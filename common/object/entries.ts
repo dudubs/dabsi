@@ -1,7 +1,7 @@
 import {keys} from "./keys";
 
-export function* entries<V>(obj:Record<any, V>): IterableIterator<[string, V]> {
-    for (const key in keys(obj)) {
+export function* entries<V>(obj:Record<string, V>): IterableIterator<[string, V]> {
+    for (const key of keys(obj)) {
         // @ts-ignore
         yield [key, obj[key]]
     }

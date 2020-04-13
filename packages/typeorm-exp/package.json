@@ -1,0 +1,13 @@
+{
+  "name": "@dabsi/typeorm-exp",
+  "version": "1.0.1",
+  "main": "index.js",
+  "files": [
+    "lib",
+    "package.json",
+    "README.md",
+    "index.d.ts",
+    "index.js"
+  ],
+  "license": "MIT"
+}

@@ -1,34 +1,11 @@
 {
+  "extends": "./configs/dev.tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "isolatedModules": false,
-    "lib": [
-      "es2020"
-    ],
-    "types": [
-      "node",
-      "jasmine"
-    ],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "moduleResolution": "node",
-    "skipDefaultLibCheck": true,
-    "target": "ES2017",
-    "noEmit": true,
-    "noImplicitAny": false,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "strictNullChecks": true,
-    "preserveWatchOutput": true,
-    "jsx": "react"
+    "sourceMap": true
   },
   "exclude": [
     "node_modules",
-    "packages"
-  ],
-  "include": [
-    "common",
-    "json-expr"
+    "packages",
+    "dist"
   ]
 }

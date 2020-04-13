@@ -1,5 +1,4 @@
 {
-  "name": "dabs",
   "version": "1.0.0",
   "main": "index.ts",
   "license": "MIT",
@@ -9,6 +8,7 @@
     "@types/react": "^16.9.33"
   },
   "dependencies": {
+    "@types/yargs": "^15.0.4",
     "bson": "^4.0.4",
     "immutable": "^4.0.0-rc.12",
     "jasmine": "^3.5.0",
@@ -16,6 +16,7 @@
     "sqlite3": "^4.1.1",
     "ts-node": "^8.8.2",
     "typeorm": "^0.2.24",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "yargs": "^15.3.1"
   }
 }

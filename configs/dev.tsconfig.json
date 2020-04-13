@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": false,
+    "lib": [
+      "es2020"
+    ],
+    "types": [
+      "node",
+      "jasmine"
+    ],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "skipDefaultLibCheck": true,
+    "target": "ES2017",
+    "noEmit": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "strictNullChecks": true,
+    "preserveWatchOutput": true,
+    "jsx": "react"
+  }
+}

@@ -1,5 +1,8 @@
 export type Union<T> = T[keyof T];
 
+export type Expression<T> = Union<{
+    [K in keyof T]: Record<K, T[K]>
+}>
 export type Nullable = undefined | null;
 
 export type JSONResult = string | number | boolean | undefined |
@@ -45,3 +48,8 @@ export type Merge<T, U> = Omit<T, keyof U> & {
 
 export type Replace<T, U> = Omit<T, keyof U> & U;
 
+
+
+export type ArrayTypeOrObject<T> = T extends Array<infer U> ? U : Extract<T, object>;
+
+export type ArrayType<T extends any[]> = T extends Array<infer U> ? U : never;

@@ -1,3 +1,3 @@
-import {installLet} from "./object/let";
+import {useLet} from "./object/let";
 
-installLet();
+useLet();

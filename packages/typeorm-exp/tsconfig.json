@@ -1,0 +1,12 @@
+{
+  "extends": "../../configs/prod.tsconfig.json",
+  "compilerOptions": {
+    "outDir": "lib",
+    "declarationDir": "lib",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": [
+    "../../typeorm/exp"
+  ]
+}

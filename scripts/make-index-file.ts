@@ -1,7 +1,7 @@
 import {existsSync, readFileSync, writeFileSync} from "fs";
 import {relative, resolve} from "path";
 import * as yargs from "yargs";
-import {findFilesSync} from "../server/fs/findFilesSync";
+import {findFilesSync} from "../src/server/fs/findFilesSync";
 
 
 export function makeIndexFile(outDirName: string, rootDirNames: string[]) {

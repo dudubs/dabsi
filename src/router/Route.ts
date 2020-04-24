@@ -1,5 +1,6 @@
-import {Awaitable} from "../common/typings";
-import {AnyRouter, Router, RouterParams} from "./Router";
+import {clone} from "../common/object/clone";
+import {mergeProperties} from "../common/object/mergeProperties";
+import {AnyRouter, Router} from "./Router";
 import {RouterAt} from "./RouterAt";
 import {RouterContext} from "./RouterContext";
 import {createRouterLocation, RouterLocation} from "./RouterLocation";
@@ -11,6 +12,7 @@ declare module "./Router" {
             at: typeof _at
             toLocation: typeof _toLocation,
             name: string | undefined;
+            root: AnyRoute;
         };
         extendRoute: typeof _extendRoute;
     }
@@ -25,7 +27,10 @@ Router.routeType = {
     at: _at,
     toLocation: _toLocation,
     parent: undefined,
-    name: undefined
+    name: undefined,
+    get root() {
+        return this.parent?.root ?? this;
+    }
 };
 Router.extendRoute = _extendRoute;
 
@@ -36,7 +41,9 @@ export type Route<T extends AnyRouter = Router> = T['routeType'] & {
     context: RouterContext<T>;
     parent: AnyRoute | undefined;
     name: string | undefined;
-    routeType: object|undefined,
+    root: T['routeType'];
+    routeProps: object | undefined,
+
 };
 
 export type RouteAt<T extends AnyRouter, K extends keyof T['children']> =
@@ -47,16 +54,16 @@ export function createRoute<T extends AnyRouter>(
     router: T,
     context: RouterContext<T>,
     name: string | undefined,
-    routeType: object | undefined = parent?.routeType
+    routeProps: object | undefined = parent?.routeProps
 ): AnyRoute {
-    return {
-        ...router.routeType,
-        ...routeType,
-        routeType: routeType,
+
+    return Object.setPrototypeOf({
+        ...routeProps,
+        routeProps,
         parent,
         router,
         context, name
-    }
+    }, router.routeType)
 }
 
 export function Route<T extends AnyRouter>(
@@ -81,10 +88,13 @@ function _at<T extends AnyRouter, K extends keyof T['children']>(
     return createRoute(this, this.router.at(key), context, <string>key)
 }
 
+export type ExtendRoute<T extends AnyRouter, U extends object> = T & { routeType: U };
+
 function _extendRoute<T extends AnyRouter,
     U extends object>(this: T, routeType: U):
-    T & { routeType: U } {
-    return {...this, routeType: {...this.routeType, ...routeType}}
+    ExtendRoute<T, U> {
+
+    return clone<any, any>(this, {routeType: mergeProperties(this.routeType, routeType)})
 }
 
 function _toLocation<T extends AnyRouter>(this: Route<T>): RouterLocation<T> {

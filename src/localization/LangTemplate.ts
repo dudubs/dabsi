@@ -28,6 +28,9 @@ export type LangTemplateProps<K extends string> = {
 
 export type LangTemplateElement<K extends string> = ReactElement<LangTemplateProps<K>>;
 
+
+
+
 export function LangTemplate<K extends string>(strings: ReadonlyArray<string>,
                                                params: K[]):
     LangTemplate<K> {
@@ -40,7 +43,7 @@ export function LangTemplate<K extends string>(strings: ReadonlyArray<string>,
 
     function template(arg0, ...args) {
         if ((args.length === 0) && (typeof arg0 === "object")) {
-            return createElement(LangTemplateType, {
+            return createElement(LangTemplateText, {
                 token,
                 props: arg0
             })
@@ -54,7 +57,7 @@ export function LangTemplate<K extends string>(strings: ReadonlyArray<string>,
 
 }
 
-export function LangTemplateType<K extends string>(
+export function LangTemplateText<K extends string>(
     {props, token}: LangTemplateProps<K>
 ) {
     const service = useContextOrType(LangService);

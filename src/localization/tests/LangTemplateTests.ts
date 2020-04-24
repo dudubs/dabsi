@@ -1,5 +1,5 @@
-import {Lang} from "../Lang";
-import {LangTemplateType} from "../LangTemplate";
+import {LangNamespace} from "../Lang";
+import {LangTemplateText} from "../LangTemplate";
 import objectContaining = jasmine.objectContaining;
 
 
@@ -12,7 +12,7 @@ it('expect to correct template key', () => {
 
 it('expect to react element', () => {
     expect(HelloMsg({name: "World"})).toEqual(objectContaining({
-        type: LangTemplateType,
+        type: LangTemplateText,
         props: objectContaining({
             token: HelloMsg.token,
             props: objectContaining({

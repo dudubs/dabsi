@@ -14,6 +14,4 @@ export function* _split(text: string, sep: string): IterableIterator<string> {
 
 }
 
-export function split(sep: string): (text: string) => Seq.Indexed<string> {
-    return text => Seq(_split(text, sep))
-}
+export const split = (text: string, sep: string) => Seq.Indexed(_split(text, sep))

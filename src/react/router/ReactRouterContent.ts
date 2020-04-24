@@ -10,7 +10,7 @@ import {createElement, Fragment, ReactNode} from "react";
 import {useDefinedContext} from "../utils/hooks/useDefinedContext";
 import {Route} from "../../router";
 import {AnyReactRouter} from "./ReactRouter";
-import {ReactRouterLocation} from "./ReactRouterContainer";
+import {ReactRouterLocation} from "./ReactRouterLocation";
 
 export function ReactRouterContent({children = undefined}: { children?: ReactNode }) {
     const {path, route: contentRoute} = useDefinedContext(ReactRouterLocation);

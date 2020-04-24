@@ -2,7 +2,7 @@ import {History} from "history";
 import {ReactNode} from "react";
 import {mapFactory} from "../../common/map/mapFactory";
 import {definedAt} from "../../common/object/defined";
-import {Router} from "../../router";
+import {ExtendRoute, Router} from "../../router";
 import {Route} from "../../router/Route";
 import {AnyRouter, ExtendRouter} from "../../router/Router";
 import {withHooks} from "../utils/withHooks";
@@ -27,16 +27,15 @@ export type ReactRouterRenderer<T extends AnyReactRouter> =
 export type AnyReactRoute = Route<AnyReactRouter>;
 
 
-export type ReactRouter = ExtendRouter<Router, {
+export type ReactRouter = ExtendRoute<ExtendRouter<Router, {
     render: typeof _render;
     renderIndex: ReactRouterRenderHook;
     renderDefault: ReactRouterRenderHook;
     renderContainer: ReactRouterRenderHook;
     getRenderers<T extends AnyReactRouter>(this: T): ReactRouterRenderer<T>[];
-    routeType: {
-        push(): void;
-        history?: History
-    }
+}>, {
+    push: typeof _push;
+    history: History | null
 }>
 
 
@@ -54,15 +53,15 @@ export const ReactRouter: ReactRouter = Router
         renderContainer: ReactRouterRenderHook(router => router.isContainer),
         getRenderers(this: AnyReactRouter) {
             return _getRenderers(this);
-        },
-        routeType: {
-            ...Router.routeType,
-            push<T extends AnyReactRoute>(this: T): void {
-                definedAt(this, "history").push(getRoutePath(this));
-            }
         }
+    }).extendRoute({
+        push: _push,
+        history: null
     });
 
+export function _push(this: AnyReactRoute): void {
+    definedAt(this, "history").push(getRoutePath(this));
+}
 
 function _render<T extends AnyReactRouter>(this: T, callback: ReactRouterRenderer<T>): T {
     this.getRenderers().push(callback);

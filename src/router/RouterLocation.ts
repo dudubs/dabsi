@@ -1,3 +1,5 @@
+import {clone} from "../common/object/clone";
+import {mergeProperties} from "../common/object/mergeProperties";
 import {AnyRouter, Router, RouterParams} from "./Router";
 import {RouterAt} from "./RouterAt";
 
@@ -49,7 +51,7 @@ export type RouterLocationAt<T extends AnyRouter, K extends keyof T['children']>
 function _at<T extends AnyRouter, K extends keyof T['children']>(
     this: RouterLocation<T>,
     key: K,
-...[params]: RouterLocationArgs<T['children']>
+    ...[params]: RouterLocationArgs<T['children']>
 ):
     RouterLocationAt<T, K> {
     // @ts-ignore
@@ -74,6 +76,8 @@ function _extendLocation<T extends AnyRouter, U extends object>(
     this: T,
     locationType: U
 ): T & { locationType: U } {
-    return {...this, locationType: {...this.locationType, ...locationType},}
+    return clone<any, any>(this, {
+        locationType: mergeProperties(this.locationType, locationType)
+    })
 }
 

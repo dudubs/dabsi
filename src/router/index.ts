@@ -2,6 +2,8 @@ export * from "./Router";
 export * from "./RouterLocation";
 export * from "./Route";
 export * from "./RouterPlugin";
+
+import "./RouterOptions";
 export {mergeProperties} from "../common/object/mergeProperties";
 
 import "./RouterAt";

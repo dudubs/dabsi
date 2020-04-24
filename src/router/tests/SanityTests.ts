@@ -1,4 +1,4 @@
-import {Router, RouterLocation} from "..";
+import {Route, Router, RouterLocation} from "..";
 import {getNextPath} from "../getNextPath";
 
 
@@ -30,8 +30,8 @@ it('getNextPath', () => {
 
 });
 
+describe('extending', () => {
 
-it('extend, extendLocation: after & before', () => {
 
     const before = "before";
     const after = "after";
@@ -39,31 +39,66 @@ it('extend, extendLocation: after & before', () => {
     const router = Router
         .extend({before})
         .extendLocation({beforeLocation: before})
+        .extendRoute({beforeRoute: before})
         .route("child", Router.route("sub-child"))
         .extend({after})
-        .extendLocation({afterLocation: after});
+        .extendLocation({afterLocation: after})
+        .extendRoute({afterRoute: after});
 
-    expect(router.after).toEqual(after);
-    expect(router.before).toEqual(before);
 
-    const location = RouterLocation(router)
-    expect(location.afterLocation).toEqual(after);
-    expect(location.beforeLocation).toEqual(before);
+    it('router', () => {
+        expect(router.after).toEqual(after);
+        expect(router.before).toEqual(before);
+    });
+
+    const location = RouterLocation(router);
+
+    it('location', () => {
+        expect(location.afterLocation).toEqual(after);
+        expect(location.beforeLocation).toEqual(before);
+    })
 
     const childRouter = router.at("child");
-    expect(childRouter.after).toEqual(after);
-    expect(childRouter.before).toEqual(before);
+    it('child', () => {
+        expect(childRouter.after).toEqual(after);
+        expect(childRouter.before).toEqual(before);
+    })
+
+    const route = Route(router);
+    it('route', () => {
+        expect(route.afterRoute).toEqual(after);
+        expect(route.beforeRoute).toEqual(before);
+    });
 
     const childLocation = location.at("child");
-    expect(childLocation.afterLocation).toEqual(after);
-    expect(childLocation.beforeLocation).toEqual(before);
+    it('childLocation', () => {
+        expect(childLocation.afterLocation).toEqual(after);
+        expect(childLocation.beforeLocation).toEqual(before);
+    });
+
+    const childRoute = route.at("child");
+    it('childRoute', () => {
+        expect(childRoute.afterRoute).toEqual(after);
+        expect(childRoute.beforeRoute).toEqual(before);
+    });
 
     const subChildRouter = childRouter.at("sub-child");
-    expect(subChildRouter.after).toEqual(after);
-    expect(subChildRouter.before).toEqual(before);
+    it('subChildRouter', () => {
+        expect(subChildRouter.after).toEqual(after);
+        expect(subChildRouter.before).toEqual(before);
+    })
 
     const subChildLocation = childLocation.at("sub-child");
-    expect(subChildLocation.afterLocation).toEqual(after);
-    expect(subChildLocation.beforeLocation).toEqual(before);
+    it('subChildLocation', () => {
+        expect(subChildLocation.afterLocation).toEqual(after);
+        expect(subChildLocation.beforeLocation).toEqual(before);
+    });
+
+    const subChildRoute = childRoute.at("sub-child");
+    it('childRoute', () => {
+        expect(subChildRoute.afterRoute).toEqual(after);
+        expect(subChildRoute.beforeRoute).toEqual(before);
+    });
+
 });
 

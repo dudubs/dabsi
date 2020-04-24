@@ -1,4 +1,5 @@
 import {mergeObject} from "../common/object/mergeObject";
+import {mergeProperties} from "../common/object/mergeProperties";
 
 export type AnyRouter = Router<any>;
 
@@ -77,28 +78,9 @@ function _param<T extends AnyRouter, K extends string, U = string>(this: T, key:
     throw new Error();
 }
 
-function _extend<T extends AnyRouter, U extends object>(this: T, routerType: U,
-                                                        props?: Partial<ExtendRouter<T, U>>):
+function _extend<T extends AnyRouter, U extends object>(this: T, routerType: U):
     ExtendRouter<T, U> {
-
-    const base = {};
-
-    Object.defineProperties(base, Object.getOwnPropertyDescriptors(this.routerType));
-    Object.defineProperties(base, Object.getOwnPropertyDescriptors(routerType))
-
-    /*
-
-    const base = {
-        ...Object.getOwnPropertyDescriptors(this.routerType),
-        ...Object.getOwnPropertyDescriptors(routerType)
-    };
-
-    Object.setPrototypeOf({...this,...props, routerType: base}, base);
-
-     */
-    return {
-        ...this, ...routerType,
-        routerType: {...this.routerType, ...routerType}
-    }
+    routerType = <any>mergeProperties(this.routerType, routerType);
+    return Object.setPrototypeOf({...this, routerType}, routerType)
 }
 

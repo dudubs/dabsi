@@ -31,26 +31,14 @@ const _getChildren = mapFactory(new WeakMap(), (owner: AnyRouter) =>
             const routerType =
                 mergeProperties(router.routerType, owner.routerType);
 
-            const x = Object.setPrototypeOf({
+            return Object.setPrototypeOf({
                 ...router,
                 routerType,
-                // {...router.routerType, ...owner.routerType},
                 locationType:
                     mergeProperties(router.locationType, owner.locationType),
-                // {...router.locationType, ...owner.locationType},
                 routeType:
                     mergeProperties(router.routeType, owner.routeType),
-                // {...router.routeType, ...owner.routeType}
             }, routerType);
-
-
-            return ({
-                ...router,
-                ...owner.routerType,
-                routerType: {...router.routerType, ...owner.routerType},
-                locationType: {...router.locationType, ...owner.locationType},
-                routeType: {...router.routeType, ...owner.routeType}
-            });
         }
     ))
 

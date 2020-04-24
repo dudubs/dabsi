@@ -1,3 +1,4 @@
-export function toConstantCase(text: string) {
-    return text.replace(/[A-Z][a-z]+/g, x => '_' + x).toUpperCase()
-}
+import {TargetCase} from "./matchCase";
+
+
+export const toConstantCase: TargetCase = words => words.join('_').toUpperCase()

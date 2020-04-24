@@ -8,8 +8,9 @@ import {routeByPath} from "../../../router/routeByPath";
 import {elementContaining} from "../../tests/elementContaining";
 
 import {AnyReactRouter, ReactRouter} from "../ReactRouter";
-import {ReactRouterContainer, ReactRouterLocation} from "../ReactRouterContainer";
+import {ReactRouterContainer} from "../ReactRouterContainer";
 import {ReactRouterContent} from "../ReactRouterContent";
+import {ReactRouterLocation} from "../ReactRouterLocation";
 
 import arrayContaining = jasmine.arrayContaining;
 
@@ -36,8 +37,8 @@ r.at("child").at("sub-child").render(props => createElement("sub-child", props))
 
 
 it('expect data different after clone.', () => {
-    expect(({...r}.getRenderers()).length).toEqual(0);
-    expect(({...r}.at("child")).getRenderers().length).toEqual(0);
+    expect((r.extend({}).getRenderers()).length).toEqual(0);
+    expect((r.extend({}).at("child")).getRenderers().length).toEqual(0);
     expect((r).getRenderers().length).toBeGreaterThan(0);
     expect((r.at("child")).getRenderers().length).toBeGreaterThan(0);
     expect((r.at("child").at('sub-child')).getRenderers().length).toBeGreaterThan(0);

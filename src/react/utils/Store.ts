@@ -1,20 +1,20 @@
 //TODO: use Builder
 import {useState} from "react";
+import {mapObject} from "../../common/object/mapObject";
 import {omit} from "../../common/object/omit";
 import {ValueOrFactory} from "../../common/patterns/ValueOrFactory";
 import {KeysByValue, Pluck} from "../../common/typings";
 
 export type StoreProp<T> = { store: Store<T> };
-export type StateGetter<T> = () => T;
-export type StateReducer<T> = (state: T) => T;
-export type StateSetter<T> = (getState: StateReducer<T>) => void;
+export type StoreGetter<T> = () => T;
+export type StoreCallback<T> = (state: T) => T;
+export type StoreSetter<T> = (callback: StoreCallback<T>) => void;
 export type StateCallback<T> = (state: T) => void;
-
 
 export class Store<T> {
     constructor(
-        public getter: StateGetter<T>,
-        public setter: StateSetter<T>,
+        public getter: StoreGetter<T>,
+        public setter: StoreSetter<T>,
     ) {
     }
 
@@ -30,7 +30,7 @@ export class Store<T> {
         return this;
     }
 
-    push(...items: Array<Pluck<T, number>>) {
+    push<T>(this: Store<T[]>, ...items: T[]): Store<T[]> {
         return this.asArray().update(prevState => [
             ...prevState,
             ...items,
@@ -45,7 +45,8 @@ export class Store<T> {
         return this;
     }
 
-    removeByKey<K extends keyof Pluck<T, number>>(key: K, value: Pluck<T, number>) {
+    removeByKey<T, K extends keyof T>(
+        this: Store<T[]>, key: K, value: T) {
         return this.asArray().update(prevState => {
             return prevState.filter(prevValue => {
                 return prevValue[key] !== value[key]
@@ -66,7 +67,7 @@ export class Store<T> {
         })
     }
 
-    asArray(): Store<Array<Pluck<T, number>>> {
+    asArray<T>(this:Store<T[]>): Store<T[]> {
         if (!Array.isArray(this.state)) {
             throw new TypeError('State is not Array.')
         }
@@ -79,6 +80,12 @@ export class Store<T> {
         })
     }
 
+
+    default(value: NonNullable<T>): Store<NonNullable<T>> {
+        return new Store(() => this.getter() ?? value, callback => {
+            this.setter(prevValue => callback(prevValue ?? value))
+        })
+    }
 
     delete() {
         this.setter(() => <any>undefined);
@@ -134,7 +141,7 @@ export class Store<T> {
         })
     }
 
-    reducers: StateReducer<T>[] = [];
+    reducers: StoreCallback<T>[] = [];
 
     immediate?: ReturnType<typeof setImmediate> = undefined;
 
@@ -189,14 +196,13 @@ export class Store<T> {
             callback(value)
         })
     }
-}
 
-export type StoreFactory = {
-    <T>(valueOrFactory: T): Store<T>;
-    <T, K extends keyof T>(obj: T, key: K): Store<T[K]>;
-    <T>(props: [
-        T,
-        (callback: (value: T) => T) => void
-    ]): Store<T>;
-};
+    static adapter<T extends Record<string, Store<any>>>(stores: T) {
+        return new Store(() => {
+            return mapObject(stores, store => store.getter())
+        }, callback => {
+
+        })
+    }
+}
 

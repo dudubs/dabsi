@@ -1,11 +1,18 @@
 alias dabsi-node='TS_NODE_TRANSPILE_ONLY=true node -r ts-node/register'
 
+DABSI_MON="-i node_modules -i packages"
+
+if [ -f "./dabsi.sh" ]; then
+  source ./dabsi.sh
+fi
+
+
 export DABSI_PATH=$(dirname $BASH_SOURCE)
 
 function dabsi-node() {
 
     if [ "$mon" ]; then
-         _node="nodemon -i node_modules -i packages -e ts,tsx"
+         _node="nodemon $DABSI_MON -e ts,tsx"
     else
          _node="node"
     fi
@@ -20,6 +27,7 @@ function dabsi-node() {
       C="$C --inspect"
     fi
 
+#  echo \
      TS_NODE_TRANSPILE_ONLY=true \
      $_node -r ts-node/register \
       -r source-map-support/register \
@@ -37,7 +45,7 @@ function dabsi-mon() {
 
 function dabsi-test() {
     dabsi node -r ts-node/register node_modules/jasmine/bin/jasmine.js \
-              $(find $1 -type f -path '*/tests/*.ts*' ! -path '*/node_modules/*') \
+              $(find $1 -type f -path '*/tests/*' -name '*.ts*'  ! -path '*/node_modules/*') \
                 --stop-on-failure=true
 }
 

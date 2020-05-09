@@ -7,9 +7,9 @@
             }
  */
 import {createElement, Fragment, ReactNode} from "react";
-import {useDefinedContext} from "../utils/hooks/useDefinedContext";
 import {Route} from "../../router";
-import {AnyReactRouter} from "./ReactRouter";
+import {useDefinedContext} from "../utils/hooks/useDefinedContext";
+import {AnyReactRouter, ReactRouterRenderers} from "./ReactRouter";
 import {ReactRouterLocation} from "./ReactRouterLocation";
 
 export function ReactRouterContent({children = undefined}: { children?: ReactNode }) {
@@ -26,7 +26,7 @@ export function ReactRouterContent({children = undefined}: { children?: ReactNod
         const isDefault = isContent && !isIndex;
 
 
-        for (let render of router.getRenderers()) {
+        for (let render of ReactRouterRenderers(router)) {
             children = render({
                 children,
                 route,

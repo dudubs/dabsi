@@ -30,8 +30,6 @@ export type WithDefaultProps = {
         }
     ):
         FunctionComponent<PartialKeys<P, K>>;
-
-
 };
 
 export function _withDefaultProps(

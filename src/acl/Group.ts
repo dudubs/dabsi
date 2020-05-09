@@ -1,6 +1,15 @@
 import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
-import {Ref} from "../react/utils/Ref";
+import {decorateDesignType} from "../reflect/decorateDesignType";
 import {User} from "./User";
+
+
+declare module "./User" {
+    interface User {
+
+        groups: Group[];
+
+    }
+}
 
 
 @Entity()
@@ -10,8 +19,9 @@ export class Group {
     id: number;
 
     @Column()
-    title: string;
+    name?: string;
 
+    // TODO: Maybe optional?
     @ManyToMany(() => User, user => user.groups)
     @JoinTable()
     users: User[];
@@ -20,20 +30,6 @@ export class Group {
 }
 
 
-/*
-
-    get relation between $user to $user? friend|blocked|nobody
-
-    get access to $object for $user: root|owner|friend|blocked|guest
-
-    setObjectAccess($object, $toUser, "owner"
-    getObjectOwner
-    addOwner($object, $user)
-    replaceOwner()
-    getRootOwner
-
-
-
-
- */
-
+decorateDesignType(User, "groups", Array, [
+    ManyToMany(() => Group, group => group.users)
+]);

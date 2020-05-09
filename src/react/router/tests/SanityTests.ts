@@ -7,7 +7,7 @@ import {Route, Router} from "../../../router";
 import {routeByPath} from "../../../router/routeByPath";
 import {elementContaining} from "../../tests/elementContaining";
 
-import {AnyReactRouter, ReactRouter} from "../ReactRouter";
+import {AnyReactRouter, ReactRouterRenderers, ReactRouter} from "../ReactRouter";
 import {ReactRouterContainer} from "../ReactRouterContainer";
 import {ReactRouterContent} from "../ReactRouterContent";
 import {ReactRouterLocation} from "../ReactRouterLocation";
@@ -36,12 +36,12 @@ r.at("child").render(props => createElement("child", props));
 r.at("child").at("sub-child").render(props => createElement("sub-child", props));
 
 
-it('expect data different after clone.', () => {
-    expect((r.extend({}).getRenderers()).length).toEqual(0);
-    expect((r.extend({}).at("child")).getRenderers().length).toEqual(0);
-    expect((r).getRenderers().length).toBeGreaterThan(0);
-    expect((r.at("child")).getRenderers().length).toBeGreaterThan(0);
-    expect((r.at("child").at('sub-child')).getRenderers().length).toBeGreaterThan(0);
+it('expect data different after cloneObject.', () => {
+    expect(ReactRouterRenderers(r.extend({})).length).toEqual(0);
+    expect(ReactRouterRenderers(r.extend({}).at("child")).length).toEqual(0);
+    expect(ReactRouterRenderers(r).length).toBeGreaterThan(0);
+    expect(ReactRouterRenderers(r.at("child")).length).toBeGreaterThan(0);
+    expect(ReactRouterRenderers(r.at("child").at('sub-child')).length).toBeGreaterThan(0);
 });
 
 it('routeByPath', async () => {

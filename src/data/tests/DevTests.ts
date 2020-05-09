@@ -1,12 +1,8 @@
 import {Entity, PrimaryGeneratedColumn} from "typeorm";
-import {Type} from "../../common/typings";
+import {decorateDesignType} from "../../reflect/decorateDesignType";
 import {createTestConnection} from "./TestConnection";
 
 
-export function decorateDesignType<T, K extends string>(target: Type<Record<K, T>>, key: K, type: Function & Type<T>, decorators: Function[]) {
-
-    Reflect.decorate([...<any>decorators, Reflect.metadata("design:type", type)], target.prototype, key);
-}
 
 xit('dev', async () => {
 

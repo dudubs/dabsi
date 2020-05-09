@@ -19,11 +19,9 @@ export function Debounce(defaultMs: number = 1000): Debounce {
             clearTimeout(timeout);
         },
         wait: (ms = defaultMs) => {
-
             if (timeout !== undefined) {
                 clearTimeout(timeout);
             }
-
             const id = ++counter;
             isPending = true;
             return new Promise<void>(resolve => {

@@ -1,12 +1,5 @@
-import {
-    Column,
-    Entity,
-    getMetadataArgsStorage,
-    ManyToOne,
-    OneToMany,
-    PrimaryColumn,
-    PrimaryGeneratedColumn
-} from "typeorm";
+import {Column, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn} from "typeorm";
+import {User} from "../../acl/User";
 import {useQueryBuilderExp} from "../../typeorm/exp/useQueryBuilderExp";
 import {EntityDataSource} from "../EntityDataSource";
 import {
@@ -16,7 +9,7 @@ import {
     TestMovieData,
     TestMsgData
 } from "./defineDataSourceTests";
-import {createTestConnection, TestConnection} from "./TestConnection";
+import {TestConnection} from "./TestConnection";
 
 useQueryBuilderExp();
 
@@ -59,31 +52,6 @@ export class TestMovie implements TestMovieData {
 
 }
 
-it('', async () => {
-    const conn = await createTestConnection([TestMovie])
-    const repo = conn.getRepository(TestMovie);
-
-    const qb = repo.createQueryBuilder();
-
-    qb.expressionMap.selects.length = 0;
-    qb.expressionMap.selects.push({
-        selection: "year",
-        aliasName: "id2"
-    }, {
-        selection: "year",
-        aliasName: "id3"
-    })
-    console.log(await
-        qb.getQuery()
-    );
-
-    console.log(
-        getMetadataArgsStorage().filterColumns(TestMsg)
-            .filter(f => f.options.primary)
-    );
-
-})
-
 
 export class EntityDataSourceTests extends DataSourceTester {
 
@@ -104,6 +72,10 @@ export class EntityDataSourceTests extends DataSourceTester {
     comments = EntityDataSource.create(TestComment as new() => TestCommentData, {
         connection: this.connection
     });
+
+    users = new EntityDataSource(User, {
+        connection: this.connection
+    })
 
 
 }

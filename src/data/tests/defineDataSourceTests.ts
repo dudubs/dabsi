@@ -1,5 +1,5 @@
+import {User} from "../../acl/User";
 import {JSONFields} from "../../json-exp/JSONExp";
-import {ExpressTester} from "../../rpc/tests/ExpressTests";
 import {DataSource} from "../DataSource";
 import objectContaining = jasmine.objectContaining;
 
@@ -31,6 +31,7 @@ export abstract class DataSourceTester {
 
     abstract comments: DataSource<TestCommentData>;
 
+    abstract users: DataSource<User>;
 }
 
 
@@ -41,7 +42,7 @@ export function defineDataSourceTests(
     const tester = getTester();
 
 
-    fit('relation of', async () => {
+    it('relation of', async () => {
         const msgId = await tester.msgs.insert({
             text: "msg1"
         });
@@ -85,8 +86,6 @@ export function defineDataSourceTests(
         await tester.movies.insert({year: 1992, name: "NotTitanic"});
         const id = await tester.movies.insert({year: 1992, name: "Titanic"});
 
-
-        console.log(id);
         expect(await tester.movies.get(id,
             JSONFields("year", "name"))).toEqual(objectContaining({
             year: 1992,
@@ -97,13 +96,13 @@ export function defineDataSourceTests(
             year: 1999
         })
 
-        console.log(await tester.movies.find({
-                fields: {name: "name"}
-            })
-                .then(a => a.items)
-        );
-
     });
 
+    it('', () => {
+
+
+    })
+
 }
+
 

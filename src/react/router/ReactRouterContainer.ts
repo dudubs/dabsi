@@ -3,11 +3,12 @@
 
 import {History} from "history";
 import {ReactNode, useEffect, useMemo, useState} from "react";
-import {Route} from "../../router";
-import {createRoute} from "../../router/Route";
+import {UndefinedProp} from "../../common/typings";
+import {AnyRoute, Route} from "../../router";
+
 import {routeByPath} from "../../router/routeByPath";
 import {RouterContext} from "../../router/RouterContext";
-import {attachCallback} from "../utils/attachCallback";
+import {mergeCallback} from "../utils/mergeCallback";
 import {provide} from "../utils/provide";
 import {AnyReactRouter} from "./ReactRouter";
 import {ReactRouterLocation} from "./ReactRouterLocation";
@@ -16,22 +17,27 @@ export type ReactRouterContainerProps<T extends AnyReactRouter> = {
     history: History;
     router: T;
     children?: ReactNode;
-    context: RouterContext<T> ;
-};
+} & UndefinedProp<"context", RouterContext<T>>;
 
 
 export function ReactRouterContainer<T extends AnyReactRouter>(
     props: ReactRouterContainerProps<T>) {
     const {history, children} = props;
 
-    const [error, setError] = useState<{ error }>();
-
+    const [error, setError] = useState();
 
 
     // @ts-ignore
     const initRoute: Route<AnyReactRouter> =
-        useMemo(()=>createRoute(undefined, props.router, <any>props.context, undefined,
-            {history}),[props.router]);
+        useMemo(() => {
+            return AnyRoute({
+                parent: undefined,
+                instance: {history},
+                name: undefined,
+                context: props.context,
+                router: props.router
+            });
+        }, [props.router]);
 
     const [location, setLocation] = useState<ReactRouterLocation>(() =>
         new ReactRouterLocation(initRoute, history.location.pathname));
@@ -40,7 +46,7 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
         let counter = 0;
         updatePath(history.location.pathname);
 
-        return attachCallback(history.listen(({pathname}) => {
+        return mergeCallback(history.listen(({pathname}) => {
             updatePath(pathname);
         }), () => {
             counter++;
@@ -61,7 +67,7 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
     }, [history]);
 
     if (error)
-        throw error.error;
+        throw error;
 
 
     return provide(ReactRouterLocation, location, children)

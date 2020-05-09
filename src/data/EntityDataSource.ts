@@ -1,4 +1,4 @@
-import {Connection, getConnection, ObjectType, RelationQueryBuilder, Repository, SelectQueryBuilder} from "typeorm";
+import {Connection, getConnection, ObjectType, RelationQueryBuilder, SelectQueryBuilder} from "typeorm";
 import {assert} from "../common/assert";
 import {defined, definedAt} from "../common/object/defined";
 import {entries} from "../common/object/entries";
@@ -6,9 +6,9 @@ import {mapObject} from "../common/object/mapObject";
 import {Lazy} from "../common/patterns/lazy";
 import {JSONExp} from "../json-exp/JSONExp";
 import {useQueryBuilderExp} from "../typeorm/exp/useQueryBuilderExp";
-import {DataAll, DataFields, DataRow} from "./DataFields";
+import {DataFields, DataRow} from "./DataFields";
 import {DataQuery, DataQueryResult} from "./DataQuery";
-import {DataSource, DataValues} from "./DataSource";
+import {DataSource, DataSourceCursor, DataValues} from "./DataSource/DataSource";
 import {EntityID, EntityIDHelper} from "./EntityID";
 
 
@@ -36,16 +36,25 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     constructor(
         public mainEntityType: ObjectType<T>,
-        public options: EntityDataSourceOptions<T> = {}
+        public options: EntityDataSourceOptions<T> = {},
+        public cursor?: DataSourceCursor
     ) {
         super();
     }
 
+    createQueryBuilder(): SelectQueryBuilder<T> {
+        return this.entityRepository.createQueryBuilder();
+    }
 
-    @Lazy get entityInfo(): EntityDataSourceInfo<T> {
+    protected withCursor<T = any>(cursor: DataSourceCursor): DataSource<T> {
+        return new EntityDataSource<T>(this.mainEntityType, this.options,
+            cursor)
+    }
+
+    @Lazy() get entityInfo(): EntityDataSourceInfo<T> {
         let entityType = this.mainEntityType;
         let owner: EntityDataSourceInfo<T>['owner'] = undefined;
-        for (let key of this.path) {
+        for (let key of this.cursor?.path ?? []) {
             const metadata = defined(this.connection.getMetadata(entityType)
                 .relations.find(relation => relation.propertyName === key.name), () =>
                 `No relation "${key.name}" in ${entityType.name}.`);
@@ -62,15 +71,15 @@ export class EntityDataSource<T> extends DataSource<T> {
             }
         }
         return {
-      owner, type: entityType
+            owner, type: entityType
         }
     }
 
-    @Lazy get entityID(): EntityIDHelper<T> {
+    @Lazy() get entityID(): EntityIDHelper<T> {
         return new EntityIDHelper<T>(this.entityRepository.metadata);
     }
 
-    @Lazy get entityRepository() {
+    @Lazy() get entityRepository() {
         return this.connection.getRepository(this.entityType)
     }
 
@@ -79,8 +88,14 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
 
 
+    getDefaultSelections(): DataFields<T> {
+        return <any>this.entityRepository.metadata.columns.toObject(c =>
+            [c.propertyName, c.propertyName]);
+    }
+
+
     async get<Fields extends DataFields<T>>(key: string, fields: Fields): Promise<DataRow<T, Fields>> {
-        const qb = this.entityRepository.createQueryBuilder();
+        const qb = this.createQueryBuilder();
         qb.expressionMap.selects.length = 0;
         const getValues = this.selectFields(qb, fields);
         const raw = await qb.andWhereExp(this.entityID.parse(key).toExpression())
@@ -94,39 +109,18 @@ export class EntityDataSource<T> extends DataSource<T> {
     selectFields<Fields extends DataFields<T>>(qb: SelectQueryBuilder<T>, fields: Fields):
         (raw: any) => DataRow<T, Fields> {
 
-        let mapFields = {};
-        let selectAll = false;
-
-        if (fields === DataAll) {
-            selectAll = true;
-        } else if (Array.isArray(fields)) {
-            selectAll = true;
-            [mapFields] = fields;
-        } else if (typeof fields === "object") {
-            mapFields = fields;
-        }
 
         // {include:""}
+
 
         const {expressionMap: {selects}} = qb;
         const fieldToAliasName: Record<string, string> = {};
 
-
-        for (const [key, exp] of entries<JSONExp<T>>(mapFields)) {
+        ''
+        for (const [key, exp] of entries<JSONExp<T>>(fields)) {
             const aliasName = '_' + key;
             selects.push({selection: qb.exp(exp), aliasName});
             fieldToAliasName[key] = aliasName;
-        }
-
-        if (selectAll) {
-            for (let column of this.entityRepository.metadata.columns) {
-                if (column.propertyName in fieldToAliasName)
-                    continue;
-
-                const aliasName = '_' + column.propertyName;
-                selects.push({selection: column.databaseName, aliasName});
-                fieldToAliasName[column.propertyName] = aliasName;
-            }
         }
 
         return raw => <any>mapObject(fieldToAliasName, aliasName => raw[aliasName]);
@@ -134,13 +128,13 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     async find<Fields extends DataFields<T>>(query: DataQuery<T, Fields>):
         Promise<DataQueryResult<T, Fields>> {
-        const qb = this.entityRepository.createQueryBuilder();
+        const qb = this.createQueryBuilder();
 
 
-        for (let {by, type, nulls} of (query.order ?? [])) {
+        for (let {by, sort, nulls} of (query.order ?? [])) {
             qb.addOrderByExp(
                 by,
-                type === "DESC" ? "DESC" : "ASC",
+                sort === "DESC" ? "DESC" : "ASC",
                 nulls === "FIRST" ? "NULLS FIRST" : "NULLS LAST"
             )
         }
@@ -157,7 +151,6 @@ export class EntityDataSource<T> extends DataSource<T> {
         selects.length = 0;
 
         const getValues = this.selectFields(qb, query.fields);
-
 
         this.entityID.select(qb);
 
@@ -176,11 +169,17 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
 
     count(filter?: JSONExp<T>): Promise<number> {
-        return this.entityRepository.createQueryBuilder()
+        return this.createQueryBuilder()
             .andWhereExp(filter)
             .getCount()
     }
 
+    has(filter?: JSONExp<T>): Promise<boolean> {
+        return this.createQueryBuilder()
+            .andWhereExp(filter)
+            .limit(1)
+            .getCount().then(count => count > 1)
+    }
 
     getRelation(entityID: EntityID<T>): {
         type: "to-many" | "to-one",
@@ -292,6 +291,8 @@ export class EntityDataSource<T> extends DataSource<T> {
                 return this.options.connection();
             case "object":
                 return this.options.connection;
+            case "undefined":
+                return getConnection()
             default:
                 throw new Error()
         }

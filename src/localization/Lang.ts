@@ -1,43 +1,69 @@
-/*
+import {createElement, ReactElement} from "react";
+import {definedAt} from "../common/object/defined";
+import {LangTemplate, LangTemplateProps} from "./LangTemplate";
+import {LangView} from "./LangView";
 
-    MaxLengthError = LangNamespace`MAX_ERROR_MUST_BE_LEAST_{"minLength"}`;
+export type LangTokenElement = ReactElement<LangTokenProps>;
 
-    LangTemplate
-    LangProvider
-    LangConsumer
+export type LangTokenProps = {
+    type: LangPropsType.token,
+    token: string, section?: string
+};
 
-    MaxLengthError({minLength});
+export type Lang = LangTemplate<any> | ReactElement<LangTokenProps>;
 
-    HebrewLang = LangNamespace(
-        MaxLengthError`${....}`,
-        AX``
-    )
- */
+export type LangElement = ReactElement<LangProps>;
 
+export type LangNode = string | LangElement | LangNode[];
 
-import {LangTemplate} from "./LangTemplate";
+export type LangFactory = {
 
-
-export type LangNamespace = {
-
-    <K extends string>(strings: TemplateStringsArray,
-                       ...keys: K[]): LangTemplate<K>;
+    <K extends string>(strings: TemplateStringsArray):
+        ReactElement<LangTokenProps>;
 
 
+    <K extends string, P extends string>(strings: TemplateStringsArray,
+                                         p: P,
+                                         ...keys: K[]):
+        LangTemplate<P | K>;
+
+}
+export type LangNamespace = LangFactory & {
+
+    (section: string): LangFactory;
 
 
 };
 
-export const Lang: LangNamespace = function (arg0, ...args) {
+export enum LangPropsType {
+    token,
+    template
+}
 
+export const Lang: LangNamespace = function (arg0, ...args): any {
+    if (typeof arg0 === "string") {
+        const section = arg0;
+        return (arg0, ...args) => {
+            if (arg0.length === 1) {
+                return createElement(LangView, {
+                    type: LangPropsType.token,
+                    token: arg0[0]
+                })
+            }
 
-    if ('raw' in arg0) {
-
-        return LangTemplate(arg0.raw, args);
+            return LangTemplate(arg0, args, section);
+        };
     }
 
-    throw new Error();
+    if (arg0.length === 1) {
+        return createElement(LangView, {
+            type: LangPropsType.token,
+            token: arg0[0]
+        })
+    }
+
+    return LangTemplate(definedAt(arg0, 'raw'), args);
 };
 
-//
 
+export type LangProps = LangTemplateProps<any> | LangTokenProps;

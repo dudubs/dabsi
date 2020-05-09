@@ -41,14 +41,10 @@ export function Nullable<T>(value?: T): T | Nullable {
 
 export type Type<T> = { prototype: T, name: string } & Function;
 
-export type Action<T> = Union<{
+export type Actions<T> = Union<{
     [K in keyof T]: { type: K } & T[K]
 }>
 
-
-export type Merge<T, U> = Omit<T, keyof U> & {
-    [K in keyof U]: K extends keyof T ? (T[K] & U[K]) : U[K]
-};
 
 export type Replace<T, U> = Omit<T, keyof U> & U;
 
@@ -57,3 +53,15 @@ export type ArrayTypeOrObject<T> = T extends Array<infer U> ? U : Extract<T, obj
 
 export type ArrayType<T extends any[]> = T extends Array<infer U> ? U : never;
 
+
+export  type UndefinedArgs<T> =
+    T extends undefined ? [undefined?] : [T];
+
+export type UndefinedProp<K extends string, T> = T extends undefined ?
+    Partial<Record<K, T>> : Record<K, T>;
+
+export type UndefinedIfNoKeys<T> =
+    keyof T extends never ? undefined : T;
+
+export type UndefinedObject<T extends object> =
+    UndefinedIfNoKeys<OmitByValue<T, undefined>>

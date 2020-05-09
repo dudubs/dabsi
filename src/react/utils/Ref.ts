@@ -3,11 +3,6 @@ import {Nullable} from "../../common/typings";
 
 export type ObjectRef<T> = { current: T };
 
-export function ObjectRef<T>(): ObjectRef<T | undefined>
-export function ObjectRef<T>(current: T): ObjectRef<T>
-export function ObjectRef<T>(current?) {
-    return {current}
-}
 
 export type CallbackRef<T> = (current: T) => void;
 
@@ -35,7 +30,7 @@ export function updateRef<T>(ref: Ref<T>[] | Ref<T>, current: T) {
     }
 }
 
-export function attachRef<T>(...refs: Ref<T>[]): CallbackRef<T> {
+export function mergeRef<T>(...refs: Ref<T>[]): CallbackRef<T> {
     return current => {
         updateRef(refs, current);
     }

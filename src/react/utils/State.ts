@@ -1,65 +1,46 @@
 import {Component} from "react";
-import {KeysByValue} from "../../common/typings";
+import {mapFactory} from "../../common/map/mapFactory";
+import {SymbolMap} from "../../common/map/SymbolMap";
 
-const isStateReady = Symbol('isStateReady');
-const currentState = Symbol('currentState');
-const immediate = Symbol('immediateState');
+const didMount = Symbol('didMount');
 
-function getCurrentState(component) {
-    return component[currentState] ?? (component[currentState] = {});
-}
+const setStateCalled = Symbol('setStateCalled');
 
-
-export const AfterMount = componentHook("componentDidMount");
-export const BeforeMount = componentHook("componentWillMount");
-export const AfterUnmount = componentHook("componentWillUnmount");
-
-export function componentHook(eventProp: keyof Component) {
-    return function BeforeUnmount() {
-        return function (target:Component, prop) {
-            // @ts-ignore
-            const prev = target[eventProp];
-            // @ts-ignore
-            target[eventProp] = function () {
-                prev?.apply(this);
-                this[prop]();
-            }
-        }
-
-    }
-}
+const getState = mapFactory(
+    SymbolMap("currentState"),
+    ():any => ({})
+);
 
 
 export const State = <K extends PropertyKey = never>(method?: K) =>
     (target: Record<K, (key: string) => void> & { componentDidMount? }, prop: string) => {
-        if (typeof target[isStateReady] !== "boolean") {
-            target[isStateReady] = false;
+        // is first time to use @State decorator
+        if (typeof target[didMount] !== "boolean") {
+            target[didMount] = false;
             const {componentDidMount} = target;
             target.componentDidMount = function () {
-                this[isStateReady] = true;
+                this[didMount] = true;
                 return componentDidMount?.apply(this);
             }
-
         }
-        target[immediate] = undefined;
+
+        target[setStateCalled] = false;
         Object.defineProperty(target, prop, {
             get() {
-                return getCurrentState(this)[prop];
+                return getState(this)[prop];
             },
-            set(this: Component & { isDidMount }, value) {
-                if (getCurrentState(this)[prop] === value)
+            set(this: Component, value) {
+                if (getState(this)[prop] === value)
                     return;
-                getCurrentState(this)[prop] = value;
+                getState(this)[prop] = value;
                 // @ts-ignore
                 method && this?.[method](prop);
 
-                if (target[immediate] === undefined) {
-                    if (this[isStateReady]) {
-                        this.setState(state => {
-                            target[immediate] = undefined;
-                            return {...state, ...getCurrentState(this)}
-                        })
-                    }
+                if (this[didMount] && !this[setStateCalled]) {
+                    this.setState(state => {
+                        this[setStateCalled] = false;
+                        return {...state, ...getState(this)}
+                    })
                 }
             }
         })

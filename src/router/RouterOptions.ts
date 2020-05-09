@@ -1,4 +1,4 @@
-import {AnyRouter, ExtendRouter, Router} from "./Router";
+import {AnyRouter, Router, RouterWithRouterType} from "./Router";
 
 declare module "./Router" {
     interface RouterInit {
@@ -21,20 +21,24 @@ Router.options = {};
 Router.config = _config;
 Router.configure = _configure;
 
-export type RouterWithOptions<T extends AnyRouter, O extends object> = ExtendRouter<T, {
-    options: O;
-    configure: typeof _configure;
-}>;
 
-export function _config<T extends AnyRouter>(this: T):
-    <O extends object>() => RouterWithOptions<T, O> {
-    return (): any => this;
+export type RouterWithOptions<O extends object> =
+    { options: O } & RouterWithRouterType<{ options: O }>;
+
+
+export function _config<T extends AnyRouter, O extends object>(this: T, defaultOptions: O): T & RouterWithOptions<O> {
+
+    this.options = {...this.options, ...defaultOptions}
+
+    return this.extend({
+        options: this.options
+    });
 }
 
 
-export function _configure<T extends AnyRouter & { options }>(
+export function _configure<T extends AnyRouter & { options },K extends keyof T['options']>(
     this: T,
-    options: T['options']
+    options: Pick<T['options'],K>
 ): T {
     this.options = {...this.options, ...options};
     return this;

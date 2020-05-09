@@ -1,18 +1,29 @@
+import {assert} from "../assert";
+import {BaseMap} from "./BaseMap";
 
-export function mapFactory<T extends (key:any)=>any>(
-    map: {
-        get(key: Parameters<T>[0]): ReturnType<T>;
-        has(key: Parameters<T>[0]): boolean;
-        set(key: Parameters<T>[0], value: ReturnType<T>): void;
-    },
-    create: T
-): (key: Parameters<T>[0]) => ReturnType<T> {
-    return key=> {
-        let value = map.get(key);
-        if (value || map.has(key)) {
-            return value;
+export function mapFactory<K, V>(
+    map: BaseMap<K, V>,
+    factory: (key: K) => V
+): {
+    map: BaseMap<K, V>,
+    (key: K): NonNullable<V>
+    <T>(key: K, callback: (value: NonNullable<V>) => T): T | undefined
+} {
+    touch.map = map;
+    return touch
+
+    function touch(key, callback?): any {
+
+        if (callback) {
+            return map.has(key) ? callback(map.get(key)) : undefined;
         }
-        map.set(key, value = create(key));
-        return value;
+
+        let value = map.get(key);
+        if (value || (typeof value !== "undefined")) {
+            return <V>value;
+        }
+        map.set(key, value = factory(key));
+        assert(typeof value !== "undefined");
+        return <V>value;
     }
 }

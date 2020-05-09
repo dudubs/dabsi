@@ -1,20 +1,25 @@
-import {clone} from "../common/object/clone";
+import {assert} from "../common/assert";
+import {cloneObject} from "../common/object/cloneObject";
 import {mergeProperties} from "../common/object/mergeProperties";
-import {AnyRouter, Router} from "./Router";
+import {UndefinedArgs, UndefinedObject} from "../common/typings";
+import {AnyRouter, Router, RouterParams} from "./Router";
 import {RouterAt} from "./RouterAt";
 import {RouterContext} from "./RouterContext";
-import {createRouterLocation, RouterLocation} from "./RouterLocation";
+import {RouterInstance} from "./RouterInstance";
+import {AnyRouterLocation, RouterLocation} from "./RouterLocation";
 
 declare module "./Router" {
     interface Router {
         routeType: {
             parent: AnyRoute | undefined;
-            at: typeof _at
+            at: typeof _at,
+            loadAt: typeof _loadAt,
             toLocation: typeof _toLocation,
+            stack: typeof _stack;
             name: string | undefined;
             root: AnyRoute;
         };
-        extendRoute: typeof _extendRoute;
+        extendRoute: typeof _extend;
     }
 }
 
@@ -23,81 +28,120 @@ declare module "./RouterAt" {
         routeType: T['routeType'];
     }
 }
+
 Router.routeType = {
     at: _at,
+    loadAt: _loadAt,
     toLocation: _toLocation,
+    stack: _stack,
     parent: undefined,
     name: undefined,
     get root() {
         return this.parent?.root ?? this;
     }
 };
-Router.extendRoute = _extendRoute;
+Router.extendRoute = _extend;
 
 export type AnyRoute = Route<AnyRouter>;
 
-export type Route<T extends AnyRouter = Router> = T['routeType'] & {
+export type Route<T extends AnyRouter = Router> = T['routeType'] & T['instanceType'] & {
     router: T;
     context: RouterContext<T>;
     parent: AnyRoute | undefined;
     name: string | undefined;
     root: T['routeType'];
-    routeProps: object | undefined,
-
+    instance: RouterInstance<T>
 };
 
-export type RouteAt<T extends AnyRouter, K extends keyof T['children']> =
-    Route<RouterAt<T, K>>;
-
-export function createRoute<T extends AnyRouter>(
+export function AnyRoute(props: {
     parent: AnyRoute | undefined,
-    router: T,
-    context: RouterContext<T>,
+    router: AnyRouter,
+    instance: object | undefined,
     name: string | undefined,
-    routeProps: object | undefined = parent?.routeProps
-): AnyRoute {
-
+    context: any
+}): AnyRoute {
     return Object.setPrototypeOf({
-        ...routeProps,
-        routeProps,
-        parent,
-        router,
-        context, name
-    }, router.routeType)
+        ...props.instance,
+        instance: props.instance,
+        parent: props.parent,
+        router: props.router,
+        context: props.context,
+        name: props.name
+    }, props.router.routeType)
+
 }
+
+export type RouteProps<T extends AnyRouter> = {
+    instance: RouterInstance<T>,
+    context: RouterContext<T>
+};
+
 
 export function Route<T extends AnyRouter>(
     router: T,
-    ...[context]: RouteArgs<T>
+    ...[props]: UndefinedArgs<UndefinedObject<RouteProps<T>>>
 ): Route<T> {
-    // @ts-ignore
-    return createRoute(undefined, router, <any>context ?? {}, undefined)
+    return <any>AnyRoute({
+        parent: undefined,
+        instance: (<RouteProps<T>>props)?.instance,
+        context: (<RouteProps<T>>props)?.context,
+        name: undefined,
+        router,
+    })
 }
 
-///
-
-export type RouteArgs<T extends AnyRouter> =
-    RouterContext<T> extends undefined ?
-        [RouterContext<T>?]
-        : [RouterContext<T>];
+export async function _loadAt<T extends AnyRouter,
+    K extends keyof T['children']>(
+    this: Route<T>,
+    key: string & K,
+    ...[params]: UndefinedArgs<RouterParams<T['children'][K]>>
+): Promise<Route<RouterAt<T, K>>> {
+    const router = this.router.at(key);
+    if (router.contextAdapter) {
+        const context = await router.contextAdapter.load(params);
+        // @ts-ignore
+        return this.at(key, context);
+    }
+    // @ts-ignore
+    return this.at(key);
+}
 
 function _at<T extends AnyRouter, K extends keyof T['children']>(
     this: Route<T>,
-    key: K, ...[context]: RouteArgs<T['children'][K]>): RouteAt<T, K> {
-    // @ts-ignore
-    return createRoute(this, this.router.at(key), context, <string>key)
+    key: string & K,
+    ...[context]: UndefinedArgs<RouterContext<T['children'][K]>>
+): Route<RouterAt<T, K>> {
+    return <any>AnyRoute({
+        parent: <AnyRoute>this,
+        instance: this.instance,
+        context,
+        name: key,
+        router: this.router.at(key)
+    })
 }
 
-export type ExtendRoute<T extends AnyRouter, U extends object> = T & { routeType: U };
 
-function _extendRoute<T extends AnyRouter,
-    U extends object>(this: T, routeType: U):
-    ExtendRoute<T, U> {
+export type RouterWithRouteType<U extends object> = { routeType: U };
 
-    return clone<any, any>(this, {routeType: mergeProperties(this.routeType, routeType)})
+function _extend<T extends AnyRouter, U extends object>(this: T, routeType: U): T & RouterWithRouteType<U> {
+    return <any>cloneObject(this, {routeType: <any>mergeProperties(this.routeType, routeType)})
 }
 
 function _toLocation<T extends AnyRouter>(this: Route<T>): RouterLocation<T> {
-    return createRouterLocation(undefined, this.router,
-        this.router.contextAdapter?.pack(this.context))
+    return AnyRouterLocation({
+        parent: this.parent?.toLocation(),
+        router: this.router,
+        instance: this.instance,
+        params: this.router.contextAdapter?.pack(this.context)
+    })
+}
+
+function _stack<T extends AnyRouter, K extends keyof T['stack']>
+(this: Route<T>, key: K): Route<RouterAt<T['stack'][K], K>> {
+    if (this.name === key) {
+        return this;
+    }
+    if (!this.parent)
+        throw new Error(`No router "${key}" in stack.`)
+    return this.parent.stack(key);
 }

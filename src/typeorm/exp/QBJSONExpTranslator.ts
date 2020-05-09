@@ -28,9 +28,14 @@ const SQLOperators: Record<JSONNamedOperator, string> = {
 };
 
 export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
+
+    static create<T>(qb: SelectQueryBuilder<T>): QBJSONExpTranslator<T> {
+        return new QBJSONExpTranslator<T>(qb, qb.alias, null)
+    }
+
     constructor(public qb: SelectQueryBuilder<T>,
                 public schema: string,
-                protected _rootQb: SelectQueryBuilder<T>|null) {
+                protected _rootQb: SelectQueryBuilder<T> | null) {
         super();
 
     }
@@ -160,9 +165,9 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
 
 
     getToManyQuery(key: string,
-             where: JSONExp<any>,
-             callback: (qb: SelectQueryBuilder<any>,
-                        translator: QBJSONExpTranslator<any>) => void
+                   where: JSONExp<any>,
+                   callback: (qb: SelectQueryBuilder<any>,
+                              translator: QBJSONExpTranslator<any>) => void
     ): string {
 
 

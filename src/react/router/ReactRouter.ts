@@ -2,20 +2,21 @@ import {History} from "history";
 import {ReactNode} from "react";
 import {mapFactory} from "../../common/map/mapFactory";
 import {definedAt} from "../../common/object/defined";
-import {ExtendRoute, Router} from "../../router";
+import {Router, RouterWithRouterType, RouterWithRouteType} from "../../router";
 import {Route} from "../../router/Route";
-import {AnyRouter, ExtendRouter} from "../../router/Router";
+import {AnyRouter} from "../../router/Router";
+import {RouterWithInstanceType} from "../../router/RouterInstance";
+import {RouterWithOptions} from "../../router/RouterOptions";
 import {withHooks} from "../utils/withHooks";
 import {getRoutePath} from "./getRoutePath";
 
-export type ReactRouterRendererProps<T extends AnyReactRouter> = {
+export type ReactRouterRendererProps<T extends AnyRouter> = {
     children: ReactNode,
     route: Route<T>,
     isIndex: boolean,
     isDefault: boolean,
     isContainer: boolean,
     isContent: boolean,
-
     contentRoute: AnyReactRoute;
     path: string
 };
@@ -26,60 +27,64 @@ export type ReactRouterRenderer<T extends AnyReactRouter> =
 
 export type AnyReactRoute = Route<AnyReactRouter>;
 
-
-export type ReactRouter = ExtendRoute<ExtendRouter<Router, {
-    render: typeof _render;
-    renderIndex: ReactRouterRenderHook;
-    renderDefault: ReactRouterRenderHook;
-    renderContainer: ReactRouterRenderHook;
-    getRenderers<T extends AnyReactRouter>(this: T): ReactRouterRenderer<T>[];
-}>, {
-    push: typeof _push;
-    history: History | null
-}>
+export type ReactRouter = Router &
+    RouterWithRouterType<{
+        render: typeof _render;
+        renderIndex: ReactRouterRenderHook;
+        renderDefault: ReactRouterRenderHook;
+        renderContainer: ReactRouterRenderHook;
+    }> &
+    RouterWithRouteType<{
+        push: typeof _pushRoute;
+        history: History | null
+    }> &
+    RouterWithInstanceType<{}>
+    & RouterWithOptions<{ hasIndex: boolean }>
+    ;
 
 
 export type AnyReactRouter = AnyRouter & ReactRouter;
 
-const _getRenderers =
-    mapFactory(new WeakMap(), (router: AnyReactRouter):
+export const ReactRouterRenderers =
+    mapFactory(new WeakMap(), (router: AnyRouter):
     ReactRouterRenderer<any>[] => []);
 
 export const ReactRouter: ReactRouter = Router
     .extend({
         render: _render,
-        renderIndex: ReactRouterRenderHook(router => router.isIndex),
+        renderIndex: ReactRouterRenderHook(router => router.isIndex,
+            router => router.configure({hasIndex: true})),
         renderDefault: ReactRouterRenderHook(router => router.isDefault),
         renderContainer: ReactRouterRenderHook(router => router.isContainer),
-        getRenderers(this: AnyReactRouter) {
-            return _getRenderers(this);
-        }
-    }).extendRoute({
-        push: _push,
-        history: null
-    });
 
-export function _push(this: AnyReactRoute): void {
+    }).extendRoute({
+        push: _pushRoute,
+        history: null
+    }).config({hasIndex: false})
+
+export function _pushRoute(this: AnyReactRoute): void {
     definedAt(this, "history").push(getRoutePath(this));
 }
 
 function _render<T extends AnyReactRouter>(this: T, callback: ReactRouterRenderer<T>): T {
-    this.getRenderers().push(callback);
+    ReactRouterRenderers(this).push(callback);
     return this;
 }
 
-type ReactRouterRenderHook = <T extends AnyReactRouter>(
+export type ReactRouterRenderHook = <T extends AnyReactRouter>(
     this: T,
     callback: (props: ReactRouterRendererProps<T>) => ReactNode) => T;
 
 export function ReactRouterRenderHook(
-    toRender: (props: ReactRouterRendererProps<any>) => boolean
+    toRender: (props: ReactRouterRendererProps<any>) => boolean,
+    getRouter?: (router: AnyReactRouter) => AnyReactRouter
 ): ReactRouterRenderHook {
-    return function <T extends AnyReactRouter>(this: T, callback) {
-        return this.render(
+    return function <T extends AnyReactRouter>(this: T, callback): any {
+        return (getRouter ? getRouter(this) : this).render(
             withHooks(
                 props => toRender(props) ? callback(props) : props.children
             )
         )
     };
 }
+

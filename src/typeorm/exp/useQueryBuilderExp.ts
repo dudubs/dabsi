@@ -1,4 +1,6 @@
 import {SelectQueryBuilder} from "typeorm";
+import {mapFactory} from "../../common/map/mapFactory";
+import {SymbolMap} from "../../common/map/SymbolMap";
 import {Lazy} from "../../common/patterns/lazy";
 import {JSONExp} from "../../json-exp/JSONExp";
 import {QBJSONExpTranslator} from "./QBJSONExpTranslator";
@@ -32,10 +34,15 @@ declare module "typeorm" {
 }
 
 
+export const QueryBuilderTranslator = SymbolMap<SelectQueryBuilder<any>, QBJSONExpTranslator<any>>("translator");
+
+const getQueryBuilderTranslator = mapFactory(QueryBuilderTranslator, qb => QBJSONExpTranslator.create(qb));
+
 export const useQueryBuilderExp = Lazy(() => {
     const qb = SelectQueryBuilder.prototype;
+
     qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: JSONExp<T>) {
-        return new QBJSONExpTranslator(this, this.alias, null).translate(exp)
+        return getQueryBuilderTranslator(this).translate(exp)
     };
 
     install('where');

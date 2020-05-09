@@ -14,7 +14,24 @@ export class User extends BaseEntity {
     @Column({nullable: true})
     lastName?: string;
 
-    @ManyToMany(() => Group, group => group.users)
-    groups: Group[];
+    @Column({nullable:true})
+    loginName: string;
+
+
+    get fullName() {
+        return `${this.firstName} ${this.lastName}`
+    }
+
+    set fullName(fullName: string) {
+        const index = fullName.indexOf(" ");
+        if (0 > index) {
+            this.firstName = fullName;
+            this.lastName = undefined;
+
+        } else {
+            this.firstName = fullName.substring(0, index).trim();
+            this.lastName = fullName.substring(index + 1).trim();
+        }
+    }
 }
 

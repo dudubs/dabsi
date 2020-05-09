@@ -1,4 +1,4 @@
-import {clone} from "../common/object/clone";
+import {cloneObject} from "../common/object/cloneObject";
 import {AnyRouter, Router} from "./Router";
 
 
@@ -19,7 +19,7 @@ export function _apply<T extends AnyRouter>(
     this: T,
     ...plugins: RouterPlugin<T>[]
 ): T {
-    const router = clone(this);
+    const router = cloneObject(this);
     for (let plugin of plugins) {
         plugin(router);
     }

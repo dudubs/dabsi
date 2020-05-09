@@ -22,7 +22,9 @@ export interface IRouterAt<T extends AnyRouter> {
 export type RouterAt<T extends AnyRouter, K extends keyof T['children']> =
     T['children'][K] &
     T['routerType'] &
-    IRouterAt<T>;
+    IRouterAt<T> & {
+    stack: T['stack'] & Record<K, T>
+};
 
 
 const _getChildren = mapFactory(new WeakMap(), (owner: AnyRouter) =>

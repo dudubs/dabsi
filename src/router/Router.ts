@@ -1,5 +1,6 @@
 import {mergeObject} from "../common/object/mergeObject";
 import {mergeProperties} from "../common/object/mergeProperties";
+import {UndefinedIfNoKeys} from "../common/typings";
 
 export type AnyRouter = Router<any>;
 
@@ -25,10 +26,9 @@ export interface Router<Init extends RouterInit = DefaultRouterInit> {
 
     params: Init['params'];
 
-    stack?: Init['stack'];
+    stack: Init['stack'];
 
     routerType: {};
-
 
     extend: typeof _extend;
 
@@ -36,19 +36,19 @@ export interface Router<Init extends RouterInit = DefaultRouterInit> {
 
     param: typeof _param;
 
-
 }
 
+
+export type UndefinedRouterParams<T extends AnyRouter> =
+    UndefinedIfNoKeys<RouterParams<T>>
 
 export type RouterParams<T extends AnyRouter> = {
     [K in keyof T['params']]: ReturnType<T['params'][K]>
 };
 
 
-export type ExtendRouter<T extends AnyRouter, U extends object> =
-    T & U & { routerType: U };
-
-
+export type RouterWithRouterType<T extends object> = T & { routerType: T };
+export type RouterWithChild<K extends string, Router extends AnyRouter> = { children: Record<K, Router> };
 export const Router: Router = <Router>{
     children: {},
     params: {},
@@ -60,10 +60,10 @@ export const Router: Router = <Router>{
 };
 
 
-function _route<T extends AnyRouter,
+function _route<Router extends AnyRouter,
     K extends string,
-    U extends AnyRouter = Router>(this: T, key: K, router?: U):
-    T & { children: Record<K, U> } {
+    ChildRouter extends AnyRouter = Router>(this: Router, key: K, router?: ChildRouter):
+    Router & RouterWithChild<K, ChildRouter> {
 
     return mergeObject(this, {
         children: {
@@ -73,13 +73,19 @@ function _route<T extends AnyRouter,
 
 }
 
-function _param<T extends AnyRouter, K extends string, U = string>(this: T, key: K, type?: (value: string) => U):
-    T & { params: Record<K, (value: string) => U> } {
-    throw new Error();
+export type RouterWithParam<K extends string, V> =
+    { params: Record<K, (value: string) => V> };
+
+function _param<Router extends AnyRouter, K extends string, V = string>
+(this: Router, key: K, type?: (value: string) => V):
+    Router & RouterWithParam<K, V> {
+    return mergeObject(this, {
+        params: {[key]: type ?? String}
+    })
 }
 
 function _extend<T extends AnyRouter, U extends object>(this: T, routerType: U):
-    ExtendRouter<T, U> {
+    T & RouterWithRouterType<U> {
     routerType = <any>mergeProperties(this.routerType, routerType);
     return Object.setPrototypeOf({...this, routerType}, routerType)
 }

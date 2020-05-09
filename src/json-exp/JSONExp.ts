@@ -1,7 +1,8 @@
+import {Seq} from "immutable";
 import {ArrayTypeOrObject, Expression, KeysByValue, Union} from "../common/typings";
 
 
-export type JSONFieldKey<T> = string & KeysByValue<T, JSONPrimitive>;
+export type JSONFieldKey<T> = string & KeysByValue<Required<T>, JSONPrimitive>;
 
 
 export type JSONSymbolicOperator = keyof {
@@ -146,7 +147,16 @@ export type JSONExp<T> =
 
 
 export function JSONExp<T>(...exps: Array<JSONExp<T>>): JSONExp<T> {
-    exps = exps.filter(exp => !!exp);
+    exps = Seq.Indexed(exps).flatMap(function callback(exp): Iterable<JSONExp<T>> {
+        if (!exp)
+            return [];
+        if (typeof exp === "object") {
+            if ("$all" in exp) {
+                return Seq.Indexed(exp.$all).flatMap(callback);
+            }
+        }
+        return [exp];
+    }) .toArray()
     return exps.length > 1 ? {$all: exps} : exps[0];
 }
 

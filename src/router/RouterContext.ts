@@ -1,3 +1,4 @@
+import {cloneObject} from "../common/object/cloneObject";
 import {Awaitable} from "../common/typings";
 import {AnyRouter, Router, RouterParams} from "./Router";
 
@@ -13,15 +14,15 @@ declare module "./Router" {
     }
 
     interface DefaultRouterInit {
-        contextAdapter: never;
+        contextAdapter: RouterContextAdapter<never, never>;
 
     }
 }
 
 
-export type RouterContextAdapter<T extends AnyRouter, C> = {
-    load(params: RouterParams<T>): Awaitable<C>,
-    pack(context: C): RouterParams<T>;
+export type RouterContextAdapter<P, C> = {
+    load(params: P): Awaitable<C>,
+    pack(context: C): P;
 };
 
 export type RouterContextAdapterType<T extends RouterContextAdapter<any, any>> =
@@ -32,12 +33,14 @@ export type RouterContext<T extends AnyRouter> =
         undefined : RouterContextAdapterType<T['contextAdapter']>;
 
 
-export function RouterContext<T extends AnyRouter, C>(
-    loader: (params: RouterParams<T>) => Awaitable<C>,
-    packer: (context: C) => RouterParams<T>
-): (router: T) => T & { contextAdapter: RouterContextAdapter<T, C> } {
-    return router => ({
-        ...router,
+export type RouterWithContextAdapter<P, C> =
+    { contextAdapter: RouterContextAdapter<P, C> };
+
+export function RouterContext<Router extends AnyRouter, Context>(
+    loader: (params: RouterParams<Router>) => Awaitable<Context>,
+    packer: (context: Context) => RouterParams<Router>
+): (router: Router) => Router & RouterWithContextAdapter<RouterParams<Router>, Context> {
+    return router => cloneObject(router, {
         contextAdapter: {
             load: loader,
             pack: packer

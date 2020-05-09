@@ -1,7 +1,11 @@
-export type LangMapValue = string | ((props) => string);
+export type LangMapValue = string | ((props: object) => string);
+
+export type LangMap = Record<string, LangMapValue>;
+
+export type LangMapEntry = [string, LangMapValue];
 
 export function LangMap(
-    ...args: (Record<string, LangMapValue> | Array<LangMapItem>)[]
+    ...args: (Record<string, LangMapValue> | Array<LangMapEntry>)[]
 ) {
     const items = {};
     for (let arg of args) {
@@ -15,6 +19,3 @@ export function LangMap(
     }
     return items;
 }
-
-export type LangMap = Record<string, LangMapValue>;
-export type LangMapItem = [string, LangMapValue];

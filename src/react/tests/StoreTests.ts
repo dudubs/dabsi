@@ -1,4 +1,4 @@
-import {Store} from "./Store";
+import {Store} from "../utils/Store";
 
 class Msg {
     constructor(public text, public comments: Msg[] = []) {

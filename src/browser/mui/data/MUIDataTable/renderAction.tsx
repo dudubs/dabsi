@@ -10,7 +10,7 @@ import {AnyMUIDataTable, MUIDataTableAction} from "./index";
 export function renderAction(
     table: AnyMUIDataTable,
     ms: ModalStack,
-    action: MUIDataTableAction<any, any>,
+    action: MUIDataTableAction<any>,
     index: number,
     getKeys: () => string[]
 ) {

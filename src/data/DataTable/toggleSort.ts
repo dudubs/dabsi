@@ -1,7 +1,7 @@
 import {AnyDataTable, DataTable} from "./DataTable";
 
 declare module "./DataTable" {
-    interface DataTable<T, Fields, Props> {
+    interface DataTable<T, Props> {
         toggleSort: typeof toggleSort;
     }
 }

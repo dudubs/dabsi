@@ -1,118 +1,121 @@
 import {firstDefinedEntry} from "../common/object/firstDefinedEntry";
 import {mapObjectToArray} from "../common/object/mapObjectToArray";
-import {ArrayTypeOrObject, KeysByValue} from "../common/typings";
 import {
+    JSONCompareOperator,
     JSONExp,
     JSONExpTypes,
     JSONFieldExp,
     JSONFieldKey,
     JSONFieldsExp,
     JSONNamedOperator,
-    JSONCompareOperator,
-    JSONSymbolicToNamedOperator,
-    JSONPrimitive
+    JSONPrimitive,
+    JSONSymbolicToNamedOperator
 } from "./JSONExp";
 
 
-export type JSONExpMethods<T, U> = {
+export type JSONExpTranslatorMethods<T, U> = {
     [K in keyof JSONExpTypes<T>]: (exp: JSONExpTypes<T>[K]) => U
 }
 
-export abstract class JSONExpTranslator<T, U> implements JSONExpMethods<T, U> {
+export abstract class JSONExpTranslator<T, U>
+    implements JSONExpTranslatorMethods<T, U> {
 
-    abstract concat(exps: U[]): U;
 
-    abstract all(exps: U[]): U;
-
-    abstract any(exps: U[]): U;
-
-    abstract translateCompare(op: JSONNamedOperator, left: JSONExp<T>, right: JSONExp<T>): U;
-
-    abstract translateCount(key: string, where: JSONExp<any>, maxCount: number): U;
+    abstract translateCompare(op: JSONNamedOperator, left: U, right: U): U;
 
     abstract True: U;
 
     abstract False: U;
 
-    abstract translateFrom(key: string, take: JSONExp<any>, where: JSONExp<any>): U;
-
     abstract translateValue(value: JSONPrimitive): U;
 
-    abstract translateAt<K extends KeysByValue<T, object>>(key: K, expr: JSONExp<ArrayTypeOrObject<T[K]>>): U;
+    abstract translateFieldExp(key: JSONFieldKey<T>): U;
 
-    abstract translateField(key: JSONFieldKey<T>): U;
+    abstract translateIn(where: U, values: U[]): U;
 
-    abstract $is(exp: JSONExpTypes<T>["$is"]): U;
+    translateInExp(where: JSONExp<T>, values: JSONExp<T>[]): U {
+        return this.translateIn(
+            this.translate(where),
+            values.map(value => this.translate(value))
+        )
+    }
 
-    abstract $length(exp: JSONExpTypes<T>["$length"]): U;
+    translateCompareExp(op: JSONNamedOperator, left: JSONExp<T>, right: JSONExp<T>): U {
+        return this.translateCompare(op, this.translate(left), this.translate(right))
+    }
 
-    abstract $not(exp: JSONExpTypes<T>["$not"]): U;
+    translateArrayExp(exp: JSONExp<T> & any[]): U {
+        if (exp.length === 3) {
+            const [left, op, right] = exp;
+            // [exp, "$in", exps...]
+            if (op === "$in") {
+                return this.translateInExp(left, <JSONExp<T>[]>right)
+            }
+            return this.translateCompareExp(
+                (JSONSymbolicToNamedOperator[<JSONCompareOperator>op] ?? op),
+                left,
+                (<JSONExp<T>>right)
+            );
+        } else if (exp.length === 2) {
+            const [left, opToValue] = exp;
+            if (Array.isArray(opToValue)) {
+                // [left, [$op, exp]]
+                const [op, exp] = opToValue;
+                if (op === "$in") {
+                    // [left, ["$in", exps...]]
+                    return this.translateInExp(left, exp)
+                }
+                return this.translate([left, op, exp]);
+            } else {
+                const [op, value] = firstDefinedEntry(opToValue);
+                if (op === "$in") {
+                    return this.translateInExp(left,
+                        value.map(value => ({$value: value}))
+                    )
+                }
+                return this.translate([left, <JSONCompareOperator>op, {$value: value}])
+            }
+        }
+        throw new TypeError(`Invalid JSONArrayExp ${exp}`);
+    }
 
-    abstract translateIn(where: JSONExp<T>, values: JSONExp<T>[]): U;
+    translateObjectExp(exp: JSONExp<T> & object): U {
+        if (Array.isArray(exp)) {
+            return this.translateArrayExp(exp)
+        }
+        const [key, value] = firstDefinedEntry(exp);
+        if (key.startsWith("$")) {
+            return this[key](value)
+        }
+
+        return this.translate({
+            $all: mapObjectToArray(<JSONFieldsExp<T>>exp,
+                (exp, key) => this.translateAtFieldExp(<any>key, <any>exp)
+            )
+        })
+    }
 
     translate(exp: JSONExp<T>): U {
-
         switch (typeof exp) {
             case "boolean":
                 return exp ? this.True : this.False;
 
             case "number":
-                return this.$value(exp);
+                return this.translateValue(exp);
 
             case "undefined":
                 return this.True;
 
             case "string":
-                return this.translateField(exp);
+                return this.translateFieldExp(exp);
 
             case "object":
-                if (Array.isArray(exp)) {
-                    if (exp.length === 3) {
-                        const [left, op, right] = exp;
-
-                        // [exp, "$in", exps[]]
-                        if (op === "$in") {
-                            return this.translateIn(left, <JSONExp<T>[]>right)
-                        }
-                        return this.translateCompare(
-                            (JSONSymbolicToNamedOperator[<JSONCompareOperator>op] ?? op),
-                            left,
-                            <JSONExp<T>>right
-                        );
-                    } else if (exp.length === 2) {
-                        const [left, opToValue] = exp;
-                        if (Array.isArray(opToValue)) {
-                            const [op, exp] = opToValue;
-                            if (op === "$in") {
-                                return this.translateIn(left, exp)
-                            }
-                            return this.translate([left, op, exp]);
-                        } else {
-                            const [op, $value] = firstDefinedEntry(opToValue);
-                            if (op === "$in") {
-                                return this.translateIn(left, $value.map($value => ({$value})))
-                            }
-                            return this.translate([left, <JSONCompareOperator>op, {$value}])
-                        }
-                    }
-                    throw new TypeError(`Invalid JSONArrayExp ${exp}`);
-                } else if (exp) {
-                    const [key, value] = firstDefinedEntry(exp);
-                    if (key.startsWith("$")) {
-                        return this[key](value);
-                    }
-
-                    return this.all(
-                        mapObjectToArray(<JSONFieldsExp<T>>exp,
-                            (exp, key) => this.translateAtField(<any>key, <any>exp)
-                        )
-                    )
-                }
+                return this.translateObjectExp(exp);
         }
         throw new Error(`Can't translate ${JSON.stringify(exp)}`)
     }
 
-    translateAtField<K extends JSONFieldKey<T>>(
+    translateAtFieldExp<K extends JSONFieldKey<T>>(
         key: K,
         fieldExp: JSONFieldExp<T, Extract<T[K], JSONPrimitive>>): U {
         switch (typeof fieldExp) {
@@ -133,18 +136,44 @@ export abstract class JSONExpTranslator<T, U> implements JSONExpMethods<T, U> {
             case "boolean":
             case "string":
             case "number":
-                return this.translateCompare("$equals", key, {$value: fieldExp})
+                return this.translateCompareExp("$equals", key, {$value: fieldExp})
         }
         throw new TypeError(`Invalid FieldExp: ${JSON.stringify(fieldExp)}`)
     }
 
 
+    abstract translateConcat(exps: U[]): U;
+
+    abstract translateAll(exps: U[]): U;
+
+    abstract translateAny(exps: U[]): U;
+
+    abstract translateIs(exp: T): U;
+
+    $is(exp: JSONExpTypes<T>["$is"]): U {
+        return this.translateIs(exp);
+    }
+
+    abstract translateFromExp(key: string, take: JSONExp<any>, where: JSONExp<any>): U;
+
+    abstract translateCountExp(key: string, where: JSONExp<any>, maxCount: number): U;
+
+    abstract translateAt(key: string, exp: JSONExp<any>): U;
+
+    abstract translateLength(exp: U): U;
+
+    abstract translateNot(exp: U): U;
+
+    $length(exp: JSONExpTypes<T>["$length"]): U {
+        return this.translateLength(this.translate(exp))
+    }
+
     $all(exp: JSONExpTypes<T>["$all"]): U {
-        return this.all(exp.map(exp => this.translate(exp)));
+        return this.translateAll(exp.map(exp => this.translate(exp)));
     }
 
     $any(exp: JSONExpTypes<T>["$any"]): U {
-        return this.any(exp.map(exp => this.translate(exp)));
+        return this.translateAny(exp.map(exp => this.translate(exp)));
     }
 
     $at(exp: JSONExpTypes<T>["$at"]): U {
@@ -153,31 +182,31 @@ export abstract class JSONExpTranslator<T, U> implements JSONExpMethods<T, U> {
     }
 
     $concat(exp: JSONExpTypes<T>["$concat"]): U {
-        return this.concat(exp.map(exp => this.translate(exp)));
+        return this.translateConcat(exp.map(exp => this.translate(exp)));
     }
 
     $count(exp: JSONExpTypes<T>["$count"]): U {
         if (typeof exp === "string") {
-            return this.translateCount(exp, undefined, 0);
+            return this.translateCountExp(exp, undefined, 0);
         } else if (typeof exp === "object") {
             const [key, subExp] = firstDefinedEntry(exp)
-            return this.translateCount(key, subExp, 0);
+            return this.translateCountExp(key, subExp, 0);
         }
         throw new TypeError()
     }
 
     $from(exp: JSONExpTypes<T>["$from"]): U {
         const [key, {take, where}] = firstDefinedEntry(exp)
-        return this.translateFrom(key, take, where);
+        return this.translateFromExp(key, take, where);
 
     }
 
     $has(exp: JSONExpTypes<T>["$has"]): U {
         if (typeof exp === "string") {
-            return this.translateCount(exp, undefined, 1)
+            return this.translateCountExp(exp, undefined, 1)
         } else if (typeof exp === "object") {
             const [key, subExp] = firstDefinedEntry(exp)
-            return this.translateCount(key, subExp, 1);
+            return this.translateCountExp(key, subExp, 1);
         }
         throw new TypeError(`Invalid "has" Exp`)
     }
@@ -203,6 +232,20 @@ export abstract class JSONExpTranslator<T, U> implements JSONExpMethods<T, U> {
     $isNot(exp: T) {
         return this.$not({$is: exp});
     }
-}
 
+    $join<K>([exps, sep]: JSONExpTypes<T>["$join"]): U {
+        const $concat: JSONExp<T>[] = [];
+        for (const [index, exp] of exps.entries()) {
+            if (index)
+                $concat.push({$value: sep})
+            $concat.push(exp);
+        }
+        return this.translate({$concat});
+    }
+
+
+    $not<K>(value: JSONExpTypes<T>["$not"]): U {
+        return this.translateNot(this.translate(value))
+    }
+}
 

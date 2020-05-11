@@ -1,3 +1,3 @@
 export * from "./DataTable";
-import "./reloadAfterRemoveOrDelete"
+import "./reloadAfterRemove"
 import "./toggleSort";

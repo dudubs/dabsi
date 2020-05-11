@@ -8,11 +8,13 @@ import {MUIDataTableToolbarProps} from "./MUIDataTableToolbar";
 import {renderTable} from "./renderTable";
 
 
-export type MUIDataTableProps<T, Fields extends DataFields<T>> =
-    DataTableProps<T, Fields, MUIDataTableColumnProps<T, Fields>> &
+export type MUIDataTableProps<T> =
+    DataTableProps<T, MUIDataTableColumnProps<T>> &
     MUIDataTableToolbarProps & {
 
-    actions?: MUIDataTableAction<T, Fields>[];
+
+
+    actions?: MUIDataTableAction<T>[];
 
     staticActions?: ({
         icon: string
@@ -24,25 +26,25 @@ export type MUIDataTableProps<T, Fields extends DataFields<T>> =
 
 }
 
-export type MUIDataTableAction<T, Fields extends DataFields<T>> =
-    DataTableAction<T, Fields> & {
+export type MUIDataTableAction<T> =
+    DataTableAction<T> & {
     MUIIconButtonProps?: Partial<MUIIconButtonProps>
 };
 
 
-export type MUIDataTableColumnProps<T, Fields extends DataFields<T>> = {
+export type MUIDataTableColumnProps<T> = {
     MUIProps?: MUITableColumnProps;
     MUIBodyProps?: MUITableColumnProps;
     MUIHeadProps?: MUITableColumnProps;
 
-} & DataTableColumnProps<T, Fields>;
+} & DataTableColumnProps<T>;
 
-export type AnyMUIDataTable<T = any, Fields extends DataFields<T> = any> =
-    MUIDataTable<T, Fields>;
+export type AnyMUIDataTable<T = any> =
+    MUIDataTable<T>;
 
 
-export class MUIDataTable<T, Fields extends DataFields<T> = {}>
-    extends DataTable<T, Fields, MUIDataTableProps<T, Fields>> {
+export class MUIDataTable<T>
+    extends DataTable<T, MUIDataTableProps<T>> {
 
 
     render(): React.ReactNode {

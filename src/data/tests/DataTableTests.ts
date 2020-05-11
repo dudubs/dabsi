@@ -4,15 +4,14 @@ import * as TestRenderer from "react-test-renderer";
 import {Group} from "../../acl/Group";
 import {User} from "../../acl/User";
 import {Timeout} from "../../common/async/Timeout";
-import {DataFields} from "../DataFields";
 import {DataTable, DataTableColumnProps, DataTableProps} from "../DataTable";
 import {EntityDataSource} from "../EntityDataSource";
 import {TestConnection} from "./TestConnection";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 
-export class TestDataTable<T, Fields extends DataFields<T> = {}>
-    extends DataTable<T, Fields, DataTableProps<T, Fields, DataTableColumnProps<T, Fields>>> {
+export class TestDataTable<T>
+    extends DataTable<T, DataTableProps<T, DataTableColumnProps<T>>> {
 
     render(): React.ReactNode {
         return createElement(Fragment)

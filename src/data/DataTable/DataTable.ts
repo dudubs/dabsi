@@ -1,88 +1,76 @@
-import {Component, ReactNode} from "react";
+import {ReactNode} from "react";
 import {Awaitable} from "../../common/typings";
-import {ImmutableSet} from "../../immutable";
 import {JSONExp} from "../../json-exp/JSONExp";
 import {LangNode} from "../../localization/Lang";
-import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {Layout} from "../../react/utils/Layout";
 import {AfterMount} from "../../react/utils/LifecycleHooks";
 import {State} from "../../react/utils/State";
 import {DataFields} from "../DataFields";
 import {DataItem} from "../DataItem";
-import {DataFieldsItem, DataOrder} from "../DataQuery";
-import {DataSource} from "../DataSource";
+import {AbstractDataList, AbstractDataListProps} from "../DataList/AbstractDataList";
+import {DataOrder,} from "../DataQuery";
 import {deleteAction} from "./actions/deleteAction";
 import {removeAction} from "./actions/removeAction";
 
 export type DataTableActionType = "single" | "multiple" | "both";
-export type AnyDataTable<T = any, Fields extends DataFields<T> = any> =
-    DataTable<T, Fields, DataTableProps<T, Fields, DataTableColumnProps<T, Fields>>>;
+
+export type AnyDataTable<T = any> =
+    DataTable<T, DataTableProps<T, DataTableColumnProps<T>>>;
 
 
-export type AnyDataTableProps<T = any, Fields extends DataFields<T> = any> =
-    DataTableProps<T, Fields, DataTableColumnProps<T, Fields>>;
+export type AnyDataTableProps<T = any> =
+    DataTableProps<T, DataTableColumnProps<T>>;
 
-export type DataTableAction<T, Fields extends DataFields<T>> = {
+
+export type DataTableAction<T> = {
     icon?: string;
     title: LangNode;
     type: DataTableActionType
-    handle?(keys: string[], table: AnyDataTable<T, Fields>): Awaitable;
+    handle?(keys: string[], table: AnyDataTable<T>): Awaitable;
     danger?: boolean
 };
 
-export type  DataTableProps<T, Fields extends DataFields<T>,
-    ColumnProps extends DataTableColumnProps<T, Fields>> = {
-
-    source: DataSource<T>;
-    fields?: Fields;
-    columns: ColumnProps[];
-    multiSort?: boolean;
-    searchIn?: JSONExp<T>[];
-    pageSize?: number;
+export type DataTableProps<T,
+    ColumnProps extends DataTableColumnProps<T>> = AbstractDataListProps<T> & {
 
     title?: LangNode;
 
     removable?: "single" | "multiple" | "both" | boolean;
+
     deletable?: "single" | "multiple" | "both" | boolean;
 
-    actions?: DataTableAction<T, Fields>[];
+    actions?: DataTableAction<T>[];
+
+    columns: ColumnProps[];
+
+    multiSort?: boolean;
+
 
 };
 
-export type DataTableColumnProps<T, Fields extends DataFields<T>> = {
+export type DataTableColumnProps<T> = {
     field?: JSONExp<T>;
-    layout?: Layout<DataFieldsItem<T, Fields> & { data: any }>;
+    layout?: Layout<DataItem<T> & { data: any }>;
     sortable?: boolean;
     title?: LangNode;
     empty?: LangNode;
     render?(children: ReactNode): ReactNode
 };
-export type DataTableColumnSort = "ASC" | "DESC" | undefined;
 
-export type DataTableColumn<T, Fields extends DataFields<T>> = {
+export type DataSort = "ASC" | "DESC";
+
+export type DataTableColumn<T> = {
     index: number,
     key: string;
-    sort?: DataTableColumnSort;
+    sort?: DataSort | undefined;
     sortNulls?: "first" | "last"
 };
 
-export abstract class DataTable<T, Fields extends DataFields<T>,
-    Props extends DataTableProps<T, Fields, DataTableColumnProps<T, Fields>>>
-    extends Component<Props> {
+export abstract class DataTable<T,
+    Props extends DataTableProps<T, DataTableColumnProps<T>>>
+    extends AbstractDataList<T, Props> {
 
-    reloadDebounce = Debounce(100);
-
-    @State() items: DataItem<any>[] = [];
-
-    @State() isLoading = false;
-
-    @State('reload') pageSize = this.props.pageSize ?? 0;
-
-    @State('reload') page = 0;
-
-    @State() totalCount: number = 0;
-
-    @State() columns: (DataTableColumn<T, Fields> & Props['columns'][number])[] =
+    @State() columns: (DataTableColumn<T> & Props['columns'][number])[] =
         this.props.columns.map((column, index) => {
             return {
                 ...column, index, key:
@@ -91,22 +79,18 @@ export abstract class DataTable<T, Fields extends DataFields<T>,
             }
         })
 
-    @State('search') text: string = "";
 
-    @State('reload') sort?: DataOrder<T>;
+    multipleActions: DataTableAction<T>[] = [];
 
-    @State() selectedKeys = ImmutableSet<string>();
+    singleActions: DataTableAction<T>[] = [];
 
-    @State() selectAll = false;
-
-    multipleActions: DataTableAction<T, Fields>[] = [];
-    singleActions: DataTableAction<T, Fields>[] = [];
-
-    toggleKey(key: string) {
-        this.selectedKeys = this.selectedKeys.has(key) ? this.selectedKeys.delete(key) :
-            this.selectedKeys.add(key);
+    async reloadRow(key: string) {
+        const row = await this.props.source.get(key, {
+            ...this.columns.filter(column => column.field !== undefined)
+                .toObject(column => [column.key, column.field])
+        });
+        this.items = this.items.map(item => item.key == key ? ({...item, row}) : item)
     }
-
 
     @AfterMount()
     protected buildActions() {
@@ -117,7 +101,7 @@ export abstract class DataTable<T, Fields extends DataFields<T>,
         enable(removeAction, this.props.removable);
         enable(deleteAction, this.props.deletable);
 
-        function enable(action: DataTableAction<T, Fields>,
+        function enable(action: DataTableAction<T>,
                         value: boolean | DataTableActionType | undefined) {
             value && build({
                 ...action,
@@ -125,7 +109,7 @@ export abstract class DataTable<T, Fields extends DataFields<T>,
             });
         }
 
-        function build(action: DataTableAction<T, Fields>) {
+        function build(action: DataTableAction<T>) {
             const isBoth = action.type === "both";
             if (isBoth || action.type === "single")
                 singleActions.push(action);
@@ -135,64 +119,30 @@ export abstract class DataTable<T, Fields extends DataFields<T>,
     }
 
 
-    async reloadKey(key: string) {
-        const row = await this.props.source.get(key, {
-            ...this.props.fields,
-            ...this.columns.filter(column => column.field !== undefined)
-                .toObject(column => [column.key, column.field])
-        });
-        this.items = this.items.map(item => item.key == key ? ({...item, row}) : item)
+    getDataFields(): DataFields<T> {
+        return this.columns.toObject(column => {
+            if (column.field !== undefined) return [
+                column.key,
+                column.field
+            ];
+        })
     }
 
-    async search() {
-        this.totalCount = 0;
-        this.page = 0;
-        await this.reload();
+    getDataOrder(): DataOrder<T>[] {
+        return this.columns.toSeq()
+            .filter(c => c.field && c.sort)
+            .map(c => ({
+                by: <JSONExp<T>>c.field,
+                sort: <DataSort>c.sort,
+                nulls: c.sortNulls === "first" ? ("FIRST" as const) : ("LAST" as const)
+            }))
+            .toArray()
     }
 
     async reload() {
         this.isLoading = true;
         await this.reloadDebounce.wait();
-
-        const fields: Record<string, JSONExp<T>> = <any>{
-            ...this.props.fields
-        };
-
-        const order = Array<DataOrder<T>>();
-
-        if (this.sort) {
-            order.push(this.sort);
-        }
-
-        for (let column of this.columns) {
-
-            if (column.field !== undefined) {
-                fields[column.key] = column.field;
-            }
-
-            if (column.field && column.sort) {
-                order.push({
-                    by: column.field,
-                    sort: column.sort,
-                    nulls: column.sortNulls === "first" ? "FIRST" : "LAST"
-                })
-            }
-        }
-
-        const {text, props: {searchIn}} = this;
-        const textFilter = !(text && searchIn) ? undefined : {
-            $all: searchIn.map(exp => ({$search: {in: exp, text}}))
-        };
-
-        const result = await this.props.source.find({
-            fields, order,
-            skip: this.pageSize * this.page,
-            take: this.pageSize,
-            filter: JSONExp(
-                textFilter
-            )
-        });
-
+        const result = await this.props.source.query(this.getDataQuery());
         if (result.count)
             this.totalCount = result.count;
 

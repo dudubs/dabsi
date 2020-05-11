@@ -61,15 +61,15 @@ export class EntityDataSourceTests extends DataSourceTester {
         TestMsg
     ]);
 
-    movies = EntityDataSource.create(TestMovie, {
+    movies = new EntityDataSource(TestMovie, {
         connection: this.connection
     });
 
-    msgs = EntityDataSource.create(TestMsg as new () => TestMsgData, {
+    msgs = new EntityDataSource(TestMsg as new () => TestMsgData, {
         connection: this.connection
     });
 
-    comments = EntityDataSource.create(TestComment as new() => TestCommentData, {
+    comments = new EntityDataSource(TestComment as new() => TestCommentData, {
         connection: this.connection
     });
 

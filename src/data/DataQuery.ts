@@ -10,6 +10,8 @@ export type DataOrder<T> = {
 
 export class DataQuery<T, Fields extends DataFields<T>> {
 
+    keys?: string[]
+
     filter?: JSONExp<T> = undefined;
 
     order?: DataOrder<T>[] = [];

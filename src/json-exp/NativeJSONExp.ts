@@ -1,4 +1,3 @@
-import {ArrayTypeOrObject, KeysByValue} from "../common/typings";
 import {JSONExp, JSONExpTypes, JSONFieldKey, JSONNamedOperator, JSONPrimitive} from "./JSONExp";
 import {JSONExpTranslator} from "./JSONExpTranslator";
 
@@ -28,7 +27,7 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
 
     False = () => false;
 
-    all(exps: NativeExp<T>[]): NativeExp<T> {
+    translateAll(exps: NativeExp<T>[]): NativeExp<T> {
         return value => {
             for (let exp of exps) {
                 if (!exp(value))
@@ -38,11 +37,11 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
         };
     }
 
-    concat(exps: NativeExp<T>[]): NativeExp<T> {
+    translateConcat(exps: NativeExp<T>[]): NativeExp<T> {
         return value => exps.map(exp => exp(value)).join()
     }
 
-    any(exps: NativeExp<T>[]): NativeExp<T> {
+    translateAny(exps: NativeExp<T>[]): NativeExp<T> {
         return value => {
             for (let exp of exps) {
                 if (exp(value))
@@ -52,11 +51,11 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
         };
     }
 
-    translateFrom(key: string, take: JSONExp<any>, where: JSONExp<any>): NativeExp<T> {
+    translateFromExp(key: string, take: JSONExp<any>, where: JSONExp<any>): NativeExp<T> {
         throw new Error()
     }
 
-    translateField(key: JSONFieldKey<T>): NativeExp<T> {
+    translateFieldExp(key: JSONFieldKey<T>): NativeExp<T> {
         return value => value[key];
     }
 
@@ -64,7 +63,7 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
         return () => value
     }
 
-    translateAt<K extends KeysByValue<T, object>>(key: K, exp: JSONExp<ArrayTypeOrObject<T[K]>>): NativeExp<T> {
+    translateAt(key: string, expr: JSONExp<any>): NativeExp<T> {
         // @ts-ignore
         const get = this.translate(exp);
         return row => {
@@ -77,7 +76,7 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
     }
 
 
-    translateCount(key: string, where: JSONExp<any>, maxCount: number): NativeExp<T> {
+    translateCountExp(key: string, where: JSONExp<any>, maxCount: number): NativeExp<T> {
         return row => {
             // @ts-ignore
             const _where = where && this.translate(where);
@@ -103,7 +102,7 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
         };
     }
 
-    $is(exp: JSONExpTypes<T>["$is"]): NativeExp<T> {
+    translateIs(exp: T): NativeExp<T> {
         const id = this.getRowId(exp);
         if (!id)
             throw new Error(`Not id for ${exp}`)
@@ -112,36 +111,40 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
         }
     }
 
-    $length(exp: JSONExpTypes<T>["$length"]): NativeExp<T> {
-        return value => String(value ?? "").length
+
+    translateLength(exp: NativeExp<T>): NativeExp<T> {
+        return value => String(exp(value) ?? "").length
     }
 
-    $not(exp: JSONExpTypes<T>["$not"]): NativeExp<T> {
-        return value => !this.translate(exp)(value)
+    translateNot(exp: NativeExp<T>): NativeExp<T> {
+        return value => !exp(value)
     }
 
-    translateCompare(op: JSONNamedOperator, left: JSONExp<T>, right: JSONExp<T>): NativeExp<T> {
+    translateCompare(op: JSONNamedOperator, left: NativeExp<T>, right: NativeExp<T>): NativeExp<T> {
         return value => {
-            const leftValue = this.translate(left)(value);
+            const leftValue = left(value);
             if (leftValue == null)
                 return false;
-            const rightValue = this.translate(right)(value);
+            const rightValue = right(value);
             if (rightValue == null)
                 return false;
             return NativeOperators[op](
                 leftValue,
                 rightValue
             );
+        };
+    }
+
+    translateIn(where: NativeExp<T>, values: NativeExp<T>[]): NativeExp<T> {
+        return value => {
+            const left = where(value);
+            for (let right of values) {
+                if (right(value) === left) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
-    translateIn(where: JSONExp<T>, values: JSONExp<T>[]): NativeExp<T> {
-        return this.translate({
-            $any: values.map((value): JSONExp<T> => [
-                where,
-                "$equals",
-                value
-            ])
-        })
-    }
 }

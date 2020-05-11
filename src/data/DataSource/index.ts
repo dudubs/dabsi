@@ -1,2 +1,3 @@
-export {DataSource} from "./DataSource";
-import "./pick";
+export {DataSource} from "../DataSource";
+
+import "./select"

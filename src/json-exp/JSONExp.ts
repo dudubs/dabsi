@@ -79,6 +79,8 @@ export interface JSONExpTypes<T> {
 
     $length: JSONExp<T>;
 
+    $join: [JSONExp<T>[], string];
+
     $concat: JSONExp<T>[];
 
     $not: JSONExp<T>;
@@ -170,3 +172,4 @@ export function JSONExp<T>(...exps: Array<JSONExp<T>>): JSONExp<T> {
 export function JSONFields<K extends string>(...keys: K[]): Record<K, K> {
     return keys.toObject(key => [key, key])
 }
+

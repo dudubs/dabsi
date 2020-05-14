@@ -1,16 +1,16 @@
 import {DataFields, DataRow} from "../DataFields";
-import {DataSource} from "../DataSource";
+import {DataSource} from "./DataSource";
 
-declare module "../DataSource" {
+declare module "./DataSource" {
     interface DataSource<T> {
         select: typeof select;
-        selectAll: typeof selectAll;
+        extend: typeof extend;
     }
 }
 
 
 DataSource.prototype.select = select;
-DataSource.prototype.selectAll = selectAll;
+DataSource.prototype.extend = extend;
 
 // select keys
 function select<T, K extends keyof T>
@@ -37,23 +37,23 @@ function select(this: DataSource<any>,
 
 
 // select * exclude keys with fields
-function selectAll<T, K extends keyof T, Fields extends DataFields<T>>
+function extend<T, K extends keyof T, Fields extends DataFields<T>>
 (this: DataSource<T>, keys: K[], fields: Fields):
     DataSource<Omit<T, K> & DataRow<T, Fields>>
 
 // select * exclude keys
-function selectAll<T, K extends keyof T>
+function extend<T, K extends keyof T>
 (this: DataSource<T>, keys: K[]):
     DataSource<Omit<T, K>>
 
 // select * with fields
-function selectAll<T, Fields extends DataFields<T>>
+function extend<T, Fields extends DataFields<T>>
 (this: DataSource<T>, fields: Fields):
-    DataSource<DataRow<T, Fields>>
+    DataSource<T & DataRow<T, Fields>>
 
-function selectAll(this: DataSource<any>,
-                   keysOrFields: string[] | DataFields<any>,
-                   maybeFields?: DataFields<any>): DataSource<any> {
+function extend(this: DataSource<any>,
+                keysOrFields: string[] | DataFields<any>,
+                maybeFields?: DataFields<any>): DataSource<any> {
     const {keys, fields} = parseSelectArgs({keysOrFields, maybeFields});
     return this.withCursor(this.cursor.omit(keys).extend(fields))
 }

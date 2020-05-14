@@ -69,6 +69,8 @@ export interface JSONExpTypes<T> {
 
     $is: T;
 
+    $key: string[] | string;
+
     $isNot: T;
 
     $all: JSONExp<T>[];
@@ -158,7 +160,7 @@ export function JSONExp<T>(...exps: Array<JSONExp<T>>): JSONExp<T> {
             }
         }
         return [exp];
-    }) .toArray()
+    }).toArray()
     return exps.length > 1 ? {$all: exps} : exps[0];
 }
 

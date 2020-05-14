@@ -16,6 +16,7 @@ export class EntityID<T> {
         return <any>this.map
     }
 
+
     toExpression(): JSONExp<T> {
         const exps = this.helper.primaryColumns.map(column => <JSONExp<T>>[
             column.propertyName,
@@ -60,7 +61,7 @@ export class EntityIDHelper<T = any> {
     select(qb: SelectQueryBuilder<any>) {
         for (let column of this.primaryColumns) {
             qb.expressionMap.selects.push({
-                selection: column.databaseName,
+                selection: `${qb.alias}.${column.databaseName}`,
                 aliasName: idAliasPrefix + column.propertyName
             })
         }

@@ -1,9 +1,9 @@
-import {cloneObject} from "../../common/object/cloneObject";
-import {mapObject} from "../../common/object/mapObject";
-import {JSONExp, JSONFieldKey} from "../../json-exp/JSONExp";
-import {DataFields} from "../DataFields";
-import {DataPath} from "../DataSource";
-import {JSONExpMapper} from "./JSONExpMapper";
+import {cloneObject} from "../common/object/cloneObject";
+import {mapObject} from "../common/object/mapObject";
+import {JSONExp, JSONFieldKey} from "../json-exp/JSONExp";
+import {DataFields} from "./DataFields";
+import {DataPath} from "./DataSource";
+import {JSONExpMapper} from "./DataSource/JSONExpMapper";
 
 class _FieldsTranslator extends JSONExpMapper<any> {
     constructor(public fields: DataFields<any>) {
@@ -29,26 +29,27 @@ export class DataCursor {
 
     exclude = new Set<string>();
 
-    at(name: string, value: string): this {
+    at(propertyName: string, key: string): this {
         return cloneObject(this, {
-            path: [...this.path, {type: "AT", name, value}],
+            path: [...this.path, {owner: true, propertyName, key}],
             fields: {},
             exclude: new Set<any>()
         })
     }
 
-    of(name: string, value: string): this {
+    of(propertyName: string, key: string): this {
         return cloneObject(this, {
-            path: [...this.path, {type: "OF", name, value}],
+            path: [...this.path, {owner: false, propertyName, key}],
         })
     }
 
-    createTranslator() {
-        return new _FieldsTranslator(this.fields)
+    translate(exp: JSONExp<any>): JSONExp<any> {
+        return new _FieldsTranslator(this.fields).translate(exp)
     }
 
-    translate(exp: JSONExp<any>): JSONExp<any> {
-        return this.createTranslator().translate(exp)
+    translateFields(fields: DataFields<any>) {
+        const translator = new _FieldsTranslator(this.fields);
+        return mapObject(fields, exp => translator.translate(exp))
     }
 
     field(key: string): JSONExp<any> {
@@ -56,11 +57,10 @@ export class DataCursor {
     }
 
     extend(fields: DataFields<any>): this {
-        const translator = this.createTranslator();
         return cloneObject(this, {
             fields: {
                 ...this.fields,
-                ...mapObject(fields, exp => translator.translate(exp)),
+                ...this.translateFields(fields),
             }
         })
     }

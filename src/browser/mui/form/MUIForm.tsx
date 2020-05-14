@@ -87,7 +87,9 @@ export const MUIForm =
             })}
             actions={[
                 ...expandIf(withCancel) ?? [
-                    MUIAction(MUIFormCancelAction, cancelAction, {handle: () => onCancel?.()})
+                    MUIAction(MUIFormCancelAction, cancelAction, {
+                        handle: () => onCancel?.()
+                    })
                 ],
                 MUIAction(MUIFormResetAction, resetAction),
                 MUIAction(MUIFormSubmitAction, submitAction)
@@ -102,9 +104,8 @@ export const MUIForm =
         </FormProvider>
 
         function renderGrid() {
-            return <Grid container spacing={1}
-                         direction={"column"}>
-                <Grid>
+            return <Grid container spacing={2} direction={"column"}>
+                <Grid item>
                     {children}
                 </Grid>
                 <Grid item>

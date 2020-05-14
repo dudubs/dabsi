@@ -8,6 +8,10 @@ export class JSONExpMapper<T> extends JSONExpTranslator<any, JSONExp<T>> {
     True: JSONExp<T> = true;
 
 
+    translateKey(key: string): JSONExp<T> {
+        return {$key: key}
+    }
+
     translateAll(exps: JSONExp<T>[]): JSONExp<T> {
         return {$all: exps};
     }

@@ -18,10 +18,6 @@ export type AnyDataTable<T = any> =
     DataTable<T, DataTableProps<T, DataTableColumnProps<T>>>;
 
 
-export type AnyDataTableProps<T = any> =
-    DataTableProps<T, DataTableColumnProps<T>>;
-
-
 export type DataTableAction<T> = {
     icon?: string;
     title: LangNode;
@@ -31,7 +27,7 @@ export type DataTableAction<T> = {
 };
 
 export type DataTableProps<T,
-    ColumnProps extends DataTableColumnProps<T>> = AbstractDataListProps<T> & {
+    ColumnProps extends DataTableColumnProps<T>=DataTableColumnProps<T>> = AbstractDataListProps<T> & {
 
     title?: LangNode;
 
@@ -44,7 +40,6 @@ export type DataTableProps<T,
     columns: ColumnProps[];
 
     multiSort?: boolean;
-
 
 };
 
@@ -85,10 +80,14 @@ export abstract class DataTable<T,
     singleActions: DataTableAction<T>[] = [];
 
     async reloadRow(key: string) {
-        const row = await this.props.source.get(key, {
-            ...this.columns.filter(column => column.field !== undefined)
-                .toObject(column => [column.key, column.field])
-        });
+        const row = await this.props.source
+            .select({
+                ...this.columns.toObject(column => {
+                    if (column.field !== undefined)
+                        return [column.key, column.field];
+                })
+            })
+            .get(key);
         this.items = this.items.map(item => item.key == key ? ({...item, row}) : item)
     }
 
@@ -119,7 +118,7 @@ export abstract class DataTable<T,
     }
 
 
-    getDataFields(): DataFields<T> {
+    getFields(): DataFields<T> {
         return this.columns.toObject(column => {
             if (column.field !== undefined) return [
                 column.key,
@@ -128,7 +127,7 @@ export abstract class DataTable<T,
         })
     }
 
-    getDataOrder(): DataOrder<T>[] {
+    getOrder(): DataOrder<T>[] {
         return this.columns.toSeq()
             .filter(c => c.field && c.sort)
             .map(c => ({
@@ -138,19 +137,6 @@ export abstract class DataTable<T,
             }))
             .toArray()
     }
-
-    async reload() {
-        this.isLoading = true;
-        await this.reloadDebounce.wait();
-        const result = await this.props.source.query(this.getDataQuery());
-        if (result.count)
-            this.totalCount = result.count;
-
-        this.items = result.items;
-        this.isLoading = false;
-    }
-
-    abstract render(): ReactNode;
 
 }
 

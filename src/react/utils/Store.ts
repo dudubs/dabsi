@@ -1,20 +1,19 @@
 //TODO: use Builder
 import {useState} from "react";
-import {mapObject} from "../../common/object/mapObject";
 import {omit} from "../../common/object/omit";
 import {ValueOrFactory} from "../../common/patterns/ValueOrFactory";
-import {KeysByValue, Pluck} from "../../common/typings";
+import {KeysByValue} from "../../common/typings";
 
 export type StoreProp<T> = { store: Store<T> };
-export type StoreGetter<T> = () => T;
-export type StoreCallback<T> = (state: T) => T;
-export type StoreSetter<T> = (callback: StoreCallback<T>) => void;
+export type GetState<T> = () => T;
+export type GetNextState<T> = (prevState: T) => T;
+export type Updater<T> = (getNextState: GetNextState<T>) => void;
 export type StateCallback<T> = (state: T) => void;
 
 export class Store<T> {
     constructor(
-        public getter: StoreGetter<T>,
-        public setter: StoreSetter<T>,
+        public getter: GetState<T>,
+        public updater: Updater<T>,
     ) {
     }
 
@@ -23,7 +22,7 @@ export class Store<T> {
     }
 
     set state(value: T) {
-        this.setter(() => value);
+        this.updater(() => value);
     }
 
     get store(): this {
@@ -67,7 +66,7 @@ export class Store<T> {
         })
     }
 
-    asArray<T>(this:Store<T[]>): Store<T[]> {
+    asArray<T>(this: Store<T[]>): Store<T[]> {
         if (!Array.isArray(this.state)) {
             throw new TypeError('State is not Array.')
         }
@@ -80,19 +79,26 @@ export class Store<T> {
         })
     }
 
+    up(getValue: (value: T) => T): Store<T> {
+        return new Store(this.getter, getNextState => {
+            this.updater(prevState => {
+                return getValue(getNextState(prevState))
+            })
+        })
+    }
 
     default(value: NonNullable<T>): Store<NonNullable<T>> {
         return new Store(() => this.getter() ?? value, callback => {
-            this.setter(prevValue => callback(prevValue ?? value))
+            this.updater(prevValue => callback(prevValue ?? value))
         })
     }
 
     delete() {
-        this.setter(() => <any>undefined);
+        this.updater(() => <any>undefined);
     }
 
     context(): Store<T> {
-        return new Store(this.getter, this.setter)
+        return new Store(this.getter, this.updater)
     }
 
     set(value: T): Store<T>
@@ -141,7 +147,7 @@ export class Store<T> {
         })
     }
 
-    reducers: StoreCallback<T>[] = [];
+    reducers: GetNextState<T>[] = [];
 
     immediate?: ReturnType<typeof setImmediate> = undefined;
 
@@ -153,7 +159,7 @@ export class Store<T> {
         this.reducers.push(callback);
         if (this.immediate === undefined) {
             this.immediate = setImmediate(() => {
-                this.setter(state => {
+                this.updater(state => {
                     this.immediate = undefined;
                     const {reducers, waiters} = this;
                     this.reducers = [];
@@ -197,12 +203,5 @@ export class Store<T> {
         })
     }
 
-    static adapter<T extends Record<string, Store<any>>>(stores: T) {
-        return new Store(() => {
-            return mapObject(stores, store => store.getter())
-        }, callback => {
-
-        })
-    }
 }
 

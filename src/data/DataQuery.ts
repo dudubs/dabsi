@@ -1,5 +1,4 @@
 import {JSONExp} from "../json-exp/JSONExp";
-import {DataFields, DataRow} from "./DataFields";
 import {DataItem} from "./DataItem";
 
 export type DataOrder<T> = {
@@ -8,15 +7,12 @@ export type DataOrder<T> = {
     nulls?: "FIRST" | "LAST"
 };
 
-export class DataQuery<T, Fields extends DataFields<T>> {
 
-    keys?: string[]
+export interface DataQuery<T> {
 
-    filter?: JSONExp<T> = undefined;
+    filter?: JSONExp<T>;
 
-    order?: DataOrder<T>[] = [];
-
-    fields: Fields;
+    order?: DataOrder<T>[];
 
     skip?: number;
 
@@ -25,10 +21,8 @@ export class DataQuery<T, Fields extends DataFields<T>> {
     count?: boolean;
 }
 
-export type DataFieldsItem<T, Fields extends DataFields<T>> =
-    DataItem<DataRow<T, Fields>>;
-
-export type DataQueryResult<T, Fields extends DataFields<T>> = {
+export type DataQueryResult<T> = {
     count?: number,
-    items: Array<DataFieldsItem<T, Fields>>;
+    items: DataItem<T>[];
 }
+

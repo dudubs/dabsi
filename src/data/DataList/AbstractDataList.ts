@@ -1,4 +1,3 @@
-
 import {Component, ReactNode} from "react";
 import {ImmutableSet} from "../../immutable";
 import {JSONExp} from "../../json-exp/JSONExp";
@@ -16,13 +15,11 @@ export type AbstractDataListProps<T> = {
     searchIn?: JSONExp<T>[];
 
     pageSize?: number;
-
 };
 
 
 export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>>
     extends Component<Props> {
-
 
     reloadDebounce = Debounce(100);
 
@@ -49,22 +46,20 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
             this.selectedKeys.add(key);
     }
 
-    abstract getDataFields(): DataFields<T>;
+    abstract getFields(): DataFields<T>;
 
-    abstract getDataOrder(): DataOrder<T>[];
+    abstract getOrder(): DataOrder<T>[];
 
-
-    getDataQuery(): DataQuery<T, any> {
+    getQuery(): DataQuery<any> {
         const {text, props: {searchIn}} = this;
         const textFilter = !(text && searchIn) ? undefined : {
             $all: searchIn.map(exp => ({$search: {in: exp, text}}))
         };
 
         return {
-            fields: this.getDataFields(),
             order: [
                 ...!this.sort ? [] : [this.sort],
-                ...this.getDataOrder()],
+                ...this.getOrder()],
             skip: this.pageSize * this.page,
             take: this.pageSize,
             filter: textFilter
@@ -74,10 +69,11 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
     async reload() {
         this.isLoading = true;
         await this.reloadDebounce.wait();
-        const result = await this.props.source.query(this.getDataQuery());
+        const result = await this.props.source
+            .select(this.getFields())
+            .query(this.getQuery());
         if (result.count)
             this.totalCount = result.count;
-
         this.items = result.items;
         this.isLoading = false;
     }

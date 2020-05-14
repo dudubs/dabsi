@@ -21,6 +21,7 @@ export function useLet() {
         Object.defineProperty(prototype, "let", {
             enumerable: false,
             configurable: true,
+            writable:true,
             value: _let
         });
 

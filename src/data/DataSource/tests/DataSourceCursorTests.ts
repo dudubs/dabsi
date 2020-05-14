@@ -1,5 +1,5 @@
 import "..";
-import {DataCursor} from "../DataCursor";
+import {DataCursor} from "../../DataCursor";
 import objectContaining = jasmine.objectContaining;
 
 const fullName = {$join: [["firstName", "lastName"], " "]};

@@ -102,6 +102,10 @@ export class NativeJSONExpTranslator<T> extends JSONExpTranslator<T, NativeExp<T
         };
     }
 
+    translateKey(key: string): NativeExp<T> {
+        throw new Error()
+    }
+
     translateIs(exp: T): NativeExp<T> {
         const id = this.getRowId(exp);
         if (!id)

@@ -1,3 +1,3 @@
-export {DataSource} from "../DataSource";
+export {DataSource, DataValues, DataPath, DataPathItem} from "./DataSource";
 
 import "./select"

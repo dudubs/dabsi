@@ -20,7 +20,10 @@ export function renderTableBodyColumn(
             }) :
             String(data);
     return <MUITableColumn {...column.MUIProps} {...column.MUIBodyProps} key={column.key}
-                           onClick={() => table.toggleKey(item.key)}>
+                           onClick={() => {
+                               if (table.multipleActions.length)
+                                   table.toggleKey(item.key);
+                           }}>
         {
             column.render ? column.render(children) :
                 children

@@ -1,14 +1,9 @@
 import {SelectQueryBuilder} from "typeorm";
 import {EntityMetadata} from "typeorm/metadata/EntityMetadata";
 import {defined, definedAt} from "../../common/object/defined";
-import {
-    JSONCompareOperator,
-    JSONExp,
-    JSONExpTypes,
-    JSONFieldKey,
-    JSONNamedOperator,
-    JSONPrimitive
-} from "../../json-exp/JSONExp";
+import {Lazy} from "../../common/patterns/lazy";
+import {EntityIDHelper} from "../../data/EntityID";
+import {JSONCompareOperator, JSONExp, JSONFieldKey, JSONNamedOperator, JSONPrimitive} from "../../json-exp/JSONExp";
 import {JSONExpTranslator} from "../../json-exp/JSONExpTranslator";
 import {_matchJoinColumns} from "./utils";
 
@@ -231,15 +226,20 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
         return `NOT ${exp}`
     }
 
-
     translateAt(key: string, exp: JSONExp<any>): string {
         const schema = this.schema + '_' + key;
         if (!this.qb.expressionMap.joinAttributes.find(j => j.alias.name === schema))
             this.qb.leftJoin(`${this.schema}.${key}`, schema);
-
         return new QBJSONExpTranslator(this.qb, schema, this.rootQb).translate(exp);
     }
 
+    @Lazy() get entityId(): EntityIDHelper<T> {
+        return new EntityIDHelper(this.schemaMetadata)
+    }
+
+    translateKey(key: string): string {
+        return this.translate(this.entityId.parse(key).toExpression())
+    }
 
     translateConcat(exps: string[]): string {
         if (this.qb.connection.driver.options.type === "sqlite") {

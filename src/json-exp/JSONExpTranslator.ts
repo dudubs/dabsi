@@ -88,11 +88,9 @@ export abstract class JSONExpTranslator<T, U>
             return this[key](value)
         }
 
-        return this.translate({
-            $all: mapObjectToArray(<JSONFieldsExp<T>>exp,
-                (exp, key) => this.translateAtFieldExp(<any>key, <any>exp)
-            )
-        })
+        return this.translateAll(mapObjectToArray(<JSONFieldsExp<T>>exp,
+            (exp, key) => this.translateAtFieldExp(<any>key, <any>exp)
+        ))
     }
 
     translate(exp: JSONExp<T>): U {
@@ -152,6 +150,15 @@ export abstract class JSONExpTranslator<T, U>
 
     $is(exp: JSONExpTypes<T>["$is"]): U {
         return this.translateIs(exp);
+    }
+
+    abstract translateKey(key: string): U;
+
+    $key(exp: JSONExpTypes<T>['$key']): U {
+        if (typeof exp === "string")
+            return this.translateKey(exp);
+        // TODO: optimize to SQL "IN" statement.
+        return this.translateAny(exp.map(exp => this.translateKey(exp)))
     }
 
     abstract translateFromExp(key: string, take: JSONExp<any>, where: JSONExp<any>): U;

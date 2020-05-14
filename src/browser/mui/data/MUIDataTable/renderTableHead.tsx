@@ -36,7 +36,7 @@ export function renderTableHead(table: AnyMUIDataTable) {
                     {...column.MUIHeadProps}
                     key={column.key}>
 
-                    {column.sortable ? <TableSortLabel
+                    {(column.sortable !== false) ? <TableSortLabel
                             active={typeof column.sort === "string"}
                             direction={column.sort === "ASC" ? "asc" : "desc"}
                             onClick={() => table.toggleSort(columnIndex)}>

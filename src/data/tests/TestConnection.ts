@@ -1,10 +1,19 @@
 import {Connection, createConnection, ObjectType} from "typeorm";
 import {defined} from "../../common/object/defined";
+import {Awaitable} from "../../common/typings";
 
 export let getTestConnection: () => Connection;
 
 
 let counter = 0;
+
+
+export function defineTestConnection(callback: (connection: Connection) => Awaitable,
+                                     entities: any[]) {
+    beforeAll(async () => {
+        await callback(await createTestConnection(entities))
+    })
+}
 
 export function createTestConnection(entities: ObjectType<any>[]): Promise<Connection> {
     return createConnection({
@@ -12,6 +21,7 @@ export function createTestConnection(entities: ObjectType<any>[]): Promise<Conne
         type: "sqlite",
         database: ":memory:",
         synchronize: true,
+        // logging: "all",
         entities
     })
 }
@@ -30,7 +40,7 @@ export function TestConnection(
     afterAll(() => connection.close())
 
     return () => {
-        getTestConnection = () => defined(connection, 'No connection');
+        getTestConnection = () => defined(connection, 'No command');
         return connection;
     }
 }

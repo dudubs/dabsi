@@ -1,126 +1,140 @@
-//TODO: use Builder
-import {useState} from "react";
+//TODO: use ObjectBuilder
+import {ComponentType} from "react";
 import {omit} from "../../common/object/omit";
-import {ValueOrFactory} from "../../common/patterns/ValueOrFactory";
-import {KeysByValue} from "../../common/typings";
+
+export type StoreInputProps<T> = { store?: Store<T> };
+export type StoreInputComponent<T> = ComponentType<StoreInputProps<T>>;
 
 export type StoreProp<T> = { store: Store<T> };
-export type GetState<T> = () => T;
-export type GetNextState<T> = (prevState: T) => T;
-export type Updater<T> = (getNextState: GetNextState<T>) => void;
+export type Puller<T> = () => T;
+export type Reducer<T> = (state: T) => T;
+export type Pusher<T> = (reducer: Reducer<T>) => void;
 export type StateCallback<T> = (state: T) => void;
+
 
 export class Store<T> {
     constructor(
-        public getter: GetState<T>,
-        public updater: Updater<T>,
+        public puller: Puller<T>,
+        public pusher: Pusher<T>,
     ) {
     }
 
     get state(): T {
-        return this.getter();
+        return this.puller();
     }
 
     set state(value: T) {
-        this.updater(() => value);
+        this.pusher(() => value);
     }
 
     get store(): this {
         return this;
     }
 
-    push<T>(this: Store<T[]>, ...items: T[]): Store<T[]> {
-        return this.asArray().update(prevState => [
+
+    add<T>(this: Store<T[]>, ...items: T[]): Store<T[]> {
+        return this.push(prevState => [
             ...prevState,
             ...items,
         ])
     }
 
-    protected callbacks: StateCallback<T>[] = [];
-    protected waiters: StateCallback<T>[] = [];
-
-    onUpdate(callback: StateCallback<T>) {
-        this.callbacks.push(callback);
-        return this;
-    }
-
-    removeByKey<T, K extends keyof T>(
-        this: Store<T[]>, key: K, value: T) {
-        return this.asArray().update(prevState => {
-            return prevState.filter(prevValue => {
-                return prevValue[key] !== value[key]
-            })
-        })
-    }
-
-    remove<K extends keyof T>(key: K) {
-        return this.update((prevState): any => {
-            if ((typeof key === "number") && Array.isArray(prevState)) {
-                return prevState.filter((_, index) => {
-                    return index !== key
-                })
-            }
-            const nextState = {...prevState};
-            delete nextState[key];
-            return nextState;
-        })
-    }
-
-    asArray<T>(this: Store<T[]>): Store<T[]> {
-        if (!Array.isArray(this.state)) {
-            throw new TypeError('State is not Array.')
+    listen<T>(this: Store<T>, callback: (state: T) => void) {
+        this.listeners.add(callback);
+        return () => {
+            this.listeners.delete(callback);
         }
-        return <any>this;
     }
 
-    at<K extends keyof T>(key: K): Store<T[K]> {
-        return new Store(() => this.state[key], getState => {
-            this.set(key, getState);
-        })
+    cast<T, U>(
+        this: Store<T>,
+        down: (value: T) => U,
+        up: (value: U) => T
+    ) {
+        return new Store<U>(
+            () => down(this.puller()),
+            reducer => {
+                this.push(state =>
+                    up(
+                        reducer(
+                            down(state)
+                        )
+                    )
+                )
+            }
+        )
     }
 
-    up(getValue: (value: T) => T): Store<T> {
-        return new Store(this.getter, getNextState => {
-            this.updater(prevState => {
-                return getValue(getNextState(prevState))
+    protected listeners = new Set<StateCallback<T>>();
+
+
+    remove<T>(this: Store<T[]>, callback: (item: T, index: number) => boolean): Store<T[]> {
+        return this.push(state => state.filter(callback))
+    }
+
+    at<T, K extends keyof T>(this: Store<T>, key: K): Store<T[K]> {
+        return new Store(() => this.state[key], reducer => {
+            this.push(state => {
+                return this.reduceKey(state, key, reducer)
             })
         })
     }
 
-    default(value: NonNullable<T>): Store<NonNullable<T>> {
-        return new Store(() => this.getter() ?? value, callback => {
-            this.updater(prevValue => callback(prevValue ?? value))
+    toDelete<T>(this: Store<T | undefined>,
+                isEmpty: (value: T) => boolean): Store<T | undefined> {
+        return this.toPush(state => {
+            if (typeof state !== "undefined") {
+                if (isEmpty(state)) {
+                    return undefined
+                }
+            }
+            return state;
+        })
+    }
+
+    toPush<T>(this: Store<T>, reducer: (value: T) => T): Store<T> {
+        return new Store(this.puller, state => {
+            this.pusher(prevState => {
+                return reducer(state(prevState))
+            })
+        })
+    }
+
+
+    toPull<T>(this: Store<T>, reducer: (value: T) => T): Store<T> {
+        return new Store(() => reducer(this.puller()), this.pusher)
+    }
+
+    default<T>(this: Store<T | undefined>, defaultValue: NonNullable<T>): Store<T> {
+        return new Store<T>(() => this.puller() ?? defaultValue, reducer => {
+            this.push(value => {
+                value = reducer(value ?? defaultValue);
+                if (typeof value?.['length'] === "number") {
+                    return value['length'] ? value : undefined;
+                }
+                return value;
+            })
         })
     }
 
     delete() {
-        this.updater(() => <any>undefined);
+        this.pusher(() => <any>undefined);
     }
 
-    context(): Store<T> {
-        return new Store(this.getter, this.updater)
+
+    set<T>(this: Store<T>, value: T): Store<T> {
+        return this.push(() => value)
     }
 
-    set(value: T): Store<T>
-    set<K extends keyof T>(key: K, callback: (value: T[K]) => T[K]): Store<T>
-    set<K extends keyof T>(key: K, value: T[K]): Store<T>
-    set(valueOrKey, valueOrCallback?) {
-        return this.update(prevState => {
-            if (valueOrCallback !== undefined) {
-                return this._setKey(prevState, valueOrKey, valueOrCallback)
-            } else {
-                return valueOrKey;
-            }
-        })
-    }
+    protected reduceKey(prevState, key, valueOrCallback) {
 
-    protected _setKey(prevState, key, valueOrCallback) {
-        const callback = typeof valueOrCallback === "function" ?
+
+        const reducer = typeof valueOrCallback === "function" ?
             valueOrCallback : () => valueOrCallback;
 
         if ((typeof key === "number") && Array.isArray(prevState)) {
             const prevItem = prevState[key];
-            const nextItem = callback(prevItem);
+            const nextItem = reducer(prevItem);
             if (nextItem === undefined)
                 return prevState.filter((_, index) => index !== key);
             return prevState.map((prevItem, index) => {
@@ -128,80 +142,61 @@ export class Store<T> {
                     prevItem
             })
         }
-        const nextValue = callback(prevState[key]);
-        if (nextValue === undefined) {
+        const nextState = reducer(prevState[key]);
+        if (nextState === undefined) {
             return omit(prevState, key)
         }
-        return {...prevState, [key]: nextValue}
-    }
-
-    toggle<K extends KeysByValue<T, boolean>>(key: K): Store<T> {
-        return this.update(state => {
-            return {...state, [key]: !state[key]}
-        })
+        return {...prevState, [key]: nextState}
     }
 
     assign<K extends keyof T>(props: Pick<T, K>) {
-        return this.update(prevState => {
+        return this.push(prevState => {
             return {...prevState, ...props}
         })
     }
 
-    reducers: GetNextState<T>[] = [];
+    reducers: Reducer<T>[] = [];
 
-    immediate?: ReturnType<typeof setImmediate> = undefined;
+    isUpdating = false;
 
-    then(callback: (state: T) => void) {
-        this.waiters.push(callback);
+
+    protected reduce(state) {
+        const {reducers} = this;
+        this.reducers = [];
+        const proto = state && Object.getPrototypeOf(state);
+        for (const reducer of reducers) {
+            state = reducer(state);
+        }
+        if (proto && state)
+            state = Object.setPrototypeOf(state, proto);
+        for (let listener of this.listeners) {
+            listener(state);
+        }
+        return state;
     }
 
-    update(callback: (state: T) => T): Store<T> {
-        this.reducers.push(callback);
-        if (this.immediate === undefined) {
-            this.immediate = setImmediate(() => {
-                this.updater(state => {
-                    this.immediate = undefined;
-                    const {reducers, waiters} = this;
-                    this.reducers = [];
-                    this.waiters = [];
-                    const proto = Object.getPrototypeOf(state);
-                    for (const reduce of reducers) {
-                        state = reduce(state);
-                    }
-                    state = Object.setPrototypeOf(state, proto);
-                    for (const callback of this.callbacks) {
-                        callback(state);
-                    }
-                    for (const waiter of waiters) {
-                        waiter(state);
-                    }
-                    return state;
-                })
-
-            });
+    push<T>(this: Store<T>, reducer: Reducer<T>): Store<T> {
+        this.reducers.push(reducer);
+        if (!this.isUpdating) {
+            this.isUpdating = true;
+            this.pusher(state => {
+                this.isUpdating = false;
+                try {
+                    return this.reduce(state);
+                } catch (err) {
+                    console.error(err);
+                    return state
+                }
+            })
         }
         return this;
     }
 
-    static use<T>(valueOrFactory: ValueOrFactory<T>): Store<T> {
-        const [state, setState] = useState<T>(() => {
-            return ValueOrFactory(valueOrFactory);
-        });
-        return new Store<T>(() => state, setState);
-    }
-
-    static at<T, K extends keyof T>(obj: T, prop: K): Store<T[K]> {
-        return new Store(() => obj[prop], callback => {
-            obj[prop] = callback(obj[prop]);
-        })
-    }
-
-    static on<T>(callback, value?: T): Store<T | undefined> {
-        return new Store(() => value, _callback => {
-            value = _callback(value);
-            callback(value)
-        })
+    map<T, U>(this: Store<T[] | undefined>,
+              mapper: (store: Store<T>, index: number) => U): U[] | undefined {
+        return this.state?.map((item, index) =>
+            mapper((this as Store<T[]>).at(index), index)
+        )
     }
 
 }
-

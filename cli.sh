@@ -24,12 +24,14 @@ function dabsi-node() {
 #    fi
 
     if [ "$DABSI_NODE_DEBUG" ]; then
-      C="$C --inspect"
+      C="$C --inspect "
     fi
 
 #  echo \
+     NODE_OPTIONS="$NODE_OPTIONS --preserve-symlinks" \
      TS_NODE_TRANSPILE_ONLY=true \
-     $_node -r ts-node/register \
+     $_node \
+      -r ts-node/register \
       -r source-map-support/register \
       $C \
       -r $DABSI_PATH/src/common/register.ts \

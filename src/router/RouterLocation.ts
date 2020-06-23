@@ -1,9 +1,10 @@
 import {cloneObject} from "../common/object/cloneObject";
 import {mergeProperties} from "../common/object/mergeProperties";
-import {UndefinedArgs, UndefinedObject} from "../common/typings";
+import {UndefinedArgs, UndefinedIfNoKeys, UndefinedObject} from "../common/typings";
 import {AnyRouter, Router, UndefinedRouterParams} from "./Router";
 import {RouterAt} from "./RouterAt";
-import {RouterInstance} from "./RouterInstance";
+import {RouterInstanceOf} from "./RouterInstance";
+
 
 declare module "./Router" {
     interface Router {
@@ -26,7 +27,7 @@ export type RouterLocation<T extends AnyRouter> = T['locationType'] & T['instanc
     at: typeof _at;
     router: T,
     params: UndefinedRouterParams<T>
-    instance: RouterInstance<T>;
+    instance: RouterInstanceOf<T>;
 }
 
 export function AnyRouterLocation(
@@ -61,7 +62,7 @@ function _at<T extends AnyRouter, K extends keyof T['children']>(
 
 export type RouterLocationProps<T extends AnyRouter> = {
     params: UndefinedRouterParams<T>,
-    instance: RouterInstance<T>
+    instance: UndefinedIfNoKeys<RouterInstanceOf<T>>
 };
 
 export function RouterLocation<T extends AnyRouter>(

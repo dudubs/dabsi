@@ -1,6 +1,6 @@
 import {Component} from "react";
 import {Lazy} from "../../common/patterns/lazy";
-import {KeysByValue} from "../../common/typings";
+import {ExtractKeys} from "../../common/typings";
 
 export interface LifecycleHook {
     (): {
@@ -17,7 +17,7 @@ export const BeforeUnmount = LifecycleHook("componentWillUnmount");
 export const BeforeRender = LifecycleHook("render");
 
 export function LifecycleHook(
-    method: string & KeysByValue<Required<Component<any, any>>, Function>
+    method: string & ExtractKeys<Required<Component<any, any>>, Function>
 ): LifecycleHook {
 
 

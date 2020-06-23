@@ -1,6 +1,6 @@
 import {EntityMetadata, ObjectType} from "typeorm";
 import {Type} from "../common/typings";
-import {DataPathItem} from "./DataSource";
+import {DataCursorPath} from "./DataSource";
 import {EntityDataSource} from "./EntityDataSource";
 import {EntityIDHelper} from "./EntityID";
 
@@ -14,7 +14,7 @@ export class EntityDataSourceHelper<T> {
     constructor(
         public source: EntityDataSource<T>,
         public type: ObjectType<T>,
-        public relation: undefined | { type: Type<any> } & DataPathItem,
+        public relation: undefined | { type: Type<any> } & DataCursorPath,
     ) {
 
     }

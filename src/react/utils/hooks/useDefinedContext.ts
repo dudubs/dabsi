@@ -1,4 +1,4 @@
-import {Context, createContext, useContext} from "react";
+import {useContext} from "react";
 import {defined} from "../../../common/object/defined";
 import {ContextOrType} from "../ContextOrType";
 
@@ -10,10 +10,3 @@ export function useDefinedContext<T>(context: ContextOrType<T>): NonNullable<T> 
 }
 
 
-export function useContextOrType<T>(context: ContextOrType<T>): T | undefined {
-    return useContext(ContextOrType(context))
-}
-
-export function createUndefinedContext<T>(): Context<T | undefined> {
-    return createContext<T | undefined>(undefined)
-}

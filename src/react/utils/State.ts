@@ -1,14 +1,14 @@
 import {Component} from "react";
-import {mapFactory} from "../../common/map/mapFactory";
+import {BaseMapFactory} from "../../common/map/mapFactory";
 import {SymbolMap} from "../../common/map/SymbolMap";
 
 const didMount = Symbol('didMount');
 
 const setStateCalled = Symbol('setStateCalled');
 
-const getState = mapFactory(
+const getState = BaseMapFactory(
     SymbolMap("currentState"),
-    ():any => ({})
+    (): any => ({})
 );
 
 

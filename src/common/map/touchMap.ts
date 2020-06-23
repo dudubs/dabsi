@@ -11,3 +11,4 @@ export function touchMap<T extends BaseMap<any, any>>(
     map.set(key, value = callback(key));
     return value;
 }
+

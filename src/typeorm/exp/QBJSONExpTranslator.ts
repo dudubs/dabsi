@@ -1,11 +1,12 @@
 import {SelectQueryBuilder} from "typeorm";
 import {EntityMetadata} from "typeorm/metadata/EntityMetadata";
-import {defined, definedAt} from "../../common/object/defined";
+import {assert} from "../../common/assert";
+import {defined} from "../../common/object/defined";
 import {Lazy} from "../../common/patterns/lazy";
 import {EntityIDHelper} from "../../data/EntityID";
 import {JSONCompareOperator, JSONExp, JSONFieldKey, JSONNamedOperator, JSONPrimitive} from "../../json-exp/JSONExp";
 import {JSONExpTranslator} from "../../json-exp/JSONExpTranslator";
-import {_matchJoinColumns} from "./utils";
+import {EntityRelation} from "../relations";
 
 let counter = 0;
 
@@ -38,8 +39,18 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
 
     False = '1';
 
+    Null = 'NULL';
+
     get rootQb(): SelectQueryBuilder<any> {
         return this._rootQb ?? this.qb;
+    }
+
+    translateIsNull(exp: string): string {
+        return `${exp} IS NULL`;
+    }
+
+    translateIsNotNull(exp: string): string {
+        return `${exp} IS NOT NULL`;
     }
 
     translateAll(exps: string[]): string {
@@ -91,85 +102,56 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
 
     getToManyTranslator(key: string): QBJSONExpTranslator<any> {
 
-        const leftMetadata = defined(
+        const debug = false;
+
+        const leftRelationMetadata = defined(
             this.schemaMetadata.relations.find(r => r.propertyName === key), () =>
                 `No relation by key for ${key}`);
 
-        switch (leftMetadata.relationType) {
-            case "one-to-many": {
+        assert(typeof leftRelationMetadata.target === "function");
 
-                const rightAliasName = `_${leftMetadata.entityMetadata.name}_${++this.counter}`;
+        const relation = new EntityRelation(this.qb.connection,
+            leftRelationMetadata.target,
+            key, false);
 
-                const subQb = this.qb.connection.getRepository(leftMetadata.type)
-                    .createQueryBuilder(rightAliasName);
+        const rightSchema = debug ? "_right" :
+            `${relation.left.entityMetadata.tableName}_${
+                relation.propertyName
+            }_${relation.right.entityMetadata.tableName}_${++this.counter}`;
 
-                const ownerMetadata = definedAt(leftMetadata, "inverseRelation");
-                subQb.andWhere(_matchJoinColumns(ownerMetadata.joinColumns,
-                    rightAliasName,
-                    this.schema))
-                return new QBJSONExpTranslator<any>(
-                    subQb,
-                    rightAliasName,
-                    this.rootQb
+        let subQb: SelectQueryBuilder<any>;
+
+
+        if (relation.ownerRelationMetadata.joinTableName) {
+            const joinSchema = debug ? "_join" : rightSchema + '_join';
+
+            subQb = this.qb.connection
+                .createQueryBuilder(relation.ownerRelationMetadata.joinTableName,
+                    joinSchema)
+                .innerJoin(relation.right.entityType, rightSchema,
+                    relation.joinByTableLeftCondition(this.schema, joinSchema)
+                    + ' AND ' +
+                    relation.joinByTableRightCondition(rightSchema, joinSchema)
                 )
-            }
+        } else {
+            subQb = this.qb.connection
+                .getRepository(leftRelationMetadata.type)
+                .createQueryBuilder(rightSchema)
+                .andWhere(relation.columnCondition(this.schema, rightSchema))
 
-            case "many-to-many": {
-                const ownerMetadata = leftMetadata.isOwning ? leftMetadata :
-                    definedAt(leftMetadata, 'inverseRelation');
-
-
-                const leftJoinColumns =
-                    defined(leftMetadata.isOwning ?
-                        ownerMetadata.joinColumns : ownerMetadata.inverseJoinColumns,
-                        'No leftJoinColumns');
-
-                const rightJoinColumns =
-                    leftMetadata.isOwning ?
-                        ownerMetadata.inverseJoinColumns : ownerMetadata.joinColumns;
-
-                const rightEntityMetadata =
-                    leftMetadata.isOwning ?
-                        definedAt(ownerMetadata, 'inverseEntityMetadata') :
-                        ownerMetadata.entityMetadata;
-
-                const rightAliasName = `_${rightEntityMetadata.name}_${++this.counter}`;
-
-                const leftAliasName = `${leftMetadata.entityMetadata.name}_to_${rightEntityMetadata.name}_${++this.counter}`
-
-                const subQb = this.qb.connection
-                    .createQueryBuilder(ownerMetadata.joinTableName, leftAliasName);
-
-
-                subQb.leftJoin(rightEntityMetadata.target, rightAliasName,
-                    _matchJoinColumns(rightJoinColumns, leftAliasName, rightAliasName)
-                )
-
-                subQb.andWhere(_matchJoinColumns(leftJoinColumns, leftAliasName, this.schema))
-                return new QBJSONExpTranslator<any>(
-                    subQb,
-                    rightAliasName,
-                    this.rootQb
-                )
-            }
-            default:
-                throw new TypeError(`Not support ${leftMetadata.relationType}`)
         }
+
+        return new QBJSONExpTranslator<any>(subQb, rightSchema, this.rootQb)
     }
 
 
-    getToManyQuery(key: string,
-                   where: JSONExp<any>,
-                   callback: (qb: SelectQueryBuilder<any>,
-                              translator: QBJSONExpTranslator<any>) => void
+    translateQueryBuilder(key: string,
+                          where: JSONExp<any>,
+                          callback: (qb: SelectQueryBuilder<any>,
+                                     translator: QBJSONExpTranslator<any>) => void
     ): string {
-
-
         const subTranslator = this.getToManyTranslator(key);
-
-
         callback(subTranslator.qb, subTranslator);
-
         if (where) {
             subTranslator.qb.andWhere(subTranslator.translate(where))
         }
@@ -179,16 +161,16 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
 
 
     translateFromExp(key: string, take: JSONExp<any>, where: JSONExp<any>): string {
-        return this.getToManyQuery(
+        return this.translateQueryBuilder(
             key, where,
             (qb, translator) => {
-                qb.select(translator.translate(take))
+                qb.select(translator.translate(take));
             }
         )
     }
 
     translateCountExp(key: string, where: JSONExp<any>, maxCount: number): string {
-        return this.getToManyQuery(key, where, qb => {
+        return this.translateQueryBuilder(key, where, qb => {
             qb.select('COUNT(*)')
             if (maxCount) {
                 qb.limit(maxCount)
@@ -208,15 +190,6 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
         return ':' + key;
     }
 
-    translateIs(exp: T): string {
-        return this.translateAll(this.schemaMetadata.primaryColumns.map(
-            primaryColumn => this.translate([
-                <JSONFieldKey<T>>primaryColumn.databaseName,
-                "$equals",
-                {$value: exp[primaryColumn.propertyName]}
-            ])
-        ));
-    }
 
     translateLength(exp: string): string {
         return `LENGTH(${exp})`
@@ -226,26 +199,39 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
         return `NOT ${exp}`
     }
 
+
     translateAt(key: string, exp: JSONExp<any>): string {
-        const schema = this.schema + '_' + key;
-        if (!this.qb.expressionMap.joinAttributes.find(j => j.alias.name === schema))
-            this.qb.leftJoin(`${this.schema}.${key}`, schema);
-        return new QBJSONExpTranslator(this.qb, schema, this.rootQb).translate(exp);
+        assert(typeof this.schemaMetadata.target === "function");
+        const relation = new EntityRelation(this.qb.connection,
+            this.schemaMetadata.target, key, false);
+        const rightSchema = relation.join("LEFT", this.qb, this.schema);
+        return new QBJSONExpTranslator(this.qb, rightSchema, this.rootQb).translate(exp);
     }
 
     @Lazy() get entityId(): EntityIDHelper<T> {
         return new EntityIDHelper(this.schemaMetadata)
     }
 
-    translateKey(key: string): string {
+    translateIs(key: string): string {
         return this.translate(this.entityId.parse(key).toExpression())
     }
 
+    translateIf(condition: string, expIfTrue: string, expIfFalse: string): string {
+        switch (this.qb.connection.driver.options.type) {
+            case "sqlite":
+                return `(CASE WHEN ${condition} THEN ${expIfTrue} ELSE ${expIfFalse} END)`
+
+            default:
+                return `IF(${condition},${expIfTrue},${expIfFalse})`
+        }
+    }
+
     translateConcat(exps: string[]): string {
-        if (this.qb.connection.driver.options.type === "sqlite") {
-            return `(${exps.join("||")})`
-        } else {
-            return `CONCAT(${exps.join(",")})`
+        switch (this.qb.connection.driver.options.type) {
+            case "sqlite":
+                return `(${exps.join("||")})`;
+            default:
+                return `CONCAT(${exps.join(",")})`
         }
     }
 
@@ -257,6 +243,10 @@ export class QBJSONExpTranslator<T> extends JSONExpTranslator<T, string> {
         return `${where} IN (${
             values.join(",")
         })`
+    }
+
+    translateIfNull(exp: string, alt_value: string): string {
+        return `IFNULL(${exp},${alt_value})`
     }
 
 }

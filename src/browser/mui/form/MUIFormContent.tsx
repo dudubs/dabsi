@@ -1,7 +1,7 @@
 import {Grid} from "@material-ui/core";
 import React from "react";
 
-export function MUIFormContent({children}) {
+export function MuiFormContent({children}) {
     return <Grid item>
         {children}
     </Grid>

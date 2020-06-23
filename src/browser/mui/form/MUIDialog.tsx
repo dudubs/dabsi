@@ -1,7 +1,98 @@
-import Dialog from "@material-ui/core/Dialog";
-import {MUICss} from "../utils/MUICss";
+import Dialog, {DialogProps} from "@material-ui/core/Dialog";
+import DialogActions, {DialogActionsProps} from "@material-ui/core/DialogActions";
+import DialogContent, {DialogContentProps} from "@material-ui/core/DialogContent";
+import DialogTitle, {DialogTitleProps} from "@material-ui/core/DialogTitle";
+import {makeStyles} from "@material-ui/styles";
+import React, {ReactNode, useContext} from "react";
+import {Assign} from "../../../common/typings";
+import {ModalStackItemContext} from "../../../react/ModalStack";
+import {mergeProps} from "../../../react/utils/mergeProps";
+import {MuiButton} from "../components/MuiButton";
+import {ReactWrapper, wrap} from "../data/wrap";
 
-export const MUIDialog = Dialog.let(MUICss`
-    direction: ${theme => theme.direction};
-`);
+const useStyles = makeStyles(theme => {
+    return ({
+        root: {
+            flip: false,
+            direction: theme.direction
+        }
+    });
+})
 
+export type MuiDialogProps = Assign<Omit<DialogProps, "open">, {
+    actions?: ReactNode,
+    title?: ReactNode;
+    popOnClose?: boolean
+    cancellable?: boolean
+    onCancel?(): void
+    closable?: boolean
+    onClose?(): void
+    DialogContentProps?: DialogContentProps;
+    DialogTitleProps?: DialogTitleProps;
+    DialogActionsProps?: DialogActionsProps;
+
+
+    contentWrapper?: ReactWrapper;
+}>;
+
+export function MuiDialog
+({
+     actions,
+
+     contentWrapper,
+     title,
+     DialogTitleProps,
+     DialogActionsProps,
+     DialogContentProps,
+     popOnClose,
+     cancellable,
+     closable,
+     onCancel,
+     onClose,
+
+
+     ...DialogProps
+ }: MuiDialogProps) {
+    const styles = useStyles();
+    const msi = useContext(ModalStackItemContext);
+
+    if (cancellable || closable) {
+        actions = <>
+            {cancellable && <MuiButton kind={"cancel"} onClick={() => {
+                msi?.pop()
+                onCancel?.();
+            }}/>}
+            {actions}
+            {closable && <MuiButton kind={"close"} onClick={() => {
+                msi?.pop()
+                onClose?.();
+            }}/>}
+        </>
+    }
+
+    return <Dialog
+        open={true}
+        onClose={() => {
+            popOnClose && msi?.pop();
+        }}
+        {...mergeProps(DialogProps, {
+            className: styles.root,
+        })}>
+        {title && <DialogTitle {...DialogTitleProps}>{title}</DialogTitle>}
+        {wrap(contentWrapper)(
+            <DialogContent {...DialogContentProps}>
+                {DialogProps.children}
+            </DialogContent>
+        )}
+        {actions && <DialogActions {...DialogActionsProps}>
+            {actions}
+        </DialogActions>}
+    </Dialog>
+
+
+}
+
+/*
+
+
+ */

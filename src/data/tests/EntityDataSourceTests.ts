@@ -1,204 +1,39 @@
-import {
-    Column,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    OneToMany,
-    OneToOne,
-    PrimaryColumn,
-    PrimaryGeneratedColumn
-} from "typeorm";
-import {User} from "../../acl/User";
-import {useQueryBuilderExp} from "../../typeorm/exp/useQueryBuilderExp";
+import {AEntity, BEntity, CEntity, getABCTestConnection as connection} from "../../typeorm/relations/tests/Entities";
 import {EntityDataSource} from "../EntityDataSource";
-import {DataSourceTester, TestCommentData, TestMovieData, TestMsgData, TestMsgTitleData} from "./dataSourceTests";
-import {TestConnection} from "./TestConnection";
-
-useQueryBuilderExp();
-
-@Entity()
-export class TestMsgTitle implements TestMsgTitleData {
-
-    @PrimaryGeneratedColumn()
-    msgTitleId: number;
-
-    @Column()
-    text: string;
-
-    @OneToOne(() => TestMsg, msg => msg.title)
-    @JoinColumn()
-    msg: InstanceType<typeof TestMsg>;
+import {DataSourceTests} from "./DataSourceTests";
+import objectContaining = jasmine.objectContaining;
 
 
+export const EDSTesters = {
+    A: EntityDataSource.create(AEntity, {connection}),
+    B: EntityDataSource.create(BEntity, {connection}),
+    C: EntityDataSource.create(CEntity, {connection})
 }
 
-@Entity()
-export class TestMsg implements TestMsgData {
+describe('EDS', () => {
+    DataSourceTests(EDSTesters.A, EDSTesters.B, EDSTesters.C);
+});
 
-    @PrimaryGeneratedColumn()
-    msgId: number;
+it('loadMap', async () => {
+    const A = EntityDataSource.create(AEntity, {connection});
 
-    @Column()
-    text: string;
+    const aKey = await A.insert({});
+    const bKey = await A.at("b", aKey).insert({});
+    const cKey = await A.at("b", aKey).at("c", bKey).insert({});
 
-    @OneToMany(() => TestComment, comment => comment.msg)
-    comments: TestComment[];
-
-    @OneToOne(() => TestMsgTitle, title => title.msg)
-    title: TestMsgTitle;
-}
-
-@Entity()
-export class TestComment implements TestCommentData {
-
-    @PrimaryGeneratedColumn()
-    commentId: number;
-
-    @Column()
-    text: string;
-
-    @ManyToOne(() => TestMsg, msg => msg.comments)
-    msg: TestMsg;
-
-}
-
-@Entity()
-export class TestMovie implements TestMovieData {
-
-    @PrimaryColumn()
-    year: number;
-
-    @PrimaryColumn()
-    name: string;
-
-}
+    expect(await A.get(aKey)).not.toEqual(objectContaining({
+        b: jasmine.any(Object)
+    }));
+    expect(await A.load({b: {c: true}}).get(aKey)).toEqual(objectContaining({
+        b: objectContaining({
+            b_id: jasmine.any(String),
+            c: objectContaining({
+                c_id: jasmine.any(String)
+            })
+        })
+    }));
 
 
-export class EntityDataSourceTester extends DataSourceTester {
-
-    connection = TestConnection([
-        TestMovie,
-        TestComment,
-        TestMsg,
-        TestMsgTitle
-    ]);
-
-    movies = new EntityDataSource(TestMovie, {
-        connection: this.connection
-    });
-
-    msgs = new EntityDataSource(TestMsg as new () => TestMsgData, {
-        connection: this.connection
-    });
+})
 
 
-    msgsTitles = new EntityDataSource(TestMsgTitle as new () => TestMsgTitleData, {
-        connection: this.connection
-    });
-
-    comments = new EntityDataSource(TestComment as new() => TestCommentData, {
-        connection: this.connection
-    });
-
-    users = new EntityDataSource(User, {
-        connection: this.connection
-    })
-
-
-}
-
-// DataSourceTests(() => new EntityDataSourceTester());
-
-// one-to-one owner
-
-
-const tester = new EntityDataSourceTester();
-
-
-// function join(
-//     qb: SelectQueryBuilder<any>,
-//     relation: Relation<any, any>,
-//     ownerId: object | undefined) {
-//
-//     const rightSchema = `_${relation.rightMetadata.tableName}_${relation.propertyName}${
-//         ownerId ? '_' + WeakId(ownerId) : ''
-//     }`;
-//
-//     const rightParameter = rightSchema + '_';
-//
-//     const leftIsOwner = relation.relationMetadata.isOwning;
-//
-//
-//     const [leftColumn, rightColumn] = reverseIf(leftIsOwner,
-//         (c: ColumnMetadata) => c,
-//         (c: ColumnMetadata) => definedAt(c, "referencedColumn"));
-//
-//
-//     if (relation.relationMetadata.isOneToOne) {
-//         return joinOneToOne();
-//     }
-//
-//     // const [leftScehma, rightSchema] = reverseIf(leftIsOwner, qb.alias, rightSchema);
-//
-//     return qb;
-//
-//     function joinManyToMany() {
-//
-//         const joinSchema = rightSchema + 'Join';
-//
-//         const [leftJoinColumns, rightJoinColumns] = reverseIf(leftIsOwner,
-//             relation.ownerRelationMetadata.joinColumns,
-//             relation.ownerRelationMetadata.inverseJoinColumns)
-//
-//         qb.innerJoin(relation.ownerRelationMetadata.joinTableName, joinSchema,
-//             leftJoinColumns
-//                 .map(c => `${joinSchema}.${leftColumn(c)}=${joinSchema}.${leftColumn(c)}`)
-//                 .join(' AND ')
-//         );
-//
-//         // qb.leftJoin(relation.ownerType, ownerSchema,
-//         //     relation.ownerMetadata)
-//     }
-//
-//     function side(isLeft, left, right) {
-//         return isLeft ? left : right
-//     }
-//
-//     function joinOneToOne() {
-//
-//         let joinCondition = '1';
-//
-//         if (leftIsOwner) {
-//             joinCondition = relation.ownerRelationMetadata.joinColumns
-//                 .map(c => `${qb.alias}.${c.databaseName}=${
-//                     rightSchema}.${c.referencedColumn?.databaseName}`)
-//                 .join(' AND ');
-//         } else {
-//             joinCondition = relation.ownerRelationMetadata.joinColumns
-//                 .map(c => `${qb.alias}.${c.referencedColumn?.databaseName}=${
-//                     rightSchema}.${c.databaseName}`)
-//                 .join(' AND ');
-//         }
-//
-//         if (ownerId) {
-//
-//             for (let c of relation.rightMetadata.primaryColumns) {
-//                 qb.setParameter(rightParameter + c.propertyName,
-//                     ownerId[c.propertyName])
-//             }
-//             qb.innerJoin(relation.rightType, rightSchema, `${joinCondition} AND ${
-//                 relation.rightMetadata.primaryColumns
-//                     .map(c => `${rightSchema}.${rightColumn(c).databaseName}=:${
-//                         rightParameter + c.propertyName}`)
-//                     .join(' AND ')
-//             }`);
-//
-//         } else {
-//             qb.leftJoin(relation.rightType, rightSchema, joinCondition);
-//         }
-//
-//         return qb;
-//     }
-//
-//
-// }

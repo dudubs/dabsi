@@ -1,11 +1,11 @@
-import {cloneObject} from "../common/object/cloneObject";
+import {isEmptyObject} from "../common/object/isEmptyObject";
 import {mapObject} from "../common/object/mapObject";
+import {ArrayTypeOrObject, ExtractKeys} from "../common/typings";
 import {JSONExp, JSONFieldKey} from "../json-exp/JSONExp";
-import {DataFields} from "./DataFields";
-import {DataPath} from "./DataSource";
+import {DataFields, DataRow} from "./DataFields";
 import {JSONExpMapper} from "./DataSource/JSONExpMapper";
 
-class _FieldsTranslator extends JSONExpMapper<any> {
+export class DataCursorTranslator extends JSONExpMapper<any> {
     constructor(public fields: DataFields<any>) {
         super();
     }
@@ -20,74 +20,171 @@ class _FieldsTranslator extends JSONExpMapper<any> {
     }
 }
 
+export type DataLoadMapValue<T> = boolean | DataLoadMap<T>;
 
-export class DataCursor {
+export type DataLoadMap<T> = {
+    [K in ExtractKeys<Required<T>, object>]?:
+    DataLoadMapValue<T[K]>
+};
 
-    path: DataPath = [];
+/*
+
+    owner relation
+    keys relation
+
+    children
+ */
+
+export class DataCursorOwner<T = any> {
+    constructor(
+        public childKeys: Record<string, string>,
+        public filter: JSONExp<T>,
+        public propertyName: string,
+        public key: string
+    ) {
+    }
+}
+
+export class DataCursor<T = any> {
 
     fields: DataFields<any> = {};
 
-    exclude = new Set<string>();
+    filter: JSONExp<any>;
 
-    at(propertyName: string, key: string): this {
-        return cloneObject(this, {
-            path: [...this.path, {owner: true, propertyName, key}],
-            fields: {},
-            exclude: new Set<any>()
-        })
+    exclude: string[] = [];
+
+    excludeAll = false;
+
+    childKeys: Record<string, string> = {};
+
+    loadMap: DataLoadMap<any> = {};
+
+    constructor(
+        public owners: DataCursorOwner[]
+    ) {
+    }
+}
+
+export namespace DataCursor {
+    export function create<T>(): DataCursor<T> {
+        return new DataCursor<T>([]);
     }
 
-    of(propertyName: string, key: string): this {
-        return cloneObject(this, {
-            path: [...this.path, {owner: false, propertyName, key}],
-        })
+    export function filter<T>(cursor: DataCursor<T>, exps: JSONExp<T>[]): DataCursor<T> {
+        return {
+            ...cursor, filter: JSONExp({
+                $and: [cursor.filter, {$and: exps}]
+            })
+        }
     }
 
-    translate(exp: JSONExp<any>): JSONExp<any> {
-        return new _FieldsTranslator(this.fields).translate(exp)
-    }
+    export function at<T, K extends keyof T>(cursor: DataCursor<T>,
+                                             propertyName: string & K,
+                                             key: string): DataCursor<ArrayTypeOrObject<T[K]>> {
+        const cursorAt = new DataCursor([
+            ...cursor.owners,
+            new DataCursorOwner(
+                cursor.childKeys,
+                cursor.filter,
+                propertyName,
+                key)
+        ]);
 
-    translateFields(fields: DataFields<any>) {
-        const translator = new _FieldsTranslator(this.fields);
-        return mapObject(fields, exp => translator.translate(exp))
-    }
 
-    field(key: string): JSONExp<any> {
-        return this.fields[key] ?? key;
-    }
-
-    extend(fields: DataFields<any>): this {
-        return cloneObject(this, {
-            fields: {
-                ...this.fields,
-                ...this.translateFields(fields),
+        if (typeof cursor.loadMap === "object") {
+            const loadMapAt = cursorAt.loadMap[propertyName];
+            if (typeof loadMapAt === "object") {
+                cursorAt.loadMap = loadMapAt;
             }
-        })
+
+        }
+        return cursorAt;
     }
 
-    pick(keys: string[]): this {
-        return cloneObject(this, {
+    export function of<T, K extends keyof T>(cursor: DataCursor<T>,
+                                             propertyName: string & K,
+                                             key: string): DataCursor<T> {
+        return {
+            ...cursor,
+            childKeys: {...cursor.childKeys, [propertyName]: key}
+        }
+    }
+
+    export function translate<T>(cursor: DataCursor<T>,
+                                 exp: JSONExp<T>): JSONExp<T> {
+        return <any>new DataCursorTranslator(<any>cursor.fields).translate(exp)
+    }
+
+    export function translateFields<T>(cursor: DataCursor<T>,
+                                       fields: DataFields<T>): DataFields<T> {
+        const translator = new DataCursorTranslator(cursor.fields);
+        return <any>mapObject(fields, exp => translator.translate(exp))
+    }
+
+    export function extend<T, Fields extends DataFields<T>>(
+        cursor: DataCursor<T>,
+        fields: Fields): DataCursor<T & DataRow<T, Fields>> {
+
+
+        return {
+            ...cursor, fields: {
+                ...cursor.fields,
+                ...translateFields(cursor, fields)
+            }
+        }
+    }
+
+
+    export function pick<T, K extends keyof T>(
+        cursor: DataCursor<T>,
+        keys: (string & K)[]): DataCursor<Pick<T, K>> {
+        return {
+
+            ...cursor,
+            excludeAll: true,
             fields: keys.toObject(key => [key,
-                this.field(key)
+                cursor.fields[key] ?? key
             ])
-        })
+        }
     }
 
-    omit(keys: string[]): this {
-        const fields = {...this.fields};
+
+    export function omit<T, K extends keyof T>(cursor: DataCursor<T>,
+                                               keys: (string & K)[]):
+        DataCursor<Omit<T, K>> {
+        const fields = {...cursor.fields};
         const exclude = new Set<string>();
         for (let key of keys) {
-            if (key in fields) {
+            if (key in cursor.fields) {
                 delete fields[key];
             } else {
                 exclude.add(key);
             }
         }
-        return cloneObject(this, {
-            fields, exclude
-        })
+        return {
+            ...cursor,
+            fields, exclude: [...exclude]
+        }
     }
 
-
+    export function concat(left: DataCursor, right: DataCursor): DataCursor {
+        if (right.owners.length) {
+            return {
+                ...right,
+                owners: [...left.owners,
+                    ...right.owners
+                ]
+            }
+        }
+        return {
+            owners: left.owners,
+            fields: right.fields,
+            exclude: right.exclude,
+            excludeAll: right.excludeAll,
+            loadMap: isEmptyObject(right.loadMap) ?
+                left.loadMap : right.loadMap, // merge
+            childKeys: {...right.childKeys, ...left.childKeys},
+            filter: JSONExp(left.filter, right.filter)
+        }
+    }
 }
-

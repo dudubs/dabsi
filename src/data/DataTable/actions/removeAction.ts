@@ -6,8 +6,8 @@ export const removeAction: DataTableAction<any> = {
     type: "multiple",
     danger: true,
     title: Lang`REMOVE`,
-    handle: async (keys, table) => {
-        await table.props.source.remove(keys);
+    handleKeys: async (keys, table) => {
+        await table.source.remove(keys);
         await table.reloadAfterRemove();
     }
 }

@@ -8,10 +8,10 @@ export type LangTemplate<K extends string> = {
 
     token: string;
 
-    section?: string;
-
+    // formatter
     (props: Record<K, any>): LangTemplateElement<K>;
 
+    // provider
     (strings: TemplateStringsArray, ...keys: K[]):
         LangTemplateEntry<K>;
 
@@ -33,12 +33,11 @@ export type LangTemplateProps<K extends string> = {
 export type LangTemplateElement<K extends string> = ReactElement<LangTemplateProps<K>>;
 
 
-export function LangTemplate<K extends string>(strings: ReadonlyArray<string>, params: K[], section?: string):
+export function LangTemplate<K extends string>(strings: ReadonlyArray<string>, params: K[]):
     LangTemplate<K> {
     const token = joinTemplate(strings, params, param => `{${param}}`);
 
     template.token = token;
-    template.section = section;
     return <any>template;
 
     function template(arg0, ...args) {

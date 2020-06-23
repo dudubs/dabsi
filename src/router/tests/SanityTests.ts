@@ -9,15 +9,15 @@ const TestRouter = Router
     .route("child", Router.route("sub-child"));
 
 
-it('expect to self-extend', () => {
+it('tryUndefined to self-extend', () => {
     expect(TestRouter.hello).toEqual(hello);
 });
 
-it('expect to child-extend', () => {
+it('tryUndefined to child-extend', () => {
     expect(TestRouter.at("child").hello).toEqual(hello);
 })
 
-it('expect to sub-child-extend', () => {
+it('tryUndefined to sub-child-extend', () => {
     expect(TestRouter.at("child").at("sub-child").hello).toEqual(hello);
 });
 

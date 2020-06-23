@@ -11,12 +11,12 @@ const useStyles = makeStyles(theme => createStyles({
     }
 }));
 
-export type MUITableColumnProps = TableCellProps & {
+export type MuiTableColumnProps = TableCellProps & {
     fitToContent?: boolean,
 };
 
 
-export function MUITableColumn({fitToContent, ...props}: MUITableColumnProps) {
+export function MuiTableColumn({fitToContent, ...props}: MuiTableColumnProps) {
     const classes = useStyles();
 
 

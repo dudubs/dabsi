@@ -1,7 +1,8 @@
 import {Merger} from "../../common/object/Merger";
 
 
-export const mergeCallback = Merger<((...args) => void) | undefined>((left, right) => {
+type Callback = ((...args) => void) | undefined;
+export const mergeCallback = Merger<Callback>((left, right) => {
     if (!left)
         return right;
     if (!right)
@@ -11,3 +12,5 @@ export const mergeCallback = Merger<((...args) => void) | undefined>((left, righ
         right(...args);
     }
 });
+
+

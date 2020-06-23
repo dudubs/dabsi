@@ -1,13 +1,24 @@
 import "..";
+import {JSONExp} from "../../../json-exp/JSONExp";
 import {DataCursor} from "../../DataCursor";
 import objectContaining = jasmine.objectContaining;
 
-const fullName = {$join: [["firstName", "lastName"], " "]};
+type T = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    age: number
+};
+const fullName: JSONExp<T> = {$join: [["firstName", "lastName"], " "]};
 
-const cursor = new DataCursor().extend({fullName, isAdult: ["age", {">": 20}]});
+const cursor = DataCursor
+    .create<T>()
+    .let(cursor => DataCursor.extend(cursor, {
+        fullName, isAdult: ["age", {">": 20}]
+    }))
 
 it("picking", () => {
-    expect(cursor.pick(["email", "fullName"])).toEqual(objectContaining({
+    expect(<any>DataCursor.pick(cursor, ["email", "fullName"])).toEqual(objectContaining({
         fields: objectContaining({
             email: "email",
             fullName: jasmine.any(Object)
@@ -16,12 +27,12 @@ it("picking", () => {
 });
 
 it("omitting", () => {
-    expect(cursor.omit(["email", "fullName"])).toEqual(objectContaining({
+    expect(<any>DataCursor.omit(cursor, ["email", "fullName"])).toEqual(objectContaining({
         fields: objectContaining({
             isAdult: jasmine.any(Object)
         }),
-        exclude: new Set([
+        exclude: [
             "email"
-        ])
+        ]
     }))
 })

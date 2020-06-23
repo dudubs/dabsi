@@ -1,11 +1,10 @@
-import {assert} from "../common/assert";
 import {cloneObject} from "../common/object/cloneObject";
 import {mergeProperties} from "../common/object/mergeProperties";
 import {UndefinedArgs, UndefinedObject} from "../common/typings";
 import {AnyRouter, Router, RouterParams} from "./Router";
 import {RouterAt} from "./RouterAt";
-import {RouterContext} from "./RouterContext";
-import {RouterInstance} from "./RouterInstance";
+import {RouterContextOf} from "./RouterContext";
+import {RouterInstanceOf} from "./RouterInstance";
 import {AnyRouterLocation, RouterLocation} from "./RouterLocation";
 
 declare module "./Router" {
@@ -29,6 +28,7 @@ declare module "./RouterAt" {
     }
 }
 
+
 Router.routeType = {
     at: _at,
     loadAt: _loadAt,
@@ -44,13 +44,14 @@ Router.extendRoute = _extend;
 
 export type AnyRoute = Route<AnyRouter>;
 
-export type Route<T extends AnyRouter = Router> = T['routeType'] & T['instanceType'] & {
+export type Route<T extends AnyRouter = Router> =
+    T['routeType'] & T['instanceType'] & {
     router: T;
-    context: RouterContext<T>;
-    parent: AnyRoute | undefined;
+    context: RouterContextOf<T>;
+    parent?: Route<AnyRouter> | undefined;
     name: string | undefined;
     root: T['routeType'];
-    instance: RouterInstance<T>
+    instance: RouterInstanceOf<T>
 };
 
 export function AnyRoute(props: {
@@ -72,14 +73,19 @@ export function AnyRoute(props: {
 }
 
 export type RouteProps<T extends AnyRouter> = {
-    instance: RouterInstance<T>,
-    context: RouterContext<T>
+    instance: RouterInstanceOf<T>,
+    context: RouterContextOf<T>
 };
 
+type UndefinedRouteProps<Router extends AnyRouter> = {
+    context: RouterContextOf<Router>,
+    instance: keyof Router['instanceType'] extends never ?
+        undefined : Router['instanceType']
+};
 
 export function Route<T extends AnyRouter>(
     router: T,
-    ...[props]: UndefinedArgs<UndefinedObject<RouteProps<T>>>
+    ...[props]: UndefinedArgs<UndefinedObject<UndefinedRouteProps<T>>>
 ): Route<T> {
     return <any>AnyRoute({
         parent: undefined,
@@ -87,6 +93,7 @@ export function Route<T extends AnyRouter>(
         context: (<RouteProps<T>>props)?.context,
         name: undefined,
         router,
+
     })
 }
 
@@ -97,20 +104,20 @@ export async function _loadAt<T extends AnyRouter,
     ...[params]: UndefinedArgs<RouterParams<T['children'][K]>>
 ): Promise<Route<RouterAt<T, K>>> {
     const router = this.router.at(key);
-    if (router.contextAdapter) {
-        const context = await router.contextAdapter.load(params);
+    if (router.context) {
         // @ts-ignore
-        return this.at(key, context);
+        return this.at(key, await router.context?.load(params));
     }
     // @ts-ignore
     return this.at(key);
 }
 
-function _at<T extends AnyRouter, K extends keyof T['children']>(
-    this: Route<T>,
+
+function _at<Router extends AnyRouter, K extends keyof Router['children']>(
+    this: Route<Router>,
     key: string & K,
-    ...[context]: UndefinedArgs<RouterContext<T['children'][K]>>
-): Route<RouterAt<T, K>> {
+    ...[context]: UndefinedArgs<RouterContextOf<Router['children'][K]>>
+): Route<RouterAt<Router, K>> {
     return <any>AnyRoute({
         parent: <AnyRoute>this,
         instance: this.instance,
@@ -123,8 +130,12 @@ function _at<T extends AnyRouter, K extends keyof T['children']>(
 
 export type RouterWithRouteType<U extends object> = { routeType: U };
 
-function _extend<T extends AnyRouter, U extends object>(this: T, routeType: U): T & RouterWithRouteType<U> {
-    return <any>cloneObject(this, {routeType: <any>mergeProperties(this.routeType, routeType)})
+function _extend<T extends AnyRouter, U extends object>(this: T,
+                                                        routeType: U): T & RouterWithRouteType<U> {
+    return <any>cloneObject(this, {
+        routeType:
+            <any>mergeProperties(this.routeType, routeType)
+    })
 }
 
 function _toLocation<T extends AnyRouter>(this: Route<T>): RouterLocation<T> {
@@ -132,7 +143,7 @@ function _toLocation<T extends AnyRouter>(this: Route<T>): RouterLocation<T> {
         parent: this.parent?.toLocation(),
         router: this.router,
         instance: this.instance,
-        params: this.router.contextAdapter?.pack(this.context)
+        params: this.router.context?.pack(this.context) ?? {}
     })
 }
 

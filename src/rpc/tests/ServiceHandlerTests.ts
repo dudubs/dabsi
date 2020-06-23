@@ -1,15 +1,15 @@
-import {Command} from "../Command";
-import {Service} from "../Service";
-import {ServiceHandler} from "../ServiceHandler";
+import {CommandOld} from "../CommandOld";
+import {ServiceOld} from "../ServiceOld";
+import {ServiceHandlerOld} from "../ServiceHandlerOld";
 import {ExpressTester} from "./ExpressTests";
 
 
-export const TodoListService = Service({
-    add: Command<{ text: string }>(),
+export const TodoListService = ServiceOld({
+    add: CommandOld<{ text: string }>(),
 
-    delete: Command<{ id: number }>(),
+    delete: CommandOld<{ id: number }>(),
 
-    get: Command<void, { text: string, id: number }[]>()
+    get: CommandOld<void, { text: string, id: number }[]>()
 
 });
 
@@ -17,14 +17,14 @@ export const TodoListService = Service({
 const Todo = TodoListService.connect(
     ExpressTester.fetchJSON
 )
-// Command<<T>()=> >();
+// CommandOld<<Commands>()=> >();
 
 
 beforeEach(() => {
     let TodoItems: string[] = [];
 
     ExpressTester.setExpressHandler(
-        ServiceHandler(TodoListService, {
+        ServiceHandlerOld(TodoListService, {
             add: ({text}) => {
                 TodoItems = [...TodoItems, text]
             },
@@ -40,14 +40,11 @@ beforeEach(() => {
     )
 });
 
-const TestService = Service({
-    test: Command()
+const TestService = ServiceOld({
+    test: CommandOld()
 })
 
 it('', async () => {
-
-
-
 
 
     console.log("?");

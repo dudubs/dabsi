@@ -1,11 +1,6 @@
 declare global {
     interface Object {
-        let<U, T>(this: U, callback: (value: NonNullable<U>) => T): T;
-    }
-
-    interface Array<T> {
-        let<U>(callback: (value: T[]) => U): U;
-
+        let<T, U>(this: T, callback: (value: NonNullable<T>) => U): U;
     }
 
 
@@ -21,7 +16,7 @@ export function useLet() {
         Object.defineProperty(prototype, "let", {
             enumerable: false,
             configurable: true,
-            writable:true,
+            writable: true,
             value: _let
         });
 

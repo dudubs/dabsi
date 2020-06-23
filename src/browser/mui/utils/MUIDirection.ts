@@ -1,8 +1,8 @@
-import {Theme as MUITheme} from "@material-ui/core";
+import {Theme as MuiTheme} from "@material-ui/core";
 
-export function MUIDirection(
+export function MuiDirection(
     left = "left", right = "right") {
-    return (theme: MUITheme) => theme.direction === "rtl" ? right : left;
+    return (theme: MuiTheme) => theme.direction === "rtl" ? right : left;
 }
 
 

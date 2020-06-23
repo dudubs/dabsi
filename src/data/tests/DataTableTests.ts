@@ -22,7 +22,7 @@ const getConnection = TestConnection([
     User, Group
 ]);
 
-const Users = new EntityDataSource(User, {connection: getConnection});
+const Users = EntityDataSource.create(User, {connection: getConnection});
 
 beforeAll(async () => {
     await Users.insert({firstName: "David", lastName: "Ben Simon"});
@@ -39,7 +39,7 @@ describe('init', () => {
         await waitForTable(table);
     });
 
-    it('expect key is field name', () => {
+    it('tryUndefined key is field name', () => {
         expect(table.columns).toEqual(arrayContaining([
             objectContaining({
                 field: "firstName",
@@ -51,7 +51,7 @@ describe('init', () => {
 });
 
 describe('toggleSort', () => {
-    it('expect to cycle', async () => {
+    it('tryUndefined to cycle', async () => {
         const table = createTable();
         expect(table.columns[0].sort).toBeUndefined();
         table.toggleSort(0);

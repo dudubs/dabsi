@@ -1,281 +1,291 @@
-import {Connection, getConnection, ObjectType, RelationQueryBuilder, SelectQueryBuilder} from "typeorm";
-import {assert} from "../common/assert";
-import {defined} from "../common/object/defined";
+import {Connection, getConnection, ObjectType, SelectQueryBuilder} from "typeorm";
+import {asyncIterableToArray} from "../../common/data/asyncIterableToArray";
+import {last} from "../common/array/last";
+import {reversed} from "../common/array/reversed";
 import {entries} from "../common/object/entries";
+import {keys} from "../common/object/keys";
 import {mapObject} from "../common/object/mapObject";
 import {Lazy} from "../common/patterns/lazy";
-import {Type} from "../common/typings";
 import {JSONExp} from "../json-exp/JSONExp";
 import {useQueryBuilderExp} from "../typeorm/exp/useQueryBuilderExp";
-import {DataCursor} from "./DataCursor";
-import {DataFields} from "./DataFields";
-import {DataQuery, DataQueryResult} from "./DataQuery";
-import {DataPathItem, DataSource, DataValues} from "./DataSource";
-import {EntityDataSourceHelper} from "./EntityDataSourceHelper";
-import {EntityID, EntityIDHelper} from "./EntityID";
-import {RelationEntityDataSourceHelper} from "./RelationEntityDataSourceHelper";
+import {EntityRelation} from "../typeorm/relations";
+import {DataCursor, DataLoadMap} from "./DataCursor";
+import {DataItem} from "./DataItem";
+import {DataFindOptions, DataQuery, DataQueryResult} from "./DataQuery";
+import {DataSource, DataValues} from "./DataSource";
+import {EntityDataCursor} from "./EntityDataCursor";
+import {EntityIDHelper} from "./EntityID";
+import {getEntityDataInfo} from "./getEntityDataInfo";
+import {selectLoadMap} from "./selectLoadMap";
 
 
 useQueryBuilderExp();
 
-export type EntityDataSourceOptions<E> = {
-    connection?: (() => Connection) | string | Connection;
-};
 
+export type EntityDataSourceOptions<T> = {
+    getConnection?: (() => Connection) | string;
+
+};
 
 export class EntityDataSource<T> extends DataSource<T> {
 
 
-    constructor(
-        public mainEntityType: ObjectType<T>,
-        public options: EntityDataSourceOptions<T> = {},
-        public readonly cursor: DataCursor = new DataCursor()
-    ) {
-        super();
+    static create<T>(
+        entityType: ObjectType<T>,
+        options: EntityDataSourceOptions<T> = {}
+    ): EntityDataSource<T> {
+        return new EntityDataSource<T>(entityType, options,
+            DataCursor.create()
+        )
     }
 
-    protected getCursor(): DataCursor {
-        return this.cursor
+
+    constructor(
+        public mainEntityType: ObjectType<T>,
+        public options: EntityDataSourceOptions<any> = {},
+        public readonly cursor: DataCursor
+    ) {
+        super();
     }
 
 
     withCursor<T>(cursor: DataCursor): DataSource<T> {
         return new EntityDataSource<T>(this.mainEntityType,
-            this.options,
+            <any>this.options,
             cursor)
     }
 
-
-
     createQueryBuilder(): SelectQueryBuilder<T> {
+        const leftQb = this.entityRepository.createQueryBuilder()
 
-
-
-        const leftQb = this.entityRepository.createQueryBuilder();
-        const {relationHelper} = this;
-        if (!relationHelper)
-            return leftQb;
-
-
-        if (!relationHelper.info.owner) {
-
-            leftQb.andWhereExp(<any>{
-                $at: {
-                    [relationHelper.info.propertyName]:
-                        {$key: relationHelper.info.key}
-                }
-            })
-            return leftQb
-        }
-        for (let [key, value] of entries(relationHelper.entityId.map)) {
-            leftQb.setParameter('right_' + key, value)
+        for (let childRelation of this.entityInfo.childRelations) {
+            childRelation.join("INNER", leftQb, leftQb.alias);
         }
 
+        let ownerSchema = leftQb.alias;
 
-
-
-        // if (relationHelper.relationMetadata.isOneToOne) {
-        //     if (relationHelper.info.owner) {
-        //
-        //     } else {
-        //
-        //     }
-        //     return leftQb;
-        // }
-
-        throw new Error()
-        //
-        // const {relationInfo, entityInfo: {relation: entityRelationInfo}} = this;
-        //
-        // if (relationInfo && entityRelationInfo) {
-        //
-        //     const {key: relationKey} = entityRelationInfo;
-        //     if (entityRelationInfo.key.owner) {
-        //
-        //         // at  ERI.key, ERI.value
-        //         console.log({relationKey}, leftQb.alias);
-        //
-        //         const rightEntityMetadata =
-        //             this.connection.getMetadata(entityRelationInfo.entityType);
-        //
-        //         const relationMetadata =
-        //             definedAt(relationInfo.relation.expressionMap, 'relationMetadata')
-        //
-        //
-        //         const rightEntityId = new EntityIDHelper(rightEntityMetadata)
-        //             .parse(relationKey.value);
-        //
-        //         const ownerRelationMetadata = relationMetadata.isOwning ?
-        //             relationMetadata : definedAt(relationMetadata, "inverseRelation");
-        //
-        //         for (let [key, value] of entries(rightEntityId.map)) {
-        //             leftQb.setParameter('right_' + key, value)
-        //         }
-        //
-        //
-        //         switch (relationMetadata.relationType) {
-        //
-        //             case "one-to-many": {
-        //
-        //                 leftQb.innerJoin(rightEntityMetadata.tableName, '_right',
-        //
-        //                     rightEntityMetadata.primaryColumns.toSeq()
-        //                         .map(c => `_right.${c.databaseName}=:right_${c.propertyName}`)
-        //                         .join(' AND ')
-        //                     + ` AND ` +
-        //                     ownerRelationMetadata.joinColumns.toSeq()
-        //                         .map(pc => `_right.${pc.referencedColumn?.databaseName}=${leftQb.alias}.${
-        //                             pc.databaseName
-        //                         }`)
-        //                         .join(' AND ')
-        //                 );
-        //
-        //
-        //                 console.log(leftQb.getQueryAndParameters());
-        //                 break;
-        //             }
-        //             case "many-to-one": {
-        //
-        //
-        //                 leftQb.innerJoin(rightEntityMetadata.tableName, '_right',
-        //
-        //                     rightEntityMetadata.primaryColumns.toSeq()
-        //                         .map(c => `_right.${c.databaseName}=:right_${c.propertyName}`)
-        //                         .join(' AND ')
-        //                     + ` AND ` +
-        //                     relationMetadata.joinColumns.toSeq()
-        //                         .map(pc => `_right.${pc.databaseName}=${leftQb.alias}.${
-        //                             pc.referencedColumn?.databaseName
-        //                         }`)
-        //                         .join(' AND ')
-        //                 );
-        //
-        //
-        //                 break;
-        //             }
-        //             default:
-        //                 throw new Error(`No support ${relationMetadata.relationType}`)
-        //         }
-        //
-        //
-        //     } else {
-        //         // of ERI.key, ERI.value
-        //         leftQb.andWhereExp(<any>{
-        //             $at: {
-        //                 [relationKey.name]: {
-        //                     $key: relationKey.value
-        //                 }
-        //             }
-        //         })
-        //     }
-        // }
-        //
-        // return leftQb
-    }
-
-
-    @Lazy() get relationHelper(): RelationEntityDataSourceHelper | undefined {
-        if (this.helper.relation) {
-            return new RelationEntityDataSourceHelper(this)
-        }
-    }
-
-    @Lazy() get helper(): EntityDataSourceHelper<T> {
-        let entityType = this.mainEntityType;
-        let relation: undefined | { type: Type<any> } & DataPathItem = undefined;
-        for (let item of this.getCursor().path) {
-            const metadata = defined(this.connection.getMetadata(entityType)
-                .relations.find(relation => relation.propertyName === item.propertyName), () =>
-                `No relation "${item.propertyName}" in ${entityType.name}.`);
-            assert(typeof metadata.type === "function");
-
-            if (item.owner) {
-                relation = {type: entityType, ...item};
-                entityType = metadata.type;
-            } else {
-                relation = {type: metadata.type, ...item}
+        for (let [owner] of reversed(this.entityInfo.owners)) {
+            ownerSchema = owner.relation.join("INNER", leftQb, ownerSchema);
+            for (let childRelation of owner.childRelations) {
+                childRelation.join("INNER", leftQb, ownerSchema);
             }
         }
-        return new EntityDataSourceHelper(this, entityType, relation)
+
+        return leftQb;
 
     }
 
-    @Lazy() get entityID(): EntityIDHelper<T> {
+
+    @Lazy() get entityInfo(): EntityDataCursor & {
+        inverseRelationsByColumn: EntityRelation[],
+        relationsByColumn: EntityRelation[]
+    } {
+        const inverseRelationsByColumn: EntityRelation[] = [];
+        const relationsByColumn: EntityRelation[] = [];
+        const cursor = EntityDataCursor(this.connection,
+            this.cursor, this.mainEntityType);
+
+
+        const ownerRelation = last(cursor.owners)?.relation;
+
+        ownerRelation && addRelation(ownerRelation);
+        cursor.childRelations.forEach(addRelation);
+
+
+        return {
+            ...cursor,
+            inverseRelationsByColumn,
+            relationsByColumn,
+        }
+
+        function addRelation(relation: EntityRelation) {
+            if (relation.isLeftOwningByColumn()) {
+                relationsByColumn.push(relation)
+            } else {
+                inverseRelationsByColumn.push(relation)
+            }
+        }
+
+    }
+
+    @Lazy() get idHelper(): EntityIDHelper<T> {
         return new EntityIDHelper<T>(this.entityRepository.metadata);
     }
 
     @Lazy() get entityRepository() {
-        return this.helper.repository
+        return this.connection.getRepository(this.entityType)
     }
 
     get entityType(): ObjectType<T> {
-        return this.helper.type;
+        return this.entityInfo.entityType;
     }
 
-    getDefaultFields(): DataFields<T> {
-        return <any>this.entityRepository.metadata.columns.toObject(c =>
-            [c.propertyName, c.propertyName]);
-    }
-
-    async query(query?: DataQuery<T>): Promise<DataQueryResult<T>> {
-        if (!query)
-            query = {};
+    protected _findCursor(options: DataFindOptions<T>): {
+        qb: SelectQueryBuilder<T>,
+        load(): AsyncIterableIterator<DataItem<T>>
+    } {
         const qb = this.createQueryBuilder();
-
-
-        for (let {by, sort, nulls} of (query.order ?? [])) {
+        for (let {by, sort, nulls} of (options.order ?? [])) {
             qb.addOrderByExp(
                 by,
                 sort === "DESC" ? "DESC" : "ASC",
                 nulls === "FIRST" ? "NULLS FIRST" : "NULLS LAST"
             )
         }
+
         const filters: JSONExp<T>[] = [];
-        if (query.skip) {
-            qb.skip(query.skip);
+        if (options.skip) {
+            qb.skip(options.skip);
         }
-        const take = query.take
+        const take = Math.min(options.take ?? 100, 100)
         if (take) {
             qb.take(take);
         }
-        if (query.filter) {
-            filters.push(query.filter)
+
+        if (this.cursor.filter) {
+            filters.push(<any>this.cursor.filter);
+        }
+
+        if (options.filter) {
+            filters.push(options.filter)
         }
         if (filters.length) {
-            qb.andWhereExp({$all: filters})
+            qb.andWhereExp({$and: filters})
         }
         const {expressionMap: {selects}} = qb;
         selects.length = 0;
         // select key columns
-        this.entityID.select(qb);
+        this.idHelper.select(qb);
 
-        const fieldToAliasName: Record<string, string> = {};
+        const idPrefix = 'id:';
+        const idPropertyNameToAliasName: Record<string, string> = {};
 
-        {
-            // select fields
-            const {expressionMap: {selects}} = qb;
-            for (let [key, exp] of entries(this.getFields())) {
-                const aliasName = '_' + key;
-                fieldToAliasName[key] = aliasName;
+        const fieldNameToLoader: Record<string, (raw: any) => any> = {};
+        const selectionToAliasName: Record<string, any> = {};
+        const aliasNameToAliasName: Record<string, string> = {};
+
+
+        for (const column of this.idHelper.primaryColumns) {
+            const idAliasName = idPrefix + column.propertyName;
+            idPropertyNameToAliasName[column.propertyName] = idAliasName;
+            select(`${qb.alias}.${column.databaseName}`, idAliasName);
+        }
+
+
+        const loadMapObject: DataLoadMap<any> = {...this.cursor.loadMap};
+
+
+        let defaultFields: Record<string, any> = {};
+        let selectedFields: Record<string, any> = {};
+
+        if (this.cursor.excludeAll) {
+
+            for (let key of keys(loadMapObject)) {
+                const exp = this.cursor.fields[key];
+                if (key === exp) continue;
+                delete loadMapObject[key];
+            }
+
+            selectedFields = {...this.cursor.fields};
+
+        } else {
+
+            for (const c of this.entityRepository.metadata.columns) {
+                if (!c.relationMetadata) {
+                    defaultFields[c.propertyName] = c.propertyName;
+                }
+            }
+
+            for (let key of this.cursor.exclude) {
+                delete loadMapObject[key];
+                delete defaultFields[key]
+            }
+
+            selectedFields = {
+                ...defaultFields,
+                ...this.cursor.fields
+            };
+        }
+
+
+        const entityDataInfo = getEntityDataInfo(this.entityRepository.metadata);
+
+        // select fields
+        for (let [fieldName, exp] of entries(selectedFields)) {
+            const selection = qb.exp(<any>exp);
+            const aliasName = '_' + fieldName;
+            select(selection, aliasName);
+
+            const transformer =
+                (typeof exp === "string") &&
+                entityDataInfo.propertyNameToTransformer[exp];
+
+            fieldNameToLoader[fieldName] = raw => {
+                raw = getRaw(raw, aliasName);
+                return transformer ? transformer.from(raw) : raw;
+            };
+
+        }
+
+        const loader = selectLoadMap(qb, qb.alias, loadMapObject, false);
+
+
+        return {
+            qb,
+            async* load() {
+                const raws = await qb.getRawMany();
+                for (const raw of raws) {
+                    const row: any = mapObject(fieldNameToLoader, load =>
+                        load(raw)
+                    );
+                    const id = mapObject(idPropertyNameToAliasName,
+                        aliasName => getRaw(raw, aliasName));
+                    loader?.(row, raw);
+
+                    yield {
+                        key: this.idHelper.fromObject(id).toString(),
+                        row
+                    }
+                }
+            }
+        }
+
+
+        function getRaw(raw, aliasName) {
+            return raw[aliasNameToAliasName[aliasName] ?? aliasName]
+        }
+
+        function select(selection, aliasName) {
+            if (selection in selectionToAliasName) {
+                aliasNameToAliasName[aliasName] = selectionToAliasName[selection];
+            } else {
+                selectionToAliasName[selection] = aliasName;
                 selects.push({
-                    selection: qb.exp(exp),
+                    selection,
                     aliasName
                 })
             }
         }
+    }
 
+    find(options: DataFindOptions<T> = {}): AsyncIterableIterator<DataItem<T>> {
+        return this._findCursor(options).load();
+    }
+
+    async query(query?: DataQuery<T>): Promise<DataQueryResult<T>> {
+        if (!query)
+            query = {};
+        const cursor = this._findCursor(query);
         return {
             count: !query.count ? undefined : (
-                await qb.getCount()
+                await cursor.qb.getCount()
             ),
-            items: (await qb.getRawMany()).map(raw => {
-                return {
-                    key: this.entityID.load(raw).toString(),
-                    row: <any>mapObject(fieldToAliasName, aliasName =>
-                        raw[aliasName])
-                }
-            })
+            items: await asyncIterableToArray(
+                cursor.load()
+            )
         }
+
+
     }
 
 
@@ -292,112 +302,75 @@ export class EntityDataSource<T> extends DataSource<T> {
             .getCount().then(count => count > 1)
     }
 
-
-    // @Lazy() get relationInfo(): EntityRelationInfo | undefined {
-    //     const {
-    //         helper: {
-    //             relation: entityRelationInfo,
-    //             entityType: entityType
-    //         }
-    //     } = this;
-    //
-    //     if (!entityRelationInfo) return;
-    //     const relationEntityMetadata = this.connection
-    //         .getMetadata(entityRelationInfo.entityType);
-    //
-    //     const relationEntityId = new EntityIDHelper(relationEntityMetadata)
-    //         .parse(entityRelationInfo.key.value);
-    //
-    //     const ownerType = entityRelationInfo.key.owner ?
-    //         entityRelationInfo.entityType : entityType;
-    //
-    //     const relation = this.connection.getRepository(ownerType)
-    //         .createQueryBuilder()
-    //         .relation(entityRelationInfo.key.name);
-    //
-    //     const relationMetadata = definedAt(relation.expressionMap, "relationMetadata");
-    //     const toMany = relationMetadata.relationType.endsWith("-to-many");
-    //     const toOne = (!toMany) && relationMetadata.relationType.endsWith("-to-one");
-    //
-    //     const getOwnerId = (entityId: EntityID<any>) =>
-    //         entityRelationInfo.key.owner ? relationEntityId : entityId;
-    //     const getItemId = (entityId: EntityID<any>) =>
-    //         entityRelationInfo.key.owner ? entityId : relationEntityId;
-    //
-    //
-    //     return {
-    //         toOne, toMany,
-    //         relation,
-    //         getOwnerId,
-    //         getItemId,
-    //         of: (entityId: EntityID<any>) =>
-    //             relation.of(getOwnerId(entityId).map)
-    //     }
-    // }
-
-
     async insert<K extends keyof T>(values: DataValues<T>): Promise<string> {
-        const entity = await this.helper.repository.save(
-            this.helper.repository.create(<any>values)
+        // TODO: if left is order by column: set relation values...
+        for (const relation of this.entityInfo.relationsByColumn) {
+            values[relation.ownerRelationMetadata.propertyName] = relation.rightId;
+        }
+
+        const entity = await this.entityRepository.save(
+            this.entityRepository.create(<any>values)
         );
-        const entityId = this.entityID.from(entity);
-        await this.relationHelper?.add(entityId);
+        const entityId = this.idHelper.from(entity);
+        for (let relation of (this.entityInfo.inverseRelationsByColumn ?? [])) {
+            await relation.addOrSet(entityId.values)
+        }
         return entityId.toString()
     }
 
     async update<K extends keyof T>(key: string, values: DataValues<T>): Promise<void> {
+
+        values = {...values};
+        for (let relation of this.entityInfo.relationsByColumn) {
+            delete values[relation.propertyName];
+        }
+
         await this.entityRepository.update(
-            this.entityID.parse(key).asFindCondition(),
+            this.idHelper.parse(key).asFindCondition(),
             <any>values);
     }
 
-    protected async addAll(keys: string[]): Promise<void> {
-        if (!this.relationHelper)
-            throw new Error(`No relation`);
-
+    async addAll(keys: string[]): Promise<void> {
         for (let key of keys) {
-            const entityId = this.entityID.parse(key);
-            await this.relationHelper.add(entityId);
-            if (this.relationHelper.isToOne)
-                break;
+            await this.addOrRemoveEntity(key, false);
+        }
+    }
 
+    async addOrRemoveEntity(key: string, remove) {
+        const method = remove ? "removeOrUnset" : "addOrSet";
+        const id = this.idHelper.parse(key).values;
+        await last(this.entityInfo.owners)?.relation[method](id);
+        for (let childRelation of this.entityInfo.childRelations) {
+            await childRelation[method](id);
         }
     }
 
 
-    protected async removeAll(keys: string[]): Promise<void> {
-        if (!this.relationHelper) return;
+    async removeAll(keys: string[]): Promise<void> {
         for (let key of keys) {
-            const entityId = this.entityID.parse(key);
-            await this.relationHelper.remove(entityId);
-            if (this.relationHelper.isToOne)
-                break;
+            await this.addOrRemoveEntity(key, true);
         }
     }
 
+    /*
+        deleteAll()
 
-    protected async deleteAll(keys: string[]): Promise<void> {
+     */
+
+    async deleteAll(keys: string[]): Promise<void> {
         for (let key of keys) {
             await this.entityRepository.delete(
-                this.entityID.parse(key).asFindCondition()
+                this.idHelper.parse(key).asFindCondition()
             )
         }
     }
 
-    async delete(key: string): Promise<void> {
-        await this.entityRepository.delete(
-            this.entityID.parse(key).asFindCondition()
-        );
-    }
-
     get connection(): Connection {
-        switch (typeof this.options.connection) {
+        switch (typeof this.options.getConnection) {
             case "string":
-                return getConnection(this.options.connection);
+                return getConnection(this.options.getConnection);
             case "function":
-                return this.options.connection();
-            case "object":
-                return this.options.connection;
+                return this.options.getConnection();
             case "undefined":
                 return getConnection()
             default:
@@ -407,13 +380,4 @@ export class EntityDataSource<T> extends DataSource<T> {
 
 
 }
-
-type EntityRelationInfo = {
-    toMany: boolean,
-    toOne: boolean,
-    relation: RelationQueryBuilder<any>,
-    of: (entityId: EntityID<any>) => RelationQueryBuilder<any>,
-    getOwnerId: (entityId: EntityID<any>) => EntityID<any>,
-    getItemId: (entityId: EntityID<any>) => EntityID<any>
-};
 

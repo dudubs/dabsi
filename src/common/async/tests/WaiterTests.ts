@@ -1,6 +1,6 @@
 import {Waiter} from "../Waiter";
 
-it('expect to resolve', async () => {
+it('tryUndefined to resolve', async () => {
     const waiter = Waiter<void>();
     setImmediate(() => {
         waiter.resolve()

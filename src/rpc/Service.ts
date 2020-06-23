@@ -1,31 +1,76 @@
+import {entries} from "../common/object/entries";
 import {mapObject} from "../common/object/mapObject";
-import {Command} from "./Command";
-import {RPC, RPCClient} from "./RPC";
+import {AwaitableType} from "../common/typings";
+import {AnyRPC, RPC, RPCConfigOf, RPCConnectionOf, RPCHandler, RPCHandlerOf} from "./RPC";
 
-export type Commands = Record<string, Command<any, any>>;
+export type ServiceCommands = Record<string, AnyRPC>;
 
-export type Service<T extends Commands> = RPC<{
-    [K in keyof T]: RPCClient<T[K]>
-}> & { commands: T };
+export type ServiceConnection<Commands extends ServiceCommands> =
+    { [K in keyof Commands]: RPCConnectionOf<Commands[K]> };
 
-export function Service<T extends Commands>(
-    commands: T
-): Service<T> {
-    return {
-        commands,
-        connect: connection => {
-            return <any>mapObject(commands, (rpc, type) => rpc.connect(
-                params => connection({
-                    type,
-                    params
-                })
-            ))
+export type ServiceCommandsHandler<Commands extends ServiceCommands> =
+    ServiceHandler<{ [K in keyof Commands]: RPCHandlerOf<Commands[K]> }>;
+
+export type ServerHandlers = Record<string, RPCHandler>;
+
+export type ServiceHandler<Handlers extends ServerHandlers> =
+
+    (<K extends keyof Handlers>(
+        data: {
+            name: K,
+            args: Parameters<Handlers[K]>
+        }
+    ) =>
+
+        Promise<AwaitableType<ReturnType<Handlers[K]>>>);
+
+export type ServiceConfig<Commands extends ServiceCommands> = {
+    [K in keyof Commands]:
+    RPCConfigOf<Commands[K]>
+};
+
+export type Service<Commands extends ServiceCommands> =
+    RPC<ServiceCommandsHandler<Commands>, ServiceConnection<Commands>,
+        ServiceConfig<Commands>> & {
+    commands: Commands
+
+    new(handler: ServiceCommandsHandler<Commands>): ServiceConnection<Commands>;
+    (handler: ServiceCommandsHandler<Commands>): ServiceConnection<Commands>;
+
+};
+
+export function Service<Commands extends ServiceCommands>(commands: Commands):
+    Service<Commands> {
+
+    Connection.commnads = commands;
+    Connection.connect = function (handler) {
+        return mapObject(commands, (command, name: any) => {
+            return command.connect(args => {
+                return handler({name, args})
+            })
+        })
+    }
+    Connection.handle = function (commandNameToOptions) {
+        const handlers = mapObject(commands, (command, name) =>
+            command.handle(
+                commandNameToOptions[<any>name]
+            ));
+
+        return Handler;
+
+        function Handler({name, args}) {
+            return handlers[name].call(this, args);
         }
     }
+
+    return <any>Connection;
+
+    function Connection(handler) {
+        const obj = this instanceof Connection ? this : {};
+        for (const [name, command] of entries(commands)) {
+            obj[name] = (...args) => handler({name, args})
+        }
+        return obj;
+    }
 }
-
-export type AnyService = Service<any>;
-
-export type ServiceCommands<T extends AnyService> =
-    T extends Service<infer U> ? U : never;
 

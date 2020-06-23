@@ -1,16 +1,16 @@
 import Table from "@material-ui/core/Table";
 import React from "react";
-import {AnyMUIDataTable} from "./index";
+import {AnyMuiDataTable} from "./index";
 import {renderTableBody} from "./renderTableBody";
 import {renderTableFooter} from "./renderTableFooter";
 import {renderTableHead} from "./renderTableHead";
-import {MUIDataTableToolbar} from "./MUIDataTableToolbar";
+import {MuiDataTableToolbar} from "./MuiDataTableToolbar";
 
 
 
-export function renderTable(table: AnyMUIDataTable) {
+export function renderTable(table: AnyMuiDataTable) {
     return <>
-        <MUIDataTableToolbar table={table}/>
+        <MuiDataTableToolbar table={table}/>
         <Table {...table.props.TableProps}>
             {renderTableHead(table)}
             {renderTableBody(table)}

@@ -1,54 +1,93 @@
 import {TableProps} from "@material-ui/core/Table";
-import {MUIIconButtonProps} from "../../../../../browser/src/mui/components/MUIIconButton";
-import {DataFields} from "../../../../data/DataFields";
+import {DataItem} from "../../../../data/DataItem";
 import {DataTable, DataTableAction, DataTableColumnProps, DataTableProps} from "../../../../data/DataTable";
 import {LangNode} from "../../../../localization/Lang";
-import {MUITableColumnProps} from "../../MUITable/MUITableColumn";
-import {MUIDataTableToolbarProps} from "./MUIDataTableToolbar";
+import {MuiButtonProps} from "../../components/MuiButton";
+import {MuiTableColumnProps} from "../../MuiTable/MuiTableColumn";
+import {MuiDataTableToolbarProps} from "./MuiDataTableToolbar";
 import {renderTable} from "./renderTable";
 
 
-export type MUIDataTableProps<T> =
-    DataTableProps<T, MUIDataTableColumnProps<T>> &
-    MUIDataTableToolbarProps & {
+export type MuiDataTableProps<T> =
+    DataTableProps<T, MuiDataTableColumnProps<T>> &
+    MuiDataTableToolbarProps & {
 
 
+    onPick?(key: string): void;
 
-    actions?: MUIDataTableAction<T>[];
+    isSelected?(item: DataItem<T>): boolean;
+
+    actions?: MuiDataTableAction<T>[];
 
     staticActions?: ({
         icon: string
         title: LangNode,
-        handle?(table: AnyMUIDataTable): void
+        handle?(table: AnyMuiDataTable): void
     })[];
 
     TableProps?: TableProps;
 
 }
 
-export type MUIDataTableAction<T> =
+export type MuiDataTableAction<T> =
     DataTableAction<T> & {
-    MUIIconButtonProps?: Partial<MUIIconButtonProps>
+    MuiButtonProps?: Partial<MuiButtonProps>
 };
 
 
-export type MUIDataTableColumnProps<T> = {
-    MUIProps?: MUITableColumnProps;
-    MUIBodyProps?: MUITableColumnProps;
-    MUIHeadProps?: MUITableColumnProps;
+export type MuiDataTableColumnProps<T> = DataTableColumnProps<T> & {
+    MuiProps?: MuiTableColumnProps;
+    MuiBodyProps?: MuiTableColumnProps;
+    MuiHeadProps?: MuiTableColumnProps;
 
-} & DataTableColumnProps<T>;
+};
 
-export type AnyMUIDataTable<T = any> =
-    MUIDataTable<T>;
+export type AnyMuiDataTable<T = any> =
+    MuiDataTable<T>;
 
 
-export class MUIDataTable<T>
-    extends DataTable<T, MUIDataTableProps<T>> {
+export class MuiDataTable<T>
+    extends DataTable<T, MuiDataTableProps<T>> {
 
 
     render(): React.ReactNode {
         return renderTable(this);
     }
+
+    get isMultiSelection() {
+        return (!this.props.onPick) && this.multipleActions.length > 0
+    }
+
+    toggleSelect(key: string) {
+        if (this.isMultiSelection)
+            super.toggleSelect(key);
+        else {
+            this.selectedKeys =
+                this.selectedKeys.has(key) ?
+                    this.selectedKeys.clear() :
+                    this.selectedKeys.clear().add(key);
+        }
+    }
+
+    getSelectedItems() {
+        return this.items.filter(item => this.selectedKeys.has(item.key));
+    }
+
+    toggleSelectAll() {
+        const selectedItems = this.getSelectedItems();
+        const allSelectedItems = selectedItems.length === this.items.length;
+
+        if (allSelectedItems) {
+            this.selectedKeys = this.selectedKeys.clear();
+        } else {
+            const selectedKeys = this.selectedKeys.asMutable();
+            for (let {key} of this.items) {
+                selectedKeys.add(key)
+            }
+            this.selectedKeys = selectedKeys.asImmutable();
+        }
+    }
+
+
 }
 

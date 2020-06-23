@@ -1,6 +1,9 @@
 let counter = 0;
-const run = new Date().getTime();
 
-export function RandomId(p = "rm"/*RandomKey*/): string {
-    return `${p}-${++counter}-${run}`;
+const runtime = new Date().getTime().toString(36);
+
+export function RandomId(): string {
+    return `${(++counter).toString(36).padStart(3, 'x')}${runtime}`;
 }
+
+

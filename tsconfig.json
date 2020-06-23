@@ -1,7 +1,8 @@
 {
   "extends": "./configs/dev.tsconfig.json",
   "compilerOptions": {
-    "sourceMap": true
+    "sourceMap": true,
+    "preserveSymlinks": false
   },
   "exclude": [
     "node_modules",

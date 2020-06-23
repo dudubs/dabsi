@@ -1,8 +1,8 @@
 import {Seq} from "immutable";
-import {ArrayTypeOrObject, Expression, KeysByValue, Union} from "../common/typings";
+import {ArrayTypeOrObject, Expression, ExtractKeys, Union} from "../common/typings";
 
 
-export type JSONFieldKey<T> = string & KeysByValue<Required<T>, JSONPrimitive>;
+export type JSONFieldKey<T> = string & keyof Required<T>;
 
 
 export type JSONSymbolicOperator = keyof {
@@ -48,7 +48,7 @@ export type JSONPrimitive = string | number | boolean;
 
 
 export type JSONFieldsExp<T> = {
-    [K in KeysByValue<T, JSONPrimitive>]?:
+    [K in ExtractKeys<T, JSONPrimitive>]?:
     JSONFieldExp<T, Extract<T[K], JSONPrimitive>>;
 };
 
@@ -67,15 +67,20 @@ export type JSONFieldExp<T, V extends JSONPrimitive> =
 
 export interface JSONExpTypes<T> {
 
-    $is: T;
+    $if: [JSONExp<T>, JSONExp<T>, JSONExp<T>?] | {
+        condition: JSONExp<T>,
+        then: JSONExp<T>,
+        else?: JSONExp<T>
+    };
 
-    $key: string[] | string;
+    $case: ({ if: JSONExp<T>, then: JSONExp<T> } | [JSONExp<T>, JSONExp<T>])[];
 
-    $isNot: T;
 
-    $all: JSONExp<T>[];
+    $is: string[] | string;
 
-    $any: JSONExp<T>[];
+    $and: JSONExp<T>[];
+
+    $or: JSONExp<T>[];
 
     $value: JSONPrimitive;
 
@@ -88,20 +93,26 @@ export interface JSONExpTypes<T> {
     $not: JSONExp<T>;
 
     $search: {
+        // TODO: inverse: boolean,
         in: JSONExp<T>,
         text: string
     }
 
+    $isNull: JSONExp<T>;
+
+    $isNotNull: JSONExp<T>;
+
+    $ifNull: [JSONExp<T>, JSONExp<T>];
+
     ///
     $at: Union<{
-        [K in KeysByValue<T, object>]:
-
+        [K in ExtractKeys<Required<T>, object>]:
         Record<K, JSONExp<ArrayTypeOrObject<T[K]>>>
     }>;
 
 
     $from: Union<{
-        [K in keyof T]:
+        [K in keyof Required<T>]:
 
         T[K] extends Array<infer U> ? Record<K, {
                 where?: JSONExp<U>,
@@ -110,13 +121,13 @@ export interface JSONExpTypes<T> {
             never
     }>;
 
-    $count: KeysByValue<T, any[]> | Union<{
+    $count: ExtractKeys<T, any[]> | Union<{
         [K in keyof T]:
         T[K] extends Array<infer U> ? Record<K, JSONExp<U>> :
             never
     }>;
 
-    $has: KeysByValue<T, any[]> | Union<{
+    $has: ExtractKeys<T, any[]> | Union<{
         [K in keyof T]:
         T[K] extends Array<infer U> ? Record<K, JSONExp<U>> :
             never
@@ -140,12 +151,14 @@ export type JSONObjectExp<T> =
 export type JSONArrayExp<T> =
     [JSONExp<T>, Expression<Record<JSONCompareOperator, JSONPrimitive>> | { $in: JSONPrimitive[] }]
     | [JSONExp<T>, JSONCompareOperator, JSONExp<T>]
-    | [JSONExp<T>, "$in", JSONExp<T>[]];
+    | [JSONExp<T>, "$in", JSONExp<T>[]]
+    | [string];
 
 export type JSONExp<T> =
     undefined |
     boolean |
     number |
+    null |
     JSONFieldKey<T> |
     JSONObjectExp<T>;
 
@@ -155,13 +168,13 @@ export function JSONExp<T>(...exps: Array<JSONExp<T>>): JSONExp<T> {
         if (!exp)
             return [];
         if (typeof exp === "object") {
-            if ("$all" in exp) {
-                return Seq.Indexed(exp.$all).flatMap(callback);
+            if ("$and" in exp) {
+                return Seq.Indexed(exp.$and).flatMap(callback);
             }
         }
         return [exp];
     }).toArray()
-    return exps.length > 1 ? {$all: exps} : exps[0];
+    return exps.length > 1 ? {$and: exps} : exps[0];
 }
 
 /*
@@ -169,9 +182,4 @@ export function JSONExp<T>(...exps: Array<JSONExp<T>>): JSONExp<T> {
     {key: {$startsWith: ...}}
     {key: ["$startsWith", ...]
  */
-
-
-export function JSONFields<K extends string>(...keys: K[]): Record<K, K> {
-    return keys.toObject(key => [key, key])
-}
 

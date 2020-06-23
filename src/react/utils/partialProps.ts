@@ -1,49 +1,46 @@
-import {Seq} from "immutable";
-import {ComponentType, createElement, FunctionComponent} from "react";
+import {ComponentType, createElement, ReactElement} from "react";
 import {PartialKeys} from "../../common/typings";
-
-export const DefaultPropExtenderSymbol = Symbol();
-
-export type DefaultPropExtender<T> =
-    Record<typeof DefaultPropExtenderSymbol, (value: T, props) => T>;
-
-export type DefaultProp<T> = DefaultPropExtender<T> | T;
-
-export function DefaultProp<T>(
-    extend: (value: T) => T
-): DefaultPropExtender<T> {
-    return {[DefaultPropExtenderSymbol]: extend}
-}
-
 
 export type WithDefaultProps = {
 
     <T>(defaultProps: T):
         <P>(component: ComponentType<P & T>) =>
-            FunctionComponent<P & Partial<T>>;
+            (props: P & Partial<T>) => ReactElement;
 
 
     <P, K extends keyof P>(
         component: ComponentType<P>,
-        defaultProps: {
-            [_K in K]: DefaultProp<P[_K]>
-        }
+        defaultProps: Pick<P, K>
     ):
-        FunctionComponent<PartialKeys<P, K>>;
+        (props: PartialKeys<P, K>) => ReactElement;
+
+    <P, K extends keyof P>(
+        component: ComponentType<P>,
+        getDefaultProps: (props: Partial<P>) => Pick<P, K>
+    ):
+        (props: PartialKeys<P, K>) => ReactElement;
 };
 
-export function _withDefaultProps(
+function _partialProps(
     component, defaultProps,
     extraDefaultProps?
 ) {
 
-    if (component.defaultComponent)
-        return _withDefaultProps(component.defaultComponent,
+
+    if (typeof defaultProps === "function") {
+        defaultProps = defaultProps(
+            component.defaultProps ?? {}
+        )
+    }
+
+    if (component.defaultComponent) {
+        return _partialProps(component.defaultComponent,
             defaultProps, {
                 ...extraDefaultProps,
                 ...component.defaultProps,
             });
 
+    }
 
     // console.log({component});
     const func = props => {
@@ -55,15 +52,10 @@ export function _withDefaultProps(
     func.displayName = component.displayName ??
         component.name;
 
-    const _defaultPros = {...extraDefaultProps};
-    for (const [prop, value] of
-        Seq.Keyed(<Record<string, DefaultProp<any>>>defaultProps)) {
-        const extend = value?.[DefaultPropExtenderSymbol];
-        _defaultPros[prop] =
-            extend ? extend(_defaultPros[prop], _defaultPros) : value;
-    }
-
-    func.defaultProps = _defaultPros;
+    func.defaultProps = {
+        ...extraDefaultProps,
+        ...defaultProps
+    };
 
     return func;
 }
@@ -71,6 +63,6 @@ export function _withDefaultProps(
 export const partialProps: WithDefaultProps =
     (componentOrProps, props?): any => {
         if (props)
-            return _withDefaultProps(componentOrProps, props);
-        return component => _withDefaultProps(component, componentOrProps);
+            return _partialProps(componentOrProps, props);
+        return component => _partialProps(component, componentOrProps);
     };

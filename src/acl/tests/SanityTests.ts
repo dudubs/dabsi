@@ -11,8 +11,8 @@ const connection = TestConnection([
     Group
 ]);
 
-const Users = new EntityDataSource(User, {connection});
-const Groups = new EntityDataSource(Group, {connection});
+const Users = EntityDataSource.create(User, {connection});
+const Groups = EntityDataSource.create(Group, {connection});
 
 let g1: string;
 let g2: string;
@@ -34,17 +34,17 @@ beforeAll(async () => {
     await Groups.at("users", g1).add([u1, u2]);
     items = (await Groups
         .extend({
-            u1InGroup: {$has: {users: {$key: u1}}},
-            u2InGroup: {$has: {users: {$key: u2}}},
-            u3InGroup: {$has: {users: {$key: u3}}},
+            u1InGroup: {$has: {users: {$is: u1}}},
+            u2InGroup: {$has: {users: {$is: u2}}},
+            u3InGroup: {$has: {users: {$is: u3}}},
         })
         .query({})).items
 });
 
 let items: any;
 
-it('$key', async () => {
-    const result = await Users.query({filter: {$key: [u1, u2]}});
+it('$is', async () => {
+    const result = await Users.query({filter: {$is: [u1, u2]}});
     expect(result).toEqual(objectContaining({
         items: arrayContaining([
             objectContaining({key: u1}),
@@ -69,12 +69,12 @@ function assert(g: string, u: "u1" | "u2" | "u3", exists: boolean) {
     ]))
 }
 
-it('expect u1 in g1', () => assert(g1, "u1", true));
+it('tryUndefined u1 in g1', () => assert(g1, "u1", true));
 
-it('expect u2 in g1', () => assert(g1, "u2", true));
+it('tryUndefined u2 in g1', () => assert(g1, "u2", true));
 
-it('expect u3 not in g1', () => assert(g1, "u3", false));
+it('tryUndefined u3 not in g1', () => assert(g1, "u3", false));
 
-it('expect u2 not in g2', () => assert(g2, "u2", false));
+it('tryUndefined u2 not in g2', () => assert(g2, "u2", false));
 
-it('expect u3 not in g2', () => assert(g2, "u3", false));
+it('tryUndefined u3 not in g2', () => assert(g2, "u3", false));

@@ -1,6 +1,25 @@
 import {BSON2} from "../../common/BSON2";
-import {testExpressHandler} from "../../rpc/tests/ExpressTests";
+import {ExpressTester, testExpressHandler} from "../../rpc/tests/ExpressTests";
 import {ExpressBSON} from "../ExpressBSON";
+
+
+export namespace ExpressBSONTester {
+    export function fetch(data, url?) {
+        return ExpressTester
+            .fetch({
+                url,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/bson",
+                },
+                body: BSON2.pack(data)
+            })
+            .then(res => res.arrayBuffer())
+            .then(arrayBuffer => BSON2.unpack(
+                Buffer.from(arrayBuffer)
+            ))
+    }
+}
 
 export function testBSONHandler(callback) {
     return (data?) => testExpressHandler(
@@ -20,13 +39,13 @@ export function testBSONHandler(callback) {
     })
 }
 
-it('expect to regexp from server', async () => {
+it('tryUndefined to regexp from server', async () => {
     expect(await testBSONHandler(() => /hello/)()).toBeInstanceOf(
         RegExp
     );
 });
 
-it('expect to regexp to server', async () => {
+it('tryUndefined to regexp to server', async () => {
     expect(await testBSONHandler(data => data)(/hello/)).toBeInstanceOf(
         RegExp
     );

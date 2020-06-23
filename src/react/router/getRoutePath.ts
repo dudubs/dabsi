@@ -1,9 +1,9 @@
-import {mapFactory} from "../../common/map/mapFactory";
+import {WeakMapFactory} from "../../common/map/mapFactory";
 import {keys} from "../../common/object/keys";
 import {AnyRoute} from "../../router";
 
-export const getRoutePath = mapFactory(new WeakMap(), (route: AnyRoute): string => {
-    const params = route.router.contextAdapter?.pack(route.context);
+export const getRoutePath = WeakMapFactory((route: AnyRoute): string => {
+    const params = route.router.context?.pack(route.context) ?? {};
     let path = '';
 
     if (route.name) {

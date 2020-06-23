@@ -1,8 +1,8 @@
 import {ReactElement} from "react";
-import {KeysByValue} from "../../common/typings";
+import {ExtractKeys} from "../../common/typings";
 import {withDefaultKey} from "./withDefaultKey";
 
-export type KeyField<T> = KeysByValue<T, string> |
+export type KeyField<T> = ExtractKeys<T, string> |
     ((item: T) => string);
 
 export function KeyField2<T>(keyField: KeyField<T>): (item: T) => string {

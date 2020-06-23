@@ -1,6 +1,6 @@
 import {mergeObject} from "../common/object/mergeObject";
 import {mergeProperties} from "../common/object/mergeProperties";
-import {UndefinedIfNoKeys} from "../common/typings";
+import {UndefinedIf, UndefinedIfNoKeys} from "../common/typings";
 
 export type AnyRouter = Router<any>;
 
@@ -40,15 +40,16 @@ export interface Router<Init extends RouterInit = DefaultRouterInit> {
 
 
 export type UndefinedRouterParams<T extends AnyRouter> =
-    UndefinedIfNoKeys<RouterParams<T>>
+    UndefinedIfNoKeys<RouterParams<T>>;
 
-export type RouterParams<T extends AnyRouter> = {
-    [K in keyof T['params']]: ReturnType<T['params'][K]>
+export type RouterParams<Router extends AnyRouter> = {
+    [K in keyof Router['params']]: ReturnType<Router['params'][K]>
 };
 
 
 export type RouterWithRouterType<T extends object> = T & { routerType: T };
-export type RouterWithChild<K extends string, Router extends AnyRouter> = { children: Record<K, Router> };
+export type RouterWithChild<K extends string, Router extends AnyRouter> =
+    { children: Record<K, Router> };
 export const Router: Router = <Router>{
     children: {},
     params: {},
@@ -60,10 +61,14 @@ export const Router: Router = <Router>{
 };
 
 
-function _route<Router extends AnyRouter,
+function _route<TRouter extends AnyRouter,
     K extends string,
-    ChildRouter extends AnyRouter = Router>(this: Router, key: K, router?: ChildRouter):
-    Router & RouterWithChild<K, ChildRouter> {
+    ChildRouter extends AnyRouter = Router>(
+    this: TRouter,
+    key: K,
+    router?: ChildRouter
+):
+    TRouter & RouterWithChild<K, ChildRouter> {
 
     return mergeObject(this, {
         children: {

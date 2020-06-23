@@ -1,14 +1,16 @@
 import {assert} from "../assert";
-import {BaseMap} from "./BaseMap";
+import {BaseMap, MapKey, MapValue} from "./BaseMap";
 
-export function mapFactory<K, V>(
+export type MapFactory<T extends BaseMap<any, any>> = {
+    map: T;
+    (key: MapKey<T>): NonNullable<MapValue<T>>;
+
+};
+
+ function mapFactory<K, V>(
     map: BaseMap<K, V>,
     factory: (key: K) => V
-): {
-    map: BaseMap<K, V>,
-    (key: K): NonNullable<V>
-    <T>(key: K, callback: (value: NonNullable<V>) => T): T | undefined
-} {
+): MapFactory<BaseMap<K, V>> {
     touch.map = map;
     return touch
 
@@ -27,3 +29,17 @@ export function mapFactory<K, V>(
         return <V>value;
     }
 }
+
+
+export function WeakMapFactory<K extends object, V>(factory: (key: K) => V): MapFactory<WeakMap<K, V>> {
+    return <any>mapFactory(new WeakMap(), factory)
+}
+
+export function MapFactory<K, V>(factory: (key: K) => V): MapFactory<Map<K, V>> {
+    return <any>mapFactory(new Map(), factory)
+}
+
+export function BaseMapFactory<K, V>(map: BaseMap<K, V>, factory: (key: K) => V): MapFactory<BaseMap<K, V>> {
+    return <any>mapFactory(map, factory)
+}
+

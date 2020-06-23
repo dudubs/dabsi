@@ -1,49 +1,45 @@
 import {cloneObject} from "../common/object/cloneObject";
-import {Awaitable} from "../common/typings";
+import {Awaitable, Pluck, UndefinedIf} from "../common/typings";
 import {AnyRouter, Router, RouterParams} from "./Router";
+
 
 declare module "./Router" {
     interface Router<Init> {
+        withContext: typeof _withContext;
 
-        contextAdapter: Init['contextAdapter'];
-    }
 
-    interface RouterInit {
-        contextAdapter: RouterContextAdapter<any, any>;
+        context?: RouterContext<any, any>;
 
-    }
-
-    interface DefaultRouterInit {
-        contextAdapter: RouterContextAdapter<never, never>;
 
     }
+
 }
 
+Router.withContext = _withContext;
 
-export type RouterContextAdapter<P, C> = {
-    load(params: P): Awaitable<C>,
-    pack(context: C): P;
+export type RouterContext<Params, Context> = {
+    load: RouterContextLoader<Params, Context>;
+    pack: RouterContextPacker<Params, Context>;
 };
 
-export type RouterContextAdapterType<T extends RouterContextAdapter<any, any>> =
-    T extends RouterContextAdapter<any, infer U> ? U : never;
+export type RouterContextOf<Router extends AnyRouter> =
+    Pluck<Router, 'contextType', undefined>
 
-export type RouterContext<T extends AnyRouter> =
-    RouterContextAdapterType<T['contextAdapter']> extends never ?
-        undefined : RouterContextAdapterType<T['contextAdapter']>;
+export type RouterContextLoader<Params, Context> =
+    (params: Params) => Awaitable<Context>;
 
+export type RouterContextPacker<Params, Context> =
+    (context: Context) => Params;
 
-export type RouterWithContextAdapter<P, C> =
-    { contextAdapter: RouterContextAdapter<P, C> };
-
-export function RouterContext<Router extends AnyRouter, Context>(
-    loader: (params: RouterParams<Router>) => Awaitable<Context>,
-    packer: (context: Context) => RouterParams<Router>
-): (router: Router) => Router & RouterWithContextAdapter<RouterParams<Router>, Context> {
-    return router => cloneObject(router, {
-        contextAdapter: {
-            load: loader,
-            pack: packer
-        }
-    })
+export type RouterWithContext<Context> = {
+    contextType: Context
 }
+
+function _withContext<Router extends AnyRouter, Context>(
+    this: Router,
+    load: RouterContextLoader<RouterParams<Router>, Context>,
+    pack: RouterContextPacker<RouterParams<Router>, Context>
+): Router & RouterWithContext<Context> {
+    return <any>cloneObject(this, {context: {load, pack}})
+}
+

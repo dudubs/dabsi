@@ -1,23 +1,38 @@
-import {mapObject} from "../../common/object/mapObject";
 import {JSONExp, JSONFieldKey, JSONNamedOperator, JSONPrimitive} from "../../json-exp/JSONExp";
 import {JSONExpTranslator} from "../../json-exp/JSONExpTranslator";
-import {DataFields} from "../DataFields";
 
 export class JSONExpMapper<T> extends JSONExpTranslator<any, JSONExp<T>> {
     False: JSONExp<T> = false;
     True: JSONExp<T> = true;
 
+    Null: JSONExp<T> = null;
 
-    translateKey(key: string): JSONExp<T> {
-        return {$key: key}
+    translateIfNull(exp: JSONExp<T>, alt_value: JSONExp<T>): JSONExp<T> {
+        return {$ifNull:[exp,alt_value]};
+    }
+
+    translateIf(condition: JSONExp<T>, expIfTrue: JSONExp<T>, expIfFalse: JSONExp<T>): JSONExp<T> {
+        return {$if: [condition, expIfTrue, expIfFalse]};
+    }
+
+    translateIsNull(exp: JSONExp<T>): JSONExp<T> {
+        return {$isNull: exp};
+    }
+
+    translateIsNotNull(exp: JSONExp<T>): JSONExp<T> {
+        return {$isNotNull: exp};
+    }
+
+    translateIs(key: string): JSONExp<T> {
+        return {$is: key}
     }
 
     translateAll(exps: JSONExp<T>[]): JSONExp<T> {
-        return {$all: exps};
+        return {$and: exps};
     }
 
     translateAny(exps: JSONExp<T>[]): JSONExp<T> {
-        return {$any: exps};
+        return {$or: exps};
     }
 
     translateAt(key: string, exp: JSONExp<any>): JSONExp<T> {
@@ -59,9 +74,6 @@ export class JSONExpMapper<T> extends JSONExpTranslator<any, JSONExp<T>> {
         return [where, "$in", values];
     }
 
-    translateIs(exp: any): JSONExp<T> {
-        return {$is: exp};
-    }
 
     translateLength(exp: JSONExp<T>): JSONExp<T> {
         return {$length: exp};

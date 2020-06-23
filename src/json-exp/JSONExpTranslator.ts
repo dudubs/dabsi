@@ -27,6 +27,8 @@ export abstract class JSONExpTranslator<T, U>
 
     abstract False: U;
 
+    abstract Null: U;
+
     abstract translateValue(value: JSONPrimitive): U;
 
     abstract translateFieldExp(key: JSONFieldKey<T>): U;
@@ -45,6 +47,9 @@ export abstract class JSONExpTranslator<T, U>
     }
 
     translateArrayExp(exp: JSONExp<T> & any[]): U {
+        if (exp.length === 1)
+            return this.translateValue(exp[0]);
+
         if (exp.length === 3) {
             const [left, op, right] = exp;
             // [exp, "$in", exps...]
@@ -108,6 +113,8 @@ export abstract class JSONExpTranslator<T, U>
                 return this.translateFieldExp(exp);
 
             case "object":
+                if (!exp)
+                    return this.Null;
                 return this.translateObjectExp(exp);
         }
         throw new Error(`Can't translate ${JSON.stringify(exp)}`)
@@ -146,19 +153,14 @@ export abstract class JSONExpTranslator<T, U>
 
     abstract translateAny(exps: U[]): U;
 
-    abstract translateIs(exp: T): U;
 
-    $is(exp: JSONExpTypes<T>["$is"]): U {
-        return this.translateIs(exp);
-    }
+    abstract translateIs(key: string): U;
 
-    abstract translateKey(key: string): U;
-
-    $key(exp: JSONExpTypes<T>['$key']): U {
+    $is(exp: JSONExpTypes<T>['$is']): U {
         if (typeof exp === "string")
-            return this.translateKey(exp);
+            return this.translateIs(exp);
         // TODO: optimize to SQL "IN" statement.
-        return this.translateAny(exp.map(exp => this.translateKey(exp)))
+        return this.translateAny(exp.map(exp => this.translateIs(exp)))
     }
 
     abstract translateFromExp(key: string, take: JSONExp<any>, where: JSONExp<any>): U;
@@ -175,17 +177,38 @@ export abstract class JSONExpTranslator<T, U>
         return this.translateLength(this.translate(exp))
     }
 
-    $all(exp: JSONExpTypes<T>["$all"]): U {
+    $and(exp: JSONExpTypes<T>["$and"]): U {
         return this.translateAll(exp.map(exp => this.translate(exp)));
     }
 
-    $any(exp: JSONExpTypes<T>["$any"]): U {
+    $or(exp: JSONExpTypes<T>["$or"]): U {
         return this.translateAny(exp.map(exp => this.translate(exp)));
     }
+
+    abstract translateIsNull(exp: U): U;
+
+    abstract translateIsNotNull(exp: U): U;
 
     $at(exp: JSONExpTypes<T>["$at"]): U {
         const [key, subExp] = firstDefinedEntry(exp);
         return this.translateAt(<any>key, subExp)
+    }
+
+    $isNull(exp: JSONExpTypes<T>['$isNull']): U {
+        return this.translateIsNull(this.translate(exp));
+    }
+
+    $isNotNull(exp: JSONExpTypes<T>['$isNotNull']): U {
+        return this.translateIsNotNull(this.translate(exp));
+    }
+
+    abstract translateIfNull(exp: U, alt_value: U): U;
+
+    $ifNull([left, _else]: JSONExpTypes<T>['$ifNull']): U {
+        return this.translateIfNull(
+            this.translate(left),
+            this.translate(_else)
+        )
     }
 
     $concat(exp: JSONExpTypes<T>["$concat"]): U {
@@ -224,7 +247,7 @@ export abstract class JSONExpTranslator<T, U>
         if (words.length === 0)
             return this.True;
         return this.translate({
-            $all: words.map(word => [
+            $and: words.map(word => [
                 exp.in,
                 "$contains",
                 {$value: word}
@@ -236,9 +259,6 @@ export abstract class JSONExpTranslator<T, U>
         return this.translateValue(exp);
     }
 
-    $isNot(exp: T) {
-        return this.$not({$is: exp});
-    }
 
     $join<K>([exps, sep]: JSONExpTypes<T>["$join"]): U {
         const $concat: JSONExp<T>[] = [];
@@ -254,5 +274,51 @@ export abstract class JSONExpTranslator<T, U>
     $not<K>(value: JSONExpTypes<T>["$not"]): U {
         return this.translateNot(this.translate(value))
     }
+
+    abstract translateIf(condition: U,
+                         then: U,
+                         _else: U): U;
+
+    $if<K>(exp: JSONExpTypes<T>["$if"]): U {
+        if (Array.isArray(exp)) {
+            return this.translateIf(
+                this.translate(exp[0]),
+                this.translate(exp[1]),
+                this.translate(exp[2] ?? null)
+            )
+        } else {
+            return this.translateIf(
+                this.translate(exp.condition),
+                this.translate(exp.then),
+                this.translate(exp.else ?? null)
+            )
+        }
+    }
+
+    $case(cases: JSONExpTypes<T>['$case']): U {
+        const translate = (index: number) => {
+            const exp = cases[index];
+            if (!exp)
+                return this.Null;
+            const [condition, then] = Array.isArray(exp) ? exp : [exp.if, exp.then];
+            return this.translateIf(
+                this.translate(condition),
+                this.translate(then),
+                translate(index + 1)
+            )
+        };
+        return translate(0);
+    }
 }
 
+
+/*
+
+    $case:[
+        [{$isNull: ""}, ],
+
+        {default: ""}
+
+    ]
+
+ */

@@ -1,5 +1,5 @@
 import {Component, ReactNode} from "react";
-import {ImmutableSet} from "../../immutable";
+import {ImmutableSet} from "../../immutable2";
 import {JSONExp} from "../../json-exp/JSONExp";
 import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {State} from "../../react/utils/State";
@@ -14,10 +14,12 @@ export type AbstractDataListProps<T> = {
 
     searchIn?: JSONExp<T>[];
 
+
     pageSize?: number;
 };
 
 
+// TODO: Merge to AbstractDataTable class.
 export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>>
     extends Component<Props> {
 
@@ -27,7 +29,7 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     @State() isLoading = false;
 
-    @State('reload') pageSize = this.props.pageSize ?? 0;
+    @State('reload') pageSize = this.props.pageSize ?? 10;
 
     @State('reload') page = 0;
 
@@ -41,22 +43,31 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     @State() selectAll = false;
 
-    toggleKey(key: string) {
-        this.selectedKeys = this.selectedKeys.has(key) ? this.selectedKeys.delete(key) :
-            this.selectedKeys.add(key);
+    @State('reload') source = this.props.source;
+
+    updateSource(getSource: (source: DataSource<T>) => DataSource<T>) {
+        this.source = getSource(this.props.source);
+        this.totalCount = 0;
     }
 
-    abstract getFields(): DataFields<T>;
+    toggleSelect(key: string) {
+        this.selectedKeys =
+            this.selectedKeys.has(key) ?
+                this.selectedKeys.clear() :
+                this.selectedKeys.clear().add(key);
+    }
+
 
     abstract getOrder(): DataOrder<T>[];
 
     getQuery(): DataQuery<any> {
         const {text, props: {searchIn}} = this;
         const textFilter = !(text && searchIn) ? undefined : {
-            $all: searchIn.map(exp => ({$search: {in: exp, text}}))
+            $and: searchIn.map(exp => ({$search: {in: exp, text}}))
         };
 
         return {
+            count: !this.totalCount,
             order: [
                 ...!this.sort ? [] : [this.sort],
                 ...this.getOrder()],
@@ -66,11 +77,14 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
         }
     }
 
+    getQuerySource(): DataSource<any> {
+        return this.source
+    }
+
     async reload() {
         this.isLoading = true;
         await this.reloadDebounce.wait();
-        const result = await this.props.source
-            .select(this.getFields())
+        const result = await this.getQuerySource()
             .query(this.getQuery());
         if (result.count)
             this.totalCount = result.count;

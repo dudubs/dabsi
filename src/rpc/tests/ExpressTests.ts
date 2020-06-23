@@ -40,24 +40,16 @@ export function testExpressHandler(handler: Handler) {
     }
 }
 
-export function testJSONHandler(callback) {
-    return data => testExpressHandler(async (req, res) => {
-        res.json(await callback(req.body))
-    })({
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(data)
-    }).then(res => res.json())
-}
 
 export namespace ExpressTester {
 
 
     export function setExpressHandler(handler: express.Handler) {
         _handler = handler;
+        return ExpressTester;
     }
 
-    export function fetch({url, ...init}: ExpressTesterRequest) {
+    export function fetch({url, ...init}: ExpressTesterRequest={}) {
         return _fetch(_url + (url ?? ""), init)
     }
 

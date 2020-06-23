@@ -1,49 +1,55 @@
-import Grid from "@material-ui/core/Grid";
+import Grid, {GridProps} from "@material-ui/core/Grid";
 import React from "react";
-import {MUIButton, MUIButtonProps} from "../../../../browser/src/mui/components/MUIButton";
-import {ObjectMerger} from "../../../common/object/Merger";
 import {ValueOrFactory} from "../../../common/patterns/ValueOrFactory";
 import {LangNode} from "../../../localization/Lang";
 import {mergeCallback} from "../../../react/utils/mergeCallback";
+import {MuiButton, MuiButtonProps} from "../components/MuiButton";
 
-export type MUIAction<T> = {
+export type MuiActionProps<T = any> = {
     title: LangNode,
     icon?: string,
-    MUIButtonProps?: MUIButtonProps;
-    handle(context: T);
+    MuiButtonProps?: MuiButtonProps;
+    context?: T;
+    handle?(context: T);
+    item?: boolean
+    GridProps?: Partial<GridProps>;
 };
 
-export const MUIAction = ObjectMerger<MUIAction<any>>({
-    handle: mergeCallback
+export function MuiAction<T>(action: MuiActionProps<T>) {
+    let children = <MuiButton
+        ButtonProps={{variant: "contained"}}
+        color={"primary"}
+        title={action.title}
+        icon={action.icon}
+        {...action.MuiButtonProps}
+        onClick={mergeCallback(action.MuiButtonProps?.onClick, () => {
+            action.handle?.(ValueOrFactory(action.context) as any)
+        })}
+    />
+    if (action.item) {
+        children = <Grid item {...action.GridProps}>{children}</Grid>
+    }
+    return children
+}
+
+
+export type MuiActionsProps<T> = {
+    context?: ValueOrFactory<T>,
+    actions: MuiActionProps<T>[]
+
+};
+
+
+export const MuiActionProps = <T extends any>(defaultProps: MuiActionProps<T>,
+                                              props: Partial<MuiActionProps<T> | undefined>): MuiActionProps<T> => ({
+    ...defaultProps, ...props,
+    handle: mergeCallback(defaultProps.handle, props?.handle)
 });
 
-
-export type MUIActionsProps<T> = {
-    context: ValueOrFactory<T>,
-    actions: MUIAction<T>[]
-
-};
-
-export function MUIActions(props: MUIActionsProps<any>) {
+export function MuiActions<T>(props: MuiActionsProps<T>) {
     return <Grid container direction={"row"} spacing={1}>
         {props.actions.map((action, index) =>
-            <Grid item key={index}>
-                {renderAction(action, index)}
-            </Grid>
+            <MuiAction key={index} item context={props.context} {...action} />
         )}
     </Grid>;
-
-    function renderAction(action: MUIAction<any>, index: number) {
-        return <MUIButton
-            key={index}
-            variant={"contained"}
-            color={"primary"}
-            title={action.title}
-            endIcon={action.icon}
-            {...action.MUIButtonProps}
-            onClick={mergeCallback(action.MUIButtonProps?.onClick, () => {
-                action.handle(ValueOrFactory(props.context))
-            })}
-        />
-    }
 }

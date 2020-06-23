@@ -1,6 +1,6 @@
 import {BSON2} from "../common/BSON2";
 
-export function fetchBSON(url: string, data: any) {
+export function fetchBSON(url: string, data: any):Promise<any> {
     return fetch(url, {
         method: "POST",
         headers: {

@@ -7,34 +7,34 @@ const idAliasPrefix = 'id:';
 
 export class EntityID<T> {
     constructor(
-        public helper: EntityIDHelper<T>,
-        public map: Record<string, any>
+        public metadata: EntityMetadata,
+        public values: Record<string, any>
     ) {
     }
 
     asFindCondition(): FindConditions<T> {
-        return <any>this.map
+        return <any>this.values
     }
 
 
     toExpression(): JSONExp<T> {
-        const exps = this.helper.primaryColumns.map(column => <JSONExp<T>>[
+        const exps = this.metadata.primaryColumns.map(column => <JSONExp<T>>[
             column.propertyName,
-            {$equals: String(definedAt(this.map, column.propertyName))}
+            {$equals: String(definedAt(this.values, column.propertyName))}
         ]);
 
         if (exps.length === 1)
             return exps[0];
-        return {$all: exps}
+        return {$and: exps}
     }
 
     toString() {
-        if (this.helper.primaryColumn) {
-            return String(definedAt(this.map, this.helper.primaryColumn.propertyName))
+        if (this.metadata.primaryColumns.length === 1) {
+            return String(definedAt(this.values, this.metadata.primaryColumns[0].propertyName))
         } else {
-            return this.helper.primaryColumns.map(column => `${column.propertyName}=${
+            return this.metadata.primaryColumns.map(column => `${column.propertyName}=${
                 encodeURIComponent(String(
-                    definedAt(this.map, column.propertyName)
+                    definedAt(this.values, column.propertyName)
                 ))
             }`).join(',')
         }
@@ -46,10 +46,6 @@ export class EntityIDHelper<T = any> {
 
 
     primaryColumns = this.metadata.primaryColumns;
-
-    primaryColumn =
-        1 === this.primaryColumns.length ?
-            definedAt(this.primaryColumns, 0) : undefined;
 
     constructor(
         public metadata: EntityMetadata
@@ -68,13 +64,13 @@ export class EntityIDHelper<T = any> {
     }
 
     load(raw: Record<string, any>): EntityID<T> {
-        if (this.primaryColumn) {
-            return new EntityID<T>(this, {
-                [this.primaryColumn.propertyName]:
-                    definedAt(raw, idAliasPrefix + this.primaryColumn.propertyName)
+        if (this.metadata.primaryColumns.length === 1) {
+            return new EntityID<T>(this.metadata, {
+                [this.primaryColumns[0].propertyName]:
+                    definedAt(raw, idAliasPrefix + this.primaryColumns[0].propertyName)
             })
         } else {
-            return new EntityID<T>(this, this.primaryColumns.toObject(column => [
+            return new EntityID<T>(this.metadata, this.primaryColumns.toObject(column => [
                 column.propertyName,
                 definedAt(raw, idAliasPrefix + column.propertyName)
             ]))
@@ -82,10 +78,10 @@ export class EntityIDHelper<T = any> {
     }
 
 
-    fromObject(obj: Record<string, any>) {
-        return new EntityID(this, this.primaryColumns.toObject(column => [
+    fromObject(obj: object) {
+        return new EntityID(this.metadata, this.primaryColumns.toObject(column => [
             column.propertyName,
-            definedAt(obj, column.propertyName)
+            definedAt(obj as any, column.propertyName)
         ]))
     }
 
@@ -95,9 +91,9 @@ export class EntityIDHelper<T = any> {
                 return this.fromObject(id);
             case "string":
             case "number":
-                assert(this.primaryColumn);
-                return new EntityID(this, {
-                    [this.primaryColumn.propertyName]: id
+                assert(this.primaryColumns.length === 1);
+                return new EntityID(this.metadata, {
+                    [this.primaryColumns[0].propertyName]: id
                 });
 
         }
@@ -105,10 +101,10 @@ export class EntityIDHelper<T = any> {
     }
 
     parse(text: string): EntityID<T> {
-        if (this.primaryColumn) {
+        if (this.primaryColumns.length === 1) {
             return new EntityID<T>(
-                this,
-                {[this.primaryColumn.propertyName]: text}
+                this.metadata,
+                {[this.primaryColumns[0].propertyName]: text}
             )
         } else {
             const fields: Record<string, any> = {};
@@ -116,7 +112,7 @@ export class EntityIDHelper<T = any> {
                 const [key, value] = field.split("=");
                 fields[key] = decodeURIComponent(value);
             }
-            return new EntityID<T>(this, Object.fromEntries(
+            return new EntityID<T>(this.metadata, Object.fromEntries(
                 this.primaryColumns.map(column => [
                     column.propertyName,
                     definedAt(fields, column.propertyName)

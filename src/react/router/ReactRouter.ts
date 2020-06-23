@@ -1,10 +1,8 @@
 import {History} from "history";
 import {ReactNode} from "react";
-import {mapFactory} from "../../common/map/mapFactory";
+import {WeakMapFactory} from "../../common/map/mapFactory";
 import {definedAt} from "../../common/object/defined";
-import {Router, RouterWithRouterType, RouterWithRouteType} from "../../router";
-import {Route} from "../../router/Route";
-import {AnyRouter} from "../../router/Router";
+import {AnyRouter, Route, Router, RouterWithRouterType, RouterWithRouteType} from "../../router";
 import {RouterWithInstanceType} from "../../router/RouterInstance";
 import {RouterWithOptions} from "../../router/RouterOptions";
 import {withHooks} from "../utils/withHooks";
@@ -46,7 +44,7 @@ export type ReactRouter = Router &
 export type AnyReactRouter = AnyRouter & ReactRouter;
 
 export const ReactRouterRenderers =
-    mapFactory(new WeakMap(), (router: AnyRouter):
+    WeakMapFactory((router: AnyRouter):
     ReactRouterRenderer<any>[] => []);
 
 export const ReactRouter: ReactRouter = Router
@@ -62,8 +60,8 @@ export const ReactRouter: ReactRouter = Router
         history: null
     }).config({hasIndex: false})
 
-export function _pushRoute(this: AnyReactRoute): void {
-    definedAt(this, "history").push(getRoutePath(this));
+export function _pushRoute<Router extends AnyReactRouter>(this: Route<Router>): void {
+    definedAt(this, "history").push(getRoutePath(<any>this));
 }
 
 function _render<T extends AnyReactRouter>(this: T, callback: ReactRouterRenderer<T>): T {

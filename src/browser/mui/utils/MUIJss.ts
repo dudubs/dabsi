@@ -1,13 +1,11 @@
-import {jssPreset} from "@material-ui/core/styles";
+import {jssPreset} from "@material-ui/styles";
 import {create} from "jss";
 import rtl from "jss-rtl";
 
-const preset = jssPreset();
-
-export const MUIJss = create({
+export const MuiJss = create({
 
     plugins: [
-        ...preset.plugins,
+        ... jssPreset().plugins,
         rtl()
     ]
 });

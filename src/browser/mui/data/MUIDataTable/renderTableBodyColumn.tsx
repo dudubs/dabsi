@@ -1,32 +1,34 @@
 import React from "react";
 import {DataItem} from "../../../../data/DataItem";
-import {Layout} from "../../../../react/utils/Layout";
-import {MUITableColumn} from "../../MUITable/MUITableColumn";
-import {AnyMUIDataTable} from "./index";
+import {LayoutOld} from "../../../../react/utils/LayoutOld";
+import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";
+import {AnyMuiDataTable} from "./index";
 
 export function renderTableBodyColumn(
-    table: AnyMUIDataTable,
+    table: AnyMuiDataTable,
     item: DataItem<any>,
-    column: AnyMUIDataTable['columns'][number]
+    column: AnyMuiDataTable['columns'][number]
 ) {
+    // console.log({item, column});
     const data = item.row[column.key];
 
-    // const hasActions = table.props.r
+    let children;
 
-    const children = (column.empty && (data == null)) ? column.empty :
-        column.layout ? Layout(column.layout, {
-                ...item,
-                data
-            }) :
-            String(data);
-    return <MUITableColumn {...column.MUIProps} {...column.MUIBodyProps} key={column.key}
-                           onClick={() => {
-                               if (table.multipleActions.length)
-                                   table.toggleKey(item.key);
-                           }}>
+    if(column.empty &&(data==null)) {
+        children = column.empty;
+    } else {
+        children= column.render ? column.render({item, data}) : String(data);
+    }
+
+    return <MuiTableColumn
+        {...column.MuiProps}
+        {...column.MuiBodyProps} key={column.key}
+        onClick={() => {
+            if (table.multipleActions.length)
+                table.toggleSelect(item.key);
+        }}>
         {
-            column.render ? column.render(children) :
-                children
+            children
         }
-    </MUITableColumn>
+    </MuiTableColumn>
 }

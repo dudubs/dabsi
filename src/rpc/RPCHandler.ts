@@ -9,7 +9,7 @@ export async function handleRPC(
     try {
         res.json({result: await callback()})
     } catch (error) {
-        res.json({error})
+        res.json({error});
     }
 }
 
@@ -18,3 +18,5 @@ export function fetchRPC({error, result}: { error?, result? }) {
         throw error;
     return result;
 }
+
+

@@ -1,32 +1,29 @@
 import {Grid} from "@material-ui/core";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import React, {useContext, useRef} from "react";
-import {Form, FormProps, FormProvider} from "../../../../common/form/Form";
-import {expandIf} from "../../../common/array/expandIf";
-import {definedAt} from "../../../common/object/defined";
-import {Lang, LangNode} from "../../../localization/Lang";
+import React, {ReactNode, Ref, useContext, useRef} from "react";
+import {Form, FormContext, FormProps} from "../../../../common/form/Form";
+import {Assign} from "../../../common/typings";
+import {Lang} from "../../../localization/Lang";
 import {ModalStackItem, ModalStackItemContext} from "../../../react/ModalStack";
-import {mergeCallback} from "../../../react/utils/mergeCallback";
-import {mergeRef} from "../../../react/utils/Ref";
-import {MUIAction, MUIActions} from "./MUIActions";
-import {MUIDialog} from "./MUIDialog";
+import {mergeProps} from "../../../react/utils/mergeProps";
+import {partialProps} from "../../../react/utils/partialProps";
+import {MuiButton, MuiButtonProps} from "../components/MuiButton";
+import {MuiActionProps} from "./MuiActions";
+import {MuiDialog, MuiDialogProps} from "./MuiDialog";
 
-export const MUIFormOld = (({children, ...props}) => {
-    return <FormProvider {...props}>
+export const MuiFormOld = (({children, ...props}) => {
+    return <Form {...props}>
         <Grid container spacing={1} direction={"column"}>
             {children}
         </Grid>
-    </FormProvider>
+    </Form>
 })
 
-export type MUIFormAction = MUIAction<{
+export type MuiFormActionProps = MuiActionProps<{
     form: Form,
     msi: ModalStackItem | null
 }>;
 
-export type MUIFormProps = FormProps & {
+export type MuiFormProps = FormProps & {
 
 
     noCancel?: boolean;
@@ -35,98 +32,143 @@ export type MUIFormProps = FormProps & {
 
     dialog?: boolean,
 
-    title?: LangNode
+    title?: ReactNode
 
-    submit?: Partial<MUIFormAction>;
-    reset?: Partial<MUIFormAction>;
-    cancel?: Partial<MUIFormAction>
+    submitTitle?: ReactNode;
+
+    FormRef?: Ref<Form | undefined>;
+
+    actions?: ReactNode;
+
+
+    resetButton?: boolean;
+
+    MuiSubmitProps?: Partial<MuiFormButtonProps>;
+    MuiResetProps?: Partial<MuiFormButtonProps>;
+    MuiCancelProps?: Partial<MuiFormButtonProps>;
+
+    MuiDialogProps?: Partial<MuiDialogProps>;
 };
 
 
-export const MUIFormSubmitAction: MUIFormAction = {
-    title: Lang`SUBMIT`, icon: "submit",
-    handle: ({form}) => form.submit()
-}
-export const MUIFormResetAction: MUIFormAction = {
-    title: Lang`RESET`, icon: "reset",
-    handle: ({form}) => form.reset()
-};
+export function MuiForm({
+                            onCancel,
+                            noCancel,
+                            FormRef,
+                            children,
+                            dialog,
+                            title,
+                            cancellable,
+                            submitTitle,
+                            MuiSubmitProps,
+                            MuiResetProps,
+                            MuiCancelProps,
+                            actions,
+                            resetButton,
+                            MuiDialogProps,
+                            ...props
+                        }: MuiFormProps) {
+    const form = useRef<Form>(null);
+    const msi = useContext(ModalStackItemContext);
 
-export const MUIFormCancelAction: MUIFormAction = {
-    title: Lang`CANCEL`,
-    icon: "cancel",
-    handle: ({msi}) => {
-        msi?.pop();
-    }
-};
-
-export const MUIForm =
-    ({
-         onCancel,
-         noCancel,
-         serviceRef,
-         children,
-         dialog,
-         title,
-         cancellable,
-         submit: submitAction,
-         reset: resetAction,
-         cancel: cancelAction,
-         ...props
-     }: MUIFormProps) => {
-        const service = useRef<Form>(null);
-        const msi = useContext(ModalStackItemContext);
-
-        const withCancel = cancellable || (dialog && !noCancel);
+    const withCancel = cancellable || (dialog && !noCancel);
 
 
-        const actions = <MUIActions
-            context={() => ({
-                form: definedAt(service, "current"),
-                msi
-            })}
-            actions={[
-                ...expandIf(withCancel) ?? [
-                    MUIAction(MUIFormCancelAction, cancelAction, {
-                        handle: () => onCancel?.()
-                    })
-                ],
-                MUIAction(MUIFormResetAction, resetAction),
-                MUIAction(MUIFormSubmitAction, submitAction)
-            ]}/>;
+    if (!actions) actions = <>
+        {withCancel && <MuiFormButton.Cancel {...MuiCancelProps}/>}
+        {resetButton && <MuiFormButton.Reset {...MuiResetProps}/>}
+        <MuiFormButton.Submit
+
+            {...MuiSubmitProps}
+            title={submitTitle ?? MuiSubmitProps?.title ?? Lang`SUBMIT`}
+        />
+    </>;
 
 
-        return <FormProvider {...props} serviceRef={mergeRef(serviceRef, service)}
-                             onSubmit={mergeCallback(props.onSubmit, () => {
-                                 dialog && msi?.pop();
-                             })}>
-            {dialog ? renderDialog() : renderGrid()}
-        </FormProvider>
+    return <Form{...mergeProps(props, {
 
-        function renderGrid() {
-            return <Grid container spacing={2} direction={"column"}>
-                <Grid item>
-                    {children}
-                </Grid>
-                <Grid item>
-                    {actions}
-                </Grid>
+        ref: form,
+        onChange: event => {
+            switch (event) {
+                case "cancel":
+                    dialog && msi?.pop();
+                    break;
+                case "submit":
+                    dialog && msi?.pop();
+                    break;
+            }
+        }
+    })}>
+        {dialog ? renderDialog() : renderGrid()}
+    </Form>
+
+    function renderGrid() {
+        return <Grid container spacing={2} direction={"column"}>
+            <Grid item>
+                {children}
             </Grid>
-        }
+            <Grid item>
+                {actions}
+            </Grid>
+        </Grid>
+    }
 
-        function renderDialog() {
-            return <MUIDialog open={true} onClose={() => {
-                if (!noCancel) {
-                    onCancel?.();
+    function renderDialog() {
+        return <MuiDialog
+            title={title}
+            actions={actions}
+            {...mergeProps(MuiDialogProps, {
+                onClose: () => {
+                    if (!noCancel) {
+                        onCancel?.();
+                        msi?.pop();
+                    }
                 }
-            }}>
-                {title && <DialogTitle>{title}</DialogTitle>}
-                <DialogContent>
-                    {children}
-                </DialogContent>
-                <DialogActions>
-                    {actions}
-                </DialogActions>
-            </MUIDialog>
-        }
-    };
+            },
+        )}
+        >{children}</MuiDialog>
+    }
+}
+
+export type MuiFormButtonProps = Assign<MuiButtonProps, {
+    onClick?(form: Form | undefined): void
+}>;
+
+export function MuiFormButton(
+    {onClick, ...props}: MuiFormButtonProps
+) {
+    const form = useContext(FormContext);
+    return <MuiButton {...props} onClick={() => onClick?.(form)}/>
+}
+
+MuiFormButton.Submit = partialProps(MuiFormButton, {
+    kind: "submit",
+    onClick: form => {
+        form?.submit();
+    }
+});
+
+
+MuiFormButton.Reset = partialProps(MuiFormButton, {
+    kind: "reset",
+    onClick: form => {
+        form?.reset();
+    }
+});
+
+MuiFormButton.Cancel = partialProps(MuiFormButton, {
+    kind: "cancel",
+    onClick: form => {
+        form?.cancel();
+    }
+});
+
+
+/*
+    rx<ListItemProps<T>>(ListItem,[props, extraProps],
+        ....
+    )
+
+    xs(ListItem )
+
+ */

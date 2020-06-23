@@ -3,37 +3,29 @@ import Checkbox from "@material-ui/core/Checkbox";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import React from "react";
-import {MUITableColumn} from "../../MUITable/MUITableColumn";
-import {AnyMUIDataTable} from "./index";
+import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";
+import {AnyMuiDataTable} from "./index";
 
-export function renderTableHead(table: AnyMUIDataTable) {
+export function renderTableHead(table: AnyMuiDataTable) {
 
-    const selectedItems = table.items.filter(item => table.selectedKeys.has(item.key));
+    const selectedItems = table.getSelectedItems();
     const allSelectedItems = selectedItems.length === table.items.length;
 
     return <TableHead>
         <TableRow>
-            {table.multipleActions.length > 0 && <MUITableColumn padding={"checkbox"}>
+            {table.isMultiSelection && <MuiTableColumn padding={"checkbox"}>
                 <Checkbox
                     checked={selectedItems.length === table.items.length}
                     indeterminate={!allSelectedItems && (selectedItems.length > 0)}
                     onChange={() => {
-                        if (allSelectedItems) {
-                            table.selectedKeys = table.selectedKeys.clear();
-                        } else {
-                            const selectedKeys = table.selectedKeys.asMutable();
-                            for (let {key} of table.items) {
-                                selectedKeys.add(key)
-                            }
-                            table.selectedKeys = selectedKeys.asImmutable();
-                        }
+                        table.toggleSelectAll();
                     }}
                 />
-            </MUITableColumn>}
+            </MuiTableColumn>}
             {table.columns.map((column, columnIndex) => {
-                return <MUITableColumn
-                    {...column.MUIProps}
-                    {...column.MUIHeadProps}
+                return <MuiTableColumn
+                    {...column.MuiProps}
+                    {...column.MuiHeadProps}
                     key={column.key}>
 
                     {(column.sortable !== false) ? <TableSortLabel
@@ -44,9 +36,9 @@ export function renderTableHead(table: AnyMUIDataTable) {
                         </TableSortLabel> :
                         column.title
                     }
-                </MUITableColumn>
+                </MuiTableColumn>
             })}
-            {table.singleActions.length > 0 && <MUITableColumn fitToContent/>}
+            {table.singleActions.length > 0 && <MuiTableColumn fitToContent/>}
         </TableRow>
     </TableHead>
 }

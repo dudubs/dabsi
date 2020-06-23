@@ -1,118 +1,107 @@
-import {User} from "../../acl/User";
+import {ExtractKeys} from "../../common/typings";
+import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
 import {DataSource} from "../DataSource";
-import objectContaining = jasmine.objectContaining;
-
-export type TestCommentData = {
-    text: string,
-
-    msg: TestMsgData;
-};
-
-export type TestMsgTitleData = {
-    text: string;
-
-    msg: TestMsgData;
-};
-
-export type TestMsgData = {
-    text: string;
-
-    comments: TestCommentData[];
-
-    title: TestMsgTitleData;
-};
-
-
-export type TestMovieData = {
-    year: number;
-
-    name: string;
-};
-
-export abstract class DataSourceTester {
-
-    abstract movies: DataSource<TestMovieData>;
-
-    abstract msgs: DataSource<TestMsgData>;
-
-    abstract comments: DataSource<TestCommentData>;
-
-    abstract users: DataSource<User>;
-}
-
+import {EntityDataSource} from "../EntityDataSource";
 
 export function DataSourceTests(
-    getTester: () => DataSourceTester
+    ADS: DataSource<AEntity>,
+    BDS: DataSource<BEntity>,
+    CDS: DataSource<CEntity>
 ) {
 
-    const tester = getTester();
+    it('relations sanity', async () => {
+        const debug = false;
+
+        const aKey = await ADS.insert({});
+        const bKey = await BDS.insert({});
+
+        expect(await ADS.get(aKey)).toBeTruthy();
+        expect(await ADS.get(bKey)).toBeFalsy();
+        expect(await BDS.get(bKey)).toBeTruthy();
+
+        await assert("b");
+        await assert("bOwner");
+
+        await assert("manyAToManyB");
+        await assert("manyAToManyBOwner");
+
+        await assert("oneAToManyB");
+        await assert("manyAToOneB");
+
+        async function assert(p: ExtractKeys<AEntity, object>) {
+
+            debug && console.log({p, aKey, bKey});
+            const aOfBOwner = ADS.of(p, bKey);
+            const bOwnerAtA = ADS.at(p, aKey);
 
 
-    it('one-to-one sanity', async () => {
-        // const msgId = await tester.msgs.insert({text: "first"});
-        // console.log('--------- start');
-        // await tester.msgs.at("title", msgId).insert({text: "first title"});
-        // console.log('--------- end');
-    })
+            await assert(aOfBOwner, aKey, bOwnerAtA);
+            await assert(bOwnerAtA, bKey, aOfBOwner);
 
-    it('sanity', async () => {
+            async function assert<T, U>(ds: DataSource<T>,
+                                        key: string,
+                                        inverseDs: DataSource<U>) {
 
-        const firstMsg = await saveMsg("first");
+                expect(await ds.get()).toBeFalsy();
+                expect(await inverseDs.get()).toBeFalsy();
 
-        const secondMsg = await saveMsg("second");
+                await ds.add(key);
+                expect(await ds.get()).toBeTruthy();
+                expect(await inverseDs.get()).toBeTruthy();
 
-        function getMsgCountComments(msgId) {
-            return tester.msgs.select({countComments: {$count: "comments"}}).get(msgId)
-                .then(row => row.countComments)
-        }
+                await ds.remove(key);
+                expect(await ds.get()).toBeFalsy();
+                expect(await inverseDs.get()).toBeFalsy();
 
-        async function saveMsg(text) {
-            console.log({msgText: text});
-            const msgId = await tester.msgs.insert({text});
-            expect(await getMsgCountComments(msgId)).toEqual(0);
-            const commentIdByMsgs = await
-                tester.msgs.at("comments", msgId).insert({text: `${text} comment by msgs`});
 
-            const commentIdByComments = await
-                tester.comments.of("msg", msgId).insert({text: `${text} comment by comment`});
-
-            await tester.msgs.at("title", msgId).insert({
-                text: text + " title"
-            })
-
-            expect(await getMsgCountComments(msgId)).toEqual(2);
-
-            expect(await tester.comments.at("msg", commentIdByMsgs).get())
-                .toEqual(objectContaining({text}));
-
-            expect(await tester.comments.at("msg", commentIdByComments).get())
-                .toEqual(objectContaining({text}));
-
-            expect(await tester.msgs.at("comments", msgId).get())
-                .toEqual(objectContaining({
-                    text: jasmine.stringMatching(text)
-                }))
-            return {id: msgId, commentIdByMsgs, commentIdByComments}
+            }
         }
     })
 
-    it('expect to update primary columns', async () => {
+    it('insert relations', async () => {
+        const aKey = await ADS.insert({});
+        const cKey = await CDS.insert({});
+        const cKey2 = await CDS.insert({});
 
-        await tester.movies.insert({year: 1992, name: "NotTitanic"});
-        const id = await tester.movies.insert({year: 1992, name: "Titanic"});
+        const bOfAOwnerOfCOwner = BDS
+            .of("aOwner", aKey)
+            .of("cOwner", cKey);
 
-        expect(await tester.movies.select(["year", "name"]).get(id))
-            .toEqual(objectContaining({year: 1992, name: "Titanic"}));
+        expect(await bOfAOwnerOfCOwner.get()).toBeFalsy();
+        await bOfAOwnerOfCOwner.insert({});
+        expect(await bOfAOwnerOfCOwner.get()).toBeTruthy();
+        expect(await BDS.of("aOwner", aKey).get()).toBeTruthy();
+        expect(await BDS
+            .of("aOwner", aKey)
+            .of("cOwner", cKey2).get()).toBeFalsy();
 
-        await tester.movies.update(id, {year: 1999})
+        const bKey = await BDS.insert({});
+        const bAtAOwnerOfCOwner = BDS
+            .at("aOwner", bKey)
+            .of("cOwner", cKey);
 
-    });
+        expect(await bAtAOwnerOfCOwner.get()).toBeFalsy();
+        await bAtAOwnerOfCOwner.insert({});
+        expect(await bAtAOwnerOfCOwner.get()).toBeTruthy();
+        expect(await BDS
+            .at("aOwner", bKey)
+            .of("cOwner", cKey2).get()).toBeFalsy()
 
-    it('', () => {
+    })
 
+    it('deep relation sanity', async () => {
+
+        await ADS
+            .at("bOwner", "aid1")
+            .at("cOwner", "bid2")
+            .at("b", "cid3")
+            .at("a", "bid4")
+            .of("b", "bid5")
+            .of("cOwner", "cid6")
+            .at("bOwner", "aid7")
+            .at("cOwner", "bid8")
+            .get();
 
     })
 
 }
-
-

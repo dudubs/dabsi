@@ -2,12 +2,12 @@ import TableFooter from "@material-ui/core/TableFooter";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import React from "react";
-import {AnyMUIDataTable} from "./index";
+import {AnyMuiDataTable} from "./index";
 
-export function renderTableFooter(table: AnyMUIDataTable) {
+export function renderTableFooter(table: AnyMuiDataTable) {
     return <TableFooter>
         <TableRow>
-            {table.pageSize > 0 && <TablePagination
+            {!table.pageSize ? undefined : <TablePagination
                 rowsPerPage={table.pageSize}
                 page={table.page}
                 count={table.totalCount}

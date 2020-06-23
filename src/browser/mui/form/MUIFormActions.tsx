@@ -1,10 +1,10 @@
 import {Grid} from "@material-ui/core";
 import React from "react";
-import {MUITheme, MUIThemeProvider} from "../theme/MUITheme";
+import {MuiTheme, MuiThemeProvider} from "../theme/MuiTheme";
 
-export function MUIFormActions({children}) {
+export function MuiFormActions({children}) {
     return <Grid item>
-        <MUIThemeProvider<MUITheme> theme={theme => ({
+        <MuiThemeProvider<MuiTheme> theme={theme => ({
             ...theme,
             props: {
                 ...theme.props,
@@ -16,6 +16,6 @@ export function MUIFormActions({children}) {
             }
         })}>
             {children}
-        </MUIThemeProvider>
+        </MuiThemeProvider>
     </Grid>
 }

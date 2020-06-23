@@ -3,37 +3,46 @@ import TableRow from "@material-ui/core/TableRow";
 import React from "react";
 import {DataItem} from "../../../../data/DataItem";
 import {ModalStack} from "../../../../react/ModalStack";
-import {MUITableColumn} from "../../MUITable/MUITableColumn";
-import {AnyMUIDataTable} from "./index";
-import {renderAction} from "./renderAction";
+import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";
+import {AnyMuiDataTable} from "./index";
+import {MuiDataTableAction, renderTableAction} from "./renderTableAction";
 import {renderTableBodyColumn} from "./renderTableBodyColumn";
 
-export function renderTableBodyRow(table: AnyMUIDataTable,
+export function renderTableBodyRow(table: AnyMuiDataTable,
                                    item: DataItem<any>,
                                    ms: ModalStack) {
 
 
-    return <TableRow key={item.key} {
-        ...table.multipleActions.length ? {
-            hover: true,
-            rule: "checkbox",
-            selected: table.selectedKeys.has(item.key)
-        } : {}
-    }>
-        {table.multipleActions.length > 0 && <MUITableColumn padding={"checkbox"}>
+    return <TableRow key={item.key}
+                     hover={!!table.props.onPick}{
+                         ...(table.multipleActions.length ||
+                             table.props.isSelected) ? {
+                             hover: true,
+                             rule: "checkbox",
+                             selected:
+                                 table.props.isSelected?.(item) ??
+                                 table.selectedKeys.has(item.key)
+                         } : {}
+                     }>
+        {table.isMultiSelection && <MuiTableColumn padding={"checkbox"}>
             <Checkbox checked={table.selectedKeys.has(item.key)} onChange={() => {
-                table.toggleKey(item.key)
+                table.toggleSelect(item.key)
             }}/>
-        </MUITableColumn>}
+        </MuiTableColumn>}
         {table.columns.map(column =>
             renderTableBodyColumn(table, item, column))}
-        {table.singleActions.length > 0 && <MUITableColumn fitToContent>
+
+        {table.singleActions.length > 0 && <MuiTableColumn fitToContent>
             {table.singleActions.map(
                 (action, index) =>
-                    renderAction(table, ms, action, index,
-                        () => [item.key])
+                    <MuiDataTableAction
+                        item={item}
+                        table={table}
+                        action={action}
+                        index={index}
+                        key={index}/>
             )}
-        </MUITableColumn>}
+        </MuiTableColumn>}
     </TableRow>
 
 }

@@ -1,4 +1,4 @@
-import {mapFactory} from "../common/map/mapFactory";
+import {WeakMapFactory} from "../common/map/mapFactory";
 import {definedAt} from "../common/object/defined";
 import {mapObject} from "../common/object/mapObject";
 import {mergeProperties} from "../common/object/mergeProperties";
@@ -27,7 +27,7 @@ export type RouterAt<T extends AnyRouter, K extends keyof T['children']> =
 };
 
 
-const _getChildren = mapFactory(new WeakMap(), (owner: AnyRouter) =>
+const _getChildren = WeakMapFactory((owner: AnyRouter) =>
     mapObject(owner.children, (router: AnyRouter): AnyRouter => {
 
             const routerType =

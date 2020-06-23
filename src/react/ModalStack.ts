@@ -1,39 +1,41 @@
-import {Component, createContext, createElement, Fragment, ReactNode} from "react";
+import {Component, ComponentType, createElement, Fragment, ReactElement, ReactNode} from "react";
 import {Waiter} from "../common/async/Waiter";
 import {RandomId} from "../common/patterns/RandomId";
-import {ImmutableMap} from "../immutable";
+import {ImmutableMap} from "../immutable2";
+import {createUndefinedContext} from "./utils/hooks/createUndefinedContext";
 import {useDefinedContext} from "./utils/hooks/useDefinedContext";
-import {Layout} from "./utils/Layout";
 import {State} from "./utils/State";
 
 
-export class ModalStackItem {
+export class ModalStackItem<T = any> {
     constructor(
-        public layout: Layout,
+        public component: ComponentType,
         public key: string,
-        public resolve: (value: any) => void
+        public pop: () => void,
+        public resolve: (value: T) => void
     ) {
     }
 
-    pop(value?: any) {
-        this.resolve(value);
-    }
 
 }
 
-export type ModalStack = {
-    push<T>(layout: Layout): { pop(result?: T) } & PromiseLike<T>;
-    pop(key: string);
-};
+export const ModalStackContext =
+    createUndefinedContext<ModalStack>();
 
-export const ModalStackContext = createContext<ModalStack | null>(null);
+export const ModalStackItemContext =
+    createUndefinedContext<ModalStackItem>();
 
-export const ModalStackItemContext = createContext<ModalStackItem | null>(null);
 
-export class ModalStackProvider extends Component<{ children?: ReactNode }>
-    implements ModalStack {
+/*
+    ComponentStack.push(()=>{
+        ....
+    })
+ */
+
+export class ModalStack extends Component<{ children?: ReactNode }> {
 
     @State() items = ImmutableMap<string, ModalStackItem>();
+
 
     render() {
         return createElement(ModalStackContext.Provider, {
@@ -44,34 +46,59 @@ export class ModalStackProvider extends Component<{ children?: ReactNode }>
                         key: item.key,
                         children: createElement(ModalStackItemContext.Provider, {
                             value: item,
-                            children: Layout(item.layout)
+                            children: createElement(item.component)
                         })
                     })
-                ).toArray(),
+                ).toIndexedSeq().toArray(),
                 this.props.children
             ])
         })
     }
 
 
-    push<T>(layout: Layout): { pop(result?: T) } & PromiseLike<T> {
+    pick<T>(
+        component: ComponentType<OnPickProp<T>>,
+    ): Promise<T> {
+        return new Promise<T>(resolve => {
+            const key = RandomId();
+            this.items = this.items.set(key, new ModalStackItem<T>(
+                () => createElement(component, {
+                    onPick: value => {
+                        resolve(value);
+                        this.items = this.items.delete(key);
+                    }
+                }),
+                key,
+                () => {
+                    this.pop(key)
+                },
+                value => {
+                    resolve(value)
+                }
+            ));
+        })
+    }
+
+    push<T>(render: (
+        pop: () => void
+    ) => ReactElement): { pop(result?: T) } & PromiseLike<T> {
         const key = RandomId();
         const waiter = Waiter();
+        const pop = () => this.pop(key);
         this.items = this.items.set(key, new ModalStackItem(
-            layout,
+            () => render(pop),
             key,
+            () => this.pop(key),
             value => {
                 waiter.resolve(value);
                 this.pop(key);
             }
         ));
         return {
-            pop: (result?) => {
-                this.pop(key);
-                waiter.resolve(result);
-            },
+            pop,
             then: waiter.then.bind(waiter)
         }
+
     }
 
     pop(key: string) {
@@ -79,6 +106,9 @@ export class ModalStackProvider extends Component<{ children?: ReactNode }>
     }
 }
 
-export const useModalStack = () => useDefinedContext(ModalStackContext);
 
-export const useModalStackItem = () => useDefinedContext(ModalStackItemContext);
+export type OnPickProp<T> = { onPick?(value: T) };
+
+export function useModalStack() {
+    return useDefinedContext(ModalStackContext);
+}

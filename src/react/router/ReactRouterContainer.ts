@@ -7,7 +7,8 @@ import {UndefinedProp} from "../../common/typings";
 import {AnyRoute, Route} from "../../router";
 
 import {routeByPath} from "../../router/routeByPath";
-import {RouterContext} from "../../router/RouterContext";
+import {RouterContextOf} from "../../router/RouterContext";
+import {useDefinedContext} from "../utils/hooks/useDefinedContext";
 import {mergeCallback} from "../utils/mergeCallback";
 import {provide} from "../utils/provide";
 import {AnyReactRouter} from "./ReactRouter";
@@ -17,8 +18,12 @@ export type ReactRouterContainerProps<T extends AnyReactRouter> = {
     history: History;
     router: T;
     children?: ReactNode;
-} & UndefinedProp<"context", RouterContext<T>>;
+} & UndefinedProp<"context", RouterContextOf<T>>;
 
+
+export function useReactRouterLocation(): ReactRouterLocation {
+    return useDefinedContext(ReactRouterLocation);
+}
 
 export function ReactRouterContainer<T extends AnyReactRouter>(
     props: ReactRouterContainerProps<T>) {
@@ -28,16 +33,15 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
 
 
     // @ts-ignore
-    const initRoute: Route<AnyReactRouter> =
-        useMemo(() => {
-            return AnyRoute({
-                parent: undefined,
-                instance: {history},
-                name: undefined,
-                context: props.context,
-                router: props.router
-            });
-        }, [props.router]);
+    const initRoute: Route<AnyReactRouter> = useMemo(() => {
+        return AnyRoute({
+            parent: undefined,
+            instance: {history},
+            name: undefined,
+            context: props.context,
+            router: props.router
+        });
+    }, [props.router]);
 
     const [location, setLocation] = useState<ReactRouterLocation>(() =>
         new ReactRouterLocation(initRoute, history.location.pathname));

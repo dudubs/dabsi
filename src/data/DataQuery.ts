@@ -8,7 +8,12 @@ export type DataOrder<T> = {
 };
 
 
-export interface DataQuery<T> {
+export type DataQuery<T> = DataFindOptions<T> & {
+
+    count?: boolean;
+}
+
+export type DataFindOptions<T> = {
 
     filter?: JSONExp<T>;
 
@@ -18,8 +23,7 @@ export interface DataQuery<T> {
 
     take?: number;
 
-    count?: boolean;
-}
+};
 
 export type DataQueryResult<T> = {
     count?: number,

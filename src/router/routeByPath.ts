@@ -29,7 +29,7 @@ export async function routeByPath<T extends AnyRouter>(
         [value, pathAfterParams] = getNextPath(pathAfterParams);
         params[key] = parse(value)
     }
-    const context: any = await childRouter.contextAdapter?.load(params);
+    const context: any = await childRouter.context?.load(params);
     return await routeByPath((route as AnyRoute)
         .at(name, context), pathAfterParams);
 }

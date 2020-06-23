@@ -25,10 +25,6 @@ export class DataList<T> extends AbstractDataList<T, DataListProps<T>> {
         })
     }
 
-    getFields(): DataFields<T> {
-        return this.props.source.getFields();
-    }
-
     getOrder(): DataOrder<T>[] {
         return [];
     }

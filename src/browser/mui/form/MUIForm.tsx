@@ -40,6 +40,8 @@ export type MuiFormProps = FormProps & {
 
     actions?: ReactNode;
 
+    extraActions?: ReactNode;
+
 
     resetButton?: boolean;
 
@@ -51,23 +53,24 @@ export type MuiFormProps = FormProps & {
 };
 
 
-export function MuiForm({
-                            onCancel,
-                            noCancel,
-                            FormRef,
-                            children,
-                            dialog,
-                            title,
-                            cancellable,
-                            submitTitle,
-                            MuiSubmitProps,
-                            MuiResetProps,
-                            MuiCancelProps,
-                            actions,
-                            resetButton,
-                            MuiDialogProps,
-                            ...props
-                        }: MuiFormProps) {
+export function MuiForm(
+    {
+        onCancel,
+        noCancel,
+        FormRef,
+        children,
+        dialog,
+        title,
+        cancellable,
+        submitTitle,
+        MuiSubmitProps,
+        MuiResetProps,
+        MuiCancelProps,
+        actions,
+        resetButton,
+        MuiDialogProps, extraActions,
+        ...props
+    }: MuiFormProps) {
     const form = useRef<Form>(null);
     const msi = useContext(ModalStackItemContext);
 
@@ -77,11 +80,9 @@ export function MuiForm({
     if (!actions) actions = <>
         {withCancel && <MuiFormButton.Cancel {...MuiCancelProps}/>}
         {resetButton && <MuiFormButton.Reset {...MuiResetProps}/>}
-        <MuiFormButton.Submit
-
-            {...MuiSubmitProps}
-            title={submitTitle ?? MuiSubmitProps?.title ?? Lang`SUBMIT`}
-        />
+        <MuiFormButton.Submit{...MuiSubmitProps}
+                             title={submitTitle ?? MuiSubmitProps?.title ?? Lang`SUBMIT`}/>
+        {extraActions}
     </>;
 
 
@@ -118,14 +119,14 @@ export function MuiForm({
             title={title}
             actions={actions}
             {...mergeProps(MuiDialogProps, {
-                onClose: () => {
-                    if (!noCancel) {
-                        onCancel?.();
-                        msi?.pop();
+                    onClose: () => {
+                        if (!noCancel) {
+                            onCancel?.();
+                            msi?.pop();
+                        }
                     }
-                }
-            },
-        )}
+                },
+            )}
         >{children}</MuiDialog>
     }
 }

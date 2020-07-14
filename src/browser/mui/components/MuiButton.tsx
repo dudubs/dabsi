@@ -26,7 +26,7 @@ export const MuiButtonKinds: Record<string, MuiButtonProps> = {
 
 export type MuiButtonProps = Assign<Common<ButtonProps, IconButtonProps>, {
     iconOnly?: boolean,
-    icon?: string;
+    icon?: MuiIcon;
     title?: ReactNode;
 
     danger?: boolean

@@ -1,9 +1,11 @@
 import {Connection, ObjectType, RelationQueryBuilder, Repository, SelectQueryBuilder} from "typeorm";
 import {ColumnMetadata} from "typeorm/metadata/ColumnMetadata";
 import {assert} from "../../common/assert";
-import {defined, definedAt} from "../../common/object/defined";
+import {defined} from "../../common/object/defined";
+import {definedAt} from "../../common/object/definedAt";
+import {Lazy} from "../../common/patterns/lazy";
 import {ArrayTypeOrObject} from "../../common/typings";
-import {EntityIDHelper} from "../../data/EntityID";
+import {EntityDataKey} from "../../data/eds/EntityDataKey";
 
 export class EntityRelationSide<T> {
     constructor(
@@ -19,7 +21,21 @@ export class EntityRelationSide<T> {
         return this.relation.connection.getRepository(this.entityType)
     }
 
-    isOwning = this.relation.ownerRelationMetadata.target === this.entityType
+    get isOwning() {
+        if (!this.isLeft)
+            return !this.relation.left.isOwning;
+
+        if (this.relation.isTree) {
+
+            if (this.relation.relationMetadata.isManyToMany)
+                return !this.relation.invert
+
+            throw new Error(`Not supported relation (${
+                this.relation.relationMetadata.relationType
+            })`)
+        }
+        return this.relation.ownerRelationMetadata.target === this.entityType
+    }
 
     joinColumns =
         !this.isOwning ? this.relation.ownerRelationMetadata.inverseJoinColumns :
@@ -48,10 +64,6 @@ export class EntityRelationSide<T> {
 }
 
 export class EntityRelation<T = any> {
-
-
-    // of(Group, "users"): EntityRelation<Group, User>
-    // at(Group, "users"): EntityRelation<User,Group>
 
 
     static of<T, K extends keyof T>(
@@ -85,7 +97,8 @@ export class EntityRelation<T = any> {
 
     _rightId: object;
 
-    isLeftOwningByColumn() {
+
+    isLeftOwningWithoutJoinTable() {
         return this.left.isOwning && !this.ownerRelationMetadata.joinTableName;
     }
 
@@ -94,9 +107,10 @@ export class EntityRelation<T = any> {
             return this._rightId;
 
         if (typeof this.key === "string")
-            return this._rightId = new EntityIDHelper(
-                this.right.entityMetadata
-            ).parse(this.key).values;
+            return this._rightId = EntityDataKey.parse(
+                this.right.entityMetadata,
+                this.key
+            );
     }
 
     setRightId(rightId: object) {
@@ -114,9 +128,9 @@ export class EntityRelation<T = any> {
         this.relationMetadata : definedAt(this.relationMetadata, "inverseRelation");
 
 
-    left = new EntityRelationSide(this, this.getLeftEntityType(), true);
+    left = new EntityRelationSide(this, this.leftEntityType, true);
 
-    right = new EntityRelationSide(this, this.getRightEntityType(), false);
+    right = new EntityRelationSide(this, this.rightEntityType, false);
 
     getRelationType(): ObjectType<any> {
         assert(typeof this.relationMetadata?.type === "function");
@@ -127,23 +141,25 @@ export class EntityRelation<T = any> {
         return this.join("INNER", leftQb, leftQb.alias);
     }
 
+    getRightSchema(leftSchema: string) {
+        return this.invert ? `${
+                leftSchema
+            }_at_${
+                this.right.entityMetadata.tableName
+            }__${
+                this.propertyName
+            }` :
+            `${leftSchema}_${this.propertyName}`;
+    }
 
     join(
-        joinDiection: JoinDirection,
+        direction: JoinDirection,
         leftQb: SelectQueryBuilder<any>,
         leftSchema: string): string {
         const {right, rightId} = this;
 
 
-        const rightSchema =
-            this.invert ? `${
-                    leftSchema
-                }_at_${
-                    this.right.entityMetadata.tableName
-                }__${
-                    this.propertyName
-                }` :
-                `${leftSchema}_${this.propertyName}`;
+        const rightSchema =this.getRightSchema(leftSchema);
 
         const joinAttribute = leftQb.expressionMap.joinAttributes.find(
             ja => ja.alias?.name === rightSchema
@@ -152,7 +168,6 @@ export class EntityRelation<T = any> {
         if (joinAttribute) {
             return rightSchema;
         }
-
 
         const idCondition =
             rightId ? ' AND ' + right.getIdCondition(leftQb, rightSchema, rightId) : "";
@@ -165,10 +180,10 @@ export class EntityRelation<T = any> {
 
             join(this.ownerRelationMetadata.joinTableName,
                 joinSchema,
-                this.joinByTableLeftCondition(leftSchema, joinSchema)
+                this.getJoinToTableCondition(leftSchema, joinSchema)
             );
             join(right.entityMetadata.tableName, rightSchema,
-                this.joinByTableRightCondition(rightSchema, joinSchema)
+                this.getJoinFromTableCondition(rightSchema, joinSchema)
                 + idCondition
             )
         } else {
@@ -181,7 +196,7 @@ export class EntityRelation<T = any> {
         return rightSchema;
 
         function join(table, alias, condition) {
-            switch (joinDiection) {
+            switch (direction) {
                 case "LEFT":
                     return leftQb.leftJoin(table, alias, condition);
                 case "INNER":
@@ -191,7 +206,8 @@ export class EntityRelation<T = any> {
     }
 
 
-    joinByTableLeftCondition(leftSchema, joinSchema) {
+    getJoinToTableCondition(leftSchema, joinSchema) {
+        // TODO: escaping
         return this.left.joinColumns
             .map(c => `${
                 leftSchema}.${this.left.tableColumn(c).databaseName
@@ -201,7 +217,8 @@ export class EntityRelation<T = any> {
             .join(' AND ')
     }
 
-    joinByTableRightCondition(rightSchema, joinSchema) {
+    getJoinFromTableCondition(rightSchema, joinSchema) {
+        // TODO: escaping
         return this.right.joinColumns
             .map(c => `${
                 this.connection.driver.escape(rightSchema)
@@ -214,6 +231,7 @@ export class EntityRelation<T = any> {
     }
 
     columnCondition(leftSchema: string, rightSchema: string) {
+        // TODO: escaping
         return this.ownerRelationMetadata.joinColumns
             .map(c => `${
                 this.connection.driver.escape(leftSchema)
@@ -276,12 +294,20 @@ export class EntityRelation<T = any> {
         return this.isToOne ? this.unset(leftId) : this.remove(leftId);
     }
 
-    getLeftEntityType(): ObjectType<T> {
+    @Lazy() get leftEntityType(): ObjectType<T> {
         return this.invert ? this.getRelationType() : this.entityType;
     }
 
-    getRightEntityType(): ObjectType<any> {
+    @Lazy() get rightEntityType(): ObjectType<any> {
         return !this.invert ? this.getRelationType() : this.entityType;
+    }
+
+    get isTree() {
+        return this.leftEntityType === this.rightEntityType
+    }
+
+    get isManyToManyTree() {
+        return this.isTree && (this.relationMetadata.isManyToMany)
     }
 
 

@@ -13,6 +13,7 @@ export function renderTableHead(table: AnyMuiDataTable) {
 
     return <TableHead>
         <TableRow>
+            {table.props.renderItemCollapse && <MuiTableColumn/>}
             {table.isMultiSelection && <MuiTableColumn padding={"checkbox"}>
                 <Checkbox
                     checked={selectedItems.length === table.items.length}

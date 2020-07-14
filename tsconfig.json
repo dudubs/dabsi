@@ -9,5 +9,8 @@
     "packages",
     "dist",
     "src/browser"
+  ],
+  "include": [
+    "src"
   ]
 }

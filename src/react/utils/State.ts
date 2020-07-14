@@ -7,7 +7,7 @@ const didMount = Symbol('didMount');
 const setStateCalled = Symbol('setStateCalled');
 
 const getState = BaseMapFactory(
-    SymbolMap("currentState"),
+    SymbolMap({name: "currentState"}),
     (): any => ({})
 );
 

@@ -1,4 +1,4 @@
-import {CommandOptions} from "typeorm";
+import {basename, join} from "path";
 import {
     CompilerOptions,
     createCompilerHost,
@@ -7,7 +7,6 @@ import {
     getPreEmitDiagnostics
 } from "typescript";
 import {hook} from "../../common/object/hook";
-import {dirname, join, basename} from "path";
 
 let counter = 0;
 

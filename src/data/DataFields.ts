@@ -1,10 +1,7 @@
-import {JSONExp, JSONExpType} from "../json-exp/JSONExp";
+import {DataExp, DataExpType} from "../json-exp/DataExp";
 
-export const DataAll = "*";
-export type DataAll = "*";
-
-export type DataFields<T> = Record<string, JSONExp<T>>;
+export type DataFields<T> = Record<string, DataExp<T>>;
 
 export type DataRow<T, F extends DataFields<T>> =
-    { [K in keyof F]: JSONExpType<T, F[K]> };
+    { [K in keyof F]: DataExpType<T, F[K]> };
 

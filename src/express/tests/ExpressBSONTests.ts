@@ -39,13 +39,13 @@ export function testBSONHandler(callback) {
     })
 }
 
-it('tryUndefined to regexp from server', async () => {
+it('expected to regexp from server', async () => {
     expect(await testBSONHandler(() => /hello/)()).toBeInstanceOf(
         RegExp
     );
 });
 
-it('tryUndefined to regexp to server', async () => {
+it('expected to regexp to server', async () => {
     expect(await testBSONHandler(data => data)(/hello/)).toBeInstanceOf(
         RegExp
     );

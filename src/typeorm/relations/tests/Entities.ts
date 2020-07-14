@@ -10,12 +10,10 @@ import {
     OneToOne,
     PrimaryColumn
 } from "typeorm";
+import {Relation} from "../../../data/Relation";
 import {TestConnection} from "../../../data/tests/TestConnection";
 
 let randomId = 0;
-
-
-type Forward<T> = T;
 
 
 @Entity('A')
@@ -30,34 +28,38 @@ export class AEntity {
     a_id: string;
 
     @Column({nullable: true})
-    aText: string;
+    a_text: string;
 
     @Column({nullable: true})
-    aNumber: number;
+    a_number: number;
 
     @OneToOne(() => BEntity, b => b.a)
     @JoinColumn()
-    bOwner: Forward<BEntity>;
+    bOwner: Relation<BEntity>;
 
     @OneToOne(() => BEntity, b => b.aOwner)
     b: object & BEntity;
 
     @ManyToMany(() => BEntity, b => b.manyBToManyA)
     @JoinTable()
-    manyAToManyBOwner: BEntity[];
+    manyAToManyBOwner: Relation<BEntity>[];
 
     @ManyToMany(() => BEntity, b => b.manyBToManyAOwner)
-    manyAToManyB: BEntity[];
+    manyAToManyB: Relation<BEntity>[];
 
     @OneToMany(() => BEntity, b => b.manyBToOneA)
-    oneAToManyB: BEntity[];
+    oneAToManyB: Relation<BEntity>[];
 
     @ManyToOne(() => BEntity, b => b.oneBToManyA)
-    manyAToOneB: Forward<BEntity>;
+    manyAToOneB: Relation<BEntity>;
 
     @OneToOne(() => CEntity)
     @JoinColumn()
-    cOwner: Forward<CEntity>;
+    cOwner: Relation<CEntity>;
+
+    @JoinTable()
+    @ManyToMany(() => AEntity)
+    children: AEntity[]
 }
 
 @Entity('B')
@@ -72,37 +74,37 @@ export class BEntity {
     b_id: string;
 
     @Column({nullable: true})
-    bText: string;
+    b_text: string;
 
     @Column({nullable: true})
-    bNumber: number;
+    b_number: number;
 
     @OneToOne(() => AEntity, a => a.bOwner)
-    a: AEntity;
+    a: Relation<AEntity>;
 
     @OneToOne(() => AEntity, a => a.b)
     @JoinColumn()
-    aOwner: AEntity;
+    aOwner: Relation<AEntity>;
 
     @ManyToMany(() => AEntity, a => a.manyAToManyBOwner)
-    manyBToManyA: AEntity[];
+    manyBToManyA: Relation<AEntity>[];
 
     @ManyToMany(() => AEntity, a => a.manyAToManyB)
     @JoinTable()
-    manyBToManyAOwner: AEntity[];
+    manyBToManyAOwner: Relation<AEntity>[];
 
     @ManyToOne(() => AEntity, a => a.oneAToManyB)
-    manyBToOneA: AEntity;
+    manyBToOneA: Relation<AEntity>;
 
     @OneToOne(() => AEntity, a => a.manyAToOneB)
-    oneBToManyA: AEntity[];
+    oneBToManyA: Relation<AEntity>[];
 
     @OneToOne(() => CEntity, c => c.b)
     @JoinColumn()
-    cOwner: Forward<CEntity>;
+    cOwner: Relation<CEntity>;
 
     @OneToOne(() => CEntity, c => c.bOwner)
-    c: Forward<CEntity>;
+    c: Relation<CEntity>;
 }
 
 
@@ -117,18 +119,19 @@ export class CEntity {
     c_id: string;
 
     @Column({nullable: true})
-    cText: string;
+    c_text: string;
 
     @Column({nullable: true})
-    cNumber: number;
+    c_number: number;
 
     @OneToOne(() => BEntity, b => b.cOwner)
-    b: BEntity;
+    b: Relation<BEntity>;
 
     @OneToOne(() => BEntity, b => b.c)
     @JoinColumn()
-    bOwner: BEntity;
+    bOwner: Relation<BEntity>;
 }
 
 
-export const getABCTestConnection = TestConnection([AEntity, BEntity, CEntity]);
+export const getEntityTestConnection =
+    TestConnection([AEntity, BEntity, CEntity]);

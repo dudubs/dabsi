@@ -22,12 +22,11 @@ export function Lazy(callback?): any {
     }
 }
 
-
 function lazyCallback(callback) {
-    return (...args) => {
+    return function () {
         if (map.has(callback))
             return map.get(callback);
-        const value = callback(...args);
+        const value = callback.apply(this, arguments);
         map.set(callback, value);
         return value;
     }

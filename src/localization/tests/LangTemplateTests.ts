@@ -5,24 +5,24 @@ import objectContaining = jasmine.objectContaining;
 
 const HelloMsg = Lang`HELLO_${"name"}!`;
 
-it('tryUndefined to correct template key', () => {
+it('expected to correct template key', () => {
     expect(HelloMsg.token).toEqual('HELLO_{name}!');
 });
 
 
-it('tryUndefined to react element', () => {
-    expect(HelloMsg({name: "World"})).toEqual(objectContaining({
+it('expected to react element', () => {
+    expect(HelloMsg({name: "World"})).toEqual(jasmine.objectContaining({
         type: LangView,
-        props: objectContaining({
+        props: jasmine.objectContaining({
             token: HelloMsg.token,
-            props: objectContaining({
+            props: jasmine.objectContaining({
                 name: "World"
             })
         })
     }));
 });
 
-it('tryUndefined to template entry', () => {
+it('expected to template entry', () => {
     const [token, formatter] = HelloMsg`Hello ${"name"}!`;
     expect(formatter({name: "World"})).toEqual("Hello World!");
     expect(token).toEqual(HelloMsg.token);

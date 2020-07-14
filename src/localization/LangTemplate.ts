@@ -1,5 +1,5 @@
 import {createElement, ReactElement} from "react";
-import {definedAt} from "../common/object/defined";
+import {definedAt} from "../common/object/definedAt";
 import {joinTemplate} from "../common/string/joinTemplate";
 import {LangElement, LangPropsType, LangTokenElement} from "./Lang";
 import {LangView} from "./LangView";

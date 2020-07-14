@@ -1,5 +1,6 @@
 import Grid, {GridProps} from "@material-ui/core/Grid";
 import React from "react";
+import {MuiIcon} from "../../../../browser/src/old/orders/MuiIcon";
 import {ValueOrFactory} from "../../../common/patterns/ValueOrFactory";
 import {LangNode} from "../../../localization/Lang";
 import {mergeCallback} from "../../../react/utils/mergeCallback";
@@ -7,7 +8,7 @@ import {MuiButton, MuiButtonProps} from "../components/MuiButton";
 
 export type MuiActionProps<T = any> = {
     title: LangNode,
-    icon?: string,
+    icon?: MuiIcon,
     MuiButtonProps?: MuiButtonProps;
     context?: T;
     handle?(context: T);

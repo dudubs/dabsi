@@ -1,4 +1,5 @@
 import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
+import {Relation} from "../data/Relation";
 import {decorateDesignType} from "../reflect/decorateDesignType";
 import {User} from "./User";
 
@@ -6,7 +7,7 @@ import {User} from "./User";
 declare module "./User" {
     interface User {
 
-        groups: Group[];
+        groups:Relation<Group>[];
 
     }
 }
@@ -24,7 +25,7 @@ export class Group {
     // TODO: Maybe optional?
     @ManyToMany(() => User, user => user.groups)
     @JoinTable()
-    users: User[];
+    users: Relation<User>[];
 
 
 }

@@ -1,18 +1,17 @@
 import {Component, ReactNode} from "react";
 import {ImmutableSet} from "../../immutable2";
-import {JSONExp} from "../../json-exp/JSONExp";
+import {DataExp} from "../../json-exp/DataExp";
 import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {State} from "../../react/utils/State";
-import {DataFields} from "../DataFields";
 import {DataItem} from "../DataItem";
-import {DataOrder, DataQuery} from "../DataQuery";
+import {DataOrder} from "../DataOrder";
 import {DataSource} from "../DataSource";
 
 
 export type AbstractDataListProps<T> = {
     source: DataSource<T>;
 
-    searchIn?: JSONExp<T>[];
+    searchIn?: DataExp<T>[];
 
 
     pageSize?: number;
@@ -25,7 +24,7 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     reloadDebounce = Debounce(100);
 
-    @State() items: DataItem<any>[] = [];
+    @State() items: DataItem<T>[] = [];
 
     @State() isLoading = false;
 
@@ -43,7 +42,7 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     @State() selectAll = false;
 
-    @State('reload') source = this.props.source;
+    @State('reload') source: DataSource<T> = this.props.source;
 
     updateSource(getSource: (source: DataSource<T>) => DataSource<T>) {
         this.source = getSource(this.props.source);
@@ -60,35 +59,43 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     abstract getOrder(): DataOrder<T>[];
 
-    getQuery(): DataQuery<any> {
-        const {text, props: {searchIn}} = this;
+
+    getQuerySource(): DataSource<T> {
+        let {
+            source: {cursor},
+            text, props: {searchIn}
+        } = this;
+
         const textFilter = !(text && searchIn) ? undefined : {
             $and: searchIn.map(exp => ({$search: {in: exp, text}}))
         };
 
-        return {
-            count: !this.totalCount,
+        cursor = ({
+            ...cursor,
             order: [
                 ...!this.sort ? [] : [this.sort],
                 ...this.getOrder()],
             skip: this.pageSize * this.page,
             take: this.pageSize,
-            filter: textFilter
-        }
-    }
+            filter: DataExp(
+                cursor.filter,
+                textFilter)
+        })
 
-    getQuerySource(): DataSource<any> {
-        return this.source
+
+        return this.source.withCursor(cursor)
     }
 
     async reload() {
         this.isLoading = true;
         await this.reloadDebounce.wait();
-        const result = await this.getQuerySource()
-            .query(this.getQuery());
-        if (result.count)
-            this.totalCount = result.count;
-        this.items = result.items;
+
+        if (!this.totalCount) {
+            [this.totalCount, this.items] =
+                await this.getQuerySource().countAndQuery();
+        } else {
+            this.items = await this.getQuerySource().items();
+        }
         this.isLoading = false;
     }
 

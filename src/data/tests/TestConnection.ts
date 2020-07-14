@@ -1,19 +1,9 @@
 import {Connection, createConnection, ObjectType} from "typeorm";
 import {defined} from "../../common/object/defined";
-import {Awaitable} from "../../common/typings";
-
-export let getTestConnection: () => Connection;
 
 
 let counter = 0;
 
-
-export function defineTestConnection(callback: (connection: Connection) => Awaitable,
-                                     entities: any[]) {
-    beforeAll(async () => {
-        await callback(await createTestConnection(entities))
-    })
-}
 
 export function createTestConnection(entities: ObjectType<any>[]): Promise<Connection> {
     return createConnection({
@@ -33,14 +23,14 @@ export function TestConnection(
     let connection: Connection;
 
     beforeAll(async () => {
-        return connection = await createTestConnection(entities);
-
+        connection = await createTestConnection(entities);
     })
 
-    afterAll(() => connection.close())
+    afterAll(async () => {
+        await connection.close();
+    })
 
     return () => {
-        getTestConnection = () => defined(connection, 'No command');
-        return connection;
+        return defined(connection, 'No connection');
     }
 }

@@ -55,6 +55,27 @@ export class ModalStack extends Component<{ children?: ReactNode }> {
         })
     }
 
+    promise<T>(
+        render: (callback: (value: T) => void) => ReactElement
+    ): Promise<T> {
+        return new Promise<T>(resolve => {
+            const key = RandomId();
+            this.items = this.items.set(key, new ModalStackItem<T>(
+                () => render(value => {
+                    resolve(value);
+                    this.items = this.items.delete(key);
+                }),
+                key,
+                () => {
+                    this.pop(key)
+                },
+                value => {
+                    resolve(value)
+                }
+            ));
+        })
+    }
+
 
     pick<T>(
         component: ComponentType<OnPickProp<T>>,

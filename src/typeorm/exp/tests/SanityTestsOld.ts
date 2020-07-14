@@ -12,7 +12,7 @@ import {
     PrimaryColumn,
     SelectQueryBuilder
 } from "typeorm";
-import {JSONExp} from "../../../json-exp/JSONExp";
+import {DataExp} from "../../../json-exp/DataExp";
 import {useQueryBuilderExp} from "../useQueryBuilderExp";
 
 @Entity()
@@ -115,7 +115,7 @@ beforeAll(async () => {
 useQueryBuilderExp();
 
 
-const personFullNameExp: JSONExp<Person> = {
+const personFullNameExp: DataExp<Person> = {
     $concat: [
         "firstName",
         {$value: " "},

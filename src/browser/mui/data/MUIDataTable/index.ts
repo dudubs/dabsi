@@ -1,5 +1,5 @@
 import {TableProps} from "@material-ui/core/Table";
-import {DataItem} from "../../../../data/DataItem";
+import {DataItem, DataKey} from "../../../../data/DataItem";
 import {DataTable, DataTableAction, DataTableColumnProps, DataTableProps} from "../../../../data/DataTable";
 import {LangNode} from "../../../../localization/Lang";
 import {MuiButtonProps} from "../../components/MuiButton";
@@ -26,6 +26,8 @@ export type MuiDataTableProps<T> =
     })[];
 
     TableProps?: TableProps;
+
+    renderItemCollapse?(item: DataItem<T>,table:MuiDataTable<any>);
 
 }
 
@@ -70,7 +72,7 @@ export class MuiDataTable<T>
     }
 
     getSelectedItems() {
-        return this.items.filter(item => this.selectedKeys.has(item.key));
+        return this.items.filter(item => this.selectedKeys.has(DataKey(item)));
     }
 
     toggleSelectAll() {
@@ -81,8 +83,8 @@ export class MuiDataTable<T>
             this.selectedKeys = this.selectedKeys.clear();
         } else {
             const selectedKeys = this.selectedKeys.asMutable();
-            for (let {key} of this.items) {
-                selectedKeys.add(key)
+            for (let item of this.items) {
+                selectedKeys.add(item.$key)
             }
             this.selectedKeys = selectedKeys.asImmutable();
         }

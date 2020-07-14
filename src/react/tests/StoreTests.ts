@@ -35,21 +35,21 @@ it("assign at", async () => {
 });
 
 it('push at array', async () => {
-    await store.at("msgs").push(new Msg("world"));
+    await store.at("msgs").add(new Msg("world"));
     expect(state.msgs).toEqual(jasmine.arrayContaining([
         jasmine.objectContaining({text: "world"})
     ]))
 });
 
 it('push at object', async () => {
-    await store.at("msg").at("comments").push(new Msg("world"));
+    await store.at("msg").at("comments").add(new Msg("world"));
     expect(state.msg.comments).toEqual(jasmine.arrayContaining([
         jasmine.objectContaining({text: "world"})
     ]))
 });
 
 it('push at object in array', async () => {
-    await store.at("msgs").at(0).at("comments").push(new Msg("world"));
+    await store.at("msgs").at(0).at("comments").add(new Msg("world"));
     expect(state.msgs[0].comments).toEqual(jasmine.arrayContaining([
         jasmine.objectContaining({text: "world"})
     ]))

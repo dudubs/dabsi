@@ -3,22 +3,30 @@ import TableBody from "@material-ui/core/TableBody";
 import TableRow from "@material-ui/core/TableRow";
 import React from "react";
 import {Lang} from "../../../../localization/Lang";
-import {ModalStackContext} from "../../../../react/ModalStack";
+import {useModalStack} from "../../../../react/ModalStack";
 import {Hook} from "../../../../react/utils/Hook";
-import {useDefinedContext} from "../../../../react/utils/hooks/useDefinedContext";
 import {AnyMuiDataTable} from "./index";
-import {renderTableBodyRow} from "./renderTableBodyRow";
+import {MuiDataTableRow} from "./MuiDataTableRow";
 
 export const NoTableItems = Lang`NO_TABLE_ITEMS`;
 
 export function renderTableBody(table: AnyMuiDataTable) {
     return <TableBody>
-        <Hook of={() => useDefinedContext(ModalStackContext)}>{ms =>
-            !table.items.length ? <TableRow>
+        <Hook>{() => {
+            const ms = useModalStack();
+            return !table.items.length ? <TableRow>
                 <TableCell colSpan={1000}>{NoTableItems}</TableCell>
             </TableRow> : <>
-                {table.items.map(item => renderTableBodyRow(table, item, ms))}
-            </>
+                {table.items.map((item, index) =>
+                    <MuiDataTableRow
+                        key={item.$key}
+                        table={table}
+                        item={item}
+                        index={index}
+                    />
+                )}
+            </>;
+        }
         }</Hook>
         {table.isLoading && <TableRow>
             <TableCell colSpan={1000}>

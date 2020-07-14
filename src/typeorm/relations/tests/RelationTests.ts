@@ -1,3 +1,4 @@
+// TODO: rename to EntityRelationTests.
 import {Connection, Repository} from "typeorm";
 import {TestConnection} from "../../../data/tests/TestConnection";
 import {EntityRelation} from "../EntityRelation";
@@ -20,9 +21,8 @@ beforeAll(() => {
     BRepo = connection.getRepository(BEntity);
 })
 
-it('sanity', async () => {
 
-    const connection = getConnection();
+it('sanity', async () => {
 
     await assert(
         EntityRelation.of(connection, AEntity, "bOwner"),
@@ -48,24 +48,24 @@ it('sanity', async () => {
     );
 
     async function assert(aOfBOwner, aOfB, bOwnerAtA, bAtA) {
-        expect(aOfBOwner).toEqual(objectContaining({
-            left: objectContaining({entityType: AEntity, isOwning: true}),
-            right: objectContaining({entityType: BEntity, isOwning: false}),
+        expect(aOfBOwner).toEqual(jasmine.objectContaining({
+            left: jasmine.objectContaining({entityType: AEntity, isOwning: true}),
+            right: jasmine.objectContaining({entityType: BEntity, isOwning: false}),
         }));
 
-        expect(aOfB).toEqual(objectContaining({
-            left: objectContaining({entityType: AEntity, isOwning: false}),
-            right: objectContaining({entityType: BEntity, isOwning: true}),
+        expect(aOfB).toEqual(jasmine.objectContaining({
+            left: jasmine.objectContaining({entityType: AEntity, isOwning: false}),
+            right: jasmine.objectContaining({entityType: BEntity, isOwning: true}),
         }));
 
-        expect(bOwnerAtA).toEqual(objectContaining({
-            left: objectContaining({entityType: BEntity, isOwning: false}),
-            right: objectContaining({entityType: AEntity, isOwning: true}),
+        expect(bOwnerAtA).toEqual(jasmine.objectContaining({
+            left: jasmine.objectContaining({entityType: BEntity, isOwning: false}),
+            right: jasmine.objectContaining({entityType: AEntity, isOwning: true}),
         }));
 
-        expect(bAtA).toEqual(objectContaining({
-            left: objectContaining({entityType: BEntity, isOwning: true}),
-            right: objectContaining({entityType: AEntity, isOwning: false}),
+        expect(bAtA).toEqual(jasmine.objectContaining({
+            left: jasmine.objectContaining({entityType: BEntity, isOwning: true}),
+            right: jasmine.objectContaining({entityType: AEntity, isOwning: false}),
         }));
 
         await assertRelation(aOfBOwner);
@@ -98,5 +98,19 @@ it('sanity', async () => {
 
 })
 
-let randomId = 0;
+it('tree', () => {
 
+    const aOfA = EntityRelation.of(connection, AEntity, "children");
+    const aAtA = EntityRelation.at(connection, AEntity, "children");
+
+    expect(aOfA.isTree).toBeTruthy()
+    expect(aAtA.isTree).toBeTruthy()
+
+
+    expect(aOfA.left.isOwning).toBeTruthy()
+    expect(aOfA.right.isOwning).toBeFalsy()
+
+    expect(aAtA.right.isOwning).toBeTruthy()
+    expect(aAtA.left.isOwning).toBeFalsy()
+
+})

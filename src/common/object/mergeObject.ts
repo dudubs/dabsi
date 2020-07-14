@@ -2,7 +2,10 @@ import {cloneObject} from "./cloneObject";
 import {keys} from "./keys";
 
 
-export function mergeObject<T, K extends keyof T>(obj: T, props: Pick<T, K>): T {
+export function mergeObject<T, K extends keyof T>(
+    obj: T,
+    props: Pick<T, K>
+): T {
     obj = cloneObject(obj);
     for (const key of keys(props)) {
         const prev = obj[key];

@@ -1,7 +1,11 @@
+import exp from "constants";
+import {inspect} from "util";
 import {ExtractKeys} from "../../common/typings";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
+import {DataKey} from "../DataItem";
 import {DataSource} from "../DataSource";
-import {EntityDataSource} from "../EntityDataSource";
+import arrayContaining = jasmine.arrayContaining;
+import objectContaining = jasmine.objectContaining;
 
 export function DataSourceTests(
     ADS: DataSource<AEntity>,
@@ -102,6 +106,68 @@ export function DataSourceTests(
             .at("cOwner", "bid8")
             .get();
 
+    });
+
+    it('of relation', async () => {
+        const aKey = await ADS.insert({});
+        const bOfA = BDS.of("a", aKey);
+        expect(await bOfA.has()).toBeFalsy();
+        await bOfA.insert({})
+        expect(await bOfA.has()).toBeTruthy();
+    });
+
+    it("of column", async () => {
+        const aKey = await ADS.insert({});
+
+        const bOfA = BDS.of("a", aKey);
+
+        const bOfAOfHello = bOfA.of("b_text", "hello");
+        expect(await bOfAOfHello.has()).toBeFalsy();
+
+        const bOfAOfHelloKey = await bOfAOfHello.insert({});
+        expect(await bOfAOfHello.has()).toBeTruthy();
+
+        const bOfAOfWorld = bOfA.of("b_text", "world");
+        expect(await bOfAOfWorld.has()).toBeFalsy();
+
+        const cOfbOfA = CDS.of("b", bOfAOfHelloKey);
+
+        const cOfbOfAOfHello = cOfbOfA.of("c_text", "hello");
+        expect(await cOfbOfAOfHello.has()).toBeFalsy();
+
+        const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insert({});
+        expect(await cOfbOfAOfHello.has()).toBeTruthy();
+
+        expect(await BDS
+            .of("b_text", "hello")
+            .at("cOwner", bOfAOfHelloKey)
+            .has()
+        ).toBeTruthy();
+
+        expect(await BDS
+            .of("b_text", "world")
+            .at("cOwner", bOfAOfHelloKey)
+            .has()
+        ).toBeFalsy();
+
     })
 
+
+    it('children', async () => {
+        const rootKey = await ADS.insert({});
+        const rootChildren = ADS.at("children", rootKey);
+        expect(await rootChildren.count()).toEqual(0);
+
+        const childKeys = [
+            await ADS.insert({}),
+            await ADS.insert({}),
+        ]
+        await rootChildren.add(childKeys);
+        expect(await rootChildren.count()).toEqual(2);
+
+
+        expect((await rootChildren.items()).map(child=>child.$key))
+            .toEqual(arrayContaining(childKeys))
+    })
 }
+

@@ -1,7 +1,7 @@
 // select * exclude keys with fields
-import {JSONExp} from "../../json-exp/JSONExp";
-import {DataCursor} from "../DataCursor";
+import {DataExp} from "../../json-exp/DataExp";
 import {DataSource} from "./DataSource";
+
 
 declare module "./DataSource" {
     interface DataSource<T> {
@@ -12,9 +12,13 @@ declare module "./DataSource" {
 DataSource.prototype.filter = filter;
 
 function filter<T>(this: DataSource<T>,
-                   ...exps: JSONExp<T>[]): DataSource<T> {
-    return this.withCursor(
-        DataCursor.filter(this.cursor, exps)
-    )
+                   ...exps: DataExp<T>[]): DataSource<T> {
+    const filter = DataExp({$and: exps});
+    if (typeof filter === "undefined")
+        return this;
+    return this.withCursor({
+        ...this.cursor,
+        filter: DataExp(this.cursor.filter, filter)
+    })
 
 }

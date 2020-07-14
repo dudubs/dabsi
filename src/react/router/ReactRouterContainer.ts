@@ -4,10 +4,10 @@
 import {History} from "history";
 import {ReactNode, useEffect, useMemo, useState} from "react";
 import {UndefinedProp} from "../../common/typings";
-import {AnyRoute, Route} from "../../router";
+import {AnyRoute, createRoute, Route} from "../../router";
 
-import {routeByPath} from "../../router/routeByPath";
-import {RouterContextOf} from "../../router/RouterContext";
+import {routeByPath} from "../../router/route/routeByPath";
+import {RouterContextOf} from "../../router/context";
 import {useDefinedContext} from "../utils/hooks/useDefinedContext";
 import {mergeCallback} from "../utils/mergeCallback";
 import {provide} from "../utils/provide";
@@ -34,7 +34,7 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
 
     // @ts-ignore
     const initRoute: Route<AnyReactRouter> = useMemo(() => {
-        return AnyRoute({
+        return createRoute({
             parent: undefined,
             instance: {history},
             name: undefined,

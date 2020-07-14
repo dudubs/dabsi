@@ -6,69 +6,67 @@ if [ -f "./dabsi.sh" ]; then
   source ./dabsi.sh
 fi
 
-
 export DABSI_PATH=$(dirname $BASH_SOURCE)
 
 function dabsi-node() {
 
-    if [ "$mon" ]; then
-         _node="nodemon $DABSI_MON -e ts,tsx"
-    else
-         _node="node"
-    fi
+  if [ "$mon" ]; then
+    _node="nodemon $DABSI_MON -e ts,tsx"
+  else
+    _node="node"
+  fi
 
-    C="";
+  C=""
 
-#    if [ -d "./node_modules/tsconfig-paths" ]; then
-#        C="$C -r tsconfig-paths/register"
-#    fi
+  #    if [ -d "./node_modules/tsconfig-paths" ]; then
+  #        C="$C -r tsconfig-paths/register"
+  #    fi
 
-    if [ "$DABSI_NODE_DEBUG" ]; then
-      C="$C --inspect "
-    fi
+  if [ "$DABSI_NODE_DEBUG" ]; then
+    C="$C --inspect "
+  fi
 
-#  echo \
-     NODE_OPTIONS="$NODE_OPTIONS --preserve-symlinks" \
-     TS_NODE_TRANSPILE_ONLY=true \
-     $_node \
-      -r ts-node/register \
-      -r source-map-support/register \
-      $C \
-      -r $DABSI_PATH/src/common/register.ts \
-      $*
+  TS_NODE_TRANSPILE_ONLY=true \
+  NODE_OPTIONS=$(echo "$C --preserve-symlinks" \
+  " -r source-map-support/register" \
+  " -r ts-node/register" \
+  " -r $DABSI_PATH/src/common/register.ts" \
+  ) \
+     $_node $C $*
+
 
 }
-
 
 function dabsi-mon() {
   mon=1 dabsi $*
 }
 
-
 function dabsi-test() {
-    dabsi node -r ts-node/register node_modules/jasmine/bin/jasmine.js \
-              $(find $1 -type f -path '*/tests/*' -name '*.ts*'  ! -path '*/node_modules/*') \
-                --stop-on-failure=true
+  dabsi node \
+   node_modules/jasmine/bin/jasmine.js \
+    $(find $1 -type f -path '*/tests/*' -name '*.ts*' \
+      ! -path '*/node_modules/*' | grep -v 'Old') \
+    --stop-on-failure=true
 }
 
 function dabsi-debug() {
-    DABSI_NODE_DEBUG=1 dabsi $*
+  DABSI_NODE_DEBUG=1 dabsi $*
 }
 function dabsi-() {
-    echo "no dabsi command"
+  echo "no dabsi command"
 }
 
 function dabsi() {
 
- if [ -f "$DABSI_PATH/scripts/$1.ts" ]; then
+  if [ -f "$DABSI_PATH/scripts/$1.ts" ]; then
     dabsi node "$DABSI_PATH/scripts/$1.ts" ${@:2}
   else
-      if [ -f "$DABSI_PATH/scripts/$1.sh" ]; then
-       $DABSI_PATH/scripts/$1.sh ${@:2}
+    if [ -f "$DABSI_PATH/scripts/$1.sh" ]; then
+      $DABSI_PATH/scripts/$1.sh ${@:2}
     else
       dabsi-$1 ${@:2}
-    fi;
-  fi;
+    fi
+  fi
 
 }
 

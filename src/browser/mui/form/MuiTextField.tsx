@@ -8,7 +8,6 @@ export type MuiTextFieldProps =
     AbstractTextFieldProps & {
     TextFieldProps?: Partial<TextFieldProps>;
 
-
 };
 
 export class MuiTextField
@@ -32,6 +31,11 @@ export class MuiTextField
                     this.onFocus(),
                 onChange: event =>
                     this.onChangeText(event.target.value),
+                onKeyPress: event => {
+                    if (event.key === "Enter") {
+                        return this.onChange(this.text);
+                    }
+                }
             })}
             label={this.props.title}
             error={!!this.error}

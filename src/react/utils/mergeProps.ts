@@ -10,12 +10,6 @@ export const $override = "$override";
 export type PropMerger<T> =
     Record<typeof $merge, (value: T) => T> | Record<typeof $override, T>;
 
-export function PropMerger<T>(merger: (value: T) => T): PropMerger<T> {
-    return {[$merge]: merger}
-}
-
-export type RefOrCallback = Ref<any> | ((...args: any[]) => void);
-
 function mergeCallbacks(prevCallback: Function, nextCallback: Function) {
     return function () {
         const prevResult = prevCallback.apply(this, arguments);

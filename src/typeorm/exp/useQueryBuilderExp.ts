@@ -1,48 +1,47 @@
 import {SelectQueryBuilder} from "typeorm";
-import {BaseMapFactory} from "../../common/map/mapFactory";
-import {SymbolMap} from "../../common/map/SymbolMap";
 import {Lazy} from "../../common/patterns/lazy";
-import {JSONExp} from "../../json-exp/JSONExp";
-import {QBJSONExpTranslator} from "./QBJSONExpTranslator";
+import {DataSort} from "../../data/DataOrder";
+import {DataExp} from "../../json-exp/DataExp";
+import {translateQbDataExp} from "./translateQbDataExp";
+import {QbDataExpTranslator} from "./QbDataExpTranslator";
 
 declare module "typeorm" {
+
+
     interface SelectQueryBuilder<Entity> {
 
-        exp(exp: JSONExp<Entity>);
+        exp(exp: DataExp<Entity>): string;
 
-        selectExp(exp: JSONExp<Entity>, aliasName?: string): this;
+        exp(exp: DataExp<any>, schema: string): string;
 
-        buildSelectExp(aliasName: string, exp: JSONExp<Entity>): this;
+        selectExp(exp: DataExp<Entity>, aliasName?: string): this;
 
-        addSelectExp(exp: JSONExp<Entity>, aliasName?: string): this;
+        buildSelectExp(aliasName: string, exp: DataExp<Entity>): this;
 
-        whereExp(exp: JSONExp<Entity>): this;
+        addSelectExp(exp: DataExp<Entity>, aliasName?: string): this;
 
-        andWhereExp(exp: JSONExp<Entity>): this;
+        whereExp(exp: DataExp<Entity>): this;
 
-        orWhereExp(exp: JSONExp<Entity>): this;
+        andWhereExp(exp: DataExp<Entity>): this;
 
-        orderByExp(exp: JSONExp<Entity>, order?: "ASC" | "DESC", nulls?: "NULLS FIRST" | "NULLS LAST"):
+        orWhereExp(exp: DataExp<Entity>): this;
+
+        orderByExp(exp: DataExp<Entity>, order?: "ASC" | "DESC", nulls?: "NULLS FIRST" | "NULLS LAST"):
             this;
 
 
-        addOrderByExp(exp: JSONExp<Entity>, order?: "ASC" | "DESC", nulls?: "NULLS FIRST" | "NULLS LAST"):
+        addOrderByExp(exp: DataExp<Entity>, sort?: DataSort, nulls?: "NULLS FIRST" | "NULLS LAST"):
             this;
 
 
     }
 }
 
-
-export const QueryBuilderTranslator = SymbolMap<SelectQueryBuilder<any>, QBJSONExpTranslator<any>>("translator");
-
-const getQueryBuilderTranslator = BaseMapFactory(QueryBuilderTranslator, qb => QBJSONExpTranslator.create(qb));
-
 export const useQueryBuilderExp = Lazy(() => {
     const qb = SelectQueryBuilder.prototype;
 
-    qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: JSONExp<T>) {
-        return getQueryBuilderTranslator(this).translate(exp)
+    qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: DataExp<T>, schema?: string) {
+        return translateQbDataExp(this, exp, schema)
     };
 
     install('where');
@@ -56,7 +55,7 @@ export const useQueryBuilderExp = Lazy(() => {
 
 
     qb.buildSelectExp = function (this: SelectQueryBuilder<any>, aliasName,
-                                  exp: JSONExp<any>) {
+                                  exp: DataExp<any>) {
 
 
         if (!this.expressionMap.selects[0]?.aliasName) {
@@ -68,6 +67,8 @@ export const useQueryBuilderExp = Lazy(() => {
 
     function install(prop) {
         qb[prop + 'Exp'] = function (this: SelectQueryBuilder<any>, exp, ...args) {
+            if (exp === undefined)
+                return this;
             return this[prop](this.exp(exp), ...args);
         }
     }

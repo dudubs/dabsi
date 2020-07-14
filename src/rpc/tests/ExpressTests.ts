@@ -1,5 +1,6 @@
 import * as express from "express";
 import {Handler, Request} from "express";
+import * as http from "http";
 import fetch, {RequestInit} from "node-fetch";
 import {toPromise} from "../../common/async/toPromise";
 import {Awaitable} from "../../common/typings";
@@ -7,7 +8,7 @@ import {Awaitable} from "../../common/typings";
 const _fetch = fetch;
 
 let app: express.Application;
-
+let server: http.Server;
 let _handler: express.Handler;
 let _url: string;
 
@@ -22,13 +23,16 @@ beforeAll(async () => {
 
 
     await toPromise(callback => {
+        server = app.listen(callback);
         const addr = app.listen(callback).address();
-
         _url = `http://[::]:${addr?.['port']}`
-
 
     })
 
+});
+
+afterAll(() => {
+    server?.close()
 })
 
 type ExpressTesterRequest = RequestInit & { url?: string };
@@ -49,7 +53,7 @@ export namespace ExpressTester {
         return ExpressTester;
     }
 
-    export function fetch({url, ...init}: ExpressTesterRequest={}) {
+    export function fetch({url, ...init}: ExpressTesterRequest = {}) {
         return _fetch(_url + (url ?? ""), init)
     }
 
@@ -59,7 +63,10 @@ export namespace ExpressTester {
             ...init,
             method: "POST",
             body: JSON.stringify(body),
-            headers: {...init.headers, 'Content-Type': 'application/json'}
+            headers: {
+                ...init.headers,
+                'Content-Type': 'application/json'
+            }
         }).then(res => res.json())
     }
 

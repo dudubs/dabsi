@@ -1,100 +1,108 @@
 import {isEmptyObject} from "../common/object/isEmptyObject";
 import {mapObject} from "../common/object/mapObject";
 import {ArrayTypeOrObject, ExtractKeys} from "../common/typings";
-import {JSONExp, JSONFieldKey} from "../json-exp/JSONExp";
+import {DataExp} from "../json-exp/DataExp";
 import {DataFields, DataRow} from "./DataFields";
-import {JSONExpMapper} from "./DataSource/JSONExpMapper";
+import {DataFieldsTranslator} from "./DataFieldsTranslator";
+import {DataOrder} from "./DataOrder";
 
-export class DataCursorTranslator extends JSONExpMapper<any> {
-    constructor(public fields: DataFields<any>) {
-        super();
-    }
+export type DataLoadMapValue<T> = boolean | RelationMap<T>;
 
-    translateFieldExp(key: JSONFieldKey<any>): JSONExp<any> {
-        if (key in this.fields) {
-            if (typeof this.fields[key] !== "string") {
-                return this.translate(this.fields[key])
-            }
-        }
-        return super.translateFieldExp(key);
-    }
-}
-
-export type DataLoadMapValue<T> = boolean | DataLoadMap<T>;
-
-export type DataLoadMap<T> = {
+export type RelationMap<T> = {
     [K in ExtractKeys<Required<T>, object>]?:
     DataLoadMapValue<T[K]>
 };
 
-/*
+export type DataCursorOwner<T = any> = {
 
-    owner relation
-    keys relation
+    constants: Record<string, string>,
 
-    children
- */
+    filter: DataExp<T>,
+    propertyName: string,
+    key: string
+};
 
-export class DataCursorOwner<T = any> {
-    constructor(
-        public childKeys: Record<string, string>,
-        public filter: JSONExp<T>,
-        public propertyName: string,
-        public key: string
-    ) {
-    }
-}
 
-export class DataCursor<T = any> {
+export const EmptyDataCursor: DataCursor<any> = {
 
-    fields: DataFields<any> = {};
+    // selection
+    fields: {},
+    exclude: [],
+    excludeAll: false,
+    relationMap: {}, // -
 
-    filter: JSONExp<any>;
+    // + relations
+    // +
 
-    exclude: string[] = [];
 
-    excludeAll = false;
+    // position
+    owners: [],
 
-    childKeys: Record<string, string> = {};
+    //
 
-    loadMap: DataLoadMap<any> = {};
+    // constants
+    constants: {},
+    filter: undefined,
 
-    constructor(
-        public owners: DataCursorOwner[]
-    ) {
-    }
+
+    // querying
+    skip: 0,
+    take: 0,
+    order: []
+};
+
+// TODO: change to type, EmptyDataCursor const.
+export type DataCursor<T = any> = {
+
+    // selection: DataSelectionOld
+
+
+    fields: DataFields<any>;
+
+    // selection
+    exclude: string[];
+
+    excludeAll: boolean;
+
+    // TODO: rename
+    constants: Record<string, string>;
+
+    filter: DataExp<any>;
+
+    relationMap: RelationMap<any>;
+
+    // cur
+    skip: number;
+    take: number;
+
+    order: DataOrder<T>[];
+
+
+    owners: DataCursorOwner[];
+
 }
 
 export namespace DataCursor {
-    export function create<T>(): DataCursor<T> {
-        return new DataCursor<T>([]);
-    }
 
-    export function filter<T>(cursor: DataCursor<T>, exps: JSONExp<T>[]): DataCursor<T> {
-        return {
-            ...cursor, filter: JSONExp({
-                $and: [cursor.filter, {$and: exps}]
-            })
-        }
-    }
 
     export function at<T, K extends keyof T>(cursor: DataCursor<T>,
                                              propertyName: string & K,
                                              key: string): DataCursor<ArrayTypeOrObject<T[K]>> {
-        const cursorAt = new DataCursor([
-            ...cursor.owners,
-            new DataCursorOwner(
-                cursor.childKeys,
-                cursor.filter,
-                propertyName,
-                key)
-        ]);
+        const cursorAt: DataCursor = {
+            ...EmptyDataCursor,
+            owners: [...cursor.owners,
+                {
+                    filter: cursor.filter,
+                    constants: cursor.constants,
+                    propertyName,
+                    key
+                }],
+        };
 
-
-        if (typeof cursor.loadMap === "object") {
-            const loadMapAt = cursorAt.loadMap[propertyName];
-            if (typeof loadMapAt === "object") {
-                cursorAt.loadMap = loadMapAt;
+        if (typeof cursor.relationMap === "object") {
+            const relationMapAt = cursorAt.relationMap[propertyName];
+            if (typeof relationMapAt === "object") {
+                cursorAt.relationMap = relationMapAt;
             }
 
         }
@@ -106,19 +114,21 @@ export namespace DataCursor {
                                              key: string): DataCursor<T> {
         return {
             ...cursor,
-            childKeys: {...cursor.childKeys, [propertyName]: key}
+            constants: {...cursor.constants, [propertyName]: key}
         }
     }
 
     export function translate<T>(cursor: DataCursor<T>,
-                                 exp: JSONExp<T>): JSONExp<T> {
-        return <any>new DataCursorTranslator(<any>cursor.fields).translate(exp)
+                                 exp: DataExp<T>): DataExp<T> {
+        return <any>new DataFieldsTranslator(<any>cursor.fields).translate(exp)
     }
 
     export function translateFields<T>(cursor: DataCursor<T>,
                                        fields: DataFields<T>): DataFields<T> {
-        const translator = new DataCursorTranslator(cursor.fields);
-        return <any>mapObject(fields, exp => translator.translate(exp))
+        const translator = new DataFieldsTranslator(cursor.fields);
+        return <any>mapObject(fields, exp => {
+            return translator.translate(exp);
+        })
     }
 
     export function extend<T, Fields extends DataFields<T>>(
@@ -130,7 +140,8 @@ export namespace DataCursor {
             ...cursor, fields: {
                 ...cursor.fields,
                 ...translateFields(cursor, fields)
-            }
+            },
+            order: []
         }
     }
 
@@ -139,12 +150,12 @@ export namespace DataCursor {
         cursor: DataCursor<T>,
         keys: (string & K)[]): DataCursor<Pick<T, K>> {
         return {
-
             ...cursor,
             excludeAll: true,
             fields: keys.toObject(key => [key,
                 cursor.fields[key] ?? key
-            ])
+            ]),
+            order: []
         }
     }
 
@@ -163,7 +174,9 @@ export namespace DataCursor {
         }
         return {
             ...cursor,
-            fields, exclude: [...exclude]
+            fields,
+            exclude: [...exclude],
+            order: []
         }
     }
 
@@ -173,7 +186,7 @@ export namespace DataCursor {
                 ...right,
                 owners: [...left.owners,
                     ...right.owners
-                ]
+                ],
             }
         }
         return {
@@ -181,10 +194,14 @@ export namespace DataCursor {
             fields: right.fields,
             exclude: right.exclude,
             excludeAll: right.excludeAll,
-            loadMap: isEmptyObject(right.loadMap) ?
-                left.loadMap : right.loadMap, // merge
-            childKeys: {...right.childKeys, ...left.childKeys},
-            filter: JSONExp(left.filter, right.filter)
+            relationMap: isEmptyObject(right.relationMap) ?
+                left.relationMap : right.relationMap, // merge
+            constants: {...right.constants, ...left.constants},
+            filter: DataExp(left.filter, right.filter),
+            skip: right.skip,
+            take: right.take,
+            order: right.order
         }
     }
+
 }

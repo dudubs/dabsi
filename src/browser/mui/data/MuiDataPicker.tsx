@@ -3,11 +3,11 @@ import List, {ListProps} from "@material-ui/core/List";
 import ListItem, {ListItemTypeMap} from "@material-ui/core/ListItem";
 import ListItemText, {ListItemTextProps} from "@material-ui/core/ListItemText";
 import React, {ReactNode} from "react";
-import {InfinityScrollProps} from "../../../../browser/src/doIfScrollEnded";
-import {DataItem} from "../../../data/DataItem";
+import {InfinityScrollProps} from "../../../../browser/src/junk/doIfScrollEnded";
+import {DataItem, DataKey} from "../../../data/DataItem";
 import {DataSource} from "../../../data/DataSource";
 
-import {JSONExp} from "../../../json-exp/JSONExp";
+import {DataExp} from "../../../json-exp/DataExp";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";
 import {AfterMountView, View} from "../../../react/view/View";
 import {ViewState} from "../../../react/view/ViewState";
@@ -21,7 +21,7 @@ export type MuiDataPickerProps<T> = {
     pageSize?: number;
     onPick?(item: DataItem<T>): void
 
-    getTextFilter?(text: string): JSONExp<T>;
+    getTextFilter?(text: string): DataExp<T>;
 
     // renderItem(item: DataItem<P>): ReactNode
 
@@ -34,8 +34,8 @@ export type MuiDataPickerProps<T> = {
 
     listWrapper?: ReactWrapper;
 
-    renderPrimaryTitle(row: T): ReactNode;
-    renderSecondaryTitle?(row: T): ReactNode;
+    renderPrimaryTitle(row: DataItem<T>): ReactNode;
+    renderSecondaryTitle?(row: DataItem<T>): ReactNode;
 
 };
 
@@ -45,7 +45,7 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
 
     @ViewState() items: DataItem<T>[] = [];
 
-    @ViewState('reload') filter: JSONExp<T> = undefined;
+    @ViewState('reload') filter: DataExp<T> = undefined;
 
     @ViewState() isLoading = false;
 
@@ -64,15 +64,19 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
     async reload() {
         this.isLoading = true;
         await this.reloadDebounce.wait(500, true);
-        const result = await this.source
-            .query({
-                take: this.pageSize,
-                count: !this.totalCount,
-                filter: this.filter
-            });
-        if (result.count)
-            this.totalCount = result.count;
-        this.items = result.items;
+
+        if (this.totalCount) {
+
+            this.items = await this.source
+                .take(this.pageSize)
+                .filter(this.filter)
+                .items()
+        } else {
+            [this.totalCount, this.items] = await this.source
+                .take(this.pageSize)
+                .filter(this.filter)
+                .countAndQuery()
+        }
         this.isLoading = false;
 
     }
@@ -84,11 +88,10 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
         await this.loadMoreDebounce.wait(1000);
 
         this.items = [...this.items,
-            ...(await this.source.query({
-                take: this.pageSize,
-                skip: this.items.length,
-                count: false
-            })).items
+            ...(await this.source
+                .take(this.pageSize)
+                .skip(this.items.length)
+                .items())
         ]
 
         this.isLoading = false;
@@ -110,14 +113,14 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
             {wrap(this.props.listWrapper)(
                 <List {...this.props.ListProps}>
                     {this.items.map(item => {
-                        return <ListItem button {...this.props.ListItemProps} key={item.key}
+                        return <ListItem button {...this.props.ListItemProps} key={DataKey(item)}
                                          onClick={() => {
                                              this.props.onPick?.(item);
                                          }}>
                             <ListItemText
                                 {...this.props.ListItemTextProps}
-                                primary={this.props.renderPrimaryTitle(item.row)}
-                                secondary={this.props.renderSecondaryTitle?.(item.row)}
+                                primary={this.props.renderPrimaryTitle(item)}
+                                secondary={this.props.renderSecondaryTitle?.(item)}
                             />
                         </ListItem>
                     })}

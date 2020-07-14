@@ -1,6 +1,6 @@
 import {QueryBuilder} from "typeorm";
 import {ColumnMetadata} from "typeorm/metadata/ColumnMetadata";
-import {definedAt} from "../../common/object/defined";
+import {definedAt} from "../../common/object/definedAt";
 
 export function _matchJoinColumns(joinColumns: ColumnMetadata[],
                                   leftSchema: string,

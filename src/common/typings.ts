@@ -14,6 +14,7 @@ export type Awaitable<T = any> = Promise<T> | T;
 export type AwaitableType<T extends Awaitable> =
     T extends Awaitable<infer U> ? U : never;
 
+
 export type ExtractKeys<T, V> = Exclude<Union<{
     [K in keyof T]: T[K] extends V ? K : never
 }>, never>;
@@ -37,7 +38,7 @@ export function Nullable<T>(value?: T): T | Nullable {
     return value;
 }
 
-export type Type<T> = { prototype: T, name: string } & Function;
+export type Type<T> = { prototype: T } & Function;
 
 export type Actions<T> = Union<{
     [K in keyof T]: { type: K } & T[K]
@@ -47,7 +48,8 @@ export type Actions<T> = Union<{
 export type Assign<T, U> = Omit<T, keyof Required<U>> & U;
 
 
-export type ArrayTypeOrObject<T> = T extends Array<infer U> ? U : Extract<T, object>;
+export type ArrayTypeOrObject<T> =
+    T extends Array<infer U> ? U : Extract<T, object>;
 
 export type ArrayType<T extends any[]> = T extends Array<infer U> ? U : never;
 
@@ -90,3 +92,7 @@ export type OptionalOnly<T, K extends keyof T = never> = Omit<T, Exclude<Require
 
 export type RequiredOnly<T> = Pick<T, RequiredKeys<T>>;
 export type Optional<T> = Pick<T, OptionalKeys<T>>;
+
+export type Method = (...args: any[]) => any;
+
+export type If<T, U, R = never,E=T> = T extends U ? R : T;

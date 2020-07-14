@@ -1,6 +1,8 @@
 import {BaseMap} from "./BaseMap";
-import {PropertyMap} from "./PropertyMap";
+import {PropertyMap, PropertyMapOptions} from "./PropertyMap";
 
-export function SymbolMap<K extends object, V>(name?: string): BaseMap<K, V> {
-    return PropertyMap(Symbol(name));
+export function SymbolMap<K extends object, V>({name, ...options}: PropertyMapOptions & {
+    name?: string
+} = {}): BaseMap<K, V> {
+    return PropertyMap(Symbol(name), options);
 }

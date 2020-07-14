@@ -10,7 +10,7 @@ export function renderTableBodyColumn(
     column: AnyMuiDataTable['columns'][number]
 ) {
     // console.log({item, column});
-    const data = item.row[column.key];
+    const data = item[column.key];
 
     let children;
 
@@ -25,7 +25,7 @@ export function renderTableBodyColumn(
         {...column.MuiBodyProps} key={column.key}
         onClick={() => {
             if (table.multipleActions.length)
-                table.toggleSelect(item.key);
+                table.toggleSelect(item.$key);
         }}>
         {
             children

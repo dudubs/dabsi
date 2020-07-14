@@ -1,14 +1,15 @@
 import {ReactNode} from "react";
+import {MuiIcon} from "../../../browser/src/old/orders/MuiIcon";
 import {defined} from "../../common/object/defined";
 import {Awaitable} from "../../common/typings";
-import {JSONExp} from "../../json-exp/JSONExp";
+import {DataExp} from "../../json-exp/DataExp";
 import {LangNode} from "../../localization/Lang";
 import {LayoutOld} from "../../react/utils/LayoutOld";
 import {AfterMount} from "../../react/utils/LifecycleHooks";
 import {State} from "../../react/utils/State";
 import {DataItem} from "../DataItem";
 import {AbstractDataList, AbstractDataListProps} from "../DataList/AbstractDataList";
-import {DataOrder,} from "../DataQuery";
+import {DataOrder} from "../DataOrder";
 import {DataSource} from "../DataSource";
 import {deleteAction} from "./actions/deleteAction";
 import {removeAction} from "./actions/removeAction";
@@ -20,18 +21,19 @@ export type AnyDataTable<T = any> =
 
 
 export type DataTableAction<T> = {
-    icon?: string;
+    icon?: MuiIcon;
     title: LangNode;
     type?: DataTableActionType
     handleKeys?(keys: string[], table: AnyDataTable<T>): Awaitable;
     handleItem?(item: DataItem<T>): Awaitable;
     danger?: boolean
     visible?: (item: DataItem<T>) => boolean
-    disabled?: (data: DataItem<T>) => boolean
+    disabled?: (item: DataItem<T>) => boolean
 };
 
 export type DataTableProps<T,
-    ColumnProps extends DataTableColumnProps<T> = DataTableColumnProps<T>> = AbstractDataListProps<T> & {
+    ColumnProps extends DataTableColumnProps<T> =
+        DataTableColumnProps<T>> = AbstractDataListProps<T> & {
 
     title?: LangNode;
 
@@ -48,20 +50,20 @@ export type DataTableProps<T,
 };
 
 export type DataTableColumnProps<T> = {
-    field?: JSONExp<T>;
+    field?: DataExp<T>;
     sortable?: boolean;
     title?: LangNode;
     empty?: LangNode;
-    render?(props: {item:DataItem<T>,data:any}): ReactNode;
+    render?(props: { item: DataItem<T>, data: any }): ReactNode;
     renderContainer?(children: ReactNode): ReactNode
 };
 
-export type DataSort = "ASC" | "DESC";
+export type DataSortType = "ASC" | "DESC";
 
 export type DataTableColumn<T> = {
     index: number,
     key: string;
-    sort?: DataSort | undefined;
+    sort?: DataSortType | undefined;
     sortNulls?: "first" | "last"
 };
 
@@ -93,27 +95,12 @@ export abstract class DataTable<T,
                         keys: string[]) {
 
         if (action.handleItem) {
-            const {items: [item]} = await this.source.query({
-                filter: {$is: keys[0]},
-                take: 1
-            });
             await action.handleItem?.(
-                defined(item, () => `No item for key ${keys[0]}`)
+                await this.source
+                    .getOrFail(keys[0])
             );
         }
         await action.handleKeys?.(keys, this);
-    }
-
-    async reloadRow(key: string) {
-        const row = await this.source
-            .select({
-                ...this.columns.toObject(column => {
-                    if (column.field !== undefined)
-                        return [column.key, column.field];
-                })
-            })
-            .get(key);
-        this.items = this.items.map(item => item.key == key ? ({...item, row}) : item)
     }
 
     getQuerySource(): DataSource<any> {
@@ -126,9 +113,8 @@ export abstract class DataTable<T,
             }
         }
 
-        return super.getQuerySource().extend(
-            fields
-        )
+        return super.getQuerySource()
+            .extend(fields)
     }
 
     @AfterMount()
@@ -167,8 +153,8 @@ export abstract class DataTable<T,
         return this.columns.toSeq()
             .filter(c => c.field && c.sort)
             .map(c => ({
-                by: <JSONExp<T>>c.field,
-                sort: <DataSort>c.sort,
+                by: <DataExp<T>>c.field,
+                sort: <DataSortType>c.sort,
                 nulls: c.sortNulls === "first" ? ("FIRST" as const) : ("LAST" as const)
             }))
             .toArray()

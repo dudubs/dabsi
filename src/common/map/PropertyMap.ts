@@ -1,18 +1,34 @@
 import {BaseMap} from "./BaseMap";
 
+export type PropertyMapOptions = {
+    bind?: boolean,
+    configurable?: boolean,
+    enumerable?: boolean
+};
 
 export function PropertyMap<K extends object, V = any>(
-    key: PropertyKey = Symbol()
-):BaseMap<K, V> {
+    key: PropertyKey = Symbol(),
+    {bind, configurable, enumerable}: PropertyMapOptions = {}
+): BaseMap<K, V> {
     return {
         get(obj: K): V | undefined {
+            if (bind && (typeof obj[key] === "function"))
+                return obj[key].bind(obj)
             return obj[key];
         },
         has(obj: K): boolean {
             return key in obj;
         },
         set(obj: K, value: V): BaseMap<K, V> {
-            obj[key] = value;
+
+            if ((!configurable) || (!enumerable)) {
+                Object.defineProperty(obj, key, {
+                    value, enumerable, configurable
+                })
+            } else {
+                obj[key] = value
+            }
+
             return this;
         },
         delete(obj: K) {

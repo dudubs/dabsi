@@ -5,11 +5,11 @@
 import IconButton, {IconButtonProps} from "@material-ui/core/IconButton";
 import Tooltip, {TooltipProps} from "@material-ui/core/Tooltip";
 import React, {forwardRef, ReactNode} from "react";
+import {MuiIcon} from "../../../../browser/src/old/orders/MuiIcon";
 import {Assign} from "../../../common/typings";
-import {MuiIcon, MuiIconName} from "../../../../browser/src/old/orders/MuiIcon";
 
 export type MuiIconButtonProps = Assign<IconButtonProps, {
-    icon: MuiIconName | undefined,
+    icon: MuiIcon,
     tooltip?: ReactNode;
     TooltipProps?: Partial<TooltipProps>;
 }>;

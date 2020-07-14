@@ -1,5 +1,3 @@
-import {Nullable} from "../typings";
-
 export function defined<T>(value: T, errorOrCallback?): NonNullable<T> {
     if (value == null)
         throw new Error(
@@ -10,6 +8,3 @@ export function defined<T>(value: T, errorOrCallback?): NonNullable<T> {
 }
 
 
-export function definedAt<T, K extends keyof T>(obj: T, key: K): NonNullable<T[K]> {
-    return defined(obj[key], () => `No ${key}`)
-}

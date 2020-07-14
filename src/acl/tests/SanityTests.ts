@@ -1,18 +1,16 @@
-import {EntityDataSource} from "../../data/EntityDataSource";
+import {EntityDataSource} from "../../data/eds/EntityDataSource";
 import {TestConnection} from "../../data/tests/TestConnection";
 import {Group} from "../Group";
 import {User} from "../User";
-import arrayContaining = jasmine.arrayContaining;
-import objectContaining = jasmine.objectContaining;
 
 
-const connection = TestConnection([
+const getConnection = TestConnection([
     User,
     Group
 ]);
 
-const Users = EntityDataSource.create(User, {connection});
-const Groups = EntityDataSource.create(Group, {connection});
+const Users = EntityDataSource.create(User, {connection: getConnection});
+const Groups = EntityDataSource.create(Group, {connection: getConnection});
 
 let g1: string;
 let g2: string;
@@ -38,43 +36,57 @@ beforeAll(async () => {
             u2InGroup: {$has: {users: {$is: u2}}},
             u3InGroup: {$has: {users: {$is: u3}}},
         })
-        .query({})).items
+        .items())
+        .map(item => ({
+            ...item,
+            u1InGroup: !!item.u1InGroup,
+            u2InGroup: !!item.u2InGroup,
+            u3InGroup: !!item.u3InGroup,
+        }))
 });
 
-let items: any;
+let items: any[];
 
 it('$is', async () => {
-    const result = await Users.query({filter: {$is: [u1, u2]}});
-    expect(result).toEqual(objectContaining({
-        items: arrayContaining([
-            objectContaining({key: u1}),
-            objectContaining({key: u2}),
+    const result = await Users
+        .filter({$is: [u1, u2]})
+        .items();
+    expect(result).toEqual(
+        jasmine.arrayContaining([
+            jasmine.objectContaining({$key: u1}),
+            jasmine.objectContaining({$key: u2}),
         ])
-    }));
+    );
 
-    expect(result).not.toEqual(objectContaining({
-        items: arrayContaining([
-            objectContaining({key: u3}),
-        ])
-    }));
+    expect(result).not.toEqual(
+        jasmine.objectContaining(jasmine.arrayContaining([
+                jasmine.objectContaining({$key: u3}),
+            ])
+        ));
 })
 
 function assert(g: string, u: "u1" | "u2" | "u3", exists: boolean) {
-    expect(items).toEqual(arrayContaining([
-        objectContaining({
-            key: g, row: objectContaining({
-                [u + "InGroup"]: exists ? jasmine.truthy() : jasmine.falsy()
-            })
+
+
+    expect(items).toEqual(jasmine.arrayContaining([
+        jasmine.objectContaining({
+            $key: g,
+            ...{
+                [u + "InGroup"]:
+                exists
+            }
         })
     ]))
+
+
 }
 
-it('tryUndefined u1 in g1', () => assert(g1, "u1", true));
+it('expected u1 in g1', () => assert(g1, "u1", true));
 
-it('tryUndefined u2 in g1', () => assert(g1, "u2", true));
+it('expected u2 in g1', () => assert(g1, "u2", true));
 
-it('tryUndefined u3 not in g1', () => assert(g1, "u3", false));
+it('expected u3 not in g1', () => assert(g1, "u3", false));
 
-it('tryUndefined u2 not in g2', () => assert(g2, "u2", false));
+it('expected u2 not in g2', () => assert(g2, "u2", false));
 
-it('tryUndefined u3 not in g2', () => assert(g2, "u3", false));
+it('expected u3 not in g2', () => assert(g2, "u3", false));

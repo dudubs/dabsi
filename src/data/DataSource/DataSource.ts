@@ -1,46 +1,58 @@
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
 import {ArrayTypeOrObject, ExtractKeys} from "../../common/typings";
-import {JSONExp} from "../../json-exp/JSONExp";
-import {DataCursor, DataLoadMap} from "../DataCursor";
-import {DataItem} from "../DataItem";
-import {DataFindOptions, DataQuery, DataQueryResult} from "../DataQuery";
-
-export type DataValues<T> = Partial<T>;
-
+import {DataExp} from "../../json-exp/DataExp";
+import {DataCursor, RelationMap} from "../DataCursor";
+import {DataItem, DataKey, DataKeyInput} from "../DataItem";
+import {DataValues} from "./DataValues";
 
 export abstract class DataSource<T> {
 
-    abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
 
-    async getOrFail(key?: string): Promise<T> {
-        return defined(await this.get(key), () => `No row "${key}"`);
+    async countAndQuery(): Promise<[number, DataItem<T>[]]> {
+        // TODO: Optimizing
+        return [
+            await this.count(),
+            await this.items()
+        ]
     }
 
-    async get(key?: string): Promise<T | undefined> {
-        const result = await this.query({
-            filter: typeof key === "string" ? {$is: key} : undefined,
-            count: false,
-            take: 1
-        });
-        return result.items[0]?.row
+    // select(DataSelectionOld)
+
+    abstract items(): Promise<DataItem<T>[]>;
+
+    async* find(pageSize = 10): AsyncIterableIterator<DataItem<T>> {
+        let source: DataSource<T> = this;
+        while (true) {
+            const items = await source.items();
+            yield* items;
+            if (pageSize > items.length)
+                break;
+            source = source.skip(source.cursor.skip + pageSize);
+        }
     }
 
-    // query QueryProps => QueryResult
+    abstract count(): Promise<number>;
 
-    async insertItem(values: DataValues<T> = {}): Promise<DataItem<T>> {
-        return await this.getItemOrFail(await this.insert(values));
+    abstract has(): Promise<boolean>;
+
+    async getOrFail(key?: string | number): Promise<DataItem<T>> {
+        return defined(await this.get(key?.toString()),
+            () => `No row "${key}"`);
     }
 
-    abstract query(query?: DataQuery<T>): Promise<DataQueryResult<T>>;
+    async get(key?: string | number): Promise<DataItem<T> | undefined> {
+        if (typeof key === "number")
+            key = String(key)
+        const result = await this
+            .filter(typeof key === "string" ? {$is: key} : undefined)
+            .take(1)
+            .items();
+        return result[0]
+    }
 
-    abstract insert(values: DataValues<T>): Promise<string>;
-
-    abstract update(key: string, values: DataValues<T>): Promise<void>;
-
+    // relating
     abstract addAll(keys: string[]): Promise<void>;
-
-    abstract find(options?: DataFindOptions<T>): AsyncIterableIterator<DataItem<T>>;
 
     abstract removeAll(keys: string[]): Promise<void>;
 
@@ -70,54 +82,94 @@ export abstract class DataSource<T> {
         return this.removeAll(typeof keyOrKeys === "string" ? [keyOrKeys] : keyOrKeys)
     }
 
+    // writing
+
+    abstract insert(values: DataValues<T>): Promise<string>;
+
+    abstract update(key: DataKeyInput<T>, values: DataValues<T>): Promise<void>;
+
     abstract deleteAll(keys: string[]): Promise<void>;
 
-    delete(keyOrKeys: string | string[]) {
-        return this.deleteAll(typeof keyOrKeys === "string" ? [keyOrKeys] : keyOrKeys)
+    async insertAndGet(values: DataValues<T> = {}): Promise<DataItem<T>> {
+        return await this.getOrFail(await this.insert(values));
     }
 
-    abstract count(filter?: JSONExp<T>): Promise<number>;
+    async delete(keyOrKeys?: string | string[]) {
+        if (keyOrKeys) {
+            return this.deleteAll(typeof keyOrKeys === "string" ? [keyOrKeys] : keyOrKeys)
+        }
 
-    abstract has(filter?: JSONExp<T>): Promise<boolean>;
+        const keys: string[] = [];
+        for await (let row of this.select([]).find()) {
+            keys.push(row.$key);
 
-    async getItem(key?: string): Promise<DataItem<T> | undefined> {
-        if (typeof key === "string")
-            return {
-                key, row: await this.getOrFail(key),
+            if (keys.length > 10) {
+                await this.deleteAll(keys);
+                keys.length = 0;
             }
-        return (await this.query()).items[0]
+        }
+
+        if (keys.length)
+            await this.deleteAll(keys);
     }
 
-    async getItemOrFail(key?: string): Promise<DataItem<T>> {
-        return defined(await this.getItem(key), 'No item')
-    }
+
+    // cursoring
 
     abstract readonly cursor: DataCursor;
 
-    of<U>(propertyName: string & ExtractKeys<Required<T>, object>, value: string): DataSource<T> {
+    abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
+
+
+    of<K extends keyof T>(propertyName: string & K, value: DataKeyInput<T[K]>): DataSource<T> {
         return this.withCursor(
-            DataCursor.of(this.cursor, propertyName, value)
+            DataCursor.of(this.cursor, propertyName, DataKey(value))
         )
     }
 
-    at<K extends ExtractKeys<Required<T>, object>>(propertyName: string & K, key: string):
+    at<K extends ExtractKeys<Required<T>, object>>(
+        propertyName: string & K,
+        key: DataKeyInput<ArrayTypeOrObject<T[K]>>
+    ):
         DataSource<ArrayTypeOrObject<Required<T>[K]>> {
         return this.withCursor(
-            DataCursor.at(this.cursor, propertyName, key)
+            DataCursor.at(this.cursor, propertyName, DataKey(key))
         )
     }
 
 
-    load(loadMap: DataLoadMap<T>): DataSource<T> {
-        return this.loadOnly({...this.cursor.loadMap, ...loadMap})
+    load(relationMap: RelationMap<T>): DataSource<T> {
+        return this.loadOnly({...this.cursor.relationMap, ...relationMap})
     }
 
-    loadOnly(loadMap: DataLoadMap<T>): DataSource<T> {
+    loadOnly(relationMap: RelationMap<T>): DataSource<T> {
         return this.withCursor<T>({
             ...this.cursor,
-            loadMap
+            relationMap
         })
     }
+
+    skip(count: number): DataSource<T> {
+        return this.withCursor({...this.cursor, skip: count})
+    }
+
+    take(count: number): DataSource<T> {
+        return this.withCursor({...this.cursor, take: count})
+    }
+
+    noSort(): DataSource<T> {
+        return this.withCursor({...this.cursor, order: []})
+    }
+
+
+    sort(by: DataExp<T>, sort: "ASC" | "DESC", nulls?: "FIRST" | "LAST"): DataSource<T> {
+        return this.withCursor({
+            ...this.cursor, order:
+                [...this.cursor.order, {by, sort, nulls}]
+        })
+    }
+
+
 }
 
 

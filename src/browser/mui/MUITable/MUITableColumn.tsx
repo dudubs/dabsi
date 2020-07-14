@@ -1,15 +1,15 @@
-import {createStyles, TableCellProps} from "@material-ui/core";
+import {TableCellProps} from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import {makeStyles} from "@material-ui/styles";
 import clsx from "clsx";
 import {createElement} from "react";
 
-const useStyles = makeStyles(theme => createStyles({
+const useStyles = makeStyles({
     fitToContent: {
         width: '1%',
-        whiteSpace:'nowrap'
+        whiteSpace: 'nowrap'
     }
-}));
+});
 
 export type MuiTableColumnProps = TableCellProps & {
     fitToContent?: boolean,

@@ -1,107 +1,48 @@
-import {MapFactory, WeakMapFactory} from "../common/map/mapFactory";
-import {JSSchema, validateJSSchema, Validation} from "./JSONSchema";
-
-export const buildFieldMetadataSymbol = Symbol();
-
-declare global {
+import "reflect-metadata";
+import {touchMap} from "../common/map/touchMap";
+import {defined} from "../common/object/defined";
+import {FieldDecorator} from "./FieldDecorator";
 
 
-    interface Function {
-        [buildFieldMetadataSymbol]?(metadata: FieldMetadata<any>,
-                                    options: FieldOptions<any> | undefined,
-                                    type: Function | undefined): void;
-    }
-}
-
-export type FieldOptions<T> = {
-
-    validate?(value: any): Validation;
-
-    nullable?: boolean;
-
-    primaryKey?: boolean;
-
-    index?: string | boolean;
-
-    schema?: JSSchema;
-
-};
-
-export class FieldMetadata<T = any> {
-
-    constructor(
-        public target: Function,
-        public prop: string
-    ) {
-    }
-
-    validators = Array<(value: T) => Validation>();
-
-    createEmpty?(): any;
-
-    clone?(value: T): T;
-
-    configure(options: FieldOptions<any>) {
-        const {schema} = options;
-        schema && this.validators.push(value => validateJSSchema(schema, value));
-    }
-
-    validate(value): Validation {
-        if (value === null) {
-            // TODO
-        }
-        for (let validator of this.validators) {
-            const result = validator(value);
-            if (result)
-                return result;
-        }
-    }
-}
-
-export type FieldMetadataBuilder = (metadata: FieldMetadata) => void;
-
-export const getFieldMetadataBuilders = WeakMapFactory((target: Function) =>
-    MapFactory((prop: string) => Array<FieldMetadataBuilder>()));
-
-export const getFieldMetadata = WeakMapFactory((target: Function) => MapFactory((prop: string): FieldMetadata => {
-        const metadata = new FieldMetadata(target, prop);
-        for (const builder of getFieldMetadataBuilders.map.get(target)?.map.get(prop) || []) {
-            builder(metadata);
-        }
-        return metadata;
-    })
-)
-
-
-export function Field(type?: () => Function, options?: FieldOptions<any>): PropertyDecorator
-export function Field(options: () => FieldOptions<any>): PropertyDecorator
-export function Field(typeOrOptions?, maybeOptions?) {
-    return (target: Function, prop) => {
-        getFieldMetadataBuilders(target)(prop).push(
-            (metadata: FieldMetadata) => {
-
-                let type: Function | undefined = undefined;
-                let options: FieldOptions<any> | undefined;
-
-                if (typeof typeOrOptions === "function") {
-                    type = typeOrOptions;
-                    options = maybeOptions;
-                } else {
-                    options = typeOrOptions;
-                }
-
-                const designType = Reflect.getMetadata("design:type", target, prop);
-                if (designType) {
-                    designType[buildFieldMetadataSymbol]?.(metadata, options, type);
-                } else {
-                    type?.[buildFieldMetadataSymbol]?.(metadata, options, undefined);
-                }
-                options && metadata.configure(options);
-            }
-        );
-    }
+export type Field = {
+    target: Function,
+    propertyKey: string
 }
 
 
-// Array[getFieldOptions]
+export const targetToPropertyKeyToField = new WeakMap<Function, Map<string, Field>>();
+
+export function getField(target: Function, propertyKey: string): Field {
+    return defined(
+        targetToPropertyKeyToField.get(target)?.get(propertyKey),
+        () => `No field ${target.name}.${propertyKey}`
+    );
+}
+
+
+export function Field(
+    ...decorators: FieldDecorator[]
+): FieldDecorator {
+    return ({constructor: target}, propertyKey): void => {
+
+        for (let base = Object.getPrototypeOf(target);
+             typeof base === "function";
+             base = Object.getPrototypeOf(base)) {
+
+            if (targetToPropertyKeyToField.get(base)?.has(propertyKey))
+                throw new Error(`Can't override Field ${base.name}.${propertyKey} at ${target.name}.`)
+
+        }
+
+
+        const field = ({target, propertyKey});
+        touchMap(targetToPropertyKeyToField, target, () => new Map())
+            .set(propertyKey, field)
+
+        decorators.forEach(decorator => {
+            decorator(target, propertyKey)
+        })
+    }
+}
+
 

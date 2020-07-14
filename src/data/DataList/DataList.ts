@@ -1,11 +1,13 @@
 import {createElement, Fragment, ReactNode} from "react";
-import {DataFields} from "../DataFields";
-import {DataItem} from "../DataItem";
-import {DataOrder} from "../DataQuery";
+import {DataItem, DataKey} from "../DataItem";
+import {DataOrder} from "../DataOrder";
 import {AbstractDataList, AbstractDataListProps} from "./AbstractDataList";
 
 export type DataListProps<T> = AbstractDataListProps<T> & {
-    renderItem(props: DataItem<T> & { list: DataList<T>, index: number }): ReactNode;
+    renderItem(props: {
+        item: DataItem<T>,
+        list: DataList<T>, index: number
+    }): ReactNode;
 };
 
 export class DataList<T> extends AbstractDataList<T, DataListProps<T>> {
@@ -14,9 +16,9 @@ export class DataList<T> extends AbstractDataList<T, DataListProps<T>> {
         return createElement(Fragment, {
             children: this.items.map((item, index) => {
                 return createElement(Fragment, {
-                    key: item.key,
+                    key: DataKey(item),
                     children: this.props.renderItem({
-                        ...item,
+                        item,
                         list: this,
                         index,
                     })

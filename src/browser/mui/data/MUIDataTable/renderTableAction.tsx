@@ -1,6 +1,6 @@
 import React from "react";
 import {MuiConfirmDialog} from "../../../../../browser/src/sections/orders/views/mui/MuiConfirmDialog";
-import {DataItem} from "../../../../data/DataItem";
+import {DataItem, DataKey} from "../../../../data/DataItem";
 import {getTableActionKey} from "../../../../data/DataTable";
 import {Lang} from "../../../../localization/Lang";
 import {ModalStack, ModalStackContext} from "../../../../react/ModalStack";
@@ -84,6 +84,6 @@ export function MuiDataTableAction(props: {
             )) {
                 return;
             }
-            await table.executeSingleAction(action, props.item.key);
+            await table.executeSingleAction(action, DataKey(props.item));
         })}/>
 }

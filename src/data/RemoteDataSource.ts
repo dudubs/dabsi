@@ -1,16 +1,14 @@
-import {AwaitableType} from "../common/typings";
-import {JSONExp} from "../json-exp/JSONExp";
+import {AwaitableType, Type} from "../common/typings";
 import {RPC} from "../rpc/RPC";
-import {DataCursor} from "./DataCursor";
-import {DataItem} from "./DataItem";
-import {DataFindOptions, DataQuery, DataQueryResult} from "./DataQuery";
+import {DataCursor, EmptyDataCursor} from "./DataCursor";
+import {DataItem, DataKey, DataKeyInput} from "./DataItem";
 import {DataSource, DataValues} from "./DataSource";
 
 
 export type RemoteDataSourceMethod = Extract<keyof DataSource<any>, keyof {
     has,
     count,
-    query,
+    items
     insert,
     update,
     addAll,
@@ -36,7 +34,7 @@ export type RemoteDataSourceData<T, Method extends RemoteDataSourceMethod> = {
 
 export type RemoteDataSourceHandler<T> =
     <Method extends RemoteDataSourceMethod>(
-        data: RemoteDataSourceData<T, Method>
+        payload: RemoteDataSourceData<T, Method>
     ) =>
         Promise<AwaitableType<ReturnType<DataSource<T>[Method]>>>;
 
@@ -50,7 +48,9 @@ export function RemoteDataSource<T>(): RemoteDataSource<T> {
             return new RemoteDataSourceConnection<T>(handler)
         },
         handle: source => {
+
             return ({method, cursor, args}) => {
+                // TODO: more safety code.
                 cursor = DataCursor.concat(source.cursor, cursor);
                 return (<any>(source.withCursor(cursor)[method]))(...args);
             }
@@ -62,7 +62,7 @@ export class RemoteDataSourceConnection<T> extends DataSource<T> {
 
     constructor(
         public fetch: (data: RemoteDataSourceCommandIn) => Promise<any>,
-        public cursor: DataCursor = DataCursor.create()
+        public cursor: DataCursor = EmptyDataCursor
     ) {
         super();
     }
@@ -72,13 +72,16 @@ export class RemoteDataSourceConnection<T> extends DataSource<T> {
         return this.fetch({cursor: this.cursor, method, args})
     }
 
+    items(): Promise<DataItem<T>[]> {
+        return this.command('items', [])
+    }
 
     addAll(keys: string[]): Promise<void> {
         return this.command("addAll", [keys])
     }
 
-    count(filter?: JSONExp<T>): Promise<number> {
-        return this.command("count", [filter]);
+    count(): Promise<number> {
+        return this.command("count", []);
     }
 
 
@@ -86,28 +89,21 @@ export class RemoteDataSourceConnection<T> extends DataSource<T> {
         return this.command("deleteAll", [keys]);
     }
 
-    has(filter: JSONExp<T>): Promise<boolean> {
-        return this.command("has", [filter]);
+    has(): Promise<boolean> {
+        return this.command("has", []);
     }
 
     insert(values: DataValues<T>): Promise<string> {
         return this.command("insert", [values]);
     }
 
-    async* find(options: DataFindOptions<T> = {}): AsyncIterableIterator<DataItem<T>> {
-        yield* (await this.query({...options, count: false})).items
-    }
-
-    query(query?: DataQuery<T>): Promise<DataQueryResult<T>> {
-        return this.command("query", [query]);
-    }
 
     removeAll(keys: string[]): Promise<void> {
         return this.command("removeAll", [keys]);
     }
 
-    update(key: string, values: DataValues<T>): Promise<void> {
-        return this.command("update", [key, values]);
+    update(key: DataKeyInput<T>, values: DataValues<T>): Promise<void> {
+        return this.command("update", [DataKey(key), values]);
     }
 
     withCursor<T>(cursor: DataCursor): DataSource<T> {

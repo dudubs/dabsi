@@ -1,12 +1,12 @@
 import {touchMap} from "../common/map/touchMap";
-import {ExtractKeys, PickByValue, Union} from "../common/typings";
+import {Union} from "../common/typings";
 import {EventArgs} from "./EventArgs";
 import {EventCallback} from "./EventCallback";
 
 
 export type EventObject<T> = Union<{
     [K in keyof T]:
-    { type: string & K, data: EventArgs<T[K]> }
+    { type: string & K, args: EventArgs<T[K]> }
 }>;
 export type EventListener<T> = (event: EventObject<T>) => void;
 
@@ -45,7 +45,7 @@ export class EventBinder<T> {
 
     emit<K extends keyof T>(key: string & K, ...args: EventArgs<T[K]>): this {
 
-        const event = {type: key, data: args};
+        const event = {type: key,  args};
 
         for (let listener of this.listeners) {
             listener(<any>event);
@@ -54,6 +54,14 @@ export class EventBinder<T> {
             callback(...args)
         })
         return this;
+    }
+
+    wait<K extends keyof T>(key: string & K): Promise<EventArgs<T[K]>> {
+        return new Promise(resolve => {
+            this.once(key, (...args) => {
+                resolve(args)
+            })
+        })
     }
 
 

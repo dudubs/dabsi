@@ -38,6 +38,7 @@ describe("RDS", () => {
         })
     })
 
+    // console.log("--- uncomment");
     DataSourceTests(RDSTesters.A, RDSTesters.B, RDSTesters.C)
 });
 

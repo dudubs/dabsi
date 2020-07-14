@@ -14,16 +14,28 @@ declare module "./DataSource" {
 DataSource.prototype.extend = extend;
 
 function extend<T, K extends keyof T, Fields extends DataFields<T>>
-(this: DataSource<T>, keys: K[], fields: Fields):
+(
+    this: DataSource<T>,
+    keys: K[],
+    fields: Fields
+):
     DataSource<Omit<T, K> & DataRow<T, Fields>>
 // select * exclude keys
+
 function extend<T, K extends keyof T>
-(this: DataSource<T>, keys: K[]):
+(
+    this: DataSource<T>,
+    keys: K[]
+):
     DataSource<Omit<T, K>>
 // select * with fields
-function extend<T, Fields extends DataFields<T>>
-(this: DataSource<T>, fields: Fields):
+
+function extend<T, Fields extends DataFields<T>>(
+    this: DataSource<T>,
+    fields: Fields
+):
     DataSource<T & DataRow<T, Fields>>
+
 function extend(this: DataSource<any>,
                 keysOrFields: string[] | DataFields<any>,
                 maybeFields?: DataFields<any>): DataSource<any> {

@@ -257,9 +257,9 @@ E
     );
 
     function mapContaining(values: string[] = [], children = {}) {
-        return objectContaining({
-            values: arrayContaining(values),
-            children: objectContaining(children)
+        return jasmine.objectContaining({
+            values: jasmine.arrayContaining(values),
+            children: jasmine.objectContaining(children)
         })
     }
 })

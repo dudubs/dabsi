@@ -4,10 +4,10 @@ import {DataCursor} from "../DataCursor";
 import {DataFields, DataRow} from "../DataFields";
 import {DataSource} from "./DataSource";
 import {parseSelectArgs} from "./parseSelectArgs";
-import translateFields = DataCursor.translateFields;
 
 /// DataSelector
 declare module "./DataSource" {
+
     interface DataSource<T> {
         select: typeof select;
     }
@@ -39,7 +39,7 @@ function select(this: DataSource<any>,
     return this.withCursor(
         DataCursor.extend(
             DataCursor.pick(this.cursor, keys),
-            DataCursor.translateFields(this.cursor,fields)
+            DataCursor.translateFields(this.cursor, fields)
         )
     )
 }

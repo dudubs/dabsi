@@ -1,11 +1,16 @@
 export * from "./Router";
-export * from "./RouterLocation";
-export * from "./Route";
-export * from "./RouterPlugin";
-import "./RouterContext";
-import "./RouterInstance";
-import "./RouterOptions";
+export * from "./location/RouterLocation";
+export * from "./route/Route";
+export * from "./plugin";
+export * from "./route";
 
-import "./RouterAt";
-import "./RouterPlugin";
-import "./RouterContext";
+export {createLocation} from "./location/createLocation";
+export {createRouterLocation} from "./location/createRouterLocation";
+
+
+
+import "./at";
+import "./context";
+import "./instance";
+import "./options";
+import "./plugin";

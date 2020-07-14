@@ -12,7 +12,7 @@ export class CallbacksTester {
 
 }
 
-fit('merge callbacks', async () => {
+it('merge callbacks', async () => {
     const w1 = Waiter<number>();
     const w2 = Waiter<number>();
     mergeProp(() => {
@@ -24,14 +24,14 @@ fit('merge callbacks', async () => {
     expect(await w2).toEqual(2);
 });
 
-fit('merge string', () => {
+it('merge string', () => {
     expect(mergeProp("hello", "world")).toEqual("hello world");
 });
 
-fit('custom merger', () => {
+it('custom merger', () => {
     expect(mergeProps(<P>{
         className: "hello"
     }, {
         className: {$merge: s => s?.toUpperCase()}
-    })).toEqual(objectContaining({className: "HELLO"}));
+    })).toEqual(jasmine.objectContaining({className: "HELLO"}));
 })

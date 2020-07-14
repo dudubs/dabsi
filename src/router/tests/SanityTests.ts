@@ -1,6 +1,5 @@
-import {Route, Router, RouterLocation} from "..";
-import {getNextPath} from "../getNextPath";
-import objectContaining = jasmine.objectContaining;
+import {createRouterRoute, Router, createRouterLocation} from "..";
+import {getNextPath} from "../utils/getNextPath";
 
 
 const hello = "world";
@@ -9,15 +8,15 @@ const TestRouter = Router
     .route("child", Router.route("sub-child"));
 
 
-it('tryUndefined to self-extend', () => {
+it('expected to self-extendRoute', () => {
     expect(TestRouter.hello).toEqual(hello);
 });
 
-it('tryUndefined to child-extend', () => {
+it('expected to child-extendRoute', () => {
     expect(TestRouter.at("child").hello).toEqual(hello);
 })
 
-it('tryUndefined to sub-child-extend', () => {
+it('expected to sub-child-extendRoute', () => {
     expect(TestRouter.at("child").at("sub-child").hello).toEqual(hello);
 });
 
@@ -55,7 +54,7 @@ describe('extending', () => {
     });
 
     const instance = {beforeInstance: before, afterInstance: after};
-    const location = RouterLocation(router, {instance});
+    const location = createRouterLocation(router, {instance});
 
 
     it('location', () => assertLocation(location));
@@ -63,7 +62,7 @@ describe('extending', () => {
     const childRouter = router.at("child");
     it('child', () => assertRouter(childRouter));
 
-    const route = Route(router, {instance});
+    const route = createRouterRoute(router, {instance});
     it('route', () => assertRoute(route));
 
     const childLocation = location.at("child");
@@ -82,12 +81,12 @@ describe('extending', () => {
     it('childRoute', () => assertRoute(subChildRoute));
 
     function assertInstance(obj) {
-        expect(obj).toEqual(objectContaining(instance));
+        expect(obj).toEqual(jasmine.objectContaining(instance));
     }
 
     function assertLocation(obj) {
         assertInstance(obj);
-        expect(obj).toEqual(objectContaining({
+        expect(obj).toEqual(jasmine.objectContaining({
             afterLocation: after,
             beforeLocation: before
         }));
@@ -95,14 +94,14 @@ describe('extending', () => {
 
     function assertRoute(obj) {
         assertInstance(obj);
-        expect(obj).toEqual(objectContaining({
+        expect(obj).toEqual(jasmine.objectContaining({
             afterRoute: after,
             beforeRoute: before
         }));
     }
 
     function assertRouter(obj) {
-        expect(obj).toEqual(objectContaining({after, before}));
+        expect(obj).toEqual(jasmine.objectContaining({after, before}));
     }
 
 });

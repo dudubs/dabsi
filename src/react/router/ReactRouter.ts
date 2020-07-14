@@ -1,10 +1,10 @@
 import {History} from "history";
 import {ReactNode} from "react";
 import {WeakMapFactory} from "../../common/map/mapFactory";
-import {definedAt} from "../../common/object/defined";
+import {definedAt} from "../../common/object/definedAt";
 import {AnyRouter, Route, Router, RouterWithRouterType, RouterWithRouteType} from "../../router";
-import {RouterWithInstanceType} from "../../router/RouterInstance";
-import {RouterWithOptions} from "../../router/RouterOptions";
+import {RouterWithInstanceType} from "../../router/instance";
+import {RouterWithOptions} from "../../router/options";
 import {withHooks} from "../utils/withHooks";
 import {getRoutePath} from "./getRoutePath";
 

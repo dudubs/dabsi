@@ -1,9 +1,10 @@
+import {Seq} from "immutable";
 import {Component, Context, createElement, ReactNode} from "react";
 import {assert} from "../../common/assert";
 import {Waiter} from "../../common/async/Waiter";
 import {WeakMapFactory} from "../../common/map/mapFactory";
 import {Lazy} from "../../common/patterns/lazy";
-import {ContextOrType} from "../utils/ContextOrType";
+import {toIndexedSeq} from "../../data/asyncIterableToArray";
 
 export const getViewMetadataBuilders = WeakMapFactory(() =>
     Array<(metadata: ViewMetadata) => void>());
@@ -36,21 +37,21 @@ export const getViewMetadata = WeakMapFactory((view: View<any>): ViewMetadata =>
     return metadata;
 });
 
-export type ForwardContextOrType<T> = ContextOrType<T> | (() => ContextOrType<T>);
+// export type ForwardContextOrType<T> = ContextOrType<T> | (() => ContextOrType<T>);
 
-export function ViewContext<T>(
-    contextOrType: ForwardContextOrType<T>
-) {
-    return function <K extends string>(target: View<any> & Record<K, T>, key: K) {
-        getViewMetadataBuilders(target).push(metadata => {
-            const isForward = ((typeof contextOrType === "function") && !contextOrType.prototype);
-            metadata.contexts.set(key, ContextOrType(
-                isForward ? (<() => ContextOrType<any>>contextOrType)() :
-                    contextOrType
-            ));
-        })
-    }
-}
+// export function ViewContext<T>(
+//     contextOrType: ForwardContextOrType<T>
+// ) {
+//     return function <K extends string>(target: View<any> & Record<K, T>, key: K) {
+//         getViewMetadataBuilders(target).push(metadata => {
+//             const isForward = ((typeof contextOrType === "function") && !contextOrType.prototype);
+//             metadata.contexts.set(key, ContextOrType(
+//                 isForward ? (<() => ContextOrType<any>>contextOrType)() :
+//                     contextOrType
+//             ));
+//         })
+//     }
+// }
 
 
 export function BeforeRenderView() {
@@ -92,7 +93,7 @@ export function AfterUpdateView(): MethodDecorator {
 }
 
 
-export function BeforeMountView(): MethodDecorator {
+export function BeforeUnmountView(): MethodDecorator {
     return function (target, method, desc) {
         assert(typeof desc.value === "function");
         assert(typeof method === "string");
@@ -107,6 +108,7 @@ export abstract class View<P = {}> extends Component<P, any> {
 
     // @BeforeRender
 
+
     abstract renderView(): ReactNode;
 
     didMount = false;
@@ -119,6 +121,7 @@ export abstract class View<P = {}> extends Component<P, any> {
 
     metadata: ViewMetadata =
         getViewMetadata(Object.getPrototypeOf(this));
+
 
     componentDidMount() {
         this.didMount = true;
@@ -133,7 +136,6 @@ export abstract class View<P = {}> extends Component<P, any> {
             this[method]();
         }
     }
-
 
     private _updateWaiters: Waiter<void>[] = [];
 

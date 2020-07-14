@@ -1,4 +1,4 @@
-import {AEntity, BEntity, getABCTestConnection} from "../../relations/tests/Entities";
+import {AEntity, BEntity, getEntityTestConnection} from "../../relations/tests/Entities";
 import {useQueryBuilderExp} from "../useQueryBuilderExp";
 import objectContaining = jasmine.objectContaining;
 
@@ -7,8 +7,8 @@ useQueryBuilderExp();
 
 it('$at', async () => {
 
-    const ar = getABCTestConnection().getRepository(AEntity);
-    const br = getABCTestConnection().getRepository(BEntity);
+    const ar = getEntityTestConnection().getRepository(AEntity);
+    const br = getEntityTestConnection().getRepository(BEntity);
     const [a] = await ar.save([ar.create()]);
     const [b] = await br.save([br.create({aOwner: a})]);
 
@@ -29,8 +29,8 @@ it('$at', async () => {
 
     async function assertRelation(repository, entity, relationPropertyName, idPropertyName) {
         expect(await repository.findOne(entity, {relations: [relationPropertyName]}))
-            .toEqual(objectContaining({
-                [relationPropertyName]: objectContaining({
+            .toEqual(jasmine.objectContaining({
+                [relationPropertyName]: jasmine.objectContaining({
                     [idPropertyName]: jasmine.any(String)
                 })
             }));

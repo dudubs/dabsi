@@ -13,7 +13,7 @@ import {User} from "../../acl/User";
 
 @Entity()
 @TableInheritance({column: "type"})
-export class TestMessage extends BaseEntity {
+export class TestMessage  {
     @PrimaryGeneratedColumn()
     id: number;
 

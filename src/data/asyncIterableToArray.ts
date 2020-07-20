@@ -1,5 +1,3 @@
-import {Seq} from "immutable";
-
 export async function asyncIterableToArray<T>(
     iterator: AsyncIterable<T>
 ): Promise<T[]> {
@@ -11,18 +9,3 @@ export async function asyncIterableToArray<T>(
 }
 
 
-export function toIndexedSeq<T>(
-    item: T | undefined,
-    getNextItem: (item: T) => T | undefined
-): Seq.Indexed<T> {
-
-    return Seq.Indexed(flat())
-
-    function* flat() {
-        while (typeof item !== "undefined") {
-            yield item;
-            item = getNextItem(item);
-        }
-
-    }
-}

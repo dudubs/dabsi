@@ -73,6 +73,13 @@ export class RemoteDataSourceConnection<T> extends DataSource<T> {
     }
 
     items(): Promise<DataItem<T>[]> {
+        /*
+
+            map items .. item =>
+
+                DataUnion.compress
+
+         */
         return this.command('items', [])
     }
 

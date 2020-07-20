@@ -8,7 +8,7 @@ declare module "./User" {
 }
 
 @Entity()
-export class UserFriend extends BaseEntity {
+export class UserFriend  {
 
     @ManyToOne(() => User, user => user.friends)
     user: User;

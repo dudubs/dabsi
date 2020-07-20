@@ -3,7 +3,7 @@ import {Group} from "./Group";
 
 
 @Entity()
-export class User extends BaseEntity {
+export class User  {
 
     @PrimaryGeneratedColumn()
     id: number;

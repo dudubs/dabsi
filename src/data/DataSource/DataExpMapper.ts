@@ -1,4 +1,4 @@
-import {DataExp, StringDataExp, NamedCompareOperator, Parameter} from "../../json-exp/DataExp";
+import {DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../json-exp/DataExp";
 import {DataExpTranslator} from "../../json-exp/DataExpTranslator";
 
 export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
@@ -6,6 +6,14 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
     True: DataExp<T> = true;
 
     Null: DataExp<T> = null;
+
+    translateHasExp(propertyName: string, subExp: DataExp<any>): DataExp<T> {
+        return <DataExp<any>>{$has: subExp !== undefined ? {[propertyName]: subExp} : propertyName};
+    }
+
+    translateAs(unionKey: string, exp: DataExp<any>): DataExp<T> {
+        return <DataExp<any>>{$as: {[unionKey]: exp}}
+    }
 
     translateIfNull(exp: DataExp<T>, alt_value: DataExp<T>): DataExp<T> {
         return {$ifNull: [exp, alt_value]};
@@ -15,16 +23,12 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
         return {$if: [condition, expIfTrue, expIfFalse]};
     }
 
-    translateIsNull(exp: DataExp<T>): DataExp<T> {
-        return {$isNull: exp};
+    translateIsNull(inverse: boolean, exp: DataExp<T>): DataExp<T> {
+        return inverse ? {$isNotNull: exp} : {$isNull: exp};
     }
 
-    translateIsNotNull(exp: DataExp<T>): DataExp<T> {
-        return {$isNotNull: exp};
-    }
-
-    translateIs(key: string): DataExp<T> {
-        return {$is: key}
+    translateIs(inverse: boolean, keys: string[]): DataExp<T> {
+        return inverse ? {$isNot: keys} : {$is: keys}
     }
 
     translateAnd(exps: DataExp<T>[]): DataExp<T> {
@@ -47,12 +51,11 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
         return {$concat: exps};
     }
 
-    translateCountExp(key: string, where: DataExp<any>, /*TODO: translateHasExp */maxCount: number): DataExp<T> {
-
-        return {
-            $count: where ? <any>{
-                [key]: where
-            } : key
+    translateCountExp(propertyName: string, subExp: DataExp<any>): DataExp<T> {
+        return <DataExp<any>>{
+            $count: subExp !== undefined ?
+                {[propertyName]: subExp} :
+                propertyName
         };
     }
 
@@ -60,23 +63,8 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
         return key;
     }
 
-    translateFromExp(key: string, take: DataExp<any>, where: DataExp<any>): DataExp<T> {
-        return {
-            $from: <any>{
-                [key]: {
-                    take,
-                    where
-                }
-            }
-        };
-    }
-
-    translateIn(where: DataExp<T>, values: DataExp<T>[]): DataExp<T> {
-        return [where, "$in", values];
-    }
-
-    translateNotIn(where: DataExp<T>, values: DataExp<T>[]): DataExp<T> {
-        return [where, "$notIn", values];
+    translateIn(inverse: boolean, where: DataExp<T>, values: DataExp<T>[]): DataExp<T> {
+        return [where, inverse ? "$notIn" : "$in", values];
     }
 
     translateLength(exp: DataExp<T>): DataExp<T> {

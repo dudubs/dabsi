@@ -5,39 +5,42 @@ import {ExpressTester} from "./ExpressTests";
 
 
 //
+testm(__filename, () => {
 
-const TestCommand = Command<[number, number], number>();
+    const TestCommand = Command<[number, number], number>();
 
-const TestService = Service({test: TestCommand});
+    const TestService = Service({test: TestCommand});
 
-function fetchExpressTesterJson(payload) {
-    return ExpressTester.fetchJSON(payload);
-}
+    function fetchExpressTesterJson(payload) {
+        return ExpressTester.fetchJSON(payload);
+    }
 
-it('command', async () => {
+    it('command', async () => {
 
-    ExpressTester.setExpressHandler(
-        ExpressRPCHandler(
-            TestCommand.handle((a, b) => a + b)
-        )
-    );
+        ExpressTester.setExpressHandler(
+            ExpressRPCHandler(
+                TestCommand.handle((a, b) => a + b)
+            )
+        );
 
-    expect(await TestCommand
-        .connect(fetchExpressTesterJson)
-        (1, 2)
-    ).toEqual(3);
-})
+        expect(await TestCommand
+            .connect(fetchExpressTesterJson)
+            (1, 2)
+        ).toEqual(3);
+    })
 
 
-it('service', async () => {
-    ExpressTester.setExpressHandler(
-        ExpressRPCHandler(TestService.handle({
-            test: (a, b) => a + b
-        }))
-    );
+    it('service', async () => {
+        ExpressTester.setExpressHandler(
+            ExpressRPCHandler(TestService.handle({
+                test: (a, b) => a + b
+            }))
+        );
 
-    expect(await TestService
-        .connect(fetchExpressTesterJson)
-        .test(1, 2)
-    ).toEqual(3);
+        expect(await TestService
+            .connect(fetchExpressTesterJson)
+            .test(1, 2)
+        ).toEqual(3);
+    })
+
 })

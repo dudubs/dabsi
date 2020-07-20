@@ -12,4 +12,3 @@ export function mapObject<T, R>(
     return out;
 }
 
-

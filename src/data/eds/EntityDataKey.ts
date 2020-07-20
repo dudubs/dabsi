@@ -12,7 +12,7 @@ export namespace EntityDataKey {
         if (metadata.primaryColumns.length === 1) {
             return {[metadata.primaryColumns[0].propertyName]: text}
         } else {
-            return EntityDataKey.fromEntity(
+            return fromEntity(
                 metadata,
                 KeyObject.parse(text)
             )
@@ -40,50 +40,50 @@ export namespace EntityDataKey {
     }
 
 
-    export function load(
-        metadata: EntityMetadata,
-        keyPropertyNameToAliasName: Record<string, string>,
-        selector: QueryBuilderSelector,
-        raw: Record<string, any>,
-    ): string {
-        if (metadata.primaryColumns.length === 1) {
-            const [column] = metadata.primaryColumns;
-            return String(
-                selector.load(raw,
-                    keyPropertyNameToAliasName[column.propertyName]
-                )
-            )
-        } else {
-            return KeyObject.stringify(
-                mapObject(keyPropertyNameToAliasName, aliasName =>
-                    selector.load(
-                        raw,
-                        keyPropertyNameToAliasName[aliasName]
-                    )
-                )
-            )
-        }
-    }
-
-    export function select(
-        metadata: EntityMetadata,
-        selector: QueryBuilderSelector,
-        schema: string
-    ): (raw: object) => string {
-        const keyAliasNamePrefix = schema + '__key_';
-        const keyPropertyNameToAliasName: Record<string, string> = {};
-        for (const column of metadata.primaryColumns) {
-            const keyAliasName = keyAliasNamePrefix + column.propertyName;
-            keyPropertyNameToAliasName[column.propertyName] = keyAliasName;
-            selector.select(column.databaseName, keyAliasName, schema)
-        }
-
-        return raw => load(
-            metadata,
-            keyPropertyNameToAliasName,
-            selector,
-            raw
-        )
-    }
+    // export function load(
+    //     metadata: EntityMetadata,
+    //     keyPropertyNameToAliasName: Record<string, string>,
+    //     selector: QueryBuilderSelector,
+    //     raw: Record<string, any>,
+    // ): string {
+    //     if (metadata.primaryColumns.length === 1) {
+    //         const [column] = metadata.primaryColumns;
+    //         return String(
+    //             selector.load(raw,
+    //                 keyPropertyNameToAliasName[column.propertyName]
+    //             )
+    //         )
+    //     } else {
+    //         return KeyObject.stringify(
+    //             mapObject(keyPropertyNameToAliasName, aliasName =>
+    //                 selector.load(
+    //                     raw,
+    //                     keyPropertyNameToAliasName[aliasName]
+    //                 )
+    //             )
+    //         )
+    //     }
+    // }
+    //
+    // export function select(
+    //     metadata: EntityMetadata,
+    //     selector: QueryBuilderSelector,
+    //     schema: string
+    // ): (raw: object) => string {
+    //     const keyAliasNamePrefix = schema + '__key_';
+    //     const keyPropertyNameToAliasName: Record<string, string> = {};
+    //     for (const column of metadata.primaryColumns) {
+    //         const keyAliasName = keyAliasNamePrefix + column.propertyName;
+    //         keyPropertyNameToAliasName[column.propertyName] = keyAliasName;
+    //         selector.select(column.databaseName, keyAliasName, schema)
+    //     }
+    //
+    //     return raw => load(
+    //         metadata,
+    //         keyPropertyNameToAliasName,
+    //         selector,
+    //         raw
+    //     )
+    // }
 
 }

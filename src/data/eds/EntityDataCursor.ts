@@ -77,7 +77,7 @@ export namespace EntityDataCursor {
             );
             for (let [propertyName, value] of entries(childKeys)) {
 
-                if (metadata.propertyNamesWithRelation.has(propertyName)) {
+                if (propertyName in metadata.propertyNameToRelationMetadata) {
                     const relation = new EntityRelation(connection, entityType,
                         propertyName, false, value);
                     relations.push(relation);

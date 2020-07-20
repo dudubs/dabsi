@@ -5,15 +5,15 @@ import {assert} from "../../common/assert";
 import {definedAt} from "../../common/object/definedAt";
 import {entries} from "../../common/object/entries";
 import {Awaitable} from "../../common/typings";
-import {translateQbDataExp} from "../../typeorm/exp/translateQbDataExp";
+import {QbDataExpTranslator} from "../../typeorm/exp/QbDataExpTranslator";
 import {EntityRelation} from "../../typeorm/relations";
 import {DataSelection} from "../DataSelection";
 import {KeyObject} from "../KeyObject";
 import {ArrayKey} from "./ArrayKey";
-import {filterByArrayKeys} from "./filterByArrayKeys";
+import {filterJoinColumnsByArrayKeys} from "./filterJoinColumnsByArrayKeys";
 import {getEntityDataInfo} from "./getEntityDataInfo";
+import {getSchemaMetadata} from "./getSchemaMetadata";
 import {QueryBuilderSelector} from "./QueryBuilderSelector";
-import {getEntityMetadataFromQueryBuilder} from "./getEntityMetadataFromQueryBuilder";
 
 
 export namespace EntityDataSelection {
@@ -27,32 +27,20 @@ export namespace EntityDataSelection {
         contexts: RowContext[]
     };
 
-    export function selectRoot<T>(
-        qb: SelectQueryBuilder<T>,
-        selection: DataSelection<T>
-    ) {
-
-        return select(qb,
-            new QueryBuilderSelector(qb),
-            <DataSelection<any>>selection,
-            qb.alias,
-            '_'
-        )
-    }
 
     export function select(
         qb: SelectQueryBuilder<any>,
         selector: QueryBuilderSelector,
         selection: DataSelection<any>,
         schema: string,
-        prefix: string,
+        prefix: string
     ) {
         const loaders: ((context: RowContext) => void)[] = [];
 
         const relationLoaders: ((context: RowsContext) =>
             Promise<(context: RowContext) => void>)[] = [];
 
-        const entityMetadata = getEntityMetadataFromQueryBuilder(qb, schema);
+        const entityMetadata = getSchemaMetadata(qb, schema);
         const entityDataInfo = getEntityDataInfo(entityMetadata);
 
         const hasPick = 'pick' in selection;
@@ -71,6 +59,10 @@ export namespace EntityDataSelection {
             selector.select(column.databaseName, prefix + 'key_' + column.propertyName,
                 schema)
         )
+
+
+        // TODO: if "type" column of TableInheritable is not excluded,
+        // select also subtypes columns
 
         if (!omitAll) {
             for (const column of entityDataInfo.dataColumns) {
@@ -92,11 +84,11 @@ export namespace EntityDataSelection {
         // if fields is {...}
         for (const [propertyName, exp] of entries(selection.fields)) {
             if (propertyName in entityDataInfo.propertyNameToRelationMetadata) {
-                throw new Error(`Can't overide relation by field "${propertyName}".`)
+                throw new Error(`Can't override relation by field "${propertyName}".`)
             }
 
             const loader = selector.select(
-                translateQbDataExp(qb, exp),
+                QbDataExpTranslator.translate(qb, exp),
                 prefix + propertyName
             )
             loaders.push(context => {
@@ -193,9 +185,8 @@ export namespace EntityDataSelection {
 
         return {
             getRowContext,
-            loadMany,
+            getRows,
             getRowsContext,
-            loadOne,
             primaryColumnsLoaders
         }
 
@@ -221,7 +212,7 @@ export namespace EntityDataSelection {
         }
 
 
-        async function loadMany() {
+        async function getRows() {
             const context = await getRowsContext(
                 await qb.getRawMany()
             );
@@ -229,13 +220,6 @@ export namespace EntityDataSelection {
             return context.rows
         }
 
-
-        async function loadOne() {
-            const row = {};
-            const rowKey = await getRowContext(row, await qb.getRawOne());
-            // await loadRelations([rowKey], [row])
-            throw new Error()
-        }
 
         async function loadRelations(context: RowsContext) {
             const loaders:
@@ -323,7 +307,7 @@ export namespace EntityDataSelection {
         }
 
         qb.andWhere(
-            filterByArrayKeys(qb, entityMetadata,
+            filterJoinColumnsByArrayKeys(qb, entityMetadata,
                 joinSchema,
                 joinColumns,
                 keys)
@@ -367,12 +351,13 @@ export namespace EntityDataSelection {
         if (sqlFilter || selection.order) {
 
             const sqlOrder = selection.order?.map(order => {
-                return `${translateQbDataExp(qb, order.by)}${
+                return `${QbDataExpTranslator.translate(qb, order.by)}${
                     ((order.sort === "ASC") || (order.sort === "DESC")) ?
                         ` ${order.sort}` : ""
                 }${
-                    ((order.nulls === "FIRST") || (order.nulls === "LAST")) ?
-                        ` NULLS ${order.nulls}` : ""
+                    order.nulls === "FIRST" ? "NULLS FIRST" :
+                        order.nulls === "LAST" ? "NULLS LAST" :
+                            undefined
                 }`
             }).join(", ")
 
@@ -406,3 +391,9 @@ export namespace EntityDataSelection {
         return rowKey => ArrayKey.getArray(keyToSubRows, rowKey) || []
     }
 }
+
+
+/*
+
+
+ */

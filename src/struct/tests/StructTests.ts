@@ -11,12 +11,12 @@ describe('createStruct', () => {
 
     const A = createClass()
 
-    it('expect A have fields', () => {
+    it('expect ABase have fields', () => {
         expect(hasFields(A)).toBeTruthy();
     })
 
 
-    it('expect A.xs create empty string', () => {
+    it('expect ABase.xs create empty string', () => {
 
         expect(createStruct(createClass(Optional())))
             .toEqual(<any>{});

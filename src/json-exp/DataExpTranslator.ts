@@ -1,14 +1,14 @@
 import {firstDefinedEntry} from "../common/object/firstDefinedEntry";
 import {mapObjectToArray} from "../common/object/mapObjectToArray";
 import {
-
     Comparator,
+    CompareOperator,
     DataExp,
     DataExpOperatorsTypes,
+    NamedCompareOperator,
     Parameter,
-    CompareOperator,
     StringDataExp,
-    NamedCompareOperator, SymbolicCompareOperator,
+    SymbolicCompareOperator,
 } from "./DataExp";
 
 const SymbolicToNamedOperator:
@@ -44,33 +44,19 @@ export abstract class DataExpTranslator<T, U>
 
     abstract translateFieldExp(key: StringDataExp<T>): U;
 
-    abstract translateIn(where: U, values: U[]): U;
+    abstract translateIn(inverse: boolean, where: U, values: U[]): U;
 
-    abstract translateNotIn(where: U, values: U[]): U;
 
-    translateInExp(where: DataExp<T>, values: DataExp<T>[]): U {
-        if(values.length===0)
+    translateInExp(inverse: boolean, where: DataExp<T>, values: DataExp<T>[]): U {
+        if (values.length === 0)
             return this.True
 
         if (values.length === 1)
-            return this.translateCompare('$equals',
+            return this.translateCompare(inverse ? '$notEquals' : '$equals',
                 this.translate(where), this.translate(values[0]));
 
         return this.translateIn(
-            this.translate(where),
-            values.map(value => this.translate(value))
-        )
-    }
-
-    translateNotInExp(where: DataExp<T>, values: DataExp<T>[]): U {
-        if(values.length===0)
-            return this.True
-
-        if (values.length === 1)
-            return this.translateCompare('$notEquals',
-                this.translate(where), this.translate(values[0]));
-
-        return this.translateNotIn(
+            inverse,
             this.translate(where),
             values.map(value => this.translate(value))
         )
@@ -85,41 +71,34 @@ export abstract class DataExpTranslator<T, U>
             return this.translateValue(exp[0]);
 
         if (exp.length === 3) {
+            // [exp, op, exp]
             const [left, op, right] = exp;
             switch (op) {
                 case "$in":
-                    return this.translateInExp(left, <DataExp<T>[]>right);
+                    return this.translateInExp(false, left, <DataExp<T>[]>right);
                 case "$notIn":
-                    return this.translateNotInExp(left, <DataExp<T>[]>right)
-                default:
-                    return this.translateCompareExp(
-                        (SymbolicToNamedOperator[<CompareOperator>op] ?? op),
-                        left,
-                        (<DataExp<T>>right)
+                    return this.translateInExp(true, left, <DataExp<T>[]>right)
+
+            }
+            return this.translateCompareExp(
+                (SymbolicToNamedOperator[<CompareOperator>op] ?? op),
+                left,
+                (<DataExp<T>>right)
+            );
+        } else if (exp.length === 2) {
+            // [exp, {op: parameter}]
+            const [left, opToValue] = exp;
+            const [op, value] = firstDefinedEntry(opToValue);
+            switch (op) {
+                case "$in":
+                    return this.translateInExp(false, left,
+                        value.map(value => [value]));
+                case "$notIn":
+                    return this.translateInExp(true, left,
+                        value.map(value => [value])
                     );
             }
-        } else if (exp.length === 2) {
-            const [left, opToValue] = exp;
-            if (Array.isArray(opToValue)) {
-                // [left, [$op, exp]]
-                const [op, exp] = opToValue;
-                switch (op) {
-                    case "$in":
-                        return this.translateInExp(left, exp);
-                    case "$notIn":
-                        return this.translateNotInExp(left, exp);
-                    default:
-                        return this.translate([left, op, exp]);
-                }
-            } else {
-                const [op, value] = firstDefinedEntry(opToValue);
-                if (op === "$in") {
-                    return this.translateInExp(left,
-                        value.map(value => ({$value: value}))
-                    )
-                }
-                return this.translate([left, <CompareOperator>op, {$value: value}])
-            }
+            return this.translate([left, <CompareOperator>op, {$value: value}]);
         }
         throw new TypeError(`Invalid JSONArrayExp ${exp}`);
     }
@@ -173,12 +152,17 @@ export abstract class DataExpTranslator<T, U>
                     const [op, value] =
                         firstDefinedEntry(fieldExp);
 
-                    if (op === "$in") {
-                        return this.translateIn(
-                            this.translate(key),
-                            value.map(value =>
-                                this.translateValue(value))
-                        )
+                    switch (op) {
+                        case "$in":
+                            return this.translateInExp(false,
+                                key,
+                                value.map(value => [value])
+                            );
+                        case "$notIn":
+                            return this.translateInExp(true,
+                                key,
+                                value.map(value => [value])
+                            )
                     }
 
                     return this.translate([
@@ -202,19 +186,23 @@ export abstract class DataExpTranslator<T, U>
 
     abstract translateOr(exps: U[]): U;
 
-
-    abstract translateIs(key: string): U;
+    abstract translateIs(inverse: boolean, keys: string[]): U;
 
     $is(exp: DataExpOperatorsTypes<T>['$is']): U {
         if (typeof exp === "string")
-            return this.translateIs(exp);
-        // TODO: optimize to SQL "IN" statement.
-        return this.translateOr(exp.map(exp => this.translateIs(exp)))
+            return this.translateIs(false, [exp]);
+        return this.translateIs(false, exp)
     }
 
-    abstract translateFromExp(key: string, take: DataExp<any>, where: DataExp<any>): U;
 
-    abstract translateCountExp(key: string, where: DataExp<any>, maxCount: number): U;
+    $isNot(exp: DataExpOperatorsTypes<T>['$is']): U {
+        if (typeof exp === "string")
+            return this.translateIs(true, [exp]);
+        return this.translateIs(true, exp)
+    }
+
+
+    abstract translateCountExp(propertyName: string, subExp: DataExp<any>): U;
 
     abstract translateAt(key: string, exp: DataExp<any>): U;
 
@@ -234,9 +222,14 @@ export abstract class DataExpTranslator<T, U>
         return this.translateOr(exp.map(exp => this.translate(exp)));
     }
 
-    abstract translateIsNull(exp: U): U;
+    abstract translateIsNull(inverse: boolean, exp: U): U;
 
-    abstract translateIsNotNull(exp: U): U;
+    abstract translateAs(asKey: string, asExp: DataExp<any>): U;
+
+    $as(exp: DataExpOperatorsTypes<T>['$as']): U {
+        const [asKey, asExp] = firstDefinedEntry(exp);
+        return this.translateAs(asKey, asExp);
+    }
 
     $at(exp: DataExpOperatorsTypes<T>["$at"]): U {
         const [key, subExp] = firstDefinedEntry(exp);
@@ -244,11 +237,11 @@ export abstract class DataExpTranslator<T, U>
     }
 
     $isNull(exp: DataExpOperatorsTypes<T>['$isNull']): U {
-        return this.translateIsNull(this.translate(exp));
+        return this.translateIsNull(false, this.translate(exp));
     }
 
     $isNotNull(exp: DataExpOperatorsTypes<T>['$isNotNull']): U {
-        return this.translateIsNotNull(this.translate(exp));
+        return this.translateIsNull(true, this.translate(exp));
     }
 
     abstract translateIfNull(exp: U, alt_value: U): U;
@@ -266,26 +259,22 @@ export abstract class DataExpTranslator<T, U>
 
     $count(exp: DataExpOperatorsTypes<T>["$count"]): U {
         if (typeof exp === "string") {
-            return this.translateCountExp(exp, undefined, 0);
+            return this.translateCountExp(exp, undefined);
         } else if (typeof exp === "object") {
-            const [key, subExp] = firstDefinedEntry(exp)
-            return this.translateCountExp(key, subExp, 0);
+            const [propertyName, subExp] = firstDefinedEntry(exp)
+            return this.translateCountExp(propertyName, subExp);
         }
         throw new TypeError()
     }
 
-    $from(exp: DataExpOperatorsTypes<T>["$from"]): U {
-        const [key, {take, where}] = firstDefinedEntry(exp)
-        return this.translateFromExp(key, take, where);
-
-    }
+    abstract translateHasExp(propertyName: string, subExp: DataExp<any>): U;
 
     $has(exp: DataExpOperatorsTypes<T>["$has"]): U {
         if (typeof exp === "string") {
-            return this.translateCountExp(exp, undefined, 1)
+            return this.translateHasExp(exp, undefined)
         } else if (typeof exp === "object") {
-            const [key, subExp] = firstDefinedEntry(exp)
-            return this.translateCountExp(key, subExp, 1);
+            const [propertyName, subExp] = firstDefinedEntry(exp)
+            return this.translateHasExp(propertyName, subExp);
         }
         throw new TypeError(`Invalid "has" Exp`)
     }
@@ -295,12 +284,25 @@ export abstract class DataExpTranslator<T, U>
             .filter(text => text);
         if (words.length === 0)
             return this.True;
+
+        let searchInExp: DataExp<any>;
+        let inverse: boolean;
+
+        if ('in' in exp) {
+            searchInExp = exp.in
+            inverse = true;
+        } else {
+            inverse = true;
+            searchInExp = exp.notIn
+        }
+
         return this.translate({
-            $and: words.map(word => [
-                exp.in,
-                "$contains",
-                {$value: word}
-            ])
+            $and:
+                words.map(word => [
+                    searchInExp,
+                    inverse ? "$notContains" : "$contains",
+                    {$value: word}
+                ])
         });
     }
 
@@ -320,8 +322,10 @@ export abstract class DataExpTranslator<T, U>
     }
 
 
-    $not<K>(value: DataExpOperatorsTypes<T>["$not"]): U {
-        return this.translateNot(this.translate(value))
+    $not<K>(exp: DataExpOperatorsTypes<T>["$not"]): U {
+        if (exp && (typeof exp === "object") && ('$not' in exp))
+            return this.translate(exp.$not);
+        return this.translateNot(this.translate(exp))
     }
 
     abstract translateIf(condition: U,

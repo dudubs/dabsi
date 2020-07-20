@@ -4,7 +4,7 @@ import {assert} from "../../common/assert";
 import {Waiter} from "../../common/async/Waiter";
 import {WeakMapFactory} from "../../common/map/mapFactory";
 import {Lazy} from "../../common/patterns/lazy";
-import {toIndexedSeq} from "../../data/asyncIterableToArray";
+import {toIndexedSeq} from "../../data/toIndexedSeq";
 
 export const getViewMetadataBuilders = WeakMapFactory(() =>
     Array<(metadata: ViewMetadata) => void>());

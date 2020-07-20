@@ -1,10 +1,8 @@
 import {ReactNode} from "react";
 import {MuiIcon} from "../../../browser/src/old/orders/MuiIcon";
-import {defined} from "../../common/object/defined";
 import {Awaitable} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
 import {LangNode} from "../../localization/Lang";
-import {LayoutOld} from "../../react/utils/LayoutOld";
 import {AfterMount} from "../../react/utils/LifecycleHooks";
 import {State} from "../../react/utils/State";
 import {DataItem} from "../DataItem";
@@ -113,8 +111,7 @@ export abstract class DataTable<T,
             }
         }
 
-        return super.getQuerySource()
-            .extend(fields)
+        return super.getQuerySource().select(fields)
     }
 
     @AfterMount()

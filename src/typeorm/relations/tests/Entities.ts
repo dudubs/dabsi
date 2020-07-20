@@ -28,34 +28,34 @@ export class AEntity {
     a_id: string;
 
     @Column({nullable: true})
-    a_text: string;
+    aText: string;
 
     @Column({nullable: true})
     a_number: number;
 
     @OneToOne(() => BEntity, b => b.a)
     @JoinColumn()
-    bOwner: Relation<BEntity>;
+    bOwner?: Relation<BEntity>;
 
     @OneToOne(() => BEntity, b => b.aOwner)
-    b: object & BEntity;
+    b?: Relation<BEntity>;
 
     @ManyToMany(() => BEntity, b => b.manyBToManyA)
     @JoinTable()
-    manyAToManyBOwner: Relation<BEntity>[];
+    manyAToManyBOwner?: Relation<BEntity>[];
 
     @ManyToMany(() => BEntity, b => b.manyBToManyAOwner)
-    manyAToManyB: Relation<BEntity>[];
+    manyAToManyB?: Relation<BEntity>[];
 
     @OneToMany(() => BEntity, b => b.manyBToOneA)
-    oneAToManyB: Relation<BEntity>[];
+    oneAToManyB?: Relation<BEntity>[];
 
     @ManyToOne(() => BEntity, b => b.oneBToManyA)
-    manyAToOneB: Relation<BEntity>;
+    manyAToOneB?: Relation<BEntity>;
 
     @OneToOne(() => CEntity)
     @JoinColumn()
-    cOwner: Relation<CEntity>;
+    cOwner?: Relation<CEntity>;
 
     @JoinTable()
     @ManyToMany(() => AEntity)
@@ -74,37 +74,37 @@ export class BEntity {
     b_id: string;
 
     @Column({nullable: true})
-    b_text: string;
+    bText: string;
 
     @Column({nullable: true})
     b_number: number;
 
     @OneToOne(() => AEntity, a => a.bOwner)
-    a: Relation<AEntity>;
+    a?: Relation<AEntity>;
 
     @OneToOne(() => AEntity, a => a.b)
     @JoinColumn()
-    aOwner: Relation<AEntity>;
+    aOwner?: Relation<AEntity>;
 
     @ManyToMany(() => AEntity, a => a.manyAToManyBOwner)
-    manyBToManyA: Relation<AEntity>[];
+    manyBToManyA?: Relation<AEntity>[];
 
     @ManyToMany(() => AEntity, a => a.manyAToManyB)
     @JoinTable()
-    manyBToManyAOwner: Relation<AEntity>[];
+    manyBToManyAOwner?: Relation<AEntity>[];
 
     @ManyToOne(() => AEntity, a => a.oneAToManyB)
-    manyBToOneA: Relation<AEntity>;
+    manyBToOneA?: Relation<AEntity>;
 
     @OneToOne(() => AEntity, a => a.manyAToOneB)
-    oneBToManyA: Relation<AEntity>[];
+    oneBToManyA?: Relation<AEntity>[];
 
     @OneToOne(() => CEntity, c => c.b)
     @JoinColumn()
-    cOwner: Relation<CEntity>;
+    cOwner?: Relation<CEntity>;
 
     @OneToOne(() => CEntity, c => c.bOwner)
-    c: Relation<CEntity>;
+    c?: Relation<CEntity>;
 }
 
 
@@ -125,13 +125,10 @@ export class CEntity {
     c_number: number;
 
     @OneToOne(() => BEntity, b => b.cOwner)
-    b: Relation<BEntity>;
+    b?: Relation<BEntity>;
 
     @OneToOne(() => BEntity, b => b.c)
     @JoinColumn()
-    bOwner: Relation<BEntity>;
+    bOwner?: Relation<BEntity>;
 }
 
-
-export const getEntityTestConnection =
-    TestConnection([AEntity, BEntity, CEntity]);

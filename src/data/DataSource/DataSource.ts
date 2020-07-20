@@ -2,8 +2,12 @@ import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
 import {ArrayTypeOrObject, ExtractKeys} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
-import {DataCursor, RelationMap} from "../DataCursor";
+import {DataCursor} from "../DataCursor";
+import {DataFields, DataFieldsRow} from "../DataFields";
+import {DataFieldsTranslator} from "../DataFieldsTranslator";
 import {DataItem, DataKey, DataKeyInput} from "../DataItem";
+import {DataNullsSort, DataOrder, DataSort} from "../DataOrder";
+import {AnyDataUnion, DataUnion} from "../DataUnion";
 import {DataValues} from "./DataValues";
 
 export abstract class DataSource<T> {
@@ -17,12 +21,15 @@ export abstract class DataSource<T> {
         ]
     }
 
-    // select(DataSelectionOld)
-
     abstract items(): Promise<DataItem<T>[]>;
 
     async* find(pageSize = 10): AsyncIterableIterator<DataItem<T>> {
-        let source: DataSource<T> = this;
+        let source: DataSource<T> = this.withCursor({
+            ...this.cursor,
+            skip: 0,
+            take: 0
+        });
+
         while (true) {
             const items = await source.items();
             yield* items;
@@ -100,7 +107,12 @@ export abstract class DataSource<T> {
         }
 
         const keys: string[] = [];
-        for await (let row of this.select([]).find()) {
+
+
+        for await (const row of this.withCursor({
+            ...this.cursor,
+            selection: {omit: 'all'}
+        }).find()) {
             keys.push(row.$key);
 
             if (keys.length > 10) {
@@ -121,6 +133,17 @@ export abstract class DataSource<T> {
     abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
 
 
+    as<T extends AnyDataUnion,
+        K extends keyof DataUnion.ChildrenOf<T>>(
+        this: DataSource<T>,
+        type: string & K):
+        DataSource<DataUnion.ChildrenOf<T>[K]> {
+        return this.withCursor({
+            ...this.cursor,
+            type
+        })
+    }
+
     of<K extends keyof T>(propertyName: string & K, value: DataKeyInput<T[K]>): DataSource<T> {
         return this.withCursor(
             DataCursor.of(this.cursor, propertyName, DataKey(value))
@@ -137,18 +160,6 @@ export abstract class DataSource<T> {
         )
     }
 
-
-    load(relationMap: RelationMap<T>): DataSource<T> {
-        return this.loadOnly({...this.cursor.relationMap, ...relationMap})
-    }
-
-    loadOnly(relationMap: RelationMap<T>): DataSource<T> {
-        return this.withCursor<T>({
-            ...this.cursor,
-            relationMap
-        })
-    }
-
     skip(count: number): DataSource<T> {
         return this.withCursor({...this.cursor, skip: count})
     }
@@ -157,15 +168,33 @@ export abstract class DataSource<T> {
         return this.withCursor({...this.cursor, take: count})
     }
 
-    noSort(): DataSource<T> {
-        return this.withCursor({...this.cursor, order: []})
+
+    order(orders: DataOrder<T>[]): DataSource<T>
+    order(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>
+    order(expOrOrders, sort?, nulls?) {
+        if (typeof sort === "string")
+            return this.withCursor({
+                ...this.cursor, order: [
+                    ...this.cursor.order,
+                    {by: expOrOrders, sort: <DataSort>sort, nulls}
+                ]
+            })
+        return this.withCursor({...this.cursor, order: expOrOrders})
     }
 
-
-    sort(by: DataExp<T>, sort: "ASC" | "DESC", nulls?: "FIRST" | "LAST"): DataSource<T> {
+    select<Fields extends DataFields<T>>(fields: Fields):
+        DataSource<T & DataFieldsRow<T, Fields>> {
         return this.withCursor({
-            ...this.cursor, order:
-                [...this.cursor.order, {by, sort, nulls}]
+            ...this.cursor,
+            selection: {
+                ...this.cursor.selection, fields: {
+                    ...this.cursor.selection.fields,
+                    ...DataFieldsTranslator.translate(
+                        this.cursor.selection.fields,
+                        fields
+                    )
+                }
+            }
         })
     }
 
@@ -177,3 +206,4 @@ export type DataCursorPath = {
     // TODO: rename to "onwer"
     invert: boolean, propertyName: string, key: string
 };
+

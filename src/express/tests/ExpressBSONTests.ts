@@ -39,14 +39,16 @@ export function testBSONHandler(callback) {
     })
 }
 
-it('expected to regexp from server', async () => {
-    expect(await testBSONHandler(() => /hello/)()).toBeInstanceOf(
-        RegExp
-    );
-});
+testm(__filename, () => {
+    it('expected to regexp from server', async () => {
+        expect(await testBSONHandler(() => /hello/)()).toBeInstanceOf(
+            RegExp
+        );
+    });
 
-it('expected to regexp to server', async () => {
-    expect(await testBSONHandler(data => data)(/hello/)).toBeInstanceOf(
-        RegExp
-    );
-});
+    it('expected to regexp to server', async () => {
+        expect(await testBSONHandler(data => data)(/hello/)).toBeInstanceOf(
+            RegExp
+        );
+    });
+})

@@ -1,6 +1,10 @@
 import {Command} from "../Command";
 
 
-it('sanity',()=>{
-    Command();
-})
+
+testm(__filename, () => {
+    it('sanity',()=>{
+        Command();
+    })
+});
+

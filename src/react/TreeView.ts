@@ -1,5 +1,5 @@
 import {createElement} from "react";
-import {toIndexedSeq} from "../data/asyncIterableToArray";
+import {toIndexedSeq} from "../data/toIndexedSeq";
 import {IndexedSeq} from "../immutable2";
 import {createUndefinedContext} from "./utils/hooks/createUndefinedContext";
 import {BeforeUnmountView, View} from "./view/View";

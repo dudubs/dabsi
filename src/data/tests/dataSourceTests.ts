@@ -1,17 +1,15 @@
-import exp from "constants";
-import {inspect} from "util";
-import {ExtractKeys} from "../../common/typings";
+import {subTest} from "../../jasmine/subTest";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
-import {DataKey} from "../DataItem";
 import {DataSource} from "../DataSource";
+import {RelationKeys} from "../Relation";
 import arrayContaining = jasmine.arrayContaining;
-import objectContaining = jasmine.objectContaining;
 
 export function DataSourceTests(
     ADS: DataSource<AEntity>,
     BDS: DataSource<BEntity>,
     CDS: DataSource<CEntity>
 ) {
+
 
     it('relations sanity', async () => {
         const debug = false;
@@ -32,33 +30,36 @@ export function DataSourceTests(
         await assert("oneAToManyB");
         await assert("manyAToOneB");
 
-        async function assert(p: ExtractKeys<AEntity, object>) {
+        function assert(p: RelationKeys<AEntity>) {
 
-            debug && console.log({p, aKey, bKey});
-            const aOfBOwner = ADS.of(p, bKey);
-            const bOwnerAtA = ADS.at(p, aKey);
-
-
-            await assert(aOfBOwner, aKey, bOwnerAtA);
-            await assert(bOwnerAtA, bKey, aOfBOwner);
-
-            async function assert<T, U>(ds: DataSource<T>,
-                                        key: string,
-                                        inverseDs: DataSource<U>) {
-
-                expect(await ds.get()).toBeFalsy();
-                expect(await inverseDs.get()).toBeFalsy();
-
-                await ds.add(key);
-                expect(await ds.get()).toBeTruthy();
-                expect(await inverseDs.get()).toBeTruthy();
-
-                await ds.remove(key);
-                expect(await ds.get()).toBeFalsy();
-                expect(await inverseDs.get()).toBeFalsy();
+            return subTest(`(${p})`, async () => {
+                debug && console.log({p, aKey, bKey});
+                const aOfBOwner = ADS.of(p, bKey);
+                const bOwnerAtA = ADS.at(p, aKey);
 
 
-            }
+                await assert(aOfBOwner, aKey, bOwnerAtA);
+                await assert(bOwnerAtA, bKey, aOfBOwner);
+
+                async function assert<T, U>(ds: DataSource<T>,
+                                            key: string,
+                                            inverseDs: DataSource<U>) {
+
+                    expect(await ds.get()).toBeFalsy();
+                    expect(await inverseDs.get()).toBeFalsy();
+
+                    await ds.add(key);
+                    expect(await ds.get()).toBeTruthy();
+                    expect(await inverseDs.get()).toBeTruthy();
+
+                    await ds.remove(key);
+                    expect(await ds.get()).toBeFalsy();
+                    expect(await inverseDs.get()).toBeFalsy();
+
+
+                }
+            })
+
         }
     })
 
@@ -121,13 +122,13 @@ export function DataSourceTests(
 
         const bOfA = BDS.of("a", aKey);
 
-        const bOfAOfHello = bOfA.of("b_text", "hello");
+        const bOfAOfHello = bOfA.of("bText", "hello");
         expect(await bOfAOfHello.has()).toBeFalsy();
 
         const bOfAOfHelloKey = await bOfAOfHello.insert({});
         expect(await bOfAOfHello.has()).toBeTruthy();
 
-        const bOfAOfWorld = bOfA.of("b_text", "world");
+        const bOfAOfWorld = bOfA.of("bText", "world");
         expect(await bOfAOfWorld.has()).toBeFalsy();
 
         const cOfbOfA = CDS.of("b", bOfAOfHelloKey);
@@ -139,13 +140,13 @@ export function DataSourceTests(
         expect(await cOfbOfAOfHello.has()).toBeTruthy();
 
         expect(await BDS
-            .of("b_text", "hello")
+            .of("bText", "hello")
             .at("cOwner", bOfAOfHelloKey)
             .has()
         ).toBeTruthy();
 
         expect(await BDS
-            .of("b_text", "world")
+            .of("bText", "world")
             .at("cOwner", bOfAOfHelloKey)
             .has()
         ).toBeFalsy();
@@ -166,7 +167,7 @@ export function DataSourceTests(
         expect(await rootChildren.count()).toEqual(2);
 
 
-        expect((await rootChildren.items()).map(child=>child.$key))
+        expect((await rootChildren.items()).map(child => child.$key))
             .toEqual(arrayContaining(childKeys))
     })
 }

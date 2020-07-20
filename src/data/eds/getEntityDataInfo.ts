@@ -14,11 +14,9 @@ import {mergeValueTransformer} from "./mergeValueTransformer";
  */
 export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
 
-    const propertyNameToOneRelation: Record<string, RelationMetadata> = {};
+    // TODO: use EntityMetadata.propertyMap
     const propertyNameToRelationMetadata: Record<string, RelationMetadata> = {};
     const propertyNameToTransformer: Record<string, ValueTransformer> = {};
-    const propertyNamesWithRelation = new Set();
-
 
     const dataColumns: ColumnMetadata[] = [];
 
@@ -36,21 +34,13 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
     }
 
     for (let relation of metadata.relations) {
-        propertyNamesWithRelation.add(relation.propertyName);
-
-        relation.propertyName && (
-            propertyNameToRelationMetadata[relation.propertyName] = relation
-        )
-        ;
-        if (relation.isManyToOne || relation.isOneToOne)
-            propertyNameToOneRelation[relation.propertyName] =
-                relation;
+        propertyNameToRelationMetadata[relation.propertyName] = relation;
     }
 
     return {
-        propertyNameToOneRelation,
+
         propertyNameToTransformer,
-        propertyNamesWithRelation,
+
         propertyNameToRelationMetadata,
         primaryPropertyNameToIndex: mapArrayToObject(metadata.primaryColumns,
             (column, index) => [column.propertyName, index]),

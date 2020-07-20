@@ -7,14 +7,10 @@ export class QueryBuilderSelector {
     selectionToAliasName: Record<string, string> = {};
     aliasNames = new Set<string>()
 
-    // TODO: remove
-    static get = WeakMapFactory((qb: SelectQueryBuilder<any>): QueryBuilderSelector =>
-        new QueryBuilderSelector(qb));
-
     constructor(
         public qb: SelectQueryBuilder<any>
     ) {
-        // TODO build selections from qb.expressionMap.selects
+        qb.expressionMap.selects.length = 0;
     }
 
     // selectFromSchema(...)
@@ -29,7 +25,7 @@ export class QueryBuilderSelector {
                 + this.qb.connection.driver.escape(selection);
         }
 
-        if(this.aliasNames.has(aliasName)) {
+        if (this.aliasNames.has(aliasName)) {
             throw new Error(`Alias name "${aliasName}" already in use`);
         }
         this.aliasNames.add(aliasName);
@@ -49,9 +45,9 @@ export class QueryBuilderSelector {
         return raw => raw[aliasName]
 
     }
-
-    load(raw: object, aliasName: string) {
-        return raw[this.aliasNameToAliasName[aliasName] ?? aliasName]
-    }
+    //
+    // load(raw: object, aliasName: string) {
+    //     return raw[this.aliasNameToAliasName[aliasName] ?? aliasName]
+    // }
 }
 

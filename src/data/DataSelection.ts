@@ -1,50 +1,83 @@
-import {ArrayType, ExtractKeys, Pluck} from "../common/typings";
-import {DataExp, DataExpType} from "../json-exp/DataExp";
+import {Pluck} from "../common/typings";
+import {DataExp} from "../json-exp/DataExp";
+import {DataFieldsRow} from "./DataFields";
+import {DataFieldsTranslator} from "./DataFieldsTranslator";
+import {DataItem} from "./DataItem";
 import {DataOrder} from "./DataOrder";
+import {DataUnion} from "./DataUnion";
 import {IfRelationToMany, IfRelationToOne, NonRelationKeys, OmitRelations, RelationKeys} from "./Relation";
 
 
 export type DataSelection<T, P = {}> =
+    _DataSelection<NonNullable<T>, P>;
+
+export type _DataSelection<T, P = {}> =
     (DataSelection.Base<T> & P)
     | (DataSelection.OmitAll<T> & P)
     | (DataSelection.OmitKeys<T, NonRelationKeys<T>> & P)
     | (DataSelection.PickKeys<T, NonRelationKeys<T>> & P)
 
 export declare namespace DataSelection {
-    export type RelationToOne<T> = DataSelection<T, {
+
+    type RelationToOne<T> = DataSelection<T, {
         notNull?: true | false
     }>;
 
-    export type RelationToOneRow<T, S> =
+    type RelationToOneRow<T, S> =
         (Pluck<S, "notNull"> extends true ? never : null)
         |
         Row<T, S>;
 
 
-    export type RelationToMany<T> = DataSelection<T, {
+    type RelationToMany<T> = DataSelection<T, {
         skip?: number;
         take?: number;
         filter?: DataExp<T>;
         order?: DataOrder<T>[]
     }>;
 
-    export type RelationToManyRow<T, S> =
+    type RelationToManyRow<T, S> =
         S extends true ? OmitRelations<T> :
             S extends DataSelection<T> ?
                 Row<T, S> :
                 OmitRelations<T>;
 
 
-    type Base<T> = {
+    type Relations<T> = {
+        [K in RelationKeys<T>]?: true | false
+        | IfRelationToOne<T[K], RelationToOne<T[K]>>
+        | IfRelationToMany<T[K], RelationToMany<Pluck<T[K], number>>>
+    };
+
+    type Unions<T> =
+        T extends DataUnion<infer Base,
+                infer TypeKey,
+                infer Children,
+                infer Relations> ?
+            {
+                [K in keyof Children]?: DataSelection<(
+                InstanceType<Children[K]>
+                )>
+            }
+            : never
+        ;
+
+    type Base<T> =
+        _Base<DataUnion.RowWithRelationsOf<DataUnion.MetaTypeOf<T>, T>>;
+
+    type _Base<T> = {
 
         // TODO: notNull: NonRelationKeys<T>[]
         fields?: Record<string, DataExp<T>>;
 
-        relations?: {
-            [K in RelationKeys<T>]?: true | false
-            | IfRelationToOne<T[K], RelationToOne<T[K]>>
-            | IfRelationToMany<T[K], RelationToMany<Pluck<T[K], number>>>
-        }
+        relations?: DataSelection.Relations<T>;
+
+        unions?: Unions<DataUnion.MetaTypeOf<T>>;
+
+        $debugType?: T;
+        $debugMetaType?: DataUnion.MetaTypeOf<T>
+
+
     };
 
 
@@ -57,23 +90,30 @@ export declare namespace DataSelection {
     type PickKeys<T, K extends PropertyKey> =
         Base<T> & { pick: K[] };
 
-    export type RelationRow<T, S> =
+    type RelationRow<T, S> =
         IfRelationToMany<T, RelationToManyRow<Pluck<T, number>, S>[]>
         | IfRelationToOne<T, RelationToOneRow<T, S>>;
 
-    export type BaseRow<T, S> = {
-        [K in keyof Pluck<S, 'fields'>]:
-        DataExpType<T, Pluck<S, 'fields'>[K]>
-    } & {
-        [K in keyof Pluck<S, 'relations'>]:
-        RelationRow<Pluck<T, K>, Pluck<S, 'relations'>[K]>
+    type RelationsRow<T, S> = {
+        [K in keyof S]:
+        RelationRow<Pluck<T, K>, S[K]>
     };
 
+    type UnionsRow<T, S> = DataUnion.MetaType<DataUnion<any, any, any, any>>;
+
+
+    type BaseRow<T, S> = {}
+        & (S extends { fields: infer U } ? DataFieldsRow<T, U> : {})
+        & (S extends { relations: infer U } ? RelationsRow<T, U> : {})
+        & (S extends { unions: infer U } ? UnionsRow<T, U> : {})
+
+        ;
+    // If<S, { relations }, RelationsRow<T, Pluck<S, 'relations'>>, {}>;
 
     // @formatter:off
-    export type Row<T, S> =
+     type Row<T, S> = DataItem<
 
-        S extends OmitAll<T> ?
+         S extends OmitAll<T> ?
             BaseRow<T, S> :
 
         S extends OmitKeys<T, infer K> ?
@@ -82,73 +122,73 @@ export declare namespace DataSelection {
         S extends PickKeys<T, infer K> ?
             Omit<Pick<T, Extract<K, keyof T>>, keyof S> & BaseRow<T, S> :
 
-        OmitRelations<T> & BaseRow<T, S>;
+        OmitRelations<T> & BaseRow<T, S>
+    >
     // @formatter:on
+
 }
 
+export namespace DataSelection {
 
-export type DataSelectionOld<T> = {
 
-    // omit | pick
-    exclude?: NonRelationKeys<T>[] | "all"
+    export function merge(s1: DataSelection<any>, s2: DataSelection<any>) {
 
-    fields?: Record<string, DataExp<T>>
 
-    relations?: {
-        [K in RelationKeys<T>]?:
-        true | DataRelationSelectionOld<T[K]>
+        const relations = {
+            ...s1.relations,
+            ...s2.relations
+        };
+
+        const translatedFields = DataFieldsTranslator.translate(
+            s1.fields,
+            s2.fields
+        );
+
+        if (isPickKeys(s2)) {
+            const fields = {...s1.fields, ...translatedFields};
+            return {
+                pick: s2.pick.filter(k => !(k in fields)),
+                fields,
+                relations
+            }
+        }
+
+        if (isOmitKeys(s2)) {
+            const fields = {...s1.fields, ...translatedFields};
+            for (const key in s2.omit) {
+                delete fields[key];
+            }
+            return {
+                omit: s2.omit.filter(k => !(k in fields)),
+                fields,
+                relations
+            }
+        }
+
+        if (isOmitAll(s2)) {
+            return {
+                omit: 'all',
+                fields: translatedFields,
+                relations
+            }
+        }
+
+        return {
+            fields: {...s1.fields, ...translatedFields},
+            relations
+        }
+
     }
 
-    loaders?: {
-        [K in ExtractKeys<T, any[]>]?: true |
-        DataLoaderSelection<ArrayType<T[K]>>
+    function isOmitAll(value): value is OmitAll<any> {
+        return value?.omit === 'all'
     }
 
-    //
-};
+    function isOmitKeys(value): value is OmitKeys<any, any> {
+        return Array.isArray(value?.omit)
+    }
 
-export type DataLoaderSelection<T> = {
-    filter?: DataExp<T>
-    skip?: number
-    take?: number,
-    order?: DataOrder<T>[]
-    select?: DataSelectionOld<T>
+    function isPickKeys(value): value is PickKeys<any, any> {
+        return Array.isArray(value?.pick)
+    }
 }
-
-export type DataLoaderSelectionRowOld<T, Selection> =
-    Selection extends true ? OmitRelations<T> :
-        Selection extends DataLoaderSelection<T> ?
-            DataSelectionRowOld<T, Extract<Selection['select'], DataSelectionOld<T>>>
-            : never;
-export type DataRelationSelectionRowOld<T, Selection> =
-    Selection extends DataRelationSelectionOld<T> ?
-        (
-            (Selection extends { nullable: true } ? undefined : never) |
-            DataSelectionRowOld<T, Selection>
-            ) :
-        Selection extends true ? T : never;
-export type DataRelationSelectionOld<T> = DataSelectionOld<T> & {
-    notNull?: boolean
-};
-
-
-type DataSelectionExcludeKeysOld<T, Selection extends DataSelectionOld<T>> =
-    Extract<Pluck<Pluck<Selection, 'exclude'>, number>, keyof T>;
-
-export type DataSelectionRowOld<T, Selection extends DataSelectionOld<T>> =
-//
-    (Selection['exclude'] extends "all" ? never :
-        Omit<OmitRelations<T>, DataSelectionExcludeKeysOld<T, Selection>>)
-    //
-    & {
-    [K in keyof Selection['fields']]:
-    DataExpType<T, Selection['fields'][K]>
-}
-    //
-    & {
-    [K in RelationKeys<T> & keyof Selection['relations']]:
-    DataRelationSelectionRowOld<T[K], Selection['relations'][K]>
-} & {
-    [K in ExtractKeys<T, any[]> & keyof Selection['loaders']]:
-    DataLoaderSelectionRowOld<Pluck<T[K], number>, Selection['loaders'][K]>
-};

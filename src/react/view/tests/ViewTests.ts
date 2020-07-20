@@ -1,8 +1,6 @@
-import {is} from "immutable";
-import {Component, ComponentClass, ComponentProps, ComponentType, createElement, Fragment} from "react";
-import {BeforeRenderView, View} from "../View";
+import {ComponentClass, ComponentProps, createElement, Fragment} from "react";
 import * as TestRenderer from "react-test-renderer";
-import {ViewState} from "../ViewState";
+import {BeforeRenderView, View} from "../View";
 
 export function testComponentInstance<T extends ComponentClass<any, any>>(
     componentClass: T,
@@ -13,7 +11,6 @@ export function testComponentInstance<T extends ComponentClass<any, any>>(
 }
 
 let counter = 0;
-
 
 export class TestView extends View {
 
@@ -28,13 +25,20 @@ export class TestView extends View {
     }
 }
 
-it('', () => {
-    const instance = testComponentInstance(TestView,{});
 
-    const {beforeRenderProp} = instance;
+testm(__filename, () => {
 
-    expect(instance.beforeRenderProp).toEqual(beforeRenderProp,);
-    instance.render();
-    expect(instance.beforeRenderProp).toBeGreaterThan(beforeRenderProp);
+    it('', () => {
+        const instance = testComponentInstance(TestView, {});
 
-})
+        const {beforeRenderProp} = instance;
+
+        expect(instance.beforeRenderProp).toEqual(beforeRenderProp,);
+        instance.render();
+        expect(instance.beforeRenderProp).toBeGreaterThan(beforeRenderProp);
+
+    })
+
+});
+
+

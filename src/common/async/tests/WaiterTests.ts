@@ -1,9 +1,12 @@
 import {Waiter} from "../Waiter";
 
-it('expected to resolve', async () => {
-    const waiter = Waiter<void>();
-    setImmediate(() => {
-        waiter.resolve()
-    })
-    await waiter;
-});
+testm(__filename,()=>{
+    it('expected to resolve', async () => {
+        const waiter = Waiter<void>();
+        setImmediate(() => {
+            waiter.resolve()
+        })
+        await waiter;
+    });
+
+})

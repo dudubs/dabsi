@@ -2,8 +2,8 @@ import {SelectQueryBuilder} from "typeorm";
 import {Lazy} from "../../common/patterns/lazy";
 import {DataSort} from "../../data/DataOrder";
 import {DataExp} from "../../json-exp/DataExp";
-import {translateQbDataExp} from "./translateQbDataExp";
 import {QbDataExpTranslator} from "./QbDataExpTranslator";
+
 
 declare module "typeorm" {
 
@@ -29,8 +29,8 @@ declare module "typeorm" {
         orderByExp(exp: DataExp<Entity>, order?: "ASC" | "DESC", nulls?: "NULLS FIRST" | "NULLS LAST"):
             this;
 
-
-        addOrderByExp(exp: DataExp<Entity>, sort?: DataSort, nulls?: "NULLS FIRST" | "NULLS LAST"):
+        addOrderByExp(exp: DataExp<Entity>, sort?: DataSort,
+                      nulls?: "NULLS FIRST" | "NULLS LAST"):
             this;
 
 
@@ -40,8 +40,8 @@ declare module "typeorm" {
 export const useQueryBuilderExp = Lazy(() => {
     const qb = SelectQueryBuilder.prototype;
 
-    qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: DataExp<T>, schema?: string) {
-        return translateQbDataExp(this, exp, schema)
+    qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: DataExp<T>) {
+        return QbDataExpTranslator.translate(this, exp)
     };
 
     install('where');

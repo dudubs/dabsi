@@ -27,7 +27,7 @@ export type PickByValue<T, V> = Pick<T, ExtractKeys<T, V>>;
 export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;
 
 export type Pluck<T, K extends PropertyKey, U = never> =
-    K extends keyof T ? T[K] : U;
+    K extends keyof Required<T> ? T[K] : U;
 
 export type PartialKeys<T, K extends keyof T> =
     Omit<T, K> &
@@ -39,6 +39,15 @@ export function Nullable<T>(value?: T): T | Nullable {
 }
 
 export type Type<T> = { prototype: T } & Function;
+export type TypeType<T extends Type<any>> =
+    T extends Type<infer U> ? U : never;
+
+export function Type<T>(): Type<T> {
+    if (this instanceof Type) {
+        throw  new Error()
+    }
+    return Type
+}
 
 export type Actions<T> = Union<{
     [K in keyof T]: { type: K } & T[K]
@@ -95,4 +104,7 @@ export type Optional<T> = Pick<T, OptionalKeys<T>>;
 
 export type Method = (...args: any[]) => any;
 
-export type If<T, U, R = never,E=T> = T extends U ? R : T;
+
+export type Pass<T, A = never, B = never, C = never, D = never> = T;
+export type IfNever<T, U,E=never> = T | U extends U ? U : E;
+export type IfNotNever<T, U> = T | U extends U ? never : U;

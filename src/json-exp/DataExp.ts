@@ -1,4 +1,6 @@
 import {ArrayTypeOrObject, Expression, ExtractKeys, Union} from "../common/typings";
+import {AnyDataUnion, DataUnion} from "../data/DataUnion";
+import {RelationKeys, RelationToManyKeys, RelationTypeAt} from "../data/Relation";
 import {IndexedSeq} from "../immutable2";
 
 
@@ -29,6 +31,9 @@ export type NamedCompareOperator = keyof {
     $startsWith,
     $endsWith,
     $contains,
+    $notStartsWith,
+    $notEndsWith,
+    $notContains,
     $equals,
     $notEquals,
     $lessThan,
@@ -54,25 +59,24 @@ export type Comparator<T, P extends Parameter> =
     | CompareToParameter<P> ;
 
 
-export type IfOperator<Condition, Then, Else> = [Condition, Then, Else] | {
+export type IfExp<Condition, Then, Else> = [Condition, Then, Else] | {
     condition: Condition,
     then: Then,
     else?: Else
 };
 
+export type CaseExp<T> = ({ if: DataExp<T>, then: DataExp<T> } | [DataExp<T>, DataExp<T>])[];
+
 export type DataExpOperatorsTypes<T> = {
 
-    $if: IfOperator<DataExp<T>, DataExp<T>, DataExp<T>>;
+    $if: IfExp<DataExp<T>, DataExp<T>, DataExp<T>>;
 
-    $case: ({ if: DataExp<T>, then: DataExp<T> } | [DataExp<T>, DataExp<T>])[];
+    $case: CaseExp<T>;
 
-
-    // TODO: $string: DataExp<T>
-    // TODO: $number: DataExp<T>
-    // TODO: $boolean: DataExp<T>
-    // TODO: $nullable: DataExp<T>
-
+    // TODO: $is: string | number | { $key: str... }
     $is: string[] | string;
+
+    $isNot: string[] | string;
 
     $and: DataExp<T>[];
 
@@ -88,11 +92,9 @@ export type DataExpOperatorsTypes<T> = {
 
     $not: DataExp<T>;
 
-    $search: {
-        // TODO: inverse: boolean,
-        in: DataExp<T>,
-        text: string
-    }
+    $search:
+        { in: DataExp<T>, text: string }
+        | { notIn: DataExp<T>, text: string }
 
     $isNull: DataExp<T>;
 
@@ -100,37 +102,36 @@ export type DataExpOperatorsTypes<T> = {
 
     $ifNull: [DataExp<T>, DataExp<T>];
 
-    ///
+    // to-one relations
     $at: Union<{
         [K in ExtractKeys<Required<T>, object>]:
         Record<K, DataExp<ArrayTypeOrObject<T[K]>>>
     }>;
 
-
-    $from: Union<{
-        [K in keyof Required<T>]:
-
-        T[K] extends Array<infer U> ? Record<K, {
-                where?: DataExp<U>,
-                take: DataExp<U>
-            }> :
-            never
+    // to-many relations
+    $count: RelationToManyKeys<T> | Union<{
+        [K in RelationToManyKeys<T>]:
+        Record<K, DataExp<RelationTypeAt<T, K>>>
     }>;
 
-    $count: ExtractKeys<T, any[]> | Union<{
-        [K in keyof T]:
-        T[K] extends Array<infer U> ? Record<K, DataExp<U>> :
-            never
+    $has: RelationToManyKeys<T> | Union<{
+        [K in RelationKeys<T>]:
+        Record<K, DataExp<RelationTypeAt<T, K>>>
     }>;
 
-    $has: ExtractKeys<T, any[]> | Union<{
-        [K in keyof T]:
-        T[K] extends Array<infer U> ? Record<K, DataExp<U>> :
-            never
-    }>;
+
+    $as: AsExp<DataUnion.MetaTypeOf<T>>
 
 }
 
+export type AsExp<T extends AnyDataUnion> = Union<{
+    [K in keyof DataUnion.ChildrenOf<T>]:
+    Record<K,
+        DataExp<(
+            DataUnion.ChildTypeOf<DataUnion.ChildrenOf<T>[K]>
+        )>
+        >
+}>
 export type DataExpType<T, E extends DataExp<T>> =
     E extends keyof T ? T[E] : any;
 
@@ -151,14 +152,17 @@ export type ObjectDataExp<T> =
     ArrayDataExp<T>;
 
 export type ArrayDataExp<T> =
+    [Parameter]
+
     // compare exp to parameter
-    [DataExp<T>,CompareToParameter<Parameter>]
+    | [DataExp<T>, CompareToParameter<Parameter>]
+
     // compare between two expressions
     | [DataExp<T>, CompareOperator, DataExp<T>]
     // compare one expression to many expressions
     | [DataExp<T>, "$in" | "$notIn", DataExp<T>[]]
-    // parameter
-    | [Parameter];
+    ;
+
 
 export type StringDataExp<T> = string & keyof Required<T>;
 

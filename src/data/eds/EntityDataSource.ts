@@ -1,15 +1,16 @@
-import {Connection} from "typeorm";
+import {Connection, SelectQueryBuilder} from "typeorm";
 import {last} from "../../common/array/last";
 import {Lazy} from "../../common/patterns/lazy";
 import {Type} from "../../common/typings";
 import {useQueryBuilderExp} from "../../typeorm/exp/useQueryBuilderExp";
-import {asyncIterableToArray} from "../asyncIterableToArray";
 import {DataCursor, EmptyDataCursor} from "../DataCursor";
 import {DataItem, DataKey, DataKeyInput} from "../DataItem";
 import {DataSource, DataValues} from "../DataSource";
 import {createEntityConnection} from "./createEntityConnection";
-import {createEntityDataLoader} from "./createEntityDataLoader";
+import {EntityDataCursor} from "./EntityDataCursor";
 import {EntityDataKey} from "./EntityDataKey";
+import {EntityDataSelection} from "./EntityDataSelection";
+import {QueryBuilderSelector} from "./QueryBuilderSelector";
 
 
 useQueryBuilderExp();
@@ -55,10 +56,6 @@ export class EntityDataSource<T> extends DataSource<T> {
         super();
     }
 
-    find(): AsyncIterableIterator<DataItem<T>> {
-        return this.entityLoader.load()
-    }
-
     withCursor<U = T>(cursor: DataCursor): EntityDataSource<U> {
 
         return new EntityDataSource<U>(this.mainEntityType,
@@ -66,26 +63,49 @@ export class EntityDataSource<T> extends DataSource<T> {
             cursor)
     }
 
+    protected createQueryBuilder(): SelectQueryBuilder<any> {
+        return EntityDataCursor.createQueryBuilder(
+            this.entityConnection.cursor,
+            this.entityConnection.repository
+        )
+    }
+
     items(): Promise<DataItem<T>[]> {
-        return asyncIterableToArray(this.entityLoader.load<T>())
+        const {cursor} = this;
+        const qb = this.createQueryBuilder();
+        const selector = new QueryBuilderSelector(qb);
+        const loader = EntityDataSelection.select(
+            qb,
+            selector,
+            this.cursor.selection,
+            qb.alias,
+            "r_"
+        )
+        for (const order of cursor.order) {
+            qb.addOrderByExp(order.by, order.sort,
+                order.nulls === "FIRST" ? "NULLS FIRST" :
+                    order.nulls === "LAST" ? "NULLS LAST" :
+                        undefined)
+        }
+        if (cursor.skip)
+            qb.skip(cursor.skip);
+        if (cursor.take)
+            qb.take(cursor.take);
+        return loader.getRows()
     }
 
     count(): Promise<number> {
-        return this.entityLoader.qb.clone()
-            .select('COUNT(*)', 'count')
-            .getRawOne()
-            .then(raw => raw?.count ?? 0)
+        return this.createQueryBuilder().getCount();
     }
 
     has(): Promise<boolean> {
-        return this.entityLoader.qb
-            .clone()
-            .select('COUNT(*)', 'count')
-            .take(1)
-            .getRawOne()
-            .then(raw => (raw?.count ?? 0) > 0)
+        // TODO: Check if have a limit
+        return this.createQueryBuilder()
+            .take(1).getCount()
+            .then(count => count > 0)
     }
 
+    // write
     async insert<K extends keyof T>(values: DataValues<T>): Promise<string> {
         // TODO: if left is order by column: set relation values...
         for (const relation of this.entityConnection.leftRelationsWithoutJoinTable) {
@@ -127,11 +147,11 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     async addAll(keys: string[]): Promise<void> {
         for (let key of keys) {
-            await this.addOrRemoveEntity(key, false);
+            await this._addOrRemoveEntity(key, false);
         }
     }
 
-    async addOrRemoveEntity(key: string, remove) {
+    protected async _addOrRemoveEntity(key: string, remove) {
         const method = remove ? "removeOrUnset" : "addOrSet";
         const entityKeyObject = EntityDataKey.parse(
             this.entityConnection.repository.metadata,
@@ -145,7 +165,7 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     async removeAll(keys: string[]): Promise<void> {
         for (let key of keys) {
-            await this.addOrRemoveEntity(key, true);
+            await this._addOrRemoveEntity(key, true);
         }
     }
 
@@ -158,13 +178,8 @@ export class EntityDataSource<T> extends DataSource<T> {
         }
     }
 
-
     @Lazy() get entityConnection(): ReturnType<typeof createEntityConnection> {
         return createEntityConnection(this)
-    }
-
-    @Lazy() get entityLoader(): ReturnType<typeof createEntityDataLoader> {
-        return createEntityDataLoader(this);
     }
 
 

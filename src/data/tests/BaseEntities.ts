@@ -1,11 +1,12 @@
 import {
+    BeforeInsert,
     ChildEntity,
     Column,
     Entity,
     JoinTable,
     ManyToMany,
     ManyToOne,
-    OneToMany,
+    OneToMany, PrimaryColumn,
     PrimaryGeneratedColumn,
     TableInheritance
 } from "typeorm";
@@ -16,12 +17,19 @@ import {Relation} from "../Relation";
 
 export const ModuleFileName = __filename;
 
+let randomId = 0;
+
 @Entity()
 @TableInheritance({column: "aType"})
 export class ABase {
 
-    @PrimaryGeneratedColumn()
-    aId: number;
+    @BeforeInsert()
+    setNewId() {
+        this.aId = `${this.constructor.name}_${++randomId}`
+    }
+
+    @PrimaryColumn()
+    aId: string;
 
     @Column()
     aType: string;
@@ -39,6 +47,9 @@ export class ABase {
     @Column({nullable: true})
     aText?: string;
 
+    @Column({nullable: true})
+    aNumber?: number;
+
 
 }
 
@@ -47,6 +58,9 @@ export class AChild1 extends ABase {
 
     @Column({nullable: true})
     aChild1Text?: string;
+
+    @Column({nullable: true})
+    aChild1Text2?: string;
 
     @ManyToOne(() => BBase, b => b.oneBToManyA)
     manyAChild1ToOneB?: Relation<BBase>;

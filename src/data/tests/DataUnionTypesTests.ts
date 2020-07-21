@@ -110,7 +110,7 @@ testSelection(${code});
 
         tester.sub(code => `
        let sel: DataSelection<AUnion>;
-       declare function asObject(value):T;
+       
         void(${code})`, tester => {
 
             tester.expectToBeValid(`sel!.unions!.aChild1`);
@@ -124,49 +124,49 @@ testSelection(${code});
 
     })
 
+    //
+    // debugType<DataSelection<AUnion>>(s => {
+    //
+    //
+    //     s.$debugType?.manyAToOneB!.bType;
+    //
+    //     if (typeof s.relations!.manyAToOneB === "object") {
+    //
+    //
+    //         debugTypeInto(s.relations!.manyAToOneB!, t => {
+    //
+    //             debugTypeInto(t.$debugBase!.T!
+    //                 [DataUnionMetaType]!.unionChildren, t => {
+    //
+    //                 void (t.bChild1);
+    //                 void (t.bChildX);
+    //
+    //
+    //             })
+    //
+    //         })
+    //         // s.relations?
+    //         // s.relations!.manyAToOneB.$debugMetaType
+    //
+    //         s.relations!.manyAToOneB.unions!.bChildX;
+    //         s.relations!.manyAToOneB.unions!.bChildX;
+    //         s.relations!.manyAToOneB.unions!.bChild1;
+    //
+    //     }
+    // })
 
-    debugType<DataSelection<AUnion>>(s => {
-
-
-        s.$debugType?.manyAToOneB!.bType;
-
-        if (typeof s.relations!.manyAToOneB === "object") {
-
-
-            debugTypeInto(s.relations!.manyAToOneB!, t => {
-
-                debugTypeInto(t.$debugBase!.T!
-                    [DataUnionMetaType]!.unionChildren, t => {
-
-                    void (t.bChild1);
-                    void (t.bChildX);
-
-
-                })
-
-            })
-            // s.relations?
-            // s.relations!.manyAToOneB.$debugMetaType
-
-            s.relations!.manyAToOneB.unions!.bChildX;
-            s.relations!.manyAToOneB.unions!.bChildX;
-            s.relations!.manyAToOneB.unions!.bChild1;
-
-        }
-    })
-
-    testSelection({
-        unions: {
-            aChild1: {}
-        },
-        relations: {
-            manyAToOneB: {
-                unions: {
-                    bChild1x: {}
-                }
-            }
-        }
-    });
+    // testSelection({
+    //     unions: {
+    //         aChild1: {}
+    //     },
+    //     relations: {
+    //         manyAToOneB: {
+    //             unions: {
+    //                 bChild1x: {}
+    //             }
+    //         }
+    //     }
+    // });
 
     testSelection({
         unions: {

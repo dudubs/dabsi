@@ -131,7 +131,8 @@ export type AsExp<T extends AnyDataUnion> = Union<{
             DataUnion.ChildTypeOf<DataUnion.ChildrenOf<T>[K]>
         )>
         >
-}>
+}>;
+
 export type DataExpType<T, E extends DataExp<T>> =
     E extends keyof T ? T[E] : any;
 

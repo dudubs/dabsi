@@ -1,3 +1,4 @@
+import {mapObject} from "../common/object/mapObject";
 import {Pluck, Type, Union} from "../common/typings";
 import {MapRelation, NonRelationKeys, RelationKeys, RelationTypeAt} from "./Relation";
 
@@ -13,6 +14,7 @@ export type DataUnion<T,
     unionChildren: Children;
     unionRelations: Relations;
 
+    // unionChildTypes: Record<string, any>;
 
 };
 
@@ -68,7 +70,7 @@ export declare namespace DataUnion {
             Row<U, K, Children, Relations> : never;
 
 
-    type ChildType<T> = new(...args: any[]) => any;
+    type ChildType<T> = (new(...args: any[]) => T) | AnyClass<T>;
 
     type ChildTypeOf<T> =
         T extends AnyClass<infer U> ? U :
@@ -93,12 +95,12 @@ export declare namespace DataUnion {
     // MetaType<DataUnion<T, K, Children, Relations>>&
         DataUnion<T, K, Children, Relations> & {
 
-        $debugUnion: DataUnion<T, K, Children, Relations>
-        $debugInstance: T;
+        // $debugUnion: DataUnion<T, K, Children, Relations>
+        // $debugInstance: T;
 
-        $debugChildTypeOf: {
-            [K in keyof Children]: ChildTypeOf<Children[K]>
-        }
+        // $debugChildTypeOf: {
+        //     [K in keyof Children]: ChildTypeOf<Children[K]>
+        // }
 
 
         new(): MetaType<DataUnion<T, K, Children, Relations>>
@@ -110,6 +112,7 @@ export declare namespace DataUnion {
 }
 
 export type AnyDataUnion = DataUnion<any, any, any, any>;
+
 
 
 export function DataUnion<T,
@@ -130,6 +133,9 @@ export function DataUnion<T,
     Class.unionType = type;
     Class.unionChildren = children;
     Class.unionRelations = relations;
+    Class.unionChildTypes = mapObject(children, (childOrType: AnyDataUnion | Type<any>) => {
+        return 'unionType' in childOrType ? childOrType.unionType : childOrType
+    })
 
     return <any>Class;
 

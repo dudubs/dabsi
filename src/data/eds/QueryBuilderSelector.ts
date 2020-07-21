@@ -1,6 +1,7 @@
 import {SelectQueryBuilder} from "typeorm";
 import {WeakMapFactory} from "../../common/map/mapFactory";
 
+export type ColumnLoader = (raw: object) => any;
 
 export class QueryBuilderSelector {
     aliasNameToAliasName: Record<string, string> = {};
@@ -14,6 +15,20 @@ export class QueryBuilderSelector {
     }
 
     // selectFromSchema(...)
+
+    protected counter = 0;
+
+    selectColumn(
+        prefix: string,
+        schema: string,
+        columnName: string
+    ): ColumnLoader {
+        return this.select(
+            columnName,
+            prefix + `c_${schema}_${columnName}_${++this.counter}`,
+            schema
+        )
+    }
 
     select(selection: string, aliasName: string/* TODO: optional*/,
            schema?: string/**/):
@@ -45,6 +60,7 @@ export class QueryBuilderSelector {
         return raw => raw[aliasName]
 
     }
+
     //
     // load(raw: object, aliasName: string) {
     //     return raw[this.aliasNameToAliasName[aliasName] ?? aliasName]

@@ -364,14 +364,3 @@ export abstract class DataExpTranslator<T, U>
     }
 }
 
-
-/*
-
-    $case:[
-        [{$isNull: ""}, ],
-
-        {default: ""}
-
-    ]
-
- */

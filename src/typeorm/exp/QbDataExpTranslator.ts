@@ -144,9 +144,6 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
 
         }
 
-        console.log({propertyName},
-            this.unionInfo?.unionRelations);
-
         const subTranslator =
             new QbDataExpTranslator<any>(subQb, rightSchema,
                 this.rootQb,
@@ -276,6 +273,7 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
 
     translateAs(unionKey: string, exp: DataExp<any>): string {
 
+        // TODO: Do not use Join?
         const childSchema = this.schema + '_As_' + unionKey;
         const childType = defined(this.unionInfo?.unionChildren[unionKey],
             () => `Not have union as "${unionKey}".`);

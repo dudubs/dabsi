@@ -71,7 +71,7 @@ export namespace DataCursor {
         if (relationSelection && (typeof relationSelection === "object")) {
             cursorAt.selection = <DataSelection.RelationToOne<any>>relationSelection;
         }
-        return cursorAt;
+        return <any>cursorAt;
     }
 
 
@@ -115,3 +115,5 @@ export namespace DataCursor {
 
 
 }
+
+

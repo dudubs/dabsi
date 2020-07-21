@@ -3,34 +3,8 @@ import {Lazy} from "../../../common/patterns/lazy";
 import {AnyDataUnion, DataUnion} from "../../../data/DataUnion";
 import {DataExp} from "../../../json-exp/DataExp";
 import {QbDataExpTranslator} from "../QbDataExpTranslator";
+import {JasmineTester} from "./JasmineTester";
 
-
-export class JasmineTester {
-    protected _focus = false;
-    protected _debug = false;
-
-    get foucs(): this {
-        this._focus = true;
-        return this;
-    }
-
-    get debug(): this {
-        this._debug = true;
-        return this;
-    }
-
-    test(title, callback) {
-        const {_debug} = this;
-        this._debug = false;
-        (this._focus ? fit : it)(title, async () => {
-            this._debug = _debug;
-            await callback();
-            this._debug = false;
-        });
-        this._focus = false;
-    }
-
-}
 
 export class QbExpTester<T> extends JasmineTester {
     constructor(
@@ -48,7 +22,6 @@ export class QbExpTester<T> extends JasmineTester {
     @Lazy() get repository(): Repository<T> {
         return this.getConnection().getRepository(this.entityType)
     }
-
 
     get unionInfo(): AnyDataUnion | undefined {
         if ('unionType' in this.type) {
@@ -79,9 +52,25 @@ export class QbExpTester<T> extends JasmineTester {
     }
 
 
+    testExp(exp, callback, onError?) {
+        return this.describe(JSON.stringify(exp)).test(async () => {
+            try {
+                callback(
+                    await this.getOneRowWhereExp(exp)
+                );
+            } catch (err) {
+                if (onError) {
+                    await onError(err)
+                } else {
+                    throw err;
+                }
+            }
+        })
+    }
+
     expectToNotExists<U = T>(exp: DataExp<U>) {
-        this.test(JSON.stringify(exp), async () => {
-            if (await this.getOneRowWhereExp(exp)) {
+        this.testExp(exp, (row) => {
+            if (row) {
                 fail(`expected to not exists`)
             }
         })
@@ -89,21 +78,25 @@ export class QbExpTester<T> extends JasmineTester {
 
 
     expectToExists<U = T>(exp: DataExp<U>) {
-        this.test(JSON.stringify(exp), async () => {
-            if (!await this.getOneRowWhereExp(exp)) {
+        this.testExp(exp, (row) => {
+            if (!row) {
                 fail(`expected to exists`)
             }
         })
     }
 
     expectToError<U = T>(exp: DataExp<U>) {
-        this.test(JSON.stringify(exp), async () => {
-            try {
-                await this.getOneRowWhereExp(exp);
-            } catch (e) {
-                return;
-            }
+        this.testExp(exp, () => {
             fail(`expected to error.`)
+        },()=>{
+            ///
         })
     }
 }
+
+
+/*
+
+    DogType = "dog";
+
+ */

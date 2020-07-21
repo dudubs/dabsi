@@ -49,7 +49,7 @@ testm(__filename, () => {
     });
 
 
-    fdescribe('unions', () => {
+    describe('unions', () => {
 
         const t = new QbExpTester(getConnection, AUnion);
 

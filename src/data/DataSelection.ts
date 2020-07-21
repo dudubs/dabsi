@@ -74,9 +74,6 @@ export declare namespace DataSelection {
 
         unions?: Unions<DataUnion.MetaTypeOf<T>>;
 
-        $debugType?: T;
-        $debugMetaType?: DataUnion.MetaTypeOf<T>
-
 
     };
 
@@ -144,7 +141,7 @@ export namespace DataSelection {
             s2.fields
         );
 
-        if (isPickKeys(s2)) {
+        if (hasPickKeys(s2)) {
             const fields = {...s1.fields, ...translatedFields};
             return {
                 pick: s2.pick.filter(k => !(k in fields)),
@@ -153,7 +150,7 @@ export namespace DataSelection {
             }
         }
 
-        if (isOmitKeys(s2)) {
+        if (hasOmitKeys(s2)) {
             const fields = {...s1.fields, ...translatedFields};
             for (const key in s2.omit) {
                 delete fields[key];
@@ -180,15 +177,59 @@ export namespace DataSelection {
 
     }
 
-    function isOmitAll(value): value is OmitAll<any> {
+    export enum InfoType {
+        pick,
+        omit,
+        omitAll,
+        pickAll
+    }
+
+    export type Info =
+        { type: InfoType.omit, keys: Set<string> }
+        | { type: InfoType.pick, keys: Set<string> }
+        | { type: InfoType.omitAll }
+        | { type: InfoType.pickAll };
+
+    export function getInfo(selection: DataSelection<any>): Info {
+        if ('pick' in selection) {
+            return {type: InfoType.pick, keys: new Set(selection.pick)}
+        }
+
+        if ('omit' in selection) {
+            if (selection.omit === 'all')
+                return {type: InfoType.omitAll}
+            return {type: InfoType.omit, keys: new Set(selection.omit)}
+        }
+
+        return {type: InfoType.pickAll}
+    }
+
+    export function isOmitAll(value): value is OmitAll<any> {
         return value?.omit === 'all'
     }
 
-    function isOmitKeys(value): value is OmitKeys<any, any> {
+    export function hasOmitKeys(value): value is OmitKeys<any, any> {
         return Array.isArray(value?.omit)
     }
 
-    function isPickKeys(value): value is PickKeys<any, any> {
+    export function hasPickKeys(value): value is PickKeys<any, any> {
         return Array.isArray(value?.pick)
+    }
+
+    export function selectKeys(
+        selection: DataSelection<any>,
+        keys: string[],
+    ): string[] {
+        if (hasPickKeys(selection)) {
+            const pickKeys = new Set(selection.pick);
+            return keys.filter(key => pickKeys.has(key))
+        }
+        if (hasOmitKeys(selection)) {
+            const omitKeys = new Set(selection.omit);
+            return keys.filter(key => !omitKeys.has(key));
+        }
+        if (isOmitAll(selection))
+            return [];
+        return keys;
     }
 }

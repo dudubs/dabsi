@@ -97,19 +97,6 @@ export class TypeScriptTester {
         return tester
     }
 
-    scope(getCode, callback) {
-        callback({
-            expectToBeValid: code =>
-                this.expectToBeValid(getCode(code)),
-            expectToBeInvalid: code =>
-                this.expectToBeInvalid(getCode(code)),
-            scope: (subGetCode, callback) => this.scope(
-                code => subGetCode(getCode(code)),
-                callback
-            )
-        })
-    }
-
     defineVar(title, moduleCode: string, varCode: string) {
         const varName = `Var${++counter}`;
         const fileName = this.expectToBeValid(title, `${moduleCode};

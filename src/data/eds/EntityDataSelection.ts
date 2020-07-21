@@ -43,6 +43,7 @@ export namespace EntityDataSelection {
         const entityMetadata = getSchemaMetadata(qb, schema);
         const entityDataInfo = getEntityDataInfo(entityMetadata);
 
+
         const hasPick = 'pick' in selection;
         const hasOmit = 'omit' in selection;
         const omitAll = hasOmit && (
@@ -242,7 +243,7 @@ export namespace EntityDataSelection {
                 const value = keyLoader(raw);
                 if (value == null)
                     return;
-                key.push(keyLoader(raw));
+                key.push(value);
             }
 
             row.$key = primaryColumnsLoaders.length === 1 ?

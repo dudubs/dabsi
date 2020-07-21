@@ -17,13 +17,26 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
     // TODO: use EntityMetadata.propertyMap
     const propertyNameToRelationMetadata: Record<string, RelationMetadata> = {};
     const propertyNameToTransformer: Record<string, ValueTransformer> = {};
-
+    const propertyNameToColumn: Record<string, ColumnMetadata> = {};
+    const nonRelationColumnsPropertyName: string[] = [];
     const dataColumns: ColumnMetadata[] = [];
+
 
     for (const column of metadata.columns) {
 
+        propertyNameToColumn[column.propertyName] = column;
+
+
         if (!column.relationMetadata) {
             dataColumns.push(column);
+            if (column.target === metadata.target || (
+
+                (<Function>metadata.target).prototype
+                instanceof
+                (<Function>column.target)
+            )) {
+                nonRelationColumnsPropertyName.push(column.propertyName)
+            }
         }
 
         setDefinedValue(propertyNameToTransformer, column.propertyName,
@@ -38,13 +51,14 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
     }
 
     return {
-
+        propertyNameToColumn,
+        nonRelationColumnsPropertyName,
         propertyNameToTransformer,
 
         propertyNameToRelationMetadata,
         primaryPropertyNameToIndex: mapArrayToObject(metadata.primaryColumns,
             (column, index) => [column.propertyName, index]),
-        dataColumns
+        dataColumns,
 
     }
 })

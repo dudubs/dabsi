@@ -31,7 +31,7 @@ export class AEntity {
     aText: string;
 
     @Column({nullable: true})
-    a_number: number;
+    aNumber: number;
 
     @OneToOne(() => BEntity, b => b.a)
     @JoinColumn()

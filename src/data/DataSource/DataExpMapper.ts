@@ -80,3 +80,17 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
     }
 
 }
+
+
+/*
+
+
+    EntityDataSource.create(AUnion)
+        .as("aChild1")
+
+
+
+
+
+
+ */

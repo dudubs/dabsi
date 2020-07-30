@@ -1,5 +1,6 @@
-import {ArrayTypeOrObject, Expression, ExtractKeys, Union} from "../common/typings";
-import {AnyDataUnion, DataUnion} from "../data/DataUnion";
+import {Expression, ExtractKeys, Union} from "../common/typings";
+import {DataUnion} from "../data/DataUnion";
+import {MetaType} from "../data/MetaType";
 import {RelationKeys, RelationToManyKeys, RelationTypeAt} from "../data/Relation";
 import {IndexedSeq} from "../immutable2";
 
@@ -82,7 +83,7 @@ export type DataExpOperatorsTypes<T> = {
 
     $or: DataExp<T>[];
 
-    $value: Parameter;
+    $parameter: Parameter;
 
     $length: DataExp<T>;
 
@@ -103,35 +104,49 @@ export type DataExpOperatorsTypes<T> = {
     $ifNull: [DataExp<T>, DataExp<T>];
 
     // to-one relations
-    $at: Union<{
-        [K in ExtractKeys<Required<T>, object>]:
-        Record<K, DataExp<ArrayTypeOrObject<T[K]>>>
-    }>;
+    $at: AtExp<T>;
 
     // to-many relations
     $count: RelationToManyKeys<T> | Union<{
         [K in RelationToManyKeys<T>]:
-        Record<K, DataExp<RelationTypeAt<T, K>>>
+        Record<K, RelationAtExp<T, K>>
     }>;
 
-    $has: RelationToManyKeys<T> | Union<{
-        [K in RelationKeys<T>]:
-        Record<K, DataExp<RelationTypeAt<T, K>>>
-    }>;
+    // to-many relations
+    $has: HasExp<T>;
 
+    $notHas: HasExp<T>;
 
-    $as: AsExp<DataUnion.MetaTypeOf<T>>
+    $as: AsExp<T>
 
 }
-
-export type AsExp<T extends AnyDataUnion> = Union<{
-    [K in keyof DataUnion.ChildrenOf<T>]:
-    Record<K,
-        DataExp<(
-            DataUnion.ChildTypeOf<DataUnion.ChildrenOf<T>[K]>
-        )>
-        >
+export  type HasExp<T> = RelationToManyKeys<T> | Union<{
+    [K in RelationKeys<T>]:  Record<K, RelationAtExp<T, K>>
 }>;
+
+type RelationAtExp<T, RelationKey extends RelationKeys<T>> =
+    DataExp<_RelationAtExp<T, RelationKey, RelationTypeAt<T, RelationKey>>>;
+
+
+type _RelationAtExp<T, K extends RelationKeys<T>, RelationType> =
+    K extends keyof DataUnion.RelationsOf<T> ?
+        DataUnion.RelationsOf<T>[K] :
+        RelationType;
+
+
+export type AtExp<T> = Union<{
+    [K in RelationKeys<T>]:
+    Record<K, RelationAtExp<T, K>>
+}>;
+
+
+export type AsExp<T> = MetaType.Of<T> extends//
+    DataUnion<infer U, infer TypeKey, infer Children, infer Relations> ?
+    Union<{
+        [ChildKey in keyof Children]:
+        Record<ChildKey, DataExp<Children[ChildKey]>>
+    }> : never;
+
 
 export type DataExpType<T, E extends DataExp<T>> =
     E extends keyof T ? T[E] : any;

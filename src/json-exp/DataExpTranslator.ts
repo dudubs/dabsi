@@ -98,7 +98,7 @@ export abstract class DataExpTranslator<T, U>
                         value.map(value => [value])
                     );
             }
-            return this.translate([left, <CompareOperator>op, {$value: value}]);
+            return this.translate([left, <CompareOperator>op, {$parameter: value}]);
         }
         throw new TypeError(`Invalid JSONArrayExp ${exp}`);
     }
@@ -168,13 +168,13 @@ export abstract class DataExpTranslator<T, U>
                     return this.translate([
                         <StringDataExp<T>>key,
                         <CompareOperator>op,
-                        {$value: value}
+                        {$parameter: value}
                     ])
                 }
             case "boolean":
             case "string":
             case "number":
-                return this.translateCompareExp("$equals", key, {$value: fieldExp});
+                return this.translateCompareExp("$equals", key, {$parameter: fieldExp});
         }
         throw new TypeError(`Invalid FieldExp ${key}: ${JSON.stringify(fieldExp)}`)
     }
@@ -202,7 +202,7 @@ export abstract class DataExpTranslator<T, U>
     }
 
 
-    abstract translateCountExp(propertyName: string, subExp: DataExp<any>): U;
+    abstract translateCount(propertyName: string, subExp: DataExp<any>): U;
 
     abstract translateAt(key: string, exp: DataExp<any>): U;
 
@@ -231,7 +231,7 @@ export abstract class DataExpTranslator<T, U>
         return this.translateAs(asKey, asExp);
     }
 
-    $at(exp: DataExpOperatorsTypes<T>["$at"]): U {
+    $at(exp: DataExpOperatorsTypes<any>["$at"]): U {
         const [key, subExp] = firstDefinedEntry(exp);
         return this.translateAt(<any>key, subExp)
     }
@@ -259,24 +259,34 @@ export abstract class DataExpTranslator<T, U>
 
     $count(exp: DataExpOperatorsTypes<T>["$count"]): U {
         if (typeof exp === "string") {
-            return this.translateCountExp(exp, undefined);
+            return this.translateCount(exp, undefined);
         } else if (typeof exp === "object") {
             const [propertyName, subExp] = firstDefinedEntry(exp)
-            return this.translateCountExp(propertyName, subExp);
+            return this.translateCount(propertyName, subExp);
         }
         throw new TypeError()
     }
 
-    abstract translateHasExp(propertyName: string, subExp: DataExp<any>): U;
 
-    $has(exp: DataExpOperatorsTypes<T>["$has"]): U {
+    abstract translateHas(
+        inverse: boolean,
+        propertyName: string,
+        exp: DataExp<any>
+    ): U;
+
+    $has(exp: DataExpOperatorsTypes<T>["$has"], inverse = false): U {
         if (typeof exp === "string") {
-            return this.translateHasExp(exp, undefined)
+            return this.translateHas(inverse, exp, undefined)
         } else if (typeof exp === "object") {
             const [propertyName, subExp] = firstDefinedEntry(exp)
-            return this.translateHasExp(propertyName, subExp);
+            return this.translateHas(inverse, propertyName, subExp);
         }
         throw new TypeError(`Invalid "has" Exp`)
+    }
+
+    // TODO: translateHas(inverse, ...
+    $notHas(exp: DataExpOperatorsTypes<T>["$has"]): U {
+        return this.$has(exp, true)
     }
 
     $search(exp: DataExpOperatorsTypes<T>["$search"]): U {
@@ -301,12 +311,12 @@ export abstract class DataExpTranslator<T, U>
                 words.map(word => [
                     searchInExp,
                     inverse ? "$notContains" : "$contains",
-                    {$value: word}
+                    {$parameter: word}
                 ])
         });
     }
 
-    $value(exp: DataExpOperatorsTypes<T>["$value"]): U {
+    $parameter(exp: DataExpOperatorsTypes<T>["$parameter"]): U {
         return this.translateValue(exp);
     }
 
@@ -315,7 +325,7 @@ export abstract class DataExpTranslator<T, U>
         const $concat: DataExp<T>[] = [];
         for (const [index, exp] of exps.entries()) {
             if (index)
-                $concat.push({$value: sep})
+                $concat.push({$parameter: sep})
             $concat.push(exp);
         }
         return this.translate({$concat});

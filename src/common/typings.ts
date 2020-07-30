@@ -29,16 +29,17 @@ export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;
 export type Pluck<T, K extends PropertyKey, U = never> =
     K extends keyof Required<T> ? T[K] : U;
 
-export type PartialKeys<T, K extends keyof T> =
+export type PartialKeys<T, K extends PropertyKey> =
     Omit<T, K> &
-    Partial<Pick<T, K>>;
+    Partial<Pick<T, Extract<K,keyof T>>>;
 
 
 export function Nullable<T>(value?: T): T | Nullable {
     return value;
 }
 
-export type Type<T> = { prototype: T } & Function;
+export type Type<T> = Function & { prototype: T };
+
 export type TypeType<T extends Type<any>> =
     T extends Type<infer U> ? U : never;
 
@@ -49,18 +50,12 @@ export function Type<T>(): Type<T> {
     return Type
 }
 
-export type Actions<T> = Union<{
-    [K in keyof T]: { type: K } & T[K]
-}>
-
 
 export type Assign<T, U> = Omit<T, keyof Required<U>> & U;
 
 
 export type ArrayTypeOrObject<T> =
     T extends Array<infer U> ? U : Extract<T, object>;
-
-export type ArrayType<T extends any[]> = T extends Array<infer U> ? U : never;
 
 
 export type UndefinedArgs<T> =
@@ -106,5 +101,7 @@ export type Method = (...args: any[]) => any;
 
 
 export type Pass<T, A = never, B = never, C = never, D = never> = T;
-export type IfNever<T, U,E=never> = T | U extends U ? U : E;
-export type IfNotNever<T, U> = T | U extends U ? never : U;
+export type IsNever<T> = [T] extends [never] ? true : false;
+export type IfNever<T, U, E = never> = IsNever<T> extends true ? U : E;
+export type IfNotNever<T, U, E = never> = IfNever<T, E, U>;
+export type If<T, U, S> = T extends U ? S : never;

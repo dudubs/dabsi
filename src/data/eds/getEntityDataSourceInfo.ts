@@ -3,20 +3,22 @@ import {last} from "../../common/array/last";
 import {EntityRelation} from "../../typeorm/relations";
 import {EntityDataCursor} from "./EntityDataCursor";
 import {EntityDataSource} from "./EntityDataSource";
+import {getEntityDataInfo} from "./getEntityDataInfo";
 
-export function createEntityConnection(source: EntityDataSource<any>) {
+export function getEntityDataSourceInfo(source: EntityDataSource<any>) {
 
     const connection = getConnection();
     const cursor = EntityDataCursor.create(connection, source.cursor, source.mainEntityType);
-    const repository = connection.getRepository(cursor.entityType);
+    const repository = connection.getRepository(cursor.typeInfo.type);
 
     const inverseLeftRelationsWithoutJoinTable: EntityRelation[] = [];
     const leftRelationsWithoutJoinTable: EntityRelation[] = [];
 
+
     {
-        const ownerRelation = last(cursor.owners)?.relation;
+        const ownerRelation = last(cursor.location)?.relation;
         ownerRelation && addRelation(ownerRelation);
-        cursor.relations.forEach(addRelation);
+        cursor.relationKeys.forEach(addRelation);
 
         function addRelation(relation: EntityRelation) {
             if (relation.isLeftOwningWithoutJoinTable()) {
@@ -33,6 +35,10 @@ export function createEntityConnection(source: EntityDataSource<any>) {
         cursor,
         leftRelationsWithoutJoinTable,
         inverseLeftRelationsWithoutJoinTable,
+
+        entityInfo: getEntityDataInfo(
+            connection.getMetadata(cursor.typeInfo.type)
+        )
     }
 
     function getConnection(): Connection {

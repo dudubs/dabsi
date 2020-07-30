@@ -1,8 +1,8 @@
 import {SelectQueryBuilder} from "typeorm";
-import {EntityMetadata} from "typeorm/metadata/EntityMetadata";
+import {inspect} from "util";
 import {defined} from "../../common/object/defined";
 import {definedAt} from "../../common/object/definedAt";
-import {AnyDataUnion, DataUnion} from "../../data/DataUnion";
+import {DataTypeInfo} from "../../data/DataTypeInfo";
 import {createQbArrayParameter, createQbParameter} from "../../data/eds/createQueryBuilderParameter";
 import {EntityDataKey} from "../../data/eds/EntityDataKey";
 import {CompareOperator, DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../json-exp/DataExp";
@@ -17,7 +17,7 @@ const SQLOperators: Record<NamedCompareOperator, string> = {
     $lessThan: '<',
     $lessThanOrEqual: '<=',
     $greaterThan: '>',
-    $greaterThanOrEqual: '=>',
+    $greaterThanOrEqual: '>=',
 
     $startsWith: ' LIKE ',
     $endsWith: ' LIKE ',
@@ -31,10 +31,12 @@ const SQLOperators: Record<NamedCompareOperator, string> = {
 export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
 
 
-    constructor(public qb: SelectQueryBuilder<T>,
-                public schema: string,
-                public rootQb: SelectQueryBuilder<T>,
-                public unionInfo: AnyDataUnion | undefined) {
+    constructor(
+        public typeInfo: DataTypeInfo,
+        public qb: SelectQueryBuilder<T>,
+        public schema: string,
+        public rootQb: SelectQueryBuilder<T>
+    ) {
         super();
 
     }
@@ -78,14 +80,17 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
     translateCompare(op: CompareOperator, left: string, right: string): string {
         switch (op) {
             case "$startsWith":
+            case "$notStartsWith":
                 right = this.translateConcat([right, "'%'"]);
                 break;
 
             case "$endsWith":
+            case "$notEndsWith":
                 right = this.translateConcat(["'%'", right]);
                 break;
 
             case "$contains":
+            case "$notContains":
                 right = this.translateConcat(["'%'", right, "'%'"]);
                 break;
         }
@@ -94,13 +99,13 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
     }
 
 
-    get schemaMetadata(): EntityMetadata {
-        return defined(this.qb.expressionMap.aliases
-            .find(alias => alias.name === this.schema), () =>
-            `No schemaMetadata ${this.schema}`)
-            .metadata;
-    }
-
+    // get schemaMetadata(): EntityMetadata {
+    //     return defined(this.qb.expressionMap.aliases
+    //         .find(alias => alias.name === this.schema), () =>
+    //         `No schemaMetadata ${this.schema}`)
+    //         .metadata;
+    // }
+    //
 
     translateSubQuery(propertyName: string,
                       where: DataExp<any>,
@@ -110,7 +115,7 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
 
 
         const relation = new EntityRelation(this.qb.connection,
-            <Function>this.schemaMetadata.target,
+            this.typeInfo.type,
             propertyName, false);
 
         if (!relation.isToMany)
@@ -145,9 +150,12 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
         }
 
         const subTranslator =
-            new QbDataExpTranslator<any>(subQb, rightSchema,
-                this.rootQb,
-                this.unionInfo?.unionRelations[propertyName]
+            new QbDataExpTranslator<any>(
+                this.typeInfo.relations?.[propertyName] ||
+                DataTypeInfo.get(relation.right.entityType),
+                subQb,
+                rightSchema,
+                this.rootQb
             )
 
         callback(subTranslator.qb, subTranslator);
@@ -161,17 +169,20 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
     }
 
 
-    translateCountExp(propertyName: string, subExp: DataExp<any>): string {
+    translateCount(propertyName: string, subExp: DataExp<any>): string {
         return this.translateSubQuery(propertyName, subExp, subQb => {
             subQb.select('COUNT(*)')
         })
     }
 
-    translateHasExp(propertyName: string, subExp: DataExp<any>): string {
-        return this.translateSubQuery(propertyName, subExp, subQb => {
+    translateHas(inverse: boolean, propertyName: string, exp: DataExp<any>): string {
+        const sql = this.translateSubQuery(propertyName, exp, subQb => {
             subQb.select('COUNT(*)').take(1)
-        })
+        });
+
+        return inverse ? "0=" + sql : sql;
     }
+
 
     counter = 0;
 
@@ -197,24 +208,27 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
 
     translateAt(propertyName: string, exp: DataExp<any>): string {
 
-
         const relation = new EntityRelation(this.qb.connection,
-            <Function>this.schemaMetadata.target, propertyName, false);
+            this.typeInfo.type, propertyName, false);
 
         if (!relation.isToOne)
             throw new Error(`$at support in relation to-one only.`)
 
         const rightSchema = relation.join("LEFT", this.qb, this.schema);
 
-        return new QbDataExpTranslator(this.qb, rightSchema, this.rootQb,
-            this.unionInfo?.unionRelations?.[propertyName]
+        return new QbDataExpTranslator(
+            this.typeInfo.relations?.[propertyName] ||
+            DataTypeInfo.get(relation.right.entityType),
+            this.qb, rightSchema, this.rootQb
         ).translate(exp);
     }
 
     translateIs(inverse: boolean, keys: string[]): string {
 
-        const {schemaMetadata, qb: {connection: {driver}}} = this;
+        const {qb: {connection: {driver}}} = this;
         const escapedSchema = driver.escape(this.schema);
+        const schemaMetadata = this.qb.connection.getMetadata(this.typeInfo.type);
+
         if (schemaMetadata.primaryColumns.length === 1) {
             const column = schemaMetadata.primaryColumns[0];
             return `${escapedSchema}.${driver.escape(column.databaseName)}${inverse ? " NOT" : ""} IN (${
@@ -274,52 +288,47 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
     translateAs(unionKey: string, exp: DataExp<any>): string {
 
         // TODO: Do not use Join?
-        const childSchema = this.schema + '_As_' + unionKey;
-        const childType = defined(this.unionInfo?.unionChildren[unionKey],
+
+        const childTypeInfo = defined(this.typeInfo.children?.[unionKey],
             () => `Not have union as "${unionKey}".`);
 
-        if (!this.qb.expressionMap.joinAttributes.find(j => j.alias.name === childSchema)) {
 
-            const childMetadata = this.qb.connection.getMetadata(
-                'unionType' in childType ? childType.unionType : childType
-            );
+        const childMetadata = this.qb.connection.getMetadata(
+            childTypeInfo.type
+        );
 
-            const escapedColumnDatabaseName = this.driver.escape(
-                childMetadata.discriminatorColumn!.databaseName);
 
-            this.qb.leftJoin(childMetadata.target, childSchema,
-                childMetadata.primaryColumns
-                    .toSeq()
-                    .map(column => `${this.schema}.${column.databaseName}=${childSchema}.${column.databaseName}`)
-                    .concat([
-                        `${childSchema}.${escapedColumnDatabaseName} IN (${
-                            createQbArrayParameter(this.rootQb,
-                                childMetadata.childEntityMetadatas
-                                    .toSeq()
-                                    .concat([childMetadata])
-                                    .map(child => child.discriminatorValue)
-                                    .toArray()
-                            )
-                        })`
-                    ])
-                    .join(' AND ')
-            );
+        return new QbDataExpTranslator(childTypeInfo, this.qb, this.schema, this.rootQb,).translate({
+            $and: [
+                <DataExp<T>>{
+                    [childMetadata.discriminatorColumn!.propertyName]: {
+                        $in: childMetadata.childEntityMetadatas
+                            .toSeq()
+                            .map(child => child.discriminatorValue!)
+                            .concat([childMetadata.discriminatorValue!])
+                            .toArray()
+                    }
+                },
+                exp
+            ]
+        })
 
-        }
-
-        return new QbDataExpTranslator(
-            this.qb, childSchema, this.rootQb,
-            'unionType' in childType ? childType : undefined
-        ).translate(exp)
     }
 
 
     static translate<T = any>(this: typeof QbDataExpTranslator,
                               qb: SelectQueryBuilder<T>,
                               exp: DataExp<T>,
-                              unionInfo?: AnyDataUnion,
                               schema: string = qb.alias): string {
-        return new this(qb, schema, qb, unionInfo).translate(exp);
+        return new this(
+            DataTypeInfo.get(
+                <Function>qb.expressionMap.aliases.find(alias => alias.name === qb.alias)!
+                    .metadata.target
+            ),
+            qb,
+            schema,
+            qb,
+        ).translate(exp);
     }
 }
 

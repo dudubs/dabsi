@@ -10,32 +10,35 @@ export type RelationMap<T> = {
     DataLoadMapValue<T[K]>
 };
 
-export type DataCursorOwner<T = any> = {
-    constants: Record<string, string>,
+export type DataCursorPath<T = any> = {
+    keys: Record<string, string|number>,
     filter: DataExp<T>,
     propertyName: string,
-    key: string
+    key: string,
+    type: string
 };
 
 
 export const EmptyDataCursor: DataCursor = {
     selection: {},
-    owners: [],
-    constants: {},
+    location: [],
+    keys: {},
     filter: undefined,
     skip: 0,
     take: 0,
     order: [],
-    type: null
+    type: ""
 };
 
 // TODO: change to type, EmptyDataCursor const.
 export type DataCursor<T = any> = {
 
-    type: string | null;
+    location: DataCursorPath[];
+
+    type: string;
 
     filter: DataExp<any>;
-    constants: Record<string, string>;
+    keys: Record<string, string|number>;
 
     selection: DataSelection<T>;
 
@@ -45,9 +48,8 @@ export type DataCursor<T = any> = {
 
     order: DataOrder<T>[];
 
-    owners: DataCursorOwner[];
-
 }
+
 
 export namespace DataCursor {
 
@@ -58,12 +60,13 @@ export namespace DataCursor {
         DataCursor<ArrayTypeOrObject<T[K]>> {
         const cursorAt: DataCursor = {
             ...EmptyDataCursor,
-            owners: [...cursor.owners,
+            location: [...cursor.location,
                 {
                     filter: cursor.filter,
-                    constants: cursor.constants,
+                    keys: cursor.keys,
                     propertyName,
-                    key
+                    key,
+                    type: cursor.type
                 }],
         };
 
@@ -80,40 +83,40 @@ export namespace DataCursor {
                                              key: string): DataCursor<T> {
         return {
             ...cursor,
-            constants: {...cursor.constants, [propertyName]: key}
+            keys: {...cursor.keys, [propertyName]: key}
         }
     }
 
 
     export function concat(left: DataCursor, right: DataCursor): DataCursor {
-        if (right.owners.length) {
+        if (right.location.length) {
             return {
                 ...right,
-                owners: [...left.owners,
-                    ...right.owners
+                location: [...left.location,
+                    ...right.location
                 ],
+                selection: DataSelection.merge(
+                    left.selection,
+                    right.selection
+                )
             }
         }
         return {
-            owners: left.owners,
-            constants: {...right.constants, ...left.constants},
+            location: left.location,
+            keys: {...right.keys, ...left.keys},
             filter: DataExp(left.filter, right.filter),
-            selection: right.selection,
+            selection: DataSelection.merge(
+                left.selection,
+                right.selection
+            ),
             skip: right.skip,
             take: right.take,
             order: right.order,
-            type: null
+            type: ""
 
-            // old
-            // fields: right.fields,
-            // exclude: right.exclude,
-            // excludeAll: right.excludeAll,
-            // relationMap: isEmptyObject(right.relationMap) ?
-            //     left.relationMap : right.relationMap, // merge
         }
     }
 
 
 }
-
 

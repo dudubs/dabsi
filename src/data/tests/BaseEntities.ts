@@ -3,175 +3,213 @@ import {
     ChildEntity,
     Column,
     Entity,
-    JoinTable,
-    ManyToMany,
-    ManyToOne,
-    OneToMany, PrimaryColumn,
+    PrimaryColumn,
     PrimaryGeneratedColumn,
     TableInheritance
 } from "typeorm";
-import {DataSelector} from "../DataSelector";
+import {TestRelation} from "../../typeorm/relations/tests/TestRelation";
 import {DataUnion} from "../DataUnion";
 import {Relation} from "../Relation";
 
 
-export const ModuleFileName = __filename;
-
 let randomId = 0;
 
 @Entity()
-@TableInheritance({column: "aType"})
-export class ABase {
+@TableInheritance({column: "dType"})
+export class DBase {
 
     @BeforeInsert()
     setNewId() {
-        this.aId = `${this.constructor.name}_${++randomId}`
+        this.dId = `${this.constructor.name}_${++randomId}`
     }
 
     @PrimaryColumn()
-    aId: string;
+    dId: string;
 
     @Column()
-    aType: string;
-
-    @ManyToOne(() => BBase)
-    manyAToOneB?: Relation<BBase>;
-
-    @ManyToMany(() => BBase, b => b.manyBToManyAOwner)
-    manyAToManyB?: Relation<BBase>[];
-
-    @ManyToMany(() => BBase, b => b.manyBToManyA)
-    @JoinTable()
-    manyAToManyBOwner?: Relation<BBase>[];
+    dType: string;
 
     @Column({nullable: true})
-    aText?: string;
+    dText?: string;
 
     @Column({nullable: true})
-    aNumber?: number;
+    dNumber?: number;
+
+    @TestRelation(() => EBase)
+    oneDToOneE?: Relation<EBase>;
+
+    @TestRelation(() => EBase)
+    oneDToOneEOwner?: Relation<EBase>;
+
+    @TestRelation(() => EBase)
+    oneDToManyE?: Relation<EBase>[];
+
+    @TestRelation(() => EBase)
+    manyDToOneE?: Relation<EBase>;
+
+    @TestRelation(() => EBase)
+    manyDToManyE?: Relation<EBase>[];
+
+    @TestRelation(() => EBase)
+    manyDToManyEOwner?: Relation<EBase>[];
 
 
 }
 
 @ChildEntity()
-export class AChild1 extends ABase {
+export class DChild1 extends DBase {
 
     @Column({nullable: true})
-    aChild1Text?: string;
+    dChild1Text?: string;
 
     @Column({nullable: true})
-    aChild1Text2?: string;
+    dChild1Text2?: string;
 
-    @ManyToOne(() => BBase, b => b.oneBToManyA)
-    manyAChild1ToOneB?: Relation<BBase>;
+    @TestRelation(() => EBase)
+    manyDChild1ToOneE?: Relation<EBase>;
 
-    @ManyToMany(() => BBase, b => b.manyBToManyA)
-    @JoinTable()
-    manyAChild1ToManyBOwner?: Relation<BBase>[];
+    @TestRelation(() => EBase)
+    manyDChild1ToManyEOwner?: Relation<EBase>[];
 
-    @ManyToMany(() => BBase, b => b.manyBToManyAOwner)
-    manyAChild1ToManyB?: Relation<BBase>[];
+    @TestRelation(() => EBase)
+    manyDChild1ToManyE?: Relation<EBase>[];
+
+    @TestRelation(() => EBase)
+    oneDChild1ToOneEOwner?: Relation<EBase>;
+
+    @TestRelation(() => EBase)
+    oneDChild1ToOneE?: Relation<EBase>;
+
+    @TestRelation(() => EBase)
+    oneDChild1ToManyE?: Relation<EBase>[];
 }
 
 @ChildEntity()
-export class AChild2 extends ABase {
+export class DChild2 extends DBase {
 
     @Column({nullable: true})
-    aChild2Text?: string;
+    dChild2Text?: string;
 }
 
 @ChildEntity()
-export class AChild1Child1 extends AChild1 {
+export class DChild1Child1 extends DChild1 {
 
     @Column({nullable: true})
-    aChild1Child1Text?: string;
+    dChild1Child1Text?: string;
 }
 
 @Entity()
-@TableInheritance({column: "bType"})
-export class BBase {
+@TableInheritance({column: "eType"})
+export class EBase {
 
     @PrimaryGeneratedColumn()
-    bId: number;
+    eId: number;
 
     @Column()
-    bType: string;
+    eType: string;
 
     @Column({nullable: true})
-    bText: string;
+    eText: string;
+
+    @TestRelation(() => DBase)
+    oneEToOneDOwner?: Relation<DBase>;
+
+    @TestRelation(() => DBase)
+    oneEToOneD?: Relation<DBase>;
+
+    @TestRelation(() => DBase)
+    manyEToOneD?: Relation<DBase>;
+
+    @TestRelation(() => DBase)
+    oneEToManyD?: Relation<DBase>[];
+
+    @TestRelation(() => DBase)
+    manyEToManyDOwner?: Relation<DBase>[];
+
+    @TestRelation(() => DBase)
+    manyEToManyD?: Relation<DBase>[];
 
 
-    @OneToMany(() => ABase, a => a.manyAToOneB)
-    oneBToManyA?: Relation<ABase>;
+    @TestRelation(() => DChild1)
+    manyEToOneDChild1?: Relation<DChild1>;
 
-    @ManyToMany(() => ABase, a => a.manyAToManyBOwner)
-    manyBToManyA?: Relation<BBase>[];
+    @TestRelation(() => DChild1)
+    manyEToManyDChild1Owner?: Relation<DChild1>[];
 
-    @ManyToMany(() => ABase, a => a.manyAToManyB)
-    @JoinTable()
-    manyBToManyAOwner?: Relation<ABase>[];
+    @TestRelation(() => DChild1)
+    manyEToManyDChild1?: Relation<DChild1>[];
 
-    @OneToMany(() => AChild1, aChild1 => aChild1.manyAChild1ToOneB)
-    manyBToOneAChild1?: Relation<AChild1>;
+    @TestRelation(() => DChild1)
+    oneEToManyDChild1?: Relation<DChild1>[];
 
-    @ManyToMany(() => AChild1, aChild1 => aChild1.manyAChild1ToManyB)
-    @JoinTable()
-    manyBToManyAChild1Owner?: Relation<AChild1>;
 
-    @ManyToMany(() => AChild1, aChild1 => aChild1.manyAChild1ToManyBOwner)
-    manyBToManyAChild1?: Relation<AChild1>;
+    @TestRelation(() => DChild1)
+    oneEToOneDChild1?: Relation<DChild1>;
+
+    @TestRelation(() => DChild1)
+    oneEToOneDChild1Owner?: Relation<DChild1>;
+
+
 }
 
 @ChildEntity()
-export class BChild1 extends BBase {
+export class EChild1 extends EBase {
 
     @Column({nullable: true})
-    bChild1Text: string;
+    eChild1Text: string;
+
 }
 
 @ChildEntity()
-export class BChild2 extends BBase {
+export class EChild2 extends EBase {
 
     @Column({nullable: true})
-    bChild2Text: string;
+    eChild2Text: string;
 }
 
 @ChildEntity()
-export class BChild1Child1 extends BChild1 {
+export class EChild1Child1 extends EChild1 {
 
     @Column({nullable: true})
-    bChild1Child1Text: string;
+    eChild1Child1Text: string;
 }
 
 
-export class BUnion extends DataUnion(BBase, "bType", {
-    bChild1: BChild1,
-    bChild2: BChild2,
-    bChild1Child1: BChild1Child1
+export class EUnion extends DataUnion(EBase, "eType", {
+    eChild1: EChild1,
+    eChild2: EChild2,
+    eChild1Child1: EChild1Child1
 }) {
 
 }
 
 
-export class AUnion extends DataUnion(ABase, "aType", {
-    aChild1: DataUnion(AChild1, /* Not necessary */"aType", {}, {
-        manyAChild1ToOneB: BUnion,
-        manyAChild1ToManyBOwner: BUnion,
-        manyAChild1ToManyB: BUnion,
+export class DUnion extends DataUnion(DBase, "dType", {
+    dChild1: DataUnion(DChild1, {
+        manyDChild1ToOneE: EUnion,
+        manyDChild1ToManyE: EUnion,
+        manyDChild1ToOneEOwner: EUnion,
+        manyDChild1ToManyEOwner: EUnion,
     }),
-    aChild2: AChild2,
-    aChild1Child1: AChild1Child1
+    dChild2: DChild2,
+    dChild1Child1: DChild1Child1
 }, {
-    manyAToOneB: BUnion,
-    manyAToManyBOwner: BUnion,
-    manyAToManyB: BUnion
+    oneDToOneE: EUnion,
+    manyDToManyE: EUnion,
+
+    // oneDToOneEOwner: EUnion,
+    // manyDToManyEOwner: EUnion,
+
+
+    oneDToManyE: EUnion,
+    manyDToOneE: EUnion,
 }) {
 }
 
 /*
 
     unions:
-        aChild1
+        dChild1
             relations:
                 ma....
 

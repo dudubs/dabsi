@@ -25,7 +25,7 @@ export class Group {
     // TODO: Maybe optional?
     @ManyToMany(() => User, user => user.groups)
     @JoinTable()
-    users: Relation<User>[];
+    users?: Relation<User>[];
 
 
 }

@@ -3,5 +3,8 @@ export function _testm(
     callback: () => void
 ) {
 
-    describe(fileName.match(/[^\\\/]+$/)?.[0] ?? fileName, callback);
+    describe(fileName
+        .match(/[^\\\/]+$/)?.[0]
+    ?? fileName,
+    callback);
 }

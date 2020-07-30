@@ -1,21 +1,16 @@
-import {TypeScriptTester} from "./TypeScriptTester";
+import {Router} from "../Router";
 
 
+function test() {
+    const r = Router.route("child", Router.route("sub-child"));
 
-testm(__filename, () => {
-    const tester = new TypeScriptTester(__dirname);
+    r.at("child");
 
+    // @ts-expect-error
+    r.at("invalid-child");
 
-    const routerVar = tester.defineVar('BaseRouter',`import {Router} from ".."`,
-        `Router.route("child", Router.route("sub-child"))`);
+    r.at("child").at("sub-child");
 
-    tester.expectToBeValid(`${routerVar}.at("child");`);
-
-    tester.expectToBeValid(`${routerVar}.at("child").at("sub-child");`);
-
-    tester.expectToBeInvalid(`${routerVar}.at("invalid-child")`);
-
-    tester.expectToBeInvalid(`${routerVar}.at("child").at("invalid-child")`);
-
-
-})
+    // @ts-expect-error
+    r.at("child").at("invalid-child");
+}

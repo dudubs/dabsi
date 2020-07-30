@@ -1,13 +1,14 @@
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
-import {ArrayTypeOrObject, ExtractKeys} from "../../common/typings";
+import {ArrayTypeOrObject} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
 import {DataCursor} from "../DataCursor";
 import {DataFields, DataFieldsRow} from "../DataFields";
 import {DataFieldsTranslator} from "../DataFieldsTranslator";
 import {DataItem, DataKey, DataKeyInput} from "../DataItem";
 import {DataNullsSort, DataOrder, DataSort} from "../DataOrder";
-import {AnyDataUnion, DataUnion} from "../DataUnion";
+import {DataUnion} from "../DataUnion";
+import {RelationKeys} from "../Relation";
 import {DataValues} from "./DataValues";
 
 export abstract class DataSource<T> {
@@ -132,25 +133,26 @@ export abstract class DataSource<T> {
 
     abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
 
-
-    as<T extends AnyDataUnion,
-        K extends keyof DataUnion.ChildrenOf<T>>(
+    as<T, K extends string & keyof DataUnion.ChildrenOf<T>>(
         this: DataSource<T>,
-        type: string & K):
-        DataSource<DataUnion.ChildrenOf<T>[K]> {
+        type: K
+    ): DataSource<DataUnion.ChildrenOf<T>[K]> {
+
         return this.withCursor({
             ...this.cursor,
             type
         })
     }
 
-    of<K extends keyof T>(propertyName: string & K, value: DataKeyInput<T[K]>): DataSource<T> {
+
+    of<K extends keyof Required<T>>(
+        propertyName: string & K, value: DataKeyInput<T[K]>): DataSource<T> {
         return this.withCursor(
             DataCursor.of(this.cursor, propertyName, DataKey(value))
         )
     }
 
-    at<K extends ExtractKeys<Required<T>, object>>(
+    at<K extends RelationKeys<T>>(
         propertyName: string & K,
         key: DataKeyInput<ArrayTypeOrObject<T[K]>>
     ):
@@ -198,6 +200,16 @@ export abstract class DataSource<T> {
         })
     }
 
+    filter<T>(this: DataSource<T>, ...exps: DataExp<T>[]): DataSource<T> {
+        const filter = DataExp({$and: exps});
+        if (typeof filter === "undefined")
+            return this;
+        return this.withCursor({
+            ...this.cursor,
+            filter: DataExp(this.cursor.filter, filter)
+        })
+
+    }
 
 }
 

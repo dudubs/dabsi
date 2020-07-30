@@ -1,3 +1,4 @@
+import {entries} from "../common/object/entries";
 import {subTest} from "./subTest";
 
 export function expectEach<T>(iterable: Iterable<T>, callback: (item: T, index: number) => void): void {

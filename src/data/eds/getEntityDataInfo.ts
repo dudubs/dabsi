@@ -18,7 +18,7 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
     const propertyNameToRelationMetadata: Record<string, RelationMetadata> = {};
     const propertyNameToTransformer: Record<string, ValueTransformer> = {};
     const propertyNameToColumn: Record<string, ColumnMetadata> = {};
-    const nonRelationColumnsPropertyName: string[] = [];
+    const nonRelationColumnKeys: string[] = [];
     const dataColumns: ColumnMetadata[] = [];
 
 
@@ -35,7 +35,7 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
                 instanceof
                 (<Function>column.target)
             )) {
-                nonRelationColumnsPropertyName.push(column.propertyName)
+                nonRelationColumnKeys.push(column.propertyName)
             }
         }
 
@@ -52,7 +52,7 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
 
     return {
         propertyNameToColumn,
-        nonRelationColumnsPropertyName,
+        nonRelationColumnKeys,
         propertyNameToTransformer,
 
         propertyNameToRelationMetadata,

@@ -9,7 +9,7 @@ import Typography, {TypographyProps} from "@material-ui/core/Typography";
 import {makeStyles} from "@material-ui/styles";
 import clsx from "clsx";
 import React, {createElement, Fragment, ReactNode} from "react";
-import {MuiIcon} from "../../../../../browser/src/old/orders/MuiIcon";
+import {MuiIcon} from "../../MuiIcon";
 import {Lang} from "../../../../localization/Lang";
 import {useLangTranslator} from "../../../../localization/LangTranslator";
 import {ModalStackContext} from "../../../../react/ModalStack";
@@ -61,7 +61,11 @@ export function MuiDataTableToolbar({table}: { table: AnyMuiDataTable }) {
     const ms = useDefinedContext(ModalStackContext);
 
     const hasSearchBox = Boolean(table.props.searchIn?.length);
-    const hasToolbar = Boolean(title || hasSearchBox || table.props.staticActions?.length);
+    const hasToolbar = Boolean(
+        title
+        || hasSearchBox
+        || table.props.staticActions?.length
+    );
 
     if (!hasToolbar)
         return createElement(Fragment);

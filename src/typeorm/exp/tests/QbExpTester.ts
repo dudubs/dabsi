@@ -1,40 +1,23 @@
-import {Connection, DeepPartial, ObjectType, Repository} from "typeorm";
+import {Connection, ObjectType, Repository} from "typeorm";
 import {Lazy} from "../../../common/patterns/lazy";
-import {AnyDataUnion, DataUnion} from "../../../data/DataUnion";
+import {DataTypeInfo} from "../../../data/DataTypeInfo";
 import {DataExp} from "../../../json-exp/DataExp";
 import {QbDataExpTranslator} from "../QbDataExpTranslator";
-import {JasmineTester} from "./JasmineTester";
 
 
-export class QbExpTester<T> extends JasmineTester {
+export class QbExpTester<T> {
     constructor(
         public getConnection: () => Connection,
-        public type: ObjectType<T> | DataUnion.AnyClass<T>
+        public type: ObjectType<T>,
     ) {
-        super();
+
     }
 
-    get entityType() {
-        return 'unionType' in this.type ? this.type.unionType : this.type;
-    }
 
+    typeInfo = DataTypeInfo.get(this.type);
 
     @Lazy() get repository(): Repository<T> {
-        return this.getConnection().getRepository(this.entityType)
-    }
-
-    get unionInfo(): AnyDataUnion | undefined {
-        if ('unionType' in this.type) {
-            return this.type;
-        }
-    }
-
-    as<U extends T>(entityType: ObjectType<U>): QbExpTester<U> {
-        return new QbExpTester(this.getConnection, entityType)
-    }
-
-    save(entries: DeepPartial<T>[]) {
-        return this.repository.save(entries.map(entity => this.repository.create(entity)))
+        return this.getConnection().getRepository(this.typeInfo.type)
     }
 
     getOneRowWhereExp(exp) {
@@ -42,18 +25,19 @@ export class QbExpTester<T> extends JasmineTester {
             .createQueryBuilder()
             .select('1');
         qb.andWhere(
-            QbDataExpTranslator.translate(qb, <any>exp,
-                this.unionInfo)
+            new QbDataExpTranslator(
+                this.typeInfo,
+                qb,
+                qb.alias,
+                qb,
+            ).translate(exp),
         );
-        if (this._debug) {
-            console.log(qb.getQueryAndParameters());
-        }
         return qb.getRawOne();
     }
 
 
     testExp(exp, callback, onError?) {
-        return this.describe(JSON.stringify(exp)).test(async () => {
+        return it(JSON.stringify(exp), async () => {
             try {
                 callback(
                     await this.getOneRowWhereExp(exp)
@@ -68,7 +52,7 @@ export class QbExpTester<T> extends JasmineTester {
         })
     }
 
-    expectToNotExists<U = T>(exp: DataExp<U>) {
+    expectToNotExists(exp: DataExp<T>) {
         this.testExp(exp, (row) => {
             if (row) {
                 fail(`expected to not exists`)
@@ -77,7 +61,7 @@ export class QbExpTester<T> extends JasmineTester {
     }
 
 
-    expectToExists<U = T>(exp: DataExp<U>) {
+    expectToExists(exp: DataExp<T>) {
         this.testExp(exp, (row) => {
             if (!row) {
                 fail(`expected to exists`)
@@ -85,10 +69,10 @@ export class QbExpTester<T> extends JasmineTester {
         })
     }
 
-    expectToError<U = T>(exp: DataExp<U>) {
+    expectToError(exp: DataExp<T>) {
         this.testExp(exp, () => {
             fail(`expected to error.`)
-        },()=>{
+        }, () => {
             ///
         })
     }

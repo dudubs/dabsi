@@ -1,5 +1,4 @@
 import {SelectQueryBuilder} from "typeorm";
-import {WeakMapFactory} from "../../common/map/mapFactory";
 
 export type ColumnLoader = (raw: object) => any;
 
@@ -19,18 +18,23 @@ export class QueryBuilderSelector {
     protected counter = 0;
 
     selectColumn(
-        prefix: string,
         schema: string,
         columnName: string
     ): ColumnLoader {
+        const aliasName = `${schema}_c_${columnName}`;
+
+        if (this.aliasNames.has(aliasName))
+            return raw => raw[aliasName];
+
         return this.select(
             columnName,
-            prefix + `c_${schema}_${columnName}_${++this.counter}`,
+            aliasName,
             schema
         )
     }
 
-    select(selection: string, aliasName: string/* TODO: optional*/,
+    select(selection: string,
+           aliasName: string/* TODO: optional*/,
            schema?: string/**/):
         (raw: object) => any {
         if (schema) {

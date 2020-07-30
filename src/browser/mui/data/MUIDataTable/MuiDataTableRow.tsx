@@ -27,7 +27,9 @@ export function MuiDataTableRow(
 ) {
 
     const classes = useStyles();
-    const [isOpen, setOpen] = useState(index === 0);
+    const [isOpen, setOpen] = useState(
+        table.props.expandFirstItem ?
+            index === 0 : false);
 
     if (table.props.renderItemCollapse)
         return <>

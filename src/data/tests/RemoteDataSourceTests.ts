@@ -3,8 +3,9 @@ import {ExpressBSONTester} from "../../express/tests/ExpressBSONTests";
 import {ExpressTester} from "../../rpc/tests/ExpressTests";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
 import {RemoteDataSourceConnection} from "../RemoteDataSource";
+import {DUnion, EUnion} from "./BaseEntities";
 import {DataSourceTests} from "./DataSourceTests";
-import {EDSTesters} from "./EntityDataSourceTests";
+import {EDSTesters} from "../eds/tests/EntityDataSourceTests";
 
 
 function RDSTester<T>(name): RemoteDataSourceConnection<T> {
@@ -22,6 +23,8 @@ export const RDSTesters = {
     A: RDSTester<AEntity>("A"),
     B: RDSTester<BEntity>("B"),
     C: RDSTester<CEntity>("C"),
+    D: RDSTester<DUnion>("E"),
+    E: RDSTester<EUnion>("D"),
 }
 
 
@@ -39,6 +42,12 @@ describe("RDS", () => {
     })
 
     // console.log("--- uncomment");
-    DataSourceTests(RDSTesters.A, RDSTesters.B, RDSTesters.C)
+    DataSourceTests(
+        RDSTesters.A,
+        RDSTesters.B,
+        RDSTesters.C,
+        RDSTesters.D,
+        RDSTesters.E
+    )
 });
 

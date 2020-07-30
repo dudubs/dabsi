@@ -11,6 +11,7 @@ export function renderTableHead(table: AnyMuiDataTable) {
     const selectedItems = table.getSelectedItems();
     const allSelectedItems = selectedItems.length === table.items.length;
 
+
     return <TableHead>
         <TableRow>
             {table.props.renderItemCollapse && <MuiTableColumn/>}

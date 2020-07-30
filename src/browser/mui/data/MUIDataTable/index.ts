@@ -1,4 +1,5 @@
 import {TableProps} from "@material-ui/core/Table";
+import {MuiIcon} from "../../MuiIcon";
 import {DataItem, DataKey} from "../../../../data/DataItem";
 import {DataTable, DataTableAction, DataTableColumnProps, DataTableProps} from "../../../../data/DataTable";
 import {LangNode} from "../../../../localization/Lang";
@@ -20,14 +21,15 @@ export type MuiDataTableProps<T> =
     actions?: MuiDataTableAction<T>[];
 
     staticActions?: ({
-        icon: string
+        icon: MuiIcon,
         title: LangNode,
         handle?(table: AnyMuiDataTable): void
     })[];
 
     TableProps?: TableProps;
 
-    renderItemCollapse?(item: DataItem<T>,table:MuiDataTable<any>);
+    expandFirstItem?:boolean;
+    renderItemCollapse?(item: DataItem<T>, table: MuiDataTable<any>);
 
 }
 

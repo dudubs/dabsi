@@ -2,12 +2,15 @@ import {subTest} from "../../jasmine/subTest";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
 import {DataSource} from "../DataSource";
 import {RelationKeys} from "../Relation";
+import {DUnion, EUnion} from "./BaseEntities";
 import arrayContaining = jasmine.arrayContaining;
 
 export function DataSourceTests(
     ADS: DataSource<AEntity>,
     BDS: DataSource<BEntity>,
-    CDS: DataSource<CEntity>
+    CDS: DataSource<CEntity>,
+    DDS: DataSource<DUnion>,
+    EDS: DataSource<EUnion>
 ) {
 
 
@@ -21,8 +24,8 @@ export function DataSourceTests(
         expect(await ADS.get(bKey)).toBeFalsy();
         expect(await BDS.get(bKey)).toBeTruthy();
 
-        await assert("b");
-        await assert("bOwner");
+        await assert("oneAToOneB");
+        await assert("oneAToOneBOwner");
 
         await assert("manyAToManyB");
         await assert("manyAToManyBOwner");
@@ -63,100 +66,107 @@ export function DataSourceTests(
         }
     })
 
-    it('insert relations', async () => {
+
+
+    it('insert to relations', async () => {
         const aKey = await ADS.insert({});
         const cKey = await CDS.insert({});
         const cKey2 = await CDS.insert({});
 
         const bOfAOwnerOfCOwner = BDS
-            .of("aOwner", aKey)
-            .of("cOwner", cKey);
+            .of("oneBToOneAOwner", aKey)
+            .of("oneBToOneCOwner", cKey);
 
         expect(await bOfAOwnerOfCOwner.get()).toBeFalsy();
         await bOfAOwnerOfCOwner.insert({});
         expect(await bOfAOwnerOfCOwner.get()).toBeTruthy();
-        expect(await BDS.of("aOwner", aKey).get()).toBeTruthy();
+
+        expect(await BDS.of("oneBToOneAOwner", aKey).get()).toBeTruthy();
+
+
         expect(await BDS
-            .of("aOwner", aKey)
-            .of("cOwner", cKey2).get()).toBeFalsy();
+            .of("oneBToOneAOwner", aKey)
+            .of("oneBToOneCOwner", cKey2).get()).toBeFalsy();
 
         const bKey = await BDS.insert({});
         const bAtAOwnerOfCOwner = BDS
-            .at("aOwner", bKey)
-            .of("cOwner", cKey);
+            .at("oneBToOneAOwner", bKey)
+            .of("oneAToOneCOwner", cKey);
 
         expect(await bAtAOwnerOfCOwner.get()).toBeFalsy();
         await bAtAOwnerOfCOwner.insert({});
         expect(await bAtAOwnerOfCOwner.get()).toBeTruthy();
         expect(await BDS
-            .at("aOwner", bKey)
-            .of("cOwner", cKey2).get()).toBeFalsy()
+            .at("oneBToOneAOwner", bKey)
+            .of("oneAToOneCOwner", cKey2).get()).toBeFalsy()
 
     })
 
     it('deep relation sanity', async () => {
 
         await ADS
-            .at("bOwner", "aid1")
-            .at("cOwner", "bid2")
-            .at("b", "cid3")
-            .at("a", "bid4")
-            .of("b", "bid5")
-            .of("cOwner", "cid6")
-            .at("bOwner", "aid7")
-            .at("cOwner", "bid8")
+            .at("oneAToOneBOwner", "aid1")
+            .at("oneBToOneCOwner", "bid2")
+            .at("oneCToOneB", "cid3")
+            .at("oneBToOneA", "bid4")
+            .of("oneAToOneB", "bid5")
+            .of("oneAToOneCOwner", "cid6")
+            .at("oneAToOneBOwner", "aid7")
+            .at("oneBToOneCOwner", "bid8")
             .get();
 
     });
 
-    it('of relation', async () => {
+    it('of relation key', async () => {
         const aKey = await ADS.insert({});
-        const bOfA = BDS.of("a", aKey);
+        const bOfA = BDS.of("oneBToOneA", aKey);
         expect(await bOfA.has()).toBeFalsy();
         await bOfA.insert({})
         expect(await bOfA.has()).toBeTruthy();
     });
 
-    it("of column", async () => {
+    it("of data key", async () => {
         const aKey = await ADS.insert({});
 
-        const bOfA = BDS.of("a", aKey);
+        const bOfA = BDS.of("oneBToOneA", aKey);
 
-        const bOfAOfHello = bOfA.of("bText", "hello");
+
+        const bOfAOfHello = bOfA.of("bText", "bHello");
         expect(await bOfAOfHello.has()).toBeFalsy();
 
         const bOfAOfHelloKey = await bOfAOfHello.insert({});
         expect(await bOfAOfHello.has()).toBeTruthy();
 
-        const bOfAOfWorld = bOfA.of("bText", "world");
+        const bOfAOfWorld = bOfA.of("bText", "bWorld");
         expect(await bOfAOfWorld.has()).toBeFalsy();
 
-        const cOfbOfA = CDS.of("b", bOfAOfHelloKey);
+        const cOfbOfA = CDS.of("oneCToOneB", bOfAOfHelloKey);
 
-        const cOfbOfAOfHello = cOfbOfA.of("c_text", "hello");
+        const cOfbOfAOfHello = cOfbOfA.of("cText", "cHello");
         expect(await cOfbOfAOfHello.has()).toBeFalsy();
 
         const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insert({});
+
+
         expect(await cOfbOfAOfHello.has()).toBeTruthy();
 
         expect(await BDS
-            .of("bText", "hello")
-            .at("cOwner", bOfAOfHelloKey)
+            .of("bText", "bHello")
+            .at("oneBToOneCOwner", bOfAOfHelloKey)
             .has()
         ).toBeTruthy();
 
         expect(await BDS
-            .of("bText", "world")
-            .at("cOwner", bOfAOfHelloKey)
+            .of("bText", "bWorld")
+            .at("oneBToOneCOwner", bOfAOfHelloKey)
             .has()
         ).toBeFalsy();
 
     })
 
-
     it('children', async () => {
         const rootKey = await ADS.insert({});
-        const rootChildren = ADS.at("children", rootKey);
+        const rootChildren = ADS.at("manyAToManyA", rootKey);
         expect(await rootChildren.count()).toEqual(0);
 
         const childKeys = [

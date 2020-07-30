@@ -2,12 +2,14 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import List, {ListProps} from "@material-ui/core/List";
 import ListItem, {ListItemTypeMap} from "@material-ui/core/ListItem";
 import ListItemText, {ListItemTextProps} from "@material-ui/core/ListItemText";
+import Typography from "@material-ui/core/Typography";
 import React, {ReactNode} from "react";
 import {InfinityScrollProps} from "../../../../browser/src/junk/doIfScrollEnded";
 import {DataItem, DataKey} from "../../../data/DataItem";
 import {DataSource} from "../../../data/DataSource";
 
 import {DataExp} from "../../../json-exp/DataExp";
+import {Lang} from "../../../localization/Lang";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";
 import {AfterMountView, View} from "../../../react/view/View";
 import {ViewState} from "../../../react/view/ViewState";
@@ -37,6 +39,7 @@ export type MuiDataPickerProps<T> = {
     renderPrimaryTitle(row: DataItem<T>): ReactNode;
     renderSecondaryTitle?(row: DataItem<T>): ReactNode;
 
+    renderNoRows?(): ReactNode;
 };
 
 export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
@@ -97,6 +100,24 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
         this.isLoading = false;
     }
 
+    renderNoRows() {
+        return this.props.renderNoRows ? this.props.renderNoRows() :
+            <Typography>{Lang`NO_ROWS`}</Typography>
+    }
+
+    renderItem(item: DataItem<T>, index: number) {
+        return <ListItem button {...this.props.ListItemProps} key={DataKey(item)}
+                         onClick={() => {
+                             this.props.onPick?.(item);
+                         }}>
+            <ListItemText
+                {...this.props.ListItemTextProps}
+                primary={this.props.renderPrimaryTitle(item)}
+                secondary={this.props.renderSecondaryTitle?.(item)}
+            />
+        </ListItem>
+    }
+
 
     renderView() {
         return <MuiDialog
@@ -110,23 +131,17 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
             }}
             cancellable
             {...this.props.MuiDialogProps}>
-            {wrap(this.props.listWrapper)(
-                <List {...this.props.ListProps}>
-                    {this.items.map(item => {
-                        return <ListItem button {...this.props.ListItemProps} key={DataKey(item)}
-                                         onClick={() => {
-                                             this.props.onPick?.(item);
-                                         }}>
-                            <ListItemText
-                                {...this.props.ListItemTextProps}
-                                primary={this.props.renderPrimaryTitle(item)}
-                                secondary={this.props.renderSecondaryTitle?.(item)}
-                            />
-                        </ListItem>
-                    })}
-                </List>
+            {this.isLoading ? <LinearProgress/> : (
+                this.items.length ? wrap(this.props.listWrapper)(
+                    <List {...this.props.ListProps}>
+                        {this.items.map((item, index) => {
+                            return this.renderItem(item, index)
+                        })}
+                    </List>
+                ) : (
+                    this.renderNoRows()
+                )
             )}
-            {this.isLoading && <LinearProgress/>}
         </MuiDialog>
     }
 }

@@ -1,6 +1,6 @@
 import Grid, {GridProps} from "@material-ui/core/Grid";
 import React from "react";
-import {MuiIcon} from "../../../../browser/src/old/orders/MuiIcon";
+import {MuiIcon} from "../MuiIcon";
 import {ValueOrFactory} from "../../../common/patterns/ValueOrFactory";
 import {LangNode} from "../../../localization/Lang";
 import {mergeCallback} from "../../../react/utils/mergeCallback";

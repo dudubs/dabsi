@@ -48,7 +48,6 @@ export function RemoteDataSource<T>(): RemoteDataSource<T> {
             return new RemoteDataSourceConnection<T>(handler)
         },
         handle: source => {
-
             return ({method, cursor, args}) => {
                 // TODO: more safety code.
                 cursor = DataCursor.concat(source.cursor, cursor);

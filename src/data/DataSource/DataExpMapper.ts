@@ -7,8 +7,8 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
 
     Null: DataExp<T> = null;
 
-    translateHasExp(propertyName: string, subExp: DataExp<any>): DataExp<T> {
-        return <DataExp<any>>{$has: subExp !== undefined ? {[propertyName]: subExp} : propertyName};
+    translateHas(inverse: boolean, propertyName: string, exp: DataExp<any>): DataExp<T> {
+        return <DataExp<any>>{[inverse?"$notHas":"$has"]: exp !== undefined ? {[propertyName]: exp} : propertyName};
     }
 
     translateAs(unionKey: string, exp: DataExp<any>): DataExp<T> {
@@ -51,7 +51,7 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
         return {$concat: exps};
     }
 
-    translateCountExp(propertyName: string, subExp: DataExp<any>): DataExp<T> {
+    translateCount(propertyName: string, subExp: DataExp<any>): DataExp<T> {
         return <DataExp<any>>{
             $count: subExp !== undefined ?
                 {[propertyName]: subExp} :
@@ -76,7 +76,13 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
     }
 
     translateValue(value: Parameter): DataExp<T> {
-        return {$value: value};
+        switch (typeof value) {
+            case "boolean":
+            case "number":
+                return value;
+            default:
+                return [value]
+        }
     }
 
 }
@@ -85,7 +91,7 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<T>> {
 /*
 
 
-    EntityDataSource.create(AUnion)
+    EntityDataSource.create(DUnion)
         .as("aChild1")
 
 

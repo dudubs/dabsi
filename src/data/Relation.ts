@@ -16,6 +16,11 @@ export type MapRelation<T, U> =
     IfRelationToOne<T, Relation<U>> |
     IfRelationToMany<T, Relation<U>[]>;
 
+export type MapRelations<T, U> = Omit<T, RelationKeys<T>> & {
+    [K in RelationKeys<T>]: MapRelation<T[K], (
+        K extends keyof U ? U[K] : T[K]
+        )>
+};
 
 export type IfRelationToOne<T, U> =
     Required<NonNullable<T>> extends Required<Relation> ? U : never;
@@ -32,6 +37,10 @@ export type RelationKeys<T> = Union<{
 export type RelationToManyKeys<T> = Union<{
     [K in string & keyof Required<T>]:
     IfRelationToMany<Required<T>[K], K>
+}>;
+export type RelationToOneKeys<T> = Union<{
+    [K in string & keyof Required<T>]:
+    IfRelationToOne<Required<T>[K], K>
 }>;
 
 export type NonRelationKeys<T> =

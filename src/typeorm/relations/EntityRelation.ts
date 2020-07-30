@@ -28,7 +28,9 @@ export class EntityRelationSide<T> {
         if (this.relation.isTree) {
 
             if (this.relation.relationMetadata.isManyToMany)
-                return !this.relation.invert
+                return this.relation.relationMetadata.isOwning ?
+                    !this.relation.invert : this.relation.invert;
+
 
             throw new Error(`Not supported relation (${
                 this.relation.relationMetadata.relationType
@@ -38,7 +40,8 @@ export class EntityRelationSide<T> {
     }
 
     joinColumns =
-        !this.isOwning ? this.relation.ownerRelationMetadata.inverseJoinColumns :
+        !this.isOwning ?
+            this.relation.ownerRelationMetadata.inverseJoinColumns :
             this.relation.ownerRelationMetadata.joinColumns;
 
     column(column: ColumnMetadata) {
@@ -90,7 +93,7 @@ export class EntityRelation<T = any> {
         public connection: Connection,
         public entityType: ObjectType<any>,// TODO: Function|string
         public propertyName: string,
-        public invert: boolean,
+        public invert: boolean,// TODO: better name
         public key?: string
     ) {
     }
@@ -155,11 +158,11 @@ export class EntityRelation<T = any> {
     join(
         direction: JoinDirection,
         leftQb: SelectQueryBuilder<any>,
-        leftSchema: string): string {
-        const {right, rightId} = this;
+        leftSchema: string,
+        rightId = this.rightId): string {
+        const {right} = this;
 
-
-        const rightSchema =this.getRightSchema(leftSchema);
+        const rightSchema = this.getRightSchema(leftSchema);
 
         const joinAttribute = leftQb.expressionMap.joinAttributes.find(
             ja => ja.alias?.name === rightSchema
@@ -171,7 +174,6 @@ export class EntityRelation<T = any> {
 
         const idCondition =
             rightId ? ' AND ' + right.getIdCondition(leftQb, rightSchema, rightId) : "";
-
 
         if (this.ownerRelationMetadata.joinTableName) {
             // join by table
@@ -206,7 +208,7 @@ export class EntityRelation<T = any> {
     }
 
 
-    getJoinToTableCondition(leftSchema, joinSchema) {
+    getJoinToTableCondition(leftSchema, joinSchema): string {
         // TODO: escaping
         return this.left.joinColumns
             .map(c => `${
@@ -231,7 +233,6 @@ export class EntityRelation<T = any> {
     }
 
     columnCondition(leftSchema: string, rightSchema: string) {
-        // TODO: escaping
         return this.ownerRelationMetadata.joinColumns
             .map(c => `${
                 this.connection.driver.escape(leftSchema)
@@ -272,10 +273,17 @@ export class EntityRelation<T = any> {
             .remove(!this.invert ? this.rightId : leftId);
     }
 
-    set(leftId: object) {
-        return this.createRelationQueryBuilder()
+    async set(leftId: object) {
+        // console.log({leftId},this.invert,this.rightId,this.propertyName,
+        //
+        //     );
+        await this.createRelationQueryBuilder()
             .of(this.invert ? this.rightId : leftId)
-            .set(!this.invert ? this.rightId : leftId);
+            .set(!this.invert ? this.rightId : leftId)
+            .catch(error => {
+                console.log(error);
+                throw error
+            });
     }
 
     unset(leftId: object) {

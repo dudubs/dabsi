@@ -1,13 +1,11 @@
 import Button, {ButtonProps} from "@material-ui/core/Button";
 import IconButton, {IconButtonProps} from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
 import Tooltip, {TooltipProps} from "@material-ui/core/Tooltip";
-import React, {createElement, ReactNode} from "react";
-import {MuiIcon} from "../../../../browser/src/old/orders/MuiIcon";
+import React, {ReactNode} from "react";
+import {MuiIcon} from "../MuiIcon";
 import {assert} from "../../../common/assert";
-import {Common, Assign} from "../../../common/typings";
+import {Assign, Common} from "../../../common/typings";
 import {Lang} from "../../../localization/Lang";
-import {EmptyFragment} from "../../../react/utils/EmptyFragment";
 
 export const MuiButtonKinds: Record<string, MuiButtonProps> = {
     delete: {
@@ -65,10 +63,10 @@ export function MuiButton(props: MuiButtonProps) {
     if (iconOnly) {
         assert(icon);
         let element = <IconButton
-            color={isDanger ? "secondary" : undefined}
-            {...IconButtonProps}
-            {...nextProps}
-        >{MuiIcon(icon)}</IconButton>
+                color={isDanger ? "secondary" : undefined}
+                {...IconButtonProps}
+                {...nextProps}
+            >{MuiIcon(icon)}</IconButton>
 
         ;
         if (title = title || TooltipProps?.title) {

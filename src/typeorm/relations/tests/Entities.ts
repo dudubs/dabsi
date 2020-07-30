@@ -1,17 +1,7 @@
-import {
-    BeforeInsert,
-    Column,
-    Entity,
-    JoinColumn,
-    JoinTable,
-    ManyToMany,
-    ManyToOne,
-    OneToMany,
-    OneToOne,
-    PrimaryColumn
-} from "typeorm";
+import "reflect-metadata";
+import {BeforeInsert, Column, Entity, JoinTable, ManyToMany, OneToOne, PrimaryColumn} from "typeorm";
 import {Relation} from "../../../data/Relation";
-import {TestConnection} from "../../../data/tests/TestConnection";
+import {TestRelation} from "./TestRelation";
 
 let randomId = 0;
 
@@ -21,11 +11,11 @@ export class AEntity {
 
     @BeforeInsert()
     setNewId() {
-        this.a_id = `a${++randomId}`
+        this.aId = `a${++randomId}`
     }
 
     @PrimaryColumn()
-    a_id: string;
+    aId: string;
 
     @Column({nullable: true})
     aText: string;
@@ -33,33 +23,43 @@ export class AEntity {
     @Column({nullable: true})
     aNumber: number;
 
-    @OneToOne(() => BEntity, b => b.a)
-    @JoinColumn()
-    bOwner?: Relation<BEntity>;
+    // to B
+    @TestRelation(() => BEntity)
+    oneAToOneB?: Relation<BEntity>;
 
-    @OneToOne(() => BEntity, b => b.aOwner)
-    b?: Relation<BEntity>;
+    @TestRelation(() => BEntity)
+    oneAToOneBOwner?: Relation<BEntity>;
 
-    @ManyToMany(() => BEntity, b => b.manyBToManyA)
-    @JoinTable()
-    manyAToManyBOwner?: Relation<BEntity>[];
-
-    @ManyToMany(() => BEntity, b => b.manyBToManyAOwner)
-    manyAToManyB?: Relation<BEntity>[];
-
-    @OneToMany(() => BEntity, b => b.manyBToOneA)
+    @TestRelation(() => BEntity)
     oneAToManyB?: Relation<BEntity>[];
 
-    @ManyToOne(() => BEntity, b => b.oneBToManyA)
+    @TestRelation(() => BEntity)
     manyAToOneB?: Relation<BEntity>;
 
-    @OneToOne(() => CEntity)
-    @JoinColumn()
-    cOwner?: Relation<CEntity>;
+    @TestRelation(() => BEntity)
+    manyAToManyB?: Relation<BEntity>[];
 
-    @JoinTable()
-    @ManyToMany(() => AEntity)
-    children: AEntity[]
+    @TestRelation(() => BEntity)
+    manyAToManyBOwner?: Relation<BEntity>[];
+
+    @TestRelation(() => CEntity)
+    oneAToOneC?: Relation<CEntity>;
+
+    @TestRelation(() => CEntity)
+    oneAToOneCOwner?: Relation<CEntity>;
+
+    @TestRelation(() => CEntity)
+    manyAToManyC?: Relation<CEntity>[];
+
+    @TestRelation(() => CEntity)
+    manyAToManyCOwner?: Relation<CEntity>[];
+
+    @TestRelation(() => AEntity)
+    manyAToManyAOwner?: Relation<AEntity>[];
+
+    @TestRelation(() => AEntity)
+    manyAToManyA?: Relation<AEntity>[];
+
 }
 
 @Entity('B')
@@ -67,44 +67,48 @@ export class BEntity {
 
     @BeforeInsert()
     setNewId() {
-        this.b_id = `b${++randomId}`
+        this.bId = `b${++randomId}`
     }
 
-    @PrimaryColumn()
-    b_id: string;
+    @PrimaryColumn({name: 'b_idxxx'})
+    bId: string;
 
     @Column({nullable: true})
     bText: string;
 
     @Column({nullable: true})
-    b_number: number;
+    bNumber: number;
 
-    @OneToOne(() => AEntity, a => a.bOwner)
-    a?: Relation<AEntity>;
+    @TestRelation(() => AEntity)
+    oneBToOneA?: Relation<AEntity>;
 
-    @OneToOne(() => AEntity, a => a.b)
-    @JoinColumn()
-    aOwner?: Relation<AEntity>;
+    @TestRelation(() => AEntity)
+    oneBToOneAOwner?: Relation<AEntity>;
 
-    @ManyToMany(() => AEntity, a => a.manyAToManyBOwner)
-    manyBToManyA?: Relation<AEntity>[];
-
-    @ManyToMany(() => AEntity, a => a.manyAToManyB)
-    @JoinTable()
-    manyBToManyAOwner?: Relation<AEntity>[];
-
-    @ManyToOne(() => AEntity, a => a.oneAToManyB)
-    manyBToOneA?: Relation<AEntity>;
-
-    @OneToOne(() => AEntity, a => a.manyAToOneB)
+    @TestRelation(() => AEntity)
     oneBToManyA?: Relation<AEntity>[];
 
-    @OneToOne(() => CEntity, c => c.b)
-    @JoinColumn()
-    cOwner?: Relation<CEntity>;
+    @TestRelation(() => AEntity)
+    manyBToOneA?: Relation<AEntity>;
 
-    @OneToOne(() => CEntity, c => c.bOwner)
-    c?: Relation<CEntity>;
+    @TestRelation(() => AEntity)
+    manyBToManyAOwner?: Relation<AEntity>[];
+
+    @TestRelation(() => AEntity)
+    manyBToManyA?: Relation<AEntity>[];
+
+
+    @TestRelation(() => CEntity)
+    oneBToOneC?: Relation<CEntity>;
+
+    @TestRelation(() => CEntity)
+    oneBToOneCOwner?: Relation<CEntity>;
+
+    @TestRelation(() => CEntity)
+    manyBToManyCOwner?: Relation<CEntity>[];
+
+    @TestRelation(() => CEntity)
+    manyBToManyC?: Relation<CEntity>[];
 }
 
 
@@ -112,23 +116,41 @@ export class BEntity {
 export class CEntity {
     @BeforeInsert()
     setNewId() {
-        this.c_id = `c${++randomId}`
+        this.cId = `c${++randomId}`
     }
 
     @PrimaryColumn()
-    c_id: string;
+    cId: string;
 
     @Column({nullable: true})
-    c_text: string;
+    cText: string;
 
     @Column({nullable: true})
-    c_number: number;
+    cNumber: number;
 
-    @OneToOne(() => BEntity, b => b.cOwner)
-    b?: Relation<BEntity>;
+    @TestRelation(() => BEntity)
+    oneCToOneB?: Relation<BEntity>;
 
-    @OneToOne(() => BEntity, b => b.c)
-    @JoinColumn()
-    bOwner?: Relation<BEntity>;
+    @TestRelation(() => BEntity)
+    oneCToOneBOwner?: Relation<BEntity>;
+
+    @TestRelation(() => AEntity)
+    oneCToOneA?: Relation<AEntity>;
+
+    @TestRelation(() => AEntity)
+    oneCToOneAOwner?: Relation<AEntity>;
+
+    @TestRelation(() => AEntity)
+    manyCToManyAOwner?: Relation<AEntity>[];
+
+    @TestRelation(() => AEntity)
+    manyCToManyA?: Relation<AEntity>[];
+
+    @TestRelation(() => BEntity)
+    manyCToManyBOwner?: Relation<BEntity>[];
+
+    @TestRelation(() => BEntity)
+    manyCToManyB?: Relation<BEntity>[];
+
 }
 

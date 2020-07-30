@@ -1,5 +1,5 @@
 import {ReactNode} from "react";
-import {MuiIcon} from "../../../browser/src/old/orders/MuiIcon";
+import {MuiIcon} from "../../browser/mui/MuiIcon";
 import {Awaitable} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
 import {LangNode} from "../../localization/Lang";

@@ -4,36 +4,34 @@ import {entries} from "../../common/object/entries";
 import {DataExp} from "../../json-exp/DataExp";
 import {EntityRelation} from "../../typeorm/relations";
 import {DataCursor} from "../DataCursor";
+import {DataTypeInfo} from "../DataTypeInfo";
 import {getEntityDataInfo} from "./getEntityDataInfo";
 
-/*
-    EntityType
-        - of
-        - of
-        - of ...
-    - at ...
+export type EntityDataCursorPath = {
+    relation: EntityRelation
 
-        EntityType
+    filter: DataExp<any>,
 
- */
+    // childRelations
+    // relationKeys
+
+    // fieldKeys
+    relationKeys: EntityRelation[],
+
+    // childConstants
+    fieldKeys: Record<string, any>
+};
+
 export type EntityDataCursor = {
 
-    // root
-    owners: ({
-        relation: EntityRelation
+    location: EntityDataCursorPath[],
 
-        filter: DataExp<any>,
+    typeInfo: DataTypeInfo;
 
-        // childRelations
-        relations: EntityRelation[],
+    relationKeys: EntityRelation[],
 
-        // childConstants
-        constants: Record<string, any>
-    })[],
-    entityType: ObjectType<any>,
+    fieldKeys: Record<string, any>;
 
-    relations: EntityRelation[],
-    constants: Record<string, any>;
     filter: DataExp<any>
 };
 
@@ -47,31 +45,56 @@ export namespace EntityDataCursor {
     ): EntityDataCursor {
 
 
-        const owners: EntityDataCursor['owners'] = [];
+        const location: EntityDataCursor['location'] = [];
 
-        for (let cursorOwner of cursor.owners) {
+        let typeInfo = DataTypeInfo.get(entityType);
+
+        for (const owner of cursor.location) {
+
+            if (owner.type) {
+                const childType = typeInfo.children?.[owner.type];
+                if (!childType)
+                    throw new Error(`No have childType "${owner.type}" for "${typeInfo.type.name}".`)
+                typeInfo = childType;
+            }
+
             const ownerRelation = new EntityRelation(
                 connection,
-                entityType,
-                cursorOwner.propertyName, true, cursorOwner.key);
-            owners.push({
-                filter: cursorOwner.filter,
+                typeInfo.type,
+                owner.propertyName,
+                true,
+                owner.key);
+
+            location.push({
+                filter: owner.filter,
                 relation: ownerRelation,
-                ...loadChildKeys(entityType, cursorOwner.constants),
+                ...loadChildKeys(typeInfo.type, owner.keys),
             })
-            entityType = ownerRelation.left.entityType;
+
+            const entityType = ownerRelation.left.entityType;
+            const relationTypeInfo = typeInfo.relations?.[owner.propertyName];
+
+            if (relationTypeInfo) {
+                if (relationTypeInfo.type !== entityType) {
+                    throw new Error(`relation type is not left entity type.`)
+                }
+                typeInfo = relationTypeInfo;
+            } else {
+                typeInfo = DataTypeInfo.get(entityType);
+            }
+
         }
 
         return {
-            owners,
-            entityType,
+             location,
+            typeInfo,
             filter: cursor.filter,
-            ...loadChildKeys(entityType, cursor.constants)
+            ...loadChildKeys(entityType, cursor.keys)
         };
 
         function loadChildKeys(entityType, childKeys: Record<string, any>) {
-            const constants: EntityDataCursor['constants'] = {};
-            const relations: EntityDataCursor['relations'] = [];
+            const fieldKeys: EntityDataCursor['fieldKeys'] = {};
+            const relationKeys: EntityDataCursor['relationKeys'] = [];
             const metadata = getEntityDataInfo(
                 connection.getMetadata(entityType)
             );
@@ -80,13 +103,13 @@ export namespace EntityDataCursor {
                 if (propertyName in metadata.propertyNameToRelationMetadata) {
                     const relation = new EntityRelation(connection, entityType,
                         propertyName, false, value);
-                    relations.push(relation);
+                    relationKeys.push(relation);
                 } else {
-                    constants[propertyName] = value
+                    fieldKeys[propertyName] = value
                 }
 
             }
-            return {relations, constants}
+            return {relationKeys, fieldKeys}
         }
 
     }
@@ -101,18 +124,18 @@ export namespace EntityDataCursor {
         const leftQb = repository.createQueryBuilder()
 
         join(leftQb.alias,
-            cursor.relations,
-            cursor.constants,
+            cursor.relationKeys,
+            cursor.fieldKeys,
             cursor.filter);
 
 
         let ownerSchema = leftQb.alias;
 
-        for (let [owner] of reversed(cursor.owners)) {
+        for (let [owner] of reversed(cursor.location)) {
             ownerSchema = owner.relation.join("INNER", leftQb, ownerSchema);
             join(ownerSchema,
-                owner.relations,
-                owner.constants,
+                owner.relationKeys,
+                owner.fieldKeys,
                 owner.filter);
 
         }

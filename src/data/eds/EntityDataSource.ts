@@ -6,10 +6,10 @@ import {useQueryBuilderExp} from "../../typeorm/exp/useQueryBuilderExp";
 import {DataCursor, EmptyDataCursor} from "../DataCursor";
 import {DataItem, DataKey, DataKeyInput} from "../DataItem";
 import {DataSource, DataValues} from "../DataSource";
-import {createEntityConnection} from "./createEntityConnection";
 import {EntityDataCursor} from "./EntityDataCursor";
 import {EntityDataKey} from "./EntityDataKey";
-import {EntityDataSelection} from "./EntityDataSelection";
+import {EntityDataSelector} from "./EntityDataSelector";
+import {getEntityDataSourceInfo} from "./getEntityDataSourceInfo";
 import {QueryBuilderSelector} from "./QueryBuilderSelector";
 
 
@@ -65,33 +65,31 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     protected createQueryBuilder(): SelectQueryBuilder<any> {
         return EntityDataCursor.createQueryBuilder(
-            this.entityConnection.cursor,
-            this.entityConnection.repository
+            this.entitySourceInfo.cursor,
+            this.entitySourceInfo.repository
         )
     }
 
-    items(): Promise<DataItem<T>[]> {
-        const {cursor} = this;
+    protected createEntityCursor() {
         const qb = this.createQueryBuilder();
         const selector = new QueryBuilderSelector(qb);
-        const loader = EntityDataSelection.select(
+
+        const loader = EntityDataSelector.selectCursor(
+            this.entitySourceInfo.cursor.typeInfo,
             qb,
             selector,
             this.cursor.selection,
-            qb.alias,
-            "r_"
+            this.cursor
         )
-        for (const order of cursor.order) {
-            qb.addOrderByExp(order.by, order.sort,
-                order.nulls === "FIRST" ? "NULLS FIRST" :
-                    order.nulls === "LAST" ? "NULLS LAST" :
-                        undefined)
-        }
-        if (cursor.skip)
-            qb.skip(cursor.skip);
-        if (cursor.take)
-            qb.take(cursor.take);
-        return loader.getRows()
+        return {
+            qb,
+            selector,
+            loader
+        };
+    }
+
+    items(): Promise<DataItem<T>[]> {
+        return this.createEntityCursor().loader.loadMany()
     }
 
     count(): Promise<number> {
@@ -101,46 +99,51 @@ export class EntityDataSource<T> extends DataSource<T> {
     has(): Promise<boolean> {
         // TODO: Check if have a limit
         return this.createQueryBuilder()
-            .take(1).getCount()
+            .take(1)
+            .getCount()
             .then(count => count > 0)
     }
 
     // write
     async insert<K extends keyof T>(values: DataValues<T>): Promise<string> {
         // TODO: if left is order by column: set relation values...
-        for (const relation of this.entityConnection.leftRelationsWithoutJoinTable) {
+
+        for (const relation of this.entitySourceInfo.leftRelationsWithoutJoinTable) {
             values[relation.ownerRelationMetadata.propertyName] = relation.rightId;
         }
 
-        Object.assign(values, this.entityConnection.cursor.constants);
+        Object.assign(values, this.entitySourceInfo.cursor.fieldKeys);
 
-        const entity = await this.entityConnection.repository.save(
-            this.entityConnection.repository.create(<any>values)
+        const entity = await this.entitySourceInfo.repository.save(
+            this.entitySourceInfo.repository.create(<any>values)
         );
 
         const entityKeyObject =
-            EntityDataKey.fromEntity(this.entityConnection
+            EntityDataKey.fromEntity(this.entitySourceInfo
                 .repository.metadata, entity);
 
-        for (let relation of (this.entityConnection.inverseLeftRelationsWithoutJoinTable ?? [])) {
+        for (let relation of (this.entitySourceInfo.inverseLeftRelationsWithoutJoinTable ?? [])) {
             await relation.addOrSet(entityKeyObject)
         }
 
-        return EntityDataKey.stringify(
-            this.entityConnection.repository.metadata,
-            entityKeyObject)
+        const entityKey = EntityDataKey.stringify(
+            this.entitySourceInfo.repository.metadata,
+            entityKeyObject
+        );
+
+        return entityKey
     }
 
     async update(key: DataKeyInput<T>, values: DataValues<T>): Promise<void> {
 
         values = {...values};
 
-        for (let relation of this.entityConnection.leftRelationsWithoutJoinTable) {
+        for (let relation of this.entitySourceInfo.leftRelationsWithoutJoinTable) {
             delete values[relation.propertyName];
         }
 
-        await this.entityConnection.repository.update(
-            <any>EntityDataKey.parse(this.entityConnection.repository.metadata,
+        await this.entitySourceInfo.repository.update(
+            <any>EntityDataKey.parse(this.entitySourceInfo.repository.metadata,
                 DataKey(key)),
             <any>values);
     }
@@ -154,11 +157,11 @@ export class EntityDataSource<T> extends DataSource<T> {
     protected async _addOrRemoveEntity(key: string, remove) {
         const method = remove ? "removeOrUnset" : "addOrSet";
         const entityKeyObject = EntityDataKey.parse(
-            this.entityConnection.repository.metadata,
+            this.entitySourceInfo.repository.metadata,
             key
         );
-        await last(this.entityConnection.cursor.owners)?.relation[method](entityKeyObject);
-        for (let childRelation of this.entityConnection.cursor.relations) {
+        await last(this.entitySourceInfo.cursor.location)?.relation[method](entityKeyObject);
+        for (let childRelation of this.entitySourceInfo.cursor.relationKeys) {
             await childRelation[method](entityKeyObject);
         }
     }
@@ -170,7 +173,7 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
 
     async deleteAll(keys: string[]): Promise<void> {
-        const {repository} = this.entityConnection;
+        const {repository} = this.entitySourceInfo;
         for (let key of keys) {
             await repository.delete(
                 <any>EntityDataKey.parse(repository.metadata, key)
@@ -178,8 +181,8 @@ export class EntityDataSource<T> extends DataSource<T> {
         }
     }
 
-    @Lazy() get entityConnection(): ReturnType<typeof createEntityConnection> {
-        return createEntityConnection(this)
+    @Lazy() get entitySourceInfo(): ReturnType<typeof getEntityDataSourceInfo> {
+        return getEntityDataSourceInfo(this)
     }
 
 

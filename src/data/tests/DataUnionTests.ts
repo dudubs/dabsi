@@ -1,14 +1,14 @@
 // import {DataUnion} from "../DataUnion";
-// import {ABase, AChild1, AChild1Child1, AChild2, BBase, BChild1, BChild1Child1, BChild2} from "./BaseEntities";
+// import {DBase, DChild1, DChild1Child1, DChild2, EBase, EChild1, EChild1Child1, EChild2} from "./BaseEntities";
 // import {TestConnection} from "./TestConnection";
 //
 //
 // testm(__filename, () => {
 //
-//     class BData extends DataUnion(BBase, "bType", {
-//         BChild1,
-//         BChild2,
-//         BChild1Child1
+//     class BData extends DataUnion(EBase, "bType", {
+//         EChild1,
+//         EChild2,
+//         EChild1Child1
 //     }) {
 //
 //     }
@@ -18,10 +18,10 @@
 //     }
 //
 //
-//     class AData extends DataUnion(ABase, "aType", {
-//         child1: AChild1,
-//         child2: AChild2,
-//         child1Child1: AChild1Child1
+//     class AData extends DataUnion(DBase, "aType", {
+//         child1: DChild1,
+//         child2: DChild2,
+//         child1Child1: DChild1Child1
 //     }, {
 //         manyAToOneB: BData,
 //         manyAToManyBOwner: BData
@@ -72,21 +72,21 @@
 //
 //     }
 //
-//     const getConnection = TestConnection([ABase, AChild1, AChild2, AChild1Child1,
-//         BBase, BChild1, BChild2, BChild1Child1]);
+//     const getConnection = TestConnection([DBase, DChild1, DChild2, DChild1Child1,
+//         EBase, EChild1, EChild2, EChild1Child1]);
 //
 //     fit('typeorm sanity', () => {
 //         const aMetadata =
 //             getConnection()
-//                 .getMetadata(ABase);
+//                 .getMetadata(DBase);
 //         const childTargets = aMetadata.childEntityMetadatas.map(c => c.target);
 //
 //         expect(childTargets)
-//             .not.toContain(ABase);
+//             .not.toContain(DBase);
 //         expect(childTargets)
-//             .toContain(AChild1Child1);
+//             .toContain(DChild1Child1);
 //         expect(childTargets)
-//             .toContain(AChild2);
+//             .toContain(DChild2);
 //
 //         expect(aMetadata.discriminatorColumn?.databaseName)
 //             .toEqual("type");

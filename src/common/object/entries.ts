@@ -6,4 +6,3 @@ export function* entries<V = any>(obj: Record<string, V> | undefined): IterableI
         yield [key, obj[key]]
     }
 }
-

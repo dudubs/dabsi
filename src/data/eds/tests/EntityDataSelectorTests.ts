@@ -154,7 +154,7 @@ testm(__filename, () => {
     });
     describe('pick-keys and pick-keys', () => {
         testUnion({
-            pick: ["dText"], unions: {
+            pick: ["dText"], children: {
                 dChild1: {pick: ["dChild1Text"]}
             }
         }, tester => {
@@ -166,245 +166,7 @@ testm(__filename, () => {
             })
         });
     });
-    describe('pick-keys and omit-all', () => {
-        testUnion({
-            pick: ["dText"], unions: {
-                dChild1: {omit: "all"}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: true,
-                dChild1Text: false,
-                dChild1Text2: false
-            })
-        });
-    });
-    describe('pick-keys and omit-keys of child', () => {
-        testUnion({
-            pick: ["dText"], unions: {
-                dChild1: {omit: ["dChild1Text"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: true,
-                dChild1Text: false,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('pick-keys and omit-keys of parent', () => {
-        testUnion({
-            pick: ["dText"], unions: {
-                dChild1: {omit: ["dId"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: true,
-                dChild1Text: true,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('pick-keys and omit-keys of parent & child', () => {
-        testUnion({
-            pick: ["dText"], unions: {
-                dChild1: {omit: ["dChild1Text", "dText"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: true
-            });
-            tester.testDChild2({
-                dId: false,
-                dText: true,
-                dChild1Text: false,
-                dChild1Text2: false,
-                dChild2Text: false
-            });
-        });
-    });
-    describe('omit-all and pick-all', () => {
-        testUnion({omit: "all"}, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: false
-            })
-        });
-    });
-    describe('omit-all and omit-all', () => {
-        testUnion({
-            omit: "all", unions: {
-                dChild1: {omit: "all"}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: false
-            })
-        });
-    });
-    describe('omit-all and omit-keys of child', () => {
-        testUnion({
-            omit: "all", unions: {
-                dChild1: {omit: ["dChild1Text"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('omit-all and omit-keys of parent', () => {
-        testUnion({omit: "all", unions: {dChild1: {omit: ["dText"]}}}, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: true,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('omit-all and omit-keys of parent & child', () => {
-        testUnion({omit: "all", unions: {dChild1: {omit: ["dId", "dText"]}}}, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: true,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('omit-keys and pick-all', () => {
 
-        testUnion({omit: ["dText"]}, tester => {
-            tester.testDChild1({
-                dId: true,
-                dText: false,
-                dChild1Text: true,
-                dChild1Text2: true
-            })
-        });
-    });
-
-
-    describe('omit-keys and pick-keys of child', () => {
-        focusNextTest();
-        testUnion({
-            omit: ["dText"], unions: {
-                dChild1: {pick: ["dChild1Text"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: true,
-                dChild1Text2: false
-            });
-            tester.testDChild2({
-                dId: true,
-                dText: false,
-                dChild2Text: true,
-                dChild1Text2: false
-            });
-        });
-    });
-    describe('omit-keys and pick-keys of parent', () => {
-        testUnion({
-            omit: ["dText"], unions: {
-                dChild1: {pick: ["dId"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: true,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: false
-            });
-            tester.testDChild2({
-                dId: true,
-                dText: false,
-                dChild2Text: true,
-                dChild1Text2: false
-            });
-        });
-    });
-    describe('omit-keys and pick-keys of parent & child', () => {
-        testUnion({
-            omit: ["dText"], unions: {
-                dChild1: {pick: ["dId", "dText"]}
-            }
-        }, tester => {
-            tester.testDChild1({
-                dId: true,
-                dText: true,
-                dChild1Text: false,
-                dChild1Text2: false
-            });
-            tester.testDChild2({
-                dId: true, dText: false,
-                dChild2Text: true,
-                dChild1Text2: false
-            });
-        });
-    });
-    describe('omit-keys and omit-all', () => {
-        testUnion({omit: ["dText"]}, tester => {
-            testUnion({omit: ["dText"], unions: {dChild1: {omit: "all"}}}, tester => {
-                tester.testDChild1({
-                    dId: true,
-                    dText: false,
-                    dChild1Text: false,
-                    dChild1Text2: false
-                })
-            });
-        });
-    });
-    describe('omit-keys and omit-keys of child', () => {
-        testUnion({omit: ["dText"], unions: {dChild1: {omit: ["dChild1Text"]}}}, tester => {
-            tester.testDChild1({
-                dId: true,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('omit-keys and omit-keys of parent', () => {
-        testUnion({omit: ["dText"], unions: {dChild1: {omit: ["dId"]}}}, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: true,
-                dChild1Text2: true
-            })
-        });
-    });
-    describe('omit-keys and omit-keys of parent & child', () => {
-        testUnion({
-            omit: ["dText"],
-            unions: {dChild1: {omit: ["dId", "dChild1Text"]}}
-        }, tester => {
-            tester.testDChild1({
-                dId: false,
-                dText: false,
-                dChild1Text: false,
-                dChild1Text2: true
-            })
-        });
-    });
 
 
     describe("relations", () => {
@@ -443,7 +205,7 @@ testm(__filename, () => {
 
         describe('DChild1 to one B', () => {
             testUnion({
-                unions: {
+                children: {
                     dChild1: {
                         relations: mapToSelection(DChild1BAToOneRelations)
                     }
@@ -477,7 +239,7 @@ testm(__filename, () => {
 
         describe('DChild1 to many B', () => {
             testUnion({
-                unions: {
+                children: {
                     dChild1: {
                         relations: mapToSelection(ABAToManyRelations)
                     }

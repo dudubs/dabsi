@@ -109,10 +109,9 @@ export abstract class DataSource<T> {
 
         const keys: string[] = [];
 
-
         for await (const row of this.withCursor({
             ...this.cursor,
-            selection: {omit: 'all'}
+            selection: {pick: []}
         }).find()) {
             keys.push(row.$key);
 

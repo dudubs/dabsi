@@ -290,7 +290,9 @@ export class QbDataExpTranslator<T> extends DataExpTranslator<T, string> {
         // TODO: Do not use Join?
 
         const childTypeInfo = defined(this.typeInfo.children?.[unionKey],
-            () => `Not have union as "${unionKey}".`);
+            () => `Not have union as "${unionKey}" in ${this.typeInfo.name}. ${
+            inspect(this.typeInfo,{depth:10})
+            }`);
 
 
         const childMetadata = this.qb.connection.getMetadata(

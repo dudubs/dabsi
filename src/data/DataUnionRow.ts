@@ -4,56 +4,64 @@ import {DebugType, MetaType} from "./MetaType";
 import {MapRelation, RelationKeys, RelationTypeAt} from "./Relation";
 import AssignRelations = DataUnionRow.AssignRelations;
 
-export type DataUnionRow<T, TypeKey extends string, Children, Relations> =
-    IsNever<keyof Children> extends true ? (
-        Omit<T, RelationKeys<T> | TypeKey> & AssignRelations<T, Relations>
-            ) :
-        Union<DataUnionRow.Children<T, TypeKey, Children>>
+export type DataTypeKey = "$type";
+export const DataTypeKey: DataTypeKey = "$type";
+
+export type DataUnionRow<Base, Children, Relations> =
+    IsNever<keyof Children> extends true ?
+
+        Omit<Base, RelationKeys<Base>> &
+        AssignRelations<Base, Relations> :
+
+        Union<DataUnionRow.Children<Base, Children>>;
 
 export declare namespace DataUnionRow {
 
     type Of<T, E = T> = MetaType.Of<T> extends //
-        DataUnion<infer U, infer TypeKey, infer Children, infer Relations> ?
-        DataUnionRow<U, TypeKey, Children, Relations> :
+        DataUnion<infer Base, infer Children, infer Relations> ?
+        DataUnionRow<Base, Children, Relations> :
 
         E;
 
 
-    type Children<T, TypeKey extends string, Children> = {
+    type Children<T, Children> = {
         [ChildKey in string & keyof Children]:
-        DataUnionRow.Child<T, TypeKey, DataUnion.RelationsOf<Children[ChildKey]>,
+        DataUnionRow.Child<T, DataUnion.RelationsOf<Children[ChildKey]>,
             Children[ChildKey], ChildKey>
     };
 
 
     type ChildrenOf<T> = MetaType.Of<T> extends //
-        DataUnion<infer U, infer TypeKey, infer Children, infer Relations> ?
-        DataUnionRow.Children<U, TypeKey, Children> : never;
+        DataUnion<infer Base, infer Children, infer Relations> ?
+        DataUnionRow.Children<Base, Children> : never;
 
 
-
-    type ChildRelationTypeAt<Child, Relations, RelationKey extends RelationKeys<Child>> =
+    type ChildRelationTypeAt<Child, Relations,
+        RelationKey extends RelationKeys<Child>> =
         RelationKey extends keyof Relations ?//
             Relations[RelationKey] :
             RelationTypeAt<Child, RelationKey>;
+        // RelationTypeAt<Child, RelationKey>;
 
     type AssignRelations<T, Relations> = {
-        [RelationKey in RelationKeys<T>]?:
+        [K in RelationKeys<T>]?:
 
-        MapRelation<T[RelationKey], (
-            Of<ChildRelationTypeAt<T, Relations, RelationKey>>
+        MapRelation<T[K], (
+            // Of<RelationTypeAt<T, K>>
+            Of<ChildRelationTypeAt<T, Relations, K>>
             )>
     }
 
     // type
 
-    type Child<T, TypeKey extends string, Relations, Child, ChildKey extends string> =
-        Omit<Child, RelationKeys<Child> | TypeKey>
-        & Record<TypeKey, ChildKey>
+
+    type Child<Base, Relations, Child, ChildKey extends string> =
+        Omit<Child, RelationKeys<Child>>
+        & Record<DataTypeKey, ChildKey>
         & AssignRelations<Child, Relations>
 
         & DebugType<{
-        T: T,
+        Base: Base,
         Child: Child,
         ChildMetaType: MetaType.Of<Child>,
         Relations: Relations,

@@ -1,20 +1,25 @@
-import {cloneObject} from "./cloneObject";
-import {keys} from "./keys";
+import {Nullable} from "../typings";
+import {entries} from "./entries";
 
+export function mergeObject<T>(a: Record<string, T> | Nullable,
+                               b: Record<string, T> | Nullable,
+                               merger: (a: NonNullable<T>,
+                                        b: NonNullable<T>,
+                                        key:string) => T):
+    Record<string, T> | Nullable {
 
-export function mergeObject<T, K extends keyof T>(
-    obj: T,
-    props: Pick<T, K>
-): T {
-    obj = cloneObject(obj);
-    for (const key of keys(props)) {
-        const prev = obj[key];
-        if (typeof prev !== "object") {
-            throw new Error(`Can't merge ${key} of ${typeof prev}`)
+    if (!(a && b))
+        return a || b;
+
+    const c = {...a};
+    for (let [k, bv] of entries(b)) {
+        const av = a[k];
+
+        if((av!=null)&&(bv!=null)) {
+            c[k] = merger(<any>av, <any>bv,k)
+        } else {
+            c[k] = bv??av;
         }
-        // @ts-ignore
-        obj[key] = Array.isArray(prev) ? [...prev, ...props[key]] :
-            cloneObject(prev, props[key])
     }
-    return obj;
+    return c;
 }

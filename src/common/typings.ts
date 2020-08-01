@@ -27,7 +27,7 @@ export type PickByValue<T, V> = Pick<T, ExtractKeys<T, V>>;
 export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;
 
 export type Pluck<T, K extends PropertyKey, U = never> =
-    K extends keyof Required<T> ? T[K] : U;
+    K extends keyof Required<T> ? Required<T>[K] : U;
 
 export type PartialKeys<T, K extends PropertyKey> =
     Omit<T, K> &

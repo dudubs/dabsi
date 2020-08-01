@@ -1,7 +1,7 @@
 import {Expression, ExtractKeys, Union} from "../common/typings";
 import {DataUnion} from "../data/DataUnion";
 import {MetaType} from "../data/MetaType";
-import {RelationKeys, RelationToManyKeys, RelationTypeAt} from "../data/Relation";
+import {RelationKeys, RelationToManyKeys} from "../data/Relation";
 import {IndexedSeq} from "../immutable2";
 
 
@@ -121,17 +121,12 @@ export type DataExpOperatorsTypes<T> = {
 
 }
 export  type HasExp<T> = RelationToManyKeys<T> | Union<{
-    [K in RelationKeys<T>]:  Record<K, RelationAtExp<T, K>>
+    [K in RelationKeys<T>]: Record<K, RelationAtExp<T, K>>
 }>;
 
 type RelationAtExp<T, RelationKey extends RelationKeys<T>> =
-    DataExp<_RelationAtExp<T, RelationKey, RelationTypeAt<T, RelationKey>>>;
-
-
-type _RelationAtExp<T, K extends RelationKeys<T>, RelationType> =
-    K extends keyof DataUnion.RelationsOf<T> ?
-        DataUnion.RelationsOf<T>[K] :
-        RelationType;
+// ChildRelationTypeAt<T, RelationKey>
+    DataExp<DataUnion.RelationTypeAt<T, RelationKey>>;
 
 
 export type AtExp<T> = Union<{
@@ -141,7 +136,7 @@ export type AtExp<T> = Union<{
 
 
 export type AsExp<T> = MetaType.Of<T> extends//
-    DataUnion<infer U, infer TypeKey, infer Children, infer Relations> ?
+    DataUnion<infer Base, infer Children, any> ?
     Union<{
         [ChildKey in keyof Children]:
         Record<ChildKey, DataExp<Children[ChildKey]>>

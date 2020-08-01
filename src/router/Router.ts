@@ -1,4 +1,4 @@
-import {mergeObject} from "../common/object/mergeObject";
+import {mergePlainObject} from "../common/object/mergePlainObject";
 import {mergePropertyDescriptors} from "../common/object/mergePropertyDescriptors";
 import {UndefinedIfNoKeys} from "../common/typings";
 
@@ -74,7 +74,7 @@ export function _route<TRouter extends AnyRouter,
 ):
     TRouter & RouterWithChild<K, ChildRouter> {
 
-    return mergeObject(this, {
+    return mergePlainObject(this, {
         children: {
             [key]: router ?? Router
         }
@@ -88,7 +88,7 @@ export type RouterWithParam<K extends string, V> =
 export function _param<Router extends AnyRouter, K extends string, V = string>
 (this: Router, key: K, type?: (value: string) => V):
     Router & RouterWithParam<K, V> {
-    return mergeObject(this, {
+    return mergePlainObject(this, {
         params: {[key]: type ?? String}
     })
 }

@@ -1,7 +1,7 @@
 import {ArrayTypeOrObject, ExtractKeys} from "../common/typings";
 import {DataExp} from "../json-exp/DataExp";
 import {DataOrder} from "./DataOrder";
-import {DataSelection} from "./DataSelection";
+import {AnyDataSelection, DataSelection} from "./DataSelection";
 
 export type DataLoadMapValue<T> = boolean | RelationMap<T>;
 
@@ -40,7 +40,7 @@ export type DataCursor<T = any> = {
     filter: DataExp<any>;
     keys: Record<string, string|number>;
 
-    selection: DataSelection<T>;
+    selection: AnyDataSelection;
 
     // range
     skip: number;

@@ -8,7 +8,7 @@ import {DataExp} from "../../json-exp/DataExp";
 import {QbDataExpTranslator} from "../../typeorm/exp/QbDataExpTranslator";
 import {EntityRelation} from "../../typeorm/relations";
 import {DataOrder} from "../DataOrder";
-import {DataSelection} from "../DataSelection";
+import {AnyDataSelection, DataSelection} from "../DataSelection";
 import {DataTypeInfo} from "../DataTypeInfo";
 import {KeyObject} from "../KeyObject";
 import {getEntityDataInfo} from "./getEntityDataInfo";
@@ -16,8 +16,7 @@ import {QueryBuilderSelector} from "./QueryBuilderSelector";
 
 
 export namespace EntityDataSelector {
-    import RelationToMany = DataSelection.RelationToMany;
-    import RelationToOne = DataSelection.RelationToOne;
+
 
     const defaultChildKey = "";
 
@@ -25,7 +24,7 @@ export namespace EntityDataSelector {
         typeInfo: DataTypeInfo,
         qb: SelectQueryBuilder<any>,
         selector: QueryBuilderSelector,
-        selection: DataSelection<any>,
+        selection: AnyDataSelection,
         cursor: {
             skip?: number,
             take?: number,
@@ -67,7 +66,7 @@ export namespace EntityDataSelector {
         typeInfo: DataTypeInfo,
         qb: SelectQueryBuilder<any>,
         selector: QueryBuilderSelector,
-        selection: DataSelection<any>,
+        selection: AnyDataSelection,
         schema: string,/* is necessary? ?*/
     ) {
         type RowContext = {
@@ -101,14 +100,12 @@ export namespace EntityDataSelector {
 
         const entityKeys = entityInfo.nonRelationColumnKeys;
 
+        // TODO: DO NOT.
         const defaultLoader = selectChild(
             DataTypeInfo.get(typeInfo.type),
             entityMetadata,
             defaultChildKey,
-            new Set(
-                DataSelection.selectKeys(selection,
-                    entityKeys)
-            ),
+            new Set(selection.pick || entityKeys),
             selection.fields || {},
             <any>selection.relations || {}
         );
@@ -119,30 +116,25 @@ export namespace EntityDataSelector {
 
         for (const [childKey, childTypeInfo] of entries<DataTypeInfo>(typeInfo.children)) {
             const childMetadata = connection.getMetadata(childTypeInfo.type);
-            let childSelection: DataSelection<any> = selection.unions?.[childKey] ?? {};
+            let childSelection: AnyDataSelection.ToOneOrMany =
+                selection.children?.[childKey] ?? {};
 
-            childSelection = DataSelection.merge(selection,childSelection);
+            childSelection = <any>DataSelection.merge(selection, childSelection);
 
             const childEntityInfo = getEntityDataInfo(childMetadata);
 
-            const childKeys = DataSelection.selectChildKeys(
-                entityInfo.nonRelationColumnKeys,
-                selection,
-                childEntityInfo.nonRelationColumnKeys,
-                childSelection);
 
             discriminatorValueToChildKey[childMetadata.discriminatorValue!] = childKey;
 
 
             childKeyToLoaders[childKey] = selectChild(
                 childTypeInfo,
-                childMetadata, childKey, childKeys, {
+                childMetadata,
+                childKey,
+                new Set(childSelection.pick ?? childEntityInfo.nonRelationColumnKeys), {
                     // ...selection.fields,
                     ...childSelection.fields
                 }, {
-                    // TODO: omit to-many relations they not in
-                    //  child-selection and load relations by default loader
-
                     // ...<any>selection.relations,
                     ...childSelection.relations
                 });
@@ -209,7 +201,8 @@ export namespace EntityDataSelector {
             childKey: string,
             selectedKeys: Set<string>,
             fields: Record<string, DataExp<any>>,
-            relations: Record<string, boolean | RelationToOne<any> | RelationToMany<any>>
+            relations:
+                Record<string, boolean | AnyDataSelection.ToOneOrMany>
         ) {
 
             const loaders: RowLoader[] = [];
@@ -262,7 +255,7 @@ export namespace EntityDataSelector {
 
             // select relations
             for (let [propertyName, relationSelectionOrBoolean]
-                of entries<boolean | RelationToOne<any> | RelationToMany<any>>(relations)) {
+                of entries<boolean | AnyDataSelection.ToOneOrMany>(relations)) {
 
                 if (!relationSelectionOrBoolean)
                     continue;
@@ -284,7 +277,7 @@ export namespace EntityDataSelector {
                     const relationTypeInfo = childTypeInfo.relations?.[propertyName] ||
                         DataTypeInfo.get(relation.right.entityType);
 
-                    const relationSelection: RelationToOne<any> =
+                    const relationSelection: AnyDataSelection.ToOne =
                         relationSelectionOrBoolean === true ? {} :
                             relationSelectionOrBoolean;
 
@@ -323,7 +316,7 @@ export namespace EntityDataSelector {
                     );
 
 
-                    const relationSelection: RelationToMany<any> =
+                    const relationSelection: AnyDataSelection.ToMany =
                         relationSelectionOrBoolean === true ? {} :
                             relationSelectionOrBoolean;
 

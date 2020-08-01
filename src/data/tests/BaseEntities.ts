@@ -111,6 +111,9 @@ export class EBase {
     @Column({nullable: true})
     eText: string;
 
+    @Column({nullable: true})
+    eText2: string;
+
     @TestRelation(() => DBase)
     oneEToOneDOwner?: Relation<DBase>;
 
@@ -175,45 +178,47 @@ export class EChild1Child1 extends EChild1 {
 }
 
 
-export class EUnion extends DataUnion(EBase, "eType", {
-    eChild1: EChild1,
-    eChild2: EChild2,
-    eChild1Child1: EChild1Child1
+export class EUnion extends DataUnion(EBase, {
+    children: {
+        eChild1: EChild1,
+        eChild2: EChild2,
+        eChild1Child1: EChild1Child1
+    }
 }) {
 
 }
 
 
-export class DUnion extends DataUnion(DBase, "dType", {
-    dChild1: DataUnion(DChild1, {
-        manyDChild1ToOneE: EUnion,
-        manyDChild1ToManyE: EUnion,
-        manyDChild1ToOneEOwner: EUnion,
-        manyDChild1ToManyEOwner: EUnion,
-    }),
-    dChild2: DChild2,
-    dChild1Child1: DChild1Child1
-}, {
-    oneDToOneE: EUnion,
-    manyDToManyE: EUnion,
-
-    // oneDToOneEOwner: EUnion,
-    // manyDToManyEOwner: EUnion,
-
-
-    oneDToManyE: EUnion,
-    manyDToOneE: EUnion,
+export class DUnion extends DataUnion(DBase, {
+    relations: {
+        oneDToOneE: EUnion,
+        manyDToManyE: EUnion,
+        oneDToManyE: EUnion,
+        manyDToOneE: EUnion,
+    },
+    children: {
+        dChild1: DataUnion(DChild1, {
+            relations: {
+                manyDChild1ToOneE: EUnion,
+                manyDChild1ToManyE: EUnion,
+                manyDChild1ToOneEOwner: EUnion,
+                manyDChild1ToManyEOwner: EUnion,
+            }
+        }),
+        dChild2: DChild2,
+        dChild1Child1: DChild1Child1
+    }
 }) {
 }
 
 /*
 
-    unions:
+    children:
         dChild1
             relations:
                 ma....
 
     relations:
-        unions: ...
+        children: ...
 
  */

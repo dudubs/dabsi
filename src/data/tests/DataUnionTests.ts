@@ -37,7 +37,7 @@
 //         new(): {
 //             type: "x", x: 1
 //
-//             unions: { cat }
+//             children: { cat }
 //         }
 //
 //     } {
@@ -55,8 +55,8 @@
 //
 //         fields
 //
-//         unions: {
-//             a: {fields, relations, unions}
+//         children: {
+//             a: {fields, relations, children}
 //         }
 //
 //         $union: {type:"cat"}

@@ -135,7 +135,7 @@ testm(__filename, () => {
 
         const t = new QbExpTester<DUnion>(getConnection, DUnion);
 
-        describe('DUnion as dChild1',()=>{
+        describe('DUnion as dChild1', () => {
             t.expectToExists({$as: {dChild1: {dText: "hello"}}});
             t.expectToExists({$as: {dChild1: {dChild1Text: "hello"}}});
             t.expectToNotExists({$as: {dChild1: {dChild1Text: "world"}}});
@@ -144,15 +144,16 @@ testm(__filename, () => {
             t.expectToNotExists({$as: {dChild2: {dText: "hello"}}});
         })
 
-        describe('DUnion at manyDToOneE*',()=>{
+        describe('DUnion at manyDToOneE*', () => {
             // relation to one
+
             t.expectToExists({$at: {manyDToOneE: {$as: {eChild1: {eChild1Text: "hello"}}}}});
             t.expectToNotExists({$at: {manyDToOneE: {$as: {eChild1: {eChild1Text: "world"}}}}});
 
         })
 
 
-        describe('count manyDToManyE as eChild1',()=>{
+        describe('count manyDToManyE as eChild1', () => {
 
             // t.expectToExists([{$count: {manyDToManyEOwner: {$as: {eChild1: {eChild1Text: "hello"}}}}}, ">", 0]);
             // t.expectToNotExists([{$count: {manyDToManyEOwner: {$as: {eChild1: {eChild1Text: "world"}}}}}, ">", 0]);
@@ -162,9 +163,7 @@ testm(__filename, () => {
         })
 
 
-
         describe('DUnion as DChild1 at *ToOneE', () => {
-            // focusNextTest();
 
             t.expectToExists({$as: {dChild1: {$at: {manyDChild1ToOneE: true}}}});
             t.expectToExists({$as: {dChild1: {$at: {manyDChild1ToOneE: {eText: "hello"}}}}});
@@ -173,6 +172,7 @@ testm(__filename, () => {
         });
 
         describe('DUnion as DChild1 at *ToOneE as EChild1', () => {
+
             t.expectToExists({$as: {dChild1: {$at: {manyDChild1ToOneE: {$as: {eChild1: {eChild1Text: "hello"}}}}}}});
             t.expectToNotExists({$as: {dChild1: {$at: {manyDChild1ToOneE: {$as: {eChild1: {eChild1Text: "world"}}}}}}});
         })

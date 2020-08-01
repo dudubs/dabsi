@@ -5,7 +5,7 @@ import {DataUnion} from "./DataUnion";
 
 export type DataTypeInfo = {
     type: Type<any>,
-    typePropertyName?: string;
+    name: string,
     children?: Record<string, DataTypeInfo>;
     relations?: Record<string, DataTypeInfo>;
 };
@@ -13,7 +13,7 @@ export namespace DataTypeInfo {
 
     export const map = new WeakMap();
 
-    function create(unionOrType) {
+    function create(unionOrType): DataTypeInfo {
 
         if (DataUnion.isDataUnion(unionOrType)) {
 
@@ -21,13 +21,14 @@ export namespace DataTypeInfo {
 
             return {
                 type: unionOrType.unionType,
+                name: typeof unionOrType === "function" ? (<Function>unionOrType).name :
+                    unionOrType.unionType.name,
                 relations,
-                typePropertyName: unionOrType.unionTypePropertyName,
                 children: mapObject(unionOrType.unionChildren, get),
             }
         }
 
-        return {type: unionOrType}
+        return {type: unionOrType, name: unionOrType.name}
     }
 
     export function get(unionOrType): DataTypeInfo {

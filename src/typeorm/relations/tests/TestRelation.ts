@@ -59,7 +59,7 @@ export function TestRelation<T>(getInverseTargetType: () => Type<T>) {
             if (!targetToRelationKeys(inverseTargetType).has(inverseRelationName)) {
                 console.log(`At ${inverseTargetType.name}, add: \n @TestRelation(() => ${
                     target.constructor.name})\n${
-                    inverseRelationName}?: Relation<${target.constructor.name}>${
+                    inverseRelationName}: Relation<${target.constructor.name}>${
                     relationInfo.toType === "Many" ? "[]" : ""};
 `)
             }

@@ -1,7 +1,6 @@
 import {Expression, ExtractKeys, Union} from "../common/typings";
-import {DataUnion} from "../data/DataUnion";
-import {MetaType} from "../data/MetaType";
-import {RelationKeys, RelationToManyKeys} from "../data/Relation";
+import {DataUnionChildren} from "../data/DataUnion";
+import {RelationKeys, RelationToManyKeys, RelationTypeAt} from "../data/Relation";
 import {IndexedSeq} from "../immutable2";
 
 
@@ -68,7 +67,7 @@ export type IfExp<Condition, Then, Else> = [Condition, Then, Else] | {
 
 export type CaseExp<T> = ({ if: DataExp<T>, then: DataExp<T> } | [DataExp<T>, DataExp<T>])[];
 
-export type DataExpOperatorsTypes<T> = {
+export type DataMappedExpTypes<T> = {
 
     $if: IfExp<DataExp<T>, DataExp<T>, DataExp<T>>;
 
@@ -107,15 +106,15 @@ export type DataExpOperatorsTypes<T> = {
     $at: AtExp<T>;
 
     // to-many relations
-    $count: RelationToManyKeys<T> | Union<{
+    $countAt: RelationToManyKeys<T> | Union<{
         [K in RelationToManyKeys<T>]:
         Record<K, RelationAtExp<T, K>>
     }>;
 
     // to-many relations
-    $has: HasExp<T>;
+    $hasAt: HasExp<T>;
 
-    $notHas: HasExp<T>;
+    $notHasAt: HasExp<T>;
 
     $as: AsExp<T>
 
@@ -124,9 +123,9 @@ export  type HasExp<T> = RelationToManyKeys<T> | Union<{
     [K in RelationKeys<T>]: Record<K, RelationAtExp<T, K>>
 }>;
 
-type RelationAtExp<T, RelationKey extends RelationKeys<T>> =
-// ChildRelationTypeAt<T, RelationKey>
-    DataExp<DataUnion.RelationTypeAt<T, RelationKey>>;
+type RelationAtExp<T, K extends RelationKeys<T>> =
+    DataExp<RelationTypeAt<T, K>>;
+// DataExp<RelationTypeAt<T, K>>;
 
 
 export type AtExp<T> = Union<{
@@ -135,20 +134,20 @@ export type AtExp<T> = Union<{
 }>;
 
 
-export type AsExp<T> = MetaType.Of<T> extends//
-    DataUnion<infer Base, infer Children, any> ?
+export type AsExp<T> = T extends//
+    DataUnionChildren<infer Children> ?
     Union<{
-        [ChildKey in keyof Children]:
-        Record<ChildKey, DataExp<Children[ChildKey]>>
+        [K in keyof Children]:
+        Record<K, DataExp<Children[K]>>
     }> : never;
 
 
 export type DataExpType<T, E extends DataExp<T>> =
     E extends keyof T ? T[E] : any;
 
-export type OperatorDataExp<T> = Union<{
-    [K in keyof DataExpOperatorsTypes<T>]:
-    Pick<DataExpOperatorsTypes<T>, K>
+export type DataMappedExp<T> = Union<{
+    [K in keyof DataMappedExpTypes<T>]:
+    Pick<DataMappedExpTypes<T>, K>
 }>;
 
 
@@ -158,7 +157,7 @@ export type CompareMap<T> = {
 };
 
 export type ObjectDataExp<T> =
-    OperatorDataExp<T> |
+    DataMappedExp<T> |
     CompareMap<T> |
     ArrayDataExp<T>;
 
@@ -177,6 +176,7 @@ export type ArrayDataExp<T> =
 
 export type StringDataExp<T> = string & keyof Required<T>;
 
+
 export type DataExp<T> =
     undefined |
     boolean |
@@ -188,7 +188,7 @@ export type DataExp<T> =
 
 export function DataExp<T>(...exps: Array<DataExp<T>>): DataExp<T> {
     exps = IndexedSeq(exps)
-        .flatMap(function* mapper(exp): Iterable<DataExp<T>> {
+        .flatMap(function* mapper(exp: any): Iterable<DataExp<T>> {
             if (exp && (typeof exp == "object") && ('$and' in exp)) {
                 yield* IndexedSeq(<any>exp.$and).flatMap(mapper)
             } else if (typeof exp !== "undefined") {

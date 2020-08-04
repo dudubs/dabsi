@@ -25,40 +25,40 @@ export class AEntity {
 
     // to B
     @TestRelation(() => BEntity)
-    oneAToOneB?: Relation<BEntity>;
+    oneAToOneB: Relation<BEntity>;
 
     @TestRelation(() => BEntity)
-    oneAToOneBOwner?: Relation<BEntity>;
+    oneAToOneBOwner: Relation<BEntity>;
 
     @TestRelation(() => BEntity)
-    oneAToManyB?: Relation<BEntity>[];
+    oneAToManyB: Relation<BEntity>[];
 
     @TestRelation(() => BEntity)
-    manyAToOneB?: Relation<BEntity>;
+    manyAToOneB: Relation<BEntity>;
 
     @TestRelation(() => BEntity)
-    manyAToManyB?: Relation<BEntity>[];
+    manyAToManyB: Relation<BEntity>[];
 
     @TestRelation(() => BEntity)
-    manyAToManyBOwner?: Relation<BEntity>[];
+    manyAToManyBOwner: Relation<BEntity>[];
 
     @TestRelation(() => CEntity)
-    oneAToOneC?: Relation<CEntity>;
+    oneAToOneC: Relation<CEntity>;
 
     @TestRelation(() => CEntity)
-    oneAToOneCOwner?: Relation<CEntity>;
+    oneAToOneCOwner: Relation<CEntity>;
 
     @TestRelation(() => CEntity)
-    manyAToManyC?: Relation<CEntity>[];
+    manyAToManyC: Relation<CEntity>[];
 
     @TestRelation(() => CEntity)
-    manyAToManyCOwner?: Relation<CEntity>[];
+    manyAToManyCOwner: Relation<CEntity>[];
 
     @TestRelation(() => AEntity)
-    manyAToManyAOwner?: Relation<AEntity>[];
+    manyAToManyAOwner: Relation<AEntity>[];
 
     @TestRelation(() => AEntity)
-    manyAToManyA?: Relation<AEntity>[];
+    manyAToManyA: Relation<AEntity>[];
 
 }
 
@@ -80,35 +80,35 @@ export class BEntity {
     bNumber: number;
 
     @TestRelation(() => AEntity)
-    oneBToOneA?: Relation<AEntity>;
+    oneBToOneA: Relation<AEntity>;
 
     @TestRelation(() => AEntity)
-    oneBToOneAOwner?: Relation<AEntity>;
+    oneBToOneAOwner: Relation<AEntity>;
 
     @TestRelation(() => AEntity)
-    oneBToManyA?: Relation<AEntity>[];
+    oneBToManyA: Relation<AEntity>[];
 
     @TestRelation(() => AEntity)
-    manyBToOneA?: Relation<AEntity>;
+    manyBToOneA: Relation<AEntity>;
 
     @TestRelation(() => AEntity)
-    manyBToManyAOwner?: Relation<AEntity>[];
+    manyBToManyAOwner: Relation<AEntity>[];
 
     @TestRelation(() => AEntity)
-    manyBToManyA?: Relation<AEntity>[];
+    manyBToManyA: Relation<AEntity>[];
 
 
     @TestRelation(() => CEntity)
-    oneBToOneC?: Relation<CEntity>;
+    oneBToOneC: Relation<CEntity>;
 
     @TestRelation(() => CEntity)
-    oneBToOneCOwner?: Relation<CEntity>;
+    oneBToOneCOwner: Relation<CEntity>;
 
     @TestRelation(() => CEntity)
-    manyBToManyCOwner?: Relation<CEntity>[];
+    manyBToManyCOwner: Relation<CEntity>[];
 
     @TestRelation(() => CEntity)
-    manyBToManyC?: Relation<CEntity>[];
+    manyBToManyC: Relation<CEntity>[];
 }
 
 
@@ -129,28 +129,28 @@ export class CEntity {
     cNumber: number;
 
     @TestRelation(() => BEntity)
-    oneCToOneB?: Relation<BEntity>;
+    oneCToOneB: Relation<BEntity>;
 
     @TestRelation(() => BEntity)
-    oneCToOneBOwner?: Relation<BEntity>;
+    oneCToOneBOwner: Relation<BEntity>;
 
     @TestRelation(() => AEntity)
-    oneCToOneA?: Relation<AEntity>;
+    oneCToOneA: Relation<AEntity>;
 
     @TestRelation(() => AEntity)
-    oneCToOneAOwner?: Relation<AEntity>;
+    oneCToOneAOwner: Relation<AEntity>;
 
     @TestRelation(() => AEntity)
-    manyCToManyAOwner?: Relation<AEntity>[];
+    manyCToManyAOwner: Relation<AEntity>[];
 
     @TestRelation(() => AEntity)
-    manyCToManyA?: Relation<AEntity>[];
+    manyCToManyA: Relation<AEntity>[];
 
     @TestRelation(() => BEntity)
-    manyCToManyBOwner?: Relation<BEntity>[];
+    manyCToManyBOwner: Relation<BEntity>[];
 
     @TestRelation(() => BEntity)
-    manyCToManyB?: Relation<BEntity>[];
+    manyCToManyB: Relation<BEntity>[];
 
 }
 

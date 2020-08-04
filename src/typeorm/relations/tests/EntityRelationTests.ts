@@ -1,13 +1,26 @@
 // TODO: rename to EntityRelationTests.
 import {Connection, Repository} from "typeorm";
+import {
+    DBase,
+    DChild1,
+    DChild1Child1,
+    DChild2,
+    EBase,
+    EChild1,
+    EChild1Child1,
+    EChild2
+} from "../../../data/tests/BaseEntities";
 import {TestConnection} from "../../../data/tests/TestConnection";
+import {focusNextTest} from "../../exp/tests/focusNextTest";
 import {EntityRelation} from "../EntityRelation";
 import {AEntity, BEntity, CEntity} from "./Entities";
 
 
 testm(__filename, () => {
     const getConnection = TestConnection([
-        AEntity, BEntity, CEntity
+        AEntity, BEntity, CEntity,
+        DBase, DChild1, DChild2, DChild1Child1,
+        EBase, EChild1, EChild2, EChild1Child1
     ]);
 
 
@@ -124,9 +137,43 @@ testm(__filename, () => {
         expect(aAtAOwner.left.isOwning).toBeFalsy();
         expect(aAtAOwner.right.isOwning).toBeTruthy()
 
-        expect(aOfA.getJoinToTableCondition("lx", "jx"))
-            .not.toEqual(aOfAOwner.getJoinToTableCondition("lx", "jx"));
+        expect(aOfA.getLeftConditionByTableJoin("lx", "jx"))
+            .not.toEqual(aOfAOwner.getLeftConditionByTableJoin("lx", "jx"));
 
+
+    });
+
+    it('union', () => {
+        const eOfD = EntityRelation.of(connection, DBase, "oneDToOneE");
+        const eOfDChild1 = EntityRelation.of(connection, DChild1, "oneDToOneE");
+        const eOwnerOfD = EntityRelation.of(connection, DBase, "oneDToOneEOwner");
+        const eOwnerOfDChild1 = EntityRelation.of(connection, DChild1, "oneDToOneEOwner");
+
+        console.log(
+            eOwnerOfD.relationMetadata.isOwning,
+            eOwnerOfDChild1.relationMetadata.isOwning,
+            eOwnerOfD.isTree,
+            eOwnerOfDChild1.isTree,
+            eOwnerOfD.left.isOwning,
+            eOwnerOfDChild1.left.isOwning
+        );
+
+        // ((x)=>{
+        //     x(eOwnerOfD);
+        //     x(eOwnerOfDChild1);
+        // })((x:EntityRelation)=>{
+        //     console.log([
+        //         x.relationMetadata.isOwning,
+        //         x.isTree,
+        //         x.left.isOwning,
+        //         x.entityType
+        //     ]);
+        // })
+
+
+
+        expect(eOwnerOfD.left.isOwning)
+            .toEqual(eOwnerOfDChild1.left.isOwning);
 
     })
 

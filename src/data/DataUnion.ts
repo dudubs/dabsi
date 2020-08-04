@@ -1,96 +1,80 @@
 import {mapObject} from "../common/object/mapObject";
-import {Assign, Pluck} from "../common/typings";
-import {MetaType} from "./MetaType";
-import {MapRelation, RelationKeys, RelationTypeAt as _RelationTypeAt} from "./Relation";
+import {Constructor, HasKeys, If} from "../common/typings";
+import {MapRelation, RelationKeys, RelationTypeAt, RelationTypeAt as _RelationTypeAt} from "./Relation";
 
 
-export type DataUnion<Base, Children, Relations> = {
-    unionType: Base,
-    unionChildren: Children;
-    unionRelations: Relations;
+export type DataTypeKey = "$type";
+export const DataTypeKey: DataTypeKey = "$type";
+
+export type DataUnionChildrenKey = "$unionChildren";
+export type DataUnionChildren<T> =
+    If<HasKeys<T>, Record<DataUnionChildrenKey, T>, {}>
+
+
+type _BaseChild<T> = Constructor<T>;
+
+type _BaseChildren<T> = Record<string, _BaseChild<T>>;
+
+type _BaseRelation<T> =
+    Constructor<T> &
+    { unionType: new() => any };
+
+type _BaseRelations<T> =
+    {
+        [K in RelationKeys<T>]?:
+        _BaseRelation<_RelationTypeAt<T, K>>
+    };
+
+export type DataUnionClass<Base,
+    Children extends _BaseChildren<Base>,
+    Relations extends _BaseRelations<Base>> =
+
+    Constructor<DataUnion<Base,
+        _MapInstances<Children>,
+        _MapInstances<Relations>>> &
+    {
+        unionChildren: Children,
+        unionRelations: Relations
+        unionType: new () => Base;
+
+    };
+
+
+export type DataUnion<T, Children, Relations> =
+    _AssignRelations<T, Relations> &
+    DataUnionChildren<{
+        [K in keyof Children]:
+        _AssignRelations<Children[K], Relations>
+    }>;
+
+
+type _MapInstances<T> = {
+    [K in keyof T]:
+    InstanceType<Extract<T[K], Constructor<any>>>
+};
+type _AssignRelations<T, Relations> =
+// TODO: Assign
+    Omit<T, RelationKeys<T>>
+    & {
+    [K in RelationKeys<T>]:
+
+    MapRelation<T[K],
+        K extends keyof Relations ?
+            Relations[K] :
+            RelationTypeAt<T, K>>
 
 };
 
-export declare namespace DataUnion {
+export function DataUnion<T,
+    R extends _BaseRelations<T> = {},
+    C extends _BaseChildren<T> = {}>(
+    type: Constructor<T>,
+    union: {
+        relations?: R,
+        children?: C
+    },
+): DataUnionClass<T, C, R>
 
-
-    type Child<T> = (new(...args: any[]) => T) ;
-
-    type Children<T> = Record<string, Child<T>>;
-
-    type Relation<T> =
-        new(...args: any[]) => Instance<T, any, any>;
-
-    type Relations<T> = { [K in RelationKeys<T>]?: Relation<_RelationTypeAt<T, K>> };
-
-    type RelationTypeAt<T, K extends RelationKeys<T>> =
-        K extends keyof RelationsOf<T> ? RelationsOf<T>[K] :
-            _RelationTypeAt<T, K>;
-
-    type RelationsOf<T> =
-        MetaType.Of<T> extends DataUnion<any, any, infer U> ? U : {};
-
-    type ChildrenOf<T> =
-        MetaType.Of<T> extends DataUnion<any, infer U, any> ? U : {};
-
-    type Class<Base,
-        Children extends DataUnion.Children<Base>,
-        Relations extends DataUnion.Relations<Base>> =
-        DataUnion<Base, Children, Relations> & {
-
-        new(): Instance<Base, Children, Relations>;
-
-    };
-
-    type MergeRelations<T, Relations> =
-        Assign<T, {
-            [K in RelationKeys<T>]: MapRelation<T[K], (
-                // TODO: use Pluck
-                K extends keyof Relations ? Relations[K] : _RelationTypeAt<T, K>
-                )>
-
-        }> &
-        MetaType.Extend<T, MetaType.Of<T> extends//
-            DataUnion<infer Base, infer Children, infer ChildRelations> ?
-            DataUnion<Base, Children, Assign<Relations, ChildRelations>> :
-            DataUnion<T, {}, Relations>//
-            >;
-
-    type MergeChildrenRelations<Children, Relations> = {
-        [K in keyof Children]:
-        MergeRelations<Children[K], Relations>
-    };
-
-
-    type _Instance<Base, Children, Relations> =
-        MetaType.Extend<Base,
-            DataUnion<//
-                MergeRelations<Base, Relations>,
-                MergeChildrenRelations<Children, Relations>,
-                Relations//
-                >//
-            >;
-
-    type Instance<Base,
-        Children extends DataUnion.Children<Base>,
-        Relations extends DataUnion.Relations<Base>> =
-        _Instance<Base, MapInstances<Children>, MapInstances<Relations>>;
-
-
-    type MapInstances<T> =
-        { [K in keyof T]: InstanceType<Extract<T[K], new(...args: any[]) => any>> }
-}
-
-export function DataUnion<Base,
-    U extends {
-        relations?: DataUnion.Relations<Base>,
-        children?: DataUnion.Children<Base>,
-    }>(
-    type: new(...args: any[]) => Base,
-    union: U,
-): DataUnion.Class<Base,
-    NonNullable<Pluck<U, 'children', {}>>,
-    NonNullable<Pluck<U, 'relations', {}>>>
 
 export function DataUnion(
     type,
@@ -106,9 +90,9 @@ export function DataUnion(
     }
 
     Class.unionType = type;
-    Class.unionChildren = mapObject(children, (child: DataUnion.Child<any>) => {
+    Class.unionChildren = mapObject(children, (child: _BaseChild<any>) => {
         if (DataUnion.isDataUnion(child)) {
-            return DataUnion(child.unionType, {
+            return DataUnion(<any>child.unionType, {
                 relations: {
                     ...relations,
                     ...child.unionRelations
@@ -130,6 +114,6 @@ export function DataUnion(
 }
 
 
-DataUnion.isDataUnion = function (obj): obj is DataUnion<any, any, any> {
+DataUnion.isDataUnion = function (obj): obj is DataUnionClass<any, any, any> {
     return 'unionType' in obj
 }

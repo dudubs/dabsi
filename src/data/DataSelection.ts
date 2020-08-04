@@ -1,113 +1,98 @@
 import {mergeObject} from "../common/object/mergeObject";
 import {omit} from "../common/object/omit";
-import {Assign, IfNotNever, Pluck} from "../common/typings";
+import {Assign, HasKeys, If, IsNull, Pluck} from "../common/typings";
 import {DataExp} from "../json-exp/DataExp";
 import {DataOrder} from "./DataOrder";
-import {DataSelectionRow} from "./DataSelectionRow";
-import {DataUnion} from "./DataUnion";
-import {IfRelationToMany, IfRelationToOne, MapRelation, NonRelationKeys, RelationKeys} from "./Relation";
+import {DataUnionChildren, DataUnionChildrenKey} from "./DataUnion";
+import {IfRelationToMany, IfRelationToOne, NonRelationKeys, RelationKeys, RelationTypeAt} from "./Relation";
 
 
-export type DataSelection<T, P = {}> =
-    _DataSelection<NonNullable<T>, P>;
 
-type _DataSelection<T, P = {}> =
-    P & DataSelection.Base<T>;
+type _MergeRelation<L, R> =
+    L extends (null | undefined | boolean) ? R :
+        R extends (null | undefined | boolean) ? L :
+            _MergeObject<L, R> ;
 
-export declare namespace DataSelection {
+type _PickOf<T> = Pluck<T, 'pick', undefined>;
 
-    import FieldsOf = DataSelectionRow.FieldsOf;
-    type RelationToOne<T> = DataSelection<T, {
-        notNull?: true | false
-    }>;
+type _RelationsOf<T> = Pluck<T, 'relations', {}>;
 
+type _ChildrenOf<T> = Pluck<T, 'children', {}>;
 
-    type RelationToMany<T> = DataSelection<T, {
-        skip?: number;
-        take?: number;
-        filter?: DataExp<T>;
-        order?: DataOrder<T>[]
-    }>;
-
-    type Relation<T> = boolean | RelationToOne<T> | RelationToMany<T>;
+type _MergeRelations<L, R> = Assign<_RelationsOf<L>, {
+    [K in keyof _RelationsOf<R>]:
+    _MergeRelation<//
+        Pluck<_RelationsOf<L>, K, undefined>,
+        _RelationsOf<R>[K]>
+}>
 
 
-    type IsNull<T> = T extends (undefined | null) ? true : false;
-
-    type MergePicks<L, R> =
-        IsNull<L> extends true ? R :
-            IsNull<R> extends true ? L :
-                Array<Pluck<L, number> | Pluck<R, number>>;
-    // {};
-
-    type PickOf<T> = Pluck<T, 'pick', undefined>;
-
-    type RelationsOf<T> = Pluck<T, 'relations', {}>;
-
-    type ChildrenOf<T> = Pluck<T, 'children', {}>;
-
-    type MergeRelation<L, R> =
-        L extends (null | undefined | boolean) ? R :
-            R extends (null | undefined | boolean) ? L :
-                MergeObject<L, R> ;
-
-    type MergeRelations<L, R> = Assign<RelationsOf<L>, {
-        [K in keyof RelationsOf<R>]:
-        MergeRelation<//
-            Pluck<RelationsOf<L>, K, undefined>,
-            RelationsOf<R>[K]>
-    }>
+type MergeChildren<L, R> = Assign<_ChildrenOf<L>, {
+    [K in keyof _ChildrenOf<R>]:
+    MergeDataSelection<//
+        Pluck<_ChildrenOf<L>, K, undefined>, // L ChildOf K
+        _ChildrenOf<R>[K]>
+}>;
 
 
-    type MergeChildren<L, R> = Assign<ChildrenOf<L>, {
-        [K in keyof ChildrenOf<R>]:
-        Merge<//
-            Pluck<ChildrenOf<L>, K, undefined>, // L ChildOf K
-            ChildrenOf<R>[K]>
-    }>;
+export type _MergePicks<L, R> =
+    L extends ReadonlyArray<infer LK> ?
+        R extends ReadonlyArray<infer RK> ?
+            ReadonlyArray<LK | RK> :
+            ReadonlyArray<LK> :
+        R extends ReadonlyArray<infer RK> ? ReadonlyArray<RK> : undefined;
 
-    type MergeObject<L, R> = Assign<Assign<L, R>, {
-        pick: MergePicks<PickOf<L>, PickOf<R>>,
-        fields: Assign<FieldsOf<L>, FieldsOf<R>>,
-        relations: MergeRelations<L, R>,
-        children: MergeChildren<L, R>
-    }>;
 
-    type Merge<L, R> =
-        IsNull<L> extends true ? R :
-            IsNull<R> extends true ? L :
-                MergeObject<L, R>;
+type _MergeObject<L, R> = Assign<Assign<L, R>, {
+    pick: _MergePicks<_PickOf<L>, _PickOf<R>>,
+    fields: Assign<Pluck<L, 'fields'>, Pluck<R, 'fields'>>,
+    relations: _MergeRelations<L, R>,
+    children: MergeChildren<L, R>
+}>;
 
-    type Relations<T> = {
-        [K in RelationKeys<T>]?: true | false
-        | IfRelationToOne<T[K], RelationToOne<T[K]>>
-        | IfRelationToMany<T[K], RelationToMany<Pluck<T[K], number>>>
-    };
+export type MergeDataSelection<L, R> =
+    If<IsNull<L>, R,
+        If<IsNull<R>, L,
+            _MergeObject<L, R>>>;
 
-    type ChildrenRelations<T> = {
-        [K in RelationKeys<T>]:
-        MapRelation<T[K], DataUnion.RelationTypeAt<T, K>>
-    };
+type _PossibleKeysToPick<T> =
+    Exclude<NonRelationKeys<T>,
+        DataUnionChildrenKey>;
 
-    type Children<Children> = IfNotNever<keyof Children, {
-        [ChildKey in keyof Children]?:
-        DataSelection<Children[ChildKey]>
-    }>;
 
-    type Base<T> = {
+type _RelationToOne<T> = DataSelection<T> & {
+    notNull?: true | false
+};
 
-        pick?: NonRelationKeys<T>[];
+
+type _RelationToMany<T> = DataSelection<T> & {
+    skip?: number;
+    take?: number;
+    filter?: DataExp<T>;
+    order?: DataOrder<T>[]
+};
+
+export type DataSelection<T> =
+    {
+
+        // rename to get
+        pick?: readonly _PossibleKeysToPick<T>[];
 
         fields?: Record<string, DataExp<T>>;
 
-        relations?: Relations<ChildrenRelations<T>>;
+        relations?: {
+            [K in RelationKeys<T>]?: true | false
+            | IfRelationToOne<T[K], _RelationToOne<RelationTypeAt<T, K>>>
+            | IfRelationToMany<T[K], _RelationToMany<RelationTypeAt<T, K>>>
+        };
 
-        children?: Children<DataUnion.ChildrenOf<T>>
+        children?: T extends DataUnionChildren<infer Children> ?
+            If<HasKeys<Children>, {
+                [K in keyof Children]?: DataSelection<Children[K]>
+            }, undefined>
+            : undefined;
 
     };
-
-
-}
 
 export type AnyDataSelection = {
     pick?: string[]
@@ -118,12 +103,12 @@ export type AnyDataSelection = {
 
     children?: Record<string, Omit<AnyDataSelection, "children">>
 };
+///
 
 export declare namespace AnyDataSelection {
     export type ToOne = AnyDataSelection & {
         notNull?: string[]
     };
-
     export type ToMany = AnyDataSelection & {
         skip?: number;
         take?: number;
@@ -134,7 +119,6 @@ export declare namespace AnyDataSelection {
         ToOne | ToMany;
 
 }
-
 
 export namespace DataSelection {
 

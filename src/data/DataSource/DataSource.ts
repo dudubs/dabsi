@@ -7,7 +7,7 @@ import {DataFields, DataFieldsRow} from "../DataFields";
 import {DataFieldsTranslator} from "../DataFieldsTranslator";
 import {DataItem, DataKey, DataKeyInput} from "../DataItem";
 import {DataNullsSort, DataOrder, DataSort} from "../DataOrder";
-import {DataUnion} from "../DataUnion";
+import {DataUnionChildren} from "../DataUnion";
 import {RelationKeys} from "../Relation";
 import {DataValues} from "./DataValues";
 
@@ -132,10 +132,10 @@ export abstract class DataSource<T> {
 
     abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
 
-    as<T, K extends string & keyof DataUnion.ChildrenOf<T>>(
-        this: DataSource<T>,
+    as<K extends string & keyof Children, Children>(
+        this: DataSource<DataUnionChildren<Children>>,
         type: K
-    ): DataSource<DataUnion.ChildrenOf<T>[K]> {
+    ): DataSource<Children[K]> {
 
         return this.withCursor({
             ...this.cursor,

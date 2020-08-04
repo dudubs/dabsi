@@ -1,25 +1,65 @@
-import {IsNever, Pluck} from "../../common/typings";
+import {Constructor, IsNever, Pluck} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
 import {AEntity} from "../../typeorm/relations/tests/Entities";
 import {DataRow} from "../DataRow";
-import {DataSelection} from "../DataSelection";
+import {DataSelection, MergeDataSelection} from "../DataSelection";
+import * as MDataSelection from "../DataSelection";
 import {DataSelectionRow} from "../DataSelectionRow";
-import {DataUnion} from "../DataUnion";
+import {DataUnion, DataUnionChildren, DataUnionChildrenKey} from "../DataUnion";
 import {DataUnionRow} from "../DataUnionRow";
-import {DebugType, MetaType} from "../MetaType";
 import {DBase, DChild1, DUnion, EUnion} from "./BaseEntities";
 
 
 pass(() => {
+
+
+    // DataUnion
+    {
+        // no children
+        {
+
+            class _DUnion extends DataUnion(DBase, {
+                relations: {oneDToManyE: EUnion}
+            }) {
+
+            }
+        }
+
+        testType<DUnion[DataUnionChildrenKey]>(d => {
+            void (d.dChild1.dChild1Text);
+
+            // @ts-expect-error
+            void (d.dChild1.x);
+        })
+
+    }
+
+    // DataUnionRow
+    {
+        testType<DataUnionRow<DUnion>>(d => {
+
+            // @ts-expect-error
+            assertType<DataUnionChildren<any>>(d);
+
+            // @ts-expect-error
+            void (d.$type === "x");
+
+            if (d.$type === "dChild1") {
+
+
+            }
+        });
+    }
+
     // DataSelection
     {
         // MergePicks
         {
-            testType<DataSelection.MergePicks<undefined, undefined>>(d => {
+            testType<MDataSelection._MergePicks<undefined, undefined>>(d => {
                 assertType<undefined>(d);
             });
 
-            testType<DataSelection.MergePicks<(keyof { a, b })[], undefined>>(d => {
+            testType<MDataSelection._MergePicks<(keyof { a, b })[], undefined>>(d => {
                 assertType<Pluck<typeof d, number>>("a");
 
                 assertType<Pluck<typeof d, number>>("b");
@@ -29,7 +69,7 @@ pass(() => {
 
             });
 
-            testType<DataSelection.MergePicks<undefined, (keyof { a, b })[]>>(d => {
+            testType<MDataSelection._MergePicks<undefined, (keyof { a, b })[]>>(d => {
                 assertType<Pluck<typeof d, number>>("a");
 
                 assertType<Pluck<typeof d, number>>("b");
@@ -40,7 +80,7 @@ pass(() => {
             });
 
 
-            testType<DataSelection.MergePicks<(keyof { a, b })[], (keyof { b, c })[]>>(d => {
+            testType<MDataSelection._MergePicks<(keyof { a, b })[], (keyof { b, c })[]>>(d => {
                 assertType<Pluck<typeof d, number>>("a");
 
                 assertType<Pluck<typeof d, number>>("b");
@@ -58,7 +98,7 @@ pass(() => {
     {
 
         // @ts-expect-error
-        testSelection(AEntity, {relations: {x: true}});
+        testSelection(AEntity, {relations: {x: true}} as const);
 
         testSelection(AEntity, {relations: {oneAToOneB: true}});
 
@@ -70,16 +110,21 @@ pass(() => {
         testSelection(AEntity, {relations: {oneAToOneB: {relations: {x: true}}}});
 
         // @ts-expect-error
-        testSelection(AEntity, {children: {x: {}}})
+        testSelection(AEntity, {children: {x: {}}} as const);
 
-        testSelection(AEntity, {}, row => {
+
+        testSelection(AEntity, {} as const, row => {
             void (row.aText);
 
             void (row.aId);
         });
 
-        testSelection(AEntity, {pick: ["aText"]}, row => {
+        testSelection(AEntity, {pick: ['aText'] as const} as const, row => {
             void (row.aText);
+
+            // @ts-expect-error
+            void (row.x);
+
 
             // @ts-expect-error
             void (row.aId);
@@ -108,37 +153,40 @@ pass(() => {
                     fields: {
                         bx: 1
                     }
-                }
+                },
             }
-        }, row => {
+        } as const, (a, as) => {
+
+            as.oneAToOneBOwner?.bText;
+
 
             // @ts-expect-error
-            void (row.x);
+            void (a.x);
 
-            void (row.ax);
-
-            // @ts-expect-error
-            void (row.oneAToOneB?.x);
-
-            void (row.oneAToOneB?.bx);
-
-            void (row.oneAToOneB?.bId);
+            void (a.ax);
 
             // @ts-expect-error
-            void (row.oneAToOneB?.bText);
+            void (a.oneAToOneB?.x);
 
-            void (row.oneAToOneBOwner?.bText);
+            void (a.oneAToOneB?.bx);
 
-            // @ts-expect-error
-            void (row.oneAToOneBOwner?.bx);
-
-            // @ts-expect-error
-            void (row.oneAToManyB?.[0].x);
-
-            void (row.manyAToManyA?.[0].bx);
+            void (a.oneAToOneB?.bId);
 
             // @ts-expect-error
-            void (row.manyAToManyAOwner?.[0].bx);
+            void (a.oneAToOneB?.bText);
+
+            void (a.oneAToOneBOwner?.bText);
+
+            // @ts-expect-error
+            void (a.oneAToOneBOwner?.bx);
+
+            // @ts-expect-error
+            void (a.oneAToManyB?.[0].x);
+
+            void (a.manyAToManyA?.[0].bx);
+
+            // @ts-expect-error
+            void (a.manyAToManyAOwner?.[0].bx);
         });
 
     }
@@ -150,117 +198,109 @@ pass(() => {
 
         testSelection(DUnion, {children: {dChild1: {}}});
 
-        testSelection(DataUnion(DBase, {
-            relations: {
-                oneDToOneE: EUnion
-            }
-        }), {
-
+        testSelection(DBase, {
             fields: {
                 x_d: 1
             },
-
             relations: {
-
                 oneDToOneE: {
-                    pick: ['eId'],
                     fields: {
                         x_d_e: 1
-                    },
-                    children: {
-                        eChild1: {
-                            pick: ['eText', 'eChild1Text'],
-                            fields: {
-                                x_d_eChild1: 1
-                            }
-                        }
                     }
                 }
             }
-        }, (dRow, dSelRow, dt, s) => {
+        } as const, (d, ds, s) => {
 
-            testMetaType<DUnion>(mt => {
 
-                void (mt.unionType?.dText);
+            // @ts-expect-error
+            void (ds.x);
+
+            void (ds.x_d);
+
+            // @ts-expect-error
+            void (ds.oneDToOneE?.x);
+
+            void (ds.oneDToOneE?.x_d_e);
+
+            // @ts-expect-error
+            void (d.x);
+
+            void (d.x_d);
+
+            // @ts-expect-error
+            void (d.oneDToOneE?.x);
+
+            void (d.oneDToOneE?.x_d_e);
+            ;
+
+
+        });
+        testSelection(
+            DataUnion(DBase, {
+                relations: {
+                    oneDToOneE: EUnion
+                },
+
+            }), {
+                fields: {
+                    x_d: 1
+                },
+                relations: {
+                    oneDToOneE: {
+                        pick: ['eId'],
+                        fields: {
+                            x_d_e: 1
+                        },
+                        children: {
+                            eChild1: {
+                                pick: ['eChild1Text', 'eId'],
+                                fields: {
+                                    x_d_eChild1: 1
+                                }
+                            },
+                        }
+                    }
+                }
+            } as const, (d, ds, s) => {
+
+                s.relations.oneDToOneE;
+
 
                 // @ts-expect-error
-                void (mt.unionType?.x);
-            });
+                void (ds.x);
 
-            testMetaType<typeof dSelRow>(mt => {
+
+                void (ds.x_d);
+
+                // @ts-expect-error
+                void (d.x);
+
+                void (d.x_d);
+
+                // @ts-expect-error
+                void (d.oneDToOneE?.$type === "x");
+
+                // @ts-expect-error
+                void (d.oneDToOneE?.x);
+
+                void (d.oneDToOneE?.x_d_e);
 
 
                 // @ts-expect-error
-                void (mt.unionRelations.oneDToOneE.x);
+                assertType<EUnion>(d.oneDToOneE!);
 
-                void (mt.unionRelations.oneDToOneE.x_d_e);
+                void (d.oneDToOneE!.x_d_e);
 
-                testMetaType<typeof mt.unionRelations.oneDToOneE>(mt => {
+                // @ts-expect-error
+                void (d.oneDToOneE!.x);
 
-                    // @ts-expect-error
-                    void (mt.unionChildren.x);
+                if (d.oneDToOneE?.$type === "eChild1") {
 
-                    void (mt.unionChildren.eChild1);
-
-                    // @ts-expect-error
-                    void (mt.unionChildren.eChild1.x);
-
-                    void (mt.unionChildren.eChild1.x_d_eChild1);
-
-                    void (mt.unionChildren.eChild1.eId);
-
-                    void (mt.unionChildren.eChild1.eText);
-
-                    // @ts-expect-error
-                    void (mt.unionChildren.eChild2.eText);
-
-                    testType<typeof mt.unionType>(e => {
+                }
+            })
 
 
-                    })
-                });
-
-            });
-
-            // @ts-expect-error
-            void (dRow.x);
-
-            void (dRow.x_d);
-
-            // @ts-expect-error
-            void (dRow.oneDToOneE?.$type === "x");
-
-            // @ts-expect-error
-            void (dRow.oneDToOneE?.x);
-
-            void (dRow.oneDToOneE?.x_d_e);
-
-
-            /*
-
-            Relation<Base<Relation<EBase>, {
-             pick: "eId"[];
-
-             fields: { x_d_e: number; };
-
-             children: {
-                eChild1: {
-                    pick: ("eText" | "eChild1Text")[];
-
-            fields: {
-
-                x_d_eChild1: number;
-                };
-                 }; }; }>>
-
-             */
-            if (dRow.oneDToOneE?.$type === "eChild1") {
-
-            }
-        })
-
-
-        testType<DataSelection.Merge<{
+        testType<MergeDataSelection<{
             pick: ["dId"],
             fields: {
                 dX: 1,
@@ -321,11 +361,11 @@ pass(() => {
                 number>>("eChild1Text");
 
             // @ts-expect-error
-            void(s.relations.oneDToOneE.fields.x);
+            void (s.relations.oneDToOneE.fields.x);
 
-            void(s.relations.oneDToOneE.fields.eXByD);
+            void (s.relations.oneDToOneE.fields.eXByD);
 
-            void(s.relations.oneDToOneE.fields.eXByDChild1);
+            void (s.relations.oneDToOneE.fields.eXByDChild1);
 
         });
 
@@ -375,7 +415,7 @@ pass(() => {
                     }
                 }
             }
-        }, (d, ds) => {
+        } as const, (d, ds) => {
 
             // @ts-expect-error
             void (d.$type === "x");
@@ -393,7 +433,15 @@ pass(() => {
             // @ts-expect-error
             void (d.dChild1X);
 
-            if(d.$type==="dChild1") {
+            // @ts-expect-error
+            ds.$unionChildren.dChild1?.x;
+
+            // @ts-expect-error
+            ds.$unionChildren.dChild1?.$unionChildren
+
+            void (ds.$unionChildren.dChild1.dId)
+
+            if (d.$type === "dChild1") {
                 const dChild1E = d.oneDToOneE;
                 if (dChild1E) {
 
@@ -419,21 +467,6 @@ pass(() => {
                     }
                 }
             }
-
-
-
-            testMetaType<typeof ds>(mt => {
-
-                const dChild1E = mt.unionChildren.dChild1.oneDToOneE!;
-
-                void(dChild1E.eText);
-
-                // @ts-expect-error
-                void(dChild1E.eText2);
-
-                // @ts-expect-error
-                void (mt.unionChildren.x);
-            });
 
 
             if (d.$type === "dChild1") {
@@ -469,7 +502,7 @@ pass(() => {
 
     }
 
-    // DataSelection of DUnion at *To*E as eChild1
+    // DataSelection of DUnion at *To*_E_E as eChild1
     {
         // @ts-expect-error
         testSelection(DUnion, {relations: {oneDToOneE: {children: {x: {}}}}});
@@ -481,7 +514,7 @@ pass(() => {
 
         testSelection(DUnion, {relations: {oneDToManyE: {children: {eChild1: {}}}}});
     }
-    // DataSelection of DUnion as dChild1 at  *To*E as eChild1
+    // DataSelection of DUnion as dChild1 at  *To*_E_E as eChild1
     {
 
         // @ts-expect-error
@@ -538,63 +571,40 @@ pass(() => {
         assertType<IsNever<never>>(false);
     }
 
-    // DataUnion
-    {
-        // no children
-        {
-
-            class _DUnion extends DataUnion(DBase, {
-                relations: {oneDToManyE: EUnion}
-            }) {
-
-            }
-        }
-
-        testMetaType<DUnion>(mt => {
-            testMetaType<typeof mt.unionChildren.dChild1>(mt => {
-
-                // @ts-expect-error
-                void (mt.unionRelations.x);
-
-                assertType<EUnion>(mt.unionRelations.oneDToOneE);
-
-                assertType<EUnion>(mt.unionRelations.manyDChild1ToOneE);
-            });
-
-            testMetaType<typeof mt.unionChildren.dChild2>(mt => {
-
-                // @ts-expect-error
-                void (mt.unionRelations.x);
-
-                assertType<EUnion>(mt.unionRelations.oneDToOneE);
-
-            });
-        });
-    }
 
     // DataUnionRow
     {
 
-        testType<MetaType.Of<DUnion>>(d => {
 
-            assertType<EUnion>(d.unionRelations.oneDToOneE!);
+        testType(DataUnion(DBase, {
+            relations: {
+                oneDToOneE: EUnion
+            },
+            children: {
+                dChild1: DataUnion(DChild1, {
+                    relations: {
+                        oneDChild1ToOneE: EUnion
+                    }
+                })
+            }
+        }), d => {
 
-            // @ts-expect-error
-            assertType(d.unionChildren.x);
-
-            assertType<string>(d.unionChildren.dChild1.dChild1Text!);
-
-            // @ts-expect-error
-            assertType(d.unionChildren.dChild1.x);
         });
 
-        testType<DataUnionRow.Of<DUnion>>(d => {
+        testType<DataUnionRow<DUnion>>(d => {
             void (d.dId);
             void (d.dText);
 
+            // @ts-expect-error
+            void (d.x);
+
             void (d.oneDToOneE);
+
             void (d.oneDToOneE?.$type);
 
+            if (d.oneDToOneE) {
+
+            }
 
             // @ts-expect-error
             void (d.x);
@@ -618,27 +628,6 @@ pass(() => {
                 void (d.dText);
                 void (d.dChild1Text);
 
-                testDebugType(d, d => {
-
-                    testMetaType<typeof d.Relations.oneDToOneE>(mt => {
-                        void (mt.unionChildren.eChild1);
-                        void (mt.unionChildren.eChild2);
-                        void (mt.unionChildren.eChild1Child1);
-
-                        // @ts-expect-error
-                        void (mt.unionChildren.x);
-                    });
-
-                    testMetaType<typeof d.ChildRelations.manyDChild1ToManyE>(mt => {
-                        void (mt.unionChildren.eChild1);
-                        void (mt.unionChildren.eChild2);
-                        void (mt.unionChildren.eChild1Child1);
-
-                        // @ts-expect-error
-                        void (mt.unionChildren.x);
-                    });
-                })
-
 
                 void (d.oneDToOneE);
                 void (d.manyDChild1ToOneE);
@@ -653,9 +642,6 @@ pass(() => {
                 if (d.oneDToOneE?.$type === "eChild1") {
                     void (d.oneDToOneE?.eText);
                     void (d.oneDToOneE?.eChild1Text);
-                    testDebugType(d.oneDToOneE!, d => {
-
-                    })
 
 
                     // @ts-expect-error
@@ -761,16 +747,6 @@ pass(() => {
         }
 
 
-        testType<DataUnionRow.ChildrenOf<AEntity>>(children => {
-
-            // @ts-expect-error
-            void (children.eChild1Child1);
-
-            // @ts-expect-error
-            void (children.x);
-        })
-
-
         // @ts-expect-error
         test({$as: {dChild1: {$at: {x: true}}}});
 
@@ -862,17 +838,6 @@ function pass(...args) {
 }
 
 
-function testMetaType<T>(
-    callback: (mt: MetaType.Of<T>) => void
-) {
-
-}
-
-function testDebugType<T extends Record<typeof DebugType, any>>(value: T,
-                                                                callback: (debug: T[typeof DebugType]) => void) {
-
-}
-
 function testTypeExp<T>(cls: new() => T,
                         exp: DataExp<T>) {
 
@@ -882,7 +847,9 @@ function assertType<T>(value: T) {
 
 }
 
-function testType<T>(callback: (value: T) => void) {
+function testType<T>(callback: (value: T) => void)
+function testType<T>(value: T, callback: (value: T) => void)
+function testType<T>() {
 
 }
 
@@ -892,13 +859,69 @@ function assertKey(...args) {
 
 }
 
-function testSelection<T, S extends DataSelection<T>>(
-    type: new(...args: any[]) => T,
+
+testType<new() => DataUnion<DBase, {
+    dChild1: DChild1
+}, {
+    // oneDToOneE:EUnion
+}>>(d => {
+
+    /*
+    DataSelection<DUnion>()
+        .field("", "")
+        .as("dChild1", s=> {
+            s.pick("")
+            s.at("")
+        })
+
+     */
+
+
+    testSelection(d, {} as const, () => {
+
+
+    }, s => {
+
+    });
+
+    testSelection(d, {
+        pick: ['dId'],
+        relations: {
+            oneDToOneE: {
+                pick: ['eId'],
+                // children: {
+                //     eChild1: {
+                //         pick: ['eId']
+                //     }
+                // }
+            }
+        },
+        children: {
+            dChild1: {
+                pick: ['dId']
+            }
+        }
+    } as const, (_, __, s) => {
+        // @ts-expect-error
+        s.relations.x;
+
+        s.relations.oneDToOneE;
+
+    });
+
+})
+
+function testSelection<T,
+    S extends DataSelection<T>>(
+    type: Constructor<T>,
     selection: S,
     callback?: (row: DataRow<DataSelectionRow<T, S>>,
                 selRow: DataSelectionRow<T, S>,
-                t: T,
-                s: S) => void) {
+                s: S) => void,
+    callback2?: (selRow: DataRow<DataSelectionRow<T, S>>) => void,
+) {
 
 
 }
+
+

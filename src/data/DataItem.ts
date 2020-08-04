@@ -1,4 +1,4 @@
-import {Relation} from "./Relation";
+import {DataRow} from "./DataRow";
 
 export type DataKey = "$key";
 DataKey.symbol = "$key" as const;
@@ -15,10 +15,5 @@ export namespace DataKey {
 }
 
 
-export type DataItem<T> = Record<DataKey, string> & {
-    [K in keyof T]:
-    T[K] extends object ?
-        typeof Relation extends keyof Required<T[K]> ?
-            DataItem<T[K]> : T[K] : T[K]
-};
+export type DataItem<T> = DataRow<T>;
 

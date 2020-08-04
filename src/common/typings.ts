@@ -5,10 +5,6 @@ export type Expression<T> = Union<{
 }>
 export type Nullable = undefined | null;
 
-export type JSONResult = string | number | boolean | undefined |
-    JSONResult[] | {
-    [key: string]: JSONResult
-};
 export type Awaitable<T = any> = Promise<T> | T;
 
 export type AwaitableType<T extends Awaitable> =
@@ -26,12 +22,12 @@ export type ExcludeKeys<T, V> = Exclude<Union<{
 export type PickByValue<T, V> = Pick<T, ExtractKeys<T, V>>;
 export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;
 
-export type Pluck<T, K extends PropertyKey, U = never> =
-    K extends keyof Required<T> ? Required<T>[K] : U;
+export type Pluck<T, K extends PropertyKey, E = never> =
+    Required<T> extends Record<K, infer U> ? U : E;
 
 export type PartialKeys<T, K extends PropertyKey> =
     Omit<T, K> &
-    Partial<Pick<T, Extract<K,keyof T>>>;
+    Partial<Pick<T, Extract<K, keyof T>>>;
 
 
 export function Nullable<T>(value?: T): T | Nullable {
@@ -39,9 +35,6 @@ export function Nullable<T>(value?: T): T | Nullable {
 }
 
 export type Type<T> = Function & { prototype: T };
-
-export type TypeType<T extends Type<any>> =
-    T extends Type<infer U> ? U : never;
 
 export function Type<T>(): Type<T> {
     if (this instanceof Type) {
@@ -92,16 +85,23 @@ export type OptionalKeys<T> = Union<{
 }>;
 
 
-export type OptionalOnly<T, K extends keyof T = never> = Omit<T, Exclude<RequiredKeys<T>, K>>;
+export type OptionalOnly<T, K extends keyof T = never> =
+    Omit<T, Exclude<RequiredKeys<T>, K>>;
 
 export type RequiredOnly<T> = Pick<T, RequiredKeys<T>>;
+
 export type Optional<T> = Pick<T, OptionalKeys<T>>;
 
-export type Method = (...args: any[]) => any;
 
-
-export type Pass<T, A = never, B = never, C = never, D = never> = T;
 export type IsNever<T> = [T] extends [never] ? true : false;
-export type IfNever<T, U, E = never> = IsNever<T> extends true ? U : E;
-export type IfNotNever<T, U, E = never> = IfNever<T, E, U>;
-export type If<T, U, S> = T extends U ? S : never;
+
+export type IsNull<T> = T extends (undefined | null) ? true : false;
+
+export type HasKeys<T> = Not<IsNever<keyof T>>;
+
+export type Not<T extends boolean> = T extends true ? false : true;
+
+export type If<C extends boolean, T, E = never> = C extends true ? T : E;
+
+export type Constructor<T> = { new(...args: any[]): T };
+

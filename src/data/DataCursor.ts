@@ -72,7 +72,8 @@ export namespace DataCursor {
 
         const relationSelection = cursor.selection.relations?.[<any>propertyName];
         if (relationSelection && (typeof relationSelection === "object")) {
-            cursorAt.selection = <DataSelection.RelationToOne<any>>relationSelection;
+            cursorAt.selection =
+                relationSelection;
         }
         return <any>cursorAt;
     }

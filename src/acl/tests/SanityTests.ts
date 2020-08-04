@@ -34,9 +34,9 @@ testm(__filename, () => {
         await Groups.at("users", g1).add([u1, u2]);
         items = (await Groups
             .select({
-                u1InGroup: {$has: {users: {$is: u1}}},
-                u2InGroup: {$has: {users: {$is: u2}}},
-                u3InGroup: {$has: {users: {$is: u3}}},
+                u1InGroup: {$hasAt: {users: {$is: u1}}},
+                u2InGroup: {$hasAt: {users: {$is: u2}}},
+                u3InGroup: {$hasAt: {users: {$is: u3}}},
             })
             .items())
             .map(item => ({

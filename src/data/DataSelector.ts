@@ -1,10 +1,10 @@
-import {Type} from "../common/typings";
+import {Constructor, Type} from "../common/typings";
 import {DataSelection} from "./DataSelection";
 import {DataSelectionRow} from "./DataSelectionRow";
 import {DataSource} from "./DataSource";
 
 export function DataSelector<T, S extends DataSelection<T>>(
-    type: Type<T>,
+    type: Constructor<T>,
     selection: S
 ): {
     new(): DataSelectionRow<T, S>;

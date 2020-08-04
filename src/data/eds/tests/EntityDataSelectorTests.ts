@@ -1,5 +1,6 @@
 import {Connection, DeepPartial, EntityMetadata, ObjectType} from "typeorm";
 import {mapArrayToObject} from "../../../common/array/mapArrayToObject";
+import {defined} from "../../../common/object/defined";
 import {definedAt} from "../../../common/object/definedAt";
 import {entries} from "../../../common/object/entries";
 import {isEmptyObject} from "../../../common/object/isEmptyObject";
@@ -171,13 +172,13 @@ testm(__filename, () => {
 
     describe("relations", () => {
 
-        const ABToOneRelations = {
-            manyDToOneE: true,
-            oneDToOneE: true,
+        const DEToOneRelations = {
+            // manyDToOneE: true,
+            // oneDToOneE: true,
             oneDToOneEOwner: true
         };
 
-        const BAToOneRelations = {
+        const EDToOneRelations = {
             manyEToOneD: true,
             oneEToOneD: true,
             oneEToOneDOwner: true,
@@ -185,33 +186,41 @@ testm(__filename, () => {
 
 
         // BABToOneRelations
-        const BABToOneRelations =
-            mapObject(BAToOneRelations, () => ABToOneRelations);
-        const ABABToOneRelations =
-            mapObject(ABToOneRelations, () => BABToOneRelations);
-        const DChild1BToOneRelations = {
+        const EDEToOneRelations =
+            mapObject(EDToOneRelations, () => DEToOneRelations);
+        const DEDEToOneRelations =
+            mapObject(DEToOneRelations, () => EDEToOneRelations);
+        const DChild1EToOneRelations = {
             manyDChild1ToOneE: true,
         };
-        const DChild1BAToOneRelations =
-            mapObject(DChild1BToOneRelations, () => BAToOneRelations)
+        const DChild1EDToOneRelations =
+            mapObject(DChild1EToOneRelations, () => EDToOneRelations)
 
-        describe('A to one B', () => {
+        describe('D to one _E_E', () => {
+            console.log("change to DEDE");
+            const r = DEToOneRelations;
+
             testUnion({
-                relations: mapToSelection(ABABToOneRelations),
+                relations: mapToSelection(r),
             }, tester => {
-                tester.testDChild1(ABABToOneRelations);
+
+                // focusNextTest();
+
+                tester.testDChild1(r);
             })
         });
 
         describe('DChild1 to one B', () => {
+            //
+
             testUnion({
                 children: {
                     dChild1: {
-                        relations: mapToSelection(DChild1BAToOneRelations)
+                        relations: mapToSelection(DChild1EDToOneRelations)
                     }
                 }
             }, tester => {
-                tester.testDChild1(DChild1BAToOneRelations);
+                tester.testDChild1(DChild1EDToOneRelations);
             })
         });
 
@@ -309,7 +318,7 @@ testm(__filename, () => {
         callback({
             test: (getEntity, rowExpector) => {
                 const entityKey = EntityDataKey.stringify(metadata, getEntity());
-                const row = definedAt(entityKeyToRow, entityKey);
+                const row = defined(entityKeyToRow[entityKey],()=>`No entityKey ${entityKey}.`);
                 expectToRow(row, rowExpector);
             }
         })

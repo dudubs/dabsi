@@ -3,9 +3,10 @@ import {last} from "../../common/array/last";
 import {EntityRelation} from "../../typeorm/relations";
 import {EntityDataCursor} from "./EntityDataCursor";
 import {EntityDataSource} from "./EntityDataSource";
+import {EntityDataSource2} from "./EntityDataSource2";
 import {getEntityDataInfo} from "./getEntityDataInfo";
 
-export function getEntityDataSourceInfo(source: EntityDataSource<any>) {
+export function getEntityDataSourceInfo(source: EntityDataSource<any>|EntityDataSource2<any>) {
 
     const connection = getConnection();
     const cursor = EntityDataCursor.create(connection, source.cursor, source.mainEntityType);

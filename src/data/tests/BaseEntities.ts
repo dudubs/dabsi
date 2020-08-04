@@ -36,22 +36,22 @@ export class DBase {
     dNumber?: number;
 
     @TestRelation(() => EBase)
-    oneDToOneE?: Relation<EBase>;
+    oneDToOneE: Relation<EBase>;
 
     @TestRelation(() => EBase)
-    oneDToOneEOwner?: Relation<EBase>;
+    oneDToOneEOwner: Relation<EBase>;
 
     @TestRelation(() => EBase)
-    oneDToManyE?: Relation<EBase>[];
+    oneDToManyE: Relation<EBase>[];
 
     @TestRelation(() => EBase)
-    manyDToOneE?: Relation<EBase>;
+    manyDToOneE: Relation<EBase>;
 
     @TestRelation(() => EBase)
-    manyDToManyE?: Relation<EBase>[];
+    manyDToManyE: Relation<EBase>[];
 
     @TestRelation(() => EBase)
-    manyDToManyEOwner?: Relation<EBase>[];
+    manyDToManyEOwner: Relation<EBase>[];
 
 
 }
@@ -66,22 +66,22 @@ export class DChild1 extends DBase {
     dChild1Text2?: string;
 
     @TestRelation(() => EBase)
-    manyDChild1ToOneE?: Relation<EBase>;
+    manyDChild1ToOneE: Relation<EBase>;
 
     @TestRelation(() => EBase)
-    manyDChild1ToManyEOwner?: Relation<EBase>[];
+    manyDChild1ToManyEOwner: Relation<EBase>[];
 
     @TestRelation(() => EBase)
-    manyDChild1ToManyE?: Relation<EBase>[];
+    manyDChild1ToManyE: Relation<EBase>[];
 
     @TestRelation(() => EBase)
-    oneDChild1ToOneEOwner?: Relation<EBase>;
+    oneDChild1ToOneEOwner: Relation<EBase>;
 
     @TestRelation(() => EBase)
-    oneDChild1ToOneE?: Relation<EBase>;
+    oneDChild1ToOneE: Relation<EBase>;
 
     @TestRelation(() => EBase)
-    oneDChild1ToManyE?: Relation<EBase>[];
+    oneDChild1ToManyE: Relation<EBase>[];
 }
 
 @ChildEntity()
@@ -115,42 +115,42 @@ export class EBase {
     eText2: string;
 
     @TestRelation(() => DBase)
-    oneEToOneDOwner?: Relation<DBase>;
+    oneEToOneDOwner: Relation<DBase>;
 
     @TestRelation(() => DBase)
-    oneEToOneD?: Relation<DBase>;
+    oneEToOneD: Relation<DBase>;
 
     @TestRelation(() => DBase)
-    manyEToOneD?: Relation<DBase>;
+    manyEToOneD: Relation<DBase>;
 
     @TestRelation(() => DBase)
-    oneEToManyD?: Relation<DBase>[];
+    oneEToManyD: Relation<DBase>[];
 
     @TestRelation(() => DBase)
-    manyEToManyDOwner?: Relation<DBase>[];
+    manyEToManyDOwner: Relation<DBase>[];
 
     @TestRelation(() => DBase)
-    manyEToManyD?: Relation<DBase>[];
+    manyEToManyD: Relation<DBase>[];
 
 
     @TestRelation(() => DChild1)
-    manyEToOneDChild1?: Relation<DChild1>;
+    manyEToOneDChild1: Relation<DChild1>;
 
     @TestRelation(() => DChild1)
-    manyEToManyDChild1Owner?: Relation<DChild1>[];
+    manyEToManyDChild1Owner: Relation<DChild1>[];
 
     @TestRelation(() => DChild1)
-    manyEToManyDChild1?: Relation<DChild1>[];
+    manyEToManyDChild1: Relation<DChild1>[];
 
     @TestRelation(() => DChild1)
-    oneEToManyDChild1?: Relation<DChild1>[];
+    oneEToManyDChild1: Relation<DChild1>[];
 
 
     @TestRelation(() => DChild1)
-    oneEToOneDChild1?: Relation<DChild1>;
+    oneEToOneDChild1: Relation<DChild1>;
 
     @TestRelation(() => DChild1)
-    oneEToOneDChild1Owner?: Relation<DChild1>;
+    oneEToOneDChild1Owner: Relation<DChild1>;
 
 
 }

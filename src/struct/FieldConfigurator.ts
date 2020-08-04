@@ -4,9 +4,10 @@ import {FieldDecorator} from "./FieldDecorator";
 export type FieldConfigurator<U extends any[], C> =
     <T>(
         getDecorator: (...args: U) => (field: Field) => void
-    ) => ((...args: U) => FieldDecorator<T>) & {
-        get(field: Field): C | undefined;
-    };
+    ) => ((...args: U) => FieldDecorator<T>) &
+        {
+            get(field: Field): C | undefined;
+        };
 
 export function FieldConfigurator<T>(): FieldConfigurator<[T], T>
 export function FieldConfigurator<U extends any[], T = U[0]>(

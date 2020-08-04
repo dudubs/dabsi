@@ -101,7 +101,7 @@ export abstract class DataTable<T,
         await action.handleKeys?.(keys, this);
     }
 
-    getQuerySource(): DataSource<any> {
+    getQuerySource(): DataSource<T> {
 
         const fields: any = {};
 
@@ -111,7 +111,7 @@ export abstract class DataTable<T,
             }
         }
 
-        return super.getQuerySource().select(fields)
+        return <any>super.getQuerySource().select(fields)
     }
 
     @AfterMount()

@@ -1,0 +1,13 @@
+{
+  "name": "@dabsi/data",
+  "version": "1.0.2",
+  "main": "index.js",
+  "repository": "https://github.com/dudubs/dabsi",
+  "files": [
+    "lib",
+    "index.js",
+    "index.d.ts",
+    "package.json",
+    "README.md"
+  ]
+}

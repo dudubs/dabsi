@@ -1,8 +1,9 @@
-import {Connection, SelectQueryBuilder} from "typeorm";
+import {Connection} from "typeorm";
 import {last} from "../../common/array/last";
 import {Lazy} from "../../common/patterns/lazy";
 import {Type} from "../../common/typings";
 import {useQueryBuilderExp} from "../../typeorm/exp/useQueryBuilderExp";
+import {QueryExpBuilder} from "../../typeorm/QueryExpBuilder";
 import {DataCursor, EmptyDataCursor} from "../DataCursor";
 import {DataItem, DataKey, DataKeyInput} from "../DataItem";
 import {DataSource, DataValues} from "../DataSource";
@@ -10,7 +11,6 @@ import {EntityDataCursor} from "./EntityDataCursor";
 import {EntityDataKey} from "./EntityDataKey";
 import {EntityDataSelector} from "./EntityDataSelector";
 import {getEntityDataSourceInfo} from "./getEntityDataSourceInfo";
-import {QueryBuilderSelector} from "./QueryBuilderSelector";
 
 
 useQueryBuilderExp();
@@ -63,27 +63,24 @@ export class EntityDataSource<T> extends DataSource<T> {
             cursor)
     }
 
-    protected createQueryBuilder(): SelectQueryBuilder<any> {
-        return EntityDataCursor.createQueryBuilder(
+    protected createQueryExpBuilder(): QueryExpBuilder {
+        return EntityDataCursor.createQueryExpBuilder(
             this.entitySourceInfo.cursor,
             this.entitySourceInfo.repository
         )
     }
 
     protected createEntityCursor() {
-        const qb = this.createQueryBuilder();
-        const selector = new QueryBuilderSelector(qb);
+        const qb = this.createQueryExpBuilder();
 
         const loader = EntityDataSelector.selectCursor(
             this.entitySourceInfo.cursor.typeInfo,
             qb,
-            selector,
             this.cursor.selection,
             this.cursor
         )
         return {
             qb,
-            selector,
             loader
         };
     }
@@ -93,15 +90,11 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
 
     count(): Promise<number> {
-        return this.createQueryBuilder().getCount();
+        return this.createQueryExpBuilder().count();
     }
 
     has(): Promise<boolean> {
-        // TODO: Check if have a limit
-        return this.createQueryBuilder()
-            .take(1)
-            .getCount()
-            .then(count => count > 0)
+        return this.createQueryExpBuilder().has()
     }
 
     // write

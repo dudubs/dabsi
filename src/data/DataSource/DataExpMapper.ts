@@ -39,8 +39,8 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
         return {$or: exps};
     }
 
-    translateAt(key: string, exp: DataExp<any>): DataExp<any> {
-        return <any>{$at: {[key]: exp}};
+    translateAt(propertyKey: string, exp: DataExp<any>): DataExp<any> {
+        return <any>{$at: {[propertyKey]: exp}};
     }
 
     translateCompare(op: NamedCompareOperator, left: DataExp<any>, right: DataExp<any>): DataExp<any> {

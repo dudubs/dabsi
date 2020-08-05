@@ -48,6 +48,7 @@ export abstract class DataExpTranslator<T, U>
     abstract translateIn(inverse: boolean, where: U, values: U[]): U;
 
 
+
     translateInExp(inverse: boolean, where: DataExp<T>, values: DataExp<T>[]): U {
         if (values.length === 0)
             return this.True
@@ -205,7 +206,7 @@ export abstract class DataExpTranslator<T, U>
 
     abstract translateCountAt(propertyName: string, subExp: DataExp<any>): U;
 
-    abstract translateAt(key: string, exp: DataExp<any>): U;
+    abstract translateAt(propertyKey: string, exp: DataExp<any>): U;
 
     abstract translateLength(exp: U): U;
 

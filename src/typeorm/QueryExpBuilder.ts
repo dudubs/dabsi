@@ -1,12 +1,10 @@
-import {Connection} from "typeorm/index";
-import {entries} from "../common/object/entries";
-import {hasKeys} from "../common/object/hasKeys";
-import {keys} from "../common/object/keys";
-import {DataKey} from "../data/DataItem";
-import {ColumnLoader} from "../data/eds/QueryBuilderSelector";
+import {Connection} from "typeorm";
 import {DataExp} from "../json-exp/DataExp";
 import {Query, QueryExp} from "./QueryExp";
-import {SQLQueryTranslator} from "./SQLQueryTranslator";
+import {QueryExpTranslatorToSql} from "./QueryExpTranslatorToSql";
+import {isDeepEqual} from "./utils/QueryExpBuilder";
+
+export type ColumnLoader = (raw: object) => any;
 
 export class QueryExpBuilder {
 
@@ -63,59 +61,47 @@ export class QueryExpBuilder {
         return raw => raw[aliasName]
     }
 
-    getQueryAndParameters(): [string, any[]] {
-        const parameters = [];
-        const translator = new SQLQueryTranslator(
-            parameters,
+
+    createTranslator() {
+        return new QueryExpTranslatorToSql(
+            [],
             this.connection,
             this.alias
         )
+    }
 
-        let query = this.query;
-
-        if (query.fields && hasKeys(query.fields)) {
-            for (let [aliasName, selection] of entries(query.fields)) {
-
-            }
-        }
-        return [translator.translateQuery(this.query), parameters]
+    getQueryAndParameters(): [string, any[]] {
+        const translator = this.createTranslator();
+        return [translator.translateQuery(this.query),
+            translator.parameters]
     }
 
     getMany(): Promise<any> {
         const [query, parameters] = this.getQueryAndParameters();
         return this.connection.query(query, parameters)
     }
+
+    count(): Promise<number> {
+        const translator = this.createTranslator();
+        const query = translator.translateQuery(this.query);
+        return this.connection.query(`SELECT COUNT(*) value FROM (${query}) _rec`,
+            translator.parameters).then(rows => {
+            return rows[0]?.value ?? 0
+        })
+    }
+
+    has(): Promise<boolean> {
+        const translator = this.createTranslator();
+        const query = `SELECT COUNT(*) value FROM (${
+            translator.translateQuery({
+                ...this.query,
+                take: 1
+            })
+        }) _rec`;
+        return this.connection.query(query, translator.parameters).then(rows => {
+            return (rows[0]?.value ?? 0) > 0
+        })
+    }
 }
 
 
-function isDeepEqual(a, b) {
-    if (a === b)
-        return true;
-    if (typeof a !== typeof b) return false;
-    if (Array.isArray(a) && Array.isArray(b)) {
-        if (a.length !== b.length)
-            return false;
-        for (const [index, av] of a.entries()) {
-            if (!isDeepEqual(av, b[index])) {
-                return false
-            }
-        }
-        return true;
-    }
-
-
-    for (const [ak, av] of entries(a)) {
-        if (!isDeepEqual(av, b[ak])) {
-            return false;
-        }
-    }
-    for (const bk of keys(b)) {
-        if (!(bk in a)) {
-            return false;
-        }
-    }
-
-    return true;
-
-
-}

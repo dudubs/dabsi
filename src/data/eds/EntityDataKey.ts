@@ -1,8 +1,6 @@
 import {EntityMetadata} from "typeorm";
 import {definedAt} from "../../common/object/definedAt";
-import {mapObject} from "../../common/object/mapObject";
 import {KeyObject} from "../KeyObject";
-import {QueryBuilderSelector} from "./QueryBuilderSelector";
 
 export namespace EntityDataKey {
     export function parse(

@@ -2,14 +2,17 @@ import {Connection, getConnection as getGlobalConnection} from "typeorm";
 import {last} from "../../common/array/last";
 import {EntityRelation} from "../../typeorm/relations";
 import {EntityDataCursor} from "./EntityDataCursor";
+
 import {EntityDataSource} from "./EntityDataSource";
-import {EntityDataSource2} from "./EntityDataSource2";
 import {getEntityDataInfo} from "./getEntityDataInfo";
 
-export function getEntityDataSourceInfo(source: EntityDataSource<any>|EntityDataSource2<any>) {
+export function getEntityDataSourceInfo(source: EntityDataSource<any>) {
 
     const connection = getConnection();
-    const cursor = EntityDataCursor.create(connection, source.cursor, source.mainEntityType);
+    const cursor = EntityDataCursor.create(
+        connection,
+        source.cursor,
+        source.mainEntityType);
     const repository = connection.getRepository(cursor.typeInfo.type);
 
     const inverseLeftRelationsWithoutJoinTable: EntityRelation[] = [];

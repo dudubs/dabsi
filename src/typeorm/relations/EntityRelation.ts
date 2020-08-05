@@ -1,95 +1,14 @@
-import {Connection, ObjectType, RelationQueryBuilder, Repository, SelectQueryBuilder} from "typeorm";
+import {Connection, ObjectType, RelationQueryBuilder, SelectQueryBuilder} from "typeorm";
 import {ColumnMetadata} from "typeorm/metadata/ColumnMetadata";
 import {assert} from "../../common/assert";
 import {defined} from "../../common/object/defined";
 import {definedAt} from "../../common/object/definedAt";
 import {Lazy} from "../../common/patterns/lazy";
-import {ArrayTypeOrObject, Type} from "../../common/typings";
+import {ArrayTypeOrObject} from "../../common/typings";
 import {EntityDataKey} from "../../data/eds/EntityDataKey";
 import {DataExp} from "../../json-exp/DataExp";
 import {QueryExpBuilder} from "../QueryExpBuilder";
-
-export class EntityRelationSide<T> {
-    constructor(
-        public relation: EntityRelation,
-        public entityType: ObjectType<T>,
-        public isLeft: boolean,
-    ) {
-    }
-
-    entityMetadata = this.relation.connection.getMetadata(this.entityType);
-
-    get repository(): Repository<T> {
-        return this.relation.connection.getRepository(this.entityType)
-    }
-
-    get isOwning() {
-        if (!this.isLeft)
-            return !this.relation.left.isOwning;
-
-
-        if (this.relation.isTree) {
-
-            if (this.relation.relationMetadata.isManyToMany)
-                return this.relation.relationMetadata.isOwning ?
-                    !this.relation.invert : this.relation.invert;
-
-
-            throw new Error(`Not supported relation (${
-                this.relation.relationMetadata.relationType
-            })`)
-        }
-
-        return isSubClass(this.entityType,
-            <Function>this.relation.ownerRelationMetadata.target)
-    }
-
-    joinColumns =
-        !this.isOwning ?
-            this.relation.ownerRelationMetadata.inverseJoinColumns :
-            this.relation.ownerRelationMetadata.joinColumns;
-
-    column(column: ColumnMetadata) {
-        return this.isOwning ? column : definedAt(column, "referencedColumn");
-    }
-
-    tableColumn(column: ColumnMetadata) {
-        return !this.isLeft ? column : definedAt(column, "referencedColumn");
-    }
-
-    getIdCondition(qb: SelectQueryBuilder<any>, schema: string,
-                   id = definedAt(this.relation, 'rightId')): string {
-        let sql = '';
-        for (let column of this.entityMetadata.primaryColumns) {
-            const parameterName = schema + '_' + column.propertyName;
-            sql += `${sql ? ' AND ' : ""
-            }${schema}.${column.databaseName}=:${parameterName}`;
-            qb.setParameter(parameterName, id[column.propertyName]);
-        }
-        return sql;
-    }
-
-
-    getIdConditionSb(qb: QueryExpBuilder, schema: string,
-                     id = definedAt(this.relation, 'rightId')) {
-
-        return {
-            $and: this.entityMetadata.primaryColumns.map(c => {
-                return {
-                    $at: {
-                        [schema]: [
-                            c.databaseName,
-                            '=',
-                            id[c.propertyName]
-                        ]
-                    }
-                }
-            })
-        };
-    }
-
-
-}
+import {ByTableOrColumn, EntityRelationSide} from "./EntityRelationSide";
 
 export class EntityRelation<T = any> {
 
@@ -166,9 +85,6 @@ export class EntityRelation<T = any> {
         return this.relationMetadata.type;
     }
 
-    innerJoin(leftQb: SelectQueryBuilder<any>) {
-        return this.join("INNER", leftQb, leftQb.alias);
-    }
 
     getRightSchema(leftSchema: string) {
         return this.invert ? `${
@@ -182,39 +98,39 @@ export class EntityRelation<T = any> {
     }
 
 
-    joinSb(
+    joinQeb(
         joinType: JoinType,
-        sb: QueryExpBuilder,
+        qeb: QueryExpBuilder,
         leftSchema: string,
         rightId = this.rightId): string {
 
         const rightSchema = this.getRightSchema(leftSchema);
 
-        if (sb.joins[rightSchema])
+        if (qeb.joins[rightSchema])
             return rightSchema;
 
         const idCondition =
-            rightId ? ' AND ' + this.right.getIdConditionSb(sb, rightSchema, rightId) : "";
+            rightId ? this.right.getIdConditionExp(qeb, rightSchema, rightId) : undefined;
+
 
         if (this.ownerRelationMetadata.joinTableName) {
             const joinSchema = rightSchema + '_join';
-            sb.join(joinSchema, this.ownerRelationMetadata.joinTableName, joinType,
-                this.getLeftConditionByTableJoinSb(leftSchema, joinSchema)
+
+            qeb.join(joinSchema, this.ownerRelationMetadata.joinTableName, joinType,
+                this.left.getJoinConditionExpByTable(leftSchema, joinSchema)
             );
-            sb.join(rightSchema, this.right.entityMetadata.tableName, joinType, {
+
+            qeb.join(rightSchema, this.right.entityMetadata.tableName, joinType, {
                 $and: [
-                    this.getRightConditionByTableJoinSb(
-                        rightSchema,
-                        joinSchema),
-                    idCondition]
+                    this.right.getJoinConditionExpByTable(rightSchema, joinSchema),
+                    idCondition
+                ]
             })
         } else {
             // join by column
-            sb.join(rightSchema, this.right.entityMetadata.tableName, joinType, {
+            qeb.join(rightSchema, this.right.entityMetadata.tableName, joinType, {
                 $and: [
-                    this.getConditionByJoinColumn(
-                        leftSchema,
-                        rightSchema),
+                    this.getJoinConditionExpByColumn(leftSchema, rightSchema),
                     idCondition
                 ]
             })
@@ -224,16 +140,15 @@ export class EntityRelation<T = any> {
     }
 
 
-    join(
-        joinType: JoinType,
-        qb: SelectQueryBuilder<any>,
-        leftSchema: string,
-        rightId = this.rightId): string {
+    joinSqb(joinType: JoinType,
+            sqb: SelectQueryBuilder<any>,
+            leftSchema: string,
+            rightId = this.rightId): string {
         const {right} = this;
 
         const rightSchema = this.getRightSchema(leftSchema);
 
-        const joinAttribute = qb.expressionMap.joinAttributes.find(
+        const joinAttribute = sqb.expressionMap.joinAttributes.find(
             ja => ja.alias?.name === rightSchema
         );
 
@@ -242,30 +157,22 @@ export class EntityRelation<T = any> {
         }
 
         const idCondition =
-            rightId ? ' AND ' + right.getIdCondition(qb, rightSchema, rightId) : "";
-
-        // const joinSchema = this.getJoinSchema(qb,
-        //     joinType,leftSchema,rightSchema);
+            rightId ? ' AND ' + right.getIdCondition(sqb, rightSchema, rightId) : "";
 
         if (this.ownerRelationMetadata.joinTableName) {
             // join by table
-
             const joinSchema = rightSchema + '_join';
-
-            joinQb(qb, joinType, this.ownerRelationMetadata.joinTableName, joinSchema,
-                this.getLeftConditionByTableJoin(leftSchema, joinSchema)
+            joinQb(sqb, joinType, this.ownerRelationMetadata.joinTableName, joinSchema,
+                this.left.getJoinConditionSqlByTable(leftSchema, joinSchema)
             );
-
-            joinQb(qb, joinType, this.right.entityMetadata.tableName, rightSchema,
-                this.getRightConditionByTableJoin(rightSchema, joinSchema)
+            joinQb(sqb, joinType, this.right.entityMetadata.tableName, rightSchema,
+                this.right.getJoinConditionSqlByTable(rightSchema, joinSchema)
                 + idCondition
             );
-
-
         } else {
             // join by column
-            joinQb(qb, joinType, right.entityType, rightSchema,
-                this.getConditionByJoinColumn(leftSchema, rightSchema)
+            joinQb(sqb, joinType, this.right.entityMetadata.tableName, rightSchema,
+                this.getJoinConditionSqlByColumn(leftSchema, rightSchema)
                 + idCondition
             )
         }
@@ -274,90 +181,59 @@ export class EntityRelation<T = any> {
 
     }
 
-
-    getLeftConditionByTableJoinSb(leftSchema, joinSchema): DataExp<any> {
-
-        return this.getConditionSb(
-            this.left.joinColumns,
-            (s, c) => s.tableColumn(c),
-            leftSchema, joinSchema
-        )
-    }
-
-
-    getRightConditionByTableJoinSb(rightSchema, joinSchema): DataExp<any> {
-        return this.getConditionSb(
-            this.right.joinColumns,
-            (s, c) => s.tableColumn(c),
-            rightSchema, joinSchema
-        )
-    }
-
-    getConditionByJoinColumnSb(leftSchema: string, rightSchema: string): DataExp<any> {
-        return this.getConditionSb(
+    getJoinConditionExpByColumn(leftSchema: string, rightSchema: string): DataExp<any> {
+        return this.getJoinConditionExp('column',
             this.ownerRelationMetadata.joinColumns,
-            (s, c) => s.column(c),
             leftSchema, rightSchema
         )
     }
 
-    getLeftConditionByTableJoin(leftSchema, joinSchema): string {
-
-        return this.getCondition(
-            this.left.joinColumns,
-            (s, c) => s.tableColumn(c),
-            leftSchema, joinSchema
-        )
-    }
-
-
-    getRightConditionByTableJoin(rightSchema, joinSchema) {
-        return this.getCondition(
-            this.right.joinColumns,
-            (s, c) => s.tableColumn(c),
-            rightSchema, joinSchema
-        )
-    }
-
-    getConditionByJoinColumn(leftSchema: string, rightSchema: string) {
-        return this.getCondition(
+    getJoinConditionSqlByColumn(leftSchema: string, rightSchema: string) {
+        return this.getJoinConditionSql('column',
             this.ownerRelationMetadata.joinColumns,
-            (s, c) => s.column(c),
             leftSchema, rightSchema
         )
     }
 
-    getConditionSb(
+
+    getJoinConditionExp(
+        by: ByTableOrColumn,
         joinColumns: ColumnMetadata[],
-        getColumn: (side: EntityRelationSide<any>,
-                    column: ColumnMetadata) => ColumnMetadata,
         leftSchema,
         rightSchema) {
         return {
             $and: joinColumns.map(c => [
-                {$at: {[leftSchema]: getColumn(this.left, c).databaseName}},
+                {
+                    $at: {[leftSchema]: this.left.getJoinColumn(by, c).databaseName}
+                },
                 '=',
-                {$at: {[rightSchema]: getColumn(this.left, c).databaseName}}
+                {
+                    $at: {[rightSchema]: this.right.getJoinColumn(by, c).databaseName}
+                }
             ])
         }
     }
 
-    getCondition(
+    protected escape(name: string) {
+        return this.connection.driver.escape(name)
+    }
+
+
+    getJoinConditionSql(
+        by: ByTableOrColumn,
         joinColumns: ColumnMetadata[],
-        getColumn: (side: EntityRelationSide<any>,
-                    column: ColumnMetadata) => ColumnMetadata,
         leftSchema,
         rightSchema) {
-        return joinColumns.map(c => `${
-            this.connection.driver.escape(leftSchema)
+        return joinColumns.toSeq().map(c => `${
+            this.escape(leftSchema)
         }.${
-            this.connection.driver.escape(
-                getColumn(this.left, c).databaseName
+            this.escape(
+                this.left.getJoinColumn(by, c).databaseName
             )
         }=${
-            this.connection.driver.escape(rightSchema)
+            this.escape(rightSchema)
         }.${
-            getColumn(this.right, c).databaseName
+            this.right.getJoinColumn(by, c).databaseName
         }`).join(' AND ')
     }
 
@@ -391,9 +267,6 @@ export class EntityRelation<T = any> {
     }
 
     async set(leftId: object) {
-        // console.log({leftId},this.invert,this.rightId,this.propertyName,
-        //
-        //     );
         await this.createRelationQueryBuilder()
             .of(this.invert ? this.rightId : leftId)
             .set(!this.invert ? this.rightId : leftId)
@@ -431,18 +304,10 @@ export class EntityRelation<T = any> {
         return this.leftEntityType === this.rightEntityType
     }
 
-    get isManyToManyTree() {
-        return this.isTree && (this.relationMetadata.isManyToMany)
-    }
-
 
 }
 
 export type JoinType = "INNER" | "LEFT";
-
-function isSubClass(b: Type<any>, a: Type<any>) {
-    return (a === b) || (b.prototype instanceof a)
-}
 
 function joinQb(qb: SelectQueryBuilder<any>, joinType: JoinType, table, alias, condition) {
     switch (joinType) {

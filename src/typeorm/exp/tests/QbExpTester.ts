@@ -2,7 +2,9 @@ import {Connection, ObjectType, Repository} from "typeorm";
 import {Lazy} from "../../../common/patterns/lazy";
 import {DataTypeInfo} from "../../../data/DataTypeInfo";
 import {DataExp} from "../../../json-exp/DataExp";
-import {QbDataExpTranslator} from "../QbDataExpTranslator";
+import {QueryExpBuilder} from "../../QueryExpBuilder";
+import {QueryExpTranslatorToSqb} from "../../QueryExpTranslatorToSqb";
+import {DataExpTranslatorToQeb} from "../DataExpTranslatorToQeb";
 
 
 export class QbExpTester<T> {
@@ -22,16 +24,28 @@ export class QbExpTester<T> {
 
     getOneRowWhereExp(exp) {
         const qb = this.repository
-            .createQueryBuilder()
-            .select('1');
-        qb.andWhere(
-            new QbDataExpTranslator(
-                this.typeInfo,
-                qb,
-                qb.alias,
-                qb,
-            ).translate(exp),
-        );
+            .createQueryBuilder();
+
+        const query = {
+            from: qb.expressionMap.mainAlias!.metadata.tableName,
+            as: qb.alias
+
+        };
+
+        const qebTranslator = new DataExpTranslatorToQeb(
+            this.typeInfo,
+            new QueryExpBuilder(
+                qb.connection,
+                query,
+                qb.alias
+            ),
+            qb.alias);
+
+        const sqbTranslator = new QueryExpTranslatorToSqb(qb, qb.alias);
+        const qebExp = qebTranslator.translate(exp);
+        qb.andWhere(sqbTranslator.translate(qebExp))
+        QueryExpTranslatorToSqb.build(qb, query);
+        qb.select('1');
         return qb.getRawOne();
     }
 

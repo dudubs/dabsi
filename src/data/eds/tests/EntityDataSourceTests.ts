@@ -14,6 +14,7 @@ export const EDSTesters = {
 }
 
 testm(__filename, () => {
+
     DataSourceTests(
         EDSTesters.A,
         EDSTesters.B,
@@ -23,22 +24,5 @@ testm(__filename, () => {
     );
 
 
-    it('relationMap', async () => {
-
-        const A = EntityDataSource.create(AEntity, getConnection);
-        const aKey = await A.insert({});
-        const bKey = await A.at("oneAToOneB", aKey)
-            .insert({});
-        // const cKey = await A
-        //     .at("oneAToOneB", aKey)
-        //     .at("oneBToOneC", bKey)
-        //     .insert({});
-        //
-        // expect(await A.get(aKey)).not.toEqual(jasmine.objectContaining({
-        //     b: jasmine.any(Object)
-        // }));
-
-
-    })
 
 });

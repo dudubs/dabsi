@@ -1,13 +1,13 @@
 import {Connection, DeepPartial, EntityMetadata, ObjectType} from "typeorm";
 import {mapArrayToObject} from "../../../common/array/mapArrayToObject";
 import {defined} from "../../../common/object/defined";
-import {definedAt} from "../../../common/object/definedAt";
 import {entries} from "../../../common/object/entries";
 import {isEmptyObject} from "../../../common/object/isEmptyObject";
 import {mapObject} from "../../../common/object/mapObject";
 import {Type} from "../../../common/typings";
 import {subTest} from "../../../jasmine/subTest";
 import {focusNextTest} from "../../../typeorm/exp/tests/focusNextTest";
+import {QueryExpBuilder} from "../../../typeorm/QueryExpBuilder";
 import {AEntity, BEntity, CEntity} from "../../../typeorm/relations/tests/Entities";
 import {DataSelection} from "../../DataSelection";
 import {DataTypeInfo} from "../../DataTypeInfo";
@@ -26,8 +26,8 @@ import {
 import {TestConnection} from "../../tests/TestConnection";
 import {EntityDataKey} from "../EntityDataKey";
 import {EntityDataSelector} from "../EntityDataSelector";
+
 import {getEntityDataInfo} from "../getEntityDataInfo";
-import {QueryBuilderSelector} from "../QueryBuilderSelector";
 import {buildTestRelations} from "./buildTestRelations";
 import objectContaining = jasmine.objectContaining;
 
@@ -143,7 +143,9 @@ testm(__filename, () => {
             })
         });
     });
+
     describe('pick-keys and pick-all', () => {
+
         testUnion({pick: ["dText"]}, tester => {
             tester.testDChild1({
                 dId: false,
@@ -167,7 +169,6 @@ testm(__filename, () => {
             })
         });
     });
-
 
 
     describe("relations", () => {
@@ -197,14 +198,12 @@ testm(__filename, () => {
             mapObject(DChild1EToOneRelations, () => EDToOneRelations)
 
         describe('D to one _E_E', () => {
-            console.log("change to DEDE");
-            const r = DEToOneRelations;
+            const r = DEDEToOneRelations;
 
             testUnion({
                 relations: mapToSelection(r),
             }, tester => {
 
-                // focusNextTest();
 
                 tester.testDChild1(r);
             })
@@ -239,6 +238,7 @@ testm(__filename, () => {
             mapObject(ABToManyRelations, () => BAToManyRelations);
 
         describe('A to many B', () => {
+
             testUnion({
                 relations: mapToSelection(ABAToManyRelations)
             }, tester => {
@@ -303,11 +303,11 @@ testm(__filename, () => {
         beforeAll(async () => {
             const typeInfo = DataTypeInfo.get(type);
             metadata = connection.getMetadata(typeInfo.type);
-            const qb = connection.getRepository(typeInfo.type)
-                .createQueryBuilder();
-            const selector = new QueryBuilderSelector(qb);
+            const qb = new QueryExpBuilder(connection, {
+                from: connection.getMetadata(typeInfo.type).tableName
+            });
             const loader = EntityDataSelector.select(
-                typeInfo, qb, selector, <any>selection, qb.alias
+                typeInfo, qb, <any>selection, qb.alias
             );
             entityKeyToRow = mapArrayToObject(
                 await loader.loadMany(),
@@ -318,7 +318,7 @@ testm(__filename, () => {
         callback({
             test: (getEntity, rowExpector) => {
                 const entityKey = EntityDataKey.stringify(metadata, getEntity());
-                const row = defined(entityKeyToRow[entityKey],()=>`No entityKey ${entityKey}.`);
+                const row = defined(entityKeyToRow[entityKey], () => `No entityKey ${entityKey}.`);
                 expectToRow(row, rowExpector);
             }
         })

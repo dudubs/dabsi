@@ -1,4 +1,3 @@
-import {DataTypeInfo} from "../../../data/DataTypeInfo";
 import {buildTestEntities} from "../../../data/eds/tests/buildTestEntities";
 import {buildTestRelations} from "../../../data/eds/tests/buildTestRelations";
 import {
@@ -15,10 +14,10 @@ import {
 import {TestConnection} from "../../../data/tests/TestConnection";
 import {DataExp} from "../../../json-exp/DataExp";
 import {AEntity, BEntity, CEntity} from "../../relations/tests/Entities";
-import {QbDataExpTranslator} from "../QbDataExpTranslator";
-import {focusNextTest} from "./focusNextTest";
+import {useQueryBuilderExp} from "../useQueryBuilderExp";
 import {QbExpTester} from "./QbExpTester";
 
+useQueryBuilderExp();
 
 testm(__filename, () => {
 
@@ -110,6 +109,7 @@ testm(__filename, () => {
 
 
         // $at
+
         t.expectToExists({$at: {oneAToOneB: {bText: "hello"}}});
         t.expectToExists({$at: {oneAToOneBOwner: {bText: "hello"}}});
         t.expectToNotExists({$at: {oneAToOneB: {bText: "world"}}});
@@ -120,17 +120,16 @@ testm(__filename, () => {
 
     DataExpSanityTests({
         async run(exp): Promise<any> {
-            const qb = getConnection().getRepository(AEntity)
+            const qb = getConnection()
+                .getRepository(AEntity)
                 .createQueryBuilder();
 
-            const sql = new QbDataExpTranslator(
-                DataTypeInfo.get(AEntity), qb, qb.alias, qb
-            )
-                .translate(exp);
-            qb.select(sql, 'value');
+            qb.selectExp(exp, 'value');
+
             return qb.getRawOne().then(row => row?.value)
         }
     });
+
     describe('$as sanity:', () => {
 
         const t = new QbExpTester<DUnion>(getConnection, DUnion);

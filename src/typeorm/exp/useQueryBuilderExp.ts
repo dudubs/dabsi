@@ -1,8 +1,11 @@
 import {SelectQueryBuilder} from "typeorm";
 import {Lazy} from "../../common/patterns/lazy";
 import {DataSort} from "../../data/DataOrder";
+import {DataTypeInfo} from "../../data/DataTypeInfo";
 import {DataExp} from "../../json-exp/DataExp";
-import {QbDataExpTranslator} from "./QbDataExpTranslator";
+import {QueryExpBuilder} from "../QueryExpBuilder";
+import {QueryExpTranslatorToSqb} from "../QueryExpTranslatorToSqb";
+import {DataExpTranslatorToQeb} from "./DataExpTranslatorToQeb";
 
 
 declare module "typeorm" {
@@ -41,7 +44,32 @@ export const useQueryBuilderExp = Lazy(() => {
     const qb = SelectQueryBuilder.prototype;
 
     qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: DataExp<T>) {
-        return QbDataExpTranslator.translate(this, exp)
+
+
+        const metadata = this.expressionMap.mainAlias!.metadata;
+        const query = {
+            from: metadata.tableName,
+            as: this.alias,
+        };
+        const qebTranslator = new DataExpTranslatorToQeb(
+            DataTypeInfo.get(<Function>metadata.target),
+            new QueryExpBuilder(
+                this.connection,
+                query,
+                this.alias
+            ),
+            this.alias
+        );
+
+        const sqbTranslator = new QueryExpTranslatorToSqb(this, this.alias);
+
+        const queryExp = qebTranslator.translate(exp);
+
+        const sqlExp = sqbTranslator.translate(queryExp);
+
+        QueryExpTranslatorToSqb.build(this, query);
+
+        return sqlExp
     };
 
     install('where');

@@ -29,6 +29,8 @@ export type Query = {
 
     from: string;
 
+    as?:string;
+
     fields?: Record<string, DataExp<any>>;
 
     joins?: Record<string, QueryJoin>;

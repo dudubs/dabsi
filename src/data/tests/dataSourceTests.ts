@@ -23,7 +23,6 @@ export function DataSourceTests(
         expect(await ADS.get(aKey)).toBeTruthy();
         expect(await ADS.get(bKey)).toBeFalsy();
         expect(await BDS.get(bKey)).toBeTruthy();
-
         await assert("oneAToOneB");
         await assert("oneAToOneBOwner");
 
@@ -89,11 +88,14 @@ export function DataSourceTests(
             .of("oneBToOneCOwner", cKey2).get()).toBeFalsy();
 
         const bKey = await BDS.insert({});
+
         const bAtAOwnerOfCOwner = BDS
             .at("oneBToOneAOwner", bKey)
             .of("oneAToOneCOwner", cKey);
 
+        ///
         expect(await bAtAOwnerOfCOwner.get()).toBeFalsy();
+
         await bAtAOwnerOfCOwner.insert({});
         expect(await bAtAOwnerOfCOwner.get()).toBeTruthy();
         expect(await BDS

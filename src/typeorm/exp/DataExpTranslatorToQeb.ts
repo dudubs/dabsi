@@ -1,4 +1,3 @@
-import {Connection} from "typeorm/index";
 import {inspect} from "util";
 import {defined} from "../../common/object/defined";
 import {DataExpMapper} from "../../data/DataSource/DataExpMapper";
@@ -6,9 +5,9 @@ import {DataTypeInfo} from "../../data/DataTypeInfo";
 import {EntityDataKey} from "../../data/eds/EntityDataKey";
 import {DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../json-exp/DataExp";
 import {DataExpTranslator} from "../../json-exp/DataExpTranslator";
-import {EntityRelation} from "../relations";
 import {Query, QueryExp} from "../QueryExp";
 import {QueryExpBuilder} from "../QueryExpBuilder";
+import {EntityRelation} from "../relations";
 
 
 function Mapper(target, propertyName, desc) {
@@ -19,10 +18,11 @@ function Mapper(target, propertyName, desc) {
 }
 
 
-export class SbDataExpTranslator<T> extends DataExpTranslator<T, QueryExp> {
+export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     False: DataExp<any>;
     Null: DataExp<any>;
     True: DataExp<any>;
+
 
     constructor(
         public typeInfo: DataTypeInfo,
@@ -50,7 +50,7 @@ export class SbDataExpTranslator<T> extends DataExpTranslator<T, QueryExp> {
                     .toArray()
             }
         };
-        return new SbDataExpTranslator(
+        return new DataExpTranslatorToQeb(
             childTypeInfo,
             this.qb,
             this.schema,
@@ -62,13 +62,18 @@ export class SbDataExpTranslator<T> extends DataExpTranslator<T, QueryExp> {
             this.typeInfo.type, propertyName, false);
         if (!relation.isToOne)
             throw new Error(`$at support in relation to-one only.`)
-        const rightSchema = relation.joinSb("LEFT", this.qb, this.schema)
-        return new SbDataExpTranslator(
-            this.typeInfo.relations?.[propertyName] ||
-            DataTypeInfo.get(relation.right.entityType),
-            this.qb,
-            rightSchema
-        ).translate(exp);
+        const rightSchema = relation.joinQeb("LEFT", this.qb, this.schema)
+        return {
+            $at: {
+                [rightSchema]:
+                    new DataExpTranslatorToQeb(
+                        this.typeInfo.relations?.[propertyName] ||
+                        DataTypeInfo.get(relation.right.entityType),
+                        this.qb,
+                        rightSchema
+                    ).translate(exp)
+            }
+        };
     }
 
     counter = 0;
@@ -97,38 +102,43 @@ export class SbDataExpTranslator<T> extends DataExpTranslator<T, QueryExp> {
             const joinSchema = rightSchema + '_join';
 
             subSelect = {
+                as: joinSchema,
                 from: relation.ownerRelationMetadata.joinTableName,
                 joins: {
-                    [joinSchema]: {
+                    [rightSchema]: {
                         type: "INNER",
                         from: relation.right.entityMetadata.tableName,
                         condition: {
                             $and: [
-                                relation.getLeftConditionByTableJoinSb(this.schema, joinSchema),
-                                relation.getRightConditionByTableJoinSb(rightSchema, joinSchema),
+                                relation.left.getJoinConditionExpByTable(this.schema, joinSchema),
+                                relation.right.getJoinConditionExpByTable(rightSchema, joinSchema),
                             ]
                         }
-                    }
+                    },
                 }
             }
         } else {
             subSelect = {
+                as: rightSchema,
                 from: relation.right.entityMetadata.tableName,
-                where: relation.getConditionByJoinColumnSb(this.schema, rightSchema)
+                where: relation.getJoinConditionExpByColumn(this.schema, rightSchema)
             }
         }
 
-        const subTranslator = new SbDataExpTranslator(
-            this.typeInfo.relations?.[propertyName] ||
-            DataTypeInfo.get(relation.right.entityType),
-            new QueryExpBuilder(this.qb.connection, subSelect,
-                this.schema + "_" + subSelect.from
-                + (++this.counter)),
-            rightSchema
-        )
 
         if (whereExp !== undefined) {
-            subSelect.where = subTranslator.translate(whereExp)
+            const subTypeInfo = this.typeInfo.relations?.[propertyName] ||
+                DataTypeInfo.get(relation.right.entityType);
+
+            const subTranslator = new DataExpTranslatorToQeb(
+                subTypeInfo,
+                new QueryExpBuilder(this.qb.connection, subSelect),
+                rightSchema
+            );
+
+            subSelect.where = {
+                $at: {[rightSchema]: subTranslator.translate(whereExp)}
+            }
         }
         return subSelect
     }
@@ -148,26 +158,21 @@ export class SbDataExpTranslator<T> extends DataExpTranslator<T, QueryExp> {
             this.qb.connection.getMetadata(this.typeInfo.type);
         if (entityMetadata.primaryColumns.length === 1) {
             const column = entityMetadata.primaryColumns[0];
-            return this.translateIn(inverse, column.databaseName, keys);
+            return [column.databaseName, {[inverse ? "$notIn" : "$in"]: keys}];
         }
-        const exp = this.translateOr(keys
-            .toSeq()
-            .map(key => {
-                return EntityDataKey.parse(entityMetadata, key)
-            })
-            .map(key => {
-                return this.translateAnd(entityMetadata.primaryColumns
-                    .toSeq()
-                    .map(column => [
-                        column.databaseName,
-                        "=",
-                        [key[column.referencedColumn!.propertyName]]
-                    ])
-                    .toArray()
-                )
-            })
-            .toArray()
-        );
+        const exp = {
+            $or: this.translateOr(keys.map(textKey => {
+                    const key = EntityDataKey.parse(entityMetadata, textKey);
+                    return {
+                        $and: entityMetadata.primaryColumns.map(column => [
+                            column.databaseName,
+                            "=",
+                            [key[column.referencedColumn!.propertyName]]
+                        ])
+                    }
+                })
+            )
+        }
         return inverse ? {$not: exp} : exp;
     }
 

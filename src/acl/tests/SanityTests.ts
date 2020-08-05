@@ -1,5 +1,6 @@
 import {EntityDataSource} from "../../data/eds/EntityDataSource";
 import {TestConnection} from "../../data/tests/TestConnection";
+import {focusNextTest} from "../../typeorm/exp/tests/focusNextTest";
 import {Group} from "../Group";
 import {User} from "../User";
 

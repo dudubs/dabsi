@@ -70,7 +70,7 @@ export class BEntity {
         this.bId = `b${++randomId}`
     }
 
-    @PrimaryColumn({name: 'b_idxxx'})
+    @PrimaryColumn()
     bId: string;
 
     @Column({nullable: true})

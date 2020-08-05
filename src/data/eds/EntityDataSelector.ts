@@ -1,4 +1,4 @@
-import {EntityMetadata, SelectQueryBuilder} from "typeorm";
+import {EntityMetadata} from "typeorm";
 import {mapArrayToObject} from "../../common/array/mapArrayToObject";
 import {defined} from "../../common/object/defined";
 import {definedAt} from "../../common/object/definedAt";
@@ -7,14 +7,14 @@ import {hasKeys} from "../../common/object/hasKeys";
 import {mapObject} from "../../common/object/mapObject";
 import {Awaitable} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
-import {QbDataExpTranslator} from "../../typeorm/exp/QbDataExpTranslator";
+import {DataExpTranslatorToQeb} from "../../typeorm/exp/DataExpTranslatorToQeb";
+import {QueryExpBuilder} from "../../typeorm/QueryExpBuilder";
 import {EntityRelation} from "../../typeorm/relations";
 import {DataOrder} from "../DataOrder";
 import {AnyDataSelection, DataSelection} from "../DataSelection";
 import {DataTypeInfo} from "../DataTypeInfo";
 import {KeyObject} from "../KeyObject";
 import {getEntityDataInfo} from "./getEntityDataInfo";
-import {QueryBuilderSelector} from "./QueryBuilderSelector";
 
 
 export namespace EntityDataSelector {
@@ -24,8 +24,7 @@ export namespace EntityDataSelector {
 
     export function selectCursor(
         typeInfo: DataTypeInfo,
-        qb: SelectQueryBuilder<any>,
-        selector: QueryBuilderSelector,
+        qb: QueryExpBuilder,
         selection: AnyDataSelection,
         cursor: {
             skip?: number,
@@ -39,37 +38,34 @@ export namespace EntityDataSelector {
         const loader = select(
             typeInfo,
             qb,
-            selector,
             selection,
             qb.alias
         );
-        const translator = new QbDataExpTranslator(typeInfo, qb, qb.alias, qb);
 
-        if (cursor.skip)
-            qb.skip(cursor.skip);
-        if (cursor.take)
-            qb.take(cursor.take);
+
+        const translator = new DataExpTranslatorToQeb(typeInfo, qb, qb.alias);
+
+        qb.query.skip = cursor.skip;
+        qb.query.take = cursor.take;
+
         if (cursor.filter !== undefined)
-            qb.andWhere(translator.translate(cursor.filter))
+            qb.filter(translator.translate(cursor.filter))
 
         cursor.order?.forEach(order => {
-            qb.addOrderBy(
-                translator.translate(order.by),
-                order.sort === "DESC" ? "DESC" :
-                    order.sort === "ASC" ? "ASC" : undefined,
-                order.nulls === "FIRST" ? "NULLS FIRST" :
-                    order.nulls === "LAST" ? "NULLS LAST" : undefined
-            )
+            qb.order.push({
+                by: translator.translate(order.by),
+                sort: order.sort,
+                nulls: order.nulls
+            })
         })
         return loader
     }
 
     export function select(
         typeInfo: DataTypeInfo,
-        qb: SelectQueryBuilder<any>,
-        selector: QueryBuilderSelector,
+        qb: QueryExpBuilder,
         selection: AnyDataSelection,
-        schema: string,
+        schema: string,/* is necessary? ?*/
     ) {
         type RowContext = {
             row: object, raw: object,
@@ -85,8 +81,9 @@ export namespace EntityDataSelector {
         const entityInfo = getEntityDataInfo(entityMetadata);
 
         const discriminatorValueLoader = entityMetadata.discriminatorColumn
-            ? selector.selectColumn(
-                schema, entityMetadata.discriminatorColumn.databaseName) : undefined;
+            ? qb.selectColumn(
+                schema, entityMetadata.discriminatorColumn.databaseName
+            ) : undefined;
 
         const discriminatorValueToChildKey: Record<string, string> = {};
 
@@ -95,7 +92,7 @@ export namespace EntityDataSelector {
         const objectKeyLoaders = mapArrayToObject(
             entityMetadata.primaryColumns,
             column => [column.propertyName,
-                selector.selectColumn(schema, column.databaseName)
+                qb.selectColumn(schema, column.databaseName)
             ]
         )
 
@@ -151,7 +148,7 @@ export namespace EntityDataSelector {
             //     .columns.map(c=>c.databaseName));
 
 
-            for (const raw of await qb.getRawMany()) {
+            for (const raw of await qb.getMany()) {
                 const context = await loadOneRaw(raw);
                 context && rows.push(context.row);
             }
@@ -225,7 +222,7 @@ export namespace EntityDataSelector {
                 if (column.propertyName in fields)
                     continue;
 
-                const loader = selector.selectColumn(schema, column.databaseName,);
+                const loader = qb.selectColumn(schema, column.databaseName,);
                 loaders.push(async context => {
 
                     let value = await loader(context.raw);
@@ -246,14 +243,14 @@ export namespace EntityDataSelector {
                 if (propertyName in childEntityInfo.propertyNameToRelationMetadata) {
                     throw new Error(`Can't override relation by field "${propertyName}".`)
                 }
-                const loader = selector.select(
-                    new QbDataExpTranslator(
+
+                const loader = qb.select(
+                    `${schema}${childKey ? `_as_${childKey}` : ''}_x_${propertyName}`,
+                    new DataExpTranslatorToQeb(
                         childTypeInfo,
                         qb,
-                        schema,
-                        qb,
+                        schema
                     ).translate(exp),
-                    `${schema}${childKey ? `_as_${childKey}` : ''}_x_${propertyName}`
                 );
 
                 loaders.push(context => {
@@ -289,23 +286,25 @@ export namespace EntityDataSelector {
                         relationSelectionOrBoolean === true ? {} :
                             relationSelectionOrBoolean;
 
-                    const relationSchema = relation.join("LEFT", qb, schema);
+                    const relationSchema = relation.joinQeb("LEFT", qb, schema);
 
                     const relationLoader = select(
                         relationTypeInfo,
                         qb,
-                        selector,
                         relationSelection,
                         relationSchema,
                     );
 
                     if (relationSelection.notNull) {
-                        qb.andWhere(
-                            relation.right.entityMetadata.primaryColumns
-                                .toSeq()
-                                .map(column => `${relationSchema}.${column.databaseName} IS NOT NULL`)
-                                .join(" AND ")
-                        )
+                        qb.filter({
+                            $and: relation.right.entityMetadata.primaryColumns.map(column => {
+                                return {
+                                    $isNotNull: {
+                                        $at: {[relationSchema]: column.databaseName}
+                                    }
+                                }
+                            })
+                        })
                     }
 
                     // console.log(relations);
@@ -330,12 +329,12 @@ export namespace EntityDataSelector {
 
                     loaders.push(async context => {
 
-                        const qb = connection.getRepository(relation.left.entityType)
-                            .createQueryBuilder();
+                        const qb = new QueryExpBuilder(connection, {
+                            from: relation.left.entityMetadata.tableName
+                        });
 
-                        const selector = new QueryBuilderSelector(qb);
 
-                        relation.join("INNER", qb, qb.alias, context.objectKey);
+                        relation.joinQeb("INNER", qb, qb.alias, context.objectKey);
 
                         const relationTypeInfo = childTypeInfo.relations?.[propertyName] ||
                             DataTypeInfo.get(relation.left.entityType);
@@ -343,7 +342,6 @@ export namespace EntityDataSelector {
                         const loader = selectCursor(
                             relationTypeInfo,
                             qb,
-                            selector,
                             relationSelection,
                             relationSelection
                         )

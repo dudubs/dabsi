@@ -102,7 +102,7 @@ testm(__filename, () => {
             relation = relation.setRightId(right);
 
             const qb = relation.left.repository.createQueryBuilder()
-            relation.innerJoin(qb);
+            relation.joinSqb("INNER", qb, qb.alias);
 
             expect(await qb.getRawOne()).toBeFalsy();
             await relation.addOrSet(left);
@@ -137,8 +137,8 @@ testm(__filename, () => {
         expect(aAtAOwner.left.isOwning).toBeFalsy();
         expect(aAtAOwner.right.isOwning).toBeTruthy()
 
-        expect(aOfA.getLeftConditionByTableJoin("lx", "jx"))
-            .not.toEqual(aOfAOwner.getLeftConditionByTableJoin("lx", "jx"));
+        expect(aOfA.left.getJoinConditionSqlByTable("lx", "jx"))
+            .not.toEqual(aOfAOwner.left.getJoinConditionSqlByTable("lx", "jx"));
 
 
     });
@@ -149,26 +149,6 @@ testm(__filename, () => {
         const eOwnerOfD = EntityRelation.of(connection, DBase, "oneDToOneEOwner");
         const eOwnerOfDChild1 = EntityRelation.of(connection, DChild1, "oneDToOneEOwner");
 
-        console.log(
-            eOwnerOfD.relationMetadata.isOwning,
-            eOwnerOfDChild1.relationMetadata.isOwning,
-            eOwnerOfD.isTree,
-            eOwnerOfDChild1.isTree,
-            eOwnerOfD.left.isOwning,
-            eOwnerOfDChild1.left.isOwning
-        );
-
-        // ((x)=>{
-        //     x(eOwnerOfD);
-        //     x(eOwnerOfDChild1);
-        // })((x:EntityRelation)=>{
-        //     console.log([
-        //         x.relationMetadata.isOwning,
-        //         x.isTree,
-        //         x.left.isOwning,
-        //         x.entityType
-        //     ]);
-        // })
 
 
 
@@ -178,3 +158,23 @@ testm(__filename, () => {
     })
 
 })
+
+/*
+
+    class MyDB extends DataBase({
+        users: User
+    }) {
+
+
+
+
+    }
+
+    MyDB.users.insert({
+        userName
+    })
+
+
+
+
+ */

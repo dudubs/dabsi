@@ -1,7 +1,8 @@
 {
   "name": "@dabsi/data",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
+  "license": "MIT",
   "repository": "https://github.com/dudubs/dabsi",
   "files": [
     "lib",

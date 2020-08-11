@@ -23,7 +23,8 @@ export type PickByValue<T, V> = Pick<T, ExtractKeys<T, V>>;
 export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;
 
 export type Pluck<T, K extends PropertyKey, E = never> =
-    Required<T> extends Record<K, infer U> ? U : E;
+    IsNever<T> extends true ? E :
+        Required<T> extends Record<K, infer U> ? U : E;
 
 export type PartialKeys<T, K extends PropertyKey> =
     Omit<T, K> &
@@ -44,7 +45,10 @@ export function Type<T>(): Type<T> {
 }
 
 
-export type Assign<T, U> = Omit<T, keyof Required<U>> & U;
+export type Assign<T, U> =
+    HasKeys<T> extends false ? U :
+        HasKeys<U> extends false ? T :
+            Omit<T, keyof Required<U>> & U;
 
 
 export type ArrayTypeOrObject<T> =
@@ -94,10 +98,13 @@ export type Optional<T> = Pick<T, OptionalKeys<T>>;
 
 
 export type IsNever<T> = [T] extends [never] ? true : false;
+export type IsExtend<T, U> = T extends U ? true : false;
 
 export type IsNull<T> = T extends (undefined | null) ? true : false;
 
-export type HasKeys<T> = Not<IsNever<keyof T>>;
+export type HasKeys<T> =
+    IsNever<T> extends true ? false :
+        Not<IsNever<keyof T>>;
 
 export type Not<T extends boolean> = T extends true ? false : true;
 

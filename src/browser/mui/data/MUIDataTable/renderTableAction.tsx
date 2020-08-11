@@ -1,6 +1,7 @@
 import React from "react";
 import {MuiConfirmDialog} from "../../../../../browser/src/sections/orders/views/mui/MuiConfirmDialog";
-import {DataItem, DataKey} from "../../../../data/DataItem";
+import {DataKey} from "../../../../data/DataKey";
+import {DataRow} from "../../../../data/DataRow";
 import {getTableActionKey} from "../../../../data/DataTable";
 import {Lang} from "../../../../localization/Lang";
 import {ModalStack, ModalStackContext} from "../../../../react/ModalStack";
@@ -50,7 +51,7 @@ export function MuiDataTableAction(props: {
     table: AnyMuiDataTable,
     action: MuiDataTableAction<any>,
     index: number,
-    item: DataItem<any>
+    item: DataRow<any>
 }) {
 
     const key = getTableActionKey(props.index);

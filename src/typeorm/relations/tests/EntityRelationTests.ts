@@ -1,5 +1,6 @@
 // TODO: rename to EntityRelationTests.
 import {Connection, Repository} from "typeorm";
+import {EntityDataKey} from "../../../data/eds/EntityDataKey";
 import {
     DBase,
     DChild1,
@@ -11,7 +12,6 @@ import {
     EChild2
 } from "../../../data/tests/BaseEntities";
 import {TestConnection} from "../../../data/tests/TestConnection";
-import {focusNextTest} from "../../exp/tests/focusNextTest";
 import {EntityRelation} from "../EntityRelation";
 import {AEntity, BEntity, CEntity} from "./Entities";
 
@@ -99,18 +99,21 @@ testm(__filename, () => {
                     relation.right.repository.create()
                 ])
 
-            relation = relation.setRightId(right);
 
+            const rightKey = EntityDataKey.pick(relation.right.entityMetadata, right);
             const qb = relation.left.repository.createQueryBuilder()
-            relation.joinSqb("INNER", qb, qb.alias);
+            relation.joinSqb("INNER", qb, qb.alias,
+                EntityDataKey.pick(relation.right.entityMetadata, right)
+            );
+
 
             expect(await qb.getRawOne()).toBeFalsy();
-            await relation.addOrSet(left);
-            // expect(await qb.getRawOne()).toBeTruthy();
-            // await relation.removeOrUnset(left);
-            // expect(await qb.getRawOne()).toBeFalsy();
-            // await relation.addOrSet(left);
-            // expect(await qb.getRawOne()).toBeTruthy();
+            await relation.update("addOrSet", left, rightKey);
+            expect(await qb.getRawOne()).toBeTruthy();
+            await relation.update("removeOrUnset", left, rightKey);
+            expect(await qb.getRawOne()).toBeFalsy();
+            await relation.update("addOrSet", left, rightKey);
+            expect(await qb.getRawOne()).toBeTruthy();
 
         }
 
@@ -150,8 +153,6 @@ testm(__filename, () => {
         const eOwnerOfDChild1 = EntityRelation.of(connection, DChild1, "oneDToOneEOwner");
 
 
-
-
         expect(eOwnerOfD.left.isOwning)
             .toEqual(eOwnerOfDChild1.left.isOwning);
 
@@ -170,7 +171,7 @@ testm(__filename, () => {
 
     }
 
-    MyDB.users.insert({
+    MyDB.users.insertKey({
         userName
     })
 

@@ -1,4 +1,4 @@
-import {SelectQueryBuilder} from "typeorm/index";
+import {SelectQueryBuilder} from "typeorm";
 import {entries} from "../common/object/entries";
 import {hasKeys} from "../common/object/hasKeys";
 import {DataExp, Parameter} from "../json-exp/DataExp";

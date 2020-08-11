@@ -34,6 +34,7 @@ export type RelationKeys<T> = Union<{
     | IfRelationToOne<T[K], K>
 }>;
 
+
 export type RelationToManyKeys<T> = Union<{
     [K in string & keyof Required<T>]:
     IfRelationToMany<Required<T>[K], K>

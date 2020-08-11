@@ -1,7 +1,5 @@
-import {Connection, ObjectType, Repository, SelectQueryBuilder} from "typeorm";
-import {inspect} from "util";
-import {reversed} from "../../common/array/reversed";
-import {defined} from "../../common/object/defined";
+import {Connection, EntityMetadata, ObjectType, Repository} from "typeorm";
+import {ColumnMetadata} from "typeorm/metadata/ColumnMetadata";
 import {entries} from "../../common/object/entries";
 import {DataExp} from "../../json-exp/DataExp";
 import {DataExpTranslatorToQeb} from "../../typeorm/exp/DataExpTranslatorToQeb";
@@ -9,36 +7,37 @@ import {QueryExpBuilder} from "../../typeorm/QueryExpBuilder";
 import {EntityRelation} from "../../typeorm/relations";
 import {DataCursor} from "../DataCursor";
 import {DataTypeInfo} from "../DataTypeInfo";
-import {getEntityDataInfo} from "./getEntityDataInfo";
+import {EntityDataKey} from "./EntityDataKey";
+import {EntityDataInfo, getEntityDataInfo} from "./getEntityDataInfo";
 
 export type EntityDataCursorPath = {
-    typeInfo:DataTypeInfo;
-
-    relation: EntityRelation
-
-    filter: DataExp<any>,
-
-    // childRelations
-    // relationKeys
-
-    // fieldKeys
-    relationKeys: EntityRelation[],
-
-    // childConstants
-    fieldKeys: Record<string, any>
-};
-
-export type EntityDataCursor = {
-
-    location: EntityDataCursorPath[],
 
     typeInfo: DataTypeInfo;
 
-    relationKeys: EntityRelation[],
+    filter: DataExp<any>,
 
-    fieldKeys: Record<string, any>;
+    child: { relation: EntityRelation, key: object };
 
-    filter: DataExp<any>
+    parent: EntityDataCursorPath | undefined;
+
+    relationKeys: {
+        relation: EntityRelation,
+        key: object
+    }[];
+
+
+    columnKeys: { metadata: ColumnMetadata, key: any }[];
+};
+
+export type EntityDataCursor = Omit<EntityDataCursorPath, "child"> & {
+
+    connection: Connection;
+
+    repository: Repository<any>;
+
+    entityInfo: EntityDataInfo
+
+    entityMetadata: EntityMetadata;
 };
 
 
@@ -51,37 +50,35 @@ export namespace EntityDataCursor {
     ): EntityDataCursor {
 
 
-        const location: EntityDataCursor['location'] = [];
-
         let typeInfo = DataTypeInfo.get(entityType);
+        let parent: EntityDataCursor['parent'] = undefined;
 
-        for (const owner of cursor.location) {
+        for (const path of cursor.location) {
 
-
-            if (owner.type) {
-                const childType = typeInfo.children?.[owner.type];
-                if (!childType)
-                    throw new Error(`No have childType "${owner.type}" for "${typeInfo.type.name}".`)
-                typeInfo = childType;
-            }
-
+            setChildTypeInfo(path.type);
 
             const ownerRelation = new EntityRelation(
                 connection,
                 typeInfo.type,
-                owner.propertyName,
-                true,
-                owner.key);
+                path.propertyName,
+                true);
 
-            location.push({
-                filter: owner.filter,
-                relation: ownerRelation,
+
+            parent = {
+                filter: path.filter,
                 typeInfo,
-                ...loadChildKeys(typeInfo.type, owner.keys),
-            })
+                child: {
+                    relation: ownerRelation,
+                    key: EntityDataKey.parse(ownerRelation.right.entityMetadata, path.key)
+                },
+                parent,
+                ...getChildKeys(typeInfo.type, path.keys),
+            };
+
 
             const entityType = ownerRelation.left.entityType;
-            const relationTypeInfo = typeInfo.relations?.[owner.propertyName];
+            const relationTypeInfo =
+                typeInfo.relations?.[path.propertyName];
 
             if (relationTypeInfo) {
                 if (relationTypeInfo.type !== entityType) {
@@ -93,38 +90,66 @@ export namespace EntityDataCursor {
             }
         }
 
+        setChildTypeInfo(cursor.type);
+
+        const entityMetadata = connection.getMetadata(typeInfo.type);
         return {
-            location,
+            connection,
+            repository: connection.getRepository(typeInfo.type),
             typeInfo,
             filter: cursor.filter,
-            ...loadChildKeys(typeInfo.type, cursor.keys)
+            entityMetadata,
+            entityInfo: getEntityDataInfo(entityMetadata),
+            parent,
+            ...getChildKeys(typeInfo.type, cursor.keys)
         };
 
-        function loadChildKeys(entityType: Function, childKeys: Record<string, any>) {
-            const fieldKeys: EntityDataCursor['fieldKeys'] = {};
+        function setChildTypeInfo(type: string) {
+            if (!type)
+                return typeInfo;
+
+            const childType = typeInfo.children?.[type];
+            if (!childType)
+                throw new Error(`No have childType "${type}" for "${typeInfo.name}".`)
+            typeInfo = childType
+        }
+
+        function getChildKeys(entityType: Function, dataChildKeys: Record<string, any>) {
+
+
+            const columnKeys: EntityDataCursor['columnKeys'] = [];
             const relationKeys: EntityDataCursor['relationKeys'] = [];
+
+
             const entityDataInfo = getEntityDataInfo(
                 connection.getMetadata(entityType)
             );
 
-            for (let [propertyName, value] of entries(childKeys)) {
+            for (const [propertyName, value] of entries(dataChildKeys)) {
 
-
-                if (propertyName in entityDataInfo.propertyNameToRelationMetadata) {
-                    const relation = new EntityRelation(connection,
-                        entityType,
-                        propertyName, false, value);
-                    relationKeys.push(relation);
-                } else {
-                    if (!(propertyName in entityDataInfo.propertyNameToColumn)) {
-                        throw new Error(`No have property ${entityType.name}.${propertyName}`)
-                    }
-                    fieldKeys[propertyName] = value
+                const relation = entityDataInfo.propertyNameToRelation[propertyName];
+                if (relation) {
+                    const key = EntityDataKey.parse(
+                        relation.right.entityMetadata,
+                        value
+                    );
+                    relationKeys.push({relation, key: key});
+                    continue;
                 }
+
+                const columnMetadata = entityDataInfo.propertyNameToColumnMetadata[propertyName];
+                if (columnMetadata) {
+                    columnKeys.push({metadata: columnMetadata, key: value});
+                    continue;
+                }
+                throw new Error(`No have property ${entityType.name}.${propertyName}`)
 
             }
 
-            return {relationKeys, fieldKeys}
+            return {
+                columnKeys,
+                relationKeys,
+            }
         }
 
     }
@@ -137,116 +162,48 @@ export namespace EntityDataCursor {
 
         const qb = new QueryExpBuilder(repository.metadata.connection,
             {from: repository.metadata.tableName});
-        // const qb = repository.createQueryBuilder()
 
+        join(qb.alias, cursor);
 
-        join(qb.alias,
-            cursor.typeInfo,
-            cursor.relationKeys,
-            cursor.fieldKeys,
-            cursor.filter);
-
-
-        let ownerSchema = qb.alias;
-
-        for (let [owner] of reversed(cursor.location)) {
-            ownerSchema = owner.relation.joinQeb("INNER", qb, ownerSchema);
-            join(ownerSchema,
-                owner.typeInfo,
-                owner.relationKeys,
-                owner.fieldKeys,
-                owner.filter);
-
+        let schema = qb.alias;
+        for (let path = cursor.parent; path; path = path.parent) {
+            schema = path.child.relation.joinQeb("INNER", qb, schema, path.child.key!);
+            join(schema, path);
         }
-
         return qb;
 
         function join(
             schema: string,
-            typeInfo:DataTypeInfo,
-            relations: EntityRelation[],
-            constants: Record<string, string>,
-            filter: DataExp<any>
+            path: EntityDataCursorPath | EntityDataCursor
         ) {
 
-            if (filter !== undefined) {
+            if (path.filter !== undefined) {
                 qb.filter(
                     new DataExpTranslatorToQeb(
-                        typeInfo,
+                        path.typeInfo,
                         qb,
                         schema
-                    ).translate(filter)
+                    ).translate(path.filter)
                 )
             }
-
-            for (const relation of relations) {
-                relation.joinQeb("INNER", qb, schema);
+            for (const {relation, key} of path.relationKeys) {
+                relation.joinQeb("INNER", qb, schema, key);
             }
-            for (let [key, value] of entries(constants)) {
-                qb.filter({
+            qb.filter({
+                $and: path.columnKeys.map(column => ({
                     $at: {
                         [schema]: [
-                            key, "=", [value]
+                            column.metadata.propertyName,
+                            "=",
+                            [column.key]
                         ]
                     }
-                })
-            }
+                }))
+            });
 
         }
 
     }
 
-
-    export function createQueryBuilder(
-        cursor: EntityDataCursor,
-        repository: Repository<any>,
-    ): SelectQueryBuilder<any> {
-
-
-        const qb = repository.createQueryBuilder()
-
-        join(qb.alias,
-            cursor.relationKeys,
-            cursor.fieldKeys,
-            cursor.filter);
-
-
-        let ownerSchema = qb.alias;
-
-        for (let [owner] of reversed(cursor.location)) {
-            ownerSchema = owner.relation.joinSqb("INNER", qb, ownerSchema);
-            join(ownerSchema,
-                owner.relationKeys,
-                owner.fieldKeys,
-                owner.filter);
-
-        }
-
-        return qb;
-
-        function join(
-            schema: string,
-            relations: EntityRelation[],
-            constants: Record<string, string>,
-            filter: DataExp<any>
-        ) {
-
-            if (filter !== undefined) {
-                qb.andWhere(qb.exp(filter, schema))
-            }
-
-            for (const relation of relations) {
-                relation.joinSqb("INNER", qb, schema);
-            }
-            for (let [key, value] of entries(constants)) {
-                const parameterName = '_const_' + schema + '__' + key;
-                qb.andWhere(`${schema}.${key}=:${parameterName}`)
-                qb.setParameter(parameterName, value)
-
-            }
-
-        }
-
-    }
 
 }

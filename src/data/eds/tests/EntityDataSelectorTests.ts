@@ -307,7 +307,8 @@ testm(__filename, () => {
                 from: connection.getMetadata(typeInfo.type).tableName
             });
             const loader = EntityDataSelector.select(
-                typeInfo, qb, <any>selection, qb.alias
+                typeInfo, qb, <any>selection, qb.alias,
+                row=>row
             );
             entityKeyToRow = mapArrayToObject(
                 await loader.loadMany(),

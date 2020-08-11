@@ -1,11 +1,10 @@
-import {Connection, ObjectType, RelationQueryBuilder, SelectQueryBuilder} from "typeorm";
+import {Connection, ObjectType, SelectQueryBuilder} from "typeorm";
 import {ColumnMetadata} from "typeorm/metadata/ColumnMetadata";
 import {assert} from "../../common/assert";
 import {defined} from "../../common/object/defined";
 import {definedAt} from "../../common/object/definedAt";
 import {Lazy} from "../../common/patterns/lazy";
 import {ArrayTypeOrObject} from "../../common/typings";
-import {EntityDataKey} from "../../data/eds/EntityDataKey";
 import {DataExp} from "../../json-exp/DataExp";
 import {QueryExpBuilder} from "../QueryExpBuilder";
 import {ByTableOrColumn, EntityRelationSide} from "./EntityRelationSide";
@@ -17,9 +16,8 @@ export class EntityRelation<T = any> {
         connection: Connection,
         entityType: ObjectType<T>,
         propertyName: string & K,
-        key?: string,
     ): EntityRelation<T> {
-        return new EntityRelation(connection, entityType, propertyName, false, key);
+        return new EntityRelation(connection, entityType, propertyName, false);
     }
 
 
@@ -29,7 +27,7 @@ export class EntityRelation<T = any> {
         propertyName: string & K,
         key?: string,
     ): EntityRelation<ArrayTypeOrObject<T[K]>> {
-        return new EntityRelation(connection, entityType, propertyName, true, key);
+        return new EntityRelation(connection, entityType, propertyName, true);
     }
 
 
@@ -38,31 +36,12 @@ export class EntityRelation<T = any> {
         public entityType: ObjectType<any>,// TODO: Function|string
         public propertyName: string,
         public invert: boolean,// TODO: better name
-        public key?: string
     ) {
     }
 
-    _rightId: object;
 
-
-    isLeftOwningWithoutJoinTable() {
-        return this.left.isOwning && !this.ownerRelationMetadata.joinTableName;
-    }
-
-    get rightId(): undefined | object {
-        if (this._rightId)
-            return this._rightId;
-
-        if (typeof this.key === "string")
-            return this._rightId = EntityDataKey.parse(
-                this.right.entityMetadata,
-                this.key
-            );
-    }
-
-    setRightId(rightId: object) {
-        this._rightId = rightId;
-        return this;
+    isJoinColumn() {
+        return !this.ownerRelationMetadata.joinTableName;
     }
 
     entityMetadata = this.connection.getMetadata(this.entityType);
@@ -102,7 +81,7 @@ export class EntityRelation<T = any> {
         joinType: JoinType,
         qeb: QueryExpBuilder,
         leftSchema: string,
-        rightId = this.rightId): string {
+        rightKey: object | null): string {
 
         const rightSchema = this.getRightSchema(leftSchema);
 
@@ -110,7 +89,7 @@ export class EntityRelation<T = any> {
             return rightSchema;
 
         const idCondition =
-            rightId ? this.right.getIdConditionExp(qeb, rightSchema, rightId) : undefined;
+            rightKey ? this.right.getIdConditionExp(qeb, rightSchema, rightKey) : undefined;
 
 
         if (this.ownerRelationMetadata.joinTableName) {
@@ -143,7 +122,7 @@ export class EntityRelation<T = any> {
     joinSqb(joinType: JoinType,
             sqb: SelectQueryBuilder<any>,
             leftSchema: string,
-            rightId = this.rightId): string {
+            rightKey: null | object): string {
         const {right} = this;
 
         const rightSchema = this.getRightSchema(leftSchema);
@@ -157,7 +136,7 @@ export class EntityRelation<T = any> {
         }
 
         const idCondition =
-            rightId ? ' AND ' + right.getIdCondition(sqb, rightSchema, rightId) : "";
+            rightKey ? ' AND ' + right.getIdCondition(sqb, rightSchema, rightKey) : "";
 
         if (this.ownerRelationMetadata.joinTableName) {
             // join by table
@@ -246,50 +225,34 @@ export class EntityRelation<T = any> {
         this.relationMetadata.isManyToMany ||
         this.relationMetadata.isOneToMany;
 
-    createRelationQueryBuilder(): RelationQueryBuilder<any> {
-        return this.connection
+
+    update(
+        action: 'addOrSet' | 'removeOrUnset',
+        leftKey: object,
+        rightKey: object
+    ): Promise<void> {
+
+
+        [leftKey, rightKey] = [
+            this.left.getKey(leftKey, rightKey),
+            this.right.getKey(leftKey, rightKey)
+        ];
+
+        const qb = this.connection
             .getRepository(this.entityType)
             .createQueryBuilder()
-            .relation(this.propertyName);
-    }
+            .relation(this.propertyName)
+            .of(leftKey);
 
-    add(leftId: object) {
-        // TODO: ignore from error if exists
-        return this.createRelationQueryBuilder()
-            .of(this.invert ? this.rightId : leftId)
-            .add(!this.invert ? this.rightId : leftId);
-    }
 
-    remove(leftId: object) {
-        return this.createRelationQueryBuilder()
-            .of(this.invert ? this.rightId : leftId)
-            .remove(!this.invert ? this.rightId : leftId);
-    }
+        switch (action) {
+            case "addOrSet":
+                return this.isToOne ? qb.set(rightKey) : qb.add(rightKey);
+            case "removeOrUnset":
+                return this.isToOne ? qb.set(null) : qb.remove(rightKey);
+        }
 
-    async set(leftId: object) {
-        await this.createRelationQueryBuilder()
-            .of(this.invert ? this.rightId : leftId)
-            .set(!this.invert ? this.rightId : leftId)
-            .catch(error => {
-                console.log(error);
-                throw error
-            });
-    }
-
-    unset(leftId: object) {
-        return this.createRelationQueryBuilder()
-            .of(this.invert ? this.rightId : leftId)
-            .set(null);
-    }
-
-    addOrSet(leftId: object) {
-        return this.isToOne ?
-            this.set(leftId) :
-            this.add(leftId);
-    }
-
-    removeOrUnset(leftId: object) {
-        return this.isToOne ? this.unset(leftId) : this.remove(leftId);
+        throw new Error(`Invalid action ${action}.`)
     }
 
     @Lazy() get leftEntityType(): ObjectType<T> {
@@ -304,6 +267,11 @@ export class EntityRelation<T = any> {
         return this.leftEntityType === this.rightEntityType
     }
 
+    inspect() {
+        return `Relation ${
+            this.entityType.name
+        }.${this.propertyName}`
+    }
 
 }
 
@@ -319,3 +287,4 @@ function joinQb(qb: SelectQueryBuilder<any>, joinType: JoinType, table, alias, c
             throw new Error(`Invalid join type ${joinType}.`)
     }
 }
+

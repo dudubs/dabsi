@@ -1,4 +1,9 @@
-import {RelationKeys} from "../Relation";
+import {RelationKeys, RelationToOneKeys} from "../Relation";
 
-export type DataValues<T> = Partial<Omit<T, RelationKeys<T>>> ;
-// & Partial<Record<RelationKeys<any>, string | number>>;
+// TODO: RelationToManyKeys
+
+
+export type DataValues<T> = Partial<Omit<T, RelationKeys<T>>> & {
+    [K in RelationToOneKeys<T>]?: string | number
+};
+

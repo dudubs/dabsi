@@ -1,12 +1,14 @@
-import {Constructor, IsNever, Pluck} from "../../common/typings";
+import {Constructor, HasKeys, IsNever, Pluck} from "../../common/typings";
 import {DataExp} from "../../json-exp/DataExp";
 import {AEntity} from "../../typeorm/relations/tests/Entities";
-import {DataRow} from "../DataRow";
-import {DataSelection, MergeDataSelection} from "../DataSelection";
-import * as MDataSelection from "../DataSelection";
+import {DataRow, DataUnionRow} from "../DataRow";
+import {DataSelection, FlatDataSelection} from "../DataSelection";
 import {DataSelectionRow} from "../DataSelectionRow";
+import {DataSelectionRow2} from "../DataSelectionRow2";
+import {DataSource} from "../DataSource";
 import {DataUnion, DataUnionChildren, DataUnionChildrenKey} from "../DataUnion";
-import {DataUnionRow} from "../DataUnionRow";
+import {_MergePicks, MergeDataSelection} from "../MergeDataSelection";
+import {MapRelation, RelationKeys, RelationTypeAt} from "../Relation";
 import {DBase, DChild1, DUnion, EUnion} from "./BaseEntities";
 
 
@@ -55,11 +57,11 @@ pass(() => {
     {
         // MergePicks
         {
-            testType<MDataSelection._MergePicks<undefined, undefined>>(d => {
+            testType<_MergePicks<undefined, undefined>>(d => {
                 assertType<undefined>(d);
             });
 
-            testType<MDataSelection._MergePicks<(keyof { a, b })[], undefined>>(d => {
+            testType<_MergePicks<(keyof { a, b })[], undefined>>(d => {
                 assertType<Pluck<typeof d, number>>("a");
 
                 assertType<Pluck<typeof d, number>>("b");
@@ -69,7 +71,7 @@ pass(() => {
 
             });
 
-            testType<MDataSelection._MergePicks<undefined, (keyof { a, b })[]>>(d => {
+            testType<_MergePicks<undefined, (keyof { a, b })[]>>(d => {
                 assertType<Pluck<typeof d, number>>("a");
 
                 assertType<Pluck<typeof d, number>>("b");
@@ -80,7 +82,7 @@ pass(() => {
             });
 
 
-            testType<MDataSelection._MergePicks<(keyof { a, b })[], (keyof { b, c })[]>>(d => {
+            testType<_MergePicks<(keyof { a, b })[], (keyof { b, c })[]>>(d => {
                 assertType<Pluck<typeof d, number>>("a");
 
                 assertType<Pluck<typeof d, number>>("b");
@@ -119,8 +121,56 @@ pass(() => {
             void (row.aId);
         });
 
-        testSelection(AEntity, {pick: ['aText'] as const} as const, row => {
+        testType<FlatDataSelection<{ pick: ['aText'] }>>(t => {
+
+            // @ts-expect-error
+            t.pick[0] === "x";
+
+            // @ts-expect-error
+            t.relations;
+
+
+        });
+
+        type XF<S> = IsNever<S> extends true ? {} : S;
+        type X<T, S> =
+            IsNever<S> extends true ? T :
+                HasKeys<S> extends false ? T :
+                    & Omit<T, DataUnionChildrenKey | RelationKeys<T>>
+                    & { x: Pluck<S, 'x'> }
+                    & {
+                    [K in RelationKeys<T>]: MapRelation<T[K],
+                        X<RelationTypeAt<T, K>,
+                            Pluck<Pluck<S, 'relations'>, K>>>
+                }
+            ;
+
+        testType<X<AEntity, {}>>(d => {
+
+        });
+
+        testType<DataRow<DataSelectionRow2<AEntity, {
+            fields: {},
+            relations: {}
+        }>>>(d => {
+
+        });
+
+
+        assertType<IsNever<Pluck<never, 'x'>>>(true);
+
+
+        // @ts-expect-error
+        assertType<IsNever<Pluck<never, 'x'>>>(false);
+
+
+        testSelection(AEntity, {pick: ['aText']} as const, (row, sr, s) => {
             void (row.aText);
+
+            // @ts-expect-error
+            s.pick[0] === 'x';
+
+            s.pick[0] === 'aText';
 
             // @ts-expect-error
             void (row.x);
@@ -130,6 +180,7 @@ pass(() => {
             void (row.aId);
         });
 
+
         testSelection(AEntity, {pick: []}, row => {
             // @ts-expect-error
             void (row.aText);
@@ -138,6 +189,13 @@ pass(() => {
             void (row.aId);
         });
 
+        assertType<keyof never>("x");
+        testSelection(AEntity, {
+            relations: {}
+        } as const, (a, as, s) => {
+
+            s
+        });
         testSelection(AEntity, {
             fields: {
                 ax: 1
@@ -830,6 +888,208 @@ pass(() => {
     }
 
 
+    // FlatDataSelection
+    {
+        testType<FlatDataSelection<{
+
+            children: {
+                xChild1: {
+                    relations: {
+                        xRel: {
+                            fields: { xChild1RelField: 1 },
+                            children: {
+                                xRelChild1: {
+                                    fields: { xChild1XRelChild1Field: 1 }
+                                }
+                            }
+                        },
+                        xChild1Ref: {},
+                        xRel2: {
+                            fields: { xChild1Rel2Field: 1 }
+                        }
+                    }
+                }
+            },
+            relations: {
+                xRel: {
+                    fields: {
+                        xRelField: 1
+                    },
+                    children: {
+                        xRelChild1: {
+                            fields: { xRelChild1Field: 1 }
+                        }
+                    }
+                },
+                xRel2: true
+            }
+        }>>(t => {
+
+
+            // @ts-expect-error
+            t.relations.xRel.children.xRelChild1.x;
+
+            // @ts-expect-error
+            t.relations.xRel.children.xRelChild1.children.x;
+
+            // @ts-expect-error
+            t.relations.xRel.children.xRelChild1.fields.x;
+
+            t.relations.xRel.children.xRelChild1.fields.xRelChild1Field;
+
+            testType<typeof t.children.xChild1.relations.xRel.children.xRelChild1.fields>(f => {
+                // @ts-expect-error
+                f.x;
+
+                f.xChild1RelField;
+
+                f.xChild1XRelChild1Field;
+
+                f.xRelChild1Field;
+
+                f.xRelField;
+
+            })
+
+            assertType<typeof t.relations.xRel2>(true);
+
+            // @ts-expect-error
+            t.children.xChild1.relations.xRel2.fields.x;
+
+            t.children.xChild1.relations.xRel2.fields.xChild1Rel2Field;
+
+            // @ts-expect-error
+            t.children.xChild1.relations.x;
+
+            t.children.xChild1.relations.xRel;
+
+            // @ts-expect-error
+            t.children.xChild1.relations.xRel.fields.x;
+
+            t.children.xChild1.relations.xRel.fields.xChild1RelField;
+
+            t.children.xChild1.relations.xRel.fields.xRelField;
+
+            t.relations.xRel.fields.xRelField;
+
+            t.children.xChild1.relations.xChild1Ref;
+
+            // @ts-expect-error
+            t.relations.x;
+
+            t.relations.xRel;
+
+            // @ts-expect-error
+            t.relations.xRel.fields.x;
+
+            t.relations.xRel.fields.xRelField;
+
+
+        });
+    }
+    // DataSource.as
+    {
+
+        testType<DataSource<DUnion>>(ds => {
+
+            // @ts-expect-error
+            ds.insertKey({dChild1Text: ""});
+
+            ds.as("dChild1").insertKey({
+                dText: "",
+                dChild1Text: "",
+                dBoolean: false
+            });
+
+            // TODO: test also DataSelection
+
+            testType<DataSelectionRow<DUnion, {
+                children: {
+                    dChild1: {
+                        relations: {}
+                    }
+                },
+                fields: {
+                    dX: 1
+                },
+                relations: {}
+            }>>(t => {
+
+                // @ts-expect-error
+                t.$unionChildren.x;
+
+                t.$unionChildren.dChild1;
+
+                t.$unionChildren.dChild1.dId;
+
+                t.$unionChildren.dChild2.dId;
+
+                t.dX;
+
+                // @ts-expect-error
+                t.$unionChildren.dChild2.x;
+
+                t.$unionChildren.dChild2.dX;
+
+                // @ts-expect-error
+                t.$unionChildren.dChild1.x;
+
+                t.$unionChildren.dChild1.dX;
+            });
+
+            testType<DataSelectionRow2<DUnion, {
+                children: {
+                    dChild1: {
+                        relations: {}
+                    }
+                },
+                relations: {}
+            }>>(t => {
+
+                // @ts-expect-error
+                t.$unionChildren.x;
+
+                t.$unionChildren.dChild1;
+
+                t.$unionChildren.dChild1.dId;
+
+                t.$unionChildren.dChild2.dId;
+
+                // @ts-expect-error
+                t.$unionChildren.dChild2.x;
+
+
+                // @ts-expect-error
+                t.$unionChildren.dChild1.x;
+
+            });
+
+
+            ds.select({
+                fields: {dX: 1}
+            }).getOrFail().then(row => {
+                // @ts-expect-error
+                void (row.$type === "x");
+
+                void (row.$type === "dChild1");
+
+                void (row.$type === "dChild2");
+            });
+
+
+            ds.getOrFail().then(row => {
+                // @ts-expect-error
+                void (row.$type === "x");
+
+                void (row.$type === "dChild1");
+
+                void (row.$type === "dChild2");
+            });
+
+
+        })
+    }
+
 });
 
 
@@ -884,30 +1144,30 @@ testType<new() => DataUnion<DBase, {
 
     });
 
-    testSelection(d, {
-        pick: ['dId'],
-        relations: {
-            oneDToOneE: {
-                pick: ['eId'],
-                // children: {
-                //     eChild1: {
-                //         pick: ['eId']
-                //     }
-                // }
-            }
-        },
-        children: {
-            dChild1: {
-                pick: ['dId']
-            }
-        }
-    } as const, (_, __, s) => {
-        // @ts-expect-error
-        s.relations.x;
-
-        s.relations.oneDToOneE;
-
-    });
+    // testSelection(d, {
+    //     pick: ['dId'],
+    //     relations: {
+    //         oneDToOneE: {
+    //             pick: ['eId'],
+    //             // children: {
+    //             //     eChild1: {
+    //             //         pick: ['eId']
+    //             //     }
+    //             // }
+    //         }
+    //     },
+    //     children: {
+    //         dChild1: {
+    //             pick: ['dId']
+    //         }
+    //     }
+    // } as const, (_, __, s) => {
+    //     // @ts-expect-error
+    //     s.relations.x;
+    //
+    //     s.relations.oneDToOneE;
+    //
+    // });
 
 })
 
@@ -924,4 +1184,30 @@ function testSelection<T,
 
 }
 
+
+function testSelection2<T,
+    S extends DataSelection<T>>(
+    type: Constructor<T>,
+    selection: S,
+    callback?: (row: DataSelectionRow2<T, S>,
+                selRow: DataSelectionRow2<T, S>,
+                s: S) => void,
+) {
+
+
+}
+
+
+/*
+
+    .select(s => s
+        .field()
+        .at("", s=> s)
+        .at("")
+        .as("ddd", s=>s
+            .field("",1)
+        )
+    )
+
+ */
 

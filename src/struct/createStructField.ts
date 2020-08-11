@@ -44,7 +44,8 @@ export function createStructField(
     const isStruct = type && hasFields(type);
 
     if (value === null) {
-        if (!Nullable.get(field)) {
+
+        if (!Optional.get(field) && !Nullable.get(field)) {
             throw new ValidationError(() => `Is null`)
         }
         return null;

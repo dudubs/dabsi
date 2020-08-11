@@ -1,19 +1,18 @@
-import {defined} from "../common/object/defined";
 import {entries} from "../common/object/entries";
 import {mapObject} from "../common/object/mapObject";
 import {Lazy} from "../common/patterns/lazy";
 import {AwaitableType} from "../common/typings";
-import {AnyRPC, RPC, RPCConfigOf, RPCConnectionOf, RPCHandler, RPCHandlerOf, RPCHandlerPayload} from "./RPC";
+import {AnyRpc, RPC, RpcAdapterOf, RpcConnectionOf, RPCHandler, RpcHandlerOf, RPCHandlerPayload} from "./RPC";
 
-export type ServiceCommands = Record<string, AnyRPC>;
+export type ServiceCommands = Record<string, AnyRpc>;
 
 export type ServiceConnection<Commands extends ServiceCommands> =
-    { [K in keyof Commands]: RPCConnectionOf<Commands[K]> };
+    { [K in keyof Commands]: RpcConnectionOf<Commands[K]> };
 
 export type ServiceCommandsHandler<Commands extends ServiceCommands> =
     ServiceHandler<{
         [K in keyof Commands]:
-        RPCHandlerOf<Commands[K]>
+        RpcHandlerOf<Commands[K]>
     }>;
 
 export type ServerHandlers = Record<string, RPCHandler>;
@@ -29,7 +28,7 @@ export type ServiceHandler<Handlers extends ServerHandlers> =
 
 export type ServiceConfig<Commands extends ServiceCommands> = {
     [K in keyof Commands]:
-    RPCConfigOf<Commands[K]>
+    RpcAdapterOf<Commands[K]>
 };
 
 
@@ -43,6 +42,8 @@ export type Service<Commands extends ServiceCommands> =
     & {
     commands: Commands
 
+    handler?: ServiceCommandsHandler<Commands>;
+
     new(handler: ServiceCommandsHandler<Commands>):
         ServiceConnection<Commands>;
 
@@ -54,29 +55,30 @@ export type Service<Commands extends ServiceCommands> =
 export function Service<Commands extends ServiceCommands>(commands: Commands):
     Service<Commands> {
 
-    let defaultHandler: undefined | ServiceCommandsHandler<Commands>;
+    Class.handler = undefined;
 
+    Class.commnads = commands;
 
-    Connection.commnads = commands;
+    Class.connect = function (handler: ServiceCommandsHandler<Commands>) {
 
-    Connection.connect = function (handler: ServiceCommandsHandler<Commands>) {
-        defaultHandler = handler;
+        Class.handler = handler;
         return mapObject(commands, (command, key: any) => {
+
             return command.connect(payload => {
                 return handler([key, payload])
             })
         })
     }
-    Connection.handle = function (keyToConfig): ServiceCommandsHandler<Commands> {
+    Class.handle = function (keyToAdapter): ServiceCommandsHandler<Commands> {
 
         const handlers = mapObject(commands,
             (command, key) => command.handle(
-                keyToConfig[<any>key]
+                keyToAdapter[<any>key]
             )
         );
 
 
-        defaultHandler = Handler;
+        Class.handler = Handler;
 
         return Handler;
 
@@ -86,22 +88,22 @@ export function Service<Commands extends ServiceCommands>(commands: Commands):
     }
 
     for (let [key, command] of entries(commands)) {
-        Object.defineProperty(Connection, key, {
+        Object.defineProperty(Class, key, {
             get: Lazy(() => command.connect(function (payload) {
-                    if (!defaultHandler)
+                    if (!Class.handler)
                         throw new Error(
                             `No service handler for "${this.name}".`
                         );
-                    return defaultHandler([key, payload])
+                    return Class.handler([key, payload])
                 })
             )
         })
     }
 
-    return <any>Connection;
+    return <any>Class;
 
-    function Connection(handler) {
-        const obj = this instanceof Connection ? this : {};
+    function Class(handler) {
+        const obj = this instanceof Class ? this : {};
         for (const [key, command] of entries(commands)) {
             obj[key] = command.connect(payload => handler([key, payload]))
         }

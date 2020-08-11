@@ -1,11 +1,12 @@
 import {createElement, Fragment, ReactNode} from "react";
-import {DataItem, DataKey} from "../DataItem";
+import {DataKey} from "../DataKey";
 import {DataOrder} from "../DataOrder";
+import {DataRow} from "../DataRow";
 import {AbstractDataList, AbstractDataListProps} from "./AbstractDataList";
 
 export type DataListProps<T> = AbstractDataListProps<T> & {
     renderItem(props: {
-        item: DataItem<T>,
+        item: DataRow<T>,
         list: DataList<T>, index: number
     }): ReactNode;
 };

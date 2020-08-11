@@ -5,7 +5,8 @@ import ListItemText, {ListItemTextProps} from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
 import React, {ReactNode} from "react";
 import {InfinityScrollProps} from "../../../../browser/src/junk/doIfScrollEnded";
-import {DataItem, DataKey} from "../../../data/DataItem";
+import {DataKey} from "../../../data/DataKey";
+import {DataRow} from "../../../data/DataRow";
 import {DataSource} from "../../../data/DataSource";
 
 import {DataExp} from "../../../json-exp/DataExp";
@@ -21,11 +22,11 @@ export type MuiDataPickerProps<T> = {
     source: DataSource<T>;
 
     pageSize?: number;
-    onPick?(item: DataItem<T>): void
+    onPick?(item: DataRow<T>): void
 
     getTextFilter?(text: string): DataExp<T>;
 
-    // renderItem(item: DataItem<P>): ReactNode
+    // renderItem(item: DataRow<P>): ReactNode
 
     ListProps?: Partial<ListProps>;
     ListItemProps?: Partial<ListItemTypeMap<{}, "div">>;
@@ -36,8 +37,8 @@ export type MuiDataPickerProps<T> = {
 
     listWrapper?: ReactWrapper;
 
-    renderPrimaryTitle(row: DataItem<T>): ReactNode;
-    renderSecondaryTitle?(row: DataItem<T>): ReactNode;
+    renderPrimaryTitle(row: DataRow<T>): ReactNode;
+    renderSecondaryTitle?(row: DataRow<T>): ReactNode;
 
     renderNoRows?(): ReactNode;
 };
@@ -46,7 +47,7 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
 
     @ViewState() totalCount = 0;
 
-    @ViewState() items: DataItem<T>[] = [];
+    @ViewState() items: DataRow<T>[] = [];
 
     @ViewState('reload') filter: DataExp<T> = undefined;
 
@@ -105,7 +106,7 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
             <Typography>{Lang`NO_ROWS`}</Typography>
     }
 
-    renderItem(item: DataItem<T>, index: number) {
+    renderItem(item: DataRow<T>, index: number) {
         return <ListItem button {...this.props.ListItemProps} key={DataKey(item)}
                          onClick={() => {
                              this.props.onPick?.(item);

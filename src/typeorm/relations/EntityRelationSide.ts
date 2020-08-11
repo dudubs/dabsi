@@ -17,6 +17,12 @@ export class EntityRelationSide<T> {
 
     entityMetadata = this.relation.connection.getMetadata(this.entityType);
 
+
+    getKey(leftKey: object, rightKey: object) {
+        return (this.relation.invert ? !this.isLeft : this.isLeft) ?
+            leftKey : rightKey;
+    }
+
     get repository(): Repository<T> {
         return this.relation.connection.getRepository(this.entityType)
     }
@@ -73,20 +79,20 @@ export class EntityRelationSide<T> {
     }
 
     getIdCondition(qb: SelectQueryBuilder<any>, schema: string,
-                   id = definedAt(this.relation, 'rightId')): string {
+                   key: object): string {
         let sql = '';
         for (let column of this.entityMetadata.primaryColumns) {
             const parameterName = schema + '_' + column.propertyName;
             sql += `${sql ? ' AND ' : ""
             }${schema}.${column.databaseName}=:${parameterName}`;
-            qb.setParameter(parameterName, id[column.propertyName]);
+            qb.setParameter(parameterName, key[column.propertyName]);
         }
         return sql;
     }
 
 
     getIdConditionExp(qb: QueryExpBuilder, schema: string,
-                      id = definedAt(this.relation, 'rightId')) {
+                      key: object) {
 
         return {
             $and: this.entityMetadata.primaryColumns.map(c => {
@@ -95,7 +101,7 @@ export class EntityRelationSide<T> {
                         [schema]: [
                             c.databaseName,
                             '=',
-                            [id[c.propertyName]]
+                            [key[c.propertyName]]
                         ]
                     }
                 }

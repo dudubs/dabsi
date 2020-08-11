@@ -12,7 +12,7 @@ export function validateStructField(
 ): Validation {
 
     if (value === null) {
-        if (!Nullable.get(field))
+        if (!Optional.get(field) && !Nullable.get(field))
             return () => `Is null.`
         return
     } else if (value === undefined) {

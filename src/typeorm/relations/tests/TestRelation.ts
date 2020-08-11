@@ -1,4 +1,6 @@
 import {JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne} from "typeorm";
+import {JoinTableMultipleColumnsOptions} from "typeorm/decorator/options/JoinTableMultipleColumnsOptions";
+import {JoinColumnOptions, JoinTableOptions} from "typeorm";
 import {MapFactory} from "../../../common/map/mapFactory";
 import {definedAt} from "../../../common/object/definedAt";
 import {Type} from "../../../common/typings";
@@ -6,8 +8,12 @@ import {Relation} from "../../../data/Relation";
 
 const targetToRelationKeys = MapFactory((target: Function) => new Set<string>());
 
-export function TestRelation<T>(getInverseTargetType: () => Type<T>) {
-    return <K extends string>(target:Partial<Record<K, Relation<T> | Relation<T>[]>>, relationName: K) => {
+export function TestRelation<T>(getInverseTargetType: () => Type<T>,
+                                options: {
+                                    joinTable?: JoinTableOptions | JoinTableMultipleColumnsOptions,
+                                    joinColumn?: JoinColumnOptions
+                                } = {}) {
+    return <K extends string>(target: Partial<Record<K, Relation<T> | Relation<T>[]>>, relationName: K) => {
 
         const relationInfo = parseRelationName(relationName);
 
@@ -24,8 +30,8 @@ export function TestRelation<T>(getInverseTargetType: () => Type<T>) {
         }, relationInfo.type)
 
         const ownerDecorator = {
-            oneToOne: JoinColumn,
-            manyToMany: JoinTable
+            oneToOne: (...args) => JoinColumn(options.joinColumn!)(...args),
+            manyToMany: (...args) => JoinTable(options.joinTable!)(...args),
         }[relationInfo.type];
 
 
@@ -42,7 +48,7 @@ export function TestRelation<T>(getInverseTargetType: () => Type<T>) {
             assertTargetName(inverseTargetType.name,
                 relationInfo.toName);
 
-            function assertTargetName(targetName:string,name:string) {
+            function assertTargetName(targetName: string, name: string) {
 
                 const rootMatch = targetName.match(/^(?<name>.*)(Entity|Base)$/);
                 const expectedName: string = rootMatch?.groups?.name ?? targetName;
@@ -67,7 +73,7 @@ export function TestRelation<T>(getInverseTargetType: () => Type<T>) {
 
 
         Reflect.decorate([
-            ...(ownerDecorator && relationInfo.isOwner) ? [ownerDecorator()] : [],
+            ...(ownerDecorator && relationInfo.isOwner) ? [ownerDecorator] : [],
             relationDecorator(getInverseTargetType, x => {
                 return definedAt(x, inverseRelationName);
             }),
@@ -109,7 +115,7 @@ function getInverseRelationName(
         throw new Error('Invalid property name: ' + relationInfo.name)
 
     if (isManyToManyOrOneToOne) {
-        return fromType + toName + 'To' + toType+ fromName
+        return fromType + toName + 'To' + toType + fromName
             + (isOwner ? "" : "Owner")
     }
 

@@ -1,6 +1,6 @@
 import {Expression, ExtractKeys, Union} from "../common/typings";
 import {DataUnionChildren} from "../data/DataUnion";
-import {RelationKeys, RelationToManyKeys, RelationTypeAt} from "../data/Relation";
+import {RelationKeys, RelationToManyKeys, RelationToOneKeys, RelationTypeAt} from "../data/Relation";
 import {IndexedSeq} from "../immutable2";
 
 
@@ -106,15 +106,15 @@ export type DataMappedExpTypes<T> = {
     $at: AtExp<T>;
 
     // to-many relations
-    $countAt: RelationToManyKeys<T> | Union<{
+    $count: RelationToManyKeys<T> | Union<{
         [K in RelationToManyKeys<T>]:
         Record<K, RelationAtExp<T, K>>
     }>;
 
     // to-many relations
-    $hasAt: HasExp<T>;
+    $has: HasExp<T>;
 
-    $notHasAt: HasExp<T>;
+    $notHas: HasExp<T>;
 
     $as: AsExp<T>
 
@@ -129,7 +129,7 @@ type RelationAtExp<T, K extends RelationKeys<T>> =
 
 
 export type AtExp<T> = Union<{
-    [K in RelationKeys<T>]:
+    [K in RelationToOneKeys<T>]:
     Record<K, RelationAtExp<T, K>>
 }>;
 

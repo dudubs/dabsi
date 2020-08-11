@@ -7,7 +7,7 @@ export const deleteAction: DataTableAction<any> = {
     danger: true,
     title: Lang`DELETE`,
     handleKeys: async (keys, table) => {
-        await table.source.delete(keys);
+        await table.source.deleteAll(keys);
         await table.reloadAfterRemove();
     }
 }

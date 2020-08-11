@@ -1,12 +1,11 @@
 import React from "react";
-import {DataItem} from "../../../../data/DataItem";
-import {LayoutOld} from "../../../../react/utils/LayoutOld";
+import {DataRow} from "../../../../data/DataRow";
 import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";
 import {AnyMuiDataTable} from "./index";
 
 export function renderTableBodyColumn(
     table: AnyMuiDataTable,
-    item: DataItem<any>,
+    item: DataRow<any>,
     column: AnyMuiDataTable['columns'][number]
 ) {
     // console.log({item, column});
@@ -14,10 +13,10 @@ export function renderTableBodyColumn(
 
     let children;
 
-    if(column.empty &&(data==null)) {
+    if (column.empty && (data == null)) {
         children = column.empty;
     } else {
-        children= column.render ? column.render({item, data}) : String(data);
+        children = column.render ? column.render({item, data}) : String(data);
     }
 
     return <MuiTableColumn

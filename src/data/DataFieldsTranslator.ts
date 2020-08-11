@@ -8,13 +8,13 @@ export class DataFieldsTranslator extends DataExpMapper<any> {
         super();
     }
 
-    translateFieldExp(key: StringDataExp<any>): DataExp<any> {
-        if (key in this.fields) {
-            if (typeof this.fields[key] !== "string") {
-                return this.translate(this.fields[key])
+    translateField(propertyName: string): DataExp<any> {
+        if (propertyName in this.fields) {
+            if (typeof this.fields[propertyName] !== "string") {
+                return this.translate(this.fields[propertyName])
             }
         }
-        return super.translateFieldExp(key);
+        return super.translateField(propertyName);
     }
 
 

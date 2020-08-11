@@ -2,6 +2,7 @@ import {Constructor, Type} from "../common/typings";
 import {DataSelection} from "./DataSelection";
 import {DataSelectionRow} from "./DataSelectionRow";
 import {DataSource} from "./DataSource";
+import {DataTypeInfo} from "./DataTypeInfo";
 
 export function DataSelector<T, S extends DataSelection<T>>(
     type: Constructor<T>,
@@ -11,6 +12,12 @@ export function DataSelector<T, S extends DataSelection<T>>(
 
     select(source: DataSource<T>): DataSource<DataSelectionRow<T, S>>
 } {
+
+
+
+    Selector[DataTypeInfo.symbol] = {
+        ...DataTypeInfo.get(type)
+    };
 
     Selector.select = function (source: DataSource<any>) {
         return source.withCursor({

@@ -13,8 +13,8 @@ export function Command<U = void, R = void>():
         connect: handler => async function (...args) {
             return handler.call(this, args);
         },
-        handle: handler => async function (payload: any[]) {
-            return await handler.apply(this, payload);
+        handle: adapter => async function (payload: any[]) {
+            return await adapter.apply(this, payload);
         }
     }
 }

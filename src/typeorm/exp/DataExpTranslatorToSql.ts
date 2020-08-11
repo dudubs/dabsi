@@ -1,4 +1,4 @@
-import {Connection, SelectQueryBuilder} from "typeorm/index";
+import {Connection, SelectQueryBuilder} from "typeorm";
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
 import {CompareOperator, DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../json-exp/DataExp";
@@ -91,8 +91,8 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<T, str
 
     counter = 0;
 
-    translateFieldExp(key: StringDataExp<T>): string {
-        return `${this.escape(this.schema)}.${this.escape(key)}`
+    translateField(propertyName: StringDataExp<T>): string {
+        return `${this.escape(this.schema)}.${this.escape(propertyName)}`
     }
 
 
@@ -140,11 +140,11 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<T, str
         throw new Error('Not support.')
     }
 
-    translateCountAt(propertyName: string, subExp: DataExp<any>): string {
+    translateCount(propertyName: string, subExp: DataExp<any>): string {
         throw new Error('Not support.')
     }
 
-    translateHasAt(inverse: boolean, propertyName: string, exp: DataExp<any>): string {
+    translateHas(inverse: boolean, propertyName: string, exp: DataExp<any>): string {
         throw new Error('Not support.')
     }
 
@@ -153,16 +153,16 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<T, str
     }
 
 
-    translateCount(query: Query): string {
+    translateQueryCount(query: Query): string {
         return `(SELECT COUNT(*) AS value FROM (${
             this.translateQuery(query)
         }) AS _rec)`
     }
 
-    translateHas(inverse: boolean, query: Query): string {
+    translateQueryHas(inverse: boolean, query: Query): string {
         return this.translateCompare(
             inverse ? '$equals' : '$greaterThan',
-            this.translateCount({
+            this.translateQueryCount({
                 ...query,
                 take: 1
             }),

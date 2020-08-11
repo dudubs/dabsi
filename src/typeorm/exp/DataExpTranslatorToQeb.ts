@@ -38,10 +38,10 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
             () => `Not child key "${childKey}" in ${this.typeInfo.name}. ${
                 inspect(this.typeInfo, {depth: 10})
             }`);
-        const childMetadata = this.qb.connection.getMetadata(
-            childTypeInfo.type
-        );
-        const typeExp = <DataExp<any>>{
+
+        const childMetadata = this.qb.connection.getMetadata(childTypeInfo.type);
+
+        const childExp = <DataExp<any>>{
             [childMetadata.discriminatorColumn!.propertyName]: {
                 $in: childMetadata.childEntityMetadatas
                     .toSeq()
@@ -50,11 +50,14 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
                     .toArray()
             }
         };
-        return new DataExpTranslatorToQeb(
+
+        const childTranslator = new DataExpTranslatorToQeb(
             childTypeInfo,
             this.qb,
             this.schema,
-        ).translate({$and: [typeExp, exp]})
+        );
+
+        return childTranslator.translate({$and: [childExp, exp]})
     }
 
     translateAt(propertyName: string, exp: DataExp<any>): QueryExp {
@@ -62,7 +65,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
             this.typeInfo.type, propertyName, false);
         if (!relation.isToOne)
             throw new Error(`$at support in relation to-one only.`)
-        const rightSchema = relation.joinQeb("LEFT", this.qb, this.schema)
+        const rightSchema = relation.joinQeb("LEFT", this.qb, this.schema,null)
         return {
             $at: {
                 [rightSchema]:
@@ -144,13 +147,13 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     }
 
 
-    translateCountAt(propertyName: string,
-                     whereExp: DataExp<any>): QueryExp {
-        return {$count: this.getSubSelect(propertyName, whereExp)}
+    translateCount(propertyName: string,
+                   whereExp: DataExp<any>): QueryExp {
+        return {$queryCount: this.getSubSelect(propertyName, whereExp)}
     }
 
-    translateHasAt(inverse: boolean, propertyName: string, exp: DataExp<any>): QueryExp {
-        return {$has: this.getSubSelect(propertyName, exp)}
+    translateHas(inverse: boolean, propertyName: string, exp: DataExp<any>): QueryExp {
+        return {[inverse ? "$queryNotHas" : "$queryHas"]: this.getSubSelect(propertyName, exp)}
     }
 
     translateIs(inverse: boolean, keys: string[]): QueryExp {
@@ -178,7 +181,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
 
 
     @Mapper
-    translateFieldExp(key: StringDataExp<T>): QueryExp {
+    translateField(propertyName: StringDataExp<T>): QueryExp {
         throw new Error()
     }
 

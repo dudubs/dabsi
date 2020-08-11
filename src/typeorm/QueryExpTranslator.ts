@@ -9,31 +9,31 @@ export type QueryExpTranslatorMethods<T> = {
 }
     ;
 export type QueryExpTranslator<T> = {
-    translateCount(query: Query): T;
+    translateQueryCount(query: Query): T;
 
-    translateHas(inverse: boolean, query: Query): T;
+    translateQueryHas(inverse: boolean, query: Query): T;
 
     translateQuery(query: Query): T;
 };
 
 export abstract class AbstractQueryExpTranslator<T> extends DataExpTranslator<QueryExp, T>
     implements QueryExpTranslator<T> {
-    abstract translateCount(query: Query): T;
+    abstract translateQueryCount(query: Query): T;
 
-    abstract translateHas(inverse: boolean, query: Query): T;
+    abstract translateQueryHas(inverse: boolean, query: Query): T;
 
     abstract translateQuery(query: Query): T;
 
-    $count(exp: QueryExpTypes["$count"]): T {
-        return this.translateCount(exp)
+    $queryCount(exp: QueryExpTypes["$queryCount"]): T {
+        return this.translateQueryCount(exp)
     }
 
-    $has(exp: QueryExpTypes["$has"]): T {
-        return this.translateHas(false, exp)
+    $queryHas(exp: QueryExpTypes["$queryHas"]): T {
+        return this.translateQueryHas(false, exp)
     }
 
-    $notHas(exp: QueryExpTypes["$notHas"]): T {
-        return this.translateHas(true, exp)
+    $queryNotHas(exp: QueryExpTypes["$queryNotHas"]): T {
+        return this.translateQueryHas(true, exp)
     }
 
     $query(exp: QueryExpTypes["$query"]): T {

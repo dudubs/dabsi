@@ -1,9 +1,10 @@
 import {TableProps} from "@material-ui/core/Table";
-import {MuiIcon} from "../../MuiIcon";
-import {DataItem, DataKey} from "../../../../data/DataItem";
+import {DataKey} from "../../../../data/DataKey";
+import {DataRow} from "../../../../data/DataRow";
 import {DataTable, DataTableAction, DataTableColumnProps, DataTableProps} from "../../../../data/DataTable";
 import {LangNode} from "../../../../localization/Lang";
 import {MuiButtonProps} from "../../components/MuiButton";
+import {MuiIcon} from "../../MuiIcon";
 import {MuiTableColumnProps} from "../../MuiTable/MuiTableColumn";
 import {MuiDataTableToolbarProps} from "./MuiDataTableToolbar";
 import {renderTable} from "./renderTable";
@@ -16,7 +17,7 @@ export type MuiDataTableProps<T> =
 
     onPick?(key: string): void;
 
-    isSelected?(item: DataItem<T>): boolean;
+    isSelected?(item: DataRow<T>): boolean;
 
     actions?: MuiDataTableAction<T>[];
 
@@ -28,8 +29,8 @@ export type MuiDataTableProps<T> =
 
     TableProps?: TableProps;
 
-    expandFirstItem?:boolean;
-    renderItemCollapse?(item: DataItem<T>, table: MuiDataTable<any>);
+    expandFirstItem?: boolean;
+    renderItemCollapse?(item: DataRow<T>, table: MuiDataTable<any>);
 
 }
 

@@ -35,6 +35,9 @@ export class DBase {
     @Column({nullable: true})
     dNumber?: number;
 
+    @Column({nullable: true})
+    dBoolean: boolean;
+
     @TestRelation(() => EBase)
     oneDToOneE: Relation<EBase>;
 

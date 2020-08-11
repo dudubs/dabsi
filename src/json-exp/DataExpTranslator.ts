@@ -43,7 +43,7 @@ export abstract class DataExpTranslator<T, U>
 
     abstract translateParameter(value: Parameter): U;
 
-    abstract translateFieldExp(key: StringDataExp<T>): U;
+    abstract translateField(propertyName: StringDataExp<T>): U;
 
     abstract translateIn(inverse: boolean, where: U, values: U[]): U;
 
@@ -132,7 +132,7 @@ export abstract class DataExpTranslator<T, U>
                 return this.True;
 
             case "string":
-                return this.translateFieldExp(exp);
+                return this.translateField(exp);
 
             case "object":
                 if (!exp)
@@ -204,7 +204,7 @@ export abstract class DataExpTranslator<T, U>
     }
 
 
-    abstract translateCountAt(propertyName: string, subExp: DataExp<any>): U;
+    abstract translateCount(propertyName: string, subExp: DataExp<any>): U;
 
     abstract translateAt(propertyKey: string, exp: DataExp<any>): U;
 
@@ -259,36 +259,36 @@ export abstract class DataExpTranslator<T, U>
         return this.translateConcat(exp.map(exp => this.translate(exp)));
     }
 
-    $countAt(exp: DataMappedExpTypes<T>["$countAt"]): U {
+    $count(exp: DataMappedExpTypes<T>["$count"]): U {
         if (typeof exp === "string") {
-            return this.translateCountAt(exp, undefined);
+            return this.translateCount(exp, undefined);
         } else if (typeof exp === "object") {
             const [propertyName, subExp] = firstDefinedEntry(exp)
-            return this.translateCountAt(propertyName, subExp);
+            return this.translateCount(propertyName, subExp);
         }
         throw new TypeError()
     }
 
 
-    abstract translateHasAt(
+    abstract translateHas(
         inverse: boolean,
         propertyName: string,
         exp: DataExp<any>
     ): U;
 
-    $hasAt(exp: DataMappedExpTypes<T>["$hasAt"], inverse = false): U {
+    $has(exp: DataMappedExpTypes<T>["$has"], inverse = false): U {
         if (typeof exp === "string") {
-            return this.translateHasAt(inverse, exp, undefined)
+            return this.translateHas(inverse, exp, undefined)
         } else if (typeof exp === "object") {
             const [propertyName, subExp] = firstDefinedEntry(exp)
-            return this.translateHasAt(inverse, propertyName, subExp);
+            return this.translateHas(inverse, propertyName, subExp);
         }
         throw new TypeError(`Invalid "has" Exp`)
     }
 
-    // TODO: translateHasAt(inverse, ...
-    $notHasAt(exp: DataMappedExpTypes<T>["$hasAt"]): U {
-        return this.$hasAt(exp, true)
+    // TODO: translateHas(inverse, ...
+    $notHas(exp: DataMappedExpTypes<T>["$has"]): U {
+        return this.$has(exp, true)
     }
 
     $search(exp: DataMappedExpTypes<T>["$search"]): U {

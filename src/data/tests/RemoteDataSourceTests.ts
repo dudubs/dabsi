@@ -1,22 +1,24 @@
 import {ExpressBSON} from "../../express/ExpressBSON";
 import {ExpressBSONTester} from "../../express/tests/ExpressBSONTests";
+import {fetchRpc, handleRpc} from "../../rpc/RPCHandler";
 import {ExpressTester} from "../../rpc/tests/ExpressTests";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
+import {EDSTesters} from "../eds/tests/EntityDataSourceTests";
 import {RemoteDataSourceConnection} from "../RemoteDataSource";
 import {DUnion, EUnion} from "./BaseEntities";
 import {DataSourceTests} from "./DataSourceTests";
-import {EDSTesters} from "../eds/tests/EntityDataSourceTests";
 
 
 function RDSTester<T>(name): RemoteDataSourceConnection<T> {
 
     return new RemoteDataSourceConnection(async command => {
-            return (await ExpressBSONTester.fetch({
+        return fetchRpc(
+            await ExpressBSONTester.fetch({
                 name,
                 ...command
-            }));
-        }
-    )
+            })
+        );
+    });
 }
 
 export const RDSTesters = {
@@ -32,11 +34,11 @@ describe("RDS", () => {
     beforeEach(() => {
 
         ExpressTester.setExpressHandler((req, res) => {
-            ExpressBSON()(req, res, async () => {
+            ExpressBSON()(req, res, () => {
                 const {name, cursor, method, args} = req.body;
-                res.json(
-                    await EDSTesters[name].withCursor(cursor)[method](...args)
-                )
+                return handleRpc(res, () => {
+                    return EDSTesters[name].withCursor(cursor)[method](...args)
+                })
             });
         })
     })

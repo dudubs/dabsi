@@ -7,8 +7,8 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
 
     Null: DataExp<any> = null;
 
-    translateHasAt(inverse: boolean, propertyName: string, exp: DataExp<any>): DataExp<any> {
-        return <DataExp<any>>{[inverse?"$notHasAt":"$hasAt"]: exp !== undefined ? {[propertyName]: exp} : propertyName};
+    translateHas(inverse: boolean, propertyName: string, exp: DataExp<any>): DataExp<any> {
+        return <DataExp<any>>{[inverse?"$notHas":"$has"]: exp !== undefined ? {[propertyName]: exp} : propertyName};
     }
 
     translateAs(unionKey: string, exp: DataExp<any>): DataExp<any> {
@@ -51,16 +51,16 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
         return {$concat: exps};
     }
 
-    translateCountAt(propertyName: string, subExp: DataExp<any>): DataExp<any> {
+    translateCount(propertyName: string, subExp: DataExp<any>): DataExp<any> {
         return <DataExp<any>>{
-            $countAt: subExp !== undefined ?
+            $count: subExp !== undefined ?
                 {[propertyName]: subExp} :
                 propertyName
         };
     }
 
-    translateFieldExp(key: StringDataExp<any>): DataExp<any> {
-        return key;
+    translateField(propertyName: string): DataExp<any> {
+        return propertyName;
     }
 
     translateIn(inverse: boolean, where: DataExp<any>, values: DataExp<any>[]): DataExp<any> {

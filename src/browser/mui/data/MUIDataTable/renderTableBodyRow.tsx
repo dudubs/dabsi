@@ -1,7 +1,7 @@
 import Checkbox from "@material-ui/core/Checkbox";
 import TableRow from "@material-ui/core/TableRow";
 import React from "react";
-import {DataItem} from "../../../../data/DataItem";
+import {DataRow} from "../../../../data/DataRow";
 import {MuiButton} from "../../components/MuiButton";
 import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";
 import {AnyMuiDataTable} from "./index";
@@ -9,7 +9,7 @@ import {MuiDataTableAction} from "./renderTableAction";
 import {renderTableBodyColumn} from "./renderTableBodyColumn";
 
 export function renderTableBodyRow(table: AnyMuiDataTable,
-                                   item: DataItem<any>) {
+                                   item: DataRow<any>) {
 
 
     const row = <TableRow key={item.$key}

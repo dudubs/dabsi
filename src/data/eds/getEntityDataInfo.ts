@@ -4,6 +4,7 @@ import {RelationMetadata} from "typeorm/metadata/RelationMetadata";
 import {mapArrayToObject} from "../../common/array/mapArrayToObject";
 import {WeakMapFactory} from "../../common/map/mapFactory";
 import {setDefinedValue} from "../../common/object/setDefinedValue";
+import {EntityRelation} from "../../typeorm/relations";
 import {mergeValueTransformer} from "./mergeValueTransformer";
 
 
@@ -12,21 +13,21 @@ import {mergeValueTransformer} from "./mergeValueTransformer";
     dataColumns
     relationColumn
  */
+
+export type EntityDataInfo = ReturnType<typeof getEntityDataInfo>;
+
 export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
 
     // TODO: use EntityMetadata.propertyMap
     const propertyNameToRelationMetadata: Record<string, RelationMetadata> = {};
     const propertyNameToTransformer: Record<string, ValueTransformer> = {};
-    const propertyNameToColumn: Record<string, ColumnMetadata> = {};
+    const propertyNameToColumnMetadata: Record<string, ColumnMetadata> = {};
     const nonRelationColumnKeys: string[] = [];
     const dataColumns: ColumnMetadata[] = [];
-
+    const propertyNameToRelation: Record<string, EntityRelation> = {};
 
     for (const column of metadata.columns) {
-
-        propertyNameToColumn[column.propertyName] = column;
-
-
+        propertyNameToColumnMetadata[column.propertyName] = column;
         if (!column.relationMetadata) {
             dataColumns.push(column);
             if (column.target === metadata.target || (
@@ -38,7 +39,6 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
                 nonRelationColumnKeys.push(column.propertyName)
             }
         }
-
         setDefinedValue(propertyNameToTransformer, column.propertyName,
             Array.isArray(column.transformer) ?
                 mergeValueTransformer(column.transformer) :
@@ -48,12 +48,17 @@ export const getEntityDataInfo = WeakMapFactory((metadata: EntityMetadata) => {
 
     for (let relation of metadata.relations) {
         propertyNameToRelationMetadata[relation.propertyName] = relation;
+        propertyNameToRelation[relation.propertyName] =
+            new EntityRelation(metadata.connection,
+                <Function>metadata.target, relation.propertyName,
+                false);
     }
 
     return {
-        propertyNameToColumn,
+        propertyNameToColumnMetadata,
         nonRelationColumnKeys,
         propertyNameToTransformer,
+        propertyNameToRelation,
 
         propertyNameToRelationMetadata,
         primaryPropertyNameToIndex: mapArrayToObject(metadata.primaryColumns,

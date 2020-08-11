@@ -13,11 +13,11 @@ export type QueryJoin = {
 
 
 export type QueryExpTypes = {
-    $count: Query;
+    $queryCount: Query;
 
-    $has: Query;
+    $queryHas: Query;
 
-    $notHas: Query;
+    $queryNotHas: Query;
 
     $query: Query;
 };

@@ -1,8 +1,31 @@
-import {HasKeys, IsNever} from "../typings";
+import {HasKeys, IsNever, Pluck} from "../typings";
 
 ((_) => {
 })(() => {
 
+
+    // HasKeys
+    {
+        test<HasKeys<never>>(false);
+        // @ts-expect-error
+        test<HasKeys<never>>(true);
+
+        test<HasKeys<{}>>(false);
+        // @ts-expect-error
+        test<HasKeys<{}>>(true);
+
+        test<HasKeys<{ a }>>(true);
+        // @ts-expect-error
+        test<HasKeys<{ a }>>(false);
+
+
+
+    }
+    // Pluck
+    {
+        test<IsNever<Pluck<never, "">>>(true);
+
+    }
     // IsNever
     {
         test<IsNever<any>>(false);

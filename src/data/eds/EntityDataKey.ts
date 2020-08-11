@@ -10,7 +10,7 @@ export namespace EntityDataKey {
         if (metadata.primaryColumns.length === 1) {
             return {[metadata.primaryColumns[0].propertyName]: text}
         } else {
-            return fromEntity(
+            return pick(
                 metadata,
                 KeyObject.parse(text)
             )
@@ -28,7 +28,7 @@ export namespace EntityDataKey {
         }
     }
 
-    export function fromEntity(
+    export function pick(
         metadata: EntityMetadata,
         entity: any): KeyObject {
         return metadata.primaryColumns.toObject(

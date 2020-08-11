@@ -84,28 +84,28 @@ testm(__filename, () => {
             "manyAToManyB",
         ];
 
-        // $countAt
+        // $count
         for (const key of toManyRelationKeys) {
             // @ts-ignore
-            t.expectToExists([{$countAt: key}, ">", 0]);
+            t.expectToExists([{$count: key}, ">", 0]);
             // @ts-ignore
-            t.expectToExists([{$countAt: {[key]: {bText: "hello"}}}, ">", 0]);
+            t.expectToExists([{$count: {[key]: {bText: "hello"}}}, ">", 0]);
             // @ts-ignore
-            t.expectToNotExists([{$countAt: {[key]: {bText: "world"}}}, ">", 0]);
+            t.expectToNotExists([{$count: {[key]: {bText: "world"}}}, ">", 0]);
         }
 
-        // $hasAt
+        // $has
         for (const key of toManyRelationKeys) {
             // @ts-ignore
-            t.expectToExists({$hasAt: key});
+            t.expectToExists({$has: key});
             // @ts-ignore
-            t.expectToExists({$hasAt: {[key]: {bText: "hello"}}});
+            t.expectToExists({$has: {[key]: {bText: "hello"}}});
             // @ts-ignore
-            t.expectToNotExists({$hasAt: {[key]: {bText: "world"}}});
+            t.expectToNotExists({$has: {[key]: {bText: "world"}}});
         }
         // @ts-ignore
-        t.expectToError({$hasAt: "manyAToOneB"});
-        t.expectToError({$hasAt: {manyAToOneB: true}});
+        t.expectToError({$has: "manyAToOneB"});
+        t.expectToError({$has: {manyAToOneB: true}});
 
 
         // $at
@@ -154,11 +154,11 @@ testm(__filename, () => {
 
         describe('count manyDToManyE as eChild1', () => {
 
-            // t.expectToExists([{$countAt: {manyDToManyEOwner: {$as: {eChild1: {eChild1Text: "hello"}}}}}, ">", 0]);
-            // t.expectToNotExists([{$countAt: {manyDToManyEOwner: {$as: {eChild1: {eChild1Text: "world"}}}}}, ">", 0]);
+            // t.expectToExists([{$count: {manyDToManyEOwner: {$as: {eChild1: {eChild1Text: "hello"}}}}}, ">", 0]);
+            // t.expectToNotExists([{$count: {manyDToManyEOwner: {$as: {eChild1: {eChild1Text: "world"}}}}}, ">", 0]);
 
-            t.expectToExists([{$countAt: {manyDToManyE: {$as: {eChild1: {eChild1Text: "hello"}}}}}, ">", 0]);
-            t.expectToNotExists([{$countAt: {manyDToManyE: {$as: {eChild1: {eChild1Text: "world"}}}}}, ">", 0]);
+            t.expectToExists([{$count: {manyDToManyE: {$as: {eChild1: {eChild1Text: "hello"}}}}}, ">", 0]);
+            t.expectToNotExists([{$count: {manyDToManyE: {$as: {eChild1: {eChild1Text: "world"}}}}}, ">", 0]);
         })
 
 
@@ -179,17 +179,17 @@ testm(__filename, () => {
         describe('DUnion as DChild1 count of *ToManyE*', () => {
 
 
-            t.expectToExists([{$as: {dChild1: {$countAt: {manyDChild1ToManyEOwner: {eText: "hello"}}}}}, ">", 0]);
-            t.expectToNotExists([{$as: {dChild1: {$countAt: {manyDChild1ToManyEOwner: {eText: "world"}}}}}, ">", 0]);
+            t.expectToExists([{$as: {dChild1: {$count: {manyDChild1ToManyEOwner: {eText: "hello"}}}}}, ">", 0]);
+            t.expectToNotExists([{$as: {dChild1: {$count: {manyDChild1ToManyEOwner: {eText: "world"}}}}}, ">", 0]);
 
             describe('as EChild1', () => {
 
-                t.expectToExists([{$as: {dChild1: {$countAt: {manyDChild1ToManyE: {$as: {eChild1: {eChild1Text: "hello"}}}}}}}, ">", 0]);
-                t.expectToNotExists([{$as: {dChild1: {$countAt: {manyDChild1ToManyE: {$as: {eChild1: {eChild1Text: "world"}}}}}}}, ">", 0]);
+                t.expectToExists([{$as: {dChild1: {$count: {manyDChild1ToManyE: {$as: {eChild1: {eChild1Text: "hello"}}}}}}}, ">", 0]);
+                t.expectToNotExists([{$as: {dChild1: {$count: {manyDChild1ToManyE: {$as: {eChild1: {eChild1Text: "world"}}}}}}}, ">", 0]);
 
                 describe('<owner>', () => {
-                    t.expectToExists([{$as: {dChild1: {$countAt: {manyDChild1ToManyEOwner: {$as: {eChild1: {eChild1Text: "hello"}}}}}}}, ">", 0]);
-                    t.expectToNotExists([{$as: {dChild1: {$countAt: {manyDChild1ToManyEOwner: {$as: {eChild1: {eChild1Text: "world"}}}}}}}, ">", 0]);
+                    t.expectToExists([{$as: {dChild1: {$count: {manyDChild1ToManyEOwner: {$as: {eChild1: {eChild1Text: "hello"}}}}}}}, ">", 0]);
+                    t.expectToNotExists([{$as: {dChild1: {$count: {manyDChild1ToManyEOwner: {$as: {eChild1: {eChild1Text: "world"}}}}}}}, ">", 0]);
                 })
             })
 

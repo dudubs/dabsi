@@ -4,7 +4,7 @@ import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import {makeStyles} from "@material-ui/styles";
 import React, {useState} from "react";
-import {DataItem} from "../../../../data/DataItem";
+import {DataRow} from "../../../../data/DataRow";
 import {MuiButton} from "../../components/MuiButton";
 import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";
 import {AnyMuiDataTable} from "./index";
@@ -21,7 +21,7 @@ const useStyles = makeStyles({
 export function MuiDataTableRow(
     {table, item, index}: {
         table: AnyMuiDataTable,
-        item: DataItem<any>,
+        item: DataRow<any>,
         index: number
     }
 ) {

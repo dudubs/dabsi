@@ -81,9 +81,10 @@ export class QueryExpBuilder {
         return this.connection.query(query, parameters)
     }
 
-    count(): Promise<number> {
+    async count(): Promise<number> {
         const translator = this.createTranslator();
         const query = translator.translateQuery(this.query);
+
         return this.connection.query(`SELECT COUNT(*) value FROM (${query}) _rec`,
             translator.parameters).then(rows => {
             return rows[0]?.value ?? 0

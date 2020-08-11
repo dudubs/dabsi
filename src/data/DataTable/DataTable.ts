@@ -5,9 +5,9 @@ import {DataExp} from "../../json-exp/DataExp";
 import {LangNode} from "../../localization/Lang";
 import {AfterMount} from "../../react/utils/LifecycleHooks";
 import {State} from "../../react/utils/State";
-import {DataItem} from "../DataItem";
 import {AbstractDataList, AbstractDataListProps} from "../DataList/AbstractDataList";
 import {DataOrder} from "../DataOrder";
+import {DataRow} from "../DataRow";
 import {DataSource} from "../DataSource";
 import {deleteAction} from "./actions/deleteAction";
 import {removeAction} from "./actions/removeAction";
@@ -23,10 +23,10 @@ export type DataTableAction<T> = {
     title: LangNode;
     type?: DataTableActionType
     handleKeys?(keys: string[], table: AnyDataTable<T>): Awaitable;
-    handleItem?(item: DataItem<T>): Awaitable;
+    handleItem?(item: DataRow<T>): Awaitable;
     danger?: boolean
-    visible?: (item: DataItem<T>) => boolean
-    disabled?: (item: DataItem<T>) => boolean
+    visible?: (item: DataRow<T>) => boolean
+    disabled?: (item: DataRow<T>) => boolean
 };
 
 export type DataTableProps<T,
@@ -52,7 +52,7 @@ export type DataTableColumnProps<T> = {
     sortable?: boolean;
     title?: LangNode;
     empty?: LangNode;
-    render?(props: { item: DataItem<T>, data: any }): ReactNode;
+    render?(props: { item: DataRow<T>, data: any }): ReactNode;
     renderContainer?(children: ReactNode): ReactNode
 };
 
@@ -111,7 +111,7 @@ export abstract class DataTable<T,
             }
         }
 
-        return <any>super.getQuerySource().select(fields)
+        return <any>super.getQuerySource().addFields(fields)
     }
 
     @AfterMount()

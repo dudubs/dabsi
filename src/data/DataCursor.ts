@@ -11,7 +11,7 @@ export type RelationMap<T> = {
 };
 
 export type DataCursorPath<T = any> = {
-    keys: Record<string, string|number>,
+    keys: Record<string, string | number>,
     filter: DataExp<T>,
     propertyName: string,
     key: string,
@@ -38,7 +38,7 @@ export type DataCursor<T = any> = {
     type: string;
 
     filter: DataExp<any>;
-    keys: Record<string, string|number>;
+    keys: Record<string, string | number>;
 
     selection: AnyDataSelection;
 
@@ -60,14 +60,13 @@ export namespace DataCursor {
         DataCursor<ArrayTypeOrObject<T[K]>> {
         const cursorAt: DataCursor = {
             ...EmptyDataCursor,
-            location: [...cursor.location,
-                {
-                    filter: cursor.filter,
-                    keys: cursor.keys,
-                    propertyName,
-                    key,
-                    type: cursor.type
-                }],
+            location: [...cursor.location, {
+                filter: cursor.filter,
+                keys: cursor.keys,
+                propertyName,
+                key,
+                type: cursor.type
+            }],
         };
 
         const relationSelection = cursor.selection.relations?.[<any>propertyName];
@@ -113,7 +112,7 @@ export namespace DataCursor {
             skip: right.skip,
             take: right.take,
             order: right.order,
-            type: ""
+            type: right.type
 
         }
     }

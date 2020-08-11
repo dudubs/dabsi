@@ -1,59 +1,43 @@
 import {mergeObject} from "../common/object/mergeObject";
 import {omit} from "../common/object/omit";
-import {Assign, HasKeys, If, IsNull, Pluck} from "../common/typings";
+import {HasKeys, If, IsNever, Pluck} from "../common/typings";
 import {DataExp} from "../json-exp/DataExp";
 import {DataOrder} from "./DataOrder";
 import {DataUnionChildren, DataUnionChildrenKey} from "./DataUnion";
+import {MergeDataSelection} from "./MergeDataSelection";
 import {IfRelationToMany, IfRelationToOne, NonRelationKeys, RelationKeys, RelationTypeAt} from "./Relation";
 
 
+type _FlatObject<S, SWithoutChildren, SChildren, SRelations> =
+    Omit<S, "children" | "relations">
+    & (IsNever<SChildren> extends true ? {} : {
+    children: {
+        [K in keyof SChildren]: MergeDataSelection<//
+            FlatDataSelection<SWithoutChildren>,
+            FlatDataSelection<SChildren[K]>
+            //
+            >
+    }
+})
+    & (IsNever<SRelations> extends true ? {} : {
+    relations: {
+        [K in keyof SRelations]:
+        SRelations[K] extends (null | undefined | boolean) ?
+            SRelations[K] :
+            FlatDataSelection<SRelations[K]>
+    }
+})
+    ;
 
-type _MergeRelation<L, R> =
-    L extends (null | undefined | boolean) ? R :
-        R extends (null | undefined | boolean) ? L :
-            _MergeObject<L, R> ;
+export type FlatDataSelection<S> =
+    IsNever<S> extends true ? never :
+        S extends (null | undefined | boolean) ? S :
 
-type _PickOf<T> = Pluck<T, 'pick', undefined>;
+            _FlatObject<S,
+                Omit<S, "children">,
+                Pluck<S, 'children'>,
+                Pluck<S, 'relations'>>;
 
-type _RelationsOf<T> = Pluck<T, 'relations', {}>;
-
-type _ChildrenOf<T> = Pluck<T, 'children', {}>;
-
-type _MergeRelations<L, R> = Assign<_RelationsOf<L>, {
-    [K in keyof _RelationsOf<R>]:
-    _MergeRelation<//
-        Pluck<_RelationsOf<L>, K, undefined>,
-        _RelationsOf<R>[K]>
-}>
-
-
-type MergeChildren<L, R> = Assign<_ChildrenOf<L>, {
-    [K in keyof _ChildrenOf<R>]:
-    MergeDataSelection<//
-        Pluck<_ChildrenOf<L>, K, undefined>, // L ChildOf K
-        _ChildrenOf<R>[K]>
-}>;
-
-
-export type _MergePicks<L, R> =
-    L extends ReadonlyArray<infer LK> ?
-        R extends ReadonlyArray<infer RK> ?
-            ReadonlyArray<LK | RK> :
-            ReadonlyArray<LK> :
-        R extends ReadonlyArray<infer RK> ? ReadonlyArray<RK> : undefined;
-
-
-type _MergeObject<L, R> = Assign<Assign<L, R>, {
-    pick: _MergePicks<_PickOf<L>, _PickOf<R>>,
-    fields: Assign<Pluck<L, 'fields'>, Pluck<R, 'fields'>>,
-    relations: _MergeRelations<L, R>,
-    children: MergeChildren<L, R>
-}>;
-
-export type MergeDataSelection<L, R> =
-    If<IsNull<L>, R,
-        If<IsNull<R>, L,
-            _MergeObject<L, R>>>;
 
 type _PossibleKeysToPick<T> =
     Exclude<NonRelationKeys<T>,
@@ -170,3 +154,5 @@ export namespace DataSelection {
 
 
 }
+
+

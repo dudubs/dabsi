@@ -18,10 +18,6 @@ function dabsi-node() {
 
   C=""
 
-  #    if [ -d "./node_modules/tsconfig-paths" ]; then
-  #        C="$C -r tsconfig-paths/register"
-  #    fi
-
   if [ "$DABSI_NODE_DEBUG" ]; then
     C="$C --inspect "
   fi
@@ -55,6 +51,10 @@ function dabsi-debug() {
 }
 function dabsi-() {
   echo "no dabsi command"
+}
+
+function dabsi-x() {
+  ./node_modules/.bin/$1 ${@:2}
 }
 
 function dabsi() {

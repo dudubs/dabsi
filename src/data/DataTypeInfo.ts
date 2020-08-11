@@ -12,6 +12,7 @@ export type DataTypeInfo = {
 export namespace DataTypeInfo {
 
     export const map = new WeakMap();
+    export const symbol = Symbol();
 
     function create(unionOrType): DataTypeInfo {
 
@@ -32,6 +33,11 @@ export namespace DataTypeInfo {
     }
 
     export function get(unionOrType): DataTypeInfo {
+
+        if (unionOrType[symbol]) {
+            return unionOrType[symbol]
+        }
+
         return touchMap(map, unionOrType, create)
     }
 

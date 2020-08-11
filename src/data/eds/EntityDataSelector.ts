@@ -32,14 +32,16 @@ export namespace EntityDataSelector {
             order?: DataOrder<any>[],
             filter?: DataExp<any>
 
-        }
+        },
+        baseRow: object
     ): ReturnType<typeof select> {
 
         const loader = select(
             typeInfo,
             qb,
             selection,
-            qb.alias
+            qb.alias,
+            baseRow
         );
 
 
@@ -65,7 +67,8 @@ export namespace EntityDataSelector {
         typeInfo: DataTypeInfo,
         qb: QueryExpBuilder,
         selection: AnyDataSelection,
-        schema: string,/* is necessary? ?*/
+        schema: string,
+        baseRow: object
     ) {
         type RowContext = {
             row: object, raw: object,
@@ -80,10 +83,9 @@ export namespace EntityDataSelector {
         const entityMetadata = connection.getMetadata(typeInfo.type);
         const entityInfo = getEntityDataInfo(entityMetadata);
 
-        const discriminatorValueLoader = entityMetadata.discriminatorColumn
-            ? qb.selectColumn(
-                schema, entityMetadata.discriminatorColumn.databaseName
-            ) : undefined;
+        const discriminatorValueLoader = entityMetadata.discriminatorColumn ?
+            qb.selectColumn(schema, entityMetadata.discriminatorColumn.databaseName) :
+            undefined;
 
         const discriminatorValueToChildKey: Record<string, string> = {};
 
@@ -116,9 +118,7 @@ export namespace EntityDataSelector {
         for (const [childKey, childTypeInfo] of entries<DataTypeInfo>(
             typeInfo.children)) {
             const childMetadata = connection.getMetadata(childTypeInfo.type);
-
             const childSelection = DataSelection.atChild(selection, childKey);
-
             const childEntityInfo = getEntityDataInfo(childMetadata);
 
             discriminatorValueToChildKey[childMetadata.discriminatorValue!] =
@@ -140,19 +140,11 @@ export namespace EntityDataSelector {
         }
 
         async function loadMany(): Promise<any[]> {
-
             const rows: any[] = [];
-            //
-            // console.log(qb.clone().select(`1`).getQueryAndParameters());
-            // console.log(connection.getMetadata(typeInfo.type)
-            //     .columns.map(c=>c.databaseName));
-
-
             for (const raw of await qb.getMany()) {
                 const context = await loadOneRaw(raw);
                 context && rows.push(context.row);
             }
-            // TODO: loadRelations(...)
             return rows;
         }
 
@@ -163,7 +155,7 @@ export namespace EntityDataSelector {
             const objectKey: object = mapObject(objectKeyLoaders,
                 loader => loader(raw));
 
-            const row: any = {};
+            const row: any = Object.create(baseRow);
 
             row.$key =
                 singlePrimaryColumn ?
@@ -186,6 +178,7 @@ export namespace EntityDataSelector {
                 const childKey = defined(discriminatorValueToChildKey[discriminatorValue],
                     () => `No have childKey for discriminatorValue "${discriminatorValue}".`);
 
+                row.$type = childKey;
                 const loaders = defined(
                     childKeyToLoaders[childKey]
                     //
@@ -218,7 +211,7 @@ export namespace EntityDataSelector {
             // select non-relations-columns
             for (const columnPropertyName of selectedKeys) {
 
-                const column = definedAt(childEntityInfo.propertyNameToColumn, columnPropertyName);
+                const column = definedAt(childEntityInfo.propertyNameToColumnMetadata, columnPropertyName);
                 if (column.propertyName in fields)
                     continue;
 
@@ -286,13 +279,14 @@ export namespace EntityDataSelector {
                         relationSelectionOrBoolean === true ? {} :
                             relationSelectionOrBoolean;
 
-                    const relationSchema = relation.joinQeb("LEFT", qb, schema);
+                    const relationSchema = relation.joinQeb("LEFT", qb, schema, null);
 
                     const relationLoader = select(
                         relationTypeInfo,
                         qb,
                         relationSelection,
                         relationSchema,
+                        baseRow
                     );
 
                     if (relationSelection.notNull) {
@@ -343,7 +337,8 @@ export namespace EntityDataSelector {
                             relationTypeInfo,
                             qb,
                             relationSelection,
-                            relationSelection
+                            relationSelection,
+                            baseRow
                         )
                         context.row[propertyName] = await loader.loadMany();
                     })

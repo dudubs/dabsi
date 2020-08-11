@@ -1,19 +1,45 @@
-import {AwaitableType, Type} from "../common/typings";
+import {AwaitableType} from "../common/typings";
 import {RPC} from "../rpc/RPC";
 import {DataCursor, EmptyDataCursor} from "./DataCursor";
-import {DataItem, DataKey, DataKeyInput} from "./DataItem";
+import {DataBaseRow, DataRow} from "./DataRow";
 import {DataSource, DataValues} from "./DataSource";
+import {DataKeyOrKeys} from "./DataSource/DataSource";
 
+
+const allowedMethods: Record<RemoteDataSourceMethod, true> = {
+    has: true,
+    count: true,
+    items: true,
+
+    insertKey: true,
+    update: true,
+
+    delete: true,
+    remove: true,
+    add: true,
+
+    addAll: true,
+    deleteAll: true,
+    removeAll: true,
+    updateAll: true,
+};
 
 export type RemoteDataSourceMethod = Extract<keyof DataSource<any>, keyof {
     has,
     count,
     items
-    insert,
+    insertKey,
+
     update,
+    delete,
+    remove,
+    add,
+
     addAll,
     deleteAll,
     removeAll,
+    updateAll,
+
 }>;
 
 
@@ -48,14 +74,18 @@ export function RemoteDataSource<T>(): RemoteDataSource<T> {
             return new RemoteDataSourceConnection<T>(handler)
         },
         handle: source => {
-            return ({method, cursor, args}) => {
+            return async ({method, cursor, args}) => {
                 // TODO: more safety code.
                 cursor = DataCursor.concat(source.cursor, cursor);
+                if (!allowedMethods[method]) {
+                    throw new Error(`"${method}" is not allowed method.`)
+                }
                 return (<any>(source.withCursor(cursor)[method]))(...args);
             }
         }
     }
 }
+
 
 export class RemoteDataSourceConnection<T> extends DataSource<T> {
 
@@ -66,54 +96,73 @@ export class RemoteDataSourceConnection<T> extends DataSource<T> {
         super();
     }
 
-    command<K extends keyof RemoteDataSourceActions<T>>(method: K,
-                                                        args: Parameters<DataSource<T>[K]>) {
+    command<K extends keyof RemoteDataSourceActions<T>>(
+        method: K,
+        args: Parameters<DataSource<T>[K]>
+    ) {
         return this.fetch({cursor: this.cursor, method, args})
     }
 
-    items(): Promise<DataItem<T>[]> {
-        /*
-
-            map items .. item =>
-
-                DataUnion.compress
-
-         */
-        return this.command('items', [])
+    items(): Promise<DataRow<T>[]> {
+        return this.command('items', []).then(items => {
+            const base = DataBaseRow(this);
+            return items.map(item => {
+                return Object.setPrototypeOf(item, base)
+            })
+        })
     }
 
+    @Bridge
+    updateAll(keys: string[], values: DataValues<T>): Promise<number> {
+        throw new Error()
+    }
+
+    @Bridge
     addAll(keys: string[]): Promise<void> {
-        return this.command("addAll", [keys])
+        throw new Error()
     }
 
+    @Bridge
     count(): Promise<number> {
-        return this.command("count", []);
+        throw new Error()
     }
 
-
+    @Bridge
     deleteAll(keys: string[]): Promise<void> {
-        return this.command("deleteAll", [keys]);
+        throw new Error()
     }
 
+    @Bridge
     has(): Promise<boolean> {
-        return this.command("has", []);
+        throw new Error()
     }
 
-    insert(values: DataValues<T>): Promise<string> {
-        return this.command("insert", [values]);
+    @Bridge
+    insertKey(values: DataValues<T>): Promise<string> {
+        throw new Error()
     }
 
-
+    @Bridge
     removeAll(keys: string[]): Promise<void> {
-        return this.command("removeAll", [keys]);
-    }
-
-    update(key: DataKeyInput<T>, values: DataValues<T>): Promise<void> {
-        return this.command("update", [DataKey(key), values]);
+        throw new Error()
     }
 
     withCursor<T>(cursor: DataCursor): DataSource<T> {
         return new RemoteDataSourceConnection<T>(this.fetch, cursor);
     }
 
+}
+
+function Bridge(target, propertyKey: RemoteDataSourceMethod, desc) {
+    desc.value = function (this: RemoteDataSourceConnection<any>, ...args) {
+        return this.command(propertyKey, <any>args)
+    }
+}
+
+RemoteDataSourceConnection.prototype.update = function (...args) {
+    if (args.length === 2) {
+        const [keyOrKeys, values] = args;
+        args = [DataKeyOrKeys(keyOrKeys), values];
+    }
+    return this.command('update', args)
 }

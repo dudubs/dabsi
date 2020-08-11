@@ -2,7 +2,7 @@ import {Response} from "express";
 import {Awaitable} from "../common/typings";
 
 
-export async function handleRPC(
+export async function handleRpc(
     res: Response,
     callback: () => Awaitable
 ) {
@@ -13,7 +13,7 @@ export async function handleRPC(
     }
 }
 
-export function fetchRPC({error, result}: { error?, result? }) {
+export function fetchRpc({error, result}: { error?, result? }) {
     if (error)
         throw error;
     return result;

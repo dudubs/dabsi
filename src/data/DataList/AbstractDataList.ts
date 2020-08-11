@@ -3,8 +3,9 @@ import {ImmutableSet} from "../../immutable2";
 import {DataExp} from "../../json-exp/DataExp";
 import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {State} from "../../react/utils/State";
-import {DataItem} from "../DataItem";
+import {DataKeyInput} from "../DataKey";
 import {DataOrder} from "../DataOrder";
+import {DataRow} from "../DataRow";
 import {DataSource} from "../DataSource";
 
 
@@ -24,7 +25,7 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     reloadDebounce = Debounce(100);
 
-    @State() items: DataItem<T>[] = [];
+    @State() items: DataRow<T>[] = [];
 
     @State() isLoading = false;
 
@@ -84,6 +85,10 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
 
         return this.source.withCursor(cursor)
+    }
+
+    async reloadItem(item: DataKeyInput<T>) {
+        return this.reload();
     }
 
     async reload() {

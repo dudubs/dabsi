@@ -1,5 +1,5 @@
 import {mapObject} from "../common/object/mapObject";
-import {Constructor, HasKeys, If} from "../common/typings";
+import {Constructor, HasKeys, If, IsNever} from "../common/typings";
 import {MapRelation, RelationKeys, RelationTypeAt, RelationTypeAt as _RelationTypeAt} from "./Relation";
 
 
@@ -8,7 +8,18 @@ export const DataTypeKey: DataTypeKey = "$type";
 
 export type DataUnionChildrenKey = "$unionChildren";
 export type DataUnionChildren<T> =
-    If<HasKeys<T>, Record<DataUnionChildrenKey, T>, {}>
+    Record<DataUnionChildrenKey, T>;
+
+export type DataUnionWithChildren<T> =
+    IsNever<T> extends true ? {} :
+        HasKeys<T> extends false ? {} :
+            Record<DataUnionChildrenKey, T>;
+
+export type DataUnionChildrenOf<T> =
+    T extends DataUnionChildren<infer U> ? HasKeys<T> extends true ? U : never : never;
+
+export type DataUnionChildKey<T> =
+    IsNever<DataUnionChildrenOf<T>> extends true ? never:string& keyof DataUnionChildrenOf<T>;
 
 
 type _BaseChild<T> = Constructor<T>;

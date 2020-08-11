@@ -3,8 +3,45 @@ import {Service} from "../Service";
 import {assertEvent} from "./assertEvent";
 
 
-
 testm(__filename, () => {
+
+
+    it('multiple connections to service', async () => {
+
+        class MyService extends Service({
+            test: Command<[], number>(),
+            subService: Service({
+                test: Command<[], number>()
+            })
+        }) {
+
+        }
+
+        const first = MyService.connect(
+            MyService.handle({
+                test: () => 1,
+                subService: {
+                    test: () => 1
+                }
+            })
+        );
+
+        const second = MyService.connect(
+            MyService.handle({
+                test: () => 2,
+                subService: {
+                    test: () => 2
+                }
+            })
+        );
+
+        expect(await first.test()).toEqual(1);
+        expect(await second.test()).toEqual(2);
+        expect(await first.subService.test()).toEqual(1);
+        expect(await second.subService.test()).toEqual(2);
+
+
+    });
 
     it('sanity', async () => {
 

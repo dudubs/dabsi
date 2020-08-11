@@ -5,24 +5,33 @@ export type RPCHandlerPayload<T extends RPCHandler> =
     T extends RPCHandler<infer U> ? U : never;
 
 
-export type RPC<Handler extends RPCHandler, Connection, Config> = {
+export type RPC<Handler extends RPCHandler, Connection, Adapter> = {
 
     connect(handle: Handler): Connection;
 
-    handle(config: Config): Handler;
+    handle(adapter: Adapter): Handler;
 
 };
 
 
-export type AnyRPC = RPC<any, any, any>;
+export type AnyRpc = RPC<any, any, any>;
 
-export type RPCHandlerOf<T extends AnyRPC> =
+export type RpcHandlerOf<T extends AnyRpc> =
     T extends RPC<infer U, any, any> ? U : never;
 
-export type RPCConnectionOf<T extends AnyRPC> =
+export type RpcConnectionOf<T extends AnyRpc> =
     T extends RPC<any, infer U, any> ? U : never;
 
-export type RPCConfigOf<T extends AnyRPC> =
+export type RpcAdapterOf<T extends AnyRpc> =
     T extends RPC<any, any, infer U> ? U : never;
 
 
+
+export function connectToAdapter<T extends AnyRpc>(
+    rpc: T,
+    adapter: RpcAdapterOf<T>
+) {
+    return rpc.connect(rpc.handle(
+        adapter
+    ))
+}

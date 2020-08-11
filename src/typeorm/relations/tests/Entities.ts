@@ -54,7 +54,18 @@ export class AEntity {
     @TestRelation(() => CEntity)
     manyAToManyCOwner: Relation<CEntity>[];
 
-    @TestRelation(() => AEntity)
+    @TestRelation(() => AEntity, {
+        joinTable: {
+            joinColumn: {
+                name:"aOwnerId",
+                // referencedColumnName: "xxx"
+            },
+            inverseJoinColumn:{
+                name:"aChildId",
+                // referencedColumnName:"xxx4"
+            }
+        }
+    })
     manyAToManyAOwner: Relation<AEntity>[];
 
     @TestRelation(() => AEntity)

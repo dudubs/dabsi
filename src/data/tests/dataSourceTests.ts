@@ -4,6 +4,7 @@ import {DataSource} from "../DataSource";
 import {RelationKeys} from "../Relation";
 import {DUnion, EUnion} from "./BaseEntities";
 import arrayContaining = jasmine.arrayContaining;
+import objectContaining = jasmine.objectContaining;
 
 export function DataSourceTests(
     ADS: DataSource<AEntity>,
@@ -17,8 +18,8 @@ export function DataSourceTests(
     it('relations sanity', async () => {
         const debug = false;
 
-        const aKey = await ADS.insert({});
-        const bKey = await BDS.insert({});
+        const aKey = await ADS.insertKey({});
+        const bKey = await BDS.insertKey({});
 
         expect(await ADS.get(aKey)).toBeTruthy();
         expect(await ADS.get(bKey)).toBeFalsy();
@@ -50,11 +51,11 @@ export function DataSourceTests(
                     expect(await ds.get()).toBeFalsy();
                     expect(await inverseDs.get()).toBeFalsy();
 
-                    await ds.add(key);
+                    await ds.addKey(key);
                     expect(await ds.get()).toBeTruthy();
                     expect(await inverseDs.get()).toBeTruthy();
 
-                    await ds.remove(key);
+                    await ds.removeKey(key);
                     expect(await ds.get()).toBeFalsy();
                     expect(await inverseDs.get()).toBeFalsy();
 
@@ -65,19 +66,49 @@ export function DataSourceTests(
         }
     })
 
+    it("expect to invalid insert", async () => {
+        await expectAsync(ADS.insert(<any>{badField: 1}))
+            .toBeRejected();
+    })
 
+    it('insert text', async () => {
+        expect(await ADS.insert({aText: "hello"}))
+            .toEqual(objectContaining({aText: "hello"}));
+    })
 
-    it('insert to relations', async () => {
-        const aKey = await ADS.insert({});
-        const cKey = await CDS.insert({});
-        const cKey2 = await CDS.insert({});
+    describe('insert  ', () => {
+
+        test("oneAToManyB");
+        test("oneAToManyBOwner");
+
+        function test(relationKey) {
+            describe(relationKey, () => {
+                it('expect to not insert', async () => {
+                    await expectAsync(ADS.of(<any>relationKey, await BDS.insertKey({}))
+                        .insert(<any>{
+                            [relationKey]: await BDS.insertKey({})
+                        }))
+                        .toBeRejected()
+                });
+
+                it('expect to insert',()=>{
+
+                })
+            })
+        }
+    })
+
+    it('insert relation of', async () => {
+        const aKey = await ADS.insertKey({});
+        const cKey = await CDS.insertKey({});
+        const cKey2 = await CDS.insertKey({});
 
         const bOfAOwnerOfCOwner = BDS
             .of("oneBToOneAOwner", aKey)
             .of("oneBToOneCOwner", cKey);
 
         expect(await bOfAOwnerOfCOwner.get()).toBeFalsy();
-        await bOfAOwnerOfCOwner.insert({});
+        await bOfAOwnerOfCOwner.insertKey({});
         expect(await bOfAOwnerOfCOwner.get()).toBeTruthy();
 
         expect(await BDS.of("oneBToOneAOwner", aKey).get()).toBeTruthy();
@@ -87,7 +118,7 @@ export function DataSourceTests(
             .of("oneBToOneAOwner", aKey)
             .of("oneBToOneCOwner", cKey2).get()).toBeFalsy();
 
-        const bKey = await BDS.insert({});
+        const bKey = await BDS.insertKey({});
 
         const bAtAOwnerOfCOwner = BDS
             .at("oneBToOneAOwner", bKey)
@@ -96,7 +127,7 @@ export function DataSourceTests(
         ///
         expect(await bAtAOwnerOfCOwner.get()).toBeFalsy();
 
-        await bAtAOwnerOfCOwner.insert({});
+        await bAtAOwnerOfCOwner.insertKey({});
         expect(await bAtAOwnerOfCOwner.get()).toBeTruthy();
         expect(await BDS
             .at("oneBToOneAOwner", bKey)
@@ -120,15 +151,15 @@ export function DataSourceTests(
     });
 
     it('of relation key', async () => {
-        const aKey = await ADS.insert({});
+        const aKey = await ADS.insertKey({});
         const bOfA = BDS.of("oneBToOneA", aKey);
         expect(await bOfA.has()).toBeFalsy();
-        await bOfA.insert({})
+        await bOfA.insertKey({})
         expect(await bOfA.has()).toBeTruthy();
     });
 
     it("of data key", async () => {
-        const aKey = await ADS.insert({});
+        const aKey = await ADS.insertKey({});
 
         const bOfA = BDS.of("oneBToOneA", aKey);
 
@@ -136,7 +167,7 @@ export function DataSourceTests(
         const bOfAOfHello = bOfA.of("bText", "bHello");
         expect(await bOfAOfHello.has()).toBeFalsy();
 
-        const bOfAOfHelloKey = await bOfAOfHello.insert({});
+        const bOfAOfHelloKey = await bOfAOfHello.insertKey({});
         expect(await bOfAOfHello.has()).toBeTruthy();
 
         const bOfAOfWorld = bOfA.of("bText", "bWorld");
@@ -147,7 +178,7 @@ export function DataSourceTests(
         const cOfbOfAOfHello = cOfbOfA.of("cText", "cHello");
         expect(await cOfbOfAOfHello.has()).toBeFalsy();
 
-        const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insert({});
+        const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insertKey({});
 
 
         expect(await cOfbOfAOfHello.has()).toBeTruthy();
@@ -167,20 +198,21 @@ export function DataSourceTests(
     })
 
     it('children', async () => {
-        const rootKey = await ADS.insert({});
-        const rootChildren = ADS.at("manyAToManyA", rootKey);
-        expect(await rootChildren.count()).toEqual(0);
+
+        const rootKey = await ADS.insertKey({});
+        const aChildAtA = ADS.at("manyAToManyA", rootKey);
+        expect(await aChildAtA.count()).toEqual(0);
 
         const childKeys = [
-            await ADS.insert({}),
-            await ADS.insert({}),
+            await ADS.insertKey({}),
+            await ADS.insertKey({}),
         ]
-        await rootChildren.add(childKeys);
-        expect(await rootChildren.count()).toEqual(2);
+        await aChildAtA.add(childKeys);
 
-
-        expect((await rootChildren.items()).map(child => child.$key))
+        expect(await aChildAtA.count()).toEqual(2);
+        expect((await aChildAtA.items()).map(child => child.$key))
             .toEqual(arrayContaining(childKeys))
-    })
+    });
+
 }
 

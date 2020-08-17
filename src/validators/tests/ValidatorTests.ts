@@ -1,12 +1,11 @@
 import {inspect} from "util";
+import {Validator} from "../Validator";
 import {$array} from "../ArrayValidator";
 import {$number} from "../NumberValidator";
 import {$object} from "../ObjectValidator";
 import {$optional} from "../OptionalValidator";
 import {$string} from "../StringValidator";
 
-
-import {Validator} from "../Validator";
 
 testValidator($number({min: 5, max: 10}), {
     valid: [5, 6, 9, 10],
@@ -21,28 +20,28 @@ testValidator($string({pattern: /^[a-z]*$/}), {
     valid: ["hello"],
     invalid: ["Hello"]
 });
-testValidator($array({length: {min: 1, max: 3}, of: $number}), {
+testValidator($array({length: {min: 1, max: 3}, of: $number()}), {
     valid: [[1], [1, 2, 3]],
     invalid: [[], [1, 2, 3, 4], ["1"]]
 })
-testValidator($array, {
+testValidator($array(), {
     valid: [[]],
     invalid: [{}, 1, false]
 });
-testValidator($string, {
+testValidator($string(), {
     valid: ["hello"],
     invalid: [{}, 1]
 })
-testValidator($number, {
+testValidator($number(), {
     valid: [1, 2.3],
     invalid: [{}, "1"]
 });
-testValidator($object, {
+testValidator($object(), {
     valid: [[], {}],
     invalid: [1, "hello"]
 });
 
-testValidator($object({xs: $string, xi: $optional($number)}), {
+testValidator($object({xs: $string(), xi: $optional($number())}), {
     valid: [
         {xs: "hello", xi: 1},
         {xs: "hello"}
@@ -58,13 +57,13 @@ function testValidator(validator: Validator<any>, {valid, invalid}: {
     describe(`expect ${inspect(validator)}`, () => {
         valid?.forEach(value => {
             it(`match to ${inspect(value)}`, () => {
-                expect(() => Validator(validator).assert(value)).not.toThrow();
+                expect(() => validator.assert(value)).not.toThrow();
             })
         })
 
         invalid?.forEach(value => {
             it(`not match to ${inspect(value)}`, () => {
-                expect(() => Validator(validator).assert(value)).toThrow();
+                expect(() => validator.assert(value)).toThrow();
             })
         })
     })

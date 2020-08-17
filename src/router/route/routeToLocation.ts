@@ -4,11 +4,11 @@ import {AnyRouter} from "../Router";
 import {RouterLocation} from "../location/RouterLocation";
 import {Route} from "./Route";
 
-export function toLocation<T extends AnyRouter>(this: Route<T>): RouterLocation<T> {
+export function routeToLocation<T extends AnyRouter>(this: Route<T>): RouterLocation<T> {
     return createLocation({
-        parent: this.parent?.toLocation(),
+        parent: <any> this.parent?.toLocation(),
         router: this.router,
         instance: this.instance,
-        params: this.router.context?.pack(this.context) ?? {}
+        params: this.router.contextAdapter?.pack(this.context) ?? {}
     })
 }

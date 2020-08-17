@@ -1,42 +1,10 @@
 import {mergeObject} from "../common/object/mergeObject";
 import {omit} from "../common/object/omit";
-import {HasKeys, If, IsNever, Pluck} from "../common/typings";
+import {HasKeys, If} from "../common/typings";
 import {DataExp} from "../json-exp/DataExp";
 import {DataOrder} from "./DataOrder";
 import {DataUnionChildren, DataUnionChildrenKey} from "./DataUnion";
-import {MergeDataSelection} from "./MergeDataSelection";
 import {IfRelationToMany, IfRelationToOne, NonRelationKeys, RelationKeys, RelationTypeAt} from "./Relation";
-
-
-type _FlatObject<S, SWithoutChildren, SChildren, SRelations> =
-    Omit<S, "children" | "relations">
-    & (IsNever<SChildren> extends true ? {} : {
-    children: {
-        [K in keyof SChildren]: MergeDataSelection<//
-            FlatDataSelection<SWithoutChildren>,
-            FlatDataSelection<SChildren[K]>
-            //
-            >
-    }
-})
-    & (IsNever<SRelations> extends true ? {} : {
-    relations: {
-        [K in keyof SRelations]:
-        SRelations[K] extends (null | undefined | boolean) ?
-            SRelations[K] :
-            FlatDataSelection<SRelations[K]>
-    }
-})
-    ;
-
-export type FlatDataSelection<S> =
-    IsNever<S> extends true ? never :
-        S extends (null | undefined | boolean) ? S :
-
-            _FlatObject<S,
-                Omit<S, "children">,
-                Pluck<S, 'children'>,
-                Pluck<S, 'relations'>>;
 
 
 type _PossibleKeysToPick<T> =

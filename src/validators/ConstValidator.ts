@@ -1,8 +1,8 @@
 import {inspect} from "util";
-import {BaseValidator} from "./BaseValidator";
+import {Validator} from "./Validator";
 import {Validation} from "./Validation";
 
-export class ConstValidator<T> extends BaseValidator<T> {
+export class ConstValidator<T> extends Validator<T> {
     constructor(
         public value: T
     ) {
@@ -11,7 +11,7 @@ export class ConstValidator<T> extends BaseValidator<T> {
 
     validate(value: any): Validation {
         if (value !== this.value)
-            return () => `${inspect(value)} will be ${this.inspect()}.`
+            return () => `${inspect(value)} is not ${this.inspect()}.`
     }
 
     inspect(): string {

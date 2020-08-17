@@ -1,6 +1,7 @@
 import {Connection} from "typeorm";
 import {getConnection} from "typeorm";
 import {entries} from "../../common/object/entries";
+import {hasKeys} from "../../common/object/hasKeys";
 import {Lazy} from "../../common/patterns/lazy";
 import {Type} from "../../common/typings";
 import {useQueryBuilderExp} from "../../typeorm/exp/useQueryBuilderExp";
@@ -168,6 +169,8 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
 
     async updateAll(keys: string[], values: DataValues<T>): Promise<number> {
+        if(!hasKeys(values))
+            return 0;
         let affectedRows = 0;
         const {row, relationKeys} = this._createEntityValues(values, false);
         const entityMetadata = this.entityCursor.repository.metadata;

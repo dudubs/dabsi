@@ -1,27 +1,27 @@
 import {cloneObject} from "../common/object/cloneObject";
 import {Awaitable, Pluck} from "../common/typings";
-import {AnyRouter, Router, RouterParams} from "./Router";
-
+import {AnyRouter, Router} from "./Router";
+import {RouterParams} from "./routerParam";
 
 declare module "./Router" {
-    interface Router<Init> {
-        withContext: typeof _withContext;
+    interface Router {
 
-        context?: RouterContext<any, any>;
+        withContext: typeof routerWithContext;
 
+        contextAdapter?: RouterContextAdapter<any, any>;
     }
-
 }
 
-Router.withContext = _withContext;
+Router.withContext = routerWithContext;
 
-export type RouterContext<Params, Context> = {
+export type RouterContextAdapter<Params, Context> = {
     load: RouterContextLoader<Params, Context>;
     pack: RouterContextPacker<Params, Context>;
 };
 
-export type RouterContextOf<Router extends AnyRouter> =
-    Pluck<Router, 'contextType', undefined>
+export type RouterContextType<Router> =
+    Pluck<Router, 'contextType'>;
+
 
 export type RouterContextLoader<Params, Context> =
     (params: Params) => Awaitable<Context>;
@@ -33,11 +33,11 @@ export type RouterWithContext<Context> = {
     contextType: Context
 }
 
-function _withContext<Router extends AnyRouter, Context>(
+function routerWithContext<Router extends AnyRouter, Context>(
     this: Router,
     load: RouterContextLoader<RouterParams<Router>, Context>,
     pack: RouterContextPacker<RouterParams<Router>, Context>
 ): Router & RouterWithContext<Context> {
-    return <any>cloneObject(this, {context: {load, pack}})
+    return <any>cloneObject(this, {contextAdapter: {load, pack}})
 }
 

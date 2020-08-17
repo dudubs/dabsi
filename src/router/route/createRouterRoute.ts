@@ -1,20 +1,20 @@
-import {UndefinedArgs, UndefinedObject} from "../../common/typings";
-import {createRoute} from "./createRoute";
-import {Route, RouteProps} from "./Route";
+import {OptionalObjectArg} from "../../common/typings";
+import {RouterContextType} from "../context";
+import {RouterInstanceType} from "../instance";
 import {AnyRouter} from "../Router";
-import {RouterContextOf} from "../context";
+import {createRoute} from "./createRoute";
+import {Route} from "./Route";
 
 
-export type UndefinedRouteProps<Router extends AnyRouter> = {
-    context: RouterContextOf<Router>,
-    instance: keyof Router['instanceType'] extends never ?
-        undefined : Router['instanceType']
+export type RouteProps<Router extends AnyRouter> = {
+    instance: RouterInstanceType<Router>,
+    context: RouterContextType<Router>
 };
 
 
 export function createRouterRoute<T extends AnyRouter>(
     router: T,
-    ...[props]: UndefinedArgs<UndefinedObject<UndefinedRouteProps<T>>>
+    ...[props]: OptionalObjectArg<RouteProps<T>>
 ): Route<T> {
     return <any>createRoute({
         parent: undefined,

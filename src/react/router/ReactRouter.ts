@@ -1,12 +1,12 @@
 import {History} from "history";
 import {ReactNode} from "react";
 import {WeakMapFactory} from "../../common/map/mapFactory";
-import {definedAt} from "../../common/object/definedAt";
 import {AnyRouter, Route, Router, RouterWithRouterType, RouterWithRouteType} from "../../router";
 import {RouterWithInstanceType} from "../../router/instance";
 import {RouterWithOptions} from "../../router/options";
-import {withHooks} from "../utils/withHooks";
-import {getRoutePath} from "./getRoutePath";
+import {createReactRouterRendererHook} from "./createReactRouterRendererHook";
+import {reactRouterPush} from "./reactRouterPush";
+import {reactRouterRender} from "./reactRouterRender";
 
 export type ReactRouterRendererProps<T extends AnyRouter> = {
     children: ReactNode,
@@ -25,19 +25,20 @@ export type ReactRouterRenderer<T extends AnyReactRouter> =
 
 export type AnyReactRoute = Route<AnyReactRouter>;
 
-export type ReactRouter = Router &
+export type ReactRouter =
+    Router &
     RouterWithRouterType<{
-        render: typeof _render;
+        render: typeof reactRouterRender;
         renderIndex: ReactRouterRenderHook;
         renderDefault: ReactRouterRenderHook;
         renderContainer: ReactRouterRenderHook;
     }> &
     RouterWithRouteType<{
-        push: typeof _pushRoute;
+        push: typeof reactRouterPush;
         history: History | null
     }> &
-    RouterWithInstanceType<{}>
-    & RouterWithOptions<{ hasIndex: boolean }>
+    RouterWithInstanceType<{}> &
+    RouterWithOptions<{ hasIndex: boolean }>
     ;
 
 
@@ -49,40 +50,24 @@ export const ReactRouterRenderers =
 
 export const ReactRouter: ReactRouter = Router
     .extend({
-        render: _render,
-        renderIndex: ReactRouterRenderHook(router => router.isIndex,
-            router => router.configure({hasIndex: true})),
-        renderDefault: ReactRouterRenderHook(router => router.isDefault),
-        renderContainer: ReactRouterRenderHook(router => router.isContainer),
+        render: reactRouterRender,
+        renderIndex: createReactRouterRendererHook(router => router.isIndex,
+            router => router.configure({hasIndex: true})
+        ),
+        renderDefault: createReactRouterRendererHook(
+            router => router.isDefault
+        ),
+        renderContainer: createReactRouterRendererHook(
+            router => router.isContainer
+        ),
 
     }).extendRoute({
-        push: _pushRoute,
+        push: reactRouterPush,
         history: null
-    }).config({hasIndex: false})
-
-export function _pushRoute<Router extends AnyReactRouter>(this: Route<Router>): void {
-    definedAt(this, "history").push(getRoutePath(<any>this));
-}
-
-function _render<T extends AnyReactRouter>(this: T, callback: ReactRouterRenderer<T>): T {
-    ReactRouterRenderers(this).push(callback);
-    return this;
-}
+    })
+    .config({hasIndex: false})
 
 export type ReactRouterRenderHook = <T extends AnyReactRouter>(
     this: T,
     callback: (props: ReactRouterRendererProps<T>) => ReactNode) => T;
-
-export function ReactRouterRenderHook(
-    toRender: (props: ReactRouterRendererProps<any>) => boolean,
-    getRouter?: (router: AnyReactRouter) => AnyReactRouter
-): ReactRouterRenderHook {
-    return function <T extends AnyReactRouter>(this: T, callback): any {
-        return (getRouter ? getRouter(this) : this).render(
-            withHooks(
-                props => toRender(props) ? callback(props) : props.children
-            )
-        )
-    };
-}
 

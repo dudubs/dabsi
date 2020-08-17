@@ -1,8 +1,6 @@
 import {inspect} from "util";
-import {isEmptyObject} from "../common/object/isEmptyObject";
-import {BaseValidator} from "./BaseValidator";
+import {Validator} from "./Validator";
 import {Validation} from "./Validation";
-import {validator} from "./Validator";
 
 
 export type NumberValidatorOptions = {
@@ -11,7 +9,7 @@ export type NumberValidatorOptions = {
 };
 
 
-export class NumberValidator extends BaseValidator<number> {
+export class NumberValidator extends Validator<number> {
 
     constructor(
         public options: NumberValidatorOptions
@@ -40,11 +38,8 @@ export class NumberValidator extends BaseValidator<number> {
 }
 
 
-export function $number(options: NumberValidatorOptions): NumberValidator {
+export function $number(options: NumberValidatorOptions = {}): NumberValidator {
     return new NumberValidator(options)
 }
-
-$number[validator] = new NumberValidator({});
-$number[inspect.custom] = () => `$number`
 
 

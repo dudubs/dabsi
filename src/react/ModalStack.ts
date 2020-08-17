@@ -77,10 +77,11 @@ export class ModalStack extends Component<{ children?: ReactNode }> {
     }
 
 
+    // TODO: return
     pick<T>(
-        component: ComponentType<OnPickProp<T>>,
-    ): Promise<T> {
-        return new Promise<T>(resolve => {
+        component: ComponentType<PickerProps<T>>,
+    ): Promise<T|undefined> {
+        return new Promise<T|undefined>(resolve => {
             const key = RandomId();
             this.items = this.items.set(key, new ModalStackItem<T>(
                 () => createElement(component, {
@@ -92,6 +93,7 @@ export class ModalStack extends Component<{ children?: ReactNode }> {
                 key,
                 () => {
                     this.pop(key)
+                    resolve();
                 },
                 value => {
                     resolve(value)
@@ -128,7 +130,7 @@ export class ModalStack extends Component<{ children?: ReactNode }> {
 }
 
 
-export type OnPickProp<T> = { onPick?(value: T) };
+export type PickerProps<T> = { onPick?(value: T) :void};
 
 export function useModalStack() {
     return useDefinedContext(ModalStackContext);

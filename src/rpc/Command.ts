@@ -1,8 +1,8 @@
 import {Awaitable} from "../common/typings";
-import {RPC, RPCHandler} from "./RPC";
+import {Rpc, RpcHandler} from "./Rpc";
 
 export type Command<U extends any[], R> =
-    RPC<RPCHandler<U, R>,
+    Rpc<RpcHandler<U, R>,
         (...args: U) => Promise<R>,
         (...args: U) => Awaitable<R>>
 

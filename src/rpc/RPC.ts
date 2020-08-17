@@ -1,37 +1,49 @@
-export type RPCHandler<Payload = any, Result = any> =
-    (payload: Payload) => Promise<Result>;
+export type RpcHandler<Payload = any, Result = any> = {
+    (payload: Payload): Promise<Result>;
+}
 
-export type RPCHandlerPayload<T extends RPCHandler> =
-    T extends RPCHandler<infer U> ? U : never;
+export type RpcHandlerPayload<T extends RpcHandler> =
+    T extends RpcHandler<infer U> ? U : never;
 
 
-export type RPC<Handler extends RPCHandler, Connection, Adapter> = {
+export type Rpc<Handler extends RpcHandler, Connection, Config> = {
 
-    connect(handle: Handler): Connection;
+    connect(handler: Handler): Connection;
 
-    handle(adapter: Adapter): Handler;
+    handle(config: Config): Handler;
 
 };
 
 
-export type AnyRpc = RPC<any, any, any>;
+export type AnyRpc = Rpc<any, any, any>;
+
+export type RpcPayloadOf<T extends AnyRpc> =
+    RpcHandlerOf<T> extends RpcHandler<infer U, any> ? U : never;
+
+export type RpcResultOf<T extends AnyRpc> =
+    RpcHandlerOf<T> extends RpcHandler<any,infer U> ? U : never;
 
 export type RpcHandlerOf<T extends AnyRpc> =
-    T extends RPC<infer U, any, any> ? U : never;
+    T extends Rpc<infer U, any, any> ? U : never;
 
 export type RpcConnectionOf<T extends AnyRpc> =
-    T extends RPC<any, infer U, any> ? U : never;
+    T extends Rpc<any, infer U, any> ? U : never;
 
-export type RpcAdapterOf<T extends AnyRpc> =
-    T extends RPC<any, any, infer U> ? U : never;
+export type RpcConfigOf<T extends AnyRpc> =
+    T extends Rpc<any, any, infer U> ? U : never;
 
 
-
-export function connectToAdapter<T extends AnyRpc>(
+export function connectToRpc<T extends AnyRpc>(
     rpc: T,
-    adapter: RpcAdapterOf<T>
-) {
+    config: RpcConfigOf<T>
+):RpcConnectionOf<T> {
     return rpc.connect(rpc.handle(
-        adapter
+        config
     ))
+}
+
+export class RpcError extends Error {
+    constructor(public reason: any) {
+        super();
+    }
 }

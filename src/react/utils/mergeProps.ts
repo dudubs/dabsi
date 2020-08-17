@@ -4,11 +4,12 @@ import {setRef} from "./setRef";
 
 
 export const $merge = "$merge";
-export const $override = "$override";
+
+
 
 
 export type PropMerger<T> =
-    Record<typeof $merge, (value: T) => T> | Record<typeof $override, T>;
+    Record<typeof $merge, (value: T) => T>;
 
 function mergeCallbacks(prevCallback: Function, nextCallback: Function) {
     return function () {
@@ -35,9 +36,6 @@ export function mergeProp(prevValue, nextValue) {
         const merger = nextValue?.[$merge];
         if (typeof merger === "function") {
             return merger.call(nextValue, prevValue)
-        }
-        if ($override in nextValue) {
-            return nextValue[$override];
         }
     }
     const prevType = typeof prevValue;

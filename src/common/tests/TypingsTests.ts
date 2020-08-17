@@ -1,4 +1,4 @@
-import {HasKeys, IsNever, Pluck} from "../typings";
+import {HasKeys, IsAny, IsNever, OptionalObjectArg, Pluck} from "../typings";
 
 ((_) => {
 })(() => {
@@ -19,11 +19,38 @@ import {HasKeys, IsNever, Pluck} from "../typings";
         test<HasKeys<{ a }>>(false);
 
 
+    }
+
+    // OptionalObjectArg
+    {
+        test<OptionalObjectArg<never>>([]);
+
+        test<OptionalObjectArg<{ x: never }>>([]);
+
+        test<OptionalObjectArg<{ x: never, y: number }>>([{y:1}]);
 
     }
     // Pluck
     {
         test<IsNever<Pluck<never, "">>>(true);
+
+    }
+
+
+    // IsAny
+    {
+
+        test<IsAny<any>>(true);
+
+        test<IsAny<unknown>>(false);
+
+        test<IsAny<never>>(false);
+
+        test<IsAny<string>>(false);
+
+        test<IsAny<object>>(false);
+
+        test<IsAny<{}>>(false);
 
     }
     // IsNever

@@ -19,10 +19,16 @@ const util = ((r, m) => {
 
 inspect.custom = util.inspect.custom ?? Symbol();
 
-export function inspect(...args):string {
+export function inspect(...args): string {
+    const [value] = args;
+
+    if(typeof value?.inspect==="function") {
+        return value.inspect();
+    }
+
     if (util)
         return util.inspect.apply(util, args)
-    const [value] = args;
+
     const method = value?.[inspect.custom];
     if (method)
         return method.apply(value)

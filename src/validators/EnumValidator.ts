@@ -1,9 +1,9 @@
 import {inspect} from "util";
 import {IndexedSeq} from "../immutable2";
-import {BaseValidator} from "./BaseValidator";
+import {Validator} from "./Validator";
 import {Validation} from "./Validation";
 
-export class EnumValidator<T> extends BaseValidator<T> {
+export class EnumValidator<T> extends Validator<T> {
     constructor(public options: Set<string | number>) {
         super();
     }

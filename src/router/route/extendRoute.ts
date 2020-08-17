@@ -1,12 +1,12 @@
 import {cloneObject} from "../../common/object/cloneObject";
-import {mergePropertyDescriptors} from "../../common/object/mergePropertyDescriptors";
+import {mergeDescriptors} from "../../common/object/mergeDescriptors";
 import {AnyRouter} from "../Router";
 import {RouterWithRouteType} from "./Route";
 
-export function extendRoute<T extends AnyRouter, U extends object>(this: T,
-                                                                   routeType: U): T & RouterWithRouteType<U> {
+export function routerExtendRoute<T extends AnyRouter, U extends object>(this: T,
+                                                                         routeType: U): T & RouterWithRouteType<U> {
     return <any>cloneObject(this, {
         routeType:
-            <any>mergePropertyDescriptors(this.routeType, routeType)
+            <any>mergeDescriptors(this.routeType, routeType)
     })
 }

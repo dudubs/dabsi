@@ -1,8 +1,8 @@
 import {Handler} from "express";
-import {RPCHandler} from "./RPC";
+import {RpcHandler} from "./Rpc";
 
-export function ExpressRPCHandler<T extends RPCHandler>(
-    handler: RPCHandler
+export function RpcExpressHandler<T extends RpcHandler>(
+    handler: RpcHandler
 ): Handler {
     return async (req, res) =>
         res.json(await handler(req.body))

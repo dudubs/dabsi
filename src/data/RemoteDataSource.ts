@@ -1,5 +1,5 @@
 import {AwaitableType} from "../common/typings";
-import {RPC} from "../rpc/RPC";
+import {Rpc} from "../rpc/Rpc";
 import {DataCursor, EmptyDataCursor} from "./DataCursor";
 import {DataBaseRow, DataRow} from "./DataRow";
 import {DataSource, DataValues} from "./DataSource";
@@ -64,7 +64,7 @@ export type RemoteDataSourceHandler<T> =
     ) =>
         Promise<AwaitableType<ReturnType<DataSource<T>[Method]>>>;
 
-export type RemoteDataSource<T> = RPC<RemoteDataSourceHandler<T>,
+export type RemoteDataSource<T> = Rpc<RemoteDataSourceHandler<T>,
     RemoteDataSourceConnection<T>,
     DataSource<T>>;
 
@@ -80,7 +80,7 @@ export function RemoteDataSource<T>(): RemoteDataSource<T> {
                 if (!allowedMethods[method]) {
                     throw new Error(`"${method}" is not allowed method.`)
                 }
-                return (<any>(source.withCursor(cursor)[method]))(...args);
+                return await (<any>(source.withCursor(cursor)[method]))(...args);
             }
         }
     }

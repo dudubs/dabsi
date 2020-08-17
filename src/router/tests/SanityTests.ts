@@ -10,15 +10,15 @@ testm(__filename, () => {
         .route("child", Router.route("sub-child"));
 
 
-    it('expected to self-extendRoute', () => {
+    it('expected to self-router', () => {
         expect(TestRouter.hello).toEqual(hello);
     });
 
-    it('expected to child-extendRoute', () => {
+    it('expected to child-router', () => {
         expect(TestRouter.at("child").hello).toEqual(hello);
     })
 
-    it('expected to sub-child-extendRoute', () => {
+    it('expected to sub-child-router', () => {
         expect(TestRouter.at("child").at("sub-child").hello).toEqual(hello);
     });
 

@@ -3,22 +3,24 @@
 
 import {History} from "history";
 import {ReactNode, useEffect, useMemo, useState} from "react";
-import {UndefinedProp} from "../../common/typings";
-import {AnyRoute, createRoute, Route} from "../../router";
+import {IfNever} from "../../common/typings";
+import {createRoute, Route} from "../../router";
+import {RouterContextType} from "../../router/context";
 
 import {routeByPath} from "../../router/route/routeByPath";
-import {RouterContextOf} from "../../router/context";
 import {useDefinedContext} from "../utils/hooks/useDefinedContext";
 import {mergeCallback} from "../utils/mergeCallback";
 import {provide} from "../utils/provide";
-import {AnyReactRouter} from "./ReactRouter";
+import {AnyReactRoute, AnyReactRouter} from "./ReactRouter";
 import {ReactRouterLocation} from "./ReactRouterLocation";
 
-export type ReactRouterContainerProps<T extends AnyReactRouter> = {
+export type ReactRouterContainerProps<T extends AnyReactRouter> =
+    {
     history: History;
     router: T;
     children?: ReactNode;
-} & UndefinedProp<"context", RouterContextOf<T>>;
+    context: IfNever<RouterContextType<T>, null>
+};
 
 
 export function useReactRouterLocation(): ReactRouterLocation {
@@ -61,7 +63,7 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
             try {
                 const [lastPath, route] = await routeByPath(initRoute, path);
                 if (id === counter) setLocation({
-                    route,
+                    route: route as AnyReactRoute,
                     path: lastPath
                 })
             } catch (error) {

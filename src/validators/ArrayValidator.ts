@@ -1,9 +1,9 @@
 import {inspect} from "util";
 import {isEmptyObject} from "../common/object/isEmptyObject";
-import {BaseValidator} from "./BaseValidator";
-import {NumberValidatorOptions, NumberValidator} from "./NumberValidator";
+import {Validator} from "./Validator";
+import {NumberValidator, NumberValidatorOptions} from "./NumberValidator";
 import {Validation} from "./Validation";
-import {isValidator, validator, Validator} from "./Validator";
+import {isValidator} from "./Validator";
 
 
 export type ArrayValidatorOptions<T> = {
@@ -12,7 +12,7 @@ export type ArrayValidatorOptions<T> = {
     of?: Validator<T>
 };
 
-export class ArrayValidator<T = any> extends BaseValidator<T[]> {
+export class ArrayValidator<T = any> extends Validator<T[]> {
 
     constructor(
         public options: ArrayValidatorOptions<T>
@@ -33,9 +33,8 @@ export class ArrayValidator<T = any> extends BaseValidator<T[]> {
             return () => `Because length: ${result()}`;
 
         if (this.options.of) {
-            const validator = Validator(this.options.of);
             for (const [index, item] of (<any[]>value).entries()) {
-                const result = validator.validate(item)
+                const result = this.options.of.validate(item)
                 if (result)
                     return () => `At #${index}: ${result()}`
             }
@@ -48,18 +47,12 @@ export class ArrayValidator<T = any> extends BaseValidator<T[]> {
 }
 
 
-export function $array<T>(
-    validatorOrOptions: Validator<T> | ArrayValidatorOptions<T>): ArrayValidator<T> {
+export function $array<T>(): ArrayValidator<any>
+export function $array<T>(validatorOrOptions: Validator<T> | ArrayValidatorOptions<T>): ArrayValidator<T>
+export function $array<T>(validatorOrOptions = {}) {
     if (isValidator(validatorOrOptions)) {
         return $array({of: validatorOrOptions})
     }
     return new ArrayValidator(validatorOrOptions)
 }
 
-$array.validate = value => {
-    if (!Array.isArray(value))
-        return () => `Expected to array.`
-}
-$array.inspect = () => `Array<any>`
-$array[validator] = new ArrayValidator({})
-$array[inspect.custom] = () => "$array"

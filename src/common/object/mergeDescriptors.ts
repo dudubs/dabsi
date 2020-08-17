@@ -1,4 +1,4 @@
-export function mergePropertyDescriptors(
+export function mergeDescriptors(
     ...objects:object[]
 ):object {
     const base = {};

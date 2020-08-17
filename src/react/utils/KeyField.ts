@@ -24,7 +24,7 @@ export function KeyField<T>(
         case "function":
             return keyField(item);
         default:
-            throw new TypeError('Invalid KeyField.');
+            throw new TypeError('ValidateReason KeyField.');
     }
 }
 

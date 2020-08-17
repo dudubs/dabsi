@@ -1,52 +1,42 @@
-import {Assign, HasKeys, IsNever, Pluck} from "../common/typings";
+import {Assign, HasKeys, Merge, Pluck} from "../common/typings";
 
 
 type _MergeRelation<L, R> =
-    L extends boolean? R :
+    L extends boolean ? R :
         R extends boolean ? L :
             _MergeObject<L, R> ;
 
 
-type _MergeRelations<L, R> =
-    HasKeys<L> extends false ? R :
-        HasKeys<R> extends false ? L :
-            Assign<L, {
-                [K in keyof R]:
-                _MergeRelation<//
-                    Pluck<L, K, undefined>,
-                    R[K]>
-            }>;
+type _MergeRelations<L, R> = Merge<L, R, {
+    [K in keyof R]:
+    _MergeRelation<//
+        Pluck<L, K, undefined>,
+        R[K]>
+}>
 
+type _MergeChildren<L, R> = Merge<L, R, {
+    [RK in keyof R]:
+    _Merge<//
+        Pluck<L, RK, undefined>, // L ChildOf K
+        R[RK]
+        ///
+        >
+}>;
 
-type _MergeChildren<L, R> =
-    HasKeys<L> extends false ? R :
-        HasKeys<R> extends false ? L :
-            Assign<L, {
-                [RK in keyof R]:
-                _Merge<//
-                    Pluck<L, RK, undefined>, // L ChildOf K
-                    R[RK]
-                    ///
-                    >
-            }>;
-
-export type _MergePicks<L, R> =
+type _MergePicks<L, R> =
     L extends ReadonlyArray<infer LK> ?
         R extends ReadonlyArray<infer RK> ?
             ReadonlyArray<LK | RK> :
             ReadonlyArray<LK> :
-        R extends ReadonlyArray<infer RK> ? ReadonlyArray<RK> : undefined;
+        R extends ReadonlyArray<infer RK> ?
+            ReadonlyArray<RK> : undefined;
 
-type _MergeFields<L, R> =
-    HasKeys<L> extends false ? R :
-        HasKeys<R> extends false ? L :
-            Assign<L, R>;
 
-type __MergeObject<L, R> = Assign<Assign<L, R>, {
+type _MergeObject<L, R> = Merge<L, R, {
     pick: _MergePicks<//
         Pluck<L, 'pick', undefined>,
         Pluck<R, 'pick', undefined>>,
-    fields: _MergeFields<//
+    fields: Assign<//
         Pluck<L, 'fields'>,
         Pluck<R, 'fields'>>,
     relations: _MergeRelations<//
@@ -56,7 +46,6 @@ type __MergeObject<L, R> = Assign<Assign<L, R>, {
         Pluck<L, 'children'>,
         Pluck<R, 'children'>>
 }>;
-type _MergeObject<L, R> = __MergeObject<L, R>;
 
 type _Merge<L, R> =
     HasKeys<L> extends false ? R :

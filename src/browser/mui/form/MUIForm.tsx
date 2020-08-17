@@ -86,7 +86,7 @@ export function MuiForm(
     </>;
 
 
-    return <Form{...mergeProps(props, {
+    return <Form {...mergeProps(props, {
 
         ref: form,
         onChange: event => {

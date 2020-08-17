@@ -2,17 +2,23 @@ import {inspect} from "util";
 import {entries} from "../common/object/entries";
 import {isEmptyObject} from "../common/object/isEmptyObject";
 import {ExtractKeys, PartialKeys} from "../common/typings";
-import {BaseValidator} from "./BaseValidator";
+import {Validator} from "./Validator";
+import {$const} from "./ConstValidator";
 import {OptionalValidator} from "./OptionalValidator";
 
 import {Validation} from "./Validation";
-import {validator, Validator, ValidatorOf} from "./Validator";
+import {isValidator} from "./Validator";
 
 
-export type KeyToValidator = Record<string, Validator<any>>;
+type ConstValidator = number | string | boolean;
+
+
+type KeyValidator = Validator<any> | ConstValidator;
+
+export type KeyToValidator = Record<string, KeyValidator>;
 
 export class ObjectValidator<T>
-    extends BaseValidator<T> {
+    extends Validator<T> {
 
     constructor(
         public keyToValidator: KeyToValidator
@@ -25,9 +31,14 @@ export class ObjectValidator<T>
             return () => `Is null.`
         if (typeof obj !== "object")
             return () => `Expected to object.`;
-        for (const [key, validator] of entries<Validator<any>>(this.keyToValidator)) {
+        for (let [key, validator] of entries(this.keyToValidator)) {
+
+            if (!isValidator(validator)) {
+                validator = $const(validator)
+            }
+
             const value = obj[key];
-            const result = Validator(validator).validate(value);
+            const result = validator.validate(value);
             if (result)
                 return () => `At "${key}": ${result()}`
         }
@@ -38,11 +49,13 @@ export class ObjectValidator<T>
     }
 }
 
-export function $object<T extends KeyToValidator>(
-    keyToValidator: T
-): ObjectValidator<PartialKeys<{ [K in keyof T]: ValidatorOf<T[K]> },ExtractKeys<T, OptionalValidator<any>>>> {
-    return new ObjectValidator(keyToValidator)
+export function $object<T extends KeyToValidator = {}>(
+    keyToValidator?: T): ObjectValidator<PartialKeys<{
+    [K in keyof T]:
+    T[K] extends Validator<infer U> ? U : T[K]
+}, ExtractKeys<T, OptionalValidator<any>>>> {
+    return new ObjectValidator(keyToValidator ?? {})
 }
 
-$object[validator] = new ObjectValidator<{}>({});
-$object[inspect.custom] = () => `$object`
+// $object[customValidator] = new ObjectValidator<{}>({});
+// $object[inspect.custom] = () => `$object`

@@ -23,7 +23,8 @@ export type DataTableAction<T> = {
     title: LangNode;
     type?: DataTableActionType
     handleKeys?(keys: string[], table: AnyDataTable<T>): Awaitable;
-    handleItem?(item: DataRow<T>): Awaitable;
+    handleItem?(item: DataRow<T>,
+                table: DataTable<T, any>): Awaitable;
     danger?: boolean
     visible?: (item: DataRow<T>) => boolean
     disabled?: (item: DataRow<T>) => boolean
@@ -52,7 +53,7 @@ export type DataTableColumnProps<T> = {
     sortable?: boolean;
     title?: LangNode;
     empty?: LangNode;
-    render?(props: { item: DataRow<T>, data: any }): ReactNode;
+    render?(props: { item: DataRow<T>, data: any },table:DataTable<T, any>): ReactNode;
     renderContainer?(children: ReactNode): ReactNode
 };
 
@@ -95,7 +96,8 @@ export abstract class DataTable<T,
         if (action.handleItem) {
             await action.handleItem?.(
                 await this.source
-                    .getOrFail(keys[0])
+                    .getOrFail(keys[0]),
+                this
             );
         }
         await action.handleKeys?.(keys, this);

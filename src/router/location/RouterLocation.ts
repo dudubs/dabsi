@@ -1,37 +1,33 @@
-import {UndefinedIfNoKeys} from "../../common/typings";
-import {AnyRouter, Router, UndefinedRouterParams} from "../Router";
-import {RouterInstanceOf} from "../instance";
-import {at} from "./at";
-import {extendLocation} from "./extendLocation";
+import {RouterInstanceType} from "../instance";
+import {AnyRouter, Router} from "../Router";
+import {RouterParams} from "../routerParam";
+import {locationAt} from "./locationAt";
+import {routerExtendLocation} from "./routerExtendLocation";
 
 
 declare module "../Router" {
     interface Router {
-        locationType: { at: typeof at; };
-        extendLocation: typeof extendLocation;
+        locationType: {
+            at: typeof locationAt
+        };
+        extendLocation: typeof routerExtendLocation;
     }
 }
-declare module "../at" {
-    interface IRouterAt<T> {
-        locationType: T['locationType'];
-    }
-}
+Router.locationType = {at: locationAt};
+Router.extendLocation = routerExtendLocation;
 
 
-export type RouterLocation<T extends AnyRouter> = T['locationType'] & T['instanceType'] & {
-    at: typeof at;
-    router: T,
-    params: UndefinedRouterParams<T>
-    instance: RouterInstanceOf<T>;
+export type RouterLocation<Router extends AnyRouter> =
+    & Router['locationType']
+    & {
+    router: Router,
+    params: RouterParams<Router>
+    instance: Router['instanceType'];
 }
 
 
 export type RouterLocationProps<T extends AnyRouter> = {
-    params: UndefinedRouterParams<T>,
-    instance: UndefinedIfNoKeys<RouterInstanceOf<T>>
+    params: RouterParams<T>,
+    instance: RouterInstanceType<T>
 };
-
-
-Router.extendLocation = extendLocation;
-Router.locationType = {at: at};
 

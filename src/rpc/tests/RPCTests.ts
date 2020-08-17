@@ -1,5 +1,5 @@
 import {Command} from "../Command";
-import {ExpressRPCHandler} from "../ExpressRPCHandler";
+import {RpcExpressHandler} from "../RpcExpressHandler";
 import {Service} from "../Service";
 import {ExpressTester} from "./ExpressTests";
 
@@ -18,7 +18,7 @@ testm(__filename, () => {
     it('command', async () => {
 
         ExpressTester.setExpressHandler(
-            ExpressRPCHandler(
+            RpcExpressHandler(
                 TestCommand.handle((a, b) => a + b)
             )
         );
@@ -32,7 +32,7 @@ testm(__filename, () => {
 
     it('service', async () => {
         ExpressTester.setExpressHandler(
-            ExpressRPCHandler(TestService.handle({
+            RpcExpressHandler(TestService.handle({
                 test: (a, b) => a + b
             }))
         );

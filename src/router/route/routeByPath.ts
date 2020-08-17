@@ -1,13 +1,13 @@
 import {entries} from "../../common/object/entries";
-import {Route} from "../index";
-import {AnyRoute} from "./Route";
 import {AnyRouter} from "../Router";
 import {getNextPath} from "../utils/getNextPath";
+import {Route} from "./Route";
+import {anyRouteAt} from "./routeAt";
 
-export async function routeByPath<T extends AnyRouter>(
-    route: Route<T>,
+export async function routeByPath<Router extends AnyRouter = AnyRouter>(
+    route: Route<Router>,
     path: string
-): Promise<[string, Route<T>]> {
+): Promise<[string, Route<Router>]> {
     const {router: {children}, router} = route;
     const [name, pathAfterName] = getNextPath(path);
     // console.log({name, pathAfterName});
@@ -29,7 +29,8 @@ export async function routeByPath<T extends AnyRouter>(
         [value, pathAfterParams] = getNextPath(pathAfterParams);
         params[key] = parse(value)
     }
-    const context: any = await childRouter.context?.load(params);
-    return await routeByPath((route as AnyRoute)
-        .at(name, context), pathAfterParams);
+    const context: any = await childRouter.contextAdapter?.load(params);
+
+    return await routeByPath<Router>(
+        anyRouteAt<Router>(route, name, context), pathAfterParams);
 }

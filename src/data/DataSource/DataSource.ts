@@ -272,6 +272,14 @@ export abstract class DataSource<T> {
         })
     }
 
+    pick<T, Fields extends DataFields<T>>(this: DataSource<T>,
+                                          fields: Fields):
+        DataSource<DataFieldsRow<T, Fields>> {
+        return <any>this.select({
+            pick: [],
+            fields
+        })
+    }
 
     addFields<T, Fields extends DataFields<T>>(
         this: DataSource<T>,

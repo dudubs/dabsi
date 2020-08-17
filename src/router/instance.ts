@@ -1,25 +1,29 @@
-import {UndefinedIf} from "../common/typings";
+import {HasKeys} from "../common/typings";
 import {AnyRouter, Router} from "./Router";
 
 
 declare module "./Router" {
+
+    interface RouterProps {
+        instanceType: any;
+    }
+
     interface Router {
+
         instanceType: {};
         extendInstance: typeof extendInstance;
     }
 }
-
-// Router
 
 Router.extendInstance = extendInstance;
 
 
 export type RouterWithInstanceType<U> = { instanceType: U };
 
-export type RouterInstanceOf<Router extends AnyRouter> =
-    UndefinedIf<Router['instanceType'], never>;
+export type RouterInstanceType<Router extends AnyRouter> =
+    HasKeys<Router['instanceType']> extends true ? Router['instanceType'] : never;
 
-function extendInstance<T extends AnyRouter>(this: T):
+export function extendInstance<T extends AnyRouter>(this: T):
     <U extends object>() => T & RouterWithInstanceType<U> {
     return () => <any>this;
 }

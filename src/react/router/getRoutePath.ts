@@ -3,7 +3,7 @@ import {keys} from "../../common/object/keys";
 import {AnyRoute} from "../../router";
 
 export const getRoutePath = WeakMapFactory((route: AnyRoute): string => {
-    const params = route.router.context?.pack(route.context) ?? {};
+    const params = route.router.contextAdapter?.pack(route.context) ?? {};
     let path = '';
 
     if (route.name) {
@@ -20,5 +20,6 @@ export const getRoutePath = WeakMapFactory((route: AnyRoute): string => {
     const parentPath = getRoutePath(route.parent);
     if (parentPath === '/')
         return path;
+
     return `${parentPath}${path}`
 })

@@ -112,7 +112,7 @@ function getInverseRelationName(
         (relationType === "oneToOne") || (relationType === "manyToMany");
 
     if (isOwner && !isManyToManyOrOneToOne)
-        throw new Error('Invalid property name: ' + relationInfo.name)
+        throw new Error('ValidateReason property name: ' + relationInfo.name)
 
     if (isManyToManyOrOneToOne) {
         return fromType + toName + 'To' + toType + fromName

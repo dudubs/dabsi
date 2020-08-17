@@ -6,8 +6,8 @@ export type Relation<T = {}> = T & { [Relation]?: true };
 
 
 type RelationType<T> =
-    IfRelationToOne<T, T>
-    | IfRelationToMany<T, Pluck<T, number>>
+    IfRelationToOne<T, T extends Relation<infer U> ? U : never>
+    | IfRelationToMany<T, T extends Relation<infer U>[] ? U : never>
 
 export type RelationTypeAt<T, K extends RelationKeys<T>> =
     RelationType<Required<T>[K]>;

@@ -86,7 +86,7 @@ export type DataMappedExpTypes<T> = {
 
     $length: DataExp<T>;
 
-    $join: [DataExp<T>[], string];
+    $join: readonly [readonly DataExp<T>[], string];
 
     $concat: DataExp<T>[];
 
@@ -124,7 +124,7 @@ export  type HasExp<T> = RelationToManyKeys<T> | Union<{
 }>;
 
 type RelationAtExp<T, K extends RelationKeys<T>> =
-    DataExp<RelationTypeAt<T, K>>;
+    DataExp<Required<RelationTypeAt<T, K>>>;
 // DataExp<RelationTypeAt<T, K>>;
 
 
@@ -142,7 +142,7 @@ export type AsExp<T> = T extends//
     }> : never;
 
 
-export type DataExpType<T, E extends DataExp<T>> =
+export type DataExpType<T, E> =
     E extends keyof T ? T[E] : any;
 
 export type DataMappedExp<T> = Union<{
@@ -162,15 +162,15 @@ export type ObjectDataExp<T> =
     ArrayDataExp<T>;
 
 export type ArrayDataExp<T> =
-    [Parameter]
+    readonly [Parameter]
 
     // compare exp to parameter
-    | [DataExp<T>, CompareToParameter<Parameter>]
+    | readonly [DataExp<T>, CompareToParameter<Parameter>]
 
     // compare between two expressions
-    | [DataExp<T>, CompareOperator, DataExp<T>]
+    | readonly[DataExp<T>, CompareOperator, DataExp<T>]
     // compare one expression to many expressions
-    | [DataExp<T>, "$in" | "$notIn", DataExp<T>[]]
+    | readonly[DataExp<T>, "$in" | "$notIn", DataExp<T>[]]
     ;
 
 

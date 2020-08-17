@@ -1,4 +1,5 @@
 import {HasKeys, IsNever, Pluck} from "../common/typings";
+import {BaseType, WithBaseType} from "./BaseType";
 import {DataFieldsRow} from "./DataFields";
 import {
     DataTypeKey,
@@ -47,8 +48,12 @@ type _Relations<T, S, SRelations> =
 
         };
 
-export type __Row<T, S> =
-    (Omit<_Pick<T, S>, RelationKeys<T> | DataUnionChildrenKey>)
+type NoSelectedChildren<T> = T extends DataUnionChildren<any> ? Pick<T, DataUnionChildrenKey> : {};
+
+type __Row<T, S> =
+    & (Omit<_Pick<T, S>, RelationKeys<T> | DataUnionChildrenKey>)
+
+    & WithBaseType<T>
 
     & (S extends { fields: infer SFields } ?
     _Fields<T, SFields> : {})
@@ -58,10 +63,10 @@ export type __Row<T, S> =
 
     & (S extends { children: infer SChildren } ?
     _Children<T, S, SChildren, Omit<S, 'children'>, DataUnionChildrenOf<T>>
-    : T extends DataUnionChildren<any> ? Pick<T, DataUnionChildrenKey> : {})
+    : NoSelectedChildren<T>)
     ;
 
-export type _Row<T, S> =
+type _Row<T, S> =
     HasKeys<S> extends false ? T :
         __Row<T, S>;
 

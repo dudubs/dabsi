@@ -1,5 +1,5 @@
 import {SymbolMap} from "../common/map/SymbolMap";
-import {Validation} from "../validators/Validation";
+import {assertValidation} from "../validators/assertValidation";
 import {ValidationError} from "../validators/ValidationError";
 import {createStruct} from "./createStruct";
 import {Default} from "./Default";
@@ -79,7 +79,7 @@ export function createStructField(
     return assertValue(value);
 
     function assertValue(value) {
-        Validation.assert(validateField(field, value))
+        assertValidation(validateField(field, value))
         return value;
     }
 }

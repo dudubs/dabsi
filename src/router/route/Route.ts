@@ -1,61 +1,37 @@
-import {at} from "./at";
-import {extendRoute} from "./extendRoute";
-import {loadAt} from "./loadAt";
-import {stack} from "./stack";
-import {toLocation} from "./toLocation";
+import {RouterContextType} from "../context";
 import {AnyRouter, Router} from "../Router";
-import {RouterContextOf} from "../context";
-import {RouterInstanceOf} from "../instance";
+import {routerExtendRoute} from "./extendRoute";
+import {routeAt} from "./routeAt";
+import {routeLoadAt} from "./routeLoadAt";
+import {routeStack} from "./routeStack";
+import {routeToLocation} from "./routeToLocation";
 
 declare module "../Router" {
+
+    interface RouterProps {
+        routeType: any;
+    }
+
     interface Router {
         routeType: {
             parent: AnyRoute | undefined;
-            at: typeof at,
-            loadAt: typeof loadAt,
-            toLocation: typeof toLocation,
-            stack: typeof stack;
+            at: typeof routeAt,
+            loadAt: typeof routeLoadAt,
+            toLocation: typeof routeToLocation,
+            stack: typeof routeStack;
             name: string | undefined;
             root: AnyRoute;
         };
-        extendRoute: typeof extendRoute;
+        extendRoute: typeof routerExtendRoute;
     }
 }
-
-declare module "../at" {
-    interface IRouterAt<T> {
-        routeType: T['routeType'];
-    }
-}
-
-
-export type AnyRoute = Route<AnyRouter>;
-
-export type Route<T extends AnyRouter = Router> =
-    T['routeType'] & T['instanceType'] & {
-    router: T;
-    context: RouterContextOf<T>;
-    parent?: Route<AnyRouter> | undefined;
-    name: string | undefined;
-    root: T['routeType'];
-    instance: RouterInstanceOf<T>
-};
-
-
-export type RouteProps<T extends AnyRouter> = {
-    instance: RouterInstanceOf<T>,
-    context: RouterContextOf<T>
-};
-
-
-export type RouterWithRouteType<U extends object> = { routeType: U };
 
 
 Router.routeType = {
-    at,
-    loadAt,
-    toLocation,
-    stack,
+    at: routeAt,
+    loadAt: routeLoadAt,
+    toLocation: routeToLocation,
+    stack: routeStack,
     parent: undefined,
     name: undefined,
     get root() {
@@ -63,6 +39,23 @@ Router.routeType = {
     }
 };
 
-Router.extendRoute = extendRoute;
+Router.extendRoute = routerExtendRoute;
 
 
+export type AnyRoute = Route<AnyRouter>;
+
+
+export type Route<Router extends AnyRouter> =
+    & Router['routeType']
+    & Router['instanceType']
+    & {
+    router: Router;
+    context: RouterContextType<Router>
+    parent?: Route<AnyRouter> | undefined;
+    name: string | undefined;
+    root: Router['routeType'];
+    instance: Router['instanceType']
+};
+
+
+export type RouterWithRouteType<U extends object> = { routeType: U };

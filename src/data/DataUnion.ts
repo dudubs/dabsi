@@ -1,5 +1,6 @@
 import {mapObject} from "../common/object/mapObject";
 import {Constructor, HasKeys, If, IsNever} from "../common/typings";
+import {BaseType} from "./BaseType";
 import {MapRelation, RelationKeys, RelationTypeAt, RelationTypeAt as _RelationTypeAt} from "./Relation";
 
 
@@ -19,7 +20,7 @@ export type DataUnionChildrenOf<T> =
     T extends DataUnionChildren<infer U> ? HasKeys<T> extends true ? U : never : never;
 
 export type DataUnionChildKey<T> =
-    IsNever<DataUnionChildrenOf<T>> extends true ? never:string& keyof DataUnionChildrenOf<T>;
+    IsNever<DataUnionChildrenOf<T>> extends true ? never : string & keyof DataUnionChildrenOf<T>;
 
 
 type _BaseChild<T> = Constructor<T>;
@@ -46,17 +47,20 @@ export type DataUnionClass<Base,
     {
         unionChildren: Children,
         unionRelations: Relations
+
         unionType: new () => Base;
 
     };
 
 
 export type DataUnion<T, Children, Relations> =
-    _AssignRelations<T, Relations> &
-    DataUnionChildren<{
-        [K in keyof Children]:
-        _AssignRelations<Children[K], Relations>
-    }>;
+    & BaseType<T>
+    & _AssignRelations<T, Relations>
+    & DataUnionChildren<{
+    [K in keyof Children]:
+    & BaseType<Children[K]>
+    & _AssignRelations<Children[K], Relations>
+}>;
 
 
 type _MapInstances<T> = {

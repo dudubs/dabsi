@@ -1,13 +1,13 @@
-import {Validation} from "./Validation";
+import {ValidateReason} from "./Validation";
 
 export class ValidationError {
     constructor(
-        public validation: NonNullable<Validation>
+        public reason: ValidateReason
     ) {
 
     }
 
     toString() {
-        return this.validation()
+        return this.reason()
     }
 }

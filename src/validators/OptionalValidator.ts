@@ -1,8 +1,8 @@
-import {BaseValidator} from "./BaseValidator";
+import {inspect} from "../logging";
 import {Validation} from "./Validation";
 import {Validator} from "./Validator";
 
-export class OptionalValidator<T> extends BaseValidator<T | undefined> {
+export class OptionalValidator<T> extends Validator<T | undefined> {
     constructor(public validator: Validator<T>) {
         super();
 
@@ -10,12 +10,12 @@ export class OptionalValidator<T> extends BaseValidator<T | undefined> {
 
     validate(value: any): Validation {
         if (value !== undefined) {
-            return Validator(this.validator).validate(value)
+            return this.validator.validate(value)
         }
     }
 
     inspect() {
-        return `optional ${Validator(this.validator).inspect()}`
+        return `optional ${inspect(this.validator)}`
     }
 }
 

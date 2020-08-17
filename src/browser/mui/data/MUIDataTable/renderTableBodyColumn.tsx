@@ -16,7 +16,7 @@ export function renderTableBodyColumn(
     if (column.empty && (data == null)) {
         children = column.empty;
     } else {
-        children = column.render ? column.render({item, data}) : String(data);
+        children = column.render ? column.render({item, data},table) : String(data);
     }
 
     return <MuiTableColumn

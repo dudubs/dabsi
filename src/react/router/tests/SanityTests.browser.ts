@@ -87,7 +87,7 @@ testm(__filename, () => {
         const element = () => createElement(ReactRouterContainer, {
             router: r,
             history,
-            context: undefined,
+            context: null,
             children: createElement(ReactRouterContent)
         });
 

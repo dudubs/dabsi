@@ -13,7 +13,7 @@ import {Relation} from "../Relation";
 
 
 let randomId = 0;
-
+// TODO: rename to DBase -> DEntity, EBase -> EEntity
 @Entity()
 @TableInheritance({column: "dType"})
 export class DBase {

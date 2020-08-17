@@ -1,10 +1,10 @@
 import {Route} from "../../router";
-import {AnyReactRouter} from "./ReactRouter";
+import {AnyReactRoute, AnyReactRouter} from "./ReactRouter";
 
 export class ReactRouterLocation {
 
     constructor(
-        public route: Route<AnyReactRouter>,
+        public route: AnyReactRoute,
         public path: string
     ) {
     }

@@ -11,6 +11,7 @@ import {DataSource} from "../../../data/DataSource";
 
 import {DataExp} from "../../../json-exp/DataExp";
 import {Lang} from "../../../localization/Lang";
+import {PickerProps} from "../../../react/ModalStack";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";
 import {AfterMountView, View} from "../../../react/view/View";
 import {ViewState} from "../../../react/view/ViewState";
@@ -18,11 +19,10 @@ import {MuiDialog, MuiDialogProps} from "../form/MuiDialog";
 import {ReactWrapper, wrap} from "./wrap";
 
 
-export type MuiDataPickerProps<T> = {
+export type MuiDataPickerProps<T> = PickerProps<DataRow<T>> & {
     source: DataSource<T>;
 
     pageSize?: number;
-    onPick?(item: DataRow<T>): void
 
     getTextFilter?(text: string): DataExp<T>;
 

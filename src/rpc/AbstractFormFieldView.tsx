@@ -1,7 +1,8 @@
+import {ReactElement, ReactNode} from "react";
 import {Awaitable} from "../common/typings";
-import {AfterMountView, View} from "../react/view/View";
+import {AfterMountView, BeforeUnmountView, View} from "../react/view/View";
 import {ViewState} from "../react/view/ViewState";
-import {AnyFormField, FormFieldDataOf, FormFieldElementOf} from "./FormField";
+import {AnyFormField, FormFieldType} from "./FormField";
 import {FormFieldView, FormFieldViewProps} from "./FormFieldView";
 
 export abstract class AbstractFormFieldView<T extends AnyFormField,
@@ -9,31 +10,39 @@ export abstract class AbstractFormFieldView<T extends AnyFormField,
     extends View<P>
     implements FormFieldView<T> {
 
-    abstract getData(): Awaitable<FormFieldDataOf<T>>;
+    abstract getCheckedData(): Awaitable<FormFieldType<T>['Data']>;
 
-    @ViewState() error: any;
+    @ViewState() error: FormFieldType<T>['Error'] | null = null;
 
-    @ViewState() isLoading = false;
+    @ViewState() isLoadingElement = false;
 
-    reject(error: any) {
+    rejectError(error: FormFieldType<T>['Error'] | null) {
         this.error = error;
     }
 
-    abstract setElement(element: FormFieldElementOf<T>): void;
+    abstract setElement(element: FormFieldType<T>['Element'] | null): void;
 
-    abstract createEmptyElement(): FormFieldElementOf<T>;
+    @AfterMountView()
+    mountField() {
+        this.props.fieldRef?.(this);
+    }
+
+    @BeforeUnmountView()
+    unmountField() {
+        this.props.fieldRef?.(null);
+    }
+
 
     @AfterMountView()
     async reset() {
         if (this.props.noDefault) {
-            this.setElement(this.createEmptyElement());
+            this.setElement(null);
             return;
         }
 
-        this.isLoading = true;
-        this.setElement(await this.props.connection.getElement()
-            ?? this.createEmptyElement());
-        this.isLoading = false;
+        this.isLoadingElement = true;
+        this.setElement(await this.props.connection.getElement() ?? null);
+        this.isLoadingElement = false;
     }
 
 }

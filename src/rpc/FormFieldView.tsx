@@ -1,27 +1,33 @@
+import {ReactElement, ReactNode} from "react";
 import {Awaitable} from "../common/typings";
-import {AnyFormField, FormFieldDataOf, FormFieldElementOf} from "./FormField";
-import {RpcConnectionOf} from "./Rpc";
+import {AnyFormField, FormFieldType} from "./FormField";
+import {RpcConnectionType} from "./Rpc";
 
 
 export type FormFieldViewProps<T extends AnyFormField> = {
 
-    connection: RpcConnectionOf<T>
+    connection: RpcConnectionType<T>
 
+    // TODO: <FormLoadDefaultContext> || <LoadDefault>
     noDefault?: boolean;
 
-    onChange?(data: FormFieldDataOf<T>): void;
+    onChange?(data: FormFieldType<T>['Data']): void;
 
-    fieldRef?: (fieldView: FormFieldView<T>) => void;
+    fieldRef?: (fieldView: FormFieldView<T> | null) => void;
+
 
 };
 
 
 export type FormFieldView<T extends AnyFormField> = {
-    reject(error: any): void
 
-    getData(): Awaitable<FormFieldDataOf<T>>;
+    rejectError(error: FormFieldType<T>['Error'] | null): void
 
-    setElement(element: FormFieldElementOf<T>): void
+    getCheckedData(): Awaitable<FormFieldType<T>['Data']>;
+
+
+    setElement(element: FormFieldType<T>['Element']): void
+
 
     reset(): void;
 };

@@ -6,37 +6,54 @@ export type RpcHandlerPayload<T extends RpcHandler> =
     T extends RpcHandler<infer U> ? U : never;
 
 
-export type Rpc<Handler extends RpcHandler, Connection, Config> = {
+type TRpc<Handler extends RpcHandler, Connection, Config> = {
+    Handler: Handler
+    Connection: Connection,
+    Config: Config
+};
 
-    connect(handler: Handler): Connection;
+type TAnyRpc = TRpc<any, any, any>;
 
-    handle(config: Config): Handler;
+export type Rpc<T extends TAnyRpc> = {
+
+    TRpc?: T;
+
+    connect(handler: T['Handler']): T['Connection'];
+
+    handle(config: T['Config']): T['Handler'];
 
 };
 
 
-export type AnyRpc = Rpc<any, any, any>;
+export type RpcType<T extends AnyRpc> =
+    T extends Rpc<infer U> ? U : never;
 
-export type RpcPayloadOf<T extends AnyRpc> =
-    RpcHandlerOf<T> extends RpcHandler<infer U, any> ? U : never;
+export type AnyRpc = Rpc<{
+    Handler: RpcHandler,
+    Connection: any,
+    Config: any,
+}>;
 
-export type RpcResultOf<T extends AnyRpc> =
-    RpcHandlerOf<T> extends RpcHandler<any,infer U> ? U : never;
+export type RpcPayloadType<T extends AnyRpc> =
+    RpcHandlerType<T> extends RpcHandler<infer U, any> ? U : never;
 
-export type RpcHandlerOf<T extends AnyRpc> =
-    T extends Rpc<infer U, any, any> ? U : never;
+export type RpcResultType<T extends AnyRpc> =
+    RpcHandlerType<T> extends RpcHandler<any, infer U> ? U : never;
 
-export type RpcConnectionOf<T extends AnyRpc> =
-    T extends Rpc<any, infer U, any> ? U : never;
+export type RpcHandlerType<T extends AnyRpc> =
+    RpcType<T>['Handler']
 
-export type RpcConfigOf<T extends AnyRpc> =
-    T extends Rpc<any, any, infer U> ? U : never;
+export type RpcConnectionType<T extends AnyRpc> =
+    RpcType<T>['Connection']
+
+export type RpcConfigType<T extends AnyRpc> =
+    RpcType<T>['Config']
 
 
 export function connectToRpc<T extends AnyRpc>(
     rpc: T,
-    config: RpcConfigOf<T>
-):RpcConnectionOf<T> {
+    config: RpcConfigType<T>
+): RpcConnectionType<T> {
     return rpc.connect(rpc.handle(
         config
     ))

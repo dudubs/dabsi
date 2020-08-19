@@ -6,7 +6,7 @@ import {ViewState} from "../../../react/view/ViewState";
 import {AbstractFormFieldView} from "../../../rpc/AbstractFormFieldView";
 import {FormDataField} from "../../../rpc/fields/FormDataField";
 import {FormDataFieldViewProps} from "../../../rpc/fields/FormDataFieldView";
-import {FormFieldDataOf, FormFieldElementOf} from "../../../rpc/FormField";
+import {FormFieldType} from "../../../rpc/FormField";
 
 export type MuiFormDataFieldViewProps<T> = FormDataFieldViewProps<T> & {};
 
@@ -21,18 +21,15 @@ export class MuiFormDataFieldView<T>
 
     @ViewState() selected?: { $key: string, label: string };
 
-    getData(): Awaitable<FormFieldDataOf<FormDataField<T>>> {
+    getCheckedData(): Awaitable<FormFieldType<FormDataField<T>>['Data']> {
         return this.selected?.$key ?? null;
     }
 
-    setElement(element: FormFieldElementOf<FormDataField<T>>) {
-        this.selected = element.default;
-        this.options = element.options;
+    setElement(element: FormFieldType<FormDataField<T>>['Element'] | null) {
+        this.selected = element?.default;
+        this.options = element?.options||[];
     }
 
-    createEmptyElement(): FormFieldElementOf<FormDataField<T>> {
-        return {options: []}
-    }
 
     renderView(): React.ReactNode {
         return <Select>

@@ -8,7 +8,7 @@ import {ViewState} from "../react/view/ViewState";
 import {Form} from "./Form";
 import {AnyFormField, AnyFormFields, FormError} from "./FormField";
 import {FormFieldView, FormFieldViewProps} from "./FormFieldView";
-import {RpcConnectionOf} from "./Rpc";
+import {RpcConnectionType} from "./Rpc";
 
 export type FormViewFieldProps<T extends AnyFormField, FieldProps> = Partial<FieldProps> & {
     render: Renderer<FormFieldViewProps<T> & { key: string }>
@@ -19,7 +19,7 @@ type RendererOrFieldProps<T extends AnyFormField, FieldProps> =
     | FormViewFieldProps<T, FieldProps>;
 
 export type FormViewProps<F extends AnyFormFields, R, FieldProps> = {
-    connection: RpcConnectionOf<Form<F, R>>;
+    connection: RpcConnectionType<Form<F, R>>;
 
     fields: {
         [K in keyof F]: RendererOrFieldProps<F[K], FieldProps>
@@ -36,7 +36,7 @@ export class FormView<F extends AnyFormFields, R, FieldProps,
 
     @ViewState() error: any;
 
-    protected _fields: Record<string, FormFieldView<any>> = {};
+    protected _fields: Record<string, FormFieldView<any>|null> = {};
 
     get fields(): { [K in string & keyof F]?: FormFieldView<F[K]> } {
         return this._fields as any;
@@ -46,13 +46,13 @@ export class FormView<F extends AnyFormFields, R, FieldProps,
     async reset() {
         if (this.props.noDefault) {
             for (let field of values(this._fields)) {
-                field.reset();
+                field?.reset();
             }
             return;
         }
         const element = await this.props.connection.getElement();
         for (const [key, field] of entries(this._fields)) {
-            field.setElement(element[key]);
+            field?.setElement(element[key]);
         }
     }
 
@@ -63,10 +63,9 @@ export class FormView<F extends AnyFormFields, R, FieldProps,
 
         for (const [key, field] of entries(this._fields)) {
             try {
-                data[key] = await field.getData();
+                data[key] = await field?.getCheckedData();
             } catch (error) {
                 if (error instanceof FormError) {
-                    field.reject(error.reason);
                     hasErrors = true;
                     continue;
                 }
@@ -84,7 +83,7 @@ export class FormView<F extends AnyFormFields, R, FieldProps,
                 break;
             case "invalid":
                 for (const [key, field] of entries(this._fields)) {
-                    field.reject(result.reasons[key])
+                    field?.rejectError(result.reasons[key])
                 }
                 break;
             case "fail":

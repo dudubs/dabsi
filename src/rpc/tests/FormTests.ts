@@ -16,9 +16,6 @@ testm(__filename, () => {
         }), {
             fields: {
                 text: {
-                    async check(value: string): Promise<void> {
-                        checkedTextValue = value;
-                    }
                 }
             },
             async submit(value) {

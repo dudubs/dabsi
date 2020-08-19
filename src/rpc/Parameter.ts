@@ -1,15 +1,17 @@
-import {AnyRpc, Rpc, RpcConfigOf, RpcConnectionOf, RpcHandler, RpcPayloadOf, RpcResultOf} from "./Rpc";
+import {AnyRpc, Rpc, RpcConfigType, RpcConnectionType, RpcHandler, RpcPayloadType, RpcResultType} from "./Rpc";
 
 
-export type Parameter<D, V, R extends AnyRpc> = Rpc<//
-    RpcHandler<[D, RpcPayloadOf<R>], RpcResultOf<R>>
-    , {
+export type Parameter<D, V, R extends AnyRpc> = Rpc<{
+    Handler:
+        RpcHandler<[D, RpcPayloadType<R>], RpcResultType<R>>,
+    Connection: {
 
-    (data: D): RpcConnectionOf<R>
+        (data: D): RpcConnectionType<R>
 
-}, {
-    load(data: D): Promise<V>,
-    target: (value: V) => RpcConfigOf<R>
+    }, Config: {
+        load(data: D): Promise<V>,
+        target: (value: V) => RpcConfigType<R>
+    }
 }>;
 
 export function Parameter<D, V, T extends AnyRpc>(

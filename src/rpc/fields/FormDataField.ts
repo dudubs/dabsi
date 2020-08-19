@@ -3,35 +3,51 @@ import {DataSource} from "../../data/DataSource";
 import {RemoteDataSource} from "../../data/RemoteDataSource";
 import {DataExp} from "../../json-exp/DataExp";
 import {Command} from "../Command";
-import {FormField, FormFieldElementOf, FormFieldOptionsOf} from "../FormField";
+import {FormField, FormFieldType} from "../FormField";
 import {Service} from "../Service";
 
 
-export type FormDataField<T> = FormField<string | null, DataRow<T>,
-    Service<{
+export type FormDataField<T> = FormField<{
+
+    Data: string | null,
+
+    Value: DataRow<T>,
+
+    Remote: Service<{
         search: Command<[string], {
             count: number
             rows: DataRow<T>[]
         }>
 
         source: RemoteDataSource<{ label: string }>
-    }>, {
-    textFields?: DataExp<T>[];
-}, {
-    source: DataSource<T>
-    maxSearchResults?: number
-    labelField: DataExp<T>
+    }>,
 
-    default?: DataRow<T>;
+    Options: {
+        textFields?: DataExp<T>[];
+    },
 
-}, {
-    default?: { label: string, $key: string },
-    options: ({ label: string, $key: string })[]
+    Config: {
+        source: DataSource<T>
+        maxSearchResults?: number
+        labelField: DataExp<T>
+
+        default?: DataRow<T>;
+
+    },
+
+    Element: {
+        default?: { label: string, $key: string },
+        options: ({ label: string, $key: string })[]
+    }
+
+    Error: null
+
+
 }>;
 
 
 export function FormDataField<T>(
-    options?: FormFieldOptionsOf<FormDataField<T>>
+    options?: FormFieldType<FormDataField<T>>['Options']
 ): FormDataField<T> {
     if (!options)
         options = {};
@@ -40,11 +56,14 @@ export function FormDataField<T>(
         options,
 
         remote: Service({
-            search: Command<[string], {}>(),
+            search: Command<[string], {
+                count: number
+                rows: DataRow<T>[]
+            }>(),
             source: RemoteDataSource<{ label: string }>()
         }),
 
-        async getElement(config): Promise<FormFieldElementOf<FormDataField<any>>> {
+        async getElement(config): Promise<FormFieldType<FormDataField<any>>['Element']> {
             const options = await config.source.pick({
                 label: config.labelField
             }).items();

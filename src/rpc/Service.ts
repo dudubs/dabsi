@@ -1,14 +1,13 @@
 import {entries} from "../common/object/entries";
 import {mapObject} from "../common/object/mapObject";
 import {Lazy} from "../common/patterns/lazy";
-import {AnyRpc, Rpc, RpcConfigOf, RpcConnectionOf} from "./Rpc";
+import {AnyRpc, Rpc, RpcConfigType, RpcConnectionType} from "./Rpc";
 
 export type ServiceCommands = Record<string, AnyRpc>;
-export const ServiceHandler = Symbol();
+
 
 export type ServiceConnection<Commands extends ServiceCommands> =
-    { [ServiceHandler]: ServiceHandler<Commands> } &
-    { [K in keyof Commands]: RpcConnectionOf<Commands[K]> };
+    { [K in keyof Commands]: RpcConnectionType<Commands[K]> };
 
 
 export type ServiceHandler<Commands extends ServiceCommands> =
@@ -17,15 +16,19 @@ export type ServiceHandler<Commands extends ServiceCommands> =
 
 export type ServiceConfig<Commands extends ServiceCommands> = {
     [K in keyof Commands]:
-    RpcConfigOf<Commands[K]>
+    RpcConfigType<Commands[K]>
 };
 
 export type Service<Commands extends ServiceCommands> =
-    Rpc<//
-        ServiceHandler<Commands>,
-        ServiceConnection<Commands>,
-        ServiceConfig<Commands>//
-        >
+    Rpc<{
+        Handler:
+            ServiceHandler<Commands>,
+        Connection:
+            ServiceConnection<Commands>,
+        Config:
+            ServiceConfig<Commands>
+
+    }>
     & ServiceConnection<Commands>
     & {
     commands: Commands
@@ -45,11 +48,6 @@ export function Service<Commands extends ServiceCommands>(commands: Commands):
 
     Class.handler = undefined;
 
-    Object.defineProperty(Class, ServiceHandler, {
-        get() {
-            return this.handler;
-        }
-    })
 
     Class.commnads = commands;
 
@@ -65,7 +63,6 @@ export function Service<Commands extends ServiceCommands>(commands: Commands):
                 })
             });
 
-        connection[ServiceHandler] = handler;
 
         return connection;
     }

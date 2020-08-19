@@ -1,14 +1,15 @@
 import {DataRow} from "../data/DataRow";
 import {DataSource} from "../data/DataSource";
-import {AnyRpc, Rpc, RpcConfigOf, RpcHandler, RpcPayloadOf, RpcResultOf} from "./Rpc";
+import {AnyRpc, Rpc, RpcConfigType, RpcHandler, RpcPayloadType, RpcResultType} from "./Rpc";
 
-export type DataParameter<T, R extends AnyRpc> =
-    Rpc<RpcHandler<[string, RpcPayloadOf<R>], RpcResultOf<R>>,
-        (key: string) => Promise<DataRow<T>>,
-        {
-            source: DataSource<T>
-            target: (row: DataRow<T>) => RpcConfigOf<R>
-        }>;
+export type DataParameter<T, R extends AnyRpc> = Rpc<{
+    Handler: RpcHandler<[string, RpcPayloadType<R>], RpcResultType<R>>,
+    Connection: (key: string) => Promise<DataRow<T>>,
+    Config: {
+        source: DataSource<T>
+        target: (row: DataRow<T>) => RpcConfigType<R>
+    }
+}>;
 
 export function DataParameter<T>():
     <R extends AnyRpc>(target: R) => DataParameter<T, R> {

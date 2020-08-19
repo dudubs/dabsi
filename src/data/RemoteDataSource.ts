@@ -64,9 +64,11 @@ export type RemoteDataSourceHandler<T> =
     ) =>
         Promise<AwaitableType<ReturnType<DataSource<T>[Method]>>>;
 
-export type RemoteDataSource<T> = Rpc<RemoteDataSourceHandler<T>,
-    RemoteDataSourceConnection<T>,
-    DataSource<T>>;
+export type RemoteDataSource<T> = Rpc<{
+    Handler: RemoteDataSourceHandler<T>,
+    Connection: RemoteDataSourceConnection<T>,
+    Config: DataSource<T>
+}>;
 
 export function RemoteDataSource<T>(): RemoteDataSource<T> {
     return {

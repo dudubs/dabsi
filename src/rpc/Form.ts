@@ -1,21 +1,13 @@
 import {entries} from "../common/object/entries";
 import {isEmptyObject} from "../common/object/isEmptyObject";
 import {mapObject} from "../common/object/mapObject";
-import {
-    AnyFormField,
-    AnyFormFields,
-    FormError,
-    FormFieldDataOf,
-    FormFieldElementOf,
-    FormFieldValueOf,
-    loadFormField
-} from "./FormField";
-import {AnyRpc, Rpc, RpcConfigOf, RpcConnectionOf, RpcHandler, RpcHandlerOf} from "./Rpc";
+import {AnyFormField, AnyFormFields, FormError, FormFieldType, loadFormFieldValue, TAnyFormField} from "./FormField";
+import {AnyRpc, Rpc, RpcConfigType, RpcConnectionType, RpcHandler, RpcHandlerType} from "./Rpc";
 
 
-type FormData<F extends AnyFormFields> = { [K in keyof F]: FormFieldDataOf<F[K]> };
-type FormElement<F extends AnyFormFields> = { [K in keyof F]: FormFieldElementOf<F[K]> };
-type FormValue<F extends AnyFormFields> = { [K in keyof F]: FormFieldValueOf<F[K]> };
+export type MapFormFields<F extends AnyFormFields,
+    P extends keyof TAnyFormField> =
+    { [K in keyof F]: FormFieldType<F[K]>[P] };
 
 type FormCheckResult =
     { type: "valid" }
@@ -28,38 +20,28 @@ type FormSubmitResult<R> =
 
 export type AnyForm = Form<any, any>;
 
-export type FormFieldsOf<T extends AnyForm> =
-    T extends Form<infer U, any> ? U : never;
 
-export type FormResultOf<T extends AnyForm> =
-    T extends Form<any, infer U> ? U : never;
 
 export type Form<F extends AnyFormFields, R> =
     { fields: F } &
-    Rpc<//
+    Rpc<{
+        Handler:
+            & RpcHandler<{ type: "check", data: MapFormFields<F, 'Data'> }, FormCheckResult>
+            & RpcHandler<{ type: "getElement" }, MapFormFields<F, 'Element'>>
+            & RpcHandler<{ type: "remote", name: string, payload: any }, any>
+            & RpcHandler<{ type: "submit", data: MapFormFields<F, 'Data'> }, FormSubmitResult<R>>,
+        Connection: {
+            fields: { [K in keyof F]: RpcConnectionType<F[K]> }
 
-        & RpcHandler<{ type: "check", data: FormData<F> }, FormCheckResult>
-        & RpcHandler<{ type: "getElement" }, FormElement<F>>
-        & RpcHandler<{ type: "remote", name: string, payload: any }, any>
-        & RpcHandler<{ type: "submit", data: FormData<F> }, FormSubmitResult<R>>,
-        {
+            submit(data: MapFormFields<F, 'Data'>): Promise<FormSubmitResult<R>>;
+            check(data: MapFormFields<F, 'Data'>): Promise<FormCheckResult>
 
-            // default(): FormData
-            fields: { [K in keyof F]: RpcConnectionOf<F[K]> }
-
-            submit(data: FormData<F>): Promise<FormSubmitResult<R>>;
-            check(data: FormData<F>): Promise<FormCheckResult>
-
-
-            getElement(): Promise<FormElement<F>>;
-        }, {
-
-        fields: { [K in keyof F]: RpcConfigOf<F[K]> }
-
-
-        submit?(value: FormValue<F>): Promise<R>;
-
-
+            getElement(): Promise<MapFormFields<F, 'Element'>>;
+        }
+        Config: {
+            fields: { [K in keyof F]: RpcConfigType<F[K]> }
+            submit?(value: MapFormFields<F, 'Value'>): Promise<R>;
+        }
     }>;
 
 
@@ -68,7 +50,7 @@ export function Form<R = any>():
     return <any>((fields: Record<string, AnyFormField>): AnyForm => {
         return {
             fields,
-            connect(handler: RpcHandlerOf<Form<any, any>>): RpcConnectionOf<Form<any, any>> {
+            connect(handler: RpcHandlerType<Form<any, any>>): RpcConnectionType<Form<any, any>> {
                 return {
                     fields: <any>mapObject(fields, (field: AnyRpc, name: string): any => {
                         return field.connect(async payload => {
@@ -86,10 +68,10 @@ export function Form<R = any>():
                     }
                 }
             },
-            handle(config: RpcConfigOf<Form<any, any>>): RpcHandlerOf<Form<any, any>> {
+            handle(config: RpcConfigType<Form<any, any>>): RpcHandlerType<Form<any, any>> {
 
                 const fieldNameToHandler:
-                    Record<string, RpcHandlerOf<AnyFormField>> = mapObject(fields, (field, name) => {
+                    Record<string, RpcHandlerType<AnyFormField>> = mapObject(fields, (field, name) => {
                     return field.handle(config.fields[name])
                 });
 
@@ -123,10 +105,12 @@ export function Form<R = any>():
                             const values = {};
                             const reasons = {};
 
-                            for (const [name, handler] of entries(fieldNameToHandler)) {
+                            for (const [name, field] of entries(fields)) {
+
                                 let value;
                                 try {
-                                    value = await handler({type: loadFormField, data: payload.data[name]});
+                                    value = await loadFormFieldValue(field.props, config.fields[name],
+                                        payload.data[name])
                                 } catch (error) {
                                     if (error instanceof FormError) {
                                         reasons[name] = error.reason;
@@ -134,7 +118,6 @@ export function Form<R = any>():
                                     }
                                     throw new Error()
                                 }
-                                values[name] = value;
                             }
 
                             if (!isEmptyObject(reasons)) {

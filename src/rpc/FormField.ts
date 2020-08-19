@@ -4,95 +4,99 @@ import {assertValidation} from "../validators/assertValidation";
 import {
     AnyRpc,
     Rpc,
-    RpcConfigOf,
-    RpcConnectionOf,
+    RpcConfigType,
+    RpcConnectionType,
     RpcError,
     RpcHandler,
-    RpcHandlerOf,
-    RpcPayloadOf,
-    RpcResultOf
+    RpcHandlerType,
+    RpcPayloadType,
+    RpcResultType
 } from "./Rpc";
 
-export type FormFieldCheckResult = { type: "valid" } | { type: "invalid", reason: any };
 
-export const loadFormField = Symbol();
-
-type FormFieldHandler<V, D, R extends AnyRpc, E> =
-    & RpcHandler<{ type: typeof loadFormField, data: D }, V>
-    & RpcHandler<{ type: "getElement" }, E>
-    & RpcHandler<{ type: "check", data: D }, FormFieldCheckResult>
-    & RpcHandler<{ type: "remote", payload: RpcPayloadOf<R> }, RpcResultOf<R>>
-
+type FormFieldHandler<T extends TAnyFormField> =
+    & RpcHandler<{ type: "getElement" }, T['Element']>
+    & RpcHandler<{ type: "check", data: T['Data'] }, T['Error'] | undefined>
+    & RpcHandler<{ type: "remote", payload: RpcPayloadType<T['Remote']> }, RpcResultType<T['Remote']>>
     ;
 
-type FormFieldConnection<V, D, R extends AnyRpc, E> = {
-    check(data: D): Promise<FormFieldCheckResult>
-    load(data: D): Promise<V>
 
-    remote: RpcConnectionOf<R>
+type FormFieldConnection<T extends TAnyFormField> = {
 
+    // CheckResult: { }
+    check(data: T['Data']): Promise<T['Error'] | undefined>
 
-    getElement(): Promise<E>
+    remote: RpcConnectionType<T['Remote']>
+    getElement(): Promise<T['Element']>
 };
 
 // TODO: R extends AnyRpc
-export type FormField<D, V, R extends AnyRpc, O, C, E> =
-    { options: O } &
-    Rpc<FormFieldHandler<V, D, R, E>,
-        FormFieldConnection<D, V, R, E>,
-        C>;
 
-export type AnyFormField = FormField<any, any, any, any, any, any>;
+export type TAnyFormField = TFormField<any, any, AnyRpc, any, any, any, any>;
+
+export type TFormField<Data,
+    Value,
+    Remote extends AnyRpc,
+    Options,
+    Config,
+    Element, Error> = {
+    Remote: Remote,
+    Data: Data,
+    Value: Value
+    Options: Options
+    Element: Element
+    Config: Config
+    Error: Error
+};
+
+export type FormField<T extends TAnyFormField> =
+    { props: FormFieldProps2<T> } &
+    Rpc<{
+        Handler: FormFieldHandler<T>,
+        Connection: FormFieldConnection<T>,
+        Config: T['Config']
+    }>;
+
+export type FormFieldType<T extends AnyFormField> =
+    T extends FormField<infer U> ? U : never;
+
+export type AnyFormField = FormField<any>;
 
 export type AnyFormFields = Record<string, AnyFormField>;
 
+type FormFieldProps2<T extends TAnyFormField> = {
 
-export type FormFieldDataOf<T extends AnyFormField> =
-    T extends FormField<infer U, any, any, any, any, any> ? U : never;
+    // TODO: remove
+    validate?(config: T['Config'], data: any): Validation;
+    validator?: Validator<T['Data']>;
 
-export type FormFieldValueOf<T extends AnyFormField> =
-    T extends FormField<any, infer U, any, any, any, any> ? U : never;
+    check?(config: T['Config'], value: T['Value']):
+        Awaitable<T['Error'] | undefined>;
+    load?(config: T['Config'], data: T['Data']): Promise<T['Value']>;
 
-export type FormFieldRemoteOf<T extends AnyFormField> =
-    T extends FormField<any, any, infer U, any, any, any> ? U : never;
+    remote: T['Remote'],
+    options: T['Options'],
 
-
-export type  FormFieldOptionsOf<T extends AnyFormField> =
-    T extends FormField<any, any, any, infer U, any, any> ? U : never;
-
-export type FormFieldConfigOf<T extends AnyFormField> =
-    T extends FormField<any, any, any, any, infer U, any> ? U : never;
-
-export type FormFieldElementOf<T extends AnyFormField> =
-    T extends FormField<any, any, any, any, any, infer U> ? U : never;
-
-
-type FormFieldProps<D, V, R extends AnyRpc, O, C, E> = {
-    check?(config: C, value: V): Promise<void>;
-    validate?(config: C, data: any): Validation;
-    validator?: Validator<D>;
-    load?(config: C, data: D): Promise<V>;
-    remote: R,
-    options: O,
-    getRemoteConfig?(config: C): RpcConfigOf<R>
-
-    getElement?(config: C): Awaitable<E>;
+    getRemoteConfig?(config: T['Config']): RpcConfigType<T['Remote']>
+    getElement?(config: T['Config']): Awaitable<T['Element']>;
 };
 
-export function FormField<D, V, R extends AnyRpc, O, C, E>(
-    props: FormFieldProps<D, V, R, O, C, E>
-): FormField<D, V, R, O, C, E> {
+export function FormField<Data, Value,
+    Remote extends AnyRpc,
+    Options,
+    Config, Element, Error>(
+    props: FormFieldProps2<TFormField<Data, Value, Remote, Options, Config, Element, Error>>
+): FormField<TFormField<Data, Value, Remote, Options, Config, Element, Error>> {
 
+    type T = FormField<TFormField<Data, Value, Remote, Options, Config, Element, Error>>;
 
     return {
-        options: props.options,
-        connect(handler: RpcHandlerOf<AnyFormField>): RpcConnectionOf<AnyFormField> {
+        props,
+        connect(handler: RpcHandlerType<T>):
+            RpcConnectionType<T> {
             return {
                 check(data) {
                     return handler({type: "check", data})
-                },
-                load(data) {
-                    return handler({type: loadFormField, data})
                 },
                 remote: props.remote.connect(payload => {
                     return handler({type: "remote", payload})
@@ -102,51 +106,25 @@ export function FormField<D, V, R extends AnyRpc, O, C, E>(
                 }
             }
         },
-        handle(config: C): RpcHandlerOf<AnyFormField> {
+        handle(config): RpcHandlerType<T> {
 
             const remoteHandler = props.remote?.handle(
                 props.getRemoteConfig?.(config)
             );
-
-            handler.config = config;
-
-            return handler
-
-            async function load(data) {
-                assertValidation(
-                    props.validator?.validate(data) ??
-                    props.validate?.(config, data)
-                );
-
-                const value = props.load ?
-                    await props.load(config, data) :
-                    data;
-                await props.check?.(config, value);
-                return value
-            }
-
-            async function handler(payload) {
+            return async (payload) => {
 
                 switch (payload.type) {
-                    case loadFormField:
-                        return load(payload.data);
                     case "getElement":
                         return props.getElement?.(config)
 
                     case "remote":
+                        if (!remoteHandler)
+                            throw new RpcError(`No remote`)
                         return remoteHandler(payload.payload);
 
                     case "check":
-                        try {
-                            await load(payload.data);
-
-                        } catch (err) {
-                            if (err instanceof FormError) {
-                                return {type: "invalid", reason: err.reason}
-                            }
-                            throw err;
-                        }
-                        return {type: "valid"};
+                        const value = await loadFormFieldValue(props, config, payload.data);
+                        return checkFormFieldValue(props, config, value);
                     default:
                         throw new Error(`Invalid payload type "${payload.type}".`)
                 }
@@ -163,3 +141,25 @@ export class FormError extends RpcError {
 
 }
 
+export async function checkFormFieldValue<T extends TAnyFormField>(
+    props: FormFieldProps2<T>,
+    config: T['Config'],
+    value: T['Value']
+): Promise<T['Error'] | undefined> {
+    return props.check?.(config, value)
+}
+
+export async function loadFormFieldValue<T extends TAnyFormField>(
+    props: FormFieldProps2<T>,
+    config: T['Config'],
+    data: T['Data']
+): Promise<T['Value']> {
+    assertValidation(
+        props.validator?.validate(data) ??
+        props.validate?.(config, data)
+    );
+
+    return props.load ?
+        await props.load(config, data) :
+        data;
+}

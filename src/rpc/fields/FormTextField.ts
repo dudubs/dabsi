@@ -3,28 +3,37 @@ import {FormField} from "../FormField";
 import {NoRpc} from "../NoRpc";
 
 
-export type FormTextField = FormField<string, string, NoRpc,
-    undefined | FormTextFieldOptions, null | {
-    check?(value: string): Awaitable<void>
-    default?: string|undefined
-}, string | undefined>;
+export type FormTextField<Error> = FormField<{
+
+    Error: "INVALID_PATTERN" | Error,
+
+    Data: string,
+    Value: string,
+    Remote: NoRpc,
+
+    Options: undefined | FormTextFieldOptions,
+    Config: null | {
+        default?: string | undefined
+        check?(text: string): Awaitable<Error|undefined>;
+    },
+    Element: string | undefined,
+
+}>
+    ;
 
 export type FormTextFieldOptions = {
     pattern?: RegExp,
     trim?: boolean
 };
 
-export function FormTextField(
+export function FormTextField<Error>(
     options: FormTextFieldOptions = {}
-): FormTextField {
+): FormTextField<Error> {
     return FormField({
         remote: NoRpc,
         options,
         getElement(config) {
             return config?.default
-        },
-        async check(config, value): Promise<void> {
-            await config?.check?.(value);
         },
         async load(config, data: string) {
             data = String(data);
@@ -32,6 +41,12 @@ export function FormTextField(
                 data = data.trim();
             }
             return data
+        },
+        check: async (config, value) => {
+            if (options.pattern && !options.pattern.test(value)) {
+                return "INVALID_PATTERN"
+            }
+            return config?.check?.(value)
         }
     })
 }

@@ -25,10 +25,14 @@ export type FormFieldView<T extends AnyFormField> = {
 
     getCheckedData(): Awaitable<FormFieldType<T>['Data']>;
 
-
     setElement(element: FormFieldType<T>['Element']): void
-
 
     reset(): void;
 };
 
+
+export class FormFieldViewError<T extends AnyFormField> extends Error {
+    constructor(public error: FormFieldType<T>['Error']) {
+        super();
+    }
+}

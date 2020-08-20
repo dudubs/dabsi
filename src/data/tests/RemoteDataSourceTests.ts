@@ -29,7 +29,6 @@ const RDSHandler = RpcExpressHandler(
 describe("RDS", () => {
     beforeEach(() => {
 
-
         ExpressTester.setExpressHandler(
             RDSHandler
         )

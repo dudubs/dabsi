@@ -11,7 +11,7 @@ export type FormDataField<T> = FormField<{
 
     Data: string | null,
 
-    Value: DataRow<T>,
+    Value: DataRow<T> | null,
 
     Remote: Service<{
         search: Command<[string], {
@@ -24,6 +24,7 @@ export type FormDataField<T> = FormField<{
 
     Options: {
         textFields?: DataExp<T>[];
+        required?: boolean
     },
 
     Config: {
@@ -40,7 +41,7 @@ export type FormDataField<T> = FormField<{
         options: ({ label: string, $key: string })[]
     }
 
-    Error: null
+    Error: "REQUIRED"
 
 
 }>;
@@ -52,8 +53,25 @@ export function FormDataField<T>(
     if (!options)
         options = {};
 
-    return FormField({
+    return  FormField({
         options,
+
+        check: (config, value) => {
+
+            if (typeof value !== "string") {
+                if (options?.required) {
+                    return "REQUIRED"
+                }
+                return;
+            }
+
+        },
+
+        load: (config, data) => {
+            if (typeof data === "string")
+                return config.source.getOrFail(data);
+            return null;
+        },
 
         remote: Service({
             search: Command<[string], {

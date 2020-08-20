@@ -5,9 +5,9 @@ import {values} from "../common/object/values";
 import {Renderer} from "../react/renderer";
 import {AfterMountView, View} from "../react/view/View";
 import {ViewState} from "../react/view/ViewState";
-import {Form} from "./Form";
-import {AnyFormField, AnyFormFields, FormError} from "./FormField";
-import {FormFieldView, FormFieldViewProps} from "./FormFieldView";
+import {Form, TForm, TFormArgs} from "./Form";
+import {AnyFormField, AnyFormFields} from "./FormField";
+import {FormFieldView, FormFieldViewError, FormFieldViewProps} from "./FormFieldView";
 import {RpcConnectionType} from "./Rpc";
 
 export type FormViewFieldProps<T extends AnyFormField, FieldProps> = Partial<FieldProps> & {
@@ -18,27 +18,28 @@ type RendererOrFieldProps<T extends AnyFormField, FieldProps> =
     Renderer<FormFieldViewProps<T>>
     | FormViewFieldProps<T, FieldProps>;
 
-export type FormViewProps<F extends AnyFormFields, R, FieldProps> = {
-    connection: RpcConnectionType<Form<F, R>>;
+export type FormViewProps<T extends TForm, FieldProps> = {
+    connection: RpcConnectionType<Form<T>>;
 
     fields: {
-        [K in keyof F]: RendererOrFieldProps<F[K], FieldProps>
+        [K in keyof T['Fields']]: RendererOrFieldProps<T['Fields'][K], FieldProps>
     }
 
     noDefault?: boolean
 
-    onSubmit?(result: R);
+    onSubmit?(result: T['Result']);
 
 };
 
-export class FormView<F extends AnyFormFields, R, FieldProps,
-    P extends FormViewProps<F, R, FieldProps>> extends View<P> {
+
+export class FormView<Fields extends AnyFormFields, Result, FieldProps,
+    P extends FormViewProps<TFormArgs<Fields, Result>, FieldProps>> extends View<P> {
 
     @ViewState() error: any;
 
-    protected _fields: Record<string, FormFieldView<any>|null> = {};
+    protected _fields: Record<string, FormFieldView<any> | null> = {};
 
-    get fields(): { [K in string & keyof F]?: FormFieldView<F[K]> } {
+    get fields(): { [K in string & keyof Fields]?: FormFieldView<Fields[K]> } {
         return this._fields as any;
     }
 
@@ -65,7 +66,7 @@ export class FormView<F extends AnyFormFields, R, FieldProps,
             try {
                 data[key] = await field?.getCheckedData();
             } catch (error) {
-                if (error instanceof FormError) {
+                if (error instanceof FormFieldViewError) {
                     hasErrors = true;
                     continue;
                 }
@@ -78,16 +79,13 @@ export class FormView<F extends AnyFormFields, R, FieldProps,
 
         const result = await this.props.connection.submit(data);
         switch (result.type) {
-            case "success":
+            case "result":
                 this.props.onSubmit?.(result.value);
                 break;
             case "invalid":
                 for (const [key, field] of entries(this._fields)) {
-                    field?.rejectError(result.reasons[key])
+                    field?.rejectError(result.error[key])
                 }
-                break;
-            case "fail":
-                this.error = result.reason;
                 break;
         }
     }

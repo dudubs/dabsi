@@ -5,31 +5,23 @@ import objectContaining = jasmine.objectContaining;
 
 testm(__filename, () => {
 
-    it('', async () => {
-
-        let checkedTextValue: any = undefined;
-
-        expect(await connectToRpc(Form<{ text: string }>()({
-
-            text: FormTextField({trim: true})
-
-        }), {
-            fields: {
-                text: {
+    it('expect to submit', async () => {
+        expect(await connectToRpc(
+            Form<string>()({
+                text: FormTextField({trim: true})
+            }),
+            {
+                fields: {text: null},
+                submit: value => {
+                    return value.text.toUpperCase();
                 }
-            },
-            async submit(value) {
-                return {text: value.text.toUpperCase()}
-            }
-        }).submit({
-            text: " hello "
-        })).toEqual(objectContaining({
-            type: "success", value: objectContaining({
-                text: "HELLO"
             })
-        }));
-
-        expect(checkedTextValue).toEqual("hello")
+            .submit({
+                text: " hello "
+            }))
+            .toEqual(objectContaining({
+                type: "result", value: "HELLO"
+            }));
     })
 
 });

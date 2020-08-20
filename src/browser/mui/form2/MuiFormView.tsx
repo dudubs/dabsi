@@ -2,6 +2,7 @@ import Grid, {GridProps} from "@material-ui/core/Grid";
 import React, {ReactNode} from "react";
 import {Renderer} from "../../../react/renderer";
 import {mergeProps} from "../../../react/utils/mergeProps";
+import {TForm, TFormArgs} from "../../../rpc/Form";
 import {AnyFormFields} from "../../../rpc/FormField";
 import {FormView, FormViewProps} from "../../../rpc/FormView";
 import {MuiButton, MuiButtonProps} from "../components/MuiButton";
@@ -16,8 +17,10 @@ type MuiFormViewFieldProps = {
     GridProps?: Partial<GridProps>
 };
 
-export type MuiFormViewProps<F extends AnyFormFields, R> =
-    FormViewProps<F, R, MuiFormViewFieldProps> & {
+
+export type MuiFormViewProps<T extends TForm> =
+    FormViewProps<T, MuiFormViewFieldProps> & {
+
     renderLayout?: LayoutRenderer
 
     MuiSubmitButtonProps?: Partial<MuiButtonProps>;
@@ -28,8 +31,9 @@ export type MuiFormViewProps<F extends AnyFormFields, R> =
 };
 
 
-export class MuiFormView<F extends AnyFormFields, R>
-    extends FormView<F, R, MuiFormViewFieldProps, MuiFormViewProps<F, R>> {
+export class MuiFormView<Fields extends AnyFormFields, Result>
+    extends FormView<Fields, Result, MuiFormViewFieldProps,
+        MuiFormViewProps<TFormArgs<Fields, Result>>> {
 
     renderFieldProps(key: string, props: Partial<MuiFormViewFieldProps>, element: React.ReactElement): React.ReactNode {
         if (!this.props.noGrid)
@@ -59,7 +63,7 @@ const defaultLayoutRenderer: LayoutRenderer = (props) => {
             {props.content}
         </Grid>
         <Grid item>
-            {props.resetButton}
+            {props.submitButton}
             {props.resetButton}
         </Grid>
     </Grid>

@@ -1,44 +1,20 @@
-import {Validation} from "../../validators";
-import {AnyFormField, FormError, FormField} from "../FormField";
+import {AnyFormField, FormField} from "../FormField";
+import {NoRpc} from "../NoRpc";
 import {connectToRpc, RpcConnectionType} from "../Rpc";
-import {Service} from "../Service";
 import objectContaining = jasmine.objectContaining;
 
 testm(__filename, () => {
 
 
-    it('expected to invalid check', async () => {
-        await testCheck(throws(() => new FormError(true)), {
-            type: 'error', reason: true
-        });
-    });
-
     it('expected to valid check', async () => {
-        await testCheck(() => null, {type: 'valid'});
+        await testCheck(() => null, null);
     });
 
-    it('check', async () => {
-        await testCheck(throws(() => new FormError(true)), {
-            type: 'error', reason: true
-        });
-        await testCheck(() => null, {type: 'valid'});
-    });
-
-    // it('expected to load value', async () => {
-    //     expect(await test({
-    //         async load(config, text: string) {
-    //             return text.toUpperCase()
-    //         }
-    //     }).load("hello")).toEqual("HELLO")
-    // });
 
     it('expected to validate data', async () => {
         await test({
-            validate(config, data) {
-                expect(data).toEqual("hello")
-            },
-            async load(config, text: string) {
-                return text.toUpperCase()
+            async load(config, data: string) {
+                return data.toUpperCase()
             }
         }).check("hello");
     });
@@ -63,14 +39,15 @@ testm(__filename, () => {
 
     }
 
-    function test({config = null, ...options}): RpcConnectionType<AnyFormField> {
-        return connectToRpc(FormField({
-            remote: Service({}),
+    function test({config = null, ...props}): RpcConnectionType<AnyFormField> {
+        return connectToRpc( FormField({
+            remote: NoRpc,
             options: {},
-            validate(data: any): Validation {
-                return undefined
-            },
-            ...options
+            getRemoteConfig: () => null,
+            load: () => null,
+            getElement: () => null,
+            check: () => null,
+            ...props
         }), config)
     }
 

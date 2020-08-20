@@ -1,5 +1,5 @@
 import {Awaitable} from "../common/typings";
-import {AnyFormField, checkFormFieldValue, FormField, FormFieldType, loadFormFieldValue} from "./FormField";
+import {AnyFormField, FormField, FormFieldType} from "./FormField";
 
 
 export type FormFieldCheck<Error, Target extends AnyFormField> = FormField<{
@@ -9,28 +9,25 @@ export type FormFieldCheck<Error, Target extends AnyFormField> = FormField<{
     Options: null,
     Config: {
         target: FormFieldType<Target>['Config'],
-        check(value: FormFieldType<Target>['Value']): Awaitable<Error|undefined>;
+        check(value: FormFieldType<Target>['Value']): Awaitable<Error | undefined>;
     },
     Element: FormFieldType<Target>['Element'],
     Error: { by: "target", error: FormFieldType<Target>['Error'] }
-    | { by: 'host', error: Error }
+        | { by: 'host', error: Error }
 }>;
 
 export function FormFieldCheck<Error>():
     <Target extends AnyFormField>(target: Target) => FormFieldCheck<Error, Target> {
     return (target) => {
-
-
         return FormField({
             remote: target,
             options: null,
             getRemoteConfig: config => config.target,
-            getElement: config => target.handle(config)({type: "getElement"}),
-            load: (config, data): Awaitable<any> => {
-                return loadFormFieldValue(target.props, config, data);
-            },
+            getElement: config => target.handle(config)("getElement"),
+            load: (config, data): Awaitable<any> =>
+                target.loadValue(config, data),
             check: async (config, value) => {
-                const error = await checkFormFieldValue(target.props, config, value);
+                const error = await target.checkValue(config, value);
                 if (error !== undefined)
                     return {by: "target", error}
                 {

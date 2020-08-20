@@ -6,15 +6,13 @@ export type RpcHandlerPayload<T extends RpcHandler> =
     T extends RpcHandler<infer U> ? U : never;
 
 
-type TRpc<Handler extends RpcHandler, Connection, Config> = {
-    Handler: Handler
-    Connection: Connection,
-    Config: Config
+export type TRpc = {
+    Handler: RpcHandler,
+    Connection: any,
+    Config: any
 };
 
-type TAnyRpc = TRpc<any, any, any>;
-
-export type Rpc<T extends TAnyRpc> = {
+export type Rpc<T extends TRpc> = {
 
     TRpc?: T;
 
@@ -60,7 +58,5 @@ export function connectToRpc<T extends AnyRpc>(
 }
 
 export class RpcError extends Error {
-    constructor(public reason: any) {
-        super();
-    }
+
 }

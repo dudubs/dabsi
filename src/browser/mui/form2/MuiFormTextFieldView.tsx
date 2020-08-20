@@ -3,18 +3,17 @@ import React, {ReactElement, ReactNode} from "react";
 import {Lang} from "../../../localization/Lang";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";
 import {mergeProps} from "../../../react/utils/mergeProps";
+import {AfterMountView} from "../../../react/view/View";
 import {ViewState} from "../../../react/view/ViewState";
 import {AbstractFormFieldView} from "../../../rpc/AbstractFormFieldView";
 import {FormTextField} from "../../../rpc/fields/FormTextField";
-import {FormError, FormFieldType} from "../../../rpc/FormField";
-import {FormFieldViewProps} from "../../../rpc/FormFieldView";
+import {FormFieldType} from "../../../rpc/FormField";
+import {FormFieldViewError, FormFieldViewProps} from "../../../rpc/FormFieldView";
 
 export type MuiFormTextFieldViewProps<Error> =
     FormFieldViewProps<FormTextField<Error>> & {
     label?: ReactNode
     TextFieldProps?: Partial<TextFieldProps>;
-    invalidPatternError?: ReactElement;
-
     renderError?(error: FormFieldType<FormTextField<Error>>['Error']): ReactNode;
 
 };
@@ -31,25 +30,27 @@ export class MuiFormTextFieldView<Error>
     async getCheckedData(): Promise<FormFieldType<FormTextField<Error>>['Data']> {
         this.textDebounce.resolve();
         if (this.error)
-            throw new FormError(this.error);
+            throw new FormFieldViewError(this.error);
         return this.text;
     }
-
 
     setElement(element: FormFieldType<FormTextField<Error>>['Element'] | null) {
         this.text = element || "";
     }
 
-
-    // renderError(error: FormFieldType<T>['Error']): ReactNode {
-    //     throw this.props.renderError?.(error) ?? JSON.stringify(error)
-    // }
-
-
     renderTextError(error: FormFieldType<FormTextField<never>>['Error']): ReactElement {
         switch (error) {
             case "INVALID_PATTERN":
-                return this.props.invalidPatternError ?? Lang`INVALID_PATTERN`;
+                return Lang`INVALID_PATTERN`;
+
+            case "TOO_LONG":
+                return Lang`TOO_LONG_${"max"}`({
+                    max: this.props.connection.props.options?.maxLength
+                });
+            case "TOO_SHORT":
+                return Lang`TOO_SHORT_${"min"}`({
+                    min: this.props.connection.props.options?.maxLength
+                });
         }
     }
 
@@ -87,18 +88,3 @@ export class MuiFormTextFieldView<Error>
     }
 
 }
-
-/*
-
-
-    <FormFieldCheckView {...props}
-        renderTarget={renderer(MuiFormTextView)}
-        renderError={error=>{
-
-            switch(error) {
-                case "ALREADY_EXISTS"
-            }
-
-        }}>
-
- */

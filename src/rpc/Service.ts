@@ -1,110 +1,63 @@
 import {entries} from "../common/object/entries";
-import {mapObject} from "../common/object/mapObject";
-import {Lazy} from "../common/patterns/lazy";
-import {AnyRpc, Rpc, RpcConfigType, RpcConnectionType} from "./Rpc";
+import {handleMappedRpc, MappedRpc, MappedRpcChildren} from "./MappedRpc";
+import {RpcConfigType, RpcConnectionType, RpcHandlerType} from "./Rpc";
 
-export type ServiceCommands = Record<string, AnyRpc>;
-
-
-export type ServiceConnection<Commands extends ServiceCommands> =
-    { [K in keyof Commands]: RpcConnectionType<Commands[K]> };
+export type ServiceConnection<T extends MappedRpcChildren> =
+    { [K in keyof T]: RpcConnectionType<T[K]> };
 
 
-export type ServiceHandler<Commands extends ServiceCommands> =
+export type ServiceHandler<T extends MappedRpcChildren> =
     (payload: [string, any]) => Promise<any>;
 
 
-export type ServiceConfig<Commands extends ServiceCommands> = {
-    [K in keyof Commands]:
-    RpcConfigType<Commands[K]>
+export type ServiceConfig<T extends MappedRpcChildren> = {
+    [K in keyof T]:
+    RpcConfigType<T[K]>
 };
 
-export type Service<Commands extends ServiceCommands> =
-    Rpc<{
-        Handler:
-            ServiceHandler<Commands>,
-        Connection:
-            ServiceConnection<Commands>,
-        Config:
-            ServiceConfig<Commands>
-
-    }>
-    & ServiceConnection<Commands>
-    & {
-    commands: Commands
-
-    handler?: ServiceHandler<Commands>;
-
-    new(handler: ServiceHandler<Commands>):
-        ServiceConnection<Commands>;
-
-    (handler: ServiceHandler<Commands>):
-        ServiceConnection<Commands>;
-
-};
-
-export function Service<Commands extends ServiceCommands>(commands: Commands):
-    Service<Commands> {
-
-    Class.handler = undefined;
+export type Service<T extends MappedRpcChildren> =
+    MappedRpc<T> &
+    RpcConnectionType<MappedRpc<T>> &
+    {
+        handler?: RpcHandlerType<MappedRpc<T>>
+        new(handler: RpcHandlerType<MappedRpc<T>>):
+            RpcConnectionType<MappedRpc<T>>;
+    };
 
 
-    Class.commnads = commands;
-
-    Class.connect = function (handler: ServiceHandler<Commands>) {
-
-        Class.handler = handler;
-
-        const connection: ServiceConnection<any> =
-            <any>mapObject(commands, (command, key: any) => {
-
-                return command.connect(payload => {
-                    return handler([key, payload])
-                })
-            });
+export function Service<T extends MappedRpcChildren>(children: T):
+    Service<T> {
 
 
-        return connection;
-    }
-    Class.handle = function (keyToAdapter): ServiceHandler<Commands> {
+    class StaticService {
 
-        const handlers = mapObject(commands,
-            (command, key) => command.handle(
-                keyToAdapter[<any>key]
-            )
-        );
+        static handler;
 
+        static children = children;
 
-        Class.handler = Handler;
+        constructor(handler) {
+            for (const [key, child] of entries(children)) {
+                this[key] = child.connect(payload => handler([key, payload]))
+            }
+        }
 
-        return Handler;
+        static connect(handler) {
+            return new this(StaticService.handler = handler);
+        }
 
-        function Handler([key, payload]) {
-            return handlers[key].call(this, payload);
+        static handle(config): any {
+            const handler = handleMappedRpc(children, config);
+            return StaticService.handler = handler
         }
     }
 
-    for (let [key, command] of entries(commands)) {
-        Object.defineProperty(Class, key, {
-            get: Lazy(() => command.connect(function (payload) {
-                    if (!Class.handler)
-                        throw new Error(
-                            `No service handler for "${this.name}".`
-                        );
-                    return Class.handler([key, payload])
-                })
-            )
+    for (const [key, child] of entries(children)) {
+        StaticService[key] = child.connect(payload => {
+            return StaticService.handler([key, payload])
         })
     }
+    return <any>StaticService;
 
-    return <any>Class;
 
-    function Class(handler) {
-        const obj = this instanceof Class ? this : {};
-        for (const [key, command] of entries(commands)) {
-            obj[key] = command.connect(payload => handler([key, payload]))
-        }
-        return obj;
-    }
 }
 

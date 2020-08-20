@@ -1,4 +1,3 @@
-import {breakpoints} from "@material-ui/system";
 import {AnyRpc, RpcError, RpcHandler} from "./Rpc";
 
 
@@ -66,7 +65,7 @@ function multiplexer(handler: (payloads: any[]) => Promise<Result[]>) {
     }
 }
 
-function demultiplexer(handler: (payload:any) => Promise<any>) {
+function demultiplexer(handler: (payload: any) => Promise<any>) {
     return async (payloads: any[]): Promise<Result[]> => {
         const results: Result[] = [];
         for (const payload of payloads) {
@@ -77,7 +76,7 @@ function demultiplexer(handler: (payload:any) => Promise<any>) {
                 })
             } catch (error) {
                 if (error instanceof RpcError) {
-                    results.push({type: "error", reason: error.reason})
+                    results.push({type: "error", reason: error.message})
                 }
                 throw error;
             }

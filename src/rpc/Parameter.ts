@@ -18,17 +18,17 @@ export function Parameter<D, V, T extends AnyRpc>(
     target: T
 ): Parameter<D, V, T> {
     return {
-        connect(handler) {
+        createRpcConnection(handler) {
             return data => {
-                return target.connect(payload => {
+                return target.createRpcConnection(payload => {
                     return handler([data, payload])
                 })
             }
         },
-        handle(config) {
+        createRpcHandler(config) {
             return async ([data, payload]) => {
                 const value = await config.load(data);
-                const handler = target.handle(config.target(value))
+                const handler = target.createRpcHandler(config.target(value))
                 return handler(payload);
             }
         }

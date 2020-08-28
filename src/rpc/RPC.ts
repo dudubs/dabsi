@@ -2,9 +2,6 @@ export type RpcHandler<Payload = any, Result = any> = {
     (payload: Payload): Promise<Result>;
 }
 
-export type RpcHandlerPayload<T extends RpcHandler> =
-    T extends RpcHandler<infer U> ? U : never;
-
 
 export type TRpc = {
     Handler: RpcHandler,
@@ -16,9 +13,9 @@ export type Rpc<T extends TRpc> = {
 
     TRpc?: T;
 
-    connect(handler: T['Handler']): T['Connection'];
+    createRpcConnection(handler: T['Handler']): T['Connection'];
 
-    handle(config: T['Config']): T['Handler'];
+    createRpcHandler(config: T['Config']): T['Handler'];
 
 };
 
@@ -52,7 +49,7 @@ export function connectToRpc<T extends AnyRpc>(
     rpc: T,
     config: RpcConfigType<T>
 ): RpcConnectionType<T> {
-    return rpc.connect(rpc.handle(
+    return rpc.createRpcConnection(rpc.createRpcHandler(
         config
     ))
 }
@@ -60,3 +57,4 @@ export function connectToRpc<T extends AnyRpc>(
 export class RpcError extends Error {
 
 }
+

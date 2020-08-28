@@ -1,48 +1,40 @@
 import {mapObject} from "../common/object/mapObject";
-import {Union} from "../common/typings";
-import {logDebug} from "../logging";
-import {AnyRpc, Rpc, RpcConfigType, RpcConnectionType, RpcError, RpcHandler, RpcPayloadType} from "./Rpc";
+import {ContextualRpc} from "./ContextualRpc";
+import {handleMappedRpc, MappedRpcHandler} from "./MappedRpcHandler";
+import {RpcConfigType, RpcConnectionType, RpcHandlerType, RpcPayloadType, RpcResultType} from "./Rpc";
+import {RpcMap} from "./RpcMap";
 
-export type MappedRpcChildren = Record<string, AnyRpc>;
 
-
-export type MappedRpc<T extends MappedRpcChildren> = Rpc<{
-    Handler:
-        RpcHandler<Union<{ [K in keyof T]: [K, RpcPayloadType<T[K]>] }>>,
-    Connection:
-        { [K in keyof T]: RpcConnectionType<T[K]> }
-    Config:
-        { [K in keyof T]: RpcConfigType<T[K]> }
-}> & { children: T };
-
-export function MappedRpc<T extends MappedRpcChildren>(children: T): MappedRpc<T> {
-    return {
-        children,
-        connect: handler => <any>mapObject(children, (child, key) => {
-            console.log({child, key});
-            return child.connect(payload => {
-                return handler([key, payload])
-            })
-        }),
-        handle: config =>
-            handleMappedRpc(children, config)
+export type MappedRpc<T extends RpcMap> = ContextualRpc<{
+    Static: {
+        children: T
     }
+    Context: {
+        [K in keyof T]: RpcHandlerType<T[K]>
+    }
+    Config: {
+        [K in keyof T]: RpcConfigType<T[K]>
+    }
+    Connection: {
+        [K in keyof T]: RpcConnectionType<T[K]>
+    }
+    Handler: MappedRpcHandler<{
+        [K in keyof T]: (payload: RpcPayloadType<T[K]>) => RpcResultType<T[K]>
+    }>
+}>;
+
+export function MappedRpc<T extends RpcMap>(children: T): MappedRpc<T> {
+    return ContextualRpc({
+        static: {children},
+        createConnection: (handler): any =>
+            mapObject(children, (child, key) => child.createRpcConnection(payload =>
+                handler([key, payload])
+            )),
+        createContext: (config): any =>
+            mapObject(children, (child, key) => child.createRpcHandler(config[key])),
+        createHandler: context => async payload => handleMappedRpc(payload, context,
+            (payload, handler) => handler(payload)
+        )
+    })
 }
 
-export function handleMappedRpc(children, config) {
-    return async ([key, payload]) => {
-        // console.log(`rpc at ${key}`);
-        const child = children[key];
-        if (!child) {
-            throw new RpcError(`No mapped rpc for "${key}".`)
-        }
-        try {
-            return await child.handle(config[key])(payload)
-        } catch (error) {
-            if (error instanceof RpcError) {
-                return new RpcError(`at ${key}: ${error.message}`)
-            }
-            throw error;
-        }
-    }
-}

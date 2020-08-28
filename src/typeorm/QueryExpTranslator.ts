@@ -1,5 +1,5 @@
 import {Constructor} from "../common/typings";
-import {DataExpTranslator} from "../json-exp/DataExpTranslator";
+import {DataExpTranslator} from "../data/DataExpTranslator";
 import {Query, QueryExp, QueryExpTypes} from "./QueryExp";
 
 export type QueryExpTranslatorMethods<T> = {

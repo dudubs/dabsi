@@ -6,7 +6,7 @@
 
  */
 
-import {Assign} from "../common/typings";
+import {AssignKeys} from "../common/typings";
 import {routerAt} from "./routerAt";
 
 
@@ -27,7 +27,7 @@ export interface RouterProps {
     locationType: any;
 }
 
-export type AnyRouter = Assign<Router, RouterProps>;
+export type AnyRouter = AssignKeys<Router, RouterProps>;
 
 
 export interface Router {

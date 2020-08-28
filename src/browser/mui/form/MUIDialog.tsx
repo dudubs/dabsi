@@ -4,7 +4,7 @@ import DialogContent, {DialogContentProps} from "@material-ui/core/DialogContent
 import DialogTitle, {DialogTitleProps} from "@material-ui/core/DialogTitle";
 import {makeStyles} from "@material-ui/styles";
 import React, {ReactNode, useContext} from "react";
-import {Assign} from "../../../common/typings";
+import {AssignKeys} from "../../../common/typings";
 import {ModalStackItemContext} from "../../../react/ModalStack";
 import {mergeProps} from "../../../react/utils/mergeProps";
 import {MuiButton} from "../components/MuiButton";
@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => {
     });
 })
 
-export type MuiDialogProps = Assign<Omit<DialogProps, "open">, {
+export type MuiDialogProps = AssignKeys<Omit<DialogProps, "open">, {
     actions?: ReactNode,
     title?: ReactNode;
     popOnClose?: boolean

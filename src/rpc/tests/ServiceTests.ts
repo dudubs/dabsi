@@ -17,8 +17,8 @@ testm(__filename, () => {
 
         }
 
-        const first = MyService.connect(
-            MyService.handle({
+        const first = MyService.createRpcConnection(
+            MyService.createRpcHandler({
                 test: () => 1,
                 subService: {
                     test: () => 1
@@ -26,8 +26,8 @@ testm(__filename, () => {
             })
         );
 
-        const second = MyService.connect(
-            MyService.handle({
+        const second = MyService.createRpcConnection(
+            MyService.createRpcHandler({
                 test: () => 2,
                 subService: {
                     test: () => 2
@@ -53,7 +53,7 @@ testm(__filename, () => {
 
         }
 
-        TestService.connect(async payload => {
+        TestService.createRpcConnection(async payload => {
             assertEvent.emit({payload, test: "global"})
             return <any>null;
         })
@@ -62,7 +62,7 @@ testm(__filename, () => {
         await TestService.test2(200);
 
         await TestService
-            .connect(async payload => {
+            .createRpcConnection(async payload => {
                 assertEvent.emit({payload, test: "instance"})
                 return <any>null
             })

@@ -2,7 +2,7 @@ import {SelectQueryBuilder} from "typeorm";
 import {Lazy} from "../../common/patterns/lazy";
 import {DataSort} from "../../data/DataOrder";
 import {DataTypeInfo} from "../../data/DataTypeInfo";
-import {DataExp} from "../../json-exp/DataExp";
+import {DataExp} from "../../data/DataExp";
 import {QueryExpBuilder} from "../QueryExpBuilder";
 import {QueryExpTranslatorToSqb} from "../QueryExpTranslatorToSqb";
 import {DataExpTranslatorToQeb} from "./DataExpTranslatorToQeb";

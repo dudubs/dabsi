@@ -19,12 +19,12 @@ testm(__filename, () => {
 
         ExpressTester.setExpressHandler(
             RpcExpressHandler(
-                TestCommand.handle((a, b) => a + b)
+                TestCommand.createRpcHandler((a, b) => a + b)
             )
         );
 
         expect(await TestCommand
-            .connect(fetchExpressTesterJson)
+            .createRpcConnection(fetchExpressTesterJson)
             (1, 2)
         ).toEqual(3);
     })
@@ -32,13 +32,13 @@ testm(__filename, () => {
 
     it('service', async () => {
         ExpressTester.setExpressHandler(
-            RpcExpressHandler(TestService.handle({
+            RpcExpressHandler(TestService.createRpcHandler({
                 test: (a, b) => a + b
             }))
         );
 
         expect(await TestService
-            .connect(fetchExpressTesterJson)
+            .createRpcConnection(fetchExpressTesterJson)
             .test(1, 2)
         ).toEqual(3);
     })

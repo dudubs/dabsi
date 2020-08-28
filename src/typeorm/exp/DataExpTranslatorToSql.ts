@@ -1,8 +1,8 @@
 import {Connection, SelectQueryBuilder} from "typeorm";
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
-import {CompareOperator, DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../json-exp/DataExp";
-import {DataExpTranslator} from "../../json-exp/DataExpTranslator";
+import {CompareOperator, DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../data/DataExp";
+import {DataExpTranslator} from "../../data/DataExpTranslator";
 import {Query} from "../QueryExp";
 
 

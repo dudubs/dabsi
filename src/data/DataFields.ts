@@ -1,4 +1,4 @@
-import {DataExp, DataExpType} from "../json-exp/DataExp";
+import {DataExp, DataExpType} from "./DataExp";
 
 export type DataFields<T> = Record<string, DataExp<T>>;
 

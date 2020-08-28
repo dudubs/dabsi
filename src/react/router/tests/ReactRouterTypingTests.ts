@@ -1,5 +1,5 @@
 // import {Router} from "../../../router";
-// import {ReactRouter} from "../ReactRouter";
+// import {OldReactRouter} from "../OldReactRouter";
 //
 // function test() {
 //

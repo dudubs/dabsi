@@ -4,7 +4,7 @@ import Tooltip, {TooltipProps} from "@material-ui/core/Tooltip";
 import React, {ReactNode} from "react";
 import {MuiIcon} from "../MuiIcon";
 import {assert} from "../../../common/assert";
-import {Assign, Common} from "../../../common/typings";
+import {AssignKeys, Common} from "../../../common/typings";
 import {Lang} from "../../../localization/Lang";
 
 export const MuiButtonKinds: Record<string, MuiButtonProps> = {
@@ -22,7 +22,7 @@ export const MuiButtonKinds: Record<string, MuiButtonProps> = {
     danger: {icon: "warning"}
 };
 
-export type MuiButtonProps = Assign<Common<ButtonProps, IconButtonProps>, {
+export type MuiButtonProps = AssignKeys<Common<ButtonProps, IconButtonProps>, {
     iconOnly?: boolean,
     icon?: MuiIcon;
     title?: ReactNode;

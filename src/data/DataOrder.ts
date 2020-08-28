@@ -1,4 +1,4 @@
-import {DataExp} from "../json-exp/DataExp";
+import {DataExp} from "./DataExp";
 
 export type DataSort = "ASC" | "DESC";
 export type DataNullsSort = "FIRST" | "LAST";

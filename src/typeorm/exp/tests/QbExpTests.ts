@@ -12,7 +12,7 @@ import {
     EChild2
 } from "../../../data/tests/BaseEntities";
 import {TestConnection} from "../../../data/tests/TestConnection";
-import {DataExp} from "../../../json-exp/DataExp";
+import {DataExp} from "../../../data/DataExp";
 import {AEntity, BEntity, CEntity} from "../../relations/tests/Entities";
 import {useQueryBuilderExp} from "../useQueryBuilderExp";
 import {QbExpTester} from "./QbExpTester";

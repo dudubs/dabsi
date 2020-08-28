@@ -1,4 +1,5 @@
-import {FormTextField} from "../fields/FormTextField";
+import {InputMap} from "../input/InputMap";
+import {TextInput} from "../input/TextInput";
 import {Form} from "../Form";
 import {connectToRpc} from "../Rpc";
 import objectContaining = jasmine.objectContaining;
@@ -7,13 +8,15 @@ testm(__filename, () => {
 
     it('expect to submit', async () => {
         expect(await connectToRpc(
-            Form<string>()({
-                text: FormTextField({trim: true})
-            }),
+            Form<string>()(
+                InputMap({
+                    text: TextInput({trim: true})
+                })
+            ),
             {
-                fields: {text: null},
+                input: {text: null},
                 submit: value => {
-                    return value.text.toUpperCase();
+                    return {value: value.text.toUpperCase()};
                 }
             })
             .submit({

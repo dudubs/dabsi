@@ -1,5 +1,5 @@
 import {Constructor, HasKeys, IsNever, Pluck} from "../../common/typings";
-import {DataExp} from "../../json-exp/DataExp";
+import {DataExp} from "../DataExp";
 import {AEntity} from "../../typeorm/relations/tests/Entities";
 import {DataRow} from "../DataRow";
 import {DataSelection} from "../DataSelection";

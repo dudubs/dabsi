@@ -1,21 +1,19 @@
 import {entries} from "../common/object/entries";
-import {handleMappedRpc, MappedRpc, MappedRpcChildren} from "./MappedRpc";
+import {MappedRpc} from "./MappedRpc";
+import {handleMappedRpc} from "./MappedRpcHandler";
 import {RpcConfigType, RpcConnectionType, RpcHandlerType} from "./Rpc";
+import {RpcMap} from "./RpcMap";
 
-export type ServiceConnection<T extends MappedRpcChildren> =
-    { [K in keyof T]: RpcConnectionType<T[K]> };
-
-
-export type ServiceHandler<T extends MappedRpcChildren> =
+export type ServiceHandler<T extends RpcMap> =
     (payload: [string, any]) => Promise<any>;
 
 
-export type ServiceConfig<T extends MappedRpcChildren> = {
+export type ServiceConfig<T extends RpcMap> = {
     [K in keyof T]:
     RpcConfigType<T[K]>
 };
 
-export type Service<T extends MappedRpcChildren> =
+export type Service<T extends RpcMap> =
     MappedRpc<T> &
     RpcConnectionType<MappedRpc<T>> &
     {
@@ -25,7 +23,7 @@ export type Service<T extends MappedRpcChildren> =
     };
 
 
-export function Service<T extends MappedRpcChildren>(children: T):
+export function Service<T extends RpcMap>(children: T):
     Service<T> {
 
 
@@ -37,22 +35,32 @@ export function Service<T extends MappedRpcChildren>(children: T):
 
         constructor(handler) {
             for (const [key, child] of entries(children)) {
-                this[key] = child.connect(payload => handler([key, payload]))
+                this[key] = child.createRpcConnection(
+                    payload => handler([key, payload])
+                )
             }
         }
 
-        static connect(handler) {
+        static createRpcConnection(handler) {
             return new this(StaticService.handler = handler);
         }
 
-        static handle(config): any {
-            const handler = handleMappedRpc(children, config);
-            return StaticService.handler = handler
+        static createRpcHandler(config): any {
+            const handlers = {};
+            return StaticService.handler = async payload => {
+
+                return handleMappedRpc(payload, children, (payload, child, key) => {
+                    return (handlers[key] || (handlers[key] = child.createRpcHandler(
+                        config[key]
+                    )))
+                    (payload)
+                })
+            }
         }
     }
 
     for (const [key, child] of entries(children)) {
-        StaticService[key] = child.connect(payload => {
+        StaticService[key] = child.createRpcConnection(payload => {
             return StaticService.handler([key, payload])
         })
     }
@@ -60,4 +68,3 @@ export function Service<T extends MappedRpcChildren>(children: T):
 
 
 }
-

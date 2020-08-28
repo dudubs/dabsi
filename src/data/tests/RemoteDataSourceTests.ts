@@ -17,7 +17,7 @@ export const RDSTesters = Service({
 })
 
 const RDSHandler = RpcExpressHandler(
-    RDSTesters.handle({
+    RDSTesters.createRpcHandler({
         A: EDSTesters.A,
         B: EDSTesters.B,
         C: EDSTesters.C,

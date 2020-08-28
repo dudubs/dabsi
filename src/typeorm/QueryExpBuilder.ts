@@ -1,5 +1,5 @@
 import {Connection} from "typeorm";
-import {DataExp} from "../json-exp/DataExp";
+import {DataExp} from "../data/DataExp";
 import {Query, QueryExp} from "./QueryExp";
 import {QueryExpTranslatorToSql} from "./QueryExpTranslatorToSql";
 import {isDeepEqual} from "./utils/QueryExpBuilder";

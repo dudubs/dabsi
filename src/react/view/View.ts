@@ -139,6 +139,8 @@ export abstract class View<P = {}> extends Component<P, any> {
 
     private _updateWaiters: Waiter<void>[] = [];
 
+
+
     async waitForUpdate<T>(getter: (view: this) => T | undefined, times = 3): Promise<T> {
 
         for (let index = 0; times > index; index++) {

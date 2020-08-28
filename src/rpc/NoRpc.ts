@@ -6,10 +6,10 @@ export type NoRpc = Rpc<{
     Config: null
 }>;
 export const NoRpc: NoRpc = {
-    connect(handler) {
+    createRpcConnection(handler) {
         return null
     },
-    handle(config) {
+    createRpcHandler(config) {
         return async () => {
             throw new Error()
         }

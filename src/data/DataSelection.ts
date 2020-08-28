@@ -1,7 +1,7 @@
 import {mergeObject} from "../common/object/mergeObject";
 import {omit} from "../common/object/omit";
 import {HasKeys, If} from "../common/typings";
-import {DataExp} from "../json-exp/DataExp";
+import {DataExp} from "./DataExp";
 import {DataOrder} from "./DataOrder";
 import {DataUnionChildren, DataUnionChildrenKey} from "./DataUnion";
 import {IfRelationToMany, IfRelationToOne, NonRelationKeys, RelationKeys, RelationTypeAt} from "./Relation";

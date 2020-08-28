@@ -1,7 +1,7 @@
 import {Connection, ObjectType, Repository} from "typeorm";
 import {Lazy} from "../../../common/patterns/lazy";
 import {DataTypeInfo} from "../../../data/DataTypeInfo";
-import {DataExp} from "../../../json-exp/DataExp";
+import {DataExp} from "../../../data/DataExp";
 import {QueryExpBuilder} from "../../QueryExpBuilder";
 import {QueryExpTranslatorToSqb} from "../../QueryExpTranslatorToSqb";
 import {DataExpTranslatorToQeb} from "../DataExpTranslatorToQeb";
@@ -39,7 +39,8 @@ export class QbExpTester<T> {
                 query,
                 qb.alias
             ),
-            qb.alias);
+            qb.alias
+        );
 
         const sqbTranslator = new QueryExpTranslatorToSqb(qb, qb.alias);
         const qebExp = qebTranslator.translate(exp);

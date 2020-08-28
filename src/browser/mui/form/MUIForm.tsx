@@ -1,7 +1,7 @@
 import {Grid} from "@material-ui/core";
 import React, {ReactNode, Ref, useContext, useRef} from "react";
 import {Form, FormContext, FormProps} from "../../../../common/form/Form";
-import {Assign} from "../../../common/typings";
+import {AssignKeys} from "../../../common/typings";
 import {Lang} from "../../../localization/Lang";
 import {ModalStackItem, ModalStackItemContext} from "../../../react/ModalStack";
 import {mergeProps} from "../../../react/utils/mergeProps";
@@ -131,7 +131,7 @@ export function MuiForm(
     }
 }
 
-export type MuiFormButtonProps = Assign<MuiButtonProps, {
+export type MuiFormButtonProps = AssignKeys<MuiButtonProps, {
     onClick?(form: Form | undefined): void
 }>;
 

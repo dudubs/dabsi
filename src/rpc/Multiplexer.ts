@@ -88,15 +88,15 @@ function demultiplexer(handler: (payload: any) => Promise<any>) {
 
 export function Multipelxer<T extends AnyRpc>(rpc: T): T {
 
-    const {connect, handle} = rpc;
+    const {createRpcConnection, createRpcHandler} = rpc;
 
 
-    rpc.connect = function (handler: (payloads: any[]) => Promise<any[]>) {
-        return connect.call(this, multiplexer(handler))
+    rpc.createRpcConnection = function (handler: (payloads: any[]) => Promise<any[]>) {
+        return createRpcConnection.call(this, multiplexer(handler))
     }
 
-    rpc.handle = function (config) {
-        return demultiplexer(handle.call(this, config))
+    rpc.createRpcHandler = function (config) {
+        return demultiplexer(createRpcHandler.call(this, config))
     }
 
     return rpc;

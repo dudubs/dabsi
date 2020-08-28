@@ -1,9 +1,9 @@
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
 import {ArrayTypeOrObject} from "../../common/typings";
-import {DataExp} from "../../json-exp/DataExp";
 import {chunks} from "../chunks";
 import {DataCursor} from "../DataCursor";
+import {DataExp} from "../DataExp";
 import {DataFields, DataFieldsRow} from "../DataFields";
 import {DataKey, DataKeyInput} from "../DataKey";
 import {DataNullsSort, DataOrder, DataSort} from "../DataOrder";
@@ -49,6 +49,10 @@ export abstract class DataSource<T> {
         })
     }
 
+
+    getKeys(): Promise<string[]> {
+        return this.selectKeys().items().then(rows => rows.map(row => row.$key))
+    }
 
     selectKeys(): DataSource<{}> {
         return this.withCursor({
@@ -98,7 +102,7 @@ export abstract class DataSource<T> {
         return result[0]
     }
 
-    // relating
+    // relation
 
 
     async addOrRemove(keys?: Record<string, boolean | undefined>): Promise<void>
@@ -306,6 +310,7 @@ export abstract class DataSource<T> {
 
     }
 
+
 }
 
 
@@ -313,4 +318,5 @@ export type DataCursorPath = {
     // TODO: rename to "onwer"
     invert: boolean, propertyName: string, key: string
 };
+
 

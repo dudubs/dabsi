@@ -1,4 +1,5 @@
 import {HasKeys, If, IsNever, Union} from "../common/typings";
+import {BaseTypeKey} from "./BaseType";
 import {DataFields, DataFieldsRow} from "./DataFields";
 import {DataKey} from "./DataKey";
 import {DataSource, DataValues} from "./DataSource";
@@ -76,7 +77,7 @@ export function DataBaseRow<T>(source: DataSource<T>): DataBaseRow {
 
 export type _NoChildren<T> =
     DataBaseRow
-    & Omit<T, DataUnionChildrenKey | RelationKeys<T>>
+    & Omit<T, DataUnionChildrenKey | RelationKeys<T> | BaseTypeKey>
     & Record<DataKey, string>
     & {
     [K in RelationKeys<T>]:

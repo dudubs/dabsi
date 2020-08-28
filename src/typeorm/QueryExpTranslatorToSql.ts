@@ -1,5 +1,5 @@
 import {Connection} from "typeorm";
-import {DataExp, Parameter} from "../json-exp/DataExp";
+import {DataExp, Parameter} from "../data/DataExp";
 import {DataExpTranslatorToSql} from "./exp/DataExpTranslatorToSql";
 import {QueryExpTranslator} from "./QueryExpTranslator";
 

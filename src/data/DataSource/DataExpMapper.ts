@@ -1,5 +1,5 @@
-import {DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../../json-exp/DataExp";
-import {DataExpTranslator} from "../../json-exp/DataExpTranslator";
+import {DataExp, NamedCompareOperator, Parameter, StringDataExp} from "../DataExp";
+import {DataExpTranslator} from "../DataExpTranslator";
 
 export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
     False: DataExp<any> = false;

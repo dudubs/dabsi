@@ -6,7 +6,7 @@ import {entries} from "../../common/object/entries";
 import {hasKeys} from "../../common/object/hasKeys";
 import {mapObject} from "../../common/object/mapObject";
 import {Awaitable} from "../../common/typings";
-import {DataExp} from "../../json-exp/DataExp";
+import {DataExp} from "../DataExp";
 import {DataExpTranslatorToQeb} from "../../typeorm/exp/DataExpTranslatorToQeb";
 import {QueryExpBuilder} from "../../typeorm/QueryExpBuilder";
 import {EntityRelation} from "../../typeorm/relations";

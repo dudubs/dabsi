@@ -1,4 +1,4 @@
-import {Assign, HasKeys, Merge, Pluck} from "../common/typings";
+import {AssignKeys, HasKeys, Merge, Pluck} from "../common/typings";
 
 
 type _MergeRelation<L, R> =
@@ -36,7 +36,7 @@ type _MergeObject<L, R> = Merge<L, R, {
     pick: _MergePicks<//
         Pluck<L, 'pick', undefined>,
         Pluck<R, 'pick', undefined>>,
-    fields: Assign<//
+    fields: AssignKeys<//
         Pluck<L, 'fields'>,
         Pluck<R, 'fields'>>,
     relations: _MergeRelations<//

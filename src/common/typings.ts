@@ -31,25 +31,26 @@ export type PartialKeys<T, K extends keyof T> =
     Partial<Pick<T, K>>;
 
 
-
 export function Nullable<T>(value?: T): T | Nullable {
     return value;
 }
 
 export type Type<T> = Function & { prototype: T };
 
-export function Type<T=any>(): Type<T> {
+export function Type<T = any>(): Type<T> {
     if (this instanceof Type) {
         throw  new Error()
     }
     return Type
 }
 
-
 export type Assign<T, U> =
+    Omit<T, keyof Required<U>> & U;
+
+export type AssignKeys<T, U> =
     HasKeys<T> extends false ? U :
         HasKeys<U> extends false ? T :
-            Omit<T, keyof Required<U>> & U;
+            Assign<T, U>;
 
 
 export type ArrayTypeOrObject<T> =
@@ -62,7 +63,7 @@ export type NeverKeys<T> = Union<{
     [K in keyof T]: IsNever<T[K]> extends true ? K : never
 }>;
 
-export type OmitNeverKeys<T> = Omit<T,NeverKeys<T>>;
+export type OmitNeverKeys<T> = Omit<T, NeverKeys<T>>;
 
 export type OptionalObjectArg<T> =
     IsNever<Union<T>> extends true ? [] : [
@@ -122,8 +123,12 @@ export type Constructor<T> = { new(...args: any[]): T };
 
 
 export type Merge<L, R, M> = HasKeys<L> extends false ? R :
-    HasKeys<R> extends false ? L : Assign<L, M>;
+    HasKeys<R> extends false ? L : AssignKeys<L, M>;
 
 export type PartialUndefinedKeys<T> = PartialKeys<T, Union<{
     [K in keyof T]: undefined extends T[K] ? K : never
 }>>;
+
+export type EmptyObjectIfNull<T> = IfNever<Exclude<T, null>, {}>;
+
+export type IfNull<T, U> = T extends null ? U : T;

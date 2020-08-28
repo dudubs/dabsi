@@ -11,8 +11,8 @@ import {routeByPath} from "../../router/route/routeByPath";
 import {useDefinedContext} from "../utils/hooks/useDefinedContext";
 import {mergeCallback} from "../utils/mergeCallback";
 import {provide} from "../utils/provide";
-import {AnyReactRoute, AnyReactRouter} from "./ReactRouter";
-import {ReactRouterLocation} from "./ReactRouterLocation";
+import {AnyReactRoute, AnyReactRouter} from "./OldReactRouter";
+import {ReactRouterLocationOld} from "./ReactRouterLocation";
 
 export type ReactRouterContainerProps<T extends AnyReactRouter> =
     {
@@ -23,8 +23,8 @@ export type ReactRouterContainerProps<T extends AnyReactRouter> =
 };
 
 
-export function useReactRouterLocation(): ReactRouterLocation {
-    return useDefinedContext(ReactRouterLocation);
+export function useReactRouterLocation(): ReactRouterLocationOld {
+    return useDefinedContext(ReactRouterLocationOld);
 }
 
 export function ReactRouterContainer<T extends AnyReactRouter>(
@@ -45,8 +45,8 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
         });
     }, [props.router]);
 
-    const [location, setLocation] = useState<ReactRouterLocation>(() =>
-        new ReactRouterLocation(initRoute, history.location.pathname));
+    const [location, setLocation] = useState<ReactRouterLocationOld>(() =>
+        new ReactRouterLocationOld(initRoute, history.location.pathname));
 
     useEffect(() => {
         let counter = 0;
@@ -76,6 +76,6 @@ export function ReactRouterContainer<T extends AnyReactRouter>(
         throw error;
 
 
-    return provide(ReactRouterLocation, location, children)
+    return provide(ReactRouterLocationOld, location, children)
 }
 

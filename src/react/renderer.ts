@@ -1,7 +1,7 @@
 import {ComponentType, createElement, ReactElement} from "react";
 import {PartialKeys} from "../common/typings";
 
-export type Renderer<P> = (props: P) => ReactElement;
+export type Renderer<P, U extends any[] = []> = (props: P & { key? }, ...args: U) => ReactElement;
 
 export function renderer<P, K extends keyof P>(
     component: ComponentType<P>,
@@ -17,3 +17,5 @@ export function renderer(component, defaultProps?) {
         ...props
     })
 }
+
+

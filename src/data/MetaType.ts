@@ -1,4 +1,4 @@
-import {Assign} from "../common/typings";
+import {AssignKeys} from "../common/typings";
 
 export const MetaType = Symbol();
 
@@ -9,7 +9,7 @@ export namespace MetaType {
         (Required<T> extends Required<MetaType<infer U>> ? U : {});
 
     export type Extend<T, U = {}> = Omit<T, typeof MetaType> &
-        MetaType<Assign<Of<T>, U>>;
+        MetaType<AssignKeys<Of<T>, U>>;
 }
 
 

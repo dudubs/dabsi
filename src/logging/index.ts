@@ -9,7 +9,9 @@ type Logger = {
 };
 
 // trying to require "util" module.
-const util = ((r, m) => {
+const util:undefined|{
+    inspect
+} = ((r, m) => {
     try {
         return r(m)
     } catch (error) {
@@ -17,7 +19,7 @@ const util = ((r, m) => {
 })(require, "util");
 
 
-inspect.custom = util.inspect.custom ?? Symbol();
+inspect.custom = util?.inspect.custom ?? Symbol();
 
 export function inspect(...args): string {
     const [value] = args;

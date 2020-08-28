@@ -68,7 +68,7 @@ type _MapInstances<T> = {
     InstanceType<Extract<T[K], Constructor<any>>>
 };
 type _AssignRelations<T, Relations> =
-// TODO: Assign
+// TODO: AssignKeys
     Omit<T, RelationKeys<T>>
     & {
     [K in RelationKeys<T>]:

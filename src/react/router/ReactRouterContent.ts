@@ -9,11 +9,11 @@
 import {createElement, Fragment, ReactNode} from "react";
 import {Route} from "../../router";
 import {useDefinedContext} from "../utils/hooks/useDefinedContext";
-import {AnyReactRouter, ReactRouterRenderers} from "./ReactRouter";
-import {ReactRouterLocation} from "./ReactRouterLocation";
+import {AnyReactRouter, ReactRouterRenderers} from "./OldReactRouter";
+import {ReactRouterLocationOld} from "./ReactRouterLocation";
 
 export function ReactRouterContent({children = undefined}: { children?: ReactNode }) {
-    const {path, route: contentRoute} = useDefinedContext(ReactRouterLocation);
+    const {path, route: contentRoute} = useDefinedContext(ReactRouterLocationOld);
 
     for (let route: undefined | Route<AnyReactRouter> = contentRoute;
          !!route; route = <any>route.parent) {

@@ -1,5 +1,5 @@
 import {withHooks} from "../utils/withHooks";
-import {AnyReactRouter, ReactRouterRendererProps, ReactRouterRenderHook} from "./ReactRouter";
+import {AnyReactRouter, ReactRouterRendererProps, ReactRouterRenderHook} from "./OldReactRouter";
 
 export function createReactRouterRendererHook(
     toRender: (props: ReactRouterRendererProps<any>) => boolean,

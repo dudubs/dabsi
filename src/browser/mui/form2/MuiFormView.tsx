@@ -1,70 +1,41 @@
-import Grid, {GridProps} from "@material-ui/core/Grid";
-import React, {ReactNode} from "react";
-import {Renderer} from "../../../react/renderer";
+import Grid from "@material-ui/core/Grid";
+import React, {ReactElement} from "react";
+
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {TForm, TFormArgs} from "../../../rpc/Form";
-import {AnyFormFields} from "../../../rpc/FormField";
+import {TForm} from "../../../rpc/Form";
 import {FormView, FormViewProps} from "../../../rpc/FormView";
+import {AnyInput} from "../../../rpc/input/Input";
 import {MuiButton, MuiButtonProps} from "../components/MuiButton";
 
-type LayoutRenderer = Renderer<{
-    content: ReactNode,
-    resetButton: ReactNode
-    submitButton: ReactNode
-}>;
-
-type MuiFormViewFieldProps = {
-    GridProps?: Partial<GridProps>
-};
-
-
 export type MuiFormViewProps<T extends TForm> =
-    FormViewProps<T, MuiFormViewFieldProps> & {
-
-    renderLayout?: LayoutRenderer
+    Omit<FormViewProps<T>, "children"> & {
 
     MuiSubmitButtonProps?: Partial<MuiButtonProps>;
     MuiResetButtonProps?: Partial<MuiButtonProps>;
 
-    noGrid?: boolean
-    GridProps?: Partial<GridProps>;
-};
-
-
-export class MuiFormView<Fields extends AnyFormFields, Result>
-    extends FormView<Fields, Result, MuiFormViewFieldProps,
-        MuiFormViewProps<TFormArgs<Fields, Result>>> {
-
-    renderFieldProps(key: string, props: Partial<MuiFormViewFieldProps>, element: React.ReactElement): React.ReactNode {
-        if (!this.props.noGrid)
-            element = <Grid key={key} item {...props.GridProps}>{element}</Grid>;
-        return element
-    }
-
-    renderView(): React.ReactNode {
-        return (this.props.renderLayout || defaultLayoutRenderer)({
-            content:
-                this.props.noGrid ? super.renderView() :
-                    <Grid container {...this.props.GridProps}>{super.renderView()}</Grid>,
-            resetButton: <MuiButton kind="reset" {...mergeProps(this.props.MuiResetButtonProps, {
-                onClick: () => this.reset()
-            })}/>,
-            submitButton: <MuiButton kind={"submit"} {...mergeProps(this.props.MuiSubmitButtonProps, {
-                onClick: () => this.submit()
-            })}/>
-        })
-    }
 
 }
 
-const defaultLayoutRenderer: LayoutRenderer = (props) => {
-    return <Grid container direction={"column"}>
-        <Grid item>
-            {props.content}
+export function MuiFormView<Input extends AnyInput, Value, Error>(
+    props: MuiFormViewProps<{
+        Input: Input, Value: Value, Error: Error
+    }>
+): ReactElement {
+    return <FormView {...props}>{({input, form}) =>
+        <Grid container direction={"column"}>
+            <Grid item>{input}</Grid>
+            <Grid item>
+                <MuiButton kind={"submit"} {...mergeProps(
+                    props.MuiSubmitButtonProps, {
+                        onClick: () => form.submit()
+                    }
+                )}/>
+                <MuiButton kind={"reset"} {...mergeProps(
+                    props.MuiResetButtonProps, {
+                        onClick: () => form.reset()
+                    }
+                )}/>
+            </Grid>
         </Grid>
-        <Grid item>
-            {props.submitButton}
-            {props.resetButton}
-        </Grid>
-    </Grid>
+    }</FormView>
 }

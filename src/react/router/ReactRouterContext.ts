@@ -1,7 +1,7 @@
 import {AnyRouter} from "../../router";
 import {ContextOrType} from "../utils/ContextOrType";
 import {provide} from "../utils/provide";
-import {ReactRouterRenderers, ReactRouterRendererProps} from "./ReactRouter";
+import {ReactRouterRenderers, ReactRouterRendererProps} from "./OldReactRouter";
 
 export function ReactRouterContext<T extends AnyRouter, U>(
     type: ContextOrType<U>,

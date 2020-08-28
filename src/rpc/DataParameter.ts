@@ -1,35 +1,35 @@
+import {DataKey, DataKeyInput} from "../data/DataKey";
 import {DataRow} from "../data/DataRow";
 import {DataSource} from "../data/DataSource";
-import {AnyRpc, Rpc, RpcConfigType, RpcHandler, RpcPayloadType, RpcResultType} from "./Rpc";
+import {AnyRpc, Rpc, RpcConfigType, RpcConnectionType, RpcHandler, RpcPayloadType, RpcResultType} from "./Rpc";
+import {RpcGenericConfig, RpcGenericConfigFn} from "./RpcGenericConfig";
 
-export type DataParameter<T, R extends AnyRpc> = Rpc<{
+
+type DataParameterConfig<R extends AnyRpc, T = any> = {
+    source: DataSource<T>,
+    getTargetConfig: (row: DataRow<T>) => RpcConfigType<R>
+};
+
+
+export type DataParameter<R extends AnyRpc> = Rpc<{
     Handler: RpcHandler<[string, RpcPayloadType<R>], RpcResultType<R>>,
-    Connection: (key: string) => Promise<DataRow<T>>,
-    Config: {
-        source: DataSource<T>
-        target: (row: DataRow<T>) => RpcConfigType<R>
-    }
+    Connection: (key: DataKeyInput) => RpcConnectionType<R>,
+    Config: RpcGenericConfig<<T>(config: DataParameterConfig<R, T>) => DataParameterConfig<R>>
 }>;
 
-export function DataParameter<T>():
-    <R extends AnyRpc>(target: R) => DataParameter<T, R> {
-    return target => {
+export function DataParameter<R extends AnyRpc>(
+    target: R
+): DataParameter<R> {
+    return {
+        createRpcConnection: handler => key =>
+            target.createRpcConnection(payload => handler([DataKey(key), payload])),
 
-        return {
-            connect(handler) {
-                return key => {
-                    return target.connect(payload => {
-                        return handler([key, payload])
-                    })
-                }
-            },
-            handle(config) {
-                return async ([key, payload]) => {
-                    const row = await config.source.getOrFail(key);
-                    const handler = target.handle(config.target(row))
-                    return handler(payload);
-                }
+        createRpcHandler: RpcGenericConfigFn(config => {
+            return async ([key, payload]) => {
+                const row = await config.source.getOrFail(key);
+                const targetConfig = config.getTargetConfig(row);
+                return target.createRpcHandler(targetConfig)(payload);
             }
-        }
+        })
     }
 }

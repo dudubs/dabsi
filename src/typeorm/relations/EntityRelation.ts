@@ -5,7 +5,7 @@ import {defined} from "../../common/object/defined";
 import {definedAt} from "../../common/object/definedAt";
 import {Lazy} from "../../common/patterns/lazy";
 import {ArrayTypeOrObject} from "../../common/typings";
-import {DataExp} from "../../json-exp/DataExp";
+import {DataExp} from "../../data/DataExp";
 import {QueryExpBuilder} from "../QueryExpBuilder";
 import {ByTableOrColumn, EntityRelationSide} from "./EntityRelationSide";
 

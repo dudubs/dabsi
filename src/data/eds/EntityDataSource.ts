@@ -103,14 +103,14 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     protected _createEntityValues(values, isInsert: boolean) {
 
-         const row = {};
+        const row = {};
         const relationKeys: {
             relation: EntityRelation,
             key: object
         }[] = [];
 
         const childParent = isInsert && this.entityCursor.parent?.child;
-        childParent && buildRelation(childParent.relation,childParent.key);
+        childParent && buildRelation(childParent.relation, childParent.key);
 
         for (const {relation, key} of this.entityCursor.relationKeys) {
             if (relation.propertyName in values) {
@@ -149,7 +149,7 @@ export class EntityDataSource<T> extends DataSource<T> {
                 row[relation.propertyName] = key;
                 return;
             }
-            if(!relation.isToOne)
+            if (!relation.isToOne)
                 throw new Error(`Not support.`)
             relationKeys.push({relation, key});
         }
@@ -169,7 +169,7 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
 
     async updateAll(keys: string[], values: DataValues<T>): Promise<number> {
-        if(!hasKeys(values))
+        if (!hasKeys(values))
             return 0;
         let affectedRows = 0;
         const {row, relationKeys} = this._createEntityValues(values, false);
@@ -189,12 +189,12 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     async addAll(keys: string[]): Promise<void> {
         for (let key of keys) {
-            await this._addOrRemoveEntity(key, false);
+            await this._addOrRemove(key, false);
         }
     }
 
-    protected async _addOrRemoveEntity(key: string, remove) {
-        const method = remove ? "removeOrUnset" as const : "addOrSet" as const;
+    protected async _addOrRemove(key: string, toRemove: boolean) {
+        const method = toRemove ? "removeOrUnset" as const : "addOrSet" as const;
         const entityKey = EntityDataKey.parse(
             this.entityCursor.repository.metadata,
             key
@@ -213,7 +213,7 @@ export class EntityDataSource<T> extends DataSource<T> {
 
     async removeAll(keys: string[]): Promise<void> {
         for (let key of keys) {
-            await this._addOrRemoveEntity(key, true);
+            await this._addOrRemove(key, true);
         }
     }
 
@@ -251,7 +251,6 @@ export class EntityDataSource<T> extends DataSource<T> {
             this.mainEntityType
         )
     }
-
 
 }
 

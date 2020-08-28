@@ -1,5 +1,5 @@
 import {mapObject} from "../common/object/mapObject";
-import {DataExp, StringDataExp} from "../json-exp/DataExp";
+import {DataExp, StringDataExp} from "./DataExp";
 import {DataFields} from "./DataFields";
 import {DataExpMapper} from "./DataSource/DataExpMapper";
 

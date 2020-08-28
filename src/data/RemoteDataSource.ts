@@ -72,10 +72,10 @@ export type RemoteDataSource<T> = Rpc<{
 
 export function RemoteDataSource<T>(): RemoteDataSource<T> {
     return {
-        connect: handler => {
+        createRpcConnection: handler => {
             return new RemoteDataSourceConnection<T>(handler)
         },
-        handle: source => {
+        createRpcHandler: source => {
             return async ({method, cursor, args}) => {
                 // TODO: more safety code.
                 cursor = DataCursor.concat(source.cursor, cursor);

@@ -9,7 +9,7 @@ import {DataKey} from "../../../data/DataKey";
 import {DataRow} from "../../../data/DataRow";
 import {DataSource} from "../../../data/DataSource";
 
-import {DataExp} from "../../../json-exp/DataExp";
+import {DataExp} from "../../../data/DataExp";
 import {Lang} from "../../../localization/Lang";
 import {PickerProps} from "../../../react/ModalStack";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";

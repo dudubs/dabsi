@@ -1,72 +1,80 @@
 import {Awaitable} from "../common/typings";
-import {FormConnection} from "./FormConnection";
-import {AnyFormFields, FormFieldsConfig, MapFormFields} from "./FormField";
-import {InternalForm} from "./InternalForm";
-import {MappedRpcHandlerFn} from "./MappedRpcHandlerFn";
-import {Rpc, RpcConnectionType} from "./Rpc";
-
-
-export type CheckResult<Error> =
-    { type: "valid" } | { type: "invalid", error: Error };
-
-export type FormCheckResult<T extends TForm> =
-    CheckResult<MapFormFields<T['Fields'], 'Error'>>;
-
-export type FormSubmitResult<T extends TForm> =
-    { type: "invalid", error: MapFormFields<T['Fields'], 'Error'> }
-    | { type: "result", value: T['Result'] };
-
-export type AnyForm = Form<TForm>;
-
-export type TFormArgs<Fields extends AnyFormFields, Result> = {
-    Fields: Fields,
-    Result: Result
-};
+import {AnyInput, InputType} from "./input/Input";
+import {Widget} from "./Widget";
 
 export type TForm = {
-    Fields: AnyFormFields,
-    Result: any
+    Input: AnyInput
+    Value: any
+    Error: any
 };
 
-export type FormRpc<T extends TForm> = Rpc<{
-    Handler: MappedRpcHandlerFn<FormHandlerTypes<T>>
-
-    Connection: FormConnection<T>
-
-    Config: {
-        fields: FormFieldsConfig<T['Fields']>
-        submit(value: MapFormFields<T['Fields'], 'Value'>): Awaitable<T['Result']>;
+export type TFormRpc<T extends TForm> = {
+    Handler: {
+        submit(data: InputType<T['Input']>['Data']):
+            FormSubmitResult<T>;
     }
-}>;
+    Connection: {
+        submit(data: InputType<T['Input']>['Data']):
+            Promise<FormSubmitResult<T>>;
+    }
+    Config: {
+        input: InputType<T['Input']>['Config'],
+        submit(value: InputType<T['Input']>['Value']):
+            Awaitable<FormSubmitResult<T>>
+    }
+    Element: InputType<T['Input']>['Element']
 
-export type Form<T extends TForm> =
-    { TForm?: T } & FormRpc<T> & InternalForm<T>;
+    Controller: T['Input']
 
-
-export type FormHandlerTypes<T extends TForm> = {
-
-    check(payload: { data: FormData<T> }): FormCheckResult<T>;
-
-    getElement(): FormElement<T>;
-
-    remote(payload: [string, any]): any;
-
-    submit(payload: { data: FormData<T> }): FormSubmitResult<T>;
-
+    Static: {
+        TForm?: T;
+        input: T['Input']
+    }
+    Context: {}
 };
 
-export type FormConnectionFields<T extends TForm> =
-    { [K in keyof T['Fields']]: RpcConnectionType<T['Fields'][K]> };
+export type Form<T extends TForm> = Widget<TFormRpc<T>>;
 
 
-export type FormData<T extends TForm> = MapFormFields<T['Fields'], 'Data'>;
+export type TFormArgs<Input extends AnyInput, Value, Error> = {
+    Value: Value, Error: Error, Input: Input
+};
 
-export type FormElement<T extends TForm> = MapFormFields<T['Fields'], 'Element'>;
+export type FormSubmitResult<T extends TForm> =
+    | { value: T['Value'] }
+    | { error: T['Error'] }
+    | { inputError: InputType<T['Input']>['Error'] };
 
-export function Form<Result = any>():
-    <Fields extends AnyFormFields>(fields: Fields) =>
-        Form<TFormArgs<Fields, Result>> {
 
-    return fields => new InternalForm(fields)
+export function Form<Value = null, Error = never>():
+    <Input extends AnyInput>(input: Input) => Form<{
+        Value: Value,
+        Error: Error,
+        Input: Input
+    }> {
+    return input => Widget({
+        controller: input,
+        static: {input},
+        handlers: {
+            submit: async (context, data) => {
+                const result = await input
+                    .getContext(context.config.input)
+                    .loadAndCheck(data);
+                if ('error' in result)
+                    return {inputError: result.error}
+                return context.config.submit(result.value);
+            }
+        },
+        createConnection: handler => ({
+            submit: data => handler(["submit", data])
+        }),
+        createContext: config => ({
+            getControllerConfig: () => config.input,
+            getElement: () => input
+                .getContext(config.input)
+                .getElement(),
+        }),
+    })
 }
+
 

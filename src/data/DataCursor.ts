@@ -1,5 +1,5 @@
 import {ArrayTypeOrObject, ExtractKeys} from "../common/typings";
-import {DataExp} from "../json-exp/DataExp";
+import {DataExp} from "./DataExp";
 import {DataOrder} from "./DataOrder";
 import {AnyDataSelection, DataSelection} from "./DataSelection";
 

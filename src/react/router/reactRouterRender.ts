@@ -1,4 +1,4 @@
-import {AnyReactRouter, ReactRouterRenderer, ReactRouterRenderers} from "./ReactRouter";
+import {AnyReactRouter, ReactRouterRenderer, ReactRouterRenderers} from "./OldReactRouter";
 
 export function reactRouterRender<T extends AnyReactRouter>(this: T,
                                                             renderer: ReactRouterRenderer<T>): T {

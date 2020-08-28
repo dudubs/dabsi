@@ -1,6 +1,6 @@
 import {Component, ReactNode} from "react";
 import {ImmutableSet} from "../../immutable2";
-import {DataExp} from "../../json-exp/DataExp";
+import {DataExp} from "../DataExp";
 import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {State} from "../../react/utils/State";
 import {DataKeyInput} from "../DataKey";

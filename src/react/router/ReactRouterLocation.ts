@@ -1,7 +1,7 @@
 import {Route} from "../../router";
-import {AnyReactRoute, AnyReactRouter} from "./ReactRouter";
+import {AnyReactRoute, AnyReactRouter} from "./OldReactRouter";
 
-export class ReactRouterLocation {
+export class ReactRouterLocationOld {
 
     constructor(
         public route: AnyReactRoute,

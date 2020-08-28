@@ -1,128 +1,81 @@
-import React, {ReactElement, ReactNode} from "react";
-import {entries} from "../common/object/entries";
-import {mapObjectToArray} from "../common/object/mapObjectToArray";
-import {values} from "../common/object/values";
+import {ReactElement} from "react";
+import {Awaitable} from "../common/typings";
 import {Renderer} from "../react/renderer";
-import {AfterMountView, View} from "../react/view/View";
 import {ViewState} from "../react/view/ViewState";
 import {Form, TForm, TFormArgs} from "./Form";
-import {AnyFormField, AnyFormFields} from "./FormField";
-import {FormFieldView, FormFieldViewError, FormFieldViewProps} from "./FormFieldView";
-import {RpcConnectionType} from "./Rpc";
+import {AnyInput, InputType} from "./input/Input";
+import {InputError} from "./input/InputError";
+import {InputView, InputViewProps} from "./input/InputView";
+import {WidgetType} from "./Widget";
+import {WidgetView, WidgetViewProps} from "./WidgetView";
 
-export type FormViewFieldProps<T extends AnyFormField, FieldProps> = Partial<FieldProps> & {
-    render: Renderer<FormFieldViewProps<T> & { key: string }>
-};
+export type FormViewProps<T extends TForm> =
+    WidgetViewProps<Form<T>> &
+    {
 
-type RendererOrFieldProps<T extends AnyFormField, FieldProps> =
-    Renderer<FormFieldViewProps<T>>
-    | FormViewFieldProps<T, FieldProps>;
+        input: Renderer<InputViewProps<T['Input']>>
 
-export type FormViewProps<T extends TForm, FieldProps> = {
-    connection: RpcConnectionType<Form<T>>;
+        onSubmit?(result: T['Value']);
 
-    fields: {
-        [K in keyof T['Fields']]: RendererOrFieldProps<T['Fields'][K], FieldProps>
+        onError?(result: T['Error']);
+
+        onInputError?(result: InputType<T['Input']>['Error']);
+
+        children: (props: {
+            form: FormView<T['Input'], T['Value'], T['Error']>
+            input: ReactElement
+        }) => ReactElement
+    };
+
+export class FormView<Input extends AnyInput, Value, Error>
+    extends WidgetView<Form<TFormArgs<Input, Value, Error>>,
+        FormViewProps<TFormArgs<Input, Value, Error>>> {
+
+
+    input: InputView<Input> | null = null;
+
+    @ViewState() element: InputType<Input>['Element'] | null = null;
+
+    setElement(element: WidgetType<Form<TFormArgs<Input, Value, Error>>>["Element"] | null): void {
+        this.input?.setElement(element);
     }
 
-    noDefault?: boolean
-
-    onSubmit?(result: T['Result']);
-
-};
-
-
-export class FormView<Fields extends AnyFormFields, Result, FieldProps,
-    P extends FormViewProps<TFormArgs<Fields, Result>, FieldProps>> extends View<P> {
-
-    @ViewState() error: any;
-
-    protected _fields: Record<string, FormFieldView<any> | null> = {};
-
-    get fields(): { [K in string & keyof Fields]?: FormFieldView<Fields[K]> } {
-        return this._fields as any;
-    }
-
-    @AfterMountView()
     async reset() {
-        if (this.props.noDefault) {
-            for (let field of values(this._fields)) {
-                field?.reset();
-            }
-            return;
-        }
-        const element = await this.props.connection.getElement();
-        for (const [key, field] of entries(this._fields)) {
-            field?.setElement(element[key]);
-        }
+        await this.input?.setElement(this.element);
     }
 
     async submit() {
-
-        const data: any = {};
-        let hasErrors = false;
-
-        for (const [key, field] of entries(this._fields)) {
-            try {
-                data[key] = await field?.getCheckedData();
-            } catch (error) {
-                if (error instanceof FormFieldViewError) {
-                    hasErrors = true;
-                    continue;
-                }
-                throw error;
+        let data;
+        try {
+            data = await this.input?.getValidData();
+        } catch (error) {
+            if (error instanceof InputError) {
+                return;
             }
+            throw error;
         }
-
-        if (hasErrors)
-            return;
-
         const result = await this.props.connection.submit(data);
-        switch (result.type) {
-            case "result":
-                this.props.onSubmit?.(result.value);
-                break;
-            case "invalid":
-                for (const [key, field] of entries(this._fields)) {
-                    field?.rejectError(result.error[key])
-                }
-                break;
+        if ('inputError' in result) {
+            this.input?.setError(result.inputError);
+            this.props.onInputError?.(result.inputError);
+        } else if ('error' in result) {
+            this.props.onError?.(result.error);
+        } else {
+            this.props.onSubmit?.(result.value);
         }
+
     }
 
-    renderFieldProps?(key: string, props: Partial<FieldProps>,
-                      element: ReactElement): ReactNode;
-
     renderView(): React.ReactNode {
-        return <>
-            {mapObjectToArray(this.props.fields as Record<string,
-                RendererOrFieldProps<any, FieldProps>>, (
-                rendererOrFieldProps, key
-            ) => {
-
-                let renderer: Renderer<FormFieldViewProps<any> & { key }>;
-                let fieldProps: Partial<FieldProps>;
-
-                if (typeof rendererOrFieldProps === "function") {
-                    renderer = rendererOrFieldProps;
-                    fieldProps = {};
-                } else {
-                    renderer = rendererOrFieldProps.render;
-                    fieldProps = rendererOrFieldProps;
+        return this.props.children({
+            form: this,
+            input: this.props.input({
+                connection: this.props.connection.controller,
+                element: this.element,
+                inputRef: field => {
+                    this.input = field as any;
                 }
-
-
-                const element = renderer({
-                    key,
-                    connection: this.props.connection.fields[key],
-                    noDefault: true,
-                    fieldRef: fieldView => {
-                        this._fields[key] = fieldView;
-                    }
-                });
-
-                return this.renderFieldProps ? this.renderFieldProps(key, fieldProps, element) : element;
-            })}
-        </>;
+            })
+        })
     }
 }

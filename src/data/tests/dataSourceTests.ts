@@ -1,4 +1,5 @@
 import {subTest} from "../../jasmine/subTest";
+import {inspect} from "../../logging";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
 import {DataSource} from "../DataSource";
 import {RelationKeys} from "../Relation";
@@ -91,7 +92,7 @@ export function DataSourceTests(
                         .toBeRejected()
                 });
 
-                it('expect to insert',()=>{
+                it('expect to insert', () => {
 
                 })
             })
@@ -213,6 +214,16 @@ export function DataSourceTests(
         expect((await aChildAtA.items()).map(child => child.$key))
             .toEqual(arrayContaining(childKeys))
     });
+
+    it('DataRow', async () => {
+
+        const a = await ADS.insert({});
+        const b = await BDS.insert({});
+
+        expect(await a.at("oneAToOneBOwner").count()).toEqual(0);
+        await a.at("oneAToOneBOwner").add(b);
+        expect(await a.at("oneAToOneBOwner").count()).toEqual(1);
+    })
 
 }
 

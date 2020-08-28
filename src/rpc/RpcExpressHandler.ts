@@ -1,4 +1,5 @@
 import {Handler} from "express";
+import {inspect} from "../logging";
 import {RpcHandler} from "./Rpc";
 
 export function RpcExpressHandler<T extends RpcHandler>(

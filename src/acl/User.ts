@@ -1,9 +1,8 @@
-import {BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
-import {Group} from "./Group";
+import {Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 
 
 @Entity()
-export class User  {
+export class User {
 
     @PrimaryGeneratedColumn()
     id: number;
@@ -14,9 +13,14 @@ export class User  {
     @Column({nullable: true})
     lastName?: string;
 
-    @Column({nullable:true})
+    @Column({nullable: true})
     loginName: string;
 
+    @Column({nullable: true})
+    email?: string;
+
+    @Column({nullable: true})
+    phoneNumber?: string;
 
     get fullName() {
         return `${this.firstName} ${this.lastName}`

@@ -7,25 +7,25 @@ import {routeByPath} from "../../../router/route/routeByPath";
 import {elementContaining} from "../../tests/elementContaining";
 import {provide} from "../../utils/provide";
 
-import {AnyReactRouter, ReactRouter, ReactRouterRenderers} from "../ReactRouter";
+import {AnyReactRouter, OldReactRouter, ReactRouterRenderers} from "../OldReactRouter";
 import {ReactRouterContainer} from "../ReactRouterContainer";
 import {ReactRouterContent} from "../ReactRouterContent";
-import {ReactRouterLocation} from "../ReactRouterLocation";
+import {ReactRouterLocationOld} from "../ReactRouterLocation";
 
 
 testm(__filename, () => {
     async function testRoute(route: Route<AnyReactRouter>, path: string) {
         [path, route] = await routeByPath(route, path)
         return TestRenderer.create(
-            provide(ReactRouterLocation,
-                new ReactRouterLocation(route, path),
+            provide(ReactRouterLocationOld,
+                new ReactRouterLocationOld(route, path),
                 createElement(ReactRouterContent)
             )
         ).toJSON()
     }
 
 
-    let r = ReactRouter
+    let r = OldReactRouter
         .route("child", Router.route("sub-child"));
 
     r.render(props => createElement("main", props));

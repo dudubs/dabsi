@@ -1,7 +1,7 @@
 import {SelectQueryBuilder} from "typeorm";
 import {entries} from "../common/object/entries";
 import {hasKeys} from "../common/object/hasKeys";
-import {DataExp, Parameter} from "../json-exp/DataExp";
+import {DataExp, Parameter} from "../data/DataExp";
 import {DataExpTranslatorToSql} from "./exp/DataExpTranslatorToSql";
 import {Query} from "./QueryExp";
 import {QueryExpTranslator} from "./QueryExpTranslator";

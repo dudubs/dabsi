@@ -1,7 +1,8 @@
 import {Connection, EntityMetadata, ObjectType, Repository} from "typeorm";
 import {ColumnMetadata} from "typeorm/metadata/ColumnMetadata";
 import {entries} from "../../common/object/entries";
-import {DataExp} from "../../json-exp/DataExp";
+import {inspect} from "../../logging";
+import {DataExp} from "../DataExp";
 import {DataExpTranslatorToQeb} from "../../typeorm/exp/DataExpTranslatorToQeb";
 import {QueryExpBuilder} from "../../typeorm/QueryExpBuilder";
 import {EntityRelation} from "../../typeorm/relations";
@@ -176,15 +177,16 @@ export namespace EntityDataCursor {
             schema: string,
             path: EntityDataCursorPath | EntityDataCursor
         ) {
-
             if (path.filter !== undefined) {
-                qb.filter(
-                    new DataExpTranslatorToQeb(
-                        path.typeInfo,
-                        qb,
-                        schema
-                    ).translate(path.filter)
-                )
+                qb.filter({
+                    $at: {
+                        [schema]: new DataExpTranslatorToQeb(
+                            path.typeInfo,
+                            qb,
+                            schema
+                        ).translate(path.filter)
+                    }
+                })
             }
             for (const {relation, key} of path.relationKeys) {
                 relation.joinQeb("INNER", qb, schema, key);

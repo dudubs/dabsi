@@ -1,6 +1,6 @@
 import {Expression} from "../common/typings";
 import {DataOrder} from "../data/DataOrder";
-import {DataExp} from "../json-exp/DataExp";
+import {DataExp} from "../data/DataExp";
 
 export type QueryJoinType = "LEFT" | "INNER";
 

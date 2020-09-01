@@ -8,6 +8,10 @@ export function useStoreEffectWithDebounce<T>(
     callback: (state: T) => void) {
     const debounce = useDebounce();
     useStoreEffect(store, state => {
-        debounce.wait(ms).then(() => callback(state))
+        debounce.wait(ms).then(ignore => {
+            if(!ignore) {
+                callback(state)
+            }
+        })
     })
 }

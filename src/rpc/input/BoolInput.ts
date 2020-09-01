@@ -1,5 +1,6 @@
-import {Input} from "./Input";
 import {NoRpc} from "../NoRpc";
+import {BoolInputContext} from "./BoolInputContext";
+import {Input} from "./Input";
 
 export type BoolInput = Input<{
     Data: boolean,
@@ -7,7 +8,7 @@ export type BoolInput = Input<{
     Config: {
         default: boolean,
     },
-    Static: {},
+    Props: {},
     Element: boolean
     Error: undefined,
     Controller: NoRpc
@@ -16,12 +17,8 @@ export type BoolInput = Input<{
 
 export function BoolInput(): BoolInput {
     return Input({
-        static: {},
+        props: {},
         controller: NoRpc,
-        createContext: config => ({
-            getControllerConfig: () => null,
-            loadAndCheck: data => ({value: Boolean(data)}),
-            getElement: () => config.default
-        }),
+        getContextClass: () => BoolInputContext,
     })
 }

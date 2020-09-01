@@ -19,3 +19,6 @@ export function renderer(component, defaultProps?) {
 }
 
 
+export function Renderer<P>(Component: ComponentType<P>): Renderer<P> {
+    return props => createElement(Component, props)
+}

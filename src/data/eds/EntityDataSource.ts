@@ -54,7 +54,7 @@ export class EntityDataSource<T> extends DataSource<T> {
     constructor(
         public mainEntityType: Type<T>,
         public options: EntityDataSourceOptions<any> = {},
-        public readonly cursor: DataCursor
+        public  cursor: DataCursor
     ) {
         super();
     }

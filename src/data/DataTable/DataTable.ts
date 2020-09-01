@@ -1,10 +1,9 @@
 import {ReactNode} from "react";
 import {MuiIcon} from "../../browser/mui/MuiIcon";
 import {Awaitable} from "../../common/typings";
-import {DataExp} from "../DataExp";
 import {LangNode} from "../../localization/Lang";
-import {AfterMount} from "../../react/utils/LifecycleHooks";
 import {State} from "../../react/utils/State";
+import {DataExp} from "../DataExp";
 import {AbstractDataList, AbstractDataListProps} from "../DataList/AbstractDataList";
 import {DataOrder} from "../DataOrder";
 import {DataRow} from "../DataRow";
@@ -53,7 +52,7 @@ export type DataTableColumnProps<T> = {
     sortable?: boolean;
     title?: LangNode;
     empty?: LangNode;
-    render?(props: { item: DataRow<T>, data: any },table:DataTable<T, any>): ReactNode;
+    render?(props: { item: DataRow<T>, data: any }, table: DataTable<T, any>): ReactNode;
     renderContainer?(children: ReactNode): ReactNode
 };
 
@@ -116,7 +115,12 @@ export abstract class DataTable<T,
         return <any>super.getQuerySource().addFields(fields)
     }
 
-    @AfterMount()
+    async componentDidMount() {
+         super.componentDidMount?.();
+        this.buildActions()
+        await this.reload();
+    }
+
     protected buildActions() {
         const {multipleActions, singleActions} = this;
 

@@ -20,8 +20,7 @@ export function DataSelector<T, S extends DataSelection<T>>(
     };
 
     Selector.select = function (source: DataSource<any>) {
-        return source.withCursor({
-            ...source.cursor,
+        return source.updateCursor({
             selection: DataSelection.merge(
                 source.cursor.selection,
                 <any>selection

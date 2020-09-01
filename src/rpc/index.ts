@@ -9,7 +9,7 @@
     )
 
     FormArrayField(
-        DataInput<Group>()
+        DataSelectInput<Group>()
     )
 
 

@@ -7,7 +7,7 @@ import {DataUnionChildren, DataUnionChildrenKey} from "./DataUnion";
 import {IfRelationToMany, IfRelationToOne, NonRelationKeys, RelationKeys, RelationTypeAt} from "./Relation";
 
 
-type _PossibleKeysToPick<T> =
+export type DataPickableKeys<T> =
     Exclude<NonRelationKeys<T>,
         DataUnionChildrenKey>;
 
@@ -28,7 +28,7 @@ export type DataSelection<T> =
     {
 
         // rename to get
-        pick?: readonly _PossibleKeysToPick<T>[];
+        pick?: readonly DataPickableKeys<T>[];
 
         fields?: Record<string, DataExp<T>>;
 

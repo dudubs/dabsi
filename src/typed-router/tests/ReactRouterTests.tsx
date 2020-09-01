@@ -16,7 +16,7 @@ testm(__filename, () => {
     let tester: ReactTestRenderer;
 
     const router = Router()
-        .extend(ReactRouter)
+        .use(ReactRouter)
         .route({
             a: Router({
                 aa: Router({}),
@@ -27,53 +27,52 @@ testm(__filename, () => {
             }),
         });
 
+    router.at("a").wrap(props => {
+        return <>wrap {props.children}</>
+    });
+
+    router.at("b").renderDefault(props => {
+        return <>default {props.location.path} of {props.rootPath}</>
+    })
+
+    router.render(props => {
+        return <>index</>
+    });
+
     router.at("a").at("aa").render(props => {
         return <>hello</>
     });
 
-    router.at("a").wrap(props => {
-        return <>wrap {props.children}</>
-    })
-
-    router.at("b").renderDefault(props => {
-        return <>
-            default {props.location.path}
-            of {props.route.location.path}
-        </>
-    })
-
     beforeAll(async () => {
         history = createMemoryHistory();
 
-        router.render(props => {
-            return <>index</>
-        });
-        tester = TestRenderer.create(
-            <ReactRouterView
-                history={history} router={router}>
-                <ReactRouterContentView/>
-            </ReactRouterView>
-        )
+
+        try {
+            tester = TestRenderer.create(
+                <ReactRouterView
+                    history={history} router={router}>
+                    <ReactRouterContentView/>
+                </ReactRouterView>
+            )
+        } catch (error) {
+            console.log({error});
+        }
         await Timeout(0);
     });
 
     it('expect to default b of b', async () => {
-        expect(await pushAndGetJSON('/b/hello')).toEqual([
-            "default ", "/b", "of ", "/b"
-        ]);
+        expect(await pushAndGetJSON('/b/hello')).toEqual("default /b of /b/hello");
     })
 
 
     it('expect to default b of ba', async () => {
-        expect(await pushAndGetJSON('/b/ba/hello')).toEqual([
-            "default ", "/b", "of ", "/b/ba"
-        ]);
+        expect(await pushAndGetJSON('/b/ba/hello'))
+            .toEqual("default /b/ba of /b/ba/hello");
     })
 
     it('expect to wrapper', async () => {
-        expect(await pushAndGetJSON("/a/aa")).toEqual([
-            "wrap ", "hello"
-        ]);
+        expect(await pushAndGetJSON("/a/aa"))
+            .toEqual("wrap hello");
     })
 
     async function pushAndGetJSON(path: string) {
@@ -81,7 +80,7 @@ testm(__filename, () => {
         history.push(path);
         await Timeout(0)
 
-        return tester.toJSON() as any
+        return (tester.toJSON() as any).join('') as any
     }
 
 });
@@ -90,7 +89,7 @@ testm(__filename, () => {
 function typingTests() {
 
     const router = Router()
-        .extend(ReactRouter)
+        .use(ReactRouter)
         .route({
             a: Router({
                 aa: Router({

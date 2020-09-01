@@ -1,50 +1,55 @@
 import {useMemo} from "react";
+import {Waiter} from "../../../common/async/Waiter";
 
 export type Debounce = {
-    isPending(): boolean,
-    wait(ms?: number, cancel?: boolean): Promise<void>;
+    wait(ms?: number): Promise<boolean>;
     cancel(): void;
     resolve(): void;
 };
 
+
 export function Debounce(defaultMs: number = 1000): Debounce {
-    let counter = 0;
-    let isPending = false;
+
     let timeout: ReturnType<typeof setTimeout> | undefined;
-    let lastResolve: any;
+    let lastWaiter: Waiter<boolean> | undefined = undefined;
     return {
-        isPending(): boolean {
-            return isPending
-        },
-        cancel: () => {
-            counter++;
-            if (timeout !== undefined)
-                clearTimeout(timeout);
-        },
+
+        cancel,
         resolve: () => {
-            timeout && clearTimeout(timeout);
-            timeout = undefined;
-            lastResolve?.();
-        },
-        wait: (ms = defaultMs, cancel = false) => {
-            if (cancel) {
-                counter++;
+            if(timeout!==undefined) {
+                clearTimeout(timeout);
+                timeout = undefined;
             }
+            const waiter = lastWaiter;
+            lastWaiter = undefined;
+            waiter?.resolve(false);
+        },
+        wait: (ms = defaultMs) => {
+            cancel();
+
             if (timeout !== undefined) {
                 clearTimeout(timeout);
             }
-            const id = ++counter;
-            isPending = true;
-            return new Promise<void>(resolve => {
-                lastResolve = resolve;
-                timeout = setTimeout(() => {
-                    if (id === counter) {
-                        isPending = false;
-                        lastResolve = undefined;
-                        resolve();
-                    }
-                }, ms);
-            });
+
+            const waiter = lastWaiter = Waiter();
+
+            timeout = setTimeout(() => {
+                timeout = undefined;
+                waiter.resolve(lastWaiter !== waiter);
+            }, ms);
+
+            return waiter;
+
+        }
+    }
+
+    function cancel() {
+        const waiter = lastWaiter;
+        lastWaiter = undefined;
+        waiter?.resolve(true);
+        if (timeout !== undefined) {
+            clearTimeout(timeout);
+            timeout = undefined;
         }
     }
 }

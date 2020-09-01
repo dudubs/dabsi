@@ -1,3 +1,4 @@
+// TODO: DataSource.clone(), DataSource.freeze()
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
 import {ArrayTypeOrObject} from "../../common/typings";
@@ -8,7 +9,7 @@ import {DataFields, DataFieldsRow} from "../DataFields";
 import {DataKey, DataKeyInput} from "../DataKey";
 import {DataNullsSort, DataOrder, DataSort} from "../DataOrder";
 import {DataRow} from "../DataRow";
-import {AnyDataSelection, DataSelection} from "../DataSelection";
+import {AnyDataSelection, DataPickableKeys, DataSelection} from "../DataSelection";
 import {DataSelectionRow} from "../DataSelectionRow";
 import {DataUnionChildren} from "../DataUnion";
 import {RelationKeys} from "../Relation";
@@ -31,6 +32,7 @@ export type DataRowOfSource<T extends DataSource<any>> =
 export abstract class DataSource<T> {
 
 
+    // TODO: rename to getCountAndRows
     async countAndQuery(): Promise<[number, DataRow<T>[]]> {
         // TODO: Optimizing
         return [
@@ -43,8 +45,7 @@ export abstract class DataSource<T> {
     abstract items(): Promise<DataRow<T>[]>;
 
     next(pageSize: number): DataSource<T> {
-        return this.withCursor({
-            ...this.cursor,
+        return this.updateCursor({
             skip: this.cursor.skip + pageSize
         })
     }
@@ -55,8 +56,7 @@ export abstract class DataSource<T> {
     }
 
     selectKeys(): DataSource<{}> {
-        return this.withCursor({
-            ...this.cursor,
+        return this.updateCursor({
             selection: {
                 pick: [],
                 fields: {},
@@ -68,11 +68,12 @@ export abstract class DataSource<T> {
 
 
     async* find(pageSize = 10): AsyncIterableIterator<DataRow<T>> {
-        let source: DataSource<T> = this.withCursor({
-            ...this.cursor,
-            skip: 0,
-            take: pageSize
-        });
+        let source: DataSource<T> = this
+            .createAsMutable()
+            .updateCursor({
+                skip: 0,
+                take: pageSize
+            });
 
         while (true) {
             const rows = await source.items();
@@ -207,17 +208,63 @@ export abstract class DataSource<T> {
 
     // cursoring
 
-    abstract readonly cursor: DataCursor;
+    abstract cursor: DataCursor;
 
-    abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
+    protected abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
+
+    // asMutable()
+    // asImmutable()
+
+    protected isImmutable = true;
+
+    asImmutable() {
+        if (this.isImmutable)
+            return this;
+        const source = this.clone();
+        source.isImmutable = true;
+        return source;
+    }
+
+    clone(): DataSource<T> {
+        return this.withCursor({...this.cursor})
+    }
+
+    createAsMutable(): DataSource<T> {
+        return this.clone().asMutable()
+    }
+
+    asMutable() {
+        if (!this.isImmutable)
+            return this;
+        const source = this.clone();
+        source.isImmutable = false;
+        return source;
+    }
+
+    updateCursor<U = T>(callbackOrCursor: ((cursor: DataCursor) => DataCursor) | Partial<DataCursor>): DataSource<U> {
+        if (this.isImmutable) {
+
+            return this.withCursor<U>(
+                typeof callbackOrCursor === "function" ?
+                    callbackOrCursor({...this.cursor}) :
+                    {...this.cursor, ...callbackOrCursor}
+            );
+        } else {
+            if (typeof callbackOrCursor === "function") {
+                this.cursor = callbackOrCursor(this.cursor);
+            } else {
+                Object.assign(this.cursor, callbackOrCursor)
+            }
+            return <any>this;
+        }
+    }
 
     as<K extends string & keyof Children, Children>(
         this: DataSource<DataUnionChildren<Children>>,
         type: K
     ): DataSource<Children[K]> {
 
-        return this.withCursor({
-            ...this.cursor,
+        return this.updateCursor({
             type
         })
     }
@@ -241,11 +288,11 @@ export abstract class DataSource<T> {
     }
 
     skip(count: number): DataSource<T> {
-        return this.withCursor({...this.cursor, skip: count})
+        return this.updateCursor({skip: count})
     }
 
     take(count: number): DataSource<T> {
-        return this.withCursor({...this.cursor, take: count})
+        return this.updateCursor({take: count})
     }
 
 
@@ -253,13 +300,13 @@ export abstract class DataSource<T> {
     order(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>
     order(expOrOrders, sort?, nulls?) {
         if (typeof sort === "string")
-            return this.withCursor({
-                ...this.cursor, order: [
+            return this.updateCursor({
+                order: [
                     ...this.cursor.order,
                     {by: expOrOrders, sort: <DataSort>sort, nulls}
                 ]
             })
-        return this.withCursor({...this.cursor, order: expOrOrders})
+        return this.updateCursor({order: expOrOrders})
     }
 
 
@@ -267,8 +314,7 @@ export abstract class DataSource<T> {
         this: DataSource<T>,
         selection: S
     ): DataSource<DataSelectionRow<T, S>> {
-        return this.withCursor({
-            ...this.cursor,
+        return this.updateCursor({
             selection: DataSelection.merge(
                 this.cursor.selection,
                 <AnyDataSelection>selection
@@ -276,11 +322,25 @@ export abstract class DataSource<T> {
         })
     }
 
-    pick<T, Fields extends DataFields<T>>(this: DataSource<T>,
-                                          fields: Fields):
-        DataSource<DataFieldsRow<T, Fields>> {
-        return <any>this.select({
-            pick: [],
+    pick<T, Fields extends DataFields<T>>(this: DataSource<T>, fields: Fields):
+        DataSource<DataSelectionRow<T, { pick: readonly never[], fields: Fields }>>
+    pick<T, K extends DataPickableKeys<T>>(this: DataSource<T>, keys: readonly K[]):
+        DataSource<DataSelectionRow<T, { pick: K[] }>>
+    pick<T, K extends DataPickableKeys<T>,
+        Fields extends DataFields<T>>(this: DataSource<T>, keys: readonly K[], fields: Fields):
+        DataSource<DataSelectionRow<T, { pick: K[], fields: Fields }>>
+
+    pick(this: DataSource<T>, keysOrFields, maybeFields?): any {
+        let fields;
+        let keys;
+
+        if (Array.isArray(keysOrFields)) {
+            [keys, fields] = [keysOrFields, fields || {}];
+        } else {
+            [keys, fields] = [[], maybeFields];
+        }
+        return this.select({
+            pick: keys,
             fields
         })
     }
@@ -290,8 +350,7 @@ export abstract class DataSource<T> {
         fields: Fields):
         DataSource<T & DataFieldsRow<T, Fields>> {
 
-        return this.withCursor({
-            ...this.cursor,
+        return this.updateCursor({
             selection: DataSelection.merge(
                 this.cursor.selection,
                 {fields}
@@ -303,9 +362,9 @@ export abstract class DataSource<T> {
         const filter = DataExp({$and: exps});
         if (typeof filter === "undefined")
             return this;
-        return this.withCursor({
-            ...this.cursor,
-            filter: DataExp(this.cursor.filter, filter)
+        return this.updateCursor(cursor => {
+            cursor.filter = DataExp(this.cursor.filter, filter);
+            return cursor;
         })
 
     }

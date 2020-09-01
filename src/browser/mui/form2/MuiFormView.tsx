@@ -8,7 +8,7 @@ import {AnyInput} from "../../../rpc/input/Input";
 import {MuiButton, MuiButtonProps} from "../components/MuiButton";
 
 export type MuiFormViewProps<T extends TForm> =
-    Omit<FormViewProps<T>, "children"> & {
+    FormViewProps<T> & {
 
     MuiSubmitButtonProps?: Partial<MuiButtonProps>;
     MuiResetButtonProps?: Partial<MuiButtonProps>;

@@ -19,3 +19,5 @@ export function renderTable(table: AnyMuiDataTable) {
     </>
 }
 
+
+

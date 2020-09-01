@@ -1,5 +1,7 @@
 import {Awaitable} from "../common/typings";
+import {FormContext} from "./FormContext";
 import {AnyInput, InputType} from "./input/Input";
+import {RpcConnection} from "./Rpc";
 import {Widget} from "./Widget";
 
 export type TForm = {
@@ -8,12 +10,15 @@ export type TForm = {
     Error: any
 };
 
-export type TFormRpc<T extends TForm> = {
+
+
+export type Form<T extends TForm> = Widget<{
     Handler: {
         submit(data: InputType<T['Input']>['Data']):
             FormSubmitResult<T>;
     }
     Connection: {
+        input: RpcConnection<T['Input']>
         submit(data: InputType<T['Input']>['Data']):
             Promise<FormSubmitResult<T>>;
     }
@@ -26,15 +31,12 @@ export type TFormRpc<T extends TForm> = {
 
     Controller: T['Input']
 
-    Static: {
+    Props: {
         TForm?: T;
         input: T['Input']
     }
     Context: {}
-};
-
-export type Form<T extends TForm> = Widget<TFormRpc<T>>;
-
+}>;
 
 export type TFormArgs<Input extends AnyInput, Value, Error> = {
     Value: Value, Error: Error, Input: Input
@@ -54,8 +56,8 @@ export function Form<Value = null, Error = never>():
     }> {
     return input => Widget({
         controller: input,
-        static: {input},
-        handlers: {
+        props: {input},
+        handler: {
             submit: async (context, data) => {
                 const result = await input
                     .getContext(context.config.input)
@@ -65,15 +67,12 @@ export function Form<Value = null, Error = never>():
                 return context.config.submit(result.value);
             }
         },
-        createConnection: handler => ({
+        getContextClass: () => FormContext,
+        createConnection: ({handler, controller}) => ({
+            input: controller,
             submit: data => handler(["submit", data])
         }),
-        createContext: config => ({
-            getControllerConfig: () => config.input,
-            getElement: () => input
-                .getContext(config.input)
-                .getElement(),
-        }),
+
     })
 }
 

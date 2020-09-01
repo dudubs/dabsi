@@ -1,7 +1,7 @@
-import {Rpc, RpcHandler} from "./Rpc";
+import {Rpc, RpcHandlerFn} from "./Rpc";
 
 export type NoRpc = Rpc<{
-    Handler: RpcHandler<null, null>,
+    Handler: RpcHandlerFn<null, null>,
     Connection: null,
     Config: null
 }>;

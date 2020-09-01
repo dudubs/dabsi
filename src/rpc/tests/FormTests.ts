@@ -1,6 +1,6 @@
+import {Form} from "../Form";
 import {InputMap} from "../input/InputMap";
 import {TextInput} from "../input/TextInput";
-import {Form} from "../Form";
 import {connectToRpc} from "../Rpc";
 import objectContaining = jasmine.objectContaining;
 
@@ -23,7 +23,7 @@ testm(__filename, () => {
                 text: " hello "
             }))
             .toEqual(objectContaining({
-                type: "result", value: "HELLO"
+                value: "HELLO"
             }));
     })
 

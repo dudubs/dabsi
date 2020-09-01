@@ -4,7 +4,7 @@ import {SymbolMap} from "../../common/map/SymbolMap";
 
 const didMount = Symbol('didMount');
 
-const setStateCalled = Symbol('setStateCalled');
+const didSetState = Symbol('setStateCalled');
 
 const getState = BaseMapFactory(
     SymbolMap({name: "currentState"}),
@@ -24,7 +24,7 @@ export const State = <K extends PropertyKey = never>(method?: K) =>
             }
         }
 
-        target[setStateCalled] = false;
+        target[didSetState] = false;
         Object.defineProperty(target, prop, {
             get() {
                 return getState(this)[prop];
@@ -36,9 +36,9 @@ export const State = <K extends PropertyKey = never>(method?: K) =>
                 // @ts-ignore
                 method && this?.[method](prop);
 
-                if (this[didMount] && !this[setStateCalled]) {
+                if (this[didMount] && !this[didSetState]) {
                     this.setState(state => {
-                        this[setStateCalled] = false;
+                        this[didSetState] = false;
                         return {...state, ...getState(this)}
                     })
                 }

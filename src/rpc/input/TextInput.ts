@@ -1,6 +1,8 @@
 import {Awaitable} from "../../common/typings";
 import {NoRpc} from "../NoRpc";
+import {WidgetContextClass} from "../Widget";
 import {Input, InputType} from "./Input";
+import {TextInputContext} from "./TextInputContext";
 
 
 export type TextInput<Error> = Input<{
@@ -13,7 +15,7 @@ export type TextInput<Error> = Input<{
 
     Controller: NoRpc,
 
-    Static: TextInputOptions,
+    Props: TextInputOptions,
 
 
     Config: null | {
@@ -52,27 +54,10 @@ export function checkTextInput(
 export function TextInput<Error>(
     options: TextInputOptions = {}
 ): TextInput<Error> {
-    return Input({
-        static: options,
+    return Input<TextInput<Error>>({
+        props: options,
         controller: NoRpc,
-        createContext: config => ({
-            getControllerConfig: () => null,
-            loadAndCheck: async data => {
-                let value = String(data || "");
-                if (options.trim) {
-                    value = value.trim();
-                }
-                if (options.pattern && !options.pattern.test(value)) {
-                    return {error: "INVALID_PATTERN"}
-                }
-                const error = await config?.check?.(value);
-                if (error)
-                    return {error};
-
-                return {value}
-            },
-            getElement: () => config?.default || ""
-        }),
+        getContextClass: () => TextInputContext,
 
     })
 }

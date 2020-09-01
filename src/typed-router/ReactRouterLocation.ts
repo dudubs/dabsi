@@ -1,12 +1,13 @@
 import {History} from "history";
 import {joinUrl} from "../../server/tests/joinUrl";
 import {Lazy} from "../common/patterns/lazy";
-import {HasKeys, IfNever, Pluck} from "../common/typings";
+import {Assign, HasKeys, IfNever, Pluck} from "../common/typings";
 import {createUndefinedContext} from "../react/utils/hooks/createUndefinedContext";
+import {useDefinedContext} from "../react/utils/hooks/useDefinedContext";
 import {getNextPath} from "../router/utils/getNextPath";
 import {TReactRouter} from "./ReactRouter";
 import {ReactRouterError} from "./ReactRouterError";
-import {Router, RouterAt, RouterType} from "./Router";
+import {Router, RouterAt, RouterType, TRouter} from "./Router";
 
 export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
     constructor(
@@ -78,37 +79,49 @@ export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
         this.history.push(this.path);
     }
 
-    route(path: string): ReactRouterRoute {
-        const [name, pathAfterName] = getNextPath(path);
-        if (!name) {
-            return {type: 'index', location: this, path}
-        }
-        if (!(name in this.router.children)) {
-            return {type: 'default', location: this, path}
-        }
-        const router = this.router.at(name);
-        let params = {};
-        let pathAfterParams = pathAfterName;
-        for (const name of router.params) {
-            let value: string;
-            [value, pathAfterParams] = getNextPath(pathAfterParams);
-            if (!value) {
-                return {type: 'param', name, location: this}
+    route(path: string): ReactRouterRouteProps {
+        const rootPath = path;
+        let location: ReactRouterLocation = this;
+        while (true) {
+            const nextPath = path;
+            let name: string;
+            [name, path] = getNextPath(path);
+            if (!name) {
+                return {type: 'index', location, rootPath}
             }
-            params[name] = value;
+            if (!(name in location.router.children)) {
+                return {type: 'default', location, rootPath, nextPath}
+            }
+            const router = location.router.at(name);
+            let params = {};
+            for (const name of router.params) {
+                let value: string;
+                [value, path] = getNextPath(path);
+                if (!value) {
+                    return {type: 'param', name, location, rootPath}
+                }
+                params[name] = value;
+            }
+            location = new ReactRouterLocation(
+                location, name, location.history, router, params
+            )
         }
-        const location = new ReactRouterLocation(
-            this, name, this.history, router, params
-        )
-        return location.route(pathAfterParams)
     }
+
 }
 
-export const ReactRouterRouteContext =
-    createUndefinedContext<ReactRouterRoute>();
+export const ReactRouterRoutePropsContext =
+    createUndefinedContext<ReactRouterRouteProps>();
 
-export type ReactRouterRoute = {
-    type: 'index' | 'default',
-    path: string,
-    location: ReactRouterLocation
-} | { type: 'param', name: string, location: ReactRouterLocation };
+export function useRouterRouteProps<T extends TRouter>(): ReactRouterRouteProps<T & TReactRouter> {
+    return <any>useDefinedContext(ReactRouterRoutePropsContext)
+}
+
+export type ReactRouterRouteProps<T extends TReactRouter = TReactRouter, Base = {
+    rootPath: string
+    location: ReactRouterLocation<T>
+}> =
+    | (Base & { type: 'index', })
+    | (Base & { type: 'default', nextPath: string })
+    | (Base & { type: 'param', name: string });
+

@@ -28,7 +28,7 @@ export class EventBinder<T> {
 
     once<K extends keyof T>(key: string & K, callback: EventCallback<T[K]>): this {
         const _this = this;
-        this.on(key, function _callback() {
+        this.on(key, function _callback(this: any) {
             _this.off(key, _callback);
             callback.apply(this, arguments);
         })
@@ -45,7 +45,7 @@ export class EventBinder<T> {
 
     emit<K extends keyof T>(key: string & K, ...args: EventArgs<T[K]>): this {
 
-        const event = {type: key,  args};
+        const event = {type: key, args};
 
         for (let listener of this.listeners) {
             listener(<any>event);

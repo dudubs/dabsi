@@ -1,9 +1,9 @@
 import {ReactElement} from "react";
 import {Awaitable} from "../../common/typings";
 import {ViewState} from "../../react/view/ViewState";
-import {BaseInputView} from "./BaseInputView";
+import {WidgetType} from "../Widget";
 import {InputType} from "./Input";
-import {InputViewProps} from "./InputView";
+import {InputView, InputViewProps} from "./InputView";
 import {BoolInput} from "./TextInput";
 
 
@@ -14,20 +14,17 @@ export type BoolInputViewProps = InputViewProps<BoolInput> & {
 
 
 export class BoolInputView
-    extends BaseInputView<BoolInput, BoolInputViewProps> {
+    extends InputView<BoolInput, BoolInputViewProps> {
 
     @ViewState() value: boolean;
 
+    protected updateElement(element: WidgetType<BoolInput>["Element"] | undefined) {
+        this.value = element ?? false;
+    }
 
     getValidData(): Awaitable<InputType<BoolInput>["Data"]> {
         return this.value;
     }
-
-    setBaseElement(element: InputType<BoolInput>["Element"] | null) {
-
-        this.value = element ?? false;
-    }
-
 
     renderView(): React.ReactNode {
         return this.props.children(this)

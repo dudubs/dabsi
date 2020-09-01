@@ -1,7 +1,8 @@
-import {mapObject} from "../common/object/mapObject";
+import {entries} from "../common/object/entries";
 import {MappedRpc} from "./MappedRpc";
-import {RpcConfigType, RpcConnectionType} from "./Rpc";
+import {RpcConfig, RpcConnection} from "./Rpc";
 import {AnyWidget, TWidget, Widget, WidgetType} from "./Widget";
+import {WidgetMapContext} from "./WidgetMapContext";
 
 export type AnyWidgetMap = Record<string, AnyWidget>;
 
@@ -12,52 +13,22 @@ export type MapWidgets<T extends AnyWidgetMap,
 
 export type WidgetMap<T extends AnyWidgetMap> = Widget<{
     Controller: MappedRpc<T>
-    Config: RpcConfigType<MappedRpc<T>>
+    Config: RpcConfig<MappedRpc<T>>
     Element: MapWidgets<T, 'Element'>
     Context: {}
-    Connection: {}
+    Connection: RpcConnection<MappedRpc<T>>
     Handler: {}
-    Static: { items: T }
+    Props: { items: T }
 }>;
 
 
 export function WidgetMap<T extends AnyWidgetMap>(items: T): WidgetMap<T> {
     return Widget({
         controller: MappedRpc(items),
-        static: {items},
-        handlers: {},
-        createConnection: handler => ({}),
-        createContext: config => {
-            return {
-                getControllerConfig: () => config,
-                getElement: ():any => {
-                    return mapObject(items, (widget, key) => {
-                        return widget
-                            .getContext(config[key])
-                            .getElement()
-                    })
-                }
-            }
-        }
+        props: {items},
+        handler: {},
+        getContextClass: () => WidgetMapContext,
+        createConnection: props => props.controller,
+
     })
 }
-
-
-/*
-
-
-
-WidgetMap({
-
-    addUserTo: ....
-
-})
-
-
-
-
-
-
-
-
- */

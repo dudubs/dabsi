@@ -2,7 +2,7 @@ import {entries} from "../../common/object/entries";
 import {hasKeys} from "../../common/object/hasKeys";
 import {mapObjectToArray} from "../../common/object/mapObjectToArray";
 import {Renderer} from "../../react/renderer";
-import {ViewState} from "../../react/view/ViewState";
+import {WidgetType} from "../Widget";
 import {DataInputMap} from "./DataInputMap";
 import {AnyInput, InputType} from "./Input";
 import {InputError} from "./InputError";
@@ -16,7 +16,6 @@ export class DataInputMapView<T extends AnyInput>
     extends InputView<DataInputMap<T>, DataInputMapViewProps<T>> {
 
     inputs: Record<string, InputView<T>> = {};
-
 
     async getValidData(): Promise<InputType<DataInputMap<T>>["Data"]> {
         const errors = {};
@@ -37,25 +36,15 @@ export class DataInputMapView<T extends AnyInput>
         return data;
     }
 
-    @ViewState() element = this.props.element || {};
 
-    setElement(element: InputType<DataInputMap<T>>["Element"] | null): void {
-
-        this.element = element || {};
-
-        for (let [key, input] of entries(this.inputs)) {
-            input.setElement(element?.[key]);
-        }
-    }
-
-    setError(error: InputType<DataInputMap<T>>["Error"] | null) {
+    protected updateError(error: InputType<DataInputMap<T>>["Error"] | undefined) {
         for (let [key, input] of entries(this.inputs)) {
             input.setError(error?.[key]);
         }
     }
 
     renderView(): React.ReactNode {
-        return mapObjectToArray(this.element, (element, key, index) => {
+        return mapObjectToArray(this.element || {}, (element, key, index) => {
             return this.props.input({
                 connection: this.props.connection.controller(key),
                 key,

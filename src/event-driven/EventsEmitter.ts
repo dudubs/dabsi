@@ -11,7 +11,7 @@ export function EventsEmitter<T>(): EventsEmitter<T> {
 
     return Emitter
 
-    function Emitter(type, ...args) {
+    function Emitter(this: any, type, ...args) {
         Emitter.callbacks.get(type)?.forEach(callback => {
             callback(...args);
         })

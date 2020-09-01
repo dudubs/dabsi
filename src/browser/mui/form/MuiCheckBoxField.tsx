@@ -33,8 +33,3 @@ export class MuiCheckBoxField
 }
 
 
-/*
-
-    LayoutOld.Default<AbstractTextFieldProps>
-    LayoutOld.Default(....)
- */

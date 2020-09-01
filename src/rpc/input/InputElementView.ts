@@ -1,42 +1,42 @@
 import {Awaitable} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
+import {EmptyFragment} from "../../react/utils/EmptyFragment";
+import {WidgetType} from "../Widget";
 import {AnyInput, InputType} from "./Input";
 import {ElementInput} from "./InputElement";
 import {InputView, InputViewProps} from "./InputView";
 
-export class InputElementView<E, T extends AnyInput> extends InputView<ElementInput<E, T>,
+export class InputElementView<E, T extends AnyInput>
+    extends InputView<ElementInput<E, T>,
     InputViewProps<ElementInput<E, T>> & {
     target: Renderer<[E, InputViewProps<T>]>
 }> {
 
-    input: InputView<T> | null = null;
+    target: InputView<T> | null;
 
     getValidData(): Awaitable<InputType<ElementInput<E, T>>["Data"]> {
-        return this.input?.getValidData();
+        return this.target?.getValidData();
     }
 
     renderView(): React.ReactNode {
-        if (this.props.element) {
-            const [target, element] = this.props.element;
-            return this.props.target([
-                target,
-                {
-                    connection: this.props.connection.controller,
-                    element,
-                    inputRef: input => {
-                        this.input = input;
-                    }
+        if (!this.element)
+            return EmptyFragment
+        const [target, element] = this.element;
+        return this.props.target([
+            target,
+            {
+                connection: this.props.connection.controller,
+                element,
+                inputRef: input => {
+                    this.target = input;
                 }
-            ]);
-        }
+            }
+        ]);
     }
 
-    setElement(element: InputType<ElementInput<E, T>>["Element"] | null): void {
-        return this.input?.setElement(element?.[1]);
-    }
 
-    setError(error: InputType<ElementInput<E, T>>["Error"] | null): void {
-        this.input?.setError(error);
+    protected updateError(error: InputType<ElementInput<E, T>>["Error"] | undefined): void {
+        this.target?.setError(error);
     }
 
 

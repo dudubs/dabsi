@@ -23,7 +23,7 @@ export function Lazy(callback?): any {
 }
 
 function lazyCallback(callback) {
-    return function () {
+    return function (this:any) {
         if (map.has(callback))
             return map.get(callback);
         const value = callback.apply(this, arguments);

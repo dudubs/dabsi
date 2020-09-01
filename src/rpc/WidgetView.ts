@@ -1,44 +1,41 @@
-import {Awaitable} from "../common/typings";
-import {AfterMountView, View} from "../react/view/View";
+import {View} from "../react/view/View";
 import {ViewState} from "../react/view/ViewState";
-import {RpcConnectionType} from "./Rpc";
-import {AnyWidget, WidgetType} from "./Widget";
+import {InputMap} from "./input/InputMap";
+import {RpcConnection} from "./Rpc";
+import {AnyWidget, WidgetElement} from "./Widget";
 
 export type WidgetViewProps<T extends AnyWidget> = {
 
-    connection: RpcConnectionType<T>
+    connection: RpcConnection<T>
 
-    element?: WidgetType<T>['Element']
+    element?: WidgetElement<T>
 
-    loadOnMount?: boolean;
 
 };
 
+
 export abstract class WidgetView<T extends AnyWidget,
-    P extends WidgetViewProps<T>>
+    P extends WidgetViewProps<T> = WidgetViewProps<T>>
     extends View<P> {
 
-    // protected abstract setElement(element: WidgetType<T>['Element'] | null): void;
 
-    abstract createEmptyElement(): WidgetType<T>['Element'];
+    @ViewState('forceUpdateElement') element: WidgetElement<T> | undefined;
 
+    protected updateElement?(element: WidgetElement<T> | undefined): void;
 
-    @ViewState() element: WidgetType<T>['Element'] = this.createEmptyElement();
-
-    @ViewState() isLoading = false;
-
-    constructor(props) {
-        super(props);
-        this.setElement(this.props.element);
+    forceUpdateElement() {
+        this.updateElement?.(this.element);
     }
 
-    async componentDidMount() {
-        super.componentDidMount();
-        if (this.props.loadOnMount) {
-            this.isLoading = true;
-            this.setElement(await this.props.connection.getElement())
-            this.isLoading = false;
+    shouldComponentUpdate(nextProps: Readonly<P>, nextState: Readonly<any>, nextContext: any): boolean {
+        if (nextProps.element !== this.props.element) {
+            this.element = nextProps.element;
+            this.updateElement?.(nextProps.element);
+            return true;
         }
+        return true;
     }
+
+
 
 }

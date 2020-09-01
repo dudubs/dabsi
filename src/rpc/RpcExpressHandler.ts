@@ -1,9 +1,9 @@
 import {Handler} from "express";
 import {inspect} from "../logging";
-import {RpcHandler} from "./Rpc";
+import {RpcHandlerFn} from "./Rpc";
 
-export function RpcExpressHandler<T extends RpcHandler>(
-    handler: RpcHandler
+export function RpcExpressHandler<T extends RpcHandlerFn>(
+    handler: RpcHandlerFn
 ): Handler {
     return async (req, res) => {
         // console.log(inspect(req.body, {depth: 100, colors: true}));

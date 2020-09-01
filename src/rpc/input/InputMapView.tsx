@@ -2,12 +2,14 @@ import React, {Fragment} from "react";
 import {entries} from "../../common/object/entries";
 import {hasKeys} from "../../common/object/hasKeys";
 import {mapObjectToArray} from "../../common/object/mapObjectToArray";
+import {values} from "../../common/object/values";
 import {Renderer} from "../../react/renderer";
 import {ViewState} from "../../react/view/ViewState";
-import {AnyInputMap, InputType} from "./Input";
+import {WidgetElement, WidgetType} from "../Widget";
+import {InputType} from "./Input";
 import {InputError} from "./InputError";
+import {AnyInputMap, InputMap} from "./InputMap";
 import {InputView, InputViewProps} from "./InputView";
-import {InputMap} from "./InputMap";
 
 
 export type InputMapViewProps<T extends AnyInputMap> =
@@ -40,19 +42,17 @@ export class InputMapView<T extends AnyInputMap>
         return data;
     }
 
-    setError(error: InputType<InputMap<T>>["Error"] | null): void {
+
+    protected updateError(error: InputType<InputMap<T>>["Error"] | undefined) {
         for (let [key, field] of entries(this.fields)) {
             field?.setError(error?.[key])
         }
     }
 
-    @ViewState() element: InputType<InputMap<T>>["Element"];
-
-    setElement(element: InputType<InputMap<T>>["Element"] | null) {
-        this.element = element || ({} as NonNullable<typeof element>);
-
-        for (const [key, field] of entries(this.fields)) {
-            field.setElement(element?.[key])
+    reset() {
+        super.reset();
+        for (let field of values(this.fields)) {
+            field?.reset()
         }
     }
 
@@ -64,7 +64,7 @@ export class InputMapView<T extends AnyInputMap>
                 {renderer({
                     key,
                     connection: this.props.connection.controller[key],
-                    element: this.element[key],
+                    element: this.element?.[key],
                     inputRef: field => {
                         if (field) {
                             this.fields[key] = field;

@@ -5,11 +5,9 @@ import {InputType} from "../../../rpc/input/Input";
 import {TextInput} from "../../../rpc/input/TextInput";
 import {TextInputView, TextInputViewProps} from "../../../rpc/input/TextInputView";
 
-export type MuiTextInputViewProps<Error> =
-    Omit<TextInputViewProps<Error>, "children"> & {
+export type MuiTextInputViewProps<Error> = TextInputViewProps<Error> & {
     label?: ReactNode
     TextFieldProps?: Partial<TextFieldProps>;
-    renderError?(error: InputType<TextInput<Error>>['Error']): ReactNode;
 
 };
 

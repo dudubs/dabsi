@@ -1,4 +1,5 @@
 import {defined} from "../common/object/defined";
+import {Assign, IfNever, IsNever, Pluck} from "../common/typings";
 import {inspect} from "../logging";
 
 export type TRouter = {
@@ -9,6 +10,7 @@ export type TRouter = {
     stack: Record<string, TRouter>
 
     routerType: typeof RouterType;
+
 
 }
 
@@ -31,7 +33,9 @@ export type Router<T extends TRouter = TEmptyRouter> = {
 
     children: Record<string, Router<TRouter & Pick<T, 'routerType'>>>
 
-    parent?: AnyRouter;
+    parent?: Router<Assign<T, { params: any }>>;
+
+    name?: string;
 
 } & T['routerType'];
 
@@ -73,13 +77,14 @@ export function Router(...args): AnyRouter {
 export type AnyRouter = Router<TRouter>;
 
 export type RouterType<T extends AnyRouter> =
-    T extends Router<infer U> ? U : never;
+    NonNullable<T['TRouter']>;
 
 export type RouterAt<T extends TRouter, K extends keyof T['children']> =
     Router<T['children'][K] & {
         parent: T
         routerType: T['routerType']
-        stack: T['stack'] & Record<K, T['children'][K]>
+        stack: T['stack'] & Record<K, T['children'][K]>,
+        root: IfNever<Pluck<T, 'root'>, T>
     }>
 
 
@@ -98,7 +103,7 @@ export namespace RouterType {
     }
 
 
-    export function extend<T extends TRouter, U extends object>(
+    export function use<T extends TRouter, U extends object>(
         this: Router<T>,
         type: U
     ): Router<T & { routerType: U }> {
@@ -122,9 +127,10 @@ export namespace RouterType {
         }
 
         child = this.children[name] = Router(child.params, child.children)
-            .extend(child.routerType)
-            .extend(this.routerType)
+            .use(child.routerType)
+            .use(this.routerType)
         child.parent = this;
+        child.name = name;
 
         return <any>child;
     }
@@ -140,7 +146,8 @@ export namespace RouterType {
     }
 
 
-    export function apply<T extends TRouter>(this: Router<T>, plugins: ReactRouterPlugin<T>[]): Router<T> {
+    export function apply<T extends TRouter>(this: Router<T>, plugins:
+        ((router: Router<T>) => void)[]): Router<T> {
         for (const plugin of plugins) {
             plugin(this)
         }
@@ -149,15 +156,25 @@ export namespace RouterType {
 
     export function plugin<T extends TRouter>(
         this: Router<T>,
-        callback: ReactRouterPlugin<T>
-    ): ReactRouterPlugin<T> {
-        return callback;
+        callback: (router:Router<T>)=>void
+    ): RouterPlugin<T> {
+        if (this.parent) {
+            return this.parent.plugin(router => {
+                callback(<any>router.at(<any>this.name))
+            })
+        }
+        return <any>callback;
     }
 
-    export function toString(children: AnyRouter) {
+    export function toString(this: AnyRouter, children: AnyRouter) {
         return `Router(${inspect(this.params)},${inspect(this.children)})`
     }
+
 }
 
-export type ReactRouterPlugin<T extends TRouter> = (router: Router<T>) => void;
+export type RouterPlugin<T extends TRouter> = (router: Router<Extract<IfNever<Pluck<T, 'root'>, T>, TRouter>>) => void;
+
+
 Router.prototype = RouterType;
+
+

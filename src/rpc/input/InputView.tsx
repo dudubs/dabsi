@@ -1,7 +1,8 @@
+import {ReactNode} from "react";
 import {Awaitable} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
-import {AfterMountView, BeforeUnmountView, View} from "../../react/view/View";
-import {WidgetViewProps} from "../WidgetView";
+import {ViewState} from "../../react/view/ViewState";
+import {WidgetView, WidgetViewProps} from "../WidgetView";
 import {AnyInput, InputType} from "./Input";
 
 
@@ -14,6 +15,8 @@ export type InputViewProps<T extends AnyInput> = WidgetViewProps<T> & {
 
     error?: InputType<T>['Error'];
 
+
+    renderError?(error: InputType<T>['Error']): ReactNode;
 };
 
 export type InputViewRenderer<T extends AnyInput> =
@@ -21,27 +24,57 @@ export type InputViewRenderer<T extends AnyInput> =
 
 export abstract class InputView<T extends AnyInput,
     P extends InputViewProps<T> = InputViewProps<T>>
-    extends View<P> {
+    extends WidgetView<T, P> {
 
     abstract getValidData(): Awaitable<InputType<T>['Data']>;
 
-    abstract setElement(element: InputType<T>['Element'] | null): void;
+    protected updateError?(error: InputType<T>['Error'] | undefined): void;
 
-    abstract setError(error: InputType<T>['Error'] | null): void;
+    @ViewState() protected _error:
+        InputType<T>['Error'] | undefined;
 
-    constructor(props) {
-        super(props);
-
-        this.setElement(props.element ?? null);
+    get error(): InputType<T>['Error'] | undefined {
+        return this._error;
     }
 
-    @AfterMountView()
-    protected mountInput() {
+
+    setError(error: InputType<T>['Error'] | undefined) {
+        this._error = error;
+        this.updateError?.(error);
+    }
+
+    protected renderErrorDefault?(error: InputType<T>['Error']): ReactNode;
+
+    renderError(): ReactNode {
+        const error = this.error;
+        if (error == null)
+            return
+
+        const element = this.props.renderError?.(error);
+        if (element)
+            return element;
+
+        const baseError = this.renderErrorDefault?.(error);
+        if (baseError != null)
+            return baseError;
+
+        return typeof error === "string" ? error :
+            JSON.stringify({error})
+    }
+
+    reset() {
+        this.updateElement?.(this.props.element);
+        this.element = this.props.element;
+        this.setError(null);
+    }
+
+    componentDidMount() {
+        super.componentDidMount();
         this.props.inputRef?.(this);
     }
 
-    @BeforeUnmountView()
-    protected unmountInput() {
+    componentWillUnmount() {
+        super.componentWillUnmount();
         this.props.inputRef?.(null);
     }
 

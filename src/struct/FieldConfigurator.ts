@@ -25,7 +25,7 @@ export function FieldConfigurator(
 
         return Configurator;
 
-        function Configurator(...args) {
+        function Configurator(this: any, ...args) {
             const config = getConfig ?
                 getConfig.apply(this, args) : args[0];
             return FieldDecorator(field => {

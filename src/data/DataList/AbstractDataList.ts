@@ -63,7 +63,6 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     getQuerySource(): DataSource<T> {
         let {
-            source: {cursor},
             text, props: {searchIn}
         } = this;
 
@@ -71,20 +70,18 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
             $and: searchIn.map(exp => ({$search: {in: exp, text}}))
         };
 
-        cursor = ({
-            ...cursor,
-            order: [
+
+        return this.source.updateCursor(cursor => {
+            cursor.order = [
                 ...!this.sort ? [] : [this.sort],
-                ...this.getOrder()],
-            skip: this.pageSize * this.page,
-            take: this.pageSize,
-            filter: DataExp(
+                ...this.getOrder()];
+            cursor.filter = DataExp(
                 cursor.filter,
-                textFilter)
+                textFilter);
+            cursor.skip = this.pageSize * this.page;
+            cursor.take = this.pageSize;
+            return cursor;
         })
-
-
-        return this.source.withCursor(cursor)
     }
 
     // TODO: reload(row?)
@@ -94,7 +91,9 @@ export abstract class AbstractDataList<T, Props extends AbstractDataListProps<T>
 
     async reload() {
         this.isLoading = true;
-        await this.reloadDebounce.wait();
+        if (await this.reloadDebounce.wait())
+            return;
+
 
         if (!this.totalCount) {
             [this.totalCount, this.items] =

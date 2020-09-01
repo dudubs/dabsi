@@ -1,4 +1,4 @@
-import {AnyRpc, RpcError, RpcHandler} from "./Rpc";
+import {AnyRpc, RpcError, RpcHandlerFn} from "./Rpc";
 
 
 type Result =
@@ -8,7 +8,7 @@ type Result =
 type Waiter = { resolve(result: any): void, reject(error): void };
 
 export namespace Multiplexer {
-    export function connection(handler: RpcHandler): RpcHandler {
+    export function connection(handler: RpcHandlerFn): RpcHandlerFn {
         return async payload => {
             return handler(payload)
         }

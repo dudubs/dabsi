@@ -1,7 +1,7 @@
 import {entries} from "../common/object/entries";
 import {MappedRpc} from "./MappedRpc";
 import {handleMappedRpc} from "./MappedRpcHandler";
-import {RpcConfigType, RpcConnectionType, RpcHandlerType} from "./Rpc";
+import {RpcConfig, RpcConnection, RpcHandler} from "./Rpc";
 import {RpcMap} from "./RpcMap";
 
 export type ServiceHandler<T extends RpcMap> =
@@ -10,16 +10,16 @@ export type ServiceHandler<T extends RpcMap> =
 
 export type ServiceConfig<T extends RpcMap> = {
     [K in keyof T]:
-    RpcConfigType<T[K]>
+    RpcConfig<T[K]>
 };
 
 export type Service<T extends RpcMap> =
     MappedRpc<T> &
-    RpcConnectionType<MappedRpc<T>> &
+    RpcConnection<MappedRpc<T>> &
     {
-        handler?: RpcHandlerType<MappedRpc<T>>
-        new(handler: RpcHandlerType<MappedRpc<T>>):
-            RpcConnectionType<MappedRpc<T>>;
+        handler?: RpcHandler<MappedRpc<T>>
+        new(handler: RpcHandler<MappedRpc<T>>):
+            RpcConnection<MappedRpc<T>>;
     };
 
 

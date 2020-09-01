@@ -35,3 +35,5 @@ export function renderTableBody(table: AnyMuiDataTable) {
         </TableRow>}
     </TableBody>
 }
+
+

@@ -7,6 +7,15 @@ export type Nullable = undefined | null;
 
 export type Awaitable<T = any> = Promise<T> | T;
 
+export type ToAwaitable<T> = Awaitable<AwaitableType<T>>;
+
+export type Fn = (...args: any[]) => any;
+
+
+export type PromiseType<T extends Promise<any>> =
+    T extends Promise<infer U> ? U : never;
+
+
 export type AwaitableType<T extends Awaitable> =
     T extends Awaitable<infer U> ? U : never;
 
@@ -37,7 +46,7 @@ export function Nullable<T>(value?: T): T | Nullable {
 
 export type Type<T> = Function & { prototype: T };
 
-export function Type<T = any>(): Type<T> {
+export function Type<T = any>(this: any): Type<T> {
     if (this instanceof Type) {
         throw  new Error()
     }
@@ -132,3 +141,9 @@ export type PartialUndefinedKeys<T> = PartialKeys<T, Union<{
 export type EmptyObjectIfNull<T> = IfNever<Exclude<T, null>, {}>;
 
 export type IfNull<T, U> = T extends null ? U : T;
+
+export type AsyncFn<T extends (...args: any[]) => any> =
+    (...args: Parameters<T>) => Promise<ReturnType<T>>;
+
+export type SyncFn<T extends (...args: any[]) => any> =
+    (...args: Parameters<T>) => AwaitableType<ReturnType<T>>;

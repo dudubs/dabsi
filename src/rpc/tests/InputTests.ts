@@ -1,7 +1,9 @@
-import {AnyInput, Input} from "../input/Input";
+import {Awaitable} from "../../common/typings";
+import {AbstractInputContext, AnyInput, Input, TInputCheckResult, InputType, InputCheckResult} from "../input/Input";
 import {InputMap} from "../input/InputMap";
 import {NoRpc} from "../NoRpc";
-import {connectToRpc, RpcConnectionType} from "../Rpc";
+import {connectToRpc, RpcConfig, RpcConnection} from "../Rpc";
+import {WidgetType} from "../Widget";
 import objectContaining = jasmine.objectContaining;
 
 export function TestInput(
@@ -20,16 +22,24 @@ export function TestInput(
 
     }) {
     return Input({
-        static: {},
+        props: {},
         controller,
-        createContext: config => {
-            return {
-                getControllerConfig: () => remoteConfig,
-                getElement: getElement || (() => element),
-                loadAndCheck: loadAndCheck || (data => {
-                    return error ? {error} : {value}
-                }),
+        getContextClass: () => class extends AbstractInputContext<any> {
+            getControllerConfig(): RpcConfig<WidgetType<any>["Controller"]> {
+                return remoteConfig;
             }
+
+            async getElement(): Promise<WidgetType<any>["Element"]> {
+                return getElement ? getElement() : element;
+            }
+
+            async loadAndCheck(data: InputType<any>["Data"]): Promise<InputCheckResult<AnyInput>> {
+                if (loadAndCheck) {
+                    return loadAndCheck(data)
+                }
+                return error ? {error} : {value};
+            }
+
         }
     })
 
@@ -101,15 +111,24 @@ testm(__filename, () => {
 
     }
 
-    function test({config = null, ...props}): RpcConnectionType<AnyInput> {
+    function test({config = null, ...props}): RpcConnection<AnyInput> {
         return connectToRpc(Input({
-            static: {},
+            props: {},
             controller: NoRpc,
-            createContext: () => ({
-                getControllerConfig: () => null,
-                loadAndCheck: () => ({value: null}),
-                getElement: () => null,
-            }),
+            getContextClass: () => class extends AbstractInputContext<any> {
+                getControllerConfig(): RpcConfig<WidgetType<any>["Controller"]> {
+                    return null;
+                }
+
+                async getElement(): Promise<WidgetType<any>["Element"]> {
+                    return null;
+                }
+
+                async loadAndCheck(data: InputType<any>["Data"]): Promise<InputCheckResult<AnyInput>> {
+                    return ({value: null});
+                }
+
+            },
             ...props
         }), config)
     }

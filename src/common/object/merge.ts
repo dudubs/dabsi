@@ -26,7 +26,7 @@ export type ObjectMerger<T> =
 export function merger<T extends Record<string, any>>(
     props: T
 ): ObjectMerger<T> {
-    return function (obj?: any): any {
+    return function (this:any,obj?: any): any {
         return merge(obj ?? this, props)
     }
 }

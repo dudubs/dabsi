@@ -12,10 +12,10 @@ export function setViewStateKey(
     view.currentState[key] = value;
 
 
-    if (view.didMount && !view.didSetState) {
-        view.didSetState = true;
+    if (view.isDidMount && !view.isDidSetState) {
+        view.isDidSetState = true;
         view.setState(state => {
-            view.didSetState = false;
+            view.isDidSetState = false;
             return {...state, ...view.currentState}
         })
     }

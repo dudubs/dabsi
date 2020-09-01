@@ -11,7 +11,6 @@ import {
 import {MergeDataSelection} from "./MergeDataSelection";
 import {MapRelation, RelationKeys, RelationTypeAt} from "./Relation";
 
-
 type _Pick<T, S> =
     S extends { pick: ReadonlyArray<infer K> } ?
         Pick<T, Extract<K | DataTypeKey, keyof T>> :

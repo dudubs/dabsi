@@ -29,12 +29,12 @@ testm(__filename, () => {
         const r = Router({
             a: Router({
                 aa: Router()
-            }).extend({ax: "axt"})
+            }).use({ax: "axt"})
         })
-            .extend({x: "xt"})
+            .use({x: "xt"})
             .route({
                 b: Router()
-                    .extend({bx: "bxt"})
+                    .use({bx: "bxt"})
             });
 
         expect(r.x).toEqual("xt")

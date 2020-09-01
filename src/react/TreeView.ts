@@ -2,7 +2,7 @@ import {createElement} from "react";
 import {toIndexedSeq} from "../data/toIndexedSeq";
 import {IndexedSeq} from "../immutable2";
 import {createUndefinedContext} from "./utils/hooks/createUndefinedContext";
-import {BeforeUnmountView, View} from "./view/View";
+import {View} from "./view/View";
 
 
 export const TreeViewContext = createUndefinedContext<TreeView>();
@@ -16,16 +16,15 @@ export abstract class TreeView<P = any> extends View<P> {
     children = new Set<TreeView>();
 
 
-    @BeforeUnmountView()
-    mountToParent() {
+    componentDidMount() {
+        super.componentDidMount();
         this.context?.mountChild(this);
     }
 
-    @BeforeUnmountView()
-    unmountToParent() {
+    componentWillUnmount() {
+        super.componentWillUnmount();
         this.context?.unmountChild(this);
     }
-
 
     mountChild(child: TreeView) {
         this.children.add(child)

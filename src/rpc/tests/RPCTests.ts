@@ -7,7 +7,7 @@ import {ExpressTester} from "./ExpressTests";
 //
 testm(__filename, () => {
 
-    const TestCommand = Command<[number, number], number>();
+    const TestCommand = Command<(...args: [number, number]) => number>();
 
     const TestService = Service({test: TestCommand});
 

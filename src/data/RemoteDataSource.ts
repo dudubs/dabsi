@@ -82,7 +82,7 @@ export function RemoteDataSource<T>(): RemoteDataSource<T> {
                 if (!allowedMethods[method]) {
                     throw new Error(`"${method}" is not allowed method.`)
                 }
-                return await (<any>(source.withCursor(cursor)[method]))(...args);
+                return await (<any>(source.updateCursor(() => cursor)[method]))(...args);
             }
         }
     }
@@ -166,5 +166,5 @@ RemoteDataSourceConnection.prototype.update = function (...args) {
         const [keyOrKeys, values] = args;
         args = [DataKeyOrKeys(keyOrKeys), values];
     }
-    return this.command('update', args)
+    return this.command('update', <any>args)
 }

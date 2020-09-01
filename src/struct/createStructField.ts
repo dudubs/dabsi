@@ -19,7 +19,7 @@ export const fieldTypeFactories =
     });
 
 
-fieldTypeFactories.set(Function, function (field, value) {
+fieldTypeFactories.set(Function, function (this: any, field, value) {
     if (hasFields(this)) {
         return createStruct(this, value);
     }

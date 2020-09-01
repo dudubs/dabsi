@@ -1,5 +1,4 @@
 import {ReactElement} from "react";
-import {Awaitable} from "../common/typings";
 import {Renderer} from "../react/renderer";
 import {ViewState} from "../react/view/ViewState";
 import {Form, TForm, TFormArgs} from "./Form";
@@ -21,27 +20,24 @@ export type FormViewProps<T extends TForm> =
 
         onInputError?(result: InputType<T['Input']>['Error']);
 
-        children: (props: {
-            form: FormView<T['Input'], T['Value'], T['Error']>
-            input: ReactElement
-        }) => ReactElement
     };
 
 export class FormView<Input extends AnyInput, Value, Error>
     extends WidgetView<Form<TFormArgs<Input, Value, Error>>,
-        FormViewProps<TFormArgs<Input, Value, Error>>> {
+        FormViewProps<TFormArgs<Input, Value, Error>> & {
+        children: (props: {
+            form: FormView<Input, Value, Error>
+            input: ReactElement
+        }) => ReactElement
+    }> {
 
 
     input: InputView<Input> | null = null;
 
-    @ViewState() element: InputType<Input>['Element'] | null = null;
+    @ViewState() element: InputType<Input>["Element"] | undefined = null;
 
-    setElement(element: WidgetType<Form<TFormArgs<Input, Value, Error>>>["Element"] | null): void {
-        this.input?.setElement(element);
-    }
-
-    async reset() {
-        await this.input?.setElement(this.element);
+    reset() {
+        this.input?.reset();
     }
 
     async submit() {
@@ -70,7 +66,7 @@ export class FormView<Input extends AnyInput, Value, Error>
         return this.props.children({
             form: this,
             input: this.props.input({
-                connection: this.props.connection.controller,
+                connection: this.props.connection.input,
                 element: this.element,
                 inputRef: field => {
                     this.input = field as any;

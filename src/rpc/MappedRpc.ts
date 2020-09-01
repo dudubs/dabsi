@@ -1,40 +1,43 @@
 import {mapObject} from "../common/object/mapObject";
 import {ContextualRpc} from "./ContextualRpc";
 import {handleMappedRpc, MappedRpcHandler} from "./MappedRpcHandler";
-import {RpcConfigType, RpcConnectionType, RpcHandlerType, RpcPayloadType, RpcResultType} from "./Rpc";
+import {RpcConfig, RpcConnection, RpcHandler, RpcPayload, RpcResult} from "./Rpc";
 import {RpcMap} from "./RpcMap";
 
 
 export type MappedRpc<T extends RpcMap> = ContextualRpc<{
-    Static: {
+    Props: {
         children: T
     }
     Context: {
-        [K in keyof T]: RpcHandlerType<T[K]>
+        [K in keyof T]: RpcHandler<T[K]>
     }
     Config: {
-        [K in keyof T]: RpcConfigType<T[K]>
+        [K in keyof T]: RpcConfig<T[K]>
     }
     Connection: {
-        [K in keyof T]: RpcConnectionType<T[K]>
+        [K in keyof T]: RpcConnection<T[K]>
     }
     Handler: MappedRpcHandler<{
-        [K in keyof T]: (payload: RpcPayloadType<T[K]>) => RpcResultType<T[K]>
+        [K in keyof T]: (payload: RpcPayload<T[K]>) => RpcResult<T[K]>
     }>
 }>;
 
+
 export function MappedRpc<T extends RpcMap>(children: T): MappedRpc<T> {
-    return ContextualRpc({
-        static: {children},
+    return <MappedRpc<T>>ContextualRpc<MappedRpc<any>>({
+        props: {children},
         createConnection: (handler): any =>
             mapObject(children, (child, key) => child.createRpcConnection(payload =>
                 handler([key, payload])
             )),
-        createContext: (config): any =>
-            mapObject(children, (child, key) => child.createRpcHandler(config[key])),
-        createHandler: context => async payload => handleMappedRpc(payload, context,
-            (payload, handler) => handler(payload)
-        )
+        createContext: (props, config): any =>
+            mapObject(children, (child, key) =>
+                child.createRpcHandler(config[key])),
+        createHandler: (handlers: Record<any, (payload) => any>) => async payload =>
+            handleMappedRpc(payload, handlers,
+                (payload, handler) => handler(payload)
+            )
     })
 }
 

@@ -6,7 +6,7 @@ declare global {
 
 }
 
-function _let(callback) {
+function _let(this: any, callback) {
     return callback(this)
 }
 

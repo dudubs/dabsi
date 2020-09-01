@@ -12,7 +12,7 @@ export type PropMerger<T> =
     Record<typeof $merge, (value: T) => T>;
 
 function mergeCallbacks(prevCallback: Function, nextCallback: Function) {
-    return function () {
+    return function (this:any) {
         const prevResult = prevCallback.apply(this, arguments);
         return nextCallback.apply(this, arguments) ??
             prevResult;

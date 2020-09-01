@@ -1,7 +1,7 @@
 import {History} from "History";
 import {createElement, ReactElement, ReactNode, useEffect, useState} from "react";
 import {Renderer} from "../react/renderer";
-import {ReactRouterLocation, ReactRouterRoute, ReactRouterRouteContext} from "./ReactRouterLocation";
+import {ReactRouterLocation, ReactRouterRouteProps, ReactRouterRoutePropsContext} from "./ReactRouterLocation";
 import {AnyRouter} from "./Router";
 
 export function ReactRouterView(
@@ -14,12 +14,12 @@ export function ReactRouterView(
 
         renderRoute?: Renderer<{
             children: ReactElement,
-            route: ReactRouterRoute
+            route: ReactRouterRouteProps
         }>
     }
 ) {
 
-    const [route, setRoute] = useState<ReactRouterRoute>(() =>
+    const [route, setRoute] = useState<ReactRouterRouteProps>(() =>
         getRoute(props.history.location.pathname))
 
     useEffect(() => {
@@ -29,7 +29,7 @@ export function ReactRouterView(
 
     }, [props.history]);
 
-    let children: ReactElement = createElement(ReactRouterRouteContext.Provider, {
+    let children: ReactElement = createElement(ReactRouterRoutePropsContext.Provider, {
         value: route,
         children: props.children
     });

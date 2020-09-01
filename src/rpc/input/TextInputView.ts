@@ -2,30 +2,28 @@ import {ReactElement, ReactNode} from "react";
 import {Timeout} from "../../common/async/Timeout";
 import {Lang} from "../../localization/Lang";
 import {ViewState} from "../../react/view/ViewState";
-import {BaseInputView, BaseInputViewProps} from "./BaseInputView";
+import {WidgetType} from "../Widget";
 import {InputType} from "./Input";
 import {InputError} from "./InputError";
+import {InputView, InputViewProps} from "./InputView";
 import {TextInput} from "./TextInput";
 
 
-export type TextInputViewProps<Error> =
-    BaseInputViewProps<TextInput<Error>> & {
-
-    renderError?(error: InputType<TextInput<Error>>['Error']): ReactNode;
-
-    children(field: TextInputView<Error>): ReactElement;
-};
+export type TextInputViewProps<Error> = InputViewProps<TextInput<Error>>;
 
 
 export class TextInputView<Error>
-    extends BaseInputView<TextInput<Error>, TextInputViewProps<Error>> {
-
-    @ViewState() protected text: string;
+    extends InputView<TextInput<Error>, TextInputViewProps<Error> & {
+        children(field: TextInputView<Error>): ReactElement;
+    }> {
 
     protected isValidText = false;
 
-    resetInput() {
-        this.text = this.props.element || "";
+    @ViewState() protected text: string;
+
+    protected updateElement(element: WidgetType<TextInput<Error>>["Element"] | undefined) {
+        this.setError(undefined);
+        this.text = element || "";
     }
 
     async getValidData(): Promise<InputType<TextInput<Error>>["Data"]> {
@@ -38,10 +36,6 @@ export class TextInputView<Error>
         return this.text;
     }
 
-    setBaseElement(element: InputType<TextInput<Error>>["Element"] | null): void {
-        this.text = element || "";
-    }
-
     protected debounceId = 0;
 
     isChanged = false;
@@ -50,7 +44,7 @@ export class TextInputView<Error>
         this.debounceId++;
         if (!this.isChanged)
             return;
-        this.error = await this.props.connection.check(this.text);
+        this.setError(await this.props.connection.check(this.text))
 
         if (this.error != null) {
             this.isValidText = true;
@@ -66,7 +60,7 @@ export class TextInputView<Error>
         const id = ++this.debounceId;
         this.text = text;
         this.isValidText = false;
-        this.error = undefined;
+        this._error = undefined;
         await Timeout(300);
         if (id !== this.debounceId)
             return;
@@ -74,22 +68,21 @@ export class TextInputView<Error>
         await this.emit();
     }
 
-    renderBaseError(error: InputType<TextInput<Error>>["Error"]): ReactNode {
+    protected renderErrorDefault(error: InputType<TextInput<Error>>["Error"]): ReactNode {
         switch (error) {
             case "INVALID_PATTERN":
                 return Lang`INVALID_PATTERN`;
 
             case "TOO_LONG":
                 return Lang`TOO_LONG_${"max"}`({
-                    max: this.props.connection.static?.maxLength
+                    max: this.props.connection.props?.maxLength
                 });
             case "TOO_SHORT":
                 return Lang`TOO_SHORT_${"min"}`({
-                    min: this.props.connection.static?.maxLength
+                    min: this.props.connection.props?.maxLength
                 });
         }
     }
-
 
     getText(): string {
         return this.text;

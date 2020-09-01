@@ -1,38 +1,38 @@
 import {ReactElement} from "react";
+import {flatToSeq} from "../flatToSeq";
 import {EmptyFragment} from "../react/utils/EmptyFragment";
 import {useDefinedContext} from "../react/utils/hooks/useDefinedContext";
 import {getReactRouterProps} from "./ReactRouter";
-import {ReactRouterRouteContext} from "./ReactRouterLocation";
+import {ReactRouterRoutePropsContext} from "./ReactRouterLocation";
 
 export function ReactRouterContentView() {
-    const route = useDefinedContext(ReactRouterRouteContext);
+    const routeProps = useDefinedContext(ReactRouterRoutePropsContext);
 
-    const routerProps = getReactRouterProps(route.location.router);
+    const routerProps = getReactRouterProps(routeProps.location.router);
 
     let children: ReactElement;
 
     if (routerProps.renderer) {
-        children = routerProps.renderer({
-            location: route.location
-        })
+        children = routerProps.renderer(routeProps)
     } else {
-        const defaultRouter = getDefaultRouter();
-        if (defaultRouter) {
-            children = defaultRouter.props.defaultRenderer!({
-                location: defaultRouter.location,
-                route
-            })
+        const defaultRenderer =
+            flatToSeq(routeProps.location, location => location.parent)
+                .map(location => location.router.reactProps.defaultRenderer)
+                .find(defaultRenderer => !!defaultRenderer)
+
+        if (defaultRenderer) {
+            children = defaultRenderer(routeProps)
         } else {
             children = EmptyFragment;
         }
     }
 
 
-    for (let parent = route.location.parent; parent; parent = parent.parent) {
+    for (let parent = routeProps.location.parent; parent; parent = parent.parent) {
         const props = getReactRouterProps(parent.router)
         const wrapperProps = {
             location: parent,
-            route,
+            route: routeProps,
             children
         }
         for (const wrapper of props.wrappers) {
@@ -42,13 +42,5 @@ export function ReactRouterContentView() {
 
     return children
 
-    function getDefaultRouter() {
-        for (let location = route.location; location; location = location.parent) {
-            const routerProps = getReactRouterProps(location.router);
-            if (routerProps.defaultRenderer) {
-                return {location, props: routerProps};
-            }
-        }
-    }
 
 }

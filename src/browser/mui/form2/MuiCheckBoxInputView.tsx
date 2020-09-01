@@ -1,10 +1,8 @@
 import Checkbox, {CheckboxProps} from "@material-ui/core/Checkbox";
-import {ReactNode} from "react";
-import {mergeProps} from "../../../react/utils/mergeProps";
-import {wrapIf} from "../../../react/utils/wrapIf";
-import {BoolInputView, BoolInputViewProps} from "../../../rpc/input/BoolInputView";
-import React from "react";
 import FormControlLabel, {FormControlLabelProps} from "@material-ui/core/FormControlLabel";
+import React, {ReactNode} from "react";
+import {mergeProps} from "../../../react/utils/mergeProps";
+import {BoolInputView, BoolInputViewProps} from "../../../rpc/input/BoolInputView";
 
 
 export type MuiCheckBoxInputViewProps = Omit<BoolInputViewProps, "children"> & {

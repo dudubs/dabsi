@@ -9,9 +9,9 @@ testm(__filename, () => {
     it('multiple connections to service', async () => {
 
         class MyService extends Service({
-            test: Command<[], number>(),
+            test: Command<() => number>(),
             subService: Service({
-                test: Command<[], number>()
+                test: Command<() => number>()
             })
         }) {
 
@@ -47,8 +47,8 @@ testm(__filename, () => {
 
         class TestService extends Service({
 
-            test1: Command<number>(),
-            test2: Command<number>()
+            test1: Command<(n: number) => void>(),
+            test2: Command<(n: number) => void>()
         }) {
 
         }

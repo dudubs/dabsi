@@ -1,10 +1,10 @@
-export type RpcHandler<Payload = any, Result = any> = {
+export type RpcHandlerFn<Payload = any, Result = any> = {
     (payload: Payload): Promise<Result>;
 }
 
 
 export type TRpc = {
-    Handler: RpcHandler,
+    Handler: RpcHandlerFn,
     Connection: any,
     Config: any
 };
@@ -21,34 +21,34 @@ export type Rpc<T extends TRpc> = {
 
 
 export type RpcType<T extends AnyRpc> =
-    T extends Rpc<infer U> ? U : never;
+    NonNullable<T['TRpc']>;
 
 export type AnyRpc = Rpc<{
-    Handler: RpcHandler,
+    Handler: RpcHandlerFn,
     Connection: any,
     Config: any,
 }>;
 
-export type RpcPayloadType<T extends AnyRpc> =
-    RpcHandlerType<T> extends RpcHandler<infer U, any> ? U : never;
+export type RpcPayload<T extends AnyRpc> = any;
+// RpcHandler<T> extends RpcHandlerFn<infer U, any> ? U : never;
 
-export type RpcResultType<T extends AnyRpc> =
-    RpcHandlerType<T> extends RpcHandler<any, infer U> ? U : never;
+export type RpcResult<T extends AnyRpc> = any;
+// RpcHandler<T> extends RpcHandlerFn<any, infer U> ? U : never;
 
-export type RpcHandlerType<T extends AnyRpc> =
+export type RpcHandler<T extends AnyRpc> =
     RpcType<T>['Handler']
 
-export type RpcConnectionType<T extends AnyRpc> =
+export type RpcConnection<T extends AnyRpc> =
     RpcType<T>['Connection']
 
-export type RpcConfigType<T extends AnyRpc> =
+export type RpcConfig<T extends AnyRpc> =
     RpcType<T>['Config']
 
 
 export function connectToRpc<T extends AnyRpc>(
     rpc: T,
-    config: RpcConfigType<T>
-): RpcConnectionType<T> {
+    config: RpcConfig<T>
+): RpcConnection<T> {
     return rpc.createRpcConnection(rpc.createRpcHandler(
         config
     ))

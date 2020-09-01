@@ -1,26 +1,21 @@
-import {Awaitable} from "../common/typings";
-import {Rpc, RpcHandler} from "./Rpc";
+import {AsyncFn, Awaitable, Fn} from "../common/typings";
+import {Rpc, RpcHandlerFn} from "./Rpc";
 
-export type Command<U extends any[], R> = Rpc<{
-    Handler: RpcHandler<U, R>,
-    Connection: (...args: U) => Promise<R>,
-    Config: (...args: U) => Awaitable<R>
+
+export type Command<T extends Fn> = Rpc<{
+    Handler: RpcHandlerFn<Parameters<T>, ReturnType<T>>
+    Connection: (...args: Parameters<T>) => Promise<ReturnType<T>>
+    Config: (...args: Parameters<T>) => Awaitable<ReturnType<T>>
 }>
 
-
-export function Command<U = void, R = void>():
-    Command<U extends any[] ? U : [U], R> {
+export function Command<T extends Fn>():
+    Command<T> {
     return {
-        createRpcConnection: handler => async function (...args) {
+        createRpcConnection: handler => async function (this: any, ...args) {
             return handler.call(this, args);
         },
-        createRpcHandler: adapter => async function (payload: any[]) {
+        createRpcHandler: adapter => async function (this: any, payload: any[]) {
             return await adapter.apply(this, payload);
         }
     }
 }
-
-
-
-
-

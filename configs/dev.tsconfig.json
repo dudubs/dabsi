@@ -10,6 +10,7 @@
       "jasmine"
     ],
     "experimentalDecorators": true,
+    "noImplicitThis": true,
     "emitDecoratorMetadata": true,
     "moduleResolution": "node",
     "skipDefaultLibCheck": true,

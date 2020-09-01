@@ -5,15 +5,15 @@ import ListItemText, {ListItemTextProps} from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
 import React, {ReactNode} from "react";
 import {InfinityScrollProps} from "../../../../browser/src/junk/doIfScrollEnded";
+
+import {DataExp} from "../../../data/DataExp";
 import {DataKey} from "../../../data/DataKey";
 import {DataRow} from "../../../data/DataRow";
 import {DataSource} from "../../../data/DataSource";
-
-import {DataExp} from "../../../data/DataExp";
 import {Lang} from "../../../localization/Lang";
 import {PickerProps} from "../../../react/ModalStack";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";
-import {AfterMountView, View} from "../../../react/view/View";
+import {View} from "../../../react/view/View";
 import {ViewState} from "../../../react/view/ViewState";
 import {MuiDialog, MuiDialogProps} from "../form/MuiDialog";
 import {ReactWrapper, wrap} from "./wrap";
@@ -64,10 +64,14 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
         this.items = [];
     }
 
-    @AfterMountView()
+    async componentDidMount() {
+        super.componentDidMount();
+        await this.reload();
+    }
+
     async reload() {
         this.isLoading = true;
-        await this.reloadDebounce.wait(500, true);
+        if (await this.reloadDebounce.wait(500)) return;
 
         if (this.totalCount) {
 
@@ -89,7 +93,7 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
 
     async loadMore() {
         this.isLoading = true;
-        await this.loadMoreDebounce.wait(1000);
+        if (await this.loadMoreDebounce.wait(1000)) return;
 
         this.items = [...this.items,
             ...(await this.source

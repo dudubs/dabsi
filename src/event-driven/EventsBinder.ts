@@ -10,7 +10,7 @@ export type EventsBinder<T> = <K extends keyof T, This>(
 
 
 export function EventsBinder<T>(emitter: EventsEmitter<T>) {
-    return function (type, callback) {
+    return function (this: any, type, callback) {
         touchMap(emitter.callbacks, type, () => new Set())
             .add(callback);
         return this;

@@ -1,6 +1,6 @@
 import {ComponentClass, ComponentProps, createElement, Fragment} from "react";
 import * as TestRenderer from "react-test-renderer";
-import {BeforeRenderView, View} from "../View";
+import {OnRenderView, View} from "../View";
 
 export function testComponentInstance<T extends ComponentClass<any, any>>(
     componentClass: T,
@@ -15,7 +15,7 @@ let counter = 0;
 export class TestView extends View {
 
 
-    @BeforeRenderView()
+    @OnRenderView()
     get beforeRenderProp() {
         return counter++;
     }

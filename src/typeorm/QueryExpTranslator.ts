@@ -45,7 +45,7 @@ export abstract class AbstractQueryExpTranslator<T> extends DataExpTranslator<Qu
 
 export function QueryExpTranslator<T>() {
     return (target: Constructor<QueryExpTranslator<T>>) => {
-        const desc = Object.getOwnPropertyDescriptors(AbstractQueryExpTranslator.prototype);
+        const desc:any = Object.getOwnPropertyDescriptors(AbstractQueryExpTranslator.prototype);
         delete desc.constructor;
         Object.defineProperties(target.prototype, desc);
     }

@@ -1,10 +1,9 @@
 import {ReactElement} from "react";
-import {mapAndFilterObject} from "../common/object/mapAndFilterObject";
-import {mapObject} from "../common/object/mapObject";
-import {Debounce} from "../react/utils/hooks/useDebounce";
-import {ViewState} from "../react/view/ViewState";
+import {mapAndFilterObject} from "../../common/object/mapAndFilterObject";
+import {Debounce} from "../../react/utils/hooks/useDebounce";
+import {ViewState} from "../../react/view/ViewState";
 import {DataTable, DataTableOrder} from "./DataTable";
-import {AnyRpc} from "./Rpc";
+import {AnyRpc} from "../Rpc";
 import {WidgetElement} from "./Widget";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
@@ -15,8 +14,10 @@ export class DataTableView<T, R extends AnyRpc>
         children(view: Readonly<DataTableView<T, R>>): ReactElement
     }> {
 
+    protected reloadDebounce = Debounce();
+
     @ViewState('reload') text: string = "";
-    @ViewState('reload') pageSize = 0;
+    @ViewState('reload') pageSize = this.props.connection.props.pageSize;
     @ViewState('reload') page = 0;
 
     @ViewState() count: number;
@@ -95,13 +96,10 @@ export class DataTableView<T, R extends AnyRpc>
         this._toggleSortOrNulls(key, "nulls", "FIRST", "LAST");
     }
 
-    protected reloadDebounce = Debounce();
 
     async reload() {
         if (!this.isDidMount) {
-            if (this.props.connection.props.loadOnElement) {
-                return;
-            }
+            return;
         }
         this.isLoading = true;
         if (await this.reloadDebounce.wait()) return;

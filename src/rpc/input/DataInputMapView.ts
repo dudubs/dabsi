@@ -2,7 +2,6 @@ import {entries} from "../../common/object/entries";
 import {hasKeys} from "../../common/object/hasKeys";
 import {mapObjectToArray} from "../../common/object/mapObjectToArray";
 import {Renderer} from "../../react/renderer";
-import {WidgetType} from "../Widget";
 import {DataInputMap} from "./DataInputMap";
 import {AnyInput, InputType} from "./Input";
 import {InputError} from "./InputError";

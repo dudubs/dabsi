@@ -1,29 +1,28 @@
 import {entries} from "../common/object/entries";
-import {MappedRpc} from "./MappedRpc";
-import {handleMappedRpc} from "./MappedRpcHandler";
+import {RpcMap, AnyRpcMap} from "./RpcMap";
+import {handleRpcMap} from "./RpcMapHandler";
 import {RpcConfig, RpcConnection, RpcHandler} from "./Rpc";
-import {RpcMap} from "./RpcMap";
 
-export type ServiceHandler<T extends RpcMap> =
+export type ServiceHandler<T extends AnyRpcMap> =
     (payload: [string, any]) => Promise<any>;
 
 
-export type ServiceConfig<T extends RpcMap> = {
+export type ServiceConfig<T extends AnyRpcMap> = {
     [K in keyof T]:
     RpcConfig<T[K]>
 };
 
-export type Service<T extends RpcMap> =
-    MappedRpc<T> &
-    RpcConnection<MappedRpc<T>> &
+export type Service<T extends AnyRpcMap> =
+    RpcMap<T> &
+    RpcConnection<RpcMap<T>> &
     {
-        handler?: RpcHandler<MappedRpc<T>>
-        new(handler: RpcHandler<MappedRpc<T>>):
-            RpcConnection<MappedRpc<T>>;
+        handler?: RpcHandler<RpcMap<T>>
+        new(handler: RpcHandler<RpcMap<T>>):
+            RpcConnection<RpcMap<T>>;
     };
 
 
-export function Service<T extends RpcMap>(children: T):
+export function Service<T extends AnyRpcMap>(children: T):
     Service<T> {
 
 
@@ -49,7 +48,7 @@ export function Service<T extends RpcMap>(children: T):
             const handlers = {};
             return StaticService.handler = async payload => {
 
-                return handleMappedRpc(payload, children, (payload, child, key) => {
+                return handleRpcMap(payload, children, (payload, child, key) => {
                     return (handlers[key] || (handlers[key] = child.createRpcHandler(
                         config[key]
                     )))

@@ -17,8 +17,7 @@ export type BoolInput = Input<{
 
 export function BoolInput(): BoolInput {
     return Input({
-        props: {},
-        controller: NoRpc,
         getContextClass: () => BoolInputContext,
+
     })
 }

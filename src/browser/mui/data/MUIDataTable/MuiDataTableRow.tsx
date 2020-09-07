@@ -33,7 +33,7 @@ export function MuiDataTableRow(
 
     if (table.props.renderItemCollapse)
         return <>
-            {renderRowColumns()}
+            {renderDatas()}
             <TableRow>
                 <TableCell className={classes.collapseCell} colSpan={100}>
                     <Collapse unmountOnExit in={isOpen}>
@@ -43,10 +43,10 @@ export function MuiDataTableRow(
             </TableRow>
         </>
 
-    return renderRowColumns()
+    return renderDatas()
 
 
-    function renderRowColumns() {
+    function renderDatas() {
         return <TableRow key={item.$key}
                          hover={!!table.props.onPick}{
                              ...(table.multipleActions.length ||

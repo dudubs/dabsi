@@ -1,6 +1,5 @@
-import {entries} from "../common/object/entries";
-import {MappedRpc} from "./MappedRpc";
-import {RpcConfig, RpcConnection} from "./Rpc";
+import {RpcMap} from "../RpcMap";
+import {RpcConfig} from "../Rpc";
 import {AnyWidget, TWidget, Widget, WidgetType} from "./Widget";
 import {WidgetMapContext} from "./WidgetMapContext";
 
@@ -12,23 +11,19 @@ export type MapWidgets<T extends AnyWidgetMap,
 
 
 export type WidgetMap<T extends AnyWidgetMap> = Widget<{
-    Controller: MappedRpc<T>
-    Config: RpcConfig<MappedRpc<T>>
+    Controller: RpcMap<T>
+    Config: RpcConfig<RpcMap<T>>
     Element: MapWidgets<T, 'Element'>
     Context: {}
-    Connection: RpcConnection<MappedRpc<T>>
+    Connection: {}
     Handler: {}
-    Props: { items: T }
+    Props: {}
 }>;
 
 
 export function WidgetMap<T extends AnyWidgetMap>(items: T): WidgetMap<T> {
-    return Widget({
-        controller: MappedRpc(items),
-        props: {items},
-        handler: {},
+    return <any>Widget<WidgetMap<AnyWidgetMap>>({
+        controller: RpcMap(items),
         getContextClass: () => WidgetMapContext,
-        createConnection: props => props.controller,
-
     })
 }

@@ -1,7 +1,6 @@
-import {Awaitable} from "../common/typings";
+import {Awaitable} from "../../common/typings";
 import {FormContext} from "./FormContext";
-import {AnyInput, InputType} from "./input/Input";
-import {RpcConnection} from "./Rpc";
+import {AnyInput, InputType} from "../input/Input";
 import {Widget} from "./Widget";
 
 export type TForm = {
@@ -11,14 +10,14 @@ export type TForm = {
 };
 
 
-
 export type Form<T extends TForm> = Widget<{
     Handler: {
         submit(data: InputType<T['Input']>['Data']):
             FormSubmitResult<T>;
     }
+
     Connection: {
-        input: RpcConnection<T['Input']>
+
         submit(data: InputType<T['Input']>['Data']):
             Promise<FormSubmitResult<T>>;
     }
@@ -31,10 +30,7 @@ export type Form<T extends TForm> = Widget<{
 
     Controller: T['Input']
 
-    Props: {
-        TForm?: T;
-        input: T['Input']
-    }
+    Props: {}
     Context: {}
 }>;
 
@@ -48,32 +44,32 @@ export type FormSubmitResult<T extends TForm> =
     | { inputError: InputType<T['Input']>['Error'] };
 
 
-export function Form<Value = null, Error = never>():
-    <Input extends AnyInput>(input: Input) => Form<{
+export function Form<Value = null, Error = never>() {
+    return <Input extends AnyInput>(input: Input): Form<{
         Value: Value,
         Error: Error,
         Input: Input
-    }> {
-    return input => Widget({
-        controller: input,
-        props: {input},
-        handler: {
-            submit: async (context, data) => {
-                const result = await input
-                    .getContext(context.config.input)
-                    .loadAndCheck(data);
-                if ('error' in result)
-                    return {inputError: result.error}
-                return context.config.submit(result.value);
-            }
-        },
-        getContextClass: () => FormContext,
-        createConnection: ({handler, controller}) => ({
-            input: controller,
-            submit: data => handler(["submit", data])
-        }),
+    }> =>
+        <any>Widget<Form<TForm>>({
+            controller: input,
+            handler: {
+                submit: async (context, data) => {
+                    const result = await  input
+                        .getContext(context.config.input)
+                        .loadAndCheck(data);
+                    if ('error' in result)
+                        return {inputError: result.error}
+                    return context.config.submit(result.value);
+                }
+            },
+            connection: {
+                submit(data) {
+                    return this.handler(["submit", data])
+                }
+            },
+            getContextClass: () => FormContext,
 
-    })
+        })
 }
 
 

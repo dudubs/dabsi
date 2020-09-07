@@ -1,8 +1,6 @@
 import {touchMap} from "../common/map/touchMap";
-import {Lazy} from "../common/patterns/lazy";
-import {assignOnce} from "./assignOnce";
-import {Rpc, RpcConfig, RpcHandlerFn, RpcType} from "./Rpc";
-import {AnyRpcWithGenericConfig, RpcGenericConfig} from "./RpcGenericConfig";
+import {Awaitable} from "../common/typings";
+import {Rpc, RpcHandlerFn, RpcType} from "./Rpc";
 
 export type TContextualRpc = {
     Handler: RpcHandlerFn,
@@ -14,6 +12,7 @@ export type TContextualRpc = {
     Context: object
 
     Props: object
+
 };
 
 export type ContextualRpcFn<T extends AnyContextualRpc> =
@@ -21,41 +20,19 @@ export type ContextualRpcFn<T extends AnyContextualRpc> =
         ContextualRpcType<T>['Context'];
 
 
-export type ContextualRpcOptions<T extends TContextualRpc> = {
-    props: T['Props']
-    createHandler(context: T['Context']): T['Handler']
-    createContext?: ContextualRpcFn<ContextualRpc<T>>;
-    createConnection(handler: T['Handler']): T['Connection'];
-
-}
-
+// TODO: REMOVE
 export type ContextualRpcContextClass<T extends TContextualRpc> =
     new(props: T['Props'], config: T['Config']) => T['Context'];
 
 export type ContextualRpcProps<T extends AnyContextualRpc> =
     ContextualRpcType<T>['Props'];
 
-export abstract class AbstractContextualRpcContext<T extends AnyContextualRpc> {
-    constructor(
-        public props: ContextualRpcProps<T>,
-        public config: RpcConfig<T>
-    ) {
-
-    }
-
-    get genericConfig(): RpcGenericConfig<Extract<T, AnyRpcWithGenericConfig>> {
-        if (typeof this.config === "function")
-            return RpcGenericConfig(<any>this.config)
-        throw new Error('Is not generic config.')
-    }
-}
-
 export type ContextualRpcType<T extends AnyContextualRpc> =
     NonNullable<T['TContextualRpc']>;
 
 
 export type ContextualRpc<T extends TContextualRpc> =
-    T['Props'] & BaseContextualRpc<T> ;
+    BaseContextualRpc<T> ;
 
 export type BaseContextualRpc<T extends TContextualRpc> = Rpc<{
 
@@ -66,9 +43,19 @@ export type BaseContextualRpc<T extends TContextualRpc> = Rpc<{
 }> & {
     TContextualRpc?: T;
     getContext(config: T['Config']): T['Context']
+    props: T['Props'];
 } ;
 
 export type AnyContextualRpc = ContextualRpc<TContextualRpc>;
+
+export type ContextualRpcOptions<T extends TContextualRpc> = {
+    props: T['Props']
+
+    createHandler(context: T['Context']): T['Handler']
+    createContext: ContextualRpcFn<ContextualRpc<T>>;
+    createConnection(handler: T['Handler'], props: T['Props']): T['Connection'];
+
+}
 
 export function ContextualRpc<T extends AnyContextualRpc>(
     options: ContextualRpcOptions<ContextualRpcType<T>>):
@@ -76,20 +63,21 @@ export function ContextualRpc<T extends AnyContextualRpc>(
     let nullHandler;
     const handlers = new WeakMap<any, any>();
 
-    let base: BaseContextualRpc<ContextualRpcType<T>> = {
-        getContext,
+    const base: BaseContextualRpc<ContextualRpcType<T>> = {
+        props: options.props,
+        async getContext(config) {
+            if (!config)
+                return nullHandler ?? (nullHandler = await options.createContext(options.props, <any>null));
+
+            return touchMap(handlers, config, config => options.createContext(options.props, config))
+        },
         createRpcHandler: config =>
-            options.createHandler(getContext(config)),
-        createRpcConnection: options.createConnection
+            options.createHandler(base.getContext(config)),
+        createRpcConnection: handler =>
+            options.createConnection(handler, options.props)
     };
 
-    assignOnce(base, options.props);
 
     return <any>base
 
-    function getContext(config: ContextualRpcType<T>['Config']) {
-        if (!config)
-            return nullHandler ?? (nullHandler = options.createContext!(<any>null, options.props));
-        return touchMap(handlers, config, config => options.createContext!(config, options.props))
-    }
 }

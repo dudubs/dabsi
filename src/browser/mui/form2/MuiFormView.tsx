@@ -2,8 +2,8 @@ import Grid from "@material-ui/core/Grid";
 import React, {ReactElement} from "react";
 
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {TForm} from "../../../rpc/Form";
-import {FormView, FormViewProps} from "../../../rpc/FormView";
+import {TForm} from "../../../rpc/widget/Form";
+import {FormView, FormViewProps} from "../../../rpc/widget/FormView";
 import {AnyInput} from "../../../rpc/input/Input";
 import {MuiButton, MuiButtonProps} from "../components/MuiButton";
 
@@ -39,3 +39,5 @@ export function MuiFormView<Input extends AnyInput, Value, Error>(
         </Grid>
     }</FormView>
 }
+
+

@@ -1,7 +1,6 @@
-import {View} from "../react/view/View";
-import {ViewState} from "../react/view/ViewState";
-import {InputMap} from "./input/InputMap";
-import {RpcConnection} from "./Rpc";
+import {View} from "../../react/view/View";
+import {ViewState} from "../../react/view/ViewState";
+import {RpcConnection} from "../Rpc";
 import {AnyWidget, WidgetElement} from "./Widget";
 
 export type WidgetViewProps<T extends AnyWidget> = {
@@ -23,6 +22,14 @@ export abstract class WidgetView<T extends AnyWidget,
 
     protected updateElement?(element: WidgetElement<T> | undefined): void;
 
+    constructor(props: P) {
+        super(props);
+
+        this.element = props.element;
+        this.updateElement?.(this.element)
+    }
+
+
     forceUpdateElement() {
         this.updateElement?.(this.element);
     }
@@ -33,9 +40,9 @@ export abstract class WidgetView<T extends AnyWidget,
             this.updateElement?.(nextProps.element);
             return true;
         }
+        // TODO: return true if didSetState
         return true;
     }
-
 
 
 }

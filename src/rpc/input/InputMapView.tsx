@@ -5,7 +5,7 @@ import {mapObjectToArray} from "../../common/object/mapObjectToArray";
 import {values} from "../../common/object/values";
 import {Renderer} from "../../react/renderer";
 import {ViewState} from "../../react/view/ViewState";
-import {WidgetElement, WidgetType} from "../Widget";
+import {WidgetElement, WidgetType} from "../widget/Widget";
 import {InputType} from "./Input";
 import {InputError} from "./InputError";
 import {AnyInputMap, InputMap} from "./InputMap";

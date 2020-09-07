@@ -6,3 +6,4 @@ export class InputError<T extends AnyInput> extends Error {
         super();
     }
 }
+

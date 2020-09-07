@@ -1,15 +1,11 @@
-import {entries} from "../common/object/entries";
-import {mapObject} from "../common/object/mapObject";
-import {Awaitable, SyncFn} from "../common/typings";
-import {DataExp} from "../data/DataExp";
-import {DataOrder} from "../data/DataOrder";
-import {DataRow} from "../data/DataRow";
-import {DataSource} from "../data/DataSource";
-import {ContextualRpcFn, ContextualRpcType} from "./ContextualRpc";
+import {Awaitable, SyncFn} from "../../common/typings";
+import {DataExp} from "../../data/DataExp";
+import {DataRow} from "../../data/DataRow";
+import {DataSource} from "../../data/DataSource";
+import {DataParameter} from "../DataParameter";
 import {DataTableContext} from "./DataTableContext";
-import {Parameter} from "./Parameter";
-import {AnyRpc, RpcConfig, RpcError} from "./Rpc";
-import {RpcGenericConfig, RpcGenericConfigFn} from "./RpcGenericConfig";
+import {AnyRpc, RpcConfig} from "../Rpc";
+import {RpcGenericConfigFn} from "../RpcGenericConfig";
 import {Widget} from "./Widget";
 
 
@@ -54,7 +50,8 @@ export type DataTableQueryResult<T> = {
 type GetRowsAsync<T> = (query: DataTableQuery) => Promise<DataTableQueryResult<T>>;
 
 export type DataTable<T, R extends AnyRpc> = Widget<{
-    Config: RpcGenericConfigFn<<U>(config: DataTableConfig<T, U, R>) => DataTableConfig<T, any, R>>
+    Config: RpcGenericConfigFn<<U>(config: DataTableConfig<T, U, R>) =>
+        DataTableConfig<T, any, R>>
     Handler: {
         getRows: SyncFn<GetRowsAsync<T>>
     }
@@ -72,7 +69,7 @@ export type DataTable<T, R extends AnyRpc> = Widget<{
         rows: [string, T][]
     }
     Props: {
-        loadOnElement: boolean
+        pageSize: number
     }
     Context: {
         getRows: GetRowsAsync<T>
@@ -80,58 +77,33 @@ export type DataTable<T, R extends AnyRpc> = Widget<{
             [K in keyof T]: DataTableColumnConfig<T, any, K>
         }
     }
-    Controller: Parameter<string, DataRow<any>, R>
+    Controller: DataParameter<R>
 }>;
 
 export function DataTable<T>(
-    {loadOnElement = false}: {
-        loadOnElement?: boolean
+    {pageSize = 10}: {
+        pageSize?: number
     } = {}
 ) {
     return <R extends AnyRpc>(rowController: R): DataTable<T, R> => {
-        return <DataTable<T, R>>Widget<DataTable<any, R>>({
+        return <DataTable<T, R>>Widget<DataTable<any, AnyRpc>>({
+            isGenericConfig:true,
             props: {
-                loadOnElement
+                pageSize
             },
             handler: {
                 getRows: (context, query) =>
                     context.getRows(query)
             },
-            controller: Parameter<string, DataRow<any>, R>(
+            controller: DataParameter(
                 rowController
             ),
             getContextClass: () => DataTableContext,
-            createConnection: props => ({
-                getRows: query => props.handler(['getRows', query])
-            })
+            connection: {
+                getRows(query) {
+                    return this.handler(['getRows', query])
+                }
+            },
         })
     }
 }
-
-/*
-
-DataTable<{
-    fullName:string
-}>(
-
-    MappedRpc({ delete: Command() })
-)
-.handle($ => $({
-    source: Users.addFields({fullName...}),
-
-    rowController: row=> {
-
-    }
-
-    columns:{
-        fullName: {sortable:true}
-        lastName: {sortable:false},
-        fullName: {exp:}
-    },
-    getRow: row => ({
-        return {firstName:row.firstNa}
-    })
-}))
- */
-
-

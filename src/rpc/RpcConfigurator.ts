@@ -1,36 +1,59 @@
-import {NoRpc} from "./NoRpc";
-import {NoWidgetContext} from "./NoWidgetContext";
+import {Fn} from "../common/typings";
 import {AnyRpc, Rpc, RpcConfig, RpcType} from "./Rpc";
-import {Widget} from "./Widget";
+import {RpcGenericConfig, RpcGenericConfigFn} from "./RpcGenericConfig";
 
-export type RpcConfigurator<C, T extends AnyRpc> =
-    Rpc<Omit<RpcType<T>, "Config"> & { Config: C }>
+export type RpcConfigurator<T extends AnyRpc, C> =
+    Omit<T, keyof AnyRpc> &
+    Rpc<Omit<RpcType<T>, "Config"> & { Config: C }> & {
 
-export function RpcConfigurator<C, T extends AnyRpc>(rpc: T, getConfig: (config: C) => RpcConfig<T>): RpcConfigurator<C, T> {
-    return Object.setPrototypeOf({
-
-        createRpcHandler: config => rpc.createRpcHandler(
-            getConfig(config)
-        )
-
-    }, rpc);
+    TRpcConfigurator?: {
+        SourceConfig: C
+        Target: T
+    }
 }
 
-export type NoWidget = Widget<{
-    Handler: {},
-    Controller: NoRpc,
-    Props: {},
-    Context: {},
-    Connection: {}
-    Config: null
-    Element: undefined
-}>;
+export type RpcGenericConfigurator<T extends AnyRpc, C extends Fn> =
+    RpcConfigurator<T, RpcGenericConfigFn<C>>
 
-export const NoWidget: NoWidget = Widget({
-    props: {},
-    handler: {},
-    controller: NoRpc,
-    getContextClass: () => NoWidgetContext,
+export type AnyRpcConfigurator = RpcConfigurator<AnyRpc, any>;
 
-    createConnection: () => ({})
-});
+export type RpcConfiguratorType<T extends AnyRpcConfigurator> =
+    NonNullable<T['TRpcConfigurator']>;
+
+
+export function RpcConfigurator<T extends AnyRpcConfigurator>(
+    target: RpcConfiguratorType<T>['Target'],
+    getConfig: (config: RpcConfiguratorType<T>['SourceConfig']) =>
+        RpcConfig<RpcConfiguratorType<T>['Target']>
+):
+    RpcConfigurator<RpcConfiguratorType<T>['Target'],
+        RpcConfiguratorType<T>['SourceConfig']> {
+
+    return Object.setPrototypeOf(<Pick<AnyRpc, "createRpcHandler">>{
+
+        createRpcHandler(config) {
+            return target.createRpcHandler.apply(this, [
+                getConfig(config),
+                this
+            ]);
+        }
+
+    }, target);
+}
+
+
+export type AnyRpcGenericConfigurator = RpcConfigurator<AnyRpc, RpcGenericConfigFn>;
+
+export function RpcGenericConfigurator<T extends AnyRpcConfigurator>(
+    target: RpcConfiguratorType<T>['Target'],
+    getConfig: (config: ReturnType<RpcConfiguratorType<T>['SourceConfig']>) =>
+        RpcConfig<RpcConfiguratorType<T>['Target']>
+):
+    RpcConfigurator<RpcConfiguratorType<T>['Target'],
+        RpcConfiguratorType<T>['SourceConfig']> {
+
+    return RpcConfigurator(target, (genericConfig) => {
+        return getConfig(RpcGenericConfig(genericConfig))
+    })
+}
+

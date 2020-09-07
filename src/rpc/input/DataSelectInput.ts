@@ -1,89 +1,63 @@
-import {DataExp} from "../../data/DataExp";
 import {DataRow} from "../../data/DataRow";
+import {DataSelection} from "../../data/DataSelection";
+import {DataSelectionRow} from "../../data/DataSelectionRow";
 import {DataSource} from "../../data/DataSource";
-import {NoRpc} from "../NoRpc";
-import {DataSelectInputContext} from "./DataSelectInputContext";
-import {Input, InputType} from "./Input";
+import {RpcGenericConfigurator} from "../RpcConfigurator";
+import {SelectInput} from "./SelectInput";
+import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
+
+export type DataSelectInputConfig<T,
+    S extends DataSelection<T>> = {
+    source: DataSource<T>
+    selection?: S
+    default?: ValueOrAwaitableFn<string | DataRow<T> | undefined>
+    getLabel(row: DataRow<DataSelectionRow<T, S>>): string;
+};
 
 
-export type DataInputOption = { key: string, label: string };
-
-export type DataSelectInput<T> = Input<{
-
-    Data: string | null,
-
-    Value: DataRow<T> | null,
-
-    Controller: NoRpc,
-
-    Props: {
-        textFields?: DataExp<T>[];
-        required?: boolean
-    },
+export type DataSelectInput<T, N extends boolean> =
+    RpcGenericConfigurator<SelectInput<T, N>, (
 
 
-    Config: {
+        <S extends DataSelection<T> = {}>(
+            config: DataSelectInputConfig<T, S>
+        ) => DataSelectInputConfig<T, any>
 
-        source: DataSource<T>
-        maxSearchResults?: number
-        labelField: DataExp<T>
 
-        default?: string;
+        )>;
 
-    },
 
-    Element: {
-        default?: string,
-        options: DataInputOption[]
+export function DataSelectInput<T>() {
+    return <N extends boolean = true>(options: {
+        nullable?: N
+    }): DataSelectInput<T, N> => {
+        return <any>RpcGenericConfigurator<DataSelectInput<any, any>>(
+            SelectInput(options),
+
+            // server:start
+            config => ({
+                default: () => ValueOrAwaitableFn(config.default)
+                    .then(value => {
+                        if (typeof value === "object")
+                            return value?.$key;
+                        return value
+                    }),
+                load: key => config.source.get(key),
+                options: () => config.source
+                    .createAsMutable()
+                    .select(config.selection)
+                    .items()
+                    .then(rows => {
+                        return rows.map(row => ({
+                            key: row.$key,
+                            label: config.getLabel(row)
+                        }))
+                    })
+            })
+            // server:end
+        )
     }
-
-    Error: "REQUIRED"
-
-
-}>;
-
-
-export function DataSelectInput<T>(
-    props: InputType<DataSelectInput<T>>['Props'] = {}
-): DataSelectInput<T> {
-    return <DataSelectInput<T>>Input<DataSelectInput<any>>({
-        props: props,
-        controller: NoRpc,
-        getContextClass: () => DataSelectInputContext,
-
-    })
 }
 
 
-/*
-
-DataSelectInput()
-
-
-InputMap({
-    x: DataSelectInput()
-})
-
-handle {
-    x: $ => $({
-        source: ...
-
-    })
-
-}
-
-
-
-
-
-
-.handle $ => $({
-
-    source
-
-    getValue: row=> {
-        ...
-    }
-})
-
- */
+// TypeRef<"User", AppTypes>

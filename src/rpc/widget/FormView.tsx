@@ -1,11 +1,9 @@
 import {ReactElement} from "react";
-import {Renderer} from "../react/renderer";
-import {ViewState} from "../react/view/ViewState";
+import {Renderer} from "../../react/renderer";
 import {Form, TForm, TFormArgs} from "./Form";
-import {AnyInput, InputType} from "./input/Input";
-import {InputError} from "./input/InputError";
-import {InputView, InputViewProps} from "./input/InputView";
-import {WidgetType} from "./Widget";
+import {AnyInput, InputType} from "../input/Input";
+import {InputError} from "../input/InputError";
+import {InputView, InputViewProps} from "../input/InputView";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
 export type FormViewProps<T extends TForm> =
@@ -34,7 +32,6 @@ export class FormView<Input extends AnyInput, Value, Error>
 
     input: InputView<Input> | null = null;
 
-    @ViewState() element: InputType<Input>["Element"] | undefined = null;
 
     reset() {
         this.input?.reset();
@@ -66,7 +63,7 @@ export class FormView<Input extends AnyInput, Value, Error>
         return this.props.children({
             form: this,
             input: this.props.input({
-                connection: this.props.connection.input,
+                connection: this.props.connection.controller,
                 element: this.element,
                 inputRef: field => {
                     this.input = field as any;

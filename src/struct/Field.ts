@@ -23,20 +23,21 @@ export function getField(target: Function, propertyKey: string): Field {
 export function Field(
     ...decorators: FieldDecorator[]
 ): FieldDecorator {
-    return ({constructor: target}, propertyKey): void => {
+    return (target, propertyKey): void => {
+        const {constructor: targetConstructor} = target;
 
-        for (let base = Object.getPrototypeOf(target);
+        for (let base = Object.getPrototypeOf(targetConstructor);
              typeof base === "function";
              base = Object.getPrototypeOf(base)) {
 
             if (targetToPropertyKeyToField.get(base)?.has(propertyKey))
-                throw new Error(`Can't override Field ${base.name}.${propertyKey} at ${target.name}.`)
+                throw new Error(`Can't override Field ${base.name}.${propertyKey} at ${targetConstructor.name}.`)
 
         }
 
 
-        const field = ({target, propertyKey});
-        touchMap(targetToPropertyKeyToField, target, () => new Map())
+        const field = ({target: targetConstructor, propertyKey});
+        touchMap(targetToPropertyKeyToField, targetConstructor, () => new Map())
             .set(propertyKey, field)
 
         decorators.forEach(decorator => {

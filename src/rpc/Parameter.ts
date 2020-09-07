@@ -1,37 +1,40 @@
 import {AnyRpc, Rpc, RpcConfig, RpcConnection, RpcHandlerFn, RpcPayload, RpcResult} from "./Rpc";
+import {RpcGenericConfigFn, RpcGenericConfigHandler} from "./RpcGenericConfig";
 
+export type ParameterConfig<R extends AnyRpc, D, V> = {
+    load(data: D): Promise<V>;
+    getTargetConfig(value: V): RpcConfig<R>;
+};
 
-export type Parameter<D, V, R extends AnyRpc> = Rpc<{
+export type Parameter<R extends AnyRpc, D> = Rpc<{
     Handler:
-        RpcHandlerFn<[D, RpcPayload<R>], RpcResult<R>>,
-    Connection: {
+        RpcHandlerFn<[D, RpcPayload<R>], RpcResult<R>>
 
-        (data: D): RpcConnection<R>
+    Connection:
+        (data: D) => RpcConnection<R>
 
-    }, Config: {
-        load(data: D): Promise<V>,
-        target: (value: V) => RpcConfig<R>
-    }
-}>;
+    Config:
+        RpcGenericConfigFn<<V>(config: ParameterConfig<R, D, V>) => ParameterConfig<R, D, any>>
 
-export function Parameter<D, V, T extends AnyRpc>(
-    target: T
-): Parameter<D, V, T> {
-    return {
-        createRpcConnection(handler) {
+}> & { target: R };
+
+export function Parameter<D = string>() {
+    return <R extends AnyRpc>(target: R): Parameter<R, D> => ({
+        target,
+        createRpcConnection: handler => {
             return data => {
                 return target.createRpcConnection(payload => {
                     return handler([data, payload])
                 })
             }
         },
-        createRpcHandler(config) {
+        createRpcHandler: RpcGenericConfigHandler(config => {
             return async ([data, payload]) => {
                 const value = await config.load(data);
-                const handler = target.createRpcHandler(config.target(value))
-                return handler(payload);
+                const targetConfig = config.getTargetConfig(value);
+                const targetHandler = target.createRpcHandler(targetConfig)
+                return targetHandler(payload);
             }
-        }
-    }
+        })
+    })
 }
-

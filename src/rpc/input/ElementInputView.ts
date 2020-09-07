@@ -1,16 +1,15 @@
 import {Awaitable} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
 import {EmptyFragment} from "../../react/utils/EmptyFragment";
-import {WidgetType} from "../Widget";
+import {ElementInput} from "./ElementInput";
 import {AnyInput, InputType} from "./Input";
-import {ElementInput} from "./InputElement";
 import {InputView, InputViewProps} from "./InputView";
 
-export class InputElementView<E, T extends AnyInput>
+export class ElementInputView<E, T extends AnyInput>
     extends InputView<ElementInput<E, T>,
-    InputViewProps<ElementInput<E, T>> & {
-    target: Renderer<[E, InputViewProps<T>]>
-}> {
+        InputViewProps<ElementInput<E, T>> & {
+        target: Renderer<[E, InputViewProps<T>]>
+    }> {
 
     target: InputView<T> | null;
 

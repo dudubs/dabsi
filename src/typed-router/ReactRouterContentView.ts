@@ -1,5 +1,5 @@
 import {ReactElement} from "react";
-import {flatToSeq} from "../flatToSeq";
+import {flatToSeq} from "../common/flatToSeq";
 import {EmptyFragment} from "../react/utils/EmptyFragment";
 import {useDefinedContext} from "../react/utils/hooks/useDefinedContext";
 import {getReactRouterProps} from "./ReactRouter";

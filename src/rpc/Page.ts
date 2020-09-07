@@ -1,30 +1,31 @@
 import {Awaitable} from "../common/typings";
-import {ElementWidget} from "./ElementWidget";
 import {RpcConfig} from "./Rpc";
-import {AnyWidget} from "./Widget";
-import {WidgetConfigurator} from "./WidgetConfigurator";
-import {AnyWidgetMap, WidgetMap} from "./WidgetMap";
+import {RpcConfigurator} from "./RpcConfigurator";
+import {ElementWidget} from "./widget/ElementWidget";
+import {AnyWidget} from "./widget/Widget";
+import {AnyWidgetMap, WidgetMap} from "./widget/WidgetMap";
 
 
 export type PageElement = { title: string };
 
 export type Page<T extends AnyWidget> =
-    WidgetConfigurator<{
+    RpcConfigurator<ElementWidget<PageElement, T>, {
         getTitle: () => Awaitable<string>,
-        target: RpcConfig<T>
-    }, ElementWidget<PageElement, T>>;
+        targetConfig: RpcConfig<T>
+    }>;
 
 
 export function Page<T extends AnyWidget>(widget: T): Page<T> {
-    return WidgetConfigurator(
-        ElementWidget<{ title: string }>()<T>(widget),
-        (config) => ({
+
+    return RpcConfigurator<Page<T>>(
+        ElementWidget<any>()(widget),
+        config => ({
             getElement: async () => ({
                 title: await config.getTitle()
             }),
-            target: null
+            target: config.targetConfig
         })
-    );
+    )
 }
 
 export type PageMap<T extends AnyWidgetMap> = Page<WidgetMap<T>>;

@@ -112,6 +112,8 @@ export type Optional<T> = Pick<T, OptionalKeys<T>>;
 
 
 export type IsNever<T> = [T] extends [never] ? true : false;
+export type Is<T, U> = T extends U ? true : false;
+export type IsNot<T, U> = T extends U ? false : true;
 
 export type IsAny<T> =
     0 extends 1 & T ? true : false;
@@ -127,6 +129,7 @@ export type HasKeys<T> =
 export type Not<T extends boolean> = T extends true ? false : true;
 
 export type If<C extends boolean, T, E = never> = C extends true ? T : E;
+export type IfNot<C extends boolean, T, E = never> = C extends false ? T : E;
 
 export type Constructor<T> = { new(...args: any[]): T };
 
@@ -138,12 +141,21 @@ export type PartialUndefinedKeys<T> = PartialKeys<T, Union<{
     [K in keyof T]: undefined extends T[K] ? K : never
 }>>;
 
-export type EmptyObjectIfNull<T> = IfNever<Exclude<T, null>, {}>;
 
-export type IfNull<T, U> = T extends null ? U : T;
+export type IfNull<T, U> = T extends null ? U : never;
 
 export type AsyncFn<T extends (...args: any[]) => any> =
     (...args: Parameters<T>) => Promise<ReturnType<T>>;
 
 export type SyncFn<T extends (...args: any[]) => any> =
     (...args: Parameters<T>) => AwaitableType<ReturnType<T>>;
+
+
+declare global {
+    interface TypeRefs {
+
+    }
+}
+
+export type TypeRef<K extends PropertyKey> =
+    K extends keyof TypeRefs ? TypeRefs[K] : never;

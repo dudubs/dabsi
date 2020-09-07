@@ -10,9 +10,9 @@ export type DataInputMapConfig<I extends AnyInput, T = any> = {
     // TInputValue?: DataRow<T>
 
     source: DataSource<T>
+
     getInputConfig: (row: DataRow<T>) => RpcConfig<I>
 };
-
 
 
 export type DataInputMap<I extends AnyInput> = Input<{
@@ -28,25 +28,19 @@ export type DataInputMap<I extends AnyInput> = Input<{
         input: InputType<I>['Element']
     }>
 
-    //
-
     Config: RpcGenericConfigFn<<T>(config: DataInputMapConfig<I, T>) =>
         DataInputMapConfig<I>>;
 
-    /*
-        new DataSelectInputContext(....)
-     */
-
     Error: Record<string, InputType<I>['Error']>
+
     Controller: DataParameter<I>
 }>;
 
 export function DataInputMap<I extends AnyInput>(input: I): DataInputMap<I> {
-
-
-    return Input({
+    return <any>Input<DataInputMap<AnyInput>>({
         props: {input},
-        controller: DataParameter<I>(input),
+        isGenericConfig: true,
+        controller: DataParameter(input),
         getContextClass: () => DataInputMapContext,
 
     })

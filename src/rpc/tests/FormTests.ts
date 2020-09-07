@@ -1,4 +1,4 @@
-import {Form} from "../Form";
+import {Form} from "../widget/Form";
 import {InputMap} from "../input/InputMap";
 import {TextInput} from "../input/TextInput";
 import {connectToRpc} from "../Rpc";

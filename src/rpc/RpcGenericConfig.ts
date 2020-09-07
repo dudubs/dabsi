@@ -1,33 +1,18 @@
 import {touchMap} from "../common/map/touchMap";
-import {Fn} from "../common/typings";
-import {AnyRpc, Rpc, RpcConfig} from "./Rpc";
+import {Fn, Pluck} from "../common/typings";
+import {Rpc, RpcConfig} from "./Rpc";
 
+declare const isGenericConfigFn: unique symbol;
 
 export type RpcGenericConfigFn<T extends Fn = any> =
-    (configure: T) => ReturnType<T>;
+    {
+        (configure: T): ReturnType<T>
+        [isGenericConfigFn]?: true
+    };
 
 export type RpcGenericConfig<T extends AnyRpcWithGenericConfig> =
     ReturnType<RpcConfig<T>>;
 
-
-export function RpcGenericConfig<T extends RpcGenericConfigFn>(
-    genericConfig: T
-): ReturnType<T>
-
-export function RpcGenericConfig<T extends RpcGenericConfigFn, R>(
-    genericConfig: T,
-    callback: (config: ReturnType<T>) => R
-): R
-
-
-export function RpcGenericConfig(genericConfig, callback?) {
-    const config = touchMap(cache, genericConfig, () => genericConfig(x => x));
-    if (callback)
-        return callback(config)
-    return config;
-}
-
-const cache = new WeakMap();
 
 export type AnyRpcWithGenericConfig = Rpc<{
     Handler: any,
@@ -35,11 +20,25 @@ export type AnyRpcWithGenericConfig = Rpc<{
     Connection: any
 }>;
 
-export function RpcGenericConfigFn<T extends AnyRpcWithGenericConfig, U>(
+export type IsRpcGenericConfigFn<T extends Fn> =
+    NonNullable<Pluck<T, typeof isGenericConfigFn>> extends true ? true : false;
+
+export function RpcGenericConfig<T extends RpcGenericConfigFn>(
+    genericConfig: T
+): ReturnType<T> {
+    return touchMap(genericConfigCache, genericConfig, () => genericConfig(x => x));
+}
+
+const genericConfigCache = new WeakMap();
+
+
+export function RpcGenericConfigHandler<T extends AnyRpcWithGenericConfig, U>(
     callback: (config: ReturnType<RpcConfig<T>>) =>
         U
-): (genericConfig: RpcConfig<T>) => U {
-    return genericConfig => {
-        return callback(RpcGenericConfig(genericConfig))
-    }
+): (genericConfig: RpcConfig<T>) => U
+
+export function RpcGenericConfigHandler(callback) {
+    return genericConfig => callback(
+        RpcGenericConfig(genericConfig)
+    );
 }

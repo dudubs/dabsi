@@ -1,6 +1,7 @@
 import {RpcConfig} from "../Rpc";
-import {WidgetController, WidgetElement} from "../Widget";
-import {AbstractInputContext, InputCheckResult, InputType} from "./Input";
+import {WidgetController, WidgetElement} from "../widget/Widget";
+import {AbstractInputContext} from "./AbstractInputContext";
+import {InputCheckResult, InputType} from "./Input";
 import {TextInput} from "./TextInput";
 
 export class TextInputContext<T extends TextInput<never>>

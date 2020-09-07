@@ -1,5 +1,6 @@
-import {mapObjectToArray} from "../common/object/mapObjectToArray";
-import {Renderer} from "../react/renderer";
+import {createElement, Fragment} from "react";
+import {mapObjectToArray} from "../../common/object/mapObjectToArray";
+import {Renderer} from "../../react/renderer";
 import {AnyWidgetMap, WidgetMap} from "./WidgetMap";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
@@ -16,10 +17,13 @@ export class WidgetMapView<T extends AnyWidgetMap>
 
     renderView(): React.ReactNode {
         return mapObjectToArray(this.element || {}, (element, key) => {
-            return this.props.fields[key]({
+            return createElement(Fragment, {
                 key,
-                connection: this.props.connection[key],
-                element
+                children: this.props.fields[key]({
+                    key,
+                    connection: this.props.connection[key],
+                    element
+                })
             })
         })
     }

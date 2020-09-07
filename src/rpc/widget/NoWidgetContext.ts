@@ -1,6 +1,7 @@
-import {RpcConfig} from "./Rpc";
-import {NoWidget} from "./RpcConfigurator";
-import {AbstractWidgetContext, WidgetController, WidgetElement} from "./Widget";
+import {NoWidget} from "./NoWidget";
+import {AbstractWidgetContext} from "./AbstractWidgetContext";
+import {RpcConfig} from "../Rpc";
+import {WidgetController, WidgetElement} from "./Widget";
 
 export class NoWidgetContext extends AbstractWidgetContext<NoWidget> {
     getControllerConfig(): RpcConfig<WidgetController<NoWidget>> {

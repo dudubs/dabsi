@@ -7,3 +7,4 @@ export function LangView(props: LangProps) {
     return createElement(Fragment, null,
         translator.translateProps(props))
 }
+

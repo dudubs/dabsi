@@ -1,9 +1,9 @@
-import {Awaitable} from "../../common/typings";
-import {AbstractInputContext, AnyInput, Input, TInputCheckResult, InputType, InputCheckResult} from "../input/Input";
+import {AbstractInputContext} from "../input/AbstractInputContext";
+import {AnyInput, Input, InputCheckResult, InputType} from "../input/Input";
 import {InputMap} from "../input/InputMap";
 import {NoRpc} from "../NoRpc";
 import {connectToRpc, RpcConfig, RpcConnection} from "../Rpc";
-import {WidgetType} from "../Widget";
+import {WidgetType} from "../widget/Widget";
 import objectContaining = jasmine.objectContaining;
 
 export function TestInput(
@@ -56,7 +56,7 @@ describe('InputMap', () => {
         ).toEqual({value: {hello: "WORLD"}});
     });
     it('expected to error', async () => {
-        expect(await InputMap({
+        expect(await  InputMap({
                 hello: TestInput({
                     loadAndCheck: data => ({error: data.toUpperCase()})
                 })
@@ -66,7 +66,7 @@ describe('InputMap', () => {
         ).toEqual({error: {hello: "WORLD"}});
     });
     it('expected to element', async () => {
-        expect(await InputMap({
+        expect(await  InputMap({
                 hello: TestInput({
                     getElement: () => "world"
                 })

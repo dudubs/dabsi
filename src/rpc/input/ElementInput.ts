@@ -2,10 +2,11 @@ import {Awaitable} from "../../common/typings";
 import {ElementInputContext} from "./ElementInputContext";
 import {AnyInput, Input, InputType} from "./Input";
 
+
 export type ElementInput<E, T extends AnyInput> = Input<{
     Data: InputType<T>['Data'],
     Value: InputType<T>['Value'],
-    Props: { target: T },
+    Props: {},
     Config: {
         getElement: () => Awaitable<E>,
         target: InputType<T>['Config']
@@ -18,8 +19,8 @@ export type ElementInput<E, T extends AnyInput> = Input<{
 
 export function ElementInput<E>() {
     return <T extends AnyInput>(target: T) => {
-        return Input<ElementInput<E, T>>({
-            props: {target},
+        return <ElementInput<E, T>>Input<ElementInput<E, AnyInput>>({
+
             controller: target,
             getContextClass: () => ElementInputContext,
 

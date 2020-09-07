@@ -2,7 +2,7 @@ import {ReactElement, ReactNode} from "react";
 import {Timeout} from "../../common/async/Timeout";
 import {Lang} from "../../localization/Lang";
 import {ViewState} from "../../react/view/ViewState";
-import {WidgetType} from "../Widget";
+import {WidgetType} from "../widget/Widget";
 import {InputType} from "./Input";
 import {InputError} from "./InputError";
 import {InputView, InputViewProps} from "./InputView";

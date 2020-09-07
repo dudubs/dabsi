@@ -1,10 +1,10 @@
 import {Awaitable, Union} from "../common/typings";
 import {RpcError} from "./Rpc";
 
-export type TMappedRpcHandlerMap = Record<string, (payload?: any) => any>;
+export type TRpcMapHandlerMap = Record<string, (payload?: any) => any>;
 
 
-export type MappedRpcHandler<T extends TMappedRpcHandlerMap> = {
+export type RpcMapHandler<T extends TRpcMapHandlerMap> = {
     <P extends Union<{
         [K in keyof T]: [K, Parameters<T[K]>[0]]
     }>>(
@@ -21,7 +21,7 @@ export type MappedRpcHandler<T extends TMappedRpcHandlerMap> = {
 
 }
 
-export type MappedRpcHandlerMap<C, T extends TMappedRpcHandlerMap> = {
+export type RpcMapHandlerMap<C, T extends TRpcMapHandlerMap> = {
     [K in keyof T]: (
         context: C,
         payload: Parameters<T[K]>[0],
@@ -29,8 +29,8 @@ export type MappedRpcHandlerMap<C, T extends TMappedRpcHandlerMap> = {
         Awaitable<ReturnType<T[K]>>
 };
 
-export function MappedRpcHandler<C,
-    T extends TMappedRpcHandlerMap>(
+export function RpcMapHandler<C,
+    T extends TRpcMapHandlerMap>(
     handlers: {
         [K in keyof T]: (
             context: C,
@@ -38,15 +38,15 @@ export function MappedRpcHandler<C,
         ) =>
             Awaitable<ReturnType<T[K]>>
     }
-): (context: C) => MappedRpcHandler<T> {
+): (context: C) => RpcMapHandler<T> {
     return context => async payload => {
-        return handleMappedRpc(payload, handlers,
+        return handleRpcMap(payload, handlers,
             (payload, handler) => handler(context, payload)
         );
     }
 }
 
-export function handleMappedRpc<T, K extends string & keyof T, U>(
+export function handleRpcMap<T, K extends string & keyof T, U>(
     payload: K | [K, any],
     map: T,
     callback: (payload: any, item: T[K],key:string) => U

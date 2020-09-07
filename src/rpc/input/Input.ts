@@ -1,12 +1,16 @@
 // TODO: Rename to *Input
-import {Awaitable} from "../../common/typings";
+import {Awaitable, HasKeys, If, Is, Not, PartialUndefinedKeys} from "../../common/typings";
+import {ContextualRpcType} from "../ContextualRpc";
+import {NoRpc} from "../NoRpc";
 import {AnyRpc} from "../Rpc";
-import {AbstractWidgetContext, Widget, WidgetContextClass} from "../Widget";
+import {RpcGenericConfigFn} from "../RpcGenericConfig";
+import {BaseWidgetContext, Widget, WidgetContextClass, WidgetContextConfig, WidgetType} from "../widget/Widget";
 
 
 // TODO: R extends AnyRpc
 
 export type TInput = {
+
     Data: any
     Value: any,
     Controller: AnyRpc,
@@ -22,7 +26,9 @@ export type BaseInputContext<T extends TInput> = {
 };
 
 
-export type Input<T extends TInput> = Widget<{
+export type Input<T extends TInput> = {
+    TInput?: T
+} & Widget<{
 
     Connection: {
         check(data: T['Data']): Promise<T['Error'] | undefined>
@@ -36,27 +42,13 @@ export type Input<T extends TInput> = Widget<{
         check(data: T['Data']): Awaitable<TInputCheckResult<T>>;
     }
 
-    Props: T['Props'] & {
-        TInput?: T;
-
-    }
+    Props: T['Props'];
 
     Element: T['Element']
 
     Controller: T['Controller']
 
-
 }>;
-
-export abstract class AbstractInputContext<T extends AnyInput>
-    extends AbstractWidgetContext<T>
-    implements BaseInputContext<InputType<T>> {
-
-    abstract loadAndCheck(data: InputType<T>["Data"]):
-        Promise<InputCheckResult<T>> ;
-
-
-}
 
 export type InputType<T extends AnyInput> =
     NonNullable<T['TInput']>;
@@ -72,21 +64,53 @@ export type InputCheckResult<T extends AnyInput> =
 
 export type AnyInput = Input<TInput>;
 
-export type InputOptions<T extends AnyInput> ={
+export type InputOptions<Input extends AnyInput, T extends TInput> =
+    PartialUndefinedKeys<{
 
-    controller: InputType<T>['Controller'],
+        context?: ThisType<{
+            config: WidgetContextConfig<WidgetType<Input>>
+            props: ContextualRpcType<Input>['Props']
+        }> & BaseWidgetContext<WidgetType<Input>> &
+            BaseInputContext<T>;
 
-    props: InputType<T>['Props'];
+        getContextClass: () => WidgetContextClass<Input>
 
-    getContextClass: () => WidgetContextClass<T>
+        isGenericConfig: boolean
+            | If<Not<Is<T['Config'], RpcGenericConfigFn>>, undefined>;
 
-};
+        props: T['Props']
+            | If<Not<HasKeys<T['Props']>>, undefined>;
 
-export function Input<T extends AnyInput>(options: InputOptions<T>): T {
+        /*
+        inputOptions: {
+            isGenericConfig
+            props
+            getContextClass
+        }
+         */
+
+        controller: T['Controller']
+            | If<Is<T['Controller'], NoRpc>, undefined>;
+
+    }>
+
+
+// DefaultProps<Is<T['Config'],Fn>, {isGenericConfig:boolean }, {}>
+
+export function Input<T extends AnyInput>(options: InputOptions<T, InputType<T>>): T {
+
+    const {
+        props = {},
+        controller = NoRpc,
+        isGenericConfig = false,
+        getContextClass
+    } = <InputOptions<AnyInput, TInput>>options;
+
     return <T>Widget<AnyInput>({
-        props: options.props,
-        controller: options.controller,
-        getContextClass: options.getContextClass,
+        props,
+        controller,
+        getContextClass,
+        isGenericConfig,
         handler: {
             check: async (context, data) => {
                 const result = await context
@@ -95,10 +119,10 @@ export function Input<T extends AnyInput>(options: InputOptions<T>): T {
                     return result.error
             },
         },
-        createConnection: (options) => {
-            return ({
-                check: data => options.handler(["check", data]),
-            });
+        connection: {
+            check(data) {
+                return this.handler(["check", data])
+            }
         }
     })
 }

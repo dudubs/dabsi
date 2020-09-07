@@ -1,6 +1,7 @@
 // TODO: DataSource.clone(), DataSource.freeze()
 import {defined} from "../../common/object/defined";
 import {entries} from "../../common/object/entries";
+import {hasKeys} from "../../common/object/hasKeys";
 import {ArrayTypeOrObject} from "../../common/typings";
 import {chunks} from "../chunks";
 import {DataCursor} from "../DataCursor";
@@ -314,6 +315,8 @@ export abstract class DataSource<T> {
         this: DataSource<T>,
         selection: S
     ): DataSource<DataSelectionRow<T, S>> {
+        if(!hasKeys(selection))
+            return <any>this;
         return this.updateCursor({
             selection: DataSelection.merge(
                 this.cursor.selection,

@@ -1,12 +1,13 @@
-import {IndexedSeq} from "./immutable2";
+import {IndexedSeq} from "../immutable2";
 
 export function flatToSeq<T>(
     first: T,
     getNext: (prev: T) => T | undefined | null
 ): IndexedSeq<T> {
     return IndexedSeq<T>([first]).flatMap(function* (value: any) {
-        for (; value !== null; value = getNext(value)) {
+        while (value != null) {
             yield value;
+            value = getNext(value)
         }
     })
 }

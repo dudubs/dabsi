@@ -5,7 +5,7 @@ import {LangTranslator} from "../LangTranslator";
 testm(__filename, () => {
 
     it("expected to default token", () => {
-        expect(new LangTranslator({}).translateToken({type: LangPropsType.token, token: "HELLO_WORLD"}))
+        expect(new LangTranslator({}).translateToken("HELLO_WORLD"))
             .toEqual(new LangTranslator({}).translateDefaultToken("HELLO_WORLD"));
     });
 

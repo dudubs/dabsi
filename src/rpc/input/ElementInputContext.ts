@@ -1,7 +1,8 @@
 import {RpcConfig} from "../Rpc";
-import {WidgetController, WidgetElement} from "../Widget";
-import {AbstractInputContext, AnyInput, InputCheckResult, InputType} from "./Input";
-import {ElementInput} from "./InputElement";
+import {WidgetController, WidgetElement} from "../widget/Widget";
+import {AbstractInputContext} from "./AbstractInputContext";
+import {AnyInput, InputCheckResult, InputType} from "./Input";
+import {ElementInput} from "./ElementInput";
 
 export class ElementInputContext<T extends ElementInput<E, I>, E, I extends AnyInput>
     extends AbstractInputContext<T> {
@@ -11,12 +12,12 @@ export class ElementInputContext<T extends ElementInput<E, I>, E, I extends AnyI
 
     async getElement(): Promise<WidgetElement<T>> {
         return [await this.config.getElement(),
-            await this.props.target.getContext(this.config.target).getElement()]
+            await this.props.controller.getContext(this.config.target).getElement()]
     }
 
-    loadAndCheck(data: InputType<T>["Data"]): Promise<InputCheckResult<T>> {
-        return this.props.target
-            .getContext(this.config.target)
+    async loadAndCheck(data: InputType<T>["Data"]): Promise<InputCheckResult<T>> {
+        return (await this.props.controller
+            .getContext(this.config.target))
             .loadAndCheck(data)
     }
 

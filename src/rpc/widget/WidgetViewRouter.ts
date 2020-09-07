@@ -1,11 +1,10 @@
 import {ReactElement} from "react";
-import {AwaitableType, PromiseType} from "../common/typings";
-import {EmptyFragment} from "../react/utils/EmptyFragment";
-import {TReactRouter} from "../typed-router/ReactRouter";
-import {ReactRouterRouteProps} from "../typed-router/ReactRouterLocation";
-import {Router, RouterPlugin} from "../typed-router/Router";
-import {Page, PageElement} from "./Page";
-import {AnyWidget, BaseWidgetConnection, WidgetElement, WidgetType} from "./Widget";
+import {PromiseType} from "../../common/typings";
+import {TReactRouter} from "../../typed-router/ReactRouter";
+import {ReactRouterRouteProps} from "../../typed-router/ReactRouterLocation";
+import {Router} from "../../typed-router/Router";
+import {Page} from "../Page";
+import {AnyWidget, BaseWidgetConnection, WidgetType} from "./Widget";
 
 export type TWidgetViewRouter = TReactRouter & { routerType: typeof WidgetViewRouter };
 
@@ -14,17 +13,17 @@ export namespace WidgetViewRouter {
 
     export function renderPage<T extends TWidgetViewRouter,
         E extends AnyWidget,
-        C extends BaseWidgetConnection<WidgetType<Page<any>>>>(
+        C extends BaseWidgetConnection<WidgetType<Page<AnyWidget>>>>(
         this: Router<T>,
         getConnection: (
             params: T['params'],
             props: ReactRouterRouteProps<T>) => C,
         render: (
             props: ReactRouterRouteProps<T> & {
-                page:  PromiseType<ReturnType<C['getElement']>>[0],
+                page: PromiseType<ReturnType<C['getElement']>>[0],
                 widget: {
                     connection: C['controller'],
-                    element:  PromiseType<ReturnType<C['getElement']>>[1]
+                    element: PromiseType<ReturnType<C['getElement']>>[1]
                 }
             }
         ) => ReactElement

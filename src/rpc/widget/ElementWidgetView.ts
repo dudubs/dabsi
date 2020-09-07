@@ -1,5 +1,5 @@
-import {Renderer} from "../react/renderer";
-import {EmptyFragment} from "../react/utils/EmptyFragment";
+import {Renderer} from "../../react/renderer";
+import {EmptyFragment} from "../../react/utils/EmptyFragment";
 import {ElementWidget} from "./ElementWidget";
 import {AnyWidget} from "./Widget";
 import {WidgetView, WidgetViewProps} from "./WidgetView";

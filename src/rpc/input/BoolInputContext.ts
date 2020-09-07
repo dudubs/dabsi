@@ -1,7 +1,8 @@
 import {RpcConfig} from "../Rpc";
-import {WidgetController, WidgetElement} from "../Widget";
+import {WidgetController, WidgetElement} from "../widget/Widget";
+import {AbstractInputContext} from "./AbstractInputContext";
 import {BoolInput} from "./BoolInput";
-import {AbstractInputContext, InputCheckResult, InputType} from "./Input";
+import {InputCheckResult, InputType} from "./Input";
 
 export class BoolInputContext extends AbstractInputContext<BoolInput> {
     getControllerConfig(): RpcConfig<WidgetController<BoolInput>> {
@@ -17,4 +18,3 @@ export class BoolInputContext extends AbstractInputContext<BoolInput> {
     }
 
 }
-

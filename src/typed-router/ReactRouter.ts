@@ -2,7 +2,7 @@ import {createElement, ReactElement} from "react";
 import {useLoader} from "../../browser/src/sections/items/views/useLoader";
 import {WeakMapFactory} from "../common/map/mapFactory";
 import {Awaitable} from "../common/typings";
-import {flatToSeq} from "../flatToSeq";
+import {flatToSeq} from "../common/flatToSeq";
 import {Renderer} from "../react/renderer";
 import {EmptyFragment} from "../react/utils/EmptyFragment";
 import {ReactRouterLocation, ReactRouterRouteProps, ReactRouterRoutePropsContext} from "./ReactRouterLocation";
@@ -84,7 +84,7 @@ export namespace ReactRouter {
 
 
             const renderOnLoad = flatToSeq<Router<TReactRouter>>(this, router => router.parent)
-                .map(router => router.reactProps.loadRenderer)
+                .map(router => router?.reactProps.loadRenderer)
                 .find(renderer => !!renderer)
 
 

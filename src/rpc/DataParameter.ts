@@ -1,36 +1,33 @@
-import {DataKey, DataKeyInput} from "../data/DataKey";
 import {DataRow} from "../data/DataRow";
 import {DataSource} from "../data/DataSource";
-import {AnyRpc, Rpc, RpcConfig, RpcConnection, RpcHandlerFn, RpcPayload, RpcResult} from "./Rpc";
-import {RpcGenericConfig, RpcGenericConfigFn} from "./RpcGenericConfig";
+import {Parameter} from "./Parameter";
+import {AnyRpc, RpcConfig} from "./Rpc";
+import {RpcConfigurator, RpcGenericConfigurator} from "./RpcConfigurator";
+import {RpcGenericConfigFn, RpcGenericConfigHandler} from "./RpcGenericConfig";
 
+export type DataParameter<R extends AnyRpc> =
+    RpcConfigurator<Parameter<R, string>,
+        RpcGenericConfigFn<<T>(config: DataParameterConfig<T, R>) => DataParameterConfig<any, R>>>;
 
-type DataParameterConfig<R extends AnyRpc, T = any> = {
+export function DataParameter<R extends AnyRpc>(target: R): DataParameter<R> {
+    return RpcGenericConfigurator<DataParameter<R>>(
+        Parameter()(target),
+        DataParameterConfig
+    )
+}
+
+export type DataParameterConfig<T, R extends AnyRpc> = {
     source: DataSource<T>,
-    getTargetConfig: (row: DataRow<T>) => RpcConfig<R>
-};
+    getTargetConfig(value: DataRow<T>): RpcConfig<R>
+}
 
-
-export type DataParameter<R extends AnyRpc> = Rpc<{
-    Handler: RpcHandlerFn<[string, RpcPayload<R>], RpcResult<R>>,
-    Connection: (key: DataKeyInput) => RpcConnection<R>,
-    Config: RpcGenericConfigFn<<T>(config: DataParameterConfig<R, T>) =>
-        DataParameterConfig<R>>
-}>;
-
-export function DataParameter<R extends AnyRpc>(
-    target: R
-): DataParameter<R> {
-    return {
-        createRpcConnection: handler => key =>
-            target.createRpcConnection(payload => handler([DataKey(key), payload])),
-
-        createRpcHandler: RpcGenericConfigFn(config => {
-            return async ([key, payload]) => {
-                const row = await config.source.getOrFail(key);
-                const targetConfig = config.getTargetConfig(row);
-                return target.createRpcHandler(targetConfig)(payload);
-            }
-        })
-    }
+export function DataParameterConfig<T, R extends AnyRpc>(
+    config: DataParameterConfig<T, R>
+): RpcConfig<Parameter<R, string>> {
+    return $ => $({
+        load(data) {
+            return config.source.getOrFail(data)
+        },
+        getTargetConfig: config.getTargetConfig
+    })
 }

@@ -38,7 +38,7 @@ export class LangTranslator {
             case LangPropsType.template:
                 return this.translateTemplate(props);
             case LangPropsType.token:
-                return this.translateToken(props);
+                return this.translateToken(props.token);
             default:
                 throw new TypeError()
         }
@@ -48,7 +48,7 @@ export class LangTranslator {
         return this.map[token] = matchCase(token, fromConstantCase, toTitleCase);
     }
 
-    translateToken({token}: LangTokenProps): string {
+    translateToken(token:string): string {
         const value = this.map[token];
         switch (typeof value) {
             case "function":

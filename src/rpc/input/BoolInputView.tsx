@@ -1,7 +1,7 @@
 import {ReactElement} from "react";
 import {Awaitable} from "../../common/typings";
 import {ViewState} from "../../react/view/ViewState";
-import {WidgetType} from "../Widget";
+import {WidgetType} from "../widget/Widget";
 import {InputType} from "./Input";
 import {InputView, InputViewProps} from "./InputView";
 import {BoolInput} from "./TextInput";

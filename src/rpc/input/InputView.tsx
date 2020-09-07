@@ -2,7 +2,7 @@ import {ReactNode} from "react";
 import {Awaitable} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
 import {ViewState} from "../../react/view/ViewState";
-import {WidgetView, WidgetViewProps} from "../WidgetView";
+import {WidgetView, WidgetViewProps} from "../widget/WidgetView";
 import {AnyInput, InputType} from "./Input";
 
 

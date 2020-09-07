@@ -17,7 +17,7 @@ export type BoolInput = Input<{
 
 export function BoolInput(): BoolInput {
     return Input({
-        getContextClass: () => BoolInputContext,
+        context:  BoolInputContext,
 
     })
 }

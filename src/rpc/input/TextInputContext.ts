@@ -2,9 +2,11 @@ import {RpcConfig} from "../Rpc";
 import {WidgetController, WidgetElement} from "../widget/Widget";
 import {AbstractInputContext} from "./AbstractInputContext";
 import {InputCheckResult, InputType} from "./Input";
+import {loadAndCheckString} from "./StringSchema";
 import {TextInput} from "./TextInput";
+import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
-export class TextInputContext<T extends TextInput<never>>
+export class TextInputContext<T extends TextInput>
     extends AbstractInputContext<T> {
 
 
@@ -13,23 +15,12 @@ export class TextInputContext<T extends TextInput<never>>
     }
 
     async getElement(): Promise<WidgetElement<T>> {
-        return this.config?.default || ""
+        return (await ValueOrAwaitableFn(this.config?.default)) || ""
     }
 
     async loadAndCheck(data: InputType<T>["Data"]):
         Promise<InputCheckResult<T>> {
-        let value = String(data || "");
-        if (this.props.trim) {
-            value = value.trim();
-        }
-        if (this.props.pattern && !this.props.pattern.test(value)) {
-            return {error: "INVALID_PATTERN" as const}
-        }
-        const error = await this.config?.check?.(value);
-        if (error)
-            return {error};
-
-        return {value}
+        return  loadAndCheckString(data,this.props)
     }
 
 

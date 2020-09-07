@@ -49,11 +49,11 @@ export type BaseContextualRpc<T extends TContextualRpc> = Rpc<{
 export type AnyContextualRpc = ContextualRpc<TContextualRpc>;
 
 export type ContextualRpcOptions<T extends TContextualRpc> = {
-    props: T['Props']
+    props:  Readonly<T['Props']>
 
     createHandler(context: T['Context']): T['Handler']
     createContext: ContextualRpcFn<ContextualRpc<T>>;
-    createConnection(handler: T['Handler'], props: T['Props']): T['Connection'];
+    createConnection(handler: T['Handler'], props: Readonly<T['Props']>): T['Connection'];
 
 }
 

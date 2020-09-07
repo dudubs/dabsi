@@ -1,36 +1,39 @@
 import {ReactElement} from "react";
+import {NonNullableAt} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
-import {Form, TForm, TFormArgs} from "./Form";
-import {AnyInput, InputType} from "../input/Input";
 import {InputError} from "../input/InputError";
 import {InputView, InputViewProps} from "../input/InputView";
+import {RpcConnection} from "../Rpc";
+import {AnyForm, Form, TForm} from "./Form";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
-export type FormViewProps<T extends TForm> =
-    WidgetViewProps<Form<T>> &
+export type FormViewProps<C extends RpcConnection<Form<TForm>>,
+    T extends NonNullableAt<C, 'TForm'> = NonNullableAt<C, 'TForm'>> =
+    WidgetViewProps<C> &
     {
 
-        input: Renderer<InputViewProps<T['Input']>>
+        input: Renderer<InputViewProps<C['controller']>>
 
         onSubmit?(result: T['Value']);
 
         onError?(result: T['Error']);
 
-        onInputError?(result: InputType<T['Input']>['Error']);
+        onInputError?(result: T['Input']['Error']);
 
     };
 
-export class FormView<Input extends AnyInput, Value, Error>
-    extends WidgetView<Form<TFormArgs<Input, Value, Error>>,
-        FormViewProps<TFormArgs<Input, Value, Error>> & {
+export class FormView<C extends RpcConnection<AnyForm>>
+    extends WidgetView<C,
+        FormViewProps<C>
+        & {
         children: (props: {
-            form: FormView<Input, Value, Error>
+            form: FormView<C>
             input: ReactElement
         }) => ReactElement
     }> {
 
 
-    input: InputView<Input> | null = null;
+    input: InputView<C['controller']> | null = null;
 
 
     reset() {

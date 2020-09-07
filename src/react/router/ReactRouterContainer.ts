@@ -3,7 +3,7 @@
 
 import {History} from "history";
 import {ReactNode, useEffect, useMemo, useState} from "react";
-import {IfNever} from "../../common/typings";
+import {DefaultIfNever} from "../../common/typings";
 import {createRoute, Route} from "../../router";
 import {RouterContextType} from "../../router/context";
 
@@ -19,7 +19,7 @@ export type ReactRouterContainerProps<T extends AnyReactRouter> =
     history: History;
     router: T;
     children?: ReactNode;
-    context: IfNever<RouterContextType<T>, null>
+    context: DefaultIfNever<RouterContextType<T>, null>
 };
 
 

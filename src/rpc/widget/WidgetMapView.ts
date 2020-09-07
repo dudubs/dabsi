@@ -1,17 +1,21 @@
 import {createElement, Fragment} from "react";
 import {mapObjectToArray} from "../../common/object/mapObjectToArray";
 import {Renderer} from "../../react/renderer";
+import {AnyInputMap, InputMap} from "../input/InputMap";
+import {RpcConnection} from "../Rpc";
+import {AnyWidget, WidgetType} from "./Widget";
 import {AnyWidgetMap, WidgetMap} from "./WidgetMap";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
-export type WidgetMapViewProps<T extends AnyWidgetMap> =
-    WidgetViewProps<WidgetMap<T>> & {
+export type WidgetMapViewProps<C extends RpcConnection<WidgetMap<AnyWidgetMap>>,
+    T extends Record<string, RpcConnection<AnyWidget>> = C['controller']> =
+    WidgetViewProps<C> & {
     fields: { [K in keyof T]: Renderer<WidgetViewProps<T[K]>> }
 };
 
 // TODO: WidgetElement
-export class WidgetMapView<T extends AnyWidgetMap>
-    extends WidgetView<WidgetMap<T>, WidgetMapViewProps<T>> {
+export class WidgetMapView<C extends RpcConnection<WidgetMap<AnyWidgetMap>>>
+    extends WidgetView<C, WidgetMapViewProps<C>> {
 
     fields: Record<string, WidgetView<any>>;
 

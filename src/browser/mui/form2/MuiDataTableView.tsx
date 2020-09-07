@@ -5,11 +5,14 @@ import TableHead, {TableHeadProps} from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import React, {ReactNode, useState} from "react";
+import {NonNullableAt} from "../../../common/typings";
 import {Lang} from "../../../localization/Lang";
 import {Hook} from "../../../react/utils/Hook";
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {DataTableView, DataTableViewProps} from "../../../rpc/widget/DataTableView";
 import {AnyRpc, RpcConnection} from "../../../rpc/Rpc";
+import {AnyDataTable} from "../../../rpc/widget/DataTable";
+import {DataTableView, DataTableViewProps} from "../../../rpc/widget/DataTableView";
+import {WidgetType} from "../../../rpc/widget/Widget";
 import {MuiTableColumn, MuiTableColumnProps} from "../MuiTable/MuiTableColumn";
 import {DefaultLang} from "./DefaultLang";
 import {MuiDataTableAction, MuiDataTableActionProps} from "./MuiDataTableAction";
@@ -25,13 +28,16 @@ type MuiDataTableViewColumnProps<T = any> = {
 
 };
 
-type MuiDataTableActionEvent<T, R extends AnyRpc> = {
+type MuiDataTableActionEvent<C extends RpcConnection<AnyDataTable>, T, R extends AnyRpc> = {
     row: T
     key: string,
     connection: RpcConnection<R>
-    table: Readonly<DataTableView<T, R>>;
+    table: Readonly<DataTableView<C>>;
 };
-export type MuiDataTableViewProps<T, R extends AnyRpc> = DataTableViewProps<T, R> & {
+export type MuiDataTableViewProps<C extends RpcConnection<AnyDataTable>,
+    T,
+    R extends AnyRpc> =
+    DataTableViewProps<C> & {
 
     TableProps?: TableProps;
     TableHeadProps?: TableHeadProps,
@@ -39,6 +45,7 @@ export type MuiDataTableViewProps<T, R extends AnyRpc> = DataTableViewProps<T, R
     TableFooterProps?: TableFooterProps,
 
     MuiTableToolbarProps?: Omit<MuiTableToolbarProps, "actions">
+
     columns: {
         [K in keyof T]: null | MuiDataTableViewColumnProps<T[K]>
     }
@@ -50,19 +57,19 @@ export type MuiDataTableViewProps<T, R extends AnyRpc> = DataTableViewProps<T, R
 
     // Assign<MuiDataTableActionProps, {}>
     toolbarActions?: MuiDataTableActionProps<{
-        table: Readonly<DataTableView<T, R>>
+        table: Readonly<DataTableView<C>>
     }>[]
 
 
-    onEditClick?(event: MuiDataTableActionEvent<T, R>): void;
+    onEditClick?(event: MuiDataTableActionEvent<C, T, R>): void;
 
-    onDeleteClick?(event: MuiDataTableActionEvent<T, R>): void;
-    actions?: MuiDataTableActionProps<MuiDataTableActionEvent<T, R>>[]
+    onDeleteClick?(event: MuiDataTableActionEvent<C, T, R>): void;
+    actions?: MuiDataTableActionProps<MuiDataTableActionEvent<C, T, R>>[]
 
     title?: ReactNode;
 };
 
-export function MuiDataTableView<T, R extends AnyRpc>(
+export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
     {
         TableProps,
         TableHeadProps,
@@ -75,7 +82,9 @@ export function MuiDataTableView<T, R extends AnyRpc>(
         MuiTableToolbarProps,
         toolbarActions,
         ...props
-    }: MuiDataTableViewProps<T, R>) {
+    }: MuiDataTableViewProps<C,
+        WidgetType<C>['Row'],
+        WidgetType<C>['RowController']>) {
 
     actions = [...actions];
 
@@ -100,7 +109,7 @@ export function MuiDataTableView<T, R extends AnyRpc>(
 
     })
     return <DataTableView {...props}>{table => {
-        return <TableLayout<[string, T], null | MuiDataTableViewColumnProps, T>
+        return <TableLayout<[string, any], null | MuiDataTableViewColumnProps, any>
             getRowKey={row => row[0]}
             getRowData={row => row[1]}
             rows={table.rows}
@@ -139,7 +148,7 @@ export function MuiDataTableView<T, R extends AnyRpc>(
             render={({columns, rows}) =>
                 <>
                     <Hook>{() => {
-                        const [searchText,setSearchText] = useState("");
+                        const [searchText, setSearchText] = useState("");
                         return <MuiTableToolbar
                             {...mergeProps(MuiTableToolbarProps, {})}
                             search={!table.element?.searchable ? undefined : {

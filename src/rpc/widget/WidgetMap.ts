@@ -1,5 +1,5 @@
-import {RpcMap} from "../RpcMap";
 import {RpcConfig} from "../Rpc";
+import {RpcMap} from "../RpcMap";
 import {AnyWidget, TWidget, Widget, WidgetType} from "./Widget";
 import {WidgetMapContext} from "./WidgetMapContext";
 
@@ -24,6 +24,6 @@ export type WidgetMap<T extends AnyWidgetMap> = Widget<{
 export function WidgetMap<T extends AnyWidgetMap>(items: T): WidgetMap<T> {
     return <any>Widget<WidgetMap<AnyWidgetMap>>({
         controller: RpcMap(items),
-        getContextClass: () => WidgetMapContext,
+        context:  WidgetMapContext,
     })
 }

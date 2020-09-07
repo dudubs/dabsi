@@ -1,7 +1,7 @@
 import {History} from "history";
 import {joinUrl} from "../../server/tests/joinUrl";
 import {Lazy} from "../common/patterns/lazy";
-import {Assign, HasKeys, IfNever, Pluck} from "../common/typings";
+import {Assign, HasKeys, DefaultIfNever, Pluck} from "../common/typings";
 import {createUndefinedContext} from "../react/utils/hooks/createUndefinedContext";
 import {useDefinedContext} from "../react/utils/hooks/useDefinedContext";
 import {getNextPath} from "../router/utils/getNextPath";
@@ -20,7 +20,8 @@ export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
     }
 
 
-    get parent(): IfNever<ReactRouterLocation<Extract<Pluck<T, 'parent'>, TReactRouter>>, null> {
+    get parent():
+        DefaultIfNever<ReactRouterLocation<Extract<Pluck<T, 'parent'>, TReactRouter>>, null> {
         return <any>this._parent
     }
 

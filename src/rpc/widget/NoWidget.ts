@@ -1,4 +1,5 @@
 import {NoRpc} from "../NoRpc";
+import {NoWidgetContext} from "./NoWidgetContext";
 import {Widget} from "./Widget";
 
 export type NoWidget = Widget<{
@@ -11,10 +12,5 @@ export type NoWidget = Widget<{
     Element: undefined
 }>;
 export const NoWidget: NoWidget = Widget<NoWidget>({
-    context: {
-        controllerConfig: null,
-        async getElement() {
-            return undefined
-        }
-    }
+    context:  NoWidgetContext,
 });

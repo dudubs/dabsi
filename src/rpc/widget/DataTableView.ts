@@ -2,17 +2,25 @@ import {ReactElement} from "react";
 import {mapAndFilterObject} from "../../common/object/mapAndFilterObject";
 import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {ViewState} from "../../react/view/ViewState";
-import {DataTable, DataTableOrder} from "./DataTable";
-import {AnyRpc} from "../Rpc";
-import {WidgetElement} from "./Widget";
+import {AnyRpc, RpcConnection} from "../Rpc";
+import {AnyDataTable, DataTable, DataTableOrder} from "./DataTable";
+import {WidgetElement, WidgetType} from "./Widget";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
-export type DataTableViewProps<T, R extends AnyRpc> = WidgetViewProps<DataTable<T, R>> & {};
+export type DataTableViewProps<C extends RpcConnection<AnyDataTable>> =
+    WidgetViewProps<C>;
 
-export class DataTableView<T, R extends AnyRpc>
-    extends WidgetView<DataTable<T, R>, DataTableViewProps<T, R> & {
-        children(view: Readonly<DataTableView<T, R>>): ReactElement
+type R = any;
+type T = any;
+export class DataTableView<C extends RpcConnection<AnyDataTable>,
+    // R extends AnyRpc = WidgetType<C>['RowController'],
+    // T = WidgetType<C>['Row']
+    >
+    extends WidgetView<C, DataTableViewProps<C> & {
+        children?
+        // (view: Readonly<DataTableView<C>>): ReactElement
     }> {
+
 
     protected reloadDebounce = Debounce();
 
@@ -125,7 +133,7 @@ export class DataTableView<T, R extends AnyRpc>
     }
 
     renderView(): React.ReactNode {
-        return this.props.children(this)
+        return this.props.children!(this)
     }
 
 }

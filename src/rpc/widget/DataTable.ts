@@ -3,9 +3,9 @@ import {DataExp} from "../../data/DataExp";
 import {DataRow} from "../../data/DataRow";
 import {DataSource} from "../../data/DataSource";
 import {DataParameter} from "../DataParameter";
-import {DataTableContext} from "./DataTableContext";
 import {AnyRpc, RpcConfig} from "../Rpc";
 import {RpcGenericConfigFn} from "../RpcGenericConfig";
+import {DataTableContext} from "./DataTableContext";
 import {Widget} from "./Widget";
 
 
@@ -49,7 +49,13 @@ export type DataTableQueryResult<T> = {
 
 type GetRowsAsync<T> = (query: DataTableQuery) => Promise<DataTableQueryResult<T>>;
 
+export type AnyDataTable = DataTable<any, AnyRpc>;
+
 export type DataTable<T, R extends AnyRpc> = Widget<{
+
+    Row: T;
+    RowController: R;
+
     Config: RpcGenericConfigFn<<U>(config: DataTableConfig<T, U, R>) =>
         DataTableConfig<T, any, R>>
     Handler: {
@@ -61,7 +67,7 @@ export type DataTable<T, R extends AnyRpc> = Widget<{
     Element: {
         searchable: boolean;
         columns: {
-            [K in keyof T]: {
+            [K in string&keyof T]: {
                 sortable: boolean
             }
         },
@@ -87,7 +93,7 @@ export function DataTable<T>(
 ) {
     return <R extends AnyRpc>(rowController: R): DataTable<T, R> => {
         return <DataTable<T, R>>Widget<DataTable<any, AnyRpc>>({
-            isGenericConfig:true,
+            isGenericConfig: true,
             props: {
                 pageSize
             },
@@ -98,7 +104,7 @@ export function DataTable<T>(
             controller: DataParameter(
                 rowController
             ),
-            getContextClass: () => DataTableContext,
+            context: DataTableContext,
             connection: {
                 getRows(query) {
                     return this.handler(['getRows', query])
@@ -107,3 +113,8 @@ export function DataTable<T>(
         })
     }
 }
+
+
+(class {
+
+}).prototype

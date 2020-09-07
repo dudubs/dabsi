@@ -24,7 +24,8 @@ export function TestInput(
     return Input({
         props: {},
         controller,
-        getContextClass: () => class extends AbstractInputContext<any> {
+
+        context:  class extends AbstractInputContext<any> {
             getControllerConfig(): RpcConfig<WidgetType<any>["Controller"]> {
                 return remoteConfig;
             }
@@ -115,7 +116,7 @@ testm(__filename, () => {
         return connectToRpc(Input({
             props: {},
             controller: NoRpc,
-            getContextClass: () => class extends AbstractInputContext<any> {
+            context:  class extends AbstractInputContext<any> {
                 getControllerConfig(): RpcConfig<WidgetType<any>["Controller"]> {
                     return null;
                 }

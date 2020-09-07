@@ -1,26 +1,27 @@
 import {View} from "../../react/view/View";
 import {ViewState} from "../../react/view/ViewState";
 import {RpcConnection} from "../Rpc";
-import {AnyWidget, WidgetElement} from "./Widget";
+import {AnyWidget, TWidget, WidgetType} from "./Widget";
 
-export type WidgetViewProps<T extends AnyWidget> = {
+export type WidgetViewProps<C extends RpcConnection<AnyWidget>> = {
 
-    connection: RpcConnection<T>
+    connection: C
 
-    element?: WidgetElement<T>
+    element?: WidgetType<C>['Element']
 
 
 };
 
 
-export abstract class WidgetView<T extends AnyWidget,
-    P extends WidgetViewProps<T> = WidgetViewProps<T>>
+export abstract class WidgetView<C extends RpcConnection<AnyWidget>,
+    P extends WidgetViewProps<C> = WidgetViewProps<C>,
+    T extends TWidget = WidgetType<C>>
     extends View<P> {
 
 
-    @ViewState('forceUpdateElement') element: WidgetElement<T> | undefined;
+    @ViewState('forceUpdateElement') element: T['Element'] | undefined;
 
-    protected updateElement?(element: WidgetElement<T> | undefined): void;
+    protected updateElement?(element: T['Element'] | undefined): void;
 
     constructor(props: P) {
         super(props);

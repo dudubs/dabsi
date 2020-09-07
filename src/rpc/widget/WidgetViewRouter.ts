@@ -4,7 +4,7 @@ import {TReactRouter} from "../../typed-router/ReactRouter";
 import {ReactRouterRouteProps} from "../../typed-router/ReactRouterLocation";
 import {Router} from "../../typed-router/Router";
 import {Page} from "../Page";
-import {AnyWidget, BaseWidgetConnection, WidgetType} from "./Widget";
+import {AnyWidget, WidgetConnection, WidgetType} from "./Widget";
 
 export type TWidgetViewRouter = TReactRouter & { routerType: typeof WidgetViewRouter };
 
@@ -13,7 +13,7 @@ export namespace WidgetViewRouter {
 
     export function renderPage<T extends TWidgetViewRouter,
         E extends AnyWidget,
-        C extends BaseWidgetConnection<WidgetType<Page<AnyWidget>>>>(
+        C extends WidgetConnection<WidgetType<Page<AnyWidget>>>>(
         this: Router<T>,
         getConnection: (
             params: T['params'],

@@ -2,6 +2,7 @@ import {ReactElement, ReactNode} from "react";
 import {Timeout} from "../../common/async/Timeout";
 import {Lang} from "../../localization/Lang";
 import {ViewState} from "../../react/view/ViewState";
+import {RpcConnection} from "../Rpc";
 import {WidgetType} from "../widget/Widget";
 import {InputType} from "./Input";
 import {InputError} from "./InputError";
@@ -9,24 +10,24 @@ import {InputView, InputViewProps} from "./InputView";
 import {TextInput} from "./TextInput";
 
 
-export type TextInputViewProps<Error> = InputViewProps<TextInput<Error>>;
+export type TextInputViewProps<C extends RpcConnection<TextInput>> = InputViewProps<C>;
 
 
-export class TextInputView<Error>
-    extends InputView<TextInput<Error>, TextInputViewProps<Error> & {
-        children(field: TextInputView<Error>): ReactElement;
+export class TextInputView<C extends RpcConnection<TextInput>>
+    extends InputView<C, TextInputViewProps<C> & {
+        children(field: TextInputView<C>): ReactElement;
     }> {
 
     protected isValidText = false;
 
     @ViewState() protected text: string;
 
-    protected updateElement(element: WidgetType<TextInput<Error>>["Element"] | undefined) {
+    protected updateElement(element: WidgetType<TextInput>["Element"] | undefined) {
         this.setError(undefined);
         this.text = element || "";
     }
 
-    async getValidData(): Promise<InputType<TextInput<Error>>["Data"]> {
+    async getValidData(): Promise<InputType<TextInput>["Data"]> {
         this.debounceId++;
         if (!this.isValidText) {
             await this.emit();
@@ -44,7 +45,7 @@ export class TextInputView<Error>
         this.debounceId++;
         if (!this.isChanged)
             return;
-        this.setError(await this.props.connection.check(this.text))
+        // this.setError(await this.props.connection.check(this.text))
 
         if (this.error != null) {
             this.isValidText = true;
@@ -68,7 +69,7 @@ export class TextInputView<Error>
         await this.emit();
     }
 
-    protected renderErrorDefault(error: InputType<TextInput<Error>>["Error"]): ReactNode {
+    protected renderErrorDefault(error: InputType<TextInput>["Error"]): ReactNode {
         switch (error) {
             case "INVALID_PATTERN":
                 return Lang`INVALID_PATTERN`;

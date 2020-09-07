@@ -1,9 +1,9 @@
 import {NoRpc} from "../NoRpc";
 import {RpcConfig, RpcError} from "../Rpc";
 import {WidgetController, WidgetElement} from "../widget/Widget";
-import {AbstractInputContext} from "./AbstractInputContext";
-import {Input, InputCheckResult, InputType, TInput} from "./Input";
+import {Input, InputCheckResult, InputType} from "./Input";
 import {NullableInput} from "./NullableInput";
+import {AbstractNullableInputContext} from "./AbstractNullableInputContext";
 import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
 /*
@@ -41,12 +41,12 @@ export function EnumInput<K extends string, N extends boolean = true>(
             nullable: options?.nullable ?? true,
             keys: new Set(keys)
         },
-        getContextClass: () => EnumInputContext
+        context: EnumInputContext
     })
 }
 
 export class EnumInputContext<T extends EnumInput<string, any>>
-    extends AbstractInputContext<T> {
+    extends AbstractNullableInputContext<T> {
     getControllerConfig(): RpcConfig<WidgetController<T>> {
         return null
     }
@@ -55,17 +55,13 @@ export class EnumInputContext<T extends EnumInput<string, any>>
         return {default: await ValueOrAwaitableFn(this.config.default)};
     }
 
-    async loadAndCheck(key: InputType<T>["Data"]): Promise<InputCheckResult<T>> {
-        if (typeof key === "string") {
-            if (!this.props.keys.has(key)) {
-                throw new RpcError(`Invalid enum key ${key}`)
-            }
-            return {value: key}
+    async loadAndCheckNotNull(data: NonNullable<InputType<T>["Data"]>): Promise<InputCheckResult<T>> {
+        if (!this.props.keys.has(data)) {
+            throw new RpcError(`Invalid enum key ${data}`)
         }
-        if (!this.props.nullable)
-            return {error: "REQUIRED"}
-        return {value: undefined}
+        return {value: data}
     }
+
 
 }
 

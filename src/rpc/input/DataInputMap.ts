@@ -17,6 +17,8 @@ export type DataInputMapConfig<I extends AnyInput, T = any> = {
 
 export type DataInputMap<I extends AnyInput> = Input<{
 
+    TDataInputMap?: { Input: I };
+
     Data: Record<string, InputType<I>['Data']>
 
     Value: Record<string, InputType<I>['Value']>
@@ -41,7 +43,7 @@ export function DataInputMap<I extends AnyInput>(input: I): DataInputMap<I> {
         props: {input},
         isGenericConfig: true,
         controller: DataParameter(input),
-        getContextClass: () => DataInputMapContext,
+        context: DataInputMapContext,
 
     })
 }

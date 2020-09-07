@@ -1,10 +1,9 @@
 // TODO: Rename to *Input
-import {Awaitable, HasKeys, If, Is, Not, PartialUndefinedKeys} from "../../common/typings";
-import {ContextualRpcType} from "../ContextualRpc";
+import {Awaitable, HasKeys, If, Is, Not, PartialUndefinedKeys, NonNullableAt} from "../../common/typings";
 import {NoRpc} from "../NoRpc";
-import {AnyRpc} from "../Rpc";
+import {AnyRpc, RpcConnection} from "../Rpc";
 import {RpcGenericConfigFn} from "../RpcGenericConfig";
-import {BaseWidgetContext, Widget, WidgetContextClass, WidgetContextConfig, WidgetType} from "../widget/Widget";
+import {Widget, WidgetContextClass} from "../widget/Widget";
 
 
 // TODO: R extends AnyRpc
@@ -31,6 +30,9 @@ export type Input<T extends TInput> = {
 } & Widget<{
 
     Connection: {
+
+        TInput?: T;
+
         check(data: T['Data']): Promise<T['Error'] | undefined>
     }
 
@@ -50,8 +52,9 @@ export type Input<T extends TInput> = {
 
 }>;
 
-export type InputType<T extends AnyInput> =
-    NonNullable<T['TInput']>;
+export type InputType<T extends AnyInput | RpcConnection<AnyInput>> =
+    NonNullableAt<T, 'TInput'>;
+
 export type ErrorOrValue<E, V> = { error: E } | { value: V };
 
 export type TInputCheckResult<T extends TInput> =
@@ -67,13 +70,8 @@ export type AnyInput = Input<TInput>;
 export type InputOptions<Input extends AnyInput, T extends TInput> =
     PartialUndefinedKeys<{
 
-        context?: ThisType<{
-            config: WidgetContextConfig<WidgetType<Input>>
-            props: ContextualRpcType<Input>['Props']
-        }> & BaseWidgetContext<WidgetType<Input>> &
-            BaseInputContext<T>;
 
-        getContextClass: () => WidgetContextClass<Input>
+        readonly context: WidgetContextClass<Input>;
 
         isGenericConfig: boolean
             | If<Not<Is<T['Config'], RpcGenericConfigFn>>, undefined>;
@@ -81,13 +79,6 @@ export type InputOptions<Input extends AnyInput, T extends TInput> =
         props: T['Props']
             | If<Not<HasKeys<T['Props']>>, undefined>;
 
-        /*
-        inputOptions: {
-            isGenericConfig
-            props
-            getContextClass
-        }
-         */
 
         controller: T['Controller']
             | If<Is<T['Controller'], NoRpc>, undefined>;
@@ -103,13 +94,13 @@ export function Input<T extends AnyInput>(options: InputOptions<T, InputType<T>>
         props = {},
         controller = NoRpc,
         isGenericConfig = false,
-        getContextClass
+        context
     } = <InputOptions<AnyInput, TInput>>options;
 
     return <T>Widget<AnyInput>({
         props,
         controller,
-        getContextClass,
+        context,
         isGenericConfig,
         handler: {
             check: async (context, data) => {

@@ -4,6 +4,11 @@ import {AnyInput, Input, InputType} from "./Input";
 
 
 export type ElementInput<E, T extends AnyInput> = Input<{
+
+    SubElement: E;
+    SubInput: T;
+
+
     Data: InputType<T>['Data'],
     Value: InputType<T>['Value'],
     Props: {},
@@ -20,10 +25,8 @@ export type ElementInput<E, T extends AnyInput> = Input<{
 export function ElementInput<E>() {
     return <T extends AnyInput>(target: T) => {
         return <ElementInput<E, T>>Input<ElementInput<E, AnyInput>>({
-
             controller: target,
-            getContextClass: () => ElementInputContext,
-
+            context: ElementInputContext,
         })
     }
 }

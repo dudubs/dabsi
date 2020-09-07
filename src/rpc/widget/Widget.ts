@@ -1,7 +1,7 @@
-import {Fn, HasKeys, If, Is, Not, PartialUndefinedKeys} from "../../common/typings";
+import {Fn, HasKeys, If, Is, Not, PartialUndefinedKeys, NonNullableAt} from "../../common/typings";
 import {ContextualRpc, ContextualRpcProps, ContextualRpcType} from "../ContextualRpc";
 import {NoRpc} from "../NoRpc";
-import {AnyRpc, Rpc, RpcConfig, RpcConnection, RpcPayload, RpcResult} from "../Rpc";
+import {AnyRpc, RpcConfig, RpcConnection, RpcPayload, RpcResult} from "../Rpc";
 import {IsRpcGenericConfigFn, RpcGenericConfig, RpcGenericConfigFn} from "../RpcGenericConfig";
 import {RpcMapHandler, RpcMapHandlerMap, TRpcMapHandlerMap} from "../RpcMapHandler";
 
@@ -17,8 +17,7 @@ export type WidgetHandlerMap<T extends TWidget> = T['Handler'] & {
 export type BaseWidgetContext<T extends TWidget> = {
 
 
-    getControllerConfig?(): RpcConfig<T['Controller']>;
-    readonly controllerConfig?: RpcConfig<T['Controller']>
+    getControllerConfig(): RpcConfig<T['Controller']>;
 
     getElement(): Promise<T['Element']>
 
@@ -27,9 +26,12 @@ export type BaseWidgetContext<T extends TWidget> = {
 
 type WidgetHandler<T extends TWidget> = RpcMapHandler<WidgetHandlerMap<T>>;
 
-export type BaseWidgetConnection<T extends TWidget> = {
+export type WidgetConnection<T extends TWidget> = {
+
+    TWidget?: T;
+
     handler: WidgetHandler<T>,
-    props: T['Props']
+    props: Readonly<T['Props']>
     controller: RpcConnection<T['Controller']>
     getElement(): Promise<T['Element']>
 };
@@ -71,7 +73,9 @@ export type Widget<T extends TWidget> = { TWidget?: T } & ContextualRpc<{
 
     Handler: WidgetHandler<T>
 
-    Connection: BaseWidgetConnection<T> & T['Connection']
+    Connection: WidgetConnection<T> & T['Connection'] & {
+        TWidget?:T;
+    }
 
 }>;
 
@@ -85,17 +89,12 @@ export type Widget<T extends TWidget> = { TWidget?: T } & ContextualRpc<{
 export type WidgetOptions<Widget extends AnyWidget,
     T extends TWidget> = PartialUndefinedKeys<{
 
-    context?: ThisType<{
-        config: WidgetContextConfig<T>
-        props: ContextualRpcType<Widget>['Props']
-    }> & BaseWidgetContext<T> & T['Context'];
 
     connection:
-        ThisType<BaseWidgetConnection<T>> & T['Connection']
+        ThisType<WidgetConnection<T>> & T['Connection']
         | If<Not<HasKeys<T['Connection']>>, undefined>;
 
-    // TODO: readonly contextClass
-    getContextClass?: () => WidgetContextClass<Widget>
+    readonly context: WidgetContextClass<Widget>
 
     isGenericConfig: boolean
         | If<Not<Is<T['Config'], RpcGenericConfigFn>>, undefined>;
@@ -123,7 +122,7 @@ export function Widget<T extends AnyWidget>(
         handler = {},
         connection = {},
         controller = NoRpc,
-        getContextClass,
+        context,
         isGenericConfig = false,
 
     } =
@@ -144,7 +143,7 @@ export function Widget<T extends AnyWidget>(
         createHandler: RpcMapHandler<C, H>({
             ...handler,
             controller: (context, payload) => {
-                const controllerConfig = context.getControllerConfig!();
+                const controllerConfig = context.getControllerConfig();
                 return controller.createRpcHandler(controllerConfig)(
                     payload
                 );
@@ -171,8 +170,8 @@ export function Widget<T extends AnyWidget>(
             if (isGenericConfig) {
                 config = RpcGenericConfig(config)
             }
-            const contextClass = getContextClass!();
-            return new contextClass(props, config)
+
+            return new context(props, config)
         }
     })
 }
@@ -182,8 +181,8 @@ export function Widget<T extends AnyWidget>(
 
 export type AnyWidget = Widget<TWidget>;
 
-export type WidgetType<T extends AnyWidget> =
-    NonNullable<T['TWidget']>;
+export type WidgetType<T extends AnyWidget | RpcConnection<AnyWidget>> =
+    NonNullableAt<T, 'TWidget'>;
 
 
 export type WidgetElement<T extends AnyWidget> =

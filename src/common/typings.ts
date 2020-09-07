@@ -80,7 +80,9 @@ export type OptionalObjectArg<T> =
     ];
 
 
-export type IfNever<T, U> = IsNever<T> extends true ? U : T;
+export type DefaultIfNever<T, U> = IsNever<T> extends true ? U : T;
+
+export type IfNever<T, U,E=never> = IsNever<T> extends true ? U : E;
 
 
 export type Common<L, R> = OmitByValue<{
@@ -159,3 +161,7 @@ declare global {
 
 export type TypeRef<K extends PropertyKey> =
     K extends keyof TypeRefs ? TypeRefs[K] : never;
+
+
+export type NonNullableAt<T, K extends keyof Required<T>> =
+    NonNullable<T[K]>;

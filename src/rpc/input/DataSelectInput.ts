@@ -3,6 +3,7 @@ import {DataSelection} from "../../data/DataSelection";
 import {DataSelectionRow} from "../../data/DataSelectionRow";
 import {DataSource} from "../../data/DataSource";
 import {RpcGenericConfigurator} from "../RpcConfigurator";
+import {NullableInputOptions} from "./NullableInput";
 import {SelectInput} from "./SelectInput";
 import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
@@ -28,9 +29,7 @@ export type DataSelectInput<T, N extends boolean> =
 
 
 export function DataSelectInput<T>() {
-    return <N extends boolean = true>(options: {
-        nullable?: N
-    }): DataSelectInput<T, N> => {
+    return <N extends boolean = true>(options: NullableInputOptions<N> = {}): DataSelectInput<T, N> => {
         return <any>RpcGenericConfigurator<DataSelectInput<any, any>>(
             SelectInput(options),
 

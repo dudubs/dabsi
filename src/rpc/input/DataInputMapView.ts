@@ -1,22 +1,30 @@
 import {entries} from "../../common/object/entries";
 import {hasKeys} from "../../common/object/hasKeys";
 import {mapObjectToArray} from "../../common/object/mapObjectToArray";
+import {NonNullableAt} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
+import {RpcConnection} from "../Rpc";
 import {DataInputMap} from "./DataInputMap";
 import {AnyInput, InputType} from "./Input";
 import {InputError} from "./InputError";
 import {InputView, InputViewProps} from "./InputView";
 
-export type DataInputMapViewProps<T extends AnyInput> = InputViewProps<DataInputMap<T>> & {
-    input: Renderer<InputViewProps<T>, [number]>
+export type DataInputMapViewProps<C extends RpcConnection<DataInputMap<AnyInput>>> = InputViewProps<C> & {
+    input: Renderer<InputViewProps<
+
+        RpcConnection<NonNullableAt<InputType<C>, 'TDataInputMap'>['Input']>
+
+        >, [number]>
 }
 
-export class DataInputMapView<T extends AnyInput>
-    extends InputView<DataInputMap<T>, DataInputMapViewProps<T>> {
+export class DataInputMapView<C extends RpcConnection<DataInputMap<AnyInput>>>
+    extends InputView<C, DataInputMapViewProps<C>> {
 
-    inputs: Record<string, InputView<T>> = {};
+    inputs: Record<string, InputView<
+        RpcConnection<NonNullableAt<InputType<C>, 'TDataInputMap'>['Input']>
+        >> = {};
 
-    async getValidData(): Promise<InputType<DataInputMap<T>>["Data"]> {
+    async getValidData(): Promise<InputType<C>["Data"]> {
         const errors = {};
         const data = {};
         for (const [key, input] of entries(this.inputs)) {
@@ -36,7 +44,7 @@ export class DataInputMapView<T extends AnyInput>
     }
 
 
-    protected updateError(error: InputType<DataInputMap<T>>["Error"] | undefined) {
+    protected updateError(error: InputType<C>["Error"] | undefined) {
         for (let [key, input] of entries(this.inputs)) {
             input.setError(error?.[key]);
         }

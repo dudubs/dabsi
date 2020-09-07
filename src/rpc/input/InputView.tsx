@@ -2,48 +2,52 @@ import {ReactNode} from "react";
 import {Awaitable} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
 import {ViewState} from "../../react/view/ViewState";
+import {RpcConnection} from "../Rpc";
 import {WidgetView, WidgetViewProps} from "../widget/WidgetView";
-import {AnyInput, InputType} from "./Input";
+import {AnyInput, InputType, TInput} from "./Input";
+
+export type InputViewProps<C extends RpcConnection<AnyInput>> =
+    WidgetViewProps<C> & {
 
 
-export type InputViewProps<T extends AnyInput> = WidgetViewProps<T> & {
+    onChange?(data: InputType<C>['Data']): void;
 
+    inputRef?: (input: InputView<C> | null) => void;
 
-    onChange?(data: InputType<T>['Data']): void;
+    error?: InputType<C>['Error'];
 
-    inputRef?: (input: InputView<T> | null) => void;
+    errorMap?: { [K in Extract<InputType<C>['Error'], string>]?: ReactNode }
 
-    error?: InputType<T>['Error'];
-
-
-    renderError?(error: InputType<T>['Error']): ReactNode;
+    renderError?(error: InputType<C>['Error']): ReactNode;
 };
 
-export type InputViewRenderer<T extends AnyInput> =
-    Renderer<InputViewProps<T>>;
+export type InputViewRenderer<C extends RpcConnection<AnyInput>> =
+    Renderer<InputViewProps<C>>;
 
-export abstract class InputView<T extends AnyInput,
-    P extends InputViewProps<T> = InputViewProps<T>>
-    extends WidgetView<T, P> {
+export abstract class InputView<C extends RpcConnection<AnyInput>,
+    P extends InputViewProps<C> = InputViewProps<C>,
+    T extends InputType<C> = InputType<C>,
+    >
+    extends WidgetView<C, P> {
 
-    abstract getValidData(): Awaitable<InputType<T>['Data']>;
+    abstract getValidData(): Awaitable<T['Data']>;
 
-    protected updateError?(error: InputType<T>['Error'] | undefined): void;
+    protected updateError?(error: T['Error'] | undefined): void;
 
     @ViewState() protected _error:
-        InputType<T>['Error'] | undefined;
+        T['Error'] | undefined;
 
-    get error(): InputType<T>['Error'] | undefined {
+    get error(): T['Error'] | undefined {
         return this._error;
     }
 
 
-    setError(error: InputType<T>['Error'] | undefined) {
+    setError(error: T['Error'] | undefined) {
         this._error = error;
         this.updateError?.(error);
     }
 
-    protected renderErrorDefault?(error: InputType<T>['Error']): ReactNode;
+    protected renderErrorDefault?(error: T['Error']): ReactNode;
 
     renderError(): ReactNode {
         const error = this.error;
@@ -58,8 +62,15 @@ export abstract class InputView<T extends AnyInput,
         if (baseError != null)
             return baseError;
 
-        return typeof error === "string" ? error :
-            JSON.stringify({error})
+        if (typeof error === "string") {
+
+            if (this.props.errorMap && (error in this.props.errorMap)) {
+                return this.props.errorMap[error]
+            }
+            // TODO: try to translate with "ERROR_" prefix
+            return error;
+        }
+        return JSON.stringify({error})
     }
 
     reset() {

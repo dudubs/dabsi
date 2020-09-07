@@ -1,19 +1,23 @@
-import {Awaitable} from "../../common/typings";
+import {Awaitable, NonNullableAt} from "../../common/typings";
 import {Renderer} from "../../react/renderer";
 import {EmptyFragment} from "../../react/utils/EmptyFragment";
+import {RpcConnection} from "../Rpc";
 import {ElementInput} from "./ElementInput";
 import {AnyInput, InputType} from "./Input";
 import {InputView, InputViewProps} from "./InputView";
 
-export class ElementInputView<E, T extends AnyInput>
-    extends InputView<ElementInput<E, T>,
-        InputViewProps<ElementInput<E, T>> & {
-        target: Renderer<[E, InputViewProps<T>]>
+export class ElementInputView<C extends RpcConnection<ElementInput<any, AnyInput>>>
+    extends InputView<C,
+        InputViewProps<C> & {
+        target: Renderer<[
+            InputType<C>['SubElement'],
+            InputViewProps<RpcConnection<InputType<C>['SubInput']>>
+        ]>
     }> {
 
-    target: InputView<T> | null;
+    target: InputView<C['controller']> | null;
 
-    getValidData(): Awaitable<InputType<ElementInput<E, T>>["Data"]> {
+    getValidData(): Awaitable<InputType<C>["Data"]> {
         return this.target?.getValidData();
     }
 
@@ -34,7 +38,7 @@ export class ElementInputView<E, T extends AnyInput>
     }
 
 
-    protected updateError(error: InputType<ElementInput<E, T>>["Error"] | undefined): void {
+    protected updateError(error: InputType<C>["Error"] | undefined): void {
         this.target?.setError(error);
     }
 

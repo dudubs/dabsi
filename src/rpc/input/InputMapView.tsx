@@ -5,26 +5,28 @@ import {mapObjectToArray} from "../../common/object/mapObjectToArray";
 import {values} from "../../common/object/values";
 import {Renderer} from "../../react/renderer";
 import {ViewState} from "../../react/view/ViewState";
+import {RpcConnection} from "../Rpc";
 import {WidgetElement, WidgetType} from "../widget/Widget";
-import {InputType} from "./Input";
+import {AnyInput, InputType} from "./Input";
 import {InputError} from "./InputError";
 import {AnyInputMap, InputMap} from "./InputMap";
 import {InputView, InputViewProps} from "./InputView";
 
 
-export type InputMapViewProps<T extends AnyInputMap> =
-    InputViewProps<InputMap<T>> & {
+export type InputMapViewProps<C extends RpcConnection<InputMap<AnyInputMap>>,
+    T extends Record<string, RpcConnection<AnyInput>> = C['controller']> =
+    InputViewProps<C> & {
 
     fields: { [K in keyof T]: Renderer<InputViewProps<T[K]>> }
 
 };
 
-export class InputMapView<T extends AnyInputMap>
-    extends InputView<InputMap<T>, InputMapViewProps<T>> {
+export class InputMapView<C extends RpcConnection<InputMap<AnyInputMap>>>
+    extends InputView<C, InputMapViewProps<C>> {
 
     fields: Record<string, InputView<any>> = {};
 
-    async getValidData(): Promise<InputType<InputMap<T>>["Data"]> {
+    async getValidData(): Promise<InputType<C>["Data"]> {
         let data: any = {};
         let errors: any = {};
         for (const [key, field] of entries(this.fields)) {
@@ -43,7 +45,7 @@ export class InputMapView<T extends AnyInputMap>
     }
 
 
-    protected updateError(error: InputType<InputMap<T>>["Error"] | undefined) {
+    protected updateError(error: InputType<C>["Error"] | undefined) {
         for (let [key, field] of entries(this.fields)) {
             field?.setError(error?.[key])
         }

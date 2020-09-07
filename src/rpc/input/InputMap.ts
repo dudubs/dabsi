@@ -29,7 +29,7 @@ export function InputMap<T extends AnyInputMap>(items: T):
     return <any>Input<InputMap<AnyInputMap>>({
 
         controller: RpcMap(items),
-        getContextClass: () => InputMapContext,
+        context:  InputMapContext,
 
     })
 }

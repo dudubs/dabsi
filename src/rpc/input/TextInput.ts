@@ -3,12 +3,12 @@ import {Awaitable} from "../../common/typings";
 import {NoRpc} from "../NoRpc";
 import {Input} from "./Input";
 import {TextInputContext} from "./TextInputContext";
-import {TextSchema} from "./TextSchema";
+import {StringSchema, StringSchemaError} from "./StringSchema";
+import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
+export type TextInput = Input<{
 
-export type TextInput<Error> = Input<{
-
-    Error: "INVALID_PATTERN" | "TOO_LONG" | "TOO_SHORT" | Error,
+    Error: StringSchemaError ,
 
     Data: string,
 
@@ -16,11 +16,10 @@ export type TextInput<Error> = Input<{
 
     Controller: NoRpc,
 
-    Props: TextSchema,
+    Props: StringSchema,
 
     Config: null | {
-        default?: string | null
-        check?(text: string): Awaitable<Error | undefined>;
+        default?: ValueOrAwaitableFn<string|undefined>
     },
 
     Element: string | undefined,
@@ -28,14 +27,12 @@ export type TextInput<Error> = Input<{
 }>
     ;
 
-export function TextInput<Error>(
-    options: TextSchema = {}
-): TextInput<Error> {
-    return Input<TextInput<Error>>({
+export function TextInput(
+    options: StringSchema = {}
+): TextInput {
+    return Input<TextInput>({
         props: options,
-        getContextClass: () => TextInputContext,
-
+        context: TextInputContext
     })
 }
 
-export type BoolInput = any;

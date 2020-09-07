@@ -1,5 +1,5 @@
 import {defined} from "../common/object/defined";
-import {Assign, IfNever, IsNever, Pluck} from "../common/typings";
+import {Assign, DefaultIfNever, IsNever, Pluck} from "../common/typings";
 import {inspect} from "../logging";
 
 export type TRouter = {
@@ -84,7 +84,7 @@ export type RouterAt<T extends TRouter, K extends keyof T['children']> =
         parent: T
         routerType: T['routerType']
         stack: T['stack'] & Record<K, T['children'][K]>,
-        root: IfNever<Pluck<T, 'root'>, T>
+        root: DefaultIfNever<Pluck<T, 'root'>, T>
     }>
 
 
@@ -172,7 +172,7 @@ export namespace RouterType {
 
 }
 
-export type RouterPlugin<T extends TRouter> = (router: Router<Extract<IfNever<Pluck<T, 'root'>, T>, TRouter>>) => void;
+export type RouterPlugin<T extends TRouter> = (router: Router<Extract<DefaultIfNever<Pluck<T, 'root'>, T>, TRouter>>) => void;
 
 
 Router.prototype = RouterType;

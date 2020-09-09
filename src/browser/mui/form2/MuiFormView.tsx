@@ -2,9 +2,9 @@ import Grid from "@material-ui/core/Grid";
 import React, {ReactElement} from "react";
 
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {RpcConnection} from "../../../rpc/Rpc";
-import {AnyForm} from "../../../rpc/widget/Form";
-import {FormView, FormViewProps} from "../../../rpc/widget/FormView";
+import {RpcConnection} from "../../../typerpc/Rpc";
+import {AnyForm} from "../../../typerpc/widget/Form";
+import {FormView, FormViewProps} from "../../../typerpc/widget/FormView";
 import {MuiButton, MuiButtonProps} from "../components/MuiButton";
 
 export type MuiFormViewProps<C extends RpcConnection<AnyForm>> =

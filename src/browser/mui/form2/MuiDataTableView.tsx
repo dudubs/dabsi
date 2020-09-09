@@ -5,14 +5,15 @@ import TableHead, {TableHeadProps} from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import React, {ReactNode, useState} from "react";
-import {NonNullableAt} from "../../../common/typings";
+import {PartialUndefinedKeys} from "../../../common/typings";
 import {Lang} from "../../../localization/Lang";
 import {Hook} from "../../../react/utils/Hook";
+import {useDebounce} from "../../../react/utils/hooks/useDebounce";
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {AnyRpc, RpcConnection} from "../../../rpc/Rpc";
-import {AnyDataTable} from "../../../rpc/widget/DataTable";
-import {DataTableView, DataTableViewProps} from "../../../rpc/widget/DataTableView";
-import {WidgetType} from "../../../rpc/widget/Widget";
+import {AnyRpc, RpcConnection} from "../../../typerpc/Rpc";
+import {AnyDataTable} from "../../../typerpc/widget/DataTable";
+import {DataTableView, DataTableViewProps} from "../../../typerpc/widget/DataTableView";
+import {AnyWidgetOrConnection, WidgetType} from "../../../typerpc/widget/Widget";
 import {MuiTableColumn, MuiTableColumnProps} from "../MuiTable/MuiTableColumn";
 import {DefaultLang} from "./DefaultLang";
 import {MuiDataTableAction, MuiDataTableActionProps} from "./MuiDataTableAction";
@@ -34,21 +35,24 @@ type MuiDataTableActionEvent<C extends RpcConnection<AnyDataTable>, T, R extends
     connection: RpcConnection<R>
     table: Readonly<DataTableView<C>>;
 };
-export type MuiDataTableViewProps<C extends RpcConnection<AnyDataTable>,
-    T,
-    R extends AnyRpc> =
-    DataTableViewProps<C> & {
 
+
+;
+
+export type DataTableRow<T extends AnyWidgetOrConnection<AnyDataTable>> =
+    WidgetType<T>['Row'];
+
+export type DataTableRowController<T extends AnyWidgetOrConnection<AnyDataTable>> =
+    WidgetType<T>['RowController'];
+
+export type MuiDataTableViewProps<C extends RpcConnection<AnyDataTable>> =
+    DataTableViewProps<C> & {
     TableProps?: TableProps;
     TableHeadProps?: TableHeadProps,
     TableBodyProps?: TableBodyProps,
     TableFooterProps?: TableFooterProps,
 
     MuiTableToolbarProps?: Omit<MuiTableToolbarProps, "actions">
-
-    columns: {
-        [K in keyof T]: null | MuiDataTableViewColumnProps<T[K]>
-    }
 
     // staticActions
     // onAddClick
@@ -60,11 +64,15 @@ export type MuiDataTableViewProps<C extends RpcConnection<AnyDataTable>,
         table: Readonly<DataTableView<C>>
     }>[]
 
+    columns?: PartialUndefinedKeys<{
+        [K in keyof Required<DataTableRow<C>>]:
+        undefined | MuiDataTableViewColumnProps<DataTableRow<C>[K]>
+    }>
 
-    onEditClick?(event: MuiDataTableActionEvent<C, T, R>): void;
+    onEditClick?(event: MuiDataTableActionEvent<C, DataTableRow<C>, DataTableRowController<C>>): void;
 
-    onDeleteClick?(event: MuiDataTableActionEvent<C, T, R>): void;
-    actions?: MuiDataTableActionProps<MuiDataTableActionEvent<C, T, R>>[]
+    onDeleteClick?(event: MuiDataTableActionEvent<C, DataTableRow<C>, DataTableRowController<C>>): void;
+    actions?: MuiDataTableActionProps<MuiDataTableActionEvent<C, DataTableRow<C>, DataTableRowController<C>>>[]
 
     title?: ReactNode;
 };
@@ -82,11 +90,8 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
         MuiTableToolbarProps,
         toolbarActions,
         ...props
-    }: MuiDataTableViewProps<C,
-        WidgetType<C>['Row'],
-        WidgetType<C>['RowController']>) {
+    }: MuiDataTableViewProps<C>) {
 
-    actions = [...actions];
 
     onEditClick && actions.push({
         title: Lang`EDIT`,
@@ -109,18 +114,21 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
 
     })
     return <DataTableView {...props}>{table => {
-        return <TableLayout<[string, any], null | MuiDataTableViewColumnProps, any>
+
+        // table.props.connection.props
+
+        return <TableLayout<[string, any], { sortable: boolean }, any>
             getRowKey={row => row[0]}
             getRowData={row => row[1]}
             rows={table.rows}
-            columns={columns}
+            columns={table.element?.columns || {}}
             renderColumn={(column, children) => <MuiTableColumn
                 key={column.key}
-                {...column.props?.MuiTableColumnProps}>
+                {...columns?.[column.key]?.props?.MuiTableColumnProps}>
                 {children}
             </MuiTableColumn>}
             renderTitle={column => <DefaultLang default={column.key}>
-                {column.props?.title}
+                {columns?.[column.key]?.props?.title}
             </DefaultLang>}
             renderRow={(row, children) => <TableRow key={row.key}>
                 {children}
@@ -139,8 +147,8 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                 </MuiTableColumn>}
             </TableRow>}
             renderData={(data, row, column) => {
-                if (column?.props?.renderData)
-                    return column.props.renderData(data, {
+                if (columns?.[column.key]?.props?.renderData)
+                    return columns?.[column.key]?.props.renderData(data, {
                         row: row.data
                     })
                 return String(data);
@@ -149,12 +157,17 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                 <>
                     <Hook>{() => {
                         const [searchText, setSearchText] = useState("");
+                        const debounce = useDebounce();
+
                         return <MuiTableToolbar
                             {...mergeProps(MuiTableToolbarProps, {})}
                             search={!table.element?.searchable ? undefined : {
                                 text: searchText,
-                                onTextChange: text => {
+                                onTextChange: async text => {
                                     setSearchText(text);
+                                    if (!await debounce.wait())
+                                        return;
+                                    table.search(text);
                                 }
                             }}
                             actions={toolbarActions?.map(action => ({

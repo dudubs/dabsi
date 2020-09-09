@@ -1,6 +1,6 @@
-import {RpcExpressHandler} from "../../rpc/RpcExpressHandler";
-import {Service} from "../../rpc/Service";
-import {ExpressTester} from "../../rpc/tests/ExpressTests";
+import {RpcExpressHandler} from "../../typerpc/RpcExpressHandler";
+import {Service} from "../../typerpc/Service";
+import {ExpressTester} from "../../typerpc/tests/ExpressTests";
 import {AEntity, BEntity, CEntity} from "../../typeorm/relations/tests/Entities";
 import {EDSTesters} from "../eds/tests/EntityDataSourceTests";
 import {RemoteDataSource} from "../RemoteDataSource";

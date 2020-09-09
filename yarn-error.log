@@ -1,5 +1,5 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Users\dudubs\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add typescript
+  C:\Program Files\nodejs\node.exe C:\Users\dudubs\AppData\Roaming\npm\node_modules\yarn\bin\yarn.js add react-async-hook
 
 PATH: 
   C:\cygwin64\usr\local\bin;C:\cygwin64\bin;C:\docs\bin\shell.w32-ix86;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0;C:\python\python35;C:\python\python35\Scripts;C:\cygwin64\bin;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;C:\Program Files\Git\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\ProgramData\chocolatey\bin;C:\Program Files\Java\jdk1.8.0_121\bin;node_modules\.bin;C:\WINDOWS\System32\OpenSSH;E:\Workspace\scripts;C:\Users\dudubs\Workspace\Projects\Mosquito\server\bin;C:\Program Files\dotnet;C:\Program Files (x86)\Microsoft SQL Server\150\DTS\Binn;C:\Program Files\Microsoft SQL Server\Client SDK\ODBC\110\Tools\Binn;C:\Program Files (x86)\Microsoft SQL Server\120\Tools\Binn;C:\Program Files\Microsoft SQL Server\120\Tools\Binn;C:\Program Files\Microsoft SQL Server\120\DTS\Binn;C:\Program Files\nodejs;C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Program Files\PuTTY;C:\Program Files\Amazon\AWSCLIV2;C:\Users\dudubs\AppData\Local\Android\android-sdk\tools\bin;C:\Users\dudubs\AppData\Local\Yarn\bin;C:\Users\dudubs\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin;C:\Users\dudubs\AppData\Local\Microsoft\WindowsApps;C:\Users\dudubs\AppData\Local\Android\android-sdk\tools;C:\Users\dudubs\AppData\Local\Android\android-sdk\platform-tools;C:\Users\dudubs\AppData\Local\atom\bin;C:\Users\dudubs\AppData\Local\Microsoft\WindowsApps;C:\Users\dudubs\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\dudubs\AppData\Roaming\npm
@@ -48,11 +48,11 @@ npm manifest:
       "ts-jest": "^26.1.1",
       "ts-node": "^8.10.2",
       "typeorm": "^0.2.25",
-      "typescript": "^3.9.6",
+      "typescript": "^3.9.7",
       "yargs": "^15.3.1"
     },
     "dependencies": {
-      "@types/jasmine": "^3.5.11",
+      "@types/jasmine": "^3.5.12",
       "jasmine": "^3.5.0"
     }
   }
@@ -211,10 +211,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@types/history/-/history-4.7.5.tgz#527d20ef68571a4af02ed74350164e7a67544860"
     integrity sha512-wLD/Aq2VggCJXSjxEwrMafIP51Z+13H78nXIX0ABEuIGhmB5sNGbR113MOKo+yfw+RDo1ZU3DM6yfnnRF/+ouw==
   
-  "@types/jasmine@^3.5.11":
-    version "3.5.11"
-    resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-3.5.11.tgz#ba8e80639dffbe277f49c708b45373a320d158e2"
-    integrity sha512-fg1rOd/DehQTIJTifGqGVY6q92lDgnLfs7C6t1ccSwQrMyoTGSoH6wWzhJDZb6ezhsdwAX4EIBLe8w5fXWmEng==
+  "@types/jasmine@^3.5.12":
+    version "3.5.12"
+    resolved "https://registry.yarnpkg.com/@types/jasmine/-/jasmine-3.5.12.tgz#5c378c1545cdc7cb339cff5578f854b6d1e0a17d"
+    integrity sha512-vJaQ58oceFao+NzpKNqLOWwHPsqA7YEhKv+mOXvYU4/qh+BfVWIxaBtL0Ck5iCS67yOkNwGkDCrzepnzIWF+7g==
   
   "@types/mime@*":
     version "2.0.1"
@@ -2190,10 +2190,10 @@ Lockfile:
       yargonaut "^1.1.2"
       yargs "^13.2.1"
   
-  typescript@^3.9.6:
-    version "3.9.6"
-    resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
-    integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
+  typescript@^3.9.7:
+    version "3.9.7"
+    resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
+    integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
   
   unpipe@1.0.0, unpipe@~1.0.0:
     version "1.0.0"

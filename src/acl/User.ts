@@ -14,7 +14,7 @@ export class User {
     lastName?: string;
 
     @Column({nullable: true})
-    loginName: string;
+    loginName?: string;
 
     @Column({nullable: true})
     email?: string;
@@ -22,7 +22,7 @@ export class User {
     @Column({nullable: true})
     phoneNumber?: string;
 
-    get fullName() {
+    get fullName():string {
         return `${this.firstName} ${this.lastName}`
     }
 

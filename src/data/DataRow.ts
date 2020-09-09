@@ -1,9 +1,9 @@
-import {HasKeys, If, IsNever, Union} from "../common/typings";
+import {HasKeys, IsAny, Union} from "../common/typings";
 import {BaseTypeKey} from "./BaseType";
 import {DataFields, DataFieldsRow} from "./DataFields";
 import {DataKey} from "./DataKey";
 import {DataSource, DataValues} from "./DataSource";
-import {DataTypeKey, DataUnion, DataUnionChildren, DataUnionChildrenKey, DataUnionChildrenOf} from "./DataUnion";
+import {DataTypeKey, DataUnionChildren, DataUnionChildrenKey, DataUnionChildrenOf} from "./DataUnion";
 import {MapRelation, RelationKeys, RelationTypeAt} from "./Relation";
 
 type DataUnionChildrenRow<Children> = {
@@ -19,11 +19,12 @@ export type DataUnionRow<T extends DataUnionChildren<any>,
     DataRow<DataUnionChildrenOf<T>[K]>;
 
 export type DataRow<T> =
-    T extends DataUnionChildren<infer Children> ?
-        HasKeys<Children> extends true ?
-            Union<DataUnionChildrenRow<Children>> :
-            _NoChildren<T> :
-        _NoChildren<T> ;
+    // IsAny<T> extends true ? any :
+        T extends DataUnionChildren<infer Children> ?
+            HasKeys<Children> extends true ?
+                Union<DataUnionChildrenRow<Children>> :
+                _NoChildren<T> :
+            _NoChildren<T> ;
 
 
 type TDataRow = Record<DataKey, string>;

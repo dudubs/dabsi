@@ -300,7 +300,7 @@ export abstract class DataExpTranslator<T, U>
 
         if ('in' in exp) {
             searchInExp = exp.in
-            inverse = true;
+            inverse = false;
         } else {
             inverse = true;
             searchInExp = exp.notIn

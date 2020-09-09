@@ -1,10 +1,9 @@
 import TextField, {TextFieldProps} from "@material-ui/core/TextField";
 import React, {ReactNode} from "react";
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {AnyInput, Input, InputType} from "../../../rpc/input/Input";
-import {TextInput} from "../../../rpc/input/TextInput";
-import {TextInputView, TextInputViewProps} from "../../../rpc/input/TextInputView";
-import {RpcConnection} from "../../../rpc/Rpc";
+import {TextInput} from "../../../typerpc/input/TextInput";
+import {TextInputView, TextInputViewProps} from "../../../typerpc/input/TextInputView";
+import {RpcConnection} from "../../../typerpc/Rpc";
 
 export type MuiTextInputViewProps<C extends RpcConnection<TextInput>> =
     TextInputViewProps<C> & {

@@ -31,6 +31,9 @@ export function mergeProp(prevValue, nextValue) {
 
     const nextType = typeof nextValue;
 
+
+    // TODO: $reverse
+
     if (nextType === "object") {
 
         const merger = nextValue?.[$merge];
@@ -56,6 +59,10 @@ export function mergeProp(prevValue, nextValue) {
             case "function":
                 return mergeCallbacks(prevValue, nextValue);
             case "object":
+                if(Array.isArray(prevType) && Array.isArray(nextType)) {
+                    console.info("mergeBetweenArrays");
+                    return [...prevValue,...nextValue]
+                }
                 return mergeProps(prevValue, nextValue)
         }
     }

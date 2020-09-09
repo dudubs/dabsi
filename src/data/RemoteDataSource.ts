@@ -1,5 +1,5 @@
 import {AwaitableType} from "../common/typings";
-import {Rpc} from "../rpc/Rpc";
+import {Rpc} from "../typerpc/Rpc";
 import {DataCursor, EmptyDataCursor} from "./DataCursor";
 import {DataBaseRow, DataRow} from "./DataRow";
 import {DataSource, DataValues} from "./DataSource";

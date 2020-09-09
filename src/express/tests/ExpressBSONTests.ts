@@ -1,5 +1,5 @@
 import {BSON2} from "../../common/BSON2";
-import {ExpressTester, testExpressHandler} from "../../rpc/tests/ExpressTests";
+import {ExpressTester, testExpressHandler} from "../../typerpc/tests/ExpressTests";
 import {ExpressBSON} from "../ExpressBSON";
 
 

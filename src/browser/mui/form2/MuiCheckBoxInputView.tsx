@@ -2,9 +2,9 @@ import Checkbox, {CheckboxProps} from "@material-ui/core/Checkbox";
 import FormControlLabel, {FormControlLabelProps} from "@material-ui/core/FormControlLabel";
 import React, {ReactNode} from "react";
 import {mergeProps} from "../../../react/utils/mergeProps";
-import {BoolInput} from "../../../rpc/input/BoolInput";
-import {BoolInputView, BoolInputViewProps} from "../../../rpc/input/BoolInputView";
-import {RpcConnection} from "../../../rpc/Rpc";
+import {BoolInput} from "../../../typerpc/input/BoolInput";
+import {BoolInputView, BoolInputViewProps} from "../../../typerpc/input/BoolInputView";
+import {RpcConnection} from "../../../typerpc/Rpc";
 
 
 export type MuiCheckBoxInputViewProps<C extends RpcConnection<BoolInput>> =

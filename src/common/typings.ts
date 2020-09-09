@@ -35,6 +35,9 @@ export type Pluck<T, K extends PropertyKey, E = never> =
     IsNever<T> extends true ? E :
         Required<T> extends Record<K, infer U> ? U : E;
 
+export type At<T, K extends PropertyKey> =
+    K extends keyof Required<T> ? T[K] : never;
+
 export type PartialKeys<T, K extends keyof T> =
     Omit<T, K> &
     Partial<Pick<T, K>>;
@@ -82,7 +85,7 @@ export type OptionalObjectArg<T> =
 
 export type DefaultIfNever<T, U> = IsNever<T> extends true ? U : T;
 
-export type IfNever<T, U,E=never> = IsNever<T> extends true ? U : E;
+export type IfNever<T, U, E = never> = IsNever<T> extends true ? U : E;
 
 
 export type Common<L, R> = OmitByValue<{
@@ -114,7 +117,16 @@ export type Optional<T> = Pick<T, OptionalKeys<T>>;
 
 
 export type IsNever<T> = [T] extends [never] ? true : false;
-export type Is<T, U> = T extends U ? true : false;
+export type Is<T, U> = [T] extends [U] ? true : false;
+export type  IsEmptyObject<T> = Is<{}, T>;
+
+export type And<T extends boolean, U extends boolean> =
+    T extends true ? U extends true ? true : false : false;
+
+export type OR<T extends boolean, U extends boolean> =
+    T extends true ? true : U extends true ? true : false;
+
+export type IsSome<T, U> = And<Is<T, U>, Is<U, T>>
 export type IsNot<T, U> = T extends U ? false : true;
 
 export type IsAny<T> =
@@ -131,7 +143,7 @@ export type HasKeys<T> =
 export type Not<T extends boolean> = T extends true ? false : true;
 
 export type If<C extends boolean, T, E = never> = C extends true ? T : E;
-export type IfNot<C extends boolean, T, E = never> = C extends false ? T : E;
+export type IfNot<C extends boolean, T, E = never> = If<C,E,T>;
 
 export type Constructor<T> = { new(...args: any[]): T };
 
@@ -139,10 +151,20 @@ export type Constructor<T> = { new(...args: any[]): T };
 export type Merge<L, R, M> = HasKeys<L> extends false ? R :
     HasKeys<R> extends false ? L : AssignKeys<L, M>;
 
-export type PartialUndefinedKeys<T> = PartialKeys<T, Union<{
-    [K in keyof T]: undefined extends T[K] ? K : never
-}>>;
+export type PartialUndefinedKeys<T, U = {}> =
+    (T & U) |
+    (U & PartialKeys<T, Union<{
+    [K in keyof Required<T>]:
+    undefined extends T[K] ? K : never
+}>>);
 
+export type UndefinedIfEmptyObject<T> = T | If<IsEmptyObject<T>, undefined>;
+
+export type UndefinedMap<T> = UndefinedIfEmptyObject<PartialUndefinedKeys<T>>;
+
+export type RequireOptionalKeys<T> = {
+    [K in keyof Required<T>]: T[K]
+};
 
 export type IfNull<T, U> = T extends null ? U : never;
 
@@ -163,5 +185,10 @@ export type TypeRef<K extends PropertyKey> =
     K extends keyof TypeRefs ? TypeRefs[K] : never;
 
 
-export type NonNullableAt<T, K extends keyof Required<T>> =
-    NonNullable<T[K]>;
+export type NonNullableAt<T, K extends keyof Required<T>, D = never, V =
+    NonNullable<T[K]>> =
+    IsNever<V> extends true ? D : V;
+
+export type SafeOmit<T, K extends keyof T> =
+    Omit<T, K>;
+

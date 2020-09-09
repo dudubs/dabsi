@@ -1,8 +1,96 @@
-import {HasKeys, IsAny, IsNever, OptionalObjectArg, Pluck} from "../typings";
+import {
+    HasKeys,
+    IsAny,
+    IsEmptyObject,
+    IsNever,
+    IsSome,
+    OptionalKeys,
+    OptionalObjectArg,
+    PartialUndefinedKeys,
+    Pluck,
+    RequireOptionalKeys
+} from "../typings";
+
 
 ((_) => {
 })(() => {
 
+
+    // IsEmptyObject
+    {
+        type n = number;
+
+
+        test<IsEmptyObject<{ a?: n }>>(true);
+
+        test<IsEmptyObject<{ a?: n } | { a: n }>>(true);
+
+        test<IsEmptyObject<{ a: n }>>(false);
+
+    }
+    // PartialUndefinedKeys
+    {
+
+        test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({b: 1});
+
+        // @ts-expect-error
+        test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({});
+
+        // @ts-expect-error
+        test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({b: 1, c: 1});
+    }
+
+    // IsSome
+    {
+
+        const neverIsNever: IsSome<never, never> = true;
+
+        // @ts-expect-error
+        const neverIsUnkown: IsSome<never, unknown> = true;
+
+        // @ts-expect-error
+        const neverIsAny: IsSome<never, any> = true;
+
+
+        // @ts-expect-error
+        const unknownIsNever: IsSome<unknown, never> = true;
+
+        const unknownIsUnkown: IsSome<unknown, unknown> = true;
+
+        const unknownIsAny: IsSome<unknown, any> = true;
+
+
+        // @ts-expect-error
+        const anyIsNever: IsSome<any, never> = true;
+
+        const anyIsUnkown: IsSome<any, unknown> = true;
+
+        const anyIsAny: IsSome<any, any> = true;
+
+
+    }
+
+
+    // RequireOptionalKeys
+    {
+        test<RequireOptionalKeys<{ foo?: string }>>({foo: ""});
+
+        test<RequireOptionalKeys<{ foo?: string }>>({foo: undefined});
+
+        // @ts-expect-error
+        test<RequireOptionalKeys<{ foo: string }>>({foo: undefined});
+
+        // @ts-expect-error
+        test<RequireOptionalKeys<{ foo?: string }>>({});
+    }
+
+    // OptionalKeys
+    {
+        // @ts-expect-error
+        test<OptionalKeys<{ foo, bar? }>>("foo");
+
+        test<OptionalKeys<{ foo, bar? }>>("bar");
+    }
 
     // HasKeys
     {
@@ -27,7 +115,7 @@ import {HasKeys, IsAny, IsNever, OptionalObjectArg, Pluck} from "../typings";
 
         test<OptionalObjectArg<{ x: never }>>([]);
 
-        test<OptionalObjectArg<{ x: never, y: number }>>([{y:1}]);
+        test<OptionalObjectArg<{ x: never, y: number }>>([{y: 1}]);
 
     }
     // Pluck

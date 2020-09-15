@@ -1,4 +1,5 @@
 import {History} from "history";
+import {WithMetaType} from "../common/MetaType";
 import {joinUrl} from "./joinUrl";
 import {Lazy} from "../common/patterns/lazy";
 import {Assign, HasKeys, DefaultIfNever, Pluck, Is, If, Not, IsNever} from "../common/typings";
@@ -10,13 +11,17 @@ import {ReactRouterError} from "./ReactRouterError";
 import {Router, RouterAt, RouterType, TRouter} from "./Router";
 
 export type RouterAtArgs<P> =
-    [Record<keyof P, string|number>]|
-    If<Not<HasKeys<P>>,  [undefined?]>
+    [Record<keyof P, string | number>] |
+    If<Not<HasKeys<P>>, [undefined?]>
 
+
+export interface ReactRouterLocation<T extends TReactRouter> extends WithMetaType<{
+    TRouter: T
+}> {
+
+}
 
 export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
-
-    TRouter?:T;
 
     constructor(
         protected _parent: ReactRouterLocation<any> | null,

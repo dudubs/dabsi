@@ -1,3 +1,5 @@
+import {MetaType, MetaTypeHook, WithMetaType} from "../common/MetaType";
+
 export type RpcHandlerFn<Payload = any, Result = any> = {
     (payload: Payload): Promise<Result>;
 }
@@ -9,19 +11,24 @@ export type TRpc = {
     Config: any
 };
 
-export type Rpc<T extends TRpc> = {
+export type Rpc<T extends TRpc> =
+    WithMetaType<{ TRpc: T }> &
+    {
 
-    TRpc?: T;
 
-    createRpcConnection(handler: T['Handler']): T['Connection'] ;
+        createRpcConnection(handler: T['Handler']): T['Connection'];
 
-    createRpcHandler(config: T['Config']): T['Handler'];
+        createRpcHandler(config: T['Config']): T['Handler'];
 
-};
+    };
 
 
 export type RpcType<T extends AnyRpc> =
-    NonNullable<T['TRpc']>;
+    MetaType<T>['TRpc'];
+
+export type RpcHook<R extends AnyRpc, T extends Partial<TRpc>, MT = {}> =
+    MetaTypeHook<R, AnyRpc, MT> &
+    Rpc<Extract<Omit<RpcType<R>, keyof T> & T, TRpc>>
 
 export type AnyRpc = Rpc<{
     Handler: RpcHandlerFn,

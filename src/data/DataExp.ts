@@ -200,3 +200,5 @@ export function DataExp<T>(...exps: Array<DataExp<T>>): DataExp<T> {
 }
 
 
+export type OmitRequiredKeys<T extends U, U> =
+    Omit<T,keyof Required<U>>;

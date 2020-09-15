@@ -14,12 +14,13 @@ export class LangTranslator {
     }
 
 
-    translateNode(node: LangNode) {
+    translateNode(node: LangNode):string|undefined {
         switch (typeof node) {
             case "string":
             case "number":
                 return String(node);
             case "undefined":
+                return
             case "boolean":
                 return "";
             case "object":
@@ -77,7 +78,7 @@ export class LangTranslator {
             case "undefined":
                 return matchCase(
                     joinTemplate(template.strings, template.params, param => String(
-                        template.props[param]
+                       this.translateNode( template.props[param])
                     )),
                     fromConstantCase,
                     toTitleCase

@@ -1,28 +1,33 @@
+import {entries} from "../../common/object/entries";
 import {hasKeys} from "../../common/object/hasKeys";
+import {RequireOptionalKeys} from "../../common/typings";
 import {RpcConfig} from "../Rpc";
+import {RpcConfigFactory} from "../RpcGenericConfig";
 import {WidgetController, WidgetElement} from "../widget/Widget";
 import {AbstractInputContext} from "./AbstractInputContext";
 import {DataInputMap} from "./DataInputMap";
-import {AnyInput, InputCheckResult, InputData} from "./Input";
+import {AnyInput, InputCheckResult, InputData, InputValue} from "./Input";
 
-export class DataInputMapContext<T extends DataInputMap<AnyInput>>
+type T = DataInputMap<AnyInput>;
+export class DataInputMapContext
     extends AbstractInputContext<T> {
     getControllerConfig(): RpcConfig<WidgetController<T>> {
         return $ => $({
             source: this.config.source,
             getTargetConfig: ($, row) => $(
-                this.config.getInputConfig($ => $, row)
+                RpcConfigFactory(this.config.getInputConfig, row)
             )
         })
     }
 
-    async getElement(): Promise<WidgetElement<T>> {
+    async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>>{
         const element: any = {};
-        for (const row of await this.config.source.items()) {
-            element[row.$key] = await this.props.input.getContext(
-                this.config.getInputConfig($ => $, row)
-            ).getElement()
-        }
+        if (this.config.loadAllData)
+            for (const row of await this.config.source.items()) {
+                element[row.$key] = await this.props.controller.target.getContext(
+                    RpcConfigFactory(this.config.getInputConfig, row)
+                ).getElement()
+            }
         return element;
     }
 
@@ -36,8 +41,8 @@ export class DataInputMapContext<T extends DataInputMap<AnyInput>>
             .filter({$is: keys})
             .items()) {
 
-            const result = await this.props.input
-                .getContext(this.config.getInputConfig($ => $, row))
+            const result = await this.props.controller.target
+                .getContext(RpcConfigFactory(this.config.getInputConfig, row))
                 .loadAndCheck(data[row.$key])
 
             if ('error' in result) {
@@ -48,6 +53,20 @@ export class DataInputMapContext<T extends DataInputMap<AnyInput>>
         }
 
         return hasKeys(error) ? {error} : {value};
+    }
+
+    getDataFromValue(keyToValue: InputValue<T>): InputData<T> {
+        throw new Error()
+        // const data: Record<string, any> = {};
+        // for (const [key, value] of entries(keyToValue)) {
+        //     data[key] = this.props.controller.target
+        //         .getContext(
+        //             RpcConfigFactory(this.config.getInputConfig, value)
+        //         )
+        //         .getDataFromValue(value)
+        // }
+        //
+        // return data;
     }
 
 }

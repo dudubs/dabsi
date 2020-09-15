@@ -1,5 +1,6 @@
 import {RpcConfig} from "../Rpc";
 import {RpcMap} from "../RpcMap";
+import {MapWidgets} from "../widget/WidgetMap";
 import {AnyInput, Input, InputType, TInput} from "./Input";
 import {InputMapContext} from "./InputMapContext";
 
@@ -16,7 +17,7 @@ export type MapInputs<T extends AnyInputMap,
 export type InputMap<T extends AnyInputMap> = Input<{
     Controller: RpcMap<T>
     Props: {}
-    Element: MapInputs<T, 'Element'>
+    Element: MapWidgets<T, 'Element'>
     Config: RpcConfig<RpcMap<T>>
     Error: MapInputs<T, 'Error'>
     Data: MapInputs<T, 'Data'>

@@ -1,16 +1,31 @@
+import {If, Is, PartialUndefinedKeys} from "../../common/typings";
+import {ValueOrAwaitableFn} from "../input/ValueOrAwaitableFn";
 import {NoRpc} from "../NoRpc";
-import {NoWidgetContext} from "./NoWidgetContext";
+import {AnyRpc, RpcConfig} from "../Rpc";
+import {CustomWidgetContext} from "./CustomWidgetContext";
 import {Widget} from "./Widget";
 
-export type NoWidget = Widget<{
+export type CustomWidget<T extends object, R extends AnyRpc> = Widget<{
     Handler: {},
-    Controller: NoRpc,
+    Controller: R,
     Props: {},
     Context: {},
     Connection: {}
-    Config: null
-    Element: undefined
+    Config: PartialUndefinedKeys<{
+        getControllerConfig: (() => RpcConfig<R>)
+            | If<Is<R, NoRpc>, undefined>
+        element: ValueOrAwaitableFn<T>
+    }>,
+    Element: T
 }>;
-export const NoWidget: NoWidget = Widget<NoWidget>({
-    context:  NoWidgetContext,
-});
+
+export function CustomWidget<T extends object>() {
+    return <R extends AnyRpc=NoRpc>(controller?: R): CustomWidget<T, R> => {
+        return <any>Widget<CustomWidget<any, AnyRpc>>({
+            controller,
+            context: CustomWidgetContext
+        })
+    }
+}
+
+

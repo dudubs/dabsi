@@ -21,7 +21,7 @@ export class BoolInputView<C extends RpcConnection<BoolInput>>
     @ViewState() value: boolean;
 
     protected updateElement(element: WidgetElement<BoolInput> | undefined) {
-        this.value = element ?? false;
+        this.value = element?.default ?? false;
     }
 
     getValidData(): Awaitable<InputData<BoolInput>> {

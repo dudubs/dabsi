@@ -18,6 +18,7 @@ export type SelectInput<T, N extends boolean> = NullableInput<N, {
 
     Config: {
         load(key: string): Awaitable<T | undefined>
+        getKey(value: T): string;
         default?: ValueOrAwaitableFn<string | undefined>;
         options: ValueOrAwaitableFn<{ label: string, key: string }[]>
     }

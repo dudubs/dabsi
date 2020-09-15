@@ -7,8 +7,9 @@ export type WidgetViewProps<C extends RpcConnection<AnyWidget>> = {
 
     connection: C
 
-    element?: WidgetElement<C>
+    element: WidgetElement<C>
 
+    loadOnInit?: boolean
 
 };
 
@@ -21,7 +22,7 @@ export abstract class WidgetView<C extends RpcConnection<AnyWidget>,
 
     // TODO: reloadElement
 
-    @ViewState('forceUpdateElement') element: T['Element'] | undefined;
+    @ViewState('forceUpdateElement') element: T['Element'];
 
     protected updateElement?(element: T['Element'] | undefined): void;
 
@@ -29,7 +30,13 @@ export abstract class WidgetView<C extends RpcConnection<AnyWidget>,
         super(props);
 
         this.element = props.element;
-        this.updateElement?.(this.element)
+        this.updateElement?.(props.element)
+
+        if (this.props.loadOnInit) {
+            this.props.connection.getElement().then(element => {
+                this.element = element;
+            })
+        }
     }
 
 

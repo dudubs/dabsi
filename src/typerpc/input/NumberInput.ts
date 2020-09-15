@@ -11,13 +11,13 @@ export type NumberInput<N extends boolean> = NullableInput<N, {
 
     Value: number
 
-    Props: NumberSchema
+    Props: {}
 
-    Config: {
+    Config: undefined | NumberSchema & {
         default?: number
     }
 
-    Element: number | undefined
+    Element: NumberSchema & { default?: number }
 
     Error: NumberSchemaError
 }>;

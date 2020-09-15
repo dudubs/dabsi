@@ -30,7 +30,7 @@ export type DataSelectInput<T, N extends boolean> =
 
 export function DataSelectInput<T>() {
     return <N extends boolean = true>(options: NullableInputOptions<N> = {}): DataSelectInput<T, N> => {
-        return <any>RpcGenericConfigurator<DataSelectInput<any, any>>(
+        return <any>RpcGenericConfigurator<DataSelectInput<DataRow<unknown>, any>>(
             SelectInput(options),
 
             // server:start
@@ -42,6 +42,7 @@ export function DataSelectInput<T>() {
                         return value
                     }),
                 load: key => config.source.get(key),
+                getKey: row=>row.$key,
                 options: () => config.source
                     .createAsMutable()
                     .select(config.selection)

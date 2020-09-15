@@ -107,7 +107,7 @@ export abstract class DataExpTranslator<T, U>
         if (Array.isArray(exp)) {
             return this.translateArrayExp(exp)
         }
-        const [key, value] = firstDefinedEntry(exp);
+        const [key, value] = firstDefinedEntry(<Record<string, any>>exp);
         if (key.startsWith("$")) {
             return this[key](value)
         }
@@ -150,7 +150,7 @@ export abstract class DataExpTranslator<T, U>
                     return this.translate([key, <CompareOperator>op, exp]);
                 } else {
                     const [op, value] =
-                        firstDefinedEntry(fieldExp);
+                        firstDefinedEntry(<Record<string,any>>fieldExp);
 
                     switch (op) {
                         case "$in":

@@ -1,4 +1,5 @@
 import {touchMap} from "../common/map/touchMap";
+import {MetaType, WithMetaType} from "../common/MetaType";
 import {Rpc, RpcHandlerFn} from "./Rpc";
 
 export type TContextualRpc = {
@@ -8,7 +9,7 @@ export type TContextualRpc = {
 
     Connection: any,
 
-    Config: object | null|undefined
+    Config: object  | undefined
 
     Context: object
 
@@ -21,20 +22,20 @@ export type ContextualRpcProps<T extends AnyContextualRpc> =
     ContextualRpcType<T>['Props'];
 
 export type ContextualRpcType<T extends AnyContextualRpc> =
-    NonNullable<T['TContextualRpc']>;
+    MetaType<T>['TContextualRpc'];
 
 
 export type ContextualRpcContext<T extends AnyContextualRpc> =
     ContextualRpcType<T>['Context'];
 
-export type ContextualRpc<T extends TContextualRpc> = Rpc<{
+export type ContextualRpc<T extends TContextualRpc> =
+    WithMetaType<{ TContextualRpc: T }> &
+    Rpc<{
 
-
-    Config: T['Config'],
-    Handler: T['Handler'],
-    Connection: T['Connection']
-}> & {
-    TContextualRpc?: T;
+        Config: T['Config'],
+        Handler: T['Handler'],
+        Connection: T['Connection']
+    }> & {
     getContext(config: T['Config']): T['Context']
     props: T['Props'];
 } ;
@@ -44,7 +45,7 @@ export type AnyContextualRpc = ContextualRpc<TContextualRpc>;
 export type ContextualRpcOptions<T extends TContextualRpc> = {
     props: Readonly<T['Props']>
 
-    createHandler(context: T['Context']): T['Handler']
+    createHandler(context: T['Context'], props: T['Props']): T['Handler']
     createContext(props: T['Props'], config: T['Config']): T['Context'];
     createConnection(handler: T['Handler'], props: Readonly<T['Props']>): T['Connection'];
 
@@ -69,7 +70,7 @@ export function ContextualRpc<Rpc extends AnyContextualRpc>(
             )
         },
         createRpcHandler(config) {
-            return options.createHandler(this.getContext(config));
+            return options.createHandler(this.getContext(config), options.props);
         },
         createRpcConnection: handler =>
             options.createConnection(handler, options.props)

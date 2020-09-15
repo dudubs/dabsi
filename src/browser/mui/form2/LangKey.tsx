@@ -6,8 +6,9 @@ import {LangPropsType} from "../../../localization/Lang";
 import {LangView} from "../../../localization/LangView";
 import React from "react";
 
-export function DefaultLang(props: {
-    default: string
+
+export function LangKey(props: {
+    for: string
     children: ReactNode,
     sourceCase?: SourceCase
 }): ReactElement {
@@ -18,9 +19,9 @@ export function DefaultLang(props: {
         }
 
         return <LangView type={LangPropsType.token} token={
-            matchCase(props.default,
+            matchCase(props.for,
                 props.sourceCase || fromPropertyCase,
                 toConstantCase)
         }/>
-    }, [props.children, props.default]);
+    }, [props.children, props.for]);
 }

@@ -2,7 +2,7 @@ import React, {ReactNode} from "react";
 import {
     MuiConfirmDialog,
     MuiConfirmDialogProps
-} from "../../../../browser/src/sections/orders/views/mui/MuiConfirmDialog";
+} from "../components/MuiConfirmDialog";
 import {useModalStack} from "../../../react/ModalStack";
 import {mergeProps} from "../../../react/utils/mergeProps";
 import {MuiButton, MuiButtonProps} from "../components/MuiButton";

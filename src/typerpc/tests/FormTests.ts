@@ -10,12 +10,17 @@ testm(__filename, () => {
         expect(await connectToRpc(
             Form<string>()(
                 InputMap({
-                    text: TextInput({trim: true})
+                    text: TextInput()
                 })
             ),
             {
-                input: {text: undefined},
+                input: {
+                    text: {
+                        trim: true
+                    }
+                },
                 submit: value => {
+                    expect(value.text).toEqual("hello")
                     return {value: value.text.toUpperCase()};
                 }
             })

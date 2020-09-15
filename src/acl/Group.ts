@@ -19,8 +19,8 @@ export class Group {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({nullable: true})
-    name?: string;
+    @Column()
+    name: string;
 
     // TODO: Maybe optional?
     @ManyToMany(() => User, user => user.groups)

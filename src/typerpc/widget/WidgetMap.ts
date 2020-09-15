@@ -1,3 +1,4 @@
+import {ContextualRpcContext, ContextualRpcType} from "../ContextualRpc";
 import {RpcConfig} from "../Rpc";
 import {RpcMap} from "../RpcMap";
 import {AnyWidget, TWidget, Widget, WidgetType} from "./Widget";
@@ -14,7 +15,9 @@ export type WidgetMap<T extends AnyWidgetMap> = Widget<{
     Controller: RpcMap<T>
     Config: RpcConfig<RpcMap<T>>
     Element: MapWidgets<T, 'Element'>
-    Context: {}
+    Context: {
+        getContext(key: string): ContextualRpcContext<T[string]>
+    }
     Connection: {}
     Handler: {}
     Props: {}
@@ -24,6 +27,6 @@ export type WidgetMap<T extends AnyWidgetMap> = Widget<{
 export function WidgetMap<T extends AnyWidgetMap>(items: T): WidgetMap<T> {
     return <any>Widget<WidgetMap<AnyWidgetMap>>({
         controller: RpcMap(items),
-        context:  WidgetMapContext,
+        context: WidgetMapContext,
     })
 }

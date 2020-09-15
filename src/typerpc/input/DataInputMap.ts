@@ -12,6 +12,8 @@ export type DataInputMapConfig<I extends AnyInput, T = any> = {
     source: DataSource<T>
 
     getInputConfig: RpcConfigFactory<DataRow<T>, I>
+
+    loadAllData?: boolean
 };
 
 
@@ -24,7 +26,7 @@ export type DataInputMap<I extends AnyInput> = Input<{
 
     Value: Record<string, InputValue<I>>
 
-    Props: { input: I },
+    Props: {},
 
     Element: Record<string, {
         label: string
@@ -41,7 +43,6 @@ export type DataInputMap<I extends AnyInput> = Input<{
 
 export function DataInputMap<I extends AnyInput>(input: I): DataInputMap<I> {
     return <any>Input<DataInputMap<AnyInput>>({
-        props: {input},
         isGenericConfig: true,
         controller: DataParameter(input),
         context: DataInputMapContext,

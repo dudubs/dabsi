@@ -5,13 +5,18 @@ import {DataExp} from "../../data/DataExp";
 import {DataOrder} from "../../data/DataOrder";
 import {DataRow} from "../../data/DataRow";
 import {inspect} from "../../logging";
+import {ContextualRpcContext} from "../ContextualRpc";
 import {AbstractWidgetContext} from "./AbstractWidgetContext";
 import {DataTable, DataTableColumnContext, DataTableQuery, DataTableQueryResult} from "./DataTable";
 import {AnyRpc, RpcConfig, RpcError} from "../Rpc";
 import {WidgetController, WidgetElement} from "./Widget";
 
-export class DataTableContext<C extends DataTable<any, AnyRpc>>
-    extends AbstractWidgetContext<C> {
+type T = DataTable<any, AnyRpc>;
+
+
+export class DataTableContext<C extends T>
+    extends AbstractWidgetContext<C>
+    implements ContextualRpcContext<T> {
 
     @Lazy() get columns(): Record<string, DataTableColumnContext<any, any, any>> {
         return mapObject(this.config.columns, (columnConfig, key) => {
@@ -27,7 +32,15 @@ export class DataTableContext<C extends DataTable<any, AnyRpc>>
         });
     }
 
-    async getRows(query: DataTableQuery): Promise<DataTableQueryResult<any>> {
+    async getRowFromDataRow(dataRow: DataRow<any>) {
+        const row = {$key: dataRow.$key};
+        for (const [key, column] of entries(this.columns)) {
+            row[key] = await column.load(dataRow)
+        }
+        return row;
+    }
+
+    async getRows(query: DataTableQuery<any>): Promise<DataTableQueryResult<any>> {
 
 
         const orders: DataOrder<any>[] = [];
@@ -35,13 +48,23 @@ export class DataTableContext<C extends DataTable<any, AnyRpc>>
         for (const [key, order] of entries(query.order)) {
             const column = this.columns[key];
             if (column.field === undefined) {
-                throw new RpcError(`Can't sort by ${key}`)
+                continue;
             }
-            orders.push({
-                by: column.field,
-                sort: order.sort ?? "ASC",
-                nulls: order.nulls
-            })
+
+            if (typeof order === "string") {
+                orders.push({
+                    by: column.field,
+                    sort: order,
+                })
+            } else {
+
+                orders.push({
+                    by: column.field,
+                    sort: order.sort ?? "ASC",
+                    nulls: order.nulls
+                })
+            }
+
         }
 
         const maxRows = this.config.maxRows ?? 10;
@@ -78,13 +101,9 @@ export class DataTableContext<C extends DataTable<any, AnyRpc>>
             [count, dataRows] = [0, await source.items()]
         }
 
-        const rows: [string, any][] = [];
+        const rows: any[] = [];
         for (const dataRow of dataRows) {
-            const row = {};
-            rows.push([dataRow.$key, row]);
-            for (const [key, column] of entries(this.columns)) {
-                row[key] = column.load(dataRow)
-            }
+            rows.push(await this.getRowFromDataRow(dataRow));
         }
 
         return {rows, count}
@@ -94,16 +113,16 @@ export class DataTableContext<C extends DataTable<any, AnyRpc>>
     getControllerConfig(): RpcConfig<WidgetController<C>> {
         return $ => $({
             source: this.config.source,
-            getTargetConfig: ($,row) => this.config.getRowConfig?.(row)
+            getTargetConfig: ($, row) => this.config.getRowConfig?.(row)
         })
     }
 
     async getElement(): Promise<WidgetElement<C>> {
-        const {rows, count} = this.props.pageSize ?
+        const {rows, count} = this.config.pageSize ?
             await this.getRows({
                 getCount: true,
                 text: "",
-                take: this.props.pageSize,
+                take: this.config.pageSize,
                 skip: 0,
                 order: {}
             }) : {
@@ -112,6 +131,7 @@ export class DataTableContext<C extends DataTable<any, AnyRpc>>
 
         return {
             rows, count,
+            pageSize: this.config.pageSize,
             searchable: !!this.config.searchIn?.length,
             columns: mapObject(this.columns, (column) => {
                 if (typeof column === "function")

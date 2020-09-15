@@ -1,10 +1,9 @@
 import {ReactElement} from "react";
-import {DataTableRow} from "../../browser/mui/form2/MuiDataTableView";
 import {mapAndFilterObject} from "../../common/object/mapAndFilterObject";
 import {Debounce} from "../../react/utils/hooks/useDebounce";
 import {ViewState} from "../../react/view/ViewState";
 import {AnyRpc, RpcConnection} from "../Rpc";
-import {AnyDataTable, DataTable, DataTableOrder} from "./DataTable";
+import {AnyDataTable, DataTable, DataTableOrder, DataTableRow} from "./DataTable";
 import {WidgetElement, WidgetType} from "./Widget";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
@@ -12,7 +11,6 @@ export type DataTableViewProps<C extends RpcConnection<AnyDataTable>> =
     WidgetViewProps<C>;
 
 export class DataTableView<C extends RpcConnection<AnyDataTable>,
-
     >
     extends WidgetView<C, DataTableViewProps<C> & {
         children(view: Readonly<DataTableView<C>>): ReactElement
@@ -21,17 +19,18 @@ export class DataTableView<C extends RpcConnection<AnyDataTable>,
 
     protected reloadDebounce = Debounce();
 
-    @ViewState('reload') searchText: string = "";
-    @ViewState('reload') pageSize = this.props.connection.props.pageSize;
+    @ViewState('reloadWithDebounce') searchText: string = "";
+    @ViewState('reload') pageSize;
     @ViewState('reload') page = 0;
 
     @ViewState() count: number;
-    @ViewState() rows: [string, DataTableRow<C>][];
+    @ViewState() rows: DataTableRow<C>[];
     @ViewState() isLoading = false;
 
     protected updateElement(element: WidgetElement<C> | undefined) {
-        this.rows = this.element?.rows || [];
-        this.count = this.element?.count ?? 0
+        this.rows = element?.rows || [];
+        this.count = element?.count ?? 0
+        this.pageSize = element?.pageSize || element?.rows?.length || 10;
     }
 
     @ViewState() columns: Record<string, {
@@ -58,8 +57,10 @@ export class DataTableView<C extends RpcConnection<AnyDataTable>,
         this.pageSize = 1 > pageSize ? 1 : pageSize;
     }
 
-    search(text: string) {
+
+    async search(text: string) {
         this.searchText = text;
+        this.page = 0;
     }
 
     clearSearch() {
@@ -102,13 +103,21 @@ export class DataTableView<C extends RpcConnection<AnyDataTable>,
     }
 
 
-    async reload() {
+    async reloadWithDebounce() {
         if (!this.isDidMount) {
             return;
         }
         this.isLoading = true;
         if (await this.reloadDebounce.wait()) return;
-        const getCount = (this.count === 0) && (this.page === 0);
+        await this.reload();
+    }
+
+    async reload() {
+        if (!this.isDidMount) {
+            return;
+        }
+        this.isLoading = true;
+        const getCount = (this.count === 0) || (this.page === 0);
         const {count, rows} = await this.props.connection.getRows({
             getCount,
             order: mapAndFilterObject(this.columns, column => {

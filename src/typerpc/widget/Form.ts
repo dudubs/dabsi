@@ -1,20 +1,21 @@
-import {Awaitable} from "../../common/typings";
+import {Awaitable, If, Is} from "../../common/typings";
 import {AnyInput, InputData, InputError, InputValue} from "../input/Input";
 import {RpcConfig} from "../Rpc";
+import {RpcMapHandlerFn} from "../RpcMapHandler";
 import {FormContext} from "./FormContext";
-import {AnyWidgetOrConnection, Widget, WidgetElement, WidgetType} from "./Widget";
+import {Widget, WidgetElement, WidgetType, WithWidgetType} from "./Widget";
 
 
 export type AnyForm = Form<any, any, AnyInput>;
 
 
-export type FormValue<T extends AnyWidgetOrConnection<AnyForm>> =
+export type FormValue<T extends WithWidgetType<AnyForm>> =
     WidgetType<T>['FormValue'];
 
-export type FormInput<T extends AnyWidgetOrConnection<AnyForm>> =
+export type FormInput<T extends WithWidgetType<AnyForm>> =
     WidgetType<T>['FormInput'];
 
-export type FormError<T extends AnyWidgetOrConnection<AnyForm>> =
+export type FormError<T extends WithWidgetType<AnyForm>> =
     WidgetType<T>['FormError'];
 
 export type Form<Value, Error, Input extends AnyInput,
@@ -27,8 +28,7 @@ export type Form<Value, Error, Input extends AnyInput,
     FormInput: Input
 
     Handler: {
-        submit(data: InputData<Input>):
-            Result;
+        submit: RpcMapHandlerFn<InputData<Input>, Result>
     }
 
     Connection: {
@@ -41,7 +41,9 @@ export type Form<Value, Error, Input extends AnyInput,
         input: RpcConfig<Input>,
 
         submit(value: InputValue<Input>):
-            Awaitable<Result>
+            Awaitable<Result
+                | If<Is<Value, null>, void>
+                | If<Is<Value, string | number | boolean | any[]>, Value>>
     }
     Element: WidgetElement<Input>
 
@@ -56,13 +58,20 @@ export function Form<Value = null, Error = never>() {
         <any>Widget<AnyForm>({
             controller: input,
             handler: {
-                submit: async (context, data) => {
-                    const result = await input
+                async submit(context, data) {
+                    const inputResult = await input
                         .getContext(context.config.input)
                         .loadAndCheck(data);
-                    if ('error' in result)
-                        return {inputError: result.error}
-                    return context.config.submit(result.value);
+                    if ('error' in inputResult)
+                        return {inputError: inputResult.error};
+
+                    const submitResult = await context.config.submit(inputResult.value);
+                    if (submitResult == null)
+                        return {value: null}
+                    if ((typeof submitResult !== "object") || Array.isArray(submitResult))
+                        return {value: submitResult}
+
+                    return submitResult;
                 }
             },
             connection: {

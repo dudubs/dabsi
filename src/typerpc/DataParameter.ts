@@ -1,3 +1,4 @@
+import {WithMetaType} from "../common/MetaType";
 import {DataRow} from "../data/DataRow";
 import {DataSource} from "../data/DataSource";
 import {Parameter} from "./Parameter";

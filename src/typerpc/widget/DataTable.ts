@@ -1,4 +1,4 @@
-import {At, Awaitable, If, Is, PartialUndefinedKeys, SyncFn} from "../../common/typings";
+import {At, Awaitable, If, Is, PartialUndefinedKeys} from "../../common/typings";
 import {DataExp} from "../../data/DataExp";
 import {DataRow} from "../../data/DataRow";
 import {DataSelection} from "../../data/DataSelection";
@@ -8,8 +8,9 @@ import {DataParameter} from "../DataParameter";
 import {NoRpc} from "../NoRpc";
 import {AnyRpc, RpcConfig} from "../Rpc";
 import {RpcGenericConfigFn} from "../RpcGenericConfig";
+import {RpcMapHandlerFn} from "../RpcMapHandler";
 import {DataTableContext} from "./DataTableContext";
-import {Widget} from "./Widget";
+import {Widget, WidgetType, WithWidgetType} from "./Widget";
 
 
 export type DataTableColumnContext<RowColumn, T, DataRow> = {
@@ -24,25 +25,26 @@ export type DataTableColumnConfig<Column extends string, RowColumn, T, DataRow> 
     | If<Is<At<DataRow, Column>, RowColumn>, null>;
 
 
-export type DataTableConfig<Row, RowController extends AnyRpc, T,
-    S extends DataSelection<T>> = PartialUndefinedKeys<{
+export type DataTableConfig<Row, RowController extends AnyRpc, D,
+    DS extends DataSelection<D>> = PartialUndefinedKeys<{
 
-    getRowConfig: ((row: DataRow<T>) => RpcConfig<RowController>)
+    getRowConfig: ((row: DataRow<D>) => RpcConfig<RowController>)
         | If<Is<RowController, NoRpc>, undefined>
 
-},{
+}, {
 
 
-    source: DataSource<T>,
-    selection?: S;
+    pageSize?: number
+    source: DataSource<D>,
+    selection?: DS;
 
     columns: {
         [Column in string & keyof Required<Row>]:
-        DataTableColumnConfig<Column, Row[Column], T,
-            DataRow<DataSelectionRow<T, S>>>
+        DataTableColumnConfig<Column, Row[Column], D,
+            DataRow<DataSelectionRow<D, DS>>>
 
     }
-    searchIn?: DataExp<T>[]
+    searchIn?: DataExp<D>[]
     maxRows?: number
 
 
@@ -53,20 +55,22 @@ export type DataTableOrder = {
     nulls?: "FIRST" | "LAST"
 };
 
-export type DataTableQuery = {
-    getCount: boolean;
-    order: Record<string, DataTableOrder>,
-    text: string
-    skip: number
-    take: number
+export type DataTableQuery<Row> = {
+    getCount?: boolean;
+    order?: Record<keyof Row, DataTableOrder | "ASC" | "DESC">,
+    text?: string
+    skip?: number
+    take?: number
 };
 
-export type DataTableQueryResult<T> = {
+export type DataTableQueryResult<Row> = {
     count: number,
-    rows: [string, T][]
+    rows: ({ $key: string } & Row)[]
 };
 
-type GetRowsAsync<T> = (query: DataTableQuery) => Promise<DataTableQueryResult<T>>;
+export type DataTableRow<T extends WithWidgetType<AnyDataTable>> =
+    { $key: string } &
+    WidgetType<T>['Row'];
 
 export type AnyDataTable = DataTable<Record<string, any>, AnyRpc>;
 
@@ -85,10 +89,10 @@ export type DataTable<Row, RowController extends AnyRpc> = Widget<{
         )>
 
     Handler: {
-        getRows: SyncFn<GetRowsAsync<Row>>
+        getRows: RpcMapHandlerFn<DataTableQuery<Row>, DataTableQueryResult<Row>>
     }
     Connection: {
-        getRows: GetRowsAsync<Row>
+        getRows(query: DataTableQuery<Row>): Promise<DataTableQueryResult<Row>>
     }
     Element: {
         // TODO: move to Props
@@ -99,16 +103,19 @@ export type DataTable<Row, RowController extends AnyRpc> = Widget<{
             }
         },
         count: number
-        rows: [string, Row][]
+        rows: DataTableRow<Row>[]
+        pageSize?: number
     }
-    Props: {
-        pageSize: number
-    }
+    Props: {}
     Context: {
-        getRows: GetRowsAsync<Row>
+        getRows(query: DataTableQuery<Row>):
+            Promise<DataTableQueryResult<Row>>
+
+        getRowFromDataRow(dataRow: any): Promise<{ $key: string } & Row>;
+
         columns: {
             [K in string & keyof Required<Row>]:
-            DataTableColumnConfig<K, Row[K], any, any>
+            DataTableColumnContext<Row[K], any, any>
         }
     }
     Controller: DataParameter<RowController>

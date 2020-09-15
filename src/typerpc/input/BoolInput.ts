@@ -6,10 +6,10 @@ export type BoolInput = Input<{
     Data: boolean,
     Value: boolean,
     Config: {
-        default: boolean,
-    },
+        default?: boolean,
+    } | undefined,
     Props: {},
-    Element: boolean
+    Element: { default?: boolean }
     Error: undefined,
     Controller: NoRpc
 }>;
@@ -17,7 +17,7 @@ export type BoolInput = Input<{
 
 export function BoolInput(): BoolInput {
     return Input({
-        context:  BoolInputContext,
+        context: BoolInputContext,
 
     })
 }

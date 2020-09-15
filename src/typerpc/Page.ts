@@ -17,7 +17,7 @@ export type Page<T extends AnyWidget> =
 
 export function Page<T extends AnyWidget>(widget: T): Page<T> {
 
-    return RpcConfigurator<Page<T>>(
+    return <any>RpcConfigurator<Page<AnyWidget>>(
         ElementWidget<any>()(widget),
         config => ({
             getElement: async () => ({

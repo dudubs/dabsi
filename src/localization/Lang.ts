@@ -13,7 +13,7 @@ export type Lang = LangTemplate<any> | ReactElement<LangTokenProps>;
 
 export type LangElement = ReactElement<LangProps>;
 
-export type LangNode = string | LangElement | LangNode[];
+export type LangNode = number | string | LangElement | LangNode[] | undefined;
 
 export enum LangPropsType {
     token,

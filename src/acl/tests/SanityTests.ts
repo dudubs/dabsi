@@ -21,10 +21,12 @@ testm(__filename, () => {
     let u2: string;
     let u3: string;
 
+    let gi = 0;
+
     beforeAll(async () => {
         [g1, g2] = [
-            await Groups.insertKey({}),
-            await Groups.insertKey({}),
+            await Groups.insertKey({name: `g${gi++}`}),
+            await Groups.insertKey({name: `g${gi++}`}),
         ];
         [u1, u2, u3] = [
             await Users.insertKey({}),

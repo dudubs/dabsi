@@ -1,16 +1,19 @@
-import {Awaitable, DefaultIfNever, If, IfNever, Is, PartialUndefinedKeys} from "../../common/typings";
+import {Awaitable, DefaultIfNever, If, IfNever, Is, IsSome, PartialUndefinedKeys} from "../../common/typings";
 import {RpcConfig} from "../Rpc";
 import {AnyInput, ErrorOrValue, Input, InputError, InputType, InputValue} from "./Input";
 
 export type InputLoader<V, E, T extends AnyInput> =
+
     Input<Omit<InputType<T>, "Config" | "Value" | "Error"> & {
         LoaderInput: T;
         LoaderError: E;
 
         Config: PartialUndefinedKeys<{
-             targetConfig: RpcConfig<T>
+
+            targetConfig: RpcConfig<T>
+
             load: ((value: InputValue<T>) => Awaitable<V>)
-                | If<Is<V, InputValue<T>>, undefined>
+                | If<IsSome<V, InputValue<T>>, undefined>
             check: ((value: V) => Awaitable<E | undefined>)
                 | IfNever<E, undefined>
 
@@ -19,17 +22,8 @@ export type InputLoader<V, E, T extends AnyInput> =
         Error: InputError<T> | E;
     }>;
 
-export type AnyInputErrorLoader =
-    InputLoader<any, any, AnyInput> |
-    InputLoader<never, any, AnyInput>;
-
-export type AnyInputValueLoader =
-    InputLoader<any, any, AnyInput> |
-    InputLoader<any, never, AnyInput>;
-
 export type AnyInputLoader =
-    AnyInputValueLoader |
-    AnyInputErrorLoader;
+    InputLoader<any, any, AnyInput>;
 
 
 export function InputErrorLoader<E>() {
@@ -46,7 +40,7 @@ export function InputLoader<V, E = never>() {
         return Object.setPrototypeOf(<Pick<InputLoader<any, any, AnyInput>,
             "getContext">>{
 
-            getContext(config:RpcConfig<I>) {
+            getContext(config: RpcConfig<I>) {
 
                 const context = target.getContext.call(this,
                     config.targetConfig);

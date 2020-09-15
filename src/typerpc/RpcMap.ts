@@ -1,48 +1,72 @@
+import {WithMetaType} from "../common/MetaType";
 import {mapObject} from "../common/object/mapObject";
-import {PartialUndefinedKeys, UndefinedIfEmptyObject} from "../common/typings";
-import {ContextualRpc} from "./ContextualRpc";
+import {ExtractKeys, Fn, PartialUndefinedKeys, Pluck, UndefinedIfEmptyObject} from "../common/typings";
+import {AnyContextualRpc, ContextualRpc, ContextualRpcContext} from "./ContextualRpc";
+import {AnyRpc, RpcConfig, RpcConnection, RpcError, RpcHandler, RpcPayload, RpcResult} from "./Rpc";
 import {handleRpcMap, RpcMapHandler} from "./RpcMapHandler";
-import {AnyRpc, RpcConfig, RpcConnection, RpcHandler, RpcPayload, RpcResult} from "./Rpc";
 
 
 export type AnyRpcMap = Record<string, AnyRpc>;
 
-export type RpcMap<T extends AnyRpcMap> = ContextualRpc<{
-    Props: {
-        items: T
-    }
-    Context: {
-        [K in keyof T]: RpcHandler<T[K]>
-    }
-    Config: UndefinedIfEmptyObject<PartialUndefinedKeys<{
-        [K in keyof T]: RpcConfig<T[K]>
-    }>>
-    Connection: {
-        [K in keyof T]: RpcConnection<T[K]>
-    }
-    Handler: RpcMapHandler<{
-        [K in keyof T]: (payload: RpcPayload<T[K]>) => RpcResult<T[K]>
-    }>
-}>;
+export type RpcMap<T extends AnyRpcMap> =
+    WithMetaType<{ MapItems: T }> &
+    ContextualRpc<{
+
+        Props: {
+            items: T
+        }
+        Context: {
+            getHandler<K extends keyof T>(key: K): RpcHandler<T[K]>
+
+            getContext<K extends ExtractKeys<T, AnyContextualRpc>>(key: K):
+                ContextualRpcContext<Extract<T[K], AnyContextualRpc>>
+        }
+        Config: UndefinedIfEmptyObject<PartialUndefinedKeys<{
+            [K in keyof T]: RpcConfig<T[K]>
+        }>>
+        Connection: {
+            [K in keyof T]: RpcConnection<T[K]>
+        }
+        Handler: RpcMapHandler<{
+            [K in keyof T]: (payload: RpcPayload<T[K]>) => RpcResult<T[K]>
+        }>
+    }>;
 
 
 export function RpcMap<T extends AnyRpcMap>(items: T): RpcMap<T> {
-    return <any>ContextualRpc<RpcMap<AnyRpcMap>>({
+    return <any>ContextualRpc<RpcMap<Record<string, AnyContextualRpc | AnyRpc>>>({
         props: {items},
         createConnection: (handler, props): any =>
             mapObject(props.items, (child, key) => child.createRpcConnection(payload =>
                 handler([key, payload])
             )),
-        createContext: (props, config): any => {
-            if (!config)
-                throw new Error('No Config')
-            return mapObject(props.items, (item, key) =>
-                item.createRpcHandler(config[key]));
+        createContext: (props, config) => {
+            const keyToHandler: Record<string, Fn> = {};
+            const keyToContext: Record<string, any> = {};
+            return {
+                getHandler(key) {
+                    const item = props.items[key];
+                    if (!item)
+                        throw new RpcError(`No item ${key}`)
+                    return keyToHandler[key] ?? (
+                        keyToHandler[key] = item.createRpcHandler(config?.[key])
+                    )
+                },
+                getContext(key): any {
+                    if (key in keyToContext)
+                        return keyToContext[key];
+                    const item = <AnyContextualRpc>props.items[key];
+                    if (!item)
+                        throw new RpcError(`No item ${key}`)
+                    return keyToContext[key] = item.getContext(config?.[key])
+                }
+            }
         },
-        createHandler: (handlers: Record<any, (payload) => any>) => async payload =>
-            handleRpcMap(payload, handlers,
-                (payload, handler) => handler(payload)
-            )
+        createHandler: (context, props) => async payload => {
+            return handleRpcMap(payload, props.items,
+                (payload, _, key) => context.getHandler(key)(payload)
+            );
+        }
     })
 }
 

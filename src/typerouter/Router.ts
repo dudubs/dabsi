@@ -1,3 +1,4 @@
+import {MetaType, WithMetaType} from "../common/MetaType";
 import {defined} from "../common/object/defined";
 import {Assign, DefaultIfNever, IsNever, NonNullableAt, Pluck} from "../common/typings";
 import {inspect} from "../logging";
@@ -13,7 +14,6 @@ export type TRouter = {
 
 
 }
-
 
 
 export type TEmptyRouter = {
@@ -36,22 +36,22 @@ export namespace TEmptyRouter {
 
 }
 
-export type Router<T extends TRouter = TEmptyRouter> = {
+export type Router<T extends TRouter = TEmptyRouter> =
+    WithMetaType<{ TRouter: T }> &
+    {
 
 
-    TRouter?: T;
+        params: string[];
 
-    params: string[];
+        routerType: object;
 
-    routerType: object;
+        children: Record<string, Router<TRouter & Pick<T, 'routerType'>>>
 
-    children: Record<string, Router<TRouter & Pick<T, 'routerType'>>>
+        parent?: Router<Assign<T, { params: any }>>;
 
-    parent?: Router<Assign<T, { params: any }>>;
+        name?: string;
 
-    name?: string;
-
-} & T['routerType'];
+    } & T['routerType'];
 
 
 export function Router(): Router
@@ -91,7 +91,7 @@ export function Router(...args): AnyRouter {
 export type AnyRouter = Router<TRouter>;
 
 export type RouterType<T extends AnyRouter> =
-    NonNullable<T['TRouter']>;
+    MetaType<T>['TRouter'];
 
 export type RouterAt<T extends TRouter, K extends keyof T['children']> =
     Router<T['children'][K] & {

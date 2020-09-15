@@ -1,6 +1,6 @@
 import {RpcConnection} from "../Rpc";
 import {InputType} from "./Input";
-import {AnyInputErrorLoader, AnyInputLoader} from "./InputLoader";
+import {AnyInputLoader} from "./InputLoader";
 import {InputViewProps} from "./InputView";
 
 

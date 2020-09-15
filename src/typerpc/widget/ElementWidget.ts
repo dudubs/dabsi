@@ -1,24 +1,46 @@
 import {Awaitable} from "../../common/typings";
 import {RpcConfig} from "../Rpc";
-import {AnyWidget, Widget, WidgetElement, WidgetType} from "./Widget";
+import {AnyWidget, Widget, WidgetElement, WidgetHook, WidgetType} from "./Widget";
+
+
+export type TElementWidget<E, T extends AnyWidget> = {
+
+    SubElement: E;
+
+    SubWidget: T;
+
+    Element: [E, WidgetElement<T>]
+
+    Config: {
+        getElement(): Awaitable<E>;
+        targetConfig: RpcConfig<T>
+    }
+};
 
 export type ElementWidget<E, T extends AnyWidget> =
-    Widget<Omit<WidgetType<T>, "Element" | "Config"> & {
+    WidgetHook<T, {
 
         SubElement: E;
         SubWidget: T;
 
         Element: [E, WidgetElement<T>]
+
         Config: {
             getElement(): Awaitable<E>;
             targetConfig: RpcConfig<T>
         }
     }>;
 
+export type ElementWidget2<E, T extends AnyWidget> =
+
+    Widget<Omit<WidgetType<T>, "Element" | "Config">
+        & TElementWidget<E, T>>;
+
 
 // ContextualRpcHook()
-export function ElementWidget<E>() {
-    return <T extends AnyWidget>(target: T): ElementWidget<E, T> => {
+export function ElementWidget<E>():
+    <T extends AnyWidget>(target: T) => ElementWidget<E, T> {
+    return target => {
         return Object.setPrototypeOf({
             getContext(config) {
                 const context = target.getContext.call(this, config.targetConfig);

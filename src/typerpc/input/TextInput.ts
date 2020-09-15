@@ -8,7 +8,7 @@ import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
 export type TextInput = Input<{
 
-    Error: StringSchemaError ,
+    Error: StringSchemaError,
 
     Data: string,
 
@@ -16,22 +16,23 @@ export type TextInput = Input<{
 
     Controller: NoRpc,
 
-    Props: StringSchema,
+    // Move to element
+    Props: {},
 
-    Config: undefined | {
-        default: ValueOrAwaitableFn<string|undefined>
+    Config: undefined | StringSchema & {
+        default?: ValueOrAwaitableFn<string | undefined>
     },
 
-    Element: string | undefined,
+    Element: StringSchema&{
+        default?:string
+    },
 
 }>
     ;
 
-export function TextInput(
-    options: StringSchema = {}
-): TextInput {
+export function TextInput(): TextInput {
     return Input<TextInput>({
-        props: options,
+        props: {},
         context: TextInputContext
     })
 }

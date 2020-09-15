@@ -27,7 +27,7 @@ export class TextInputView<C extends RpcConnection<TextInput>>
 
     protected updateElement(element: WidgetElement<TextInput> | undefined) {
         this.setError(undefined);
-        this.text = element || "";
+        this.text = element?.default || "";
     }
 
     async getValidData(): Promise<InputData<TextInput>> {
@@ -99,11 +99,11 @@ export class TextInputView<C extends RpcConnection<TextInput>>
 
             case "TOO_LONG":
                 return Lang`REQUIRED_MAXIMUM_${"max"}_CHARACTERS`({
-                    max: this.props.connection.props?.maxLength
+                    max: this.element?.maxLength
                 });
             case "TOO_SHORT":
                 return Lang`REQUIRED_MINIMUM_${"min"}_CHARACTERS`({
-                    min: this.props.connection.props?.minLength
+                    min: this.element?.minLength
                 });
         }
     }

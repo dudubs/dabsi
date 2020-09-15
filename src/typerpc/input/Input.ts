@@ -1,9 +1,10 @@
 // TODO: Rename to *Input
+import {MetaTypeHook} from "../../common/MetaType";
 import {Awaitable, HasKeys, If, Is, Not, PartialUndefinedKeys} from "../../common/typings";
 import {NoRpc} from "../NoRpc";
-import {AnyRpc, RpcConnection} from "../Rpc";
+import {RpcConnection} from "../Rpc";
 import {RpcGenericConfigFn} from "../RpcGenericConfig";
-import {Widget, WidgetContextClass, WidgetType} from "../widget/Widget";
+import {AnyWidget, TWidget, Widget, WidgetContextClass, WidgetType} from "../widget/Widget";
 
 
 // TODO: R extends AnyRpc
@@ -12,10 +13,10 @@ export type TInput = {
 
     Data: any
     Value: any,
-    Controller: AnyRpc,
-    Props: object,
-    Config: any,
-    Element: any,
+    Controller: TWidget['Controller'],
+    Props: TWidget['Props'],
+    Config: TWidget['Config'],
+    Element: TWidget['Element'],
     Error: any
 };
 
@@ -23,32 +24,38 @@ export type BaseInputContext<T extends TInput> = {
 
     loadAndCheck(data: T['Data']): Promise<TInputCheckResult<T>>
 
+    // getDataFromValue(value: T['Value']): T['Data']
+
 };
 
 
-export type Input<T extends TInput> = Widget<{
+export type Input<T extends TInput> =
+    Widget<{
 
-    TInput: T;
+        TInput: T;
 
-    Connection: {
-        check(data: T['Data']): Promise<T['Error'] | undefined>
-    }
+        Connection: {
+            check(data: T['Data']): Promise<T['Error'] | undefined>
+        }
 
-    Config: T['Config']
+        Config: T['Config']
 
-    Context: BaseInputContext<T>
+        Context: BaseInputContext<T>
 
-    Handler: {
-        check(data: T['Data']): Awaitable<TInputCheckResult<T>>;
-    }
+        Handler: {
+            check(data: T['Data']): Awaitable<TInputCheckResult<T>>;
+        }
 
-    Props: T['Props'];
+        Props: T['Props'];
 
-    Element: T['Element']
+        Element: T['Element']
 
-    Controller: T['Controller']
+        Controller: T['Controller']
 
-}>;
+    }>;
+export type InputHook<R extends AnyInput, T extends Partial<TInput>, MT = {}> =
+    MetaTypeHook<R, AnyInput,MT> &
+    Input<Extract<Omit<InputType<R>, keyof T> & T, TInput>>;
 
 export type InputType<T extends AnyInput | RpcConnection<AnyInput>> =
     WidgetType<T>['TInput'];
@@ -99,7 +106,7 @@ export function Input<T extends AnyInput>(options: InputOptions<T, InputType<T>>
         context,
         isGenericConfig,
         handler: {
-            check: async (context, data) => {
+            async check(context, data) {
                 const result = await context.loadAndCheck(data);
                 if ('error' in result)
                     return result.error

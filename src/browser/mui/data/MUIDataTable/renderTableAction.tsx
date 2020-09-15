@@ -1,5 +1,5 @@
 import React from "react";
-import {MuiConfirmDialog} from "../../../../../browser/src/sections/orders/views/mui/MuiConfirmDialog";
+import {MuiConfirmDialog} from "../../components/MuiConfirmDialog";
 import {DataKey} from "../../../../data/DataKey";
 import {DataRow} from "../../../../data/DataRow";
 import {getTableActionKey} from "../../../../data/DataTable";

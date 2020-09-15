@@ -7,9 +7,9 @@ export type NullableInput<N extends boolean, T extends TInput> = Input<{
 
     Controller: T['Controller']
 
-    Data: T['Data'] | If<N, null>
+    Data: T['Data'] | If<N, undefined>
 
-    Value: T['Value'] | If<N, null>
+    Value: T['Value'] | If<N, undefined>
 
     Props: T['Props'] & {
         nullable: N

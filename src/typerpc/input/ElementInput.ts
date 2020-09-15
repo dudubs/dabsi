@@ -1,21 +1,12 @@
-import {Awaitable} from "../../common/typings";
-import {RpcConfig} from "../Rpc";
 import {ElementWidget} from "../widget/ElementWidget";
-import {WidgetElement} from "../widget/Widget";
-import {AnyInput, Input, InputType} from "./Input";
+import {WidgetType} from "../widget/Widget";
+import {AnyInput, Input, InputHook, InputType} from "./Input";
 
 
 // Meta
 
-export type ElementInput<E, T extends AnyInput> = Input<Omit<InputType<T>, "Element" | "Config"> & {
-    SubElement: E;
-    SubInput: T;
+export type ElementInput<E, T extends AnyInput> =
+    InputHook<T, WidgetType<ElementWidget<E, T>>>;
 
-    Element: [E, WidgetElement<T>]
-    Config: {
-        getElement(): Awaitable<E>;
-        targetConfig: RpcConfig<T>
-    }
-}>;
 export const ElementInput = ElementWidget as
     <E>() => <T extends AnyInput>(target: T) => ElementInput<E, T>;

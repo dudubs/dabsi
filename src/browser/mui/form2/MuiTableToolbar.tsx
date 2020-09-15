@@ -6,7 +6,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Typography, {TypographyProps} from "@material-ui/core/Typography";
 import {makeStyles} from "@material-ui/styles";
 import clsx from "clsx";
-import React, {ReactNode} from "react";
+import React, {ReactNode, useEffect, useState} from "react";
 import {Lang} from "../../../localization/Lang";
 import {useLangTranslator} from "../../../localization/LangTranslator";
 import {mergeProps} from "../../../react/utils/mergeProps";
@@ -32,7 +32,7 @@ export type MuiTableToolbarProps = {
 
     search?: {
         text: string
-        onTextChange(text: string)
+        onSearch?(text: string);
         TextFieldProps?: Partial<TextFieldProps>;
     };
 
@@ -55,10 +55,15 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
     const {search: searchProps} = props;
 
     const lang = useLangTranslator();
+    const [searchText, setSearchText] = useState(props.search?.text || "");
+
+    useEffect(() => {
+        setSearchText(props.search?.text || "")
+    }, [props.search?.text])
 
     const title = props.countSelectedItems ? <>
         {COUNT_SELECTED_ITEMS({count: props.countSelectedItems})}
-    </>:props.title;
+    </> : props.title;
 
     return <Toolbar {...mergeProps(props.ToolbarProps, {
         className: classes.toolbar
@@ -66,9 +71,11 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
 
         <Grid container>
             <Grid item xs>
-                {title && <Typography variant={"h6"} {...mergeProps(props.TitleTypographyProps, {
-                    className: classes.title
-                })}>
+                {title && <Typography
+                    variant={"h6"}
+                    {...mergeProps(props.TitleTypographyProps, {
+                        className: classes.title
+                    })}>
                     {title}
                 </Typography>}
             </Grid>
@@ -82,15 +89,37 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
                         {props.actions?.map((action, index) =>
                             <MuiDataTableAction key={index} {...action} />)}
                         {searchProps && <TextField
-                            value={searchProps.text}
+                            value={searchText}
+
                             placeholder={lang.translateNode(Lang`SEARCH`)}
                             {...mergeProps(searchProps.TextFieldProps, {
                                 onChange: event => {
-                                    searchProps.onTextChange(event.target.value || "")
+                                    const text =event.target.value;
+                                    setSearchText(text || "");
+                                    searchProps?.onSearch?.(text)
                                 },
-                                onKeyDown: event => {
-                                    if (event.key === "Escape") {
-                                        searchProps.onTextChange("");
+
+                                onBlur:()=>{
+                                    searchProps?.onSearch?.(searchText);
+                                },
+                                onKeyDown:event=>{
+                                    if(event.key==="Escape") {
+                                        event.preventDefault();
+                                        setSearchText("");
+                                        searchProps?.onSearch?.("");
+                                    }
+                                },
+                                onKeyPress: event => {
+                                    // console.log({eventKey:event.key});
+
+                                    switch (event.key) {
+                                        case "Enter":
+                                            searchProps?.onSearch?.(searchText);
+                                            break;
+
+                                        case "Escape":
+                                            setSearchText("");
+                                            break;
                                     }
                                 },
                                 InputProps: {
@@ -100,9 +129,9 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
                                         </Tooltip>
                                     </InputAdornment>,
                                     startAdornment: <InputAdornment className={clsx({
-                                        [classes.hidden]: !searchProps.text
+                                        [classes.hidden]: !searchText
                                     })} position={"start"} onClick={() => {
-                                        searchProps.onTextChange("");
+                                        setSearchText("");
                                     }}>
                                         {MuiIcon("close")}
                                     </InputAdornment>

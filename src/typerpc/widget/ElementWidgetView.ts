@@ -6,9 +6,9 @@ import {ElementWidget} from "./ElementWidget";
 import {AnyWidget, WidgetType} from "./Widget";
 import {WidgetViewProps} from "./WidgetView";
 
-export function ElementWidgetView2<C extends RpcConnection<ElementWidget<any, AnyWidget>>>(
-    {target, element, ...props}: WidgetViewProps<C> & {
-        target: Renderer<[
+export function ElementWidgetView<C extends RpcConnection<ElementWidget<any, AnyWidget>>>(
+    {children, element, ...props}: WidgetViewProps<C> & {
+        children: Renderer<[
             WidgetType<C>['SubElement'],
             WidgetViewProps<RpcConnection<WidgetType<C>['SubWidget']>>
         ]>
@@ -17,10 +17,11 @@ export function ElementWidgetView2<C extends RpcConnection<ElementWidget<any, An
     if (!element)
         return EmptyFragment;
     const [subElement, targetElement] = element;
-    return target([subElement, {
+    return children([subElement, {
         ...props,
         element: targetElement
     }])
 }
+
 
 

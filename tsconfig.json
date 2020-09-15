@@ -2,14 +2,15 @@
   "extends": "./configs/dev.tsconfig.json",
   "compilerOptions": {
     "sourceMap": true,
-    "preserveSymlinks": false
+    "preserveSymlinks": false,
+    "jsx": "react"
   },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/browser"
-  ],
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules",
+    "./dist",
+    "./src/browser"
   ]
 }

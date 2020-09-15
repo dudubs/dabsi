@@ -1,5 +1,5 @@
 import {AbstractInputContext} from "../input/AbstractInputContext";
-import {AnyInput, Input, InputCheckResult, InputData, InputType} from "../input/Input";
+import {AnyInput, Input, InputCheckResult, InputData, InputType, InputValue} from "../input/Input";
 import {InputMap} from "../input/InputMap";
 import {NoRpc} from "../NoRpc";
 import {connectToRpc, RpcConfig, RpcConnection} from "../Rpc";
@@ -30,6 +30,12 @@ export function TestInput(
         controller,
         isGenericConfig: false,
         context: class extends AbstractInputContext<any> {
+
+
+            getDataFromValue(value: InputValue<any>): InputData<any> {
+                throw new Error()
+            }
+
             getControllerConfig(): RpcConfig<WidgetController<AnyInput>> {
                 return remoteConfig;
             }
@@ -57,7 +63,7 @@ describe('InputMap', () => {
                 hello: TestInput({
                     loadAndCheck: data => ({value: data.toUpperCase()})
                 })
-            }).getContext({hello: null}).loadAndCheck({hello: "world"})
+            }).getContext({hello: undefined}).loadAndCheck({hello: "world"})
         ).toEqual({value: {hello: "WORLD"}});
     });
     it('expected to error', async () => {
@@ -66,17 +72,17 @@ describe('InputMap', () => {
                     loadAndCheck: data => ({error: data.toUpperCase()})
                 })
             })
-                .getContext({hello: null})
+                .getContext({hello: undefined})
                 .loadAndCheck({hello: "world"})
         ).toEqual({error: {hello: "WORLD"}});
     });
     it('expected to element', async () => {
         expect(await InputMap({
                 hello: TestInput({
-                    getElement: () => "world"
+                    getElement: () => ({default:"world"})
                 })
-            }).getContext({hello: null}).getElement()
-        ).toEqual({hello: "world"});
+            }).getContext({hello: undefined}).getElement()
+        ).toEqual({hello: {default: "world"}});
     });
 });
 
@@ -116,19 +122,24 @@ testm(__filename, () => {
 
     }
 
-    function test({config = null, ...props}): RpcConnection<AnyInput> {
+    function test({config = undefined, ...props}): RpcConnection<AnyInput> {
         return connectToRpc(Input({
             props: {},
-            isGenericConfig:false,
+            isGenericConfig: false,
             controller: NoRpc,
             context: class extends AbstractInputContext<AnyInput> {
+
+
+                getDataFromValue(value: InputValue<any>): InputData<any> {
+                    throw new Error()
+                }
 
                 getControllerConfig(): RpcConfig<WidgetController<AnyInput>> {
                     return null;
                 }
 
                 async getElement(): Promise<WidgetElement<AnyInput>> {
-                    return null;
+                    return {};
                 }
 
                 async loadAndCheck(data: InputData<AnyInput>): Promise<InputCheckResult<AnyInput>> {

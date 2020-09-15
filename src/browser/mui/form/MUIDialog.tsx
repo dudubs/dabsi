@@ -2,6 +2,7 @@ import Dialog, {DialogProps} from "@material-ui/core/Dialog";
 import DialogActions, {DialogActionsProps} from "@material-ui/core/DialogActions";
 import DialogContent, {DialogContentProps} from "@material-ui/core/DialogContent";
 import DialogTitle, {DialogTitleProps} from "@material-ui/core/DialogTitle";
+import {Theme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/styles";
 import React, {ReactNode, useContext} from "react";
 import {AssignKeys} from "../../../common/typings";
@@ -10,7 +11,7 @@ import {mergeProps} from "../../../react/utils/mergeProps";
 import {MuiButton} from "../components/MuiButton";
 import {ReactWrapper, wrap} from "../data/wrap";
 
-const useStyles = makeStyles(theme => {
+const useStyles = makeStyles((theme: Theme) => {
     return ({
         root: {
             flip: false,

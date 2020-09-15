@@ -1,8 +1,9 @@
 import {firstKey} from "./firstKey";
 
-export function firstEntry(obj: object): [string, any] | undefined {
+export function firstEntry<T=any>(obj: Record<string, T>): [string,T]|[] {
     const key = firstKey(obj);
     if (key !== undefined)
         return [key, obj[key]]
+    return []
 }
 

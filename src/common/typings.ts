@@ -118,12 +118,13 @@ export type Optional<T> = Pick<T, OptionalKeys<T>>;
 
 export type IsNever<T> = [T] extends [never] ? true : false;
 export type Is<T, U> = [T] extends [U] ? true : false;
-export type  IsEmptyObject<T> = Is<{}, T>;
+export type  IsEmptyObject<T> =
+    Is<{}, T>;
 
 export type And<T extends boolean, U extends boolean> =
     T extends true ? U extends true ? true : false : false;
 
-export type OR<T extends boolean, U extends boolean> =
+export type Or<T extends boolean, U extends boolean> =
     T extends true ? true : U extends true ? true : false;
 
 export type IsSome<T, U> = And<Is<T, U>, Is<U, T>>
@@ -143,7 +144,7 @@ export type HasKeys<T> =
 export type Not<T extends boolean> = T extends true ? false : true;
 
 export type If<C extends boolean, T, E = never> = C extends true ? T : E;
-export type IfNot<C extends boolean, T, E = never> = If<C,E,T>;
+export type IfNot<C extends boolean, T, E = never> = If<C, E, T>;
 
 export type Constructor<T> = { new(...args: any[]): T };
 
@@ -151,16 +152,18 @@ export type Constructor<T> = { new(...args: any[]): T };
 export type Merge<L, R, M> = HasKeys<L> extends false ? R :
     HasKeys<R> extends false ? L : AssignKeys<L, M>;
 
+
 export type PartialUndefinedKeys<T, U = {}> =
-    (T & U) |
+    (U & T) |
     (U & PartialKeys<T, Union<{
-    [K in keyof Required<T>]:
-    undefined extends T[K] ? K : never
-}>>);
+        [K in keyof Required<T>]:
 
-export type UndefinedIfEmptyObject<T> = T | If<IsEmptyObject<T>, undefined>;
+        Or<IsNever<T[K]>, IsAny<T[K]>> extends true ? never :
+            undefined extends T[K] ? K : never
+    }>>);
 
-export type UndefinedMap<T> = UndefinedIfEmptyObject<PartialUndefinedKeys<T>>;
+export type UndefinedIfEmptyObject<T> =
+    If<IsEmptyObject<T>, undefined> | T;
 
 export type RequireOptionalKeys<T> = {
     [K in keyof Required<T>]: T[K]
@@ -189,6 +192,7 @@ export type NonNullableAt<T, K extends keyof Required<T>, D = never, V =
     NonNullable<T[K]>> =
     IsNever<V> extends true ? D : V;
 
-export type SafeOmit<T, K extends keyof T> =
+export type OmitKeys<T, K extends keyof T> =
     Omit<T, K>;
 
+export type UndefinedIfIsUndefined<T> = If<Is< T,undefined>, undefined>;

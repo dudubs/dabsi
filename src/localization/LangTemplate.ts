@@ -1,7 +1,7 @@
 import {createElement, ReactElement} from "react";
 import {definedAt} from "../common/object/definedAt";
 import {joinTemplate} from "../common/string/joinTemplate";
-import {LangElement, LangPropsType, LangTokenElement} from "./Lang";
+import {LangElement, LangNode, LangPropsType, LangTokenElement} from "./Lang";
 import {LangView} from "./LangView";
 
 export type LangTemplate<K extends string> = {
@@ -9,7 +9,7 @@ export type LangTemplate<K extends string> = {
     token: string;
 
     // formatter
-    (props: Record<K, any>): LangTemplateElement<K>;
+    (props: Record<K, LangNode>): LangTemplateElement<K>;
 
     // provider
     (strings: TemplateStringsArray, ...keys: K[]):

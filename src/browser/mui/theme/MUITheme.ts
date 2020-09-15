@@ -20,5 +20,12 @@ declare module "styled-components" {
 
     }
 }
-export const MuiDefaultTheme = createMuiTheme({direction: "rtl",}, heIL);
+export const MuiDefaultTheme = createMuiTheme({
+    direction: "rtl",
+    props:{
+        MuiTextField: {
+            fullWidth:true
+        }
+    }
+}, heIL);
 

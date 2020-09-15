@@ -18,11 +18,14 @@ type TableLayoutProps<T, C, D> = {
     getRowData: (row: T) => D
     renderColumn: (props: TableLayoutColumnProps<C>,
                    children: ReactNode) => ReactNode;
+    // TODO: rename to renderColumnTitle
+
     renderTitle: (props: TableLayoutColumnProps<C>) => ReactNode,
-    renderData: (
+    renderRowColumn: (
         data: any,
         row: TableLayoutRowProps<D>,
         column: TableLayoutColumnProps<C>,
+        key:string,
     ) => ReactNode,
 
     renderRow: (props: TableLayoutRowProps<D>, children: ReactNode) => ReactNode;
@@ -53,7 +56,7 @@ export function TableLayout<T, C, D>(
             };
             return props.renderRow(row, columns.map(column => {
                 return props.renderColumn(column,
-                    props.renderData(row.data[column.key], row, column)
+                    props.renderRowColumn(row.data[column.key], row, column, row.key)
                 )
             }))
         })

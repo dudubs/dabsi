@@ -20,13 +20,15 @@ export type RpcPartialConfig<T extends AnyRpcWithObjectConfig,
         | RpcConfig<T>>;
 
 
+// TODO: RpcDefaultConfig
+
 export function RpcPartialConfig<T extends AnyRpcWithObjectConfig,
     K extends keyof NonNullable<RpcConfig<T>>>(
     target: T,
     defaultConfig: Pick<NonNullable<RpcConfig<T>>, K>
 ): RpcPartialConfig<T, K> {
 
-    const baseDefaultConfig = target.createRpcHandler([baseDefaultConfigProp])
+    const baseDefaultConfig = target.createRpcHandler[baseDefaultConfigProp]
 
     if (baseDefaultConfig) {
         return <any>RpcPartialConfig(

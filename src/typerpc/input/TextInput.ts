@@ -1,39 +1,41 @@
-import {Awaitable} from "../../common/typings";
+import { Awaitable } from "../../common/typings";
 
-import {NoRpc} from "../NoRpc";
-import {Input} from "./Input";
-import {TextInputContext} from "./TextInputContext";
-import {StringSchema, StringSchemaError} from "./StringSchema";
-import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
+import { NoRpc } from "../NoRpc";
+import { Input } from "./Input";
+import { TextInputContext } from "./TextInputContext";
+import { StringSchema, StringSchemaError } from "./StringSchema";
+import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
 
 export type TextInput = Input<{
+  Error: StringSchemaError;
 
-    Error: StringSchemaError,
+  Data: string;
 
-    Data: string,
+  Value: string;
 
-    Value: string,
+  ValueElement: string;
 
-    Controller: NoRpc,
+  Controller: NoRpc;
 
-    // Move to element
-    Props: {},
+  // Move to element
+  Props: {};
 
-    Config: undefined | StringSchema & {
-        default?: ValueOrAwaitableFn<string | undefined>
-    },
+  Config:
+    | undefined
+    | (StringSchema & {
+        default?: ValueOrAwaitableFn<string | undefined>;
+      });
 
-    Element: StringSchema&{
-        default?:string
-    },
-
-}>
-    ;
+  Element: StringSchema & {
+    default?: string;
+  };
+}>;
 
 export function TextInput(): TextInput {
-    return Input<TextInput>({
-        props: {},
-        context: TextInputContext
-    })
+  return Input<TextInput>({
+    context: TextInputContext,
+    getDataFromElement: (element) => element.default || "",
+    getValueElementFromElement: (element) => element.default || "",
+    // getElementFromValueElement: (element, value) => ({ ...element, default: value }),
+  });
 }
-

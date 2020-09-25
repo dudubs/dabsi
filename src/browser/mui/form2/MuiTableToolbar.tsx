@@ -6,7 +6,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Typography, {TypographyProps} from "@material-ui/core/Typography";
 import {makeStyles} from "@material-ui/styles";
 import clsx from "clsx";
-import React, {ReactNode, useEffect, useState} from "react";
+import * as React from "react"; import {ReactNode, useEffect, useState} from "react";
 import {Lang} from "../../../localization/Lang";
 import {useLangTranslator} from "../../../localization/LangTranslator";
 import {mergeProps} from "../../../react/utils/mergeProps";

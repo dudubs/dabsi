@@ -1,4 +1,5 @@
 import {MetaType, MetaTypeHook, WithMetaType} from "../common/MetaType";
+import {If, Is, IsUndefined} from "../common/typings";
 
 export type RpcHandlerFn<Payload = any, Result = any> = {
     (payload: Payload): Promise<Result>;
@@ -12,7 +13,9 @@ export type TRpc = {
 };
 
 export type Rpc<T extends TRpc> =
-    WithMetaType<{ TRpc: T }> &
+    WithMetaType<{
+        TRpc: T
+    }> &
     {
 
 
@@ -51,8 +54,11 @@ export type RpcConnection<T extends AnyRpc> =
 export type RpcConfig<T extends AnyRpc> =
     RpcType<T>['Config']
 
+export type RpcUndefinedConfig<T extends AnyRpc> =
+    If<IsUndefined<RpcConfig<T>>, undefined>
 
-export function connectToRpc<T extends AnyRpc>(
+
+export function createRpcConnection<T extends AnyRpc>(
     rpc: T,
     config: RpcConfig<T>
 ): RpcConnection<T> {
@@ -65,3 +71,7 @@ export class RpcError extends Error {
 
 }
 
+
+export function RpcConfig<T extends AnyRpc>(rpc: T, config: RpcConfig<T>): RpcConfig<T> {
+    return config
+}

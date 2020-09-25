@@ -1,36 +1,46 @@
-import {RequireOptionalKeys} from "../../common/typings";
-import {RpcConfig} from "../Rpc";
-import {WidgetController, WidgetElement} from "../widget/Widget";
-import {AbstractNullableInputContext} from "./AbstractNullableInputContext";
-import {InputCheckResult, InputData, InputType, InputValue} from "./Input";
-import {NumberInput} from "./NumberInput";
-import {loadAndCheckNumber} from "./NumberSchema";
+import { RequireOptionalKeys } from "../../common/typings";
+import { RpcConfig } from "../Rpc";
+import {
+  WidgetConfig,
+  WidgetController,
+  WidgetElement,
+} from "../widget/Widget";
+import { AbstractInputContext } from "./AbstractInputContext";
+import { AbstractNullableInputContext } from "./AbstractNullableInputContext";
+import { InputCheckResult, InputData, InputType, InputValue } from "./Input";
+import { NumberInput } from "./NumberInput";
+import { loadAndCheckNumber } from "./NumberSchema";
 
-type T = NumberInput<any>;
+type T = NumberInput;
 
-export class NumberInputContext
-    extends AbstractNullableInputContext<T> {
-    getControllerConfig(): RpcConfig<WidgetController<T>> {
-        return null
-    }
+export class NumberInputContext extends AbstractInputContext<T> {
+  protected getInputConfigForValue(
+    value: InputType<T>["Value"]
+  ): WidgetConfig<InputType<T>> {
+    return { ...this.config, default: value };
+  }
 
-    async loadAndCheckNotNull(value: NonNullable<InputData<T>>): Promise<InputCheckResult<T>> {
-        if (!this.config)
-            return {value}
-        return loadAndCheckNumber(value, this.config!)
-    }
+  getControllerConfig(): RpcConfig<WidgetController<T>> {
+    return null;
+  }
 
-    async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
-        return {
-            default: this.config.default,
-            max: this.config.max,
-            min: this.config.min,
-            step: this.config.step
-        }
-    }
+  async loadAndCheck(
+    value: NonNullable<InputData<T>>
+  ): Promise<InputCheckResult<T>> {
+    if (!this.config) return { value };
+    return loadAndCheckNumber(value, this.config!);
+  }
 
-    getDataFromValue(value: InputValue<T>): InputData<T> {
-        return value;
-    }
+  async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
+    return {
+      default: this.config.default,
+      max: this.config.max,
+      min: this.config.min,
+      step: this.config.step,
+    };
+  }
 
+  getDataFromValue(value: InputValue<T>): InputData<T> {
+    return value;
+  }
 }

@@ -1,16 +1,20 @@
 import {RequireOptionalKeys} from "../../common/typings";
 import {DataRow} from "../../data/DataRow";
 import {RpcConfig, RpcError} from "../Rpc";
-import {WidgetController, WidgetElement} from "../widget/Widget";
+import {WidgetConfig, WidgetController, WidgetElement} from "../widget/Widget";
 import {AbstractNullableInputContext} from "./AbstractNullableInputContext";
 import {DataInput} from "./DataInput";
-import {InputCheckResult, InputData, InputValue} from "./Input";
+import {InputCheckResult, InputData, InputType, InputValue} from "./Input";
 import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
 type T = DataInput<unknown, any>;
 
 export class DataInputContext
     extends AbstractNullableInputContext<T> {
+
+    protected getInputConfigForValue(value: InputType<T>["Value"]): WidgetConfig<InputType<T>> {
+        return {...this.config, default: value};
+    }
 
     getControllerConfig(): RpcConfig<WidgetController<T>> {
         return $ => $({

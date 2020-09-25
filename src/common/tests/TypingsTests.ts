@@ -1,9 +1,11 @@
 import {
     HasKeys,
+    Is,
     IsAny,
     IsEmptyObject,
     IsNever,
     IsSome,
+    IsUndefined,
     OptionalKeys,
     OptionalObjectArg,
     PartialUndefinedKeys,
@@ -14,6 +16,23 @@ import {
 
 ((_) => {
 })(() => {
+
+    // Bool
+    {
+        // @ts-expect-error
+        test<false & true>(false);
+
+        test<false | true>(false);
+
+        test<false | true>(true);
+    }
+    // IsUndefined
+    {
+        test<IsUndefined<undefined & undefined>>(true);
+
+        // @ts-expect-error
+        test<IsUndefined<undefined & never>>(true);
+    }
 
 
     // IsEmptyObject
@@ -27,7 +46,17 @@ import {
 
         test<IsEmptyObject<{ a: n }>>(false);
 
+        test<IsEmptyObject<{ a: n } | {}>>(true);
+
+
+        test<IsEmptyObject<{ a: n } | { a?: n }>>(true);
+
+        test<IsEmptyObject<{ a: n } | { a?: n } | undefined>>(true);
+
+
     }
+
+
     // PartialUndefinedKeys
     {
 
@@ -38,6 +67,41 @@ import {
 
         // @ts-expect-error
         test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({b: 1, c: 1});
+    }
+    // Is
+    {
+
+        const undefinedIsUndefined: Is<undefined, undefined> = true;
+
+        const undefinedIsUndefinedOrNumber: Is<undefined, undefined | number> = true;
+
+        const undefinedIsUndefinedOrNever: Is<undefined, undefined | never> = true;
+
+        const undefinedIsUndefinedOrUnkown: Is<undefined, undefined | unknown> = true;
+
+        const neverIsNever: Is<never, never> = true;
+
+        const neverIsUnkown: Is<never, unknown> = true;
+
+        const neverIsAny: Is<never, any> = true;
+
+
+        // @ts-expect-error
+        const unknownIsNever: Is<unknown, never> = true;
+
+        const unknownIsUnkown: Is<unknown, unknown> = true;
+
+        const unknownIsAny: Is<unknown, any> = true;
+
+
+        // @ts-expect-error
+        const anyIsNever: Is<any, never> = true;
+
+        const anyIsUnkown: Is<any, unknown> = true;
+
+        const anyIsAny: Is<any, any> = true;
+
+
     }
 
     // IsSome

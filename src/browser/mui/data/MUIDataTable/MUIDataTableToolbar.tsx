@@ -8,7 +8,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Typography, {TypographyProps} from "@material-ui/core/Typography";
 import {makeStyles} from "@material-ui/styles";
 import clsx from "clsx";
-import React, {createElement, Fragment, ReactNode} from "react";
+import * as React from "react"; import {createElement, Fragment, ReactNode} from "react";
 import {MuiIcon} from "../../MuiIcon";
 import {Lang} from "../../../../localization/Lang";
 import {useLangTranslator} from "../../../../localization/LangTranslator";

@@ -4,7 +4,7 @@ import DialogContent, {DialogContentProps} from "@material-ui/core/DialogContent
 import DialogTitle, {DialogTitleProps} from "@material-ui/core/DialogTitle";
 import {Theme} from "@material-ui/core/styles";
 import {makeStyles} from "@material-ui/styles";
-import React, {ReactNode, useContext} from "react";
+import * as React from "react"; import {ReactNode, useContext} from "react";
 import {AssignKeys} from "../../../common/typings";
 import {ModalStackItemContext} from "../../../react/ModalStack";
 import {mergeProps} from "../../../react/utils/mergeProps";
@@ -36,7 +36,7 @@ export type MuiDialogProps = AssignKeys<Omit<DialogProps, "open">, {
     contentWrapper?: ReactWrapper;
 }>;
 
-export function MuiDialog
+export function MuiDialogOld
 ({
      actions,
 

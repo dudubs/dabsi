@@ -25,6 +25,9 @@ export const MuiDefaultTheme = createMuiTheme({
     props:{
         MuiTextField: {
             fullWidth:true
+        },
+        MuiDialog:{
+            fullWidth:true
         }
     }
 }, heIL);

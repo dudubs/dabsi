@@ -56,6 +56,7 @@ export abstract class DataSource<T> {
         return this.selectKeys().items().then(rows => rows.map(row => row.$key))
     }
 
+    // TODO: keys(): Promise<string[]>
     selectKeys(): DataSource<{}> {
         return this.updateCursor({
             selection: {

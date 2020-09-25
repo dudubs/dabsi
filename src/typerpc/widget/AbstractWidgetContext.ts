@@ -1,5 +1,5 @@
 import {Lazy} from "../../common/patterns/lazy";
-import {RequireOptionalKeys} from "../../common/typings";
+import {Pluck, RequireOptionalKeys} from "../../common/typings";
 import {AnyContextualRpc, ContextualRpcContext, ContextualRpcProps, ContextualRpcType} from "../ContextualRpc";
 import {RpcConfig} from "../Rpc";
 import {AnyWidget, BaseWidgetContext, WidgetConfig, WidgetController, WidgetElement, WidgetType} from "./Widget";
@@ -11,7 +11,12 @@ export abstract class AbstractWidgetContext<T extends AnyWidget,
 
     config:
 
-        C extends undefined ? NonNullable<RequireOptionalKeys<C>>: C;
+        C extends undefined ? NonNullable<RequireOptionalKeys<C>> : C;
+
+    get controllerProps(): Pluck<WidgetController<T>, 'props'> {
+        // @ts-expect-error
+        return this.props.controller.props;
+    }
 
     constructor(
         public props: ContextualRpcProps<T>,

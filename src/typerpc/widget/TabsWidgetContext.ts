@@ -15,7 +15,7 @@ export class TabsWidgetContext
     }
 
     async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
-        const [key, widget] = firstEntry(this.props.controller.props.items);
+        const [key, widget] = firstEntry(this.controllerProps.items);
         return {
             current: !(key && widget) ? undefined : {
                 key, element: await widget.getContext(this.config[key])

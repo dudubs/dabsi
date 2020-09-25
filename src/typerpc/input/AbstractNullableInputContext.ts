@@ -1,6 +1,6 @@
 import {RpcError} from "../Rpc";
 import {AbstractInputContext} from "./AbstractInputContext";
-import {InputCheckResult, InputData, InputType, TInput} from "./Input";
+import {InputCheckResult, InputData, TInput} from "./Input";
 import {NullableInput} from "./NullableInput";
 
 export abstract class AbstractNullableInputContext<T extends NullableInput<any, TInput>>
@@ -14,7 +14,7 @@ export abstract class AbstractNullableInputContext<T extends NullableInput<any, 
     async loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
         if (data == null) {
             if (!this.props.nullable) {
-                return {error: "REQUIRED"}
+                return {error: "REQUIRED", value: undefined}
             }
             return {value: null}
         }

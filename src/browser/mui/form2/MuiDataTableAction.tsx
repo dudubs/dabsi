@@ -1,4 +1,4 @@
-import React, {ReactNode} from "react";
+import * as React from "react"; import {ReactNode} from "react";
 import {
     MuiConfirmDialog,
     MuiConfirmDialogProps

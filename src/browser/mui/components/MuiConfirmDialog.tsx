@@ -2,9 +2,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import Typography from "@material-ui/core/Typography";
 import {TypographyProps} from "@material-ui/system";
-import React, {ReactNode} from "react";
+import * as React from "react"; import {ReactNode} from "react";
 import {MuiButton, MuiButtonProps} from "./MuiButton";
-import {MuiDialog, MuiDialogProps} from "../form/MuiDialog";
+import {MuiDialogOld, MuiDialogProps} from "../form/MuiDialog";
 import {PickerProps} from "../../../react/ModalStack";
 
 export type MuiConfirmDialogProps = PickerProps<boolean> & {
@@ -17,7 +17,7 @@ export type MuiConfirmDialogProps = PickerProps<boolean> & {
 };
 
 export function MuiConfirmDialog(props: MuiConfirmDialogProps) {
-    return <MuiDialog {...props.DialogProps}>
+    return <MuiDialogOld {...props.DialogProps}>
         <DialogContent>
             {props.text && <Typography {...props.TextTypographyProps}>{props.text}</Typography>}
             {props.children}
@@ -26,6 +26,6 @@ export function MuiConfirmDialog(props: MuiConfirmDialogProps) {
             <MuiButton kind={"cancel"} {...props.CancelButtonProps} onClick={() => props.onPick?.(false)}/>
             <MuiButton kind={"confirm"} {...props.ConfirmButtonProps} onClick={() => props.onPick?.(true)}/>
         </DialogActions>
-    </MuiDialog>
+    </MuiDialogOld>
 }
 

@@ -3,7 +3,7 @@ import List, {ListProps} from "@material-ui/core/List";
 import ListItem, {ListItemTypeMap} from "@material-ui/core/ListItem";
 import ListItemText, {ListItemTextProps} from "@material-ui/core/ListItemText";
 import Typography from "@material-ui/core/Typography";
-import React, {ReactNode} from "react";
+import * as React from "react"; import {ReactNode} from "react";
 import {InfinityScrollProps} from "../../../../browser/src/junk/doIfScrollEnded";
 
 import {DataExp} from "../../../data/DataExp";
@@ -15,7 +15,7 @@ import {PickerProps} from "../../../react/ModalStack";
 import {Debounce} from "../../../react/utils/hooks/useDebounce";
 import {View} from "../../../react/view/View";
 import {ViewState} from "../../../react/view/ViewState";
-import {MuiDialog, MuiDialogProps} from "../form/MuiDialog";
+import {MuiDialogOld, MuiDialogProps} from "../form/MuiDialog";
 import {ReactWrapper, wrap} from "./wrap";
 
 
@@ -125,7 +125,7 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
 
 
     renderView() {
-        return <MuiDialog
+        return <MuiDialogOld
             title={this.props.title}
             DialogContentProps={{
                 ...InfinityScrollProps(
@@ -147,7 +147,7 @@ export class MuiDataPicker<T> extends View<MuiDataPickerProps<T>> {
                     this.renderNoRows()
                 )
             )}
-        </MuiDialog>
+        </MuiDialogOld>
     }
 }
 

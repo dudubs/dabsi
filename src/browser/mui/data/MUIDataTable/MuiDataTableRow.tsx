@@ -3,7 +3,7 @@ import Collapse from "@material-ui/core/Collapse";
 import TableCell from "@material-ui/core/TableCell";
 import TableRow from "@material-ui/core/TableRow";
 import {makeStyles} from "@material-ui/styles";
-import React, {useState} from "react";
+import * as React from "react"; import {useState} from "react";
 import {DataRow} from "../../../../data/DataRow";
 import {MuiButton} from "../../components/MuiButton";
 import {MuiTableColumn} from "../../MuiTable/MuiTableColumn";

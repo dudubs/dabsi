@@ -162,6 +162,9 @@ export type PartialUndefinedKeys<T, U = {}> =
             undefined extends T[K] ? K : never
     }>>);
 
+
+
+
 export type UndefinedIfEmptyObject<T> =
     If<IsEmptyObject<T>, undefined> | T;
 
@@ -195,4 +198,12 @@ export type NonNullableAt<T, K extends keyof Required<T>, D = never, V =
 export type OmitKeys<T, K extends keyof T> =
     Omit<T, K>;
 
-export type UndefinedIfIsUndefined<T> = If<Is< T,undefined>, undefined>;
+export type UndefinedIfIsUndefined<T> =
+    If<IsUndefined<T>,undefined>
+
+
+export type IsUndefined<T> =
+    undefined extends T ? true : false;
+
+
+export type Defined<T> = T extends undefined ? never : T;

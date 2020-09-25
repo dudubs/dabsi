@@ -11,21 +11,21 @@ export type RpcGenericConfigFn<T extends Fn = any> =
     };
 
 
-export type RpcConfigFactory<T, R extends AnyRpc, C = RpcConfig<R>, U extends any[] = []> =
-    ($: (config: C, ...args: U) => { $: C }, context: T, ...args: U) => { $: C };
+export type ConfigFactory<T, C> = ($: (config: C) => { $: C }, context: T) => { $: C };
 
-export function RpcConfigFactory<T, C, U extends any[]>(
-    config: RpcConfigFactory<T, AnyRpc, C, U> | undefined,
+export type RpcConfigFactory<T, R extends AnyRpc> =
+    ConfigFactory<T, RpcConfig<R>>
+
+export function ConfigFactory<T, C>(
+    config: ConfigFactory<T, C> | undefined,
     context: T,
-    ...args: U
 ): C | undefined
-export function RpcConfigFactory<T, C, U extends any[]>(
-    config: RpcConfigFactory<T, AnyRpc, C>,
+export function ConfigFactory<T, C>(
+    config: ConfigFactory<T, C>,
     context: T,
-    ...args: U
 ): C
-export function RpcConfigFactory(config, context, ...args) {
-    return config($ => ({$: $}), context, ...args).$
+export function ConfigFactory(config, context) {
+    return config?.($ => ({$: $}), context)?.$
 }
 
 export type AnyRpcWithGenericConfig = Rpc<{
@@ -43,7 +43,12 @@ export type IsRpcGenericConfigFn<T extends Fn> =
 export function RpcGenericConfig<T extends RpcGenericConfigFn>(
     genericConfig: T
 ): ReturnType<T> {
-    return touchMap(genericConfigCache, genericConfig, () => genericConfig(x => x));
+    return touchMap(genericConfigCache, genericConfig, () => {
+        if(typeof genericConfig!=="function") {
+            console.log({genericConfig});
+        }
+        return genericConfig(x => x);
+    });
 }
 
 const genericConfigCache = new WeakMap();

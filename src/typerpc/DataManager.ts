@@ -16,7 +16,7 @@ import {AnyInput, InputValue} from "./input/Input";
 import {NoRpc} from "./NoRpc";
 import {AnyRpc, RpcConfig} from "./Rpc";
 import {RpcGenericConfigurator} from "./RpcConfigurator";
-import {RpcConfigFactory} from "./RpcGenericConfig";
+import {RpcConfigFactory, ConfigFactory} from "./RpcGenericConfig";
 import {RpcMap} from "./RpcMap";
 import {DataTable, DataTableConfig, DataTableOptions} from "./widget/DataTable";
 import {ElementWidget} from "./widget/ElementWidget";
@@ -199,7 +199,7 @@ export function DataManager<T extends {
                             },
                             targetConfig: {
                                 Form: {
-                                    input: RpcConfigFactory(config.editInputConfig, row),
+                                    input: ConfigFactory(config.editInputConfig, row),
                                     submit(value) {
                                         return config.editSubmit(row, value)
                                     }

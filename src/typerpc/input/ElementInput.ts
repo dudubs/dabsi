@@ -1,6 +1,6 @@
 import {ElementWidget} from "../widget/ElementWidget";
 import {WidgetType} from "../widget/Widget";
-import {AnyInput, Input, InputHook, InputType} from "./Input";
+import {AnyInput, InputHook} from "./Input";
 
 
 // Meta

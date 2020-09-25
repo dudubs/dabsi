@@ -18,14 +18,14 @@ export class WidgetMapContext<T extends WidgetMap<AnyWidgetMap>>
 
     async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
         const element: any = {};
-        for (const [key, widget] of entries(this.props.controller.props.items)) {
+        for (const [key, widget] of entries(this.controllerProps.items)) {
             element[key] = await widget.getContext(this.config[key]).getElement()
         }
         return element;
     }
 
     getContext(key: string): ContextualRpcContext<AnyWidget> {
-        const item = this.props.controller.props.items[key];
+        const item = this.controllerProps.items[key];
         if (!item)
             throw new RpcError(`No item like "${key}".`)
 

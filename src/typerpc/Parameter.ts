@@ -1,6 +1,6 @@
 import {WithMetaType} from "../common/MetaType";
 import {AnyRpc, Rpc, RpcConnection, RpcHandlerFn, RpcPayload, RpcResult} from "./Rpc";
-import {RpcConfigFactory, RpcGenericConfigFn, RpcGenericConfigHandler} from "./RpcGenericConfig";
+import {ConfigFactory, RpcConfigFactory, RpcGenericConfigFn, RpcGenericConfigHandler} from "./RpcGenericConfig";
 
 export type ParameterConfig<R extends AnyRpc, D, V> = {
     load(data: D): Promise<V>;
@@ -39,7 +39,7 @@ export function Parameter<D = string>() {
 
             return async ([data, payload]) => {
                 const value = await config.load(data);
-                const targetConfig = RpcConfigFactory(config.getTargetConfig, value);
+                const targetConfig = ConfigFactory(config.getTargetConfig, value);
                 const targetHandler = target.createRpcHandler(targetConfig)
                 return targetHandler(payload);
             }

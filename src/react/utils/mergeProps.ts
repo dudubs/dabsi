@@ -1,109 +1,95 @@
-import {Ref} from "react";
-import {entries} from "../../common/object/entries";
-import {setRef} from "./setRef";
-
+import { Ref } from "react";
+import { entries } from "../../common/object/entries";
+import { setRef } from "./setRef";
 
 export const $merge = "$merge";
 
-
-
-
-export type PropMerger<T> =
-    Record<typeof $merge, (value: T) => T>;
+export type PropMerger<T> = Record<typeof $merge, (value: T) => T>;
 
 function mergeCallbacks(prevCallback: Function, nextCallback: Function) {
-    return function (this:any) {
-        const prevResult = prevCallback.apply(this, arguments);
-        return nextCallback.apply(this, arguments) ??
-            prevResult;
-    }
+  return function (this: any) {
+    const prevResult = prevCallback.apply(this, arguments);
+    return nextCallback.apply(this, arguments) ?? prevResult;
+  };
 }
 
 function mergeRefs(prevRef, nextRef) {
-    return current => {
-        setRef(prevRef, current);
-        setRef(nextRef, current)
-    }
+  return (current) => {
+    setRef(prevRef, current);
+    setRef(nextRef, current);
+  };
 }
 
 export function mergeProp(prevValue, nextValue) {
+  const nextType = typeof nextValue;
 
+  const prevType = typeof prevValue;
 
-    const nextType = typeof nextValue;
+  // TODO: $reverse
 
+  if (nextValue && nextType === "object") {
+    const merger = nextValue[$merge];
+    if (typeof merger === "function") {
+      return merger.call(nextValue, prevValue);
+    }
+    if (prevType === "undefined") {
+      if (Object.getPrototypeOf(nextValue) === Object.prototype)
+        return mergeProps({}, nextValue);
+    }
+  }
 
-    // TODO: $reverse
+  if (nextType === "undefined") {
+    return prevValue ?? nextValue;
+  }
 
-    if (nextType === "object") {
+  if (isRefObject(prevValue) || isRefObject(nextValue)) {
+    return mergeRefs(prevValue, nextValue);
+  }
 
-        const merger = nextValue?.[$merge];
-        if (typeof merger === "function") {
-            return merger.call(nextValue, prevValue)
+  if (prevType === nextType) {
+    switch (prevType) {
+      case "string":
+        return `${prevValue} ${nextValue}`;
+      case "function":
+        return mergeCallbacks(prevValue, nextValue);
+      case "object":
+        if (Array.isArray(prevType) && Array.isArray(nextType)) {
+          console.info("mergeBetweenArrays");
+          return [...prevValue, ...nextValue];
         }
+        return mergeProps(prevValue, nextValue);
     }
-    const prevType = typeof prevValue;
+  }
 
-    if ((prevType === "undefined") ||
-        (nextType === "undefined")) {
-        return prevValue ?? nextValue;
-    }
-
-    if (isRefObject(prevValue) || isRefObject(nextValue)) {
-        return mergeRefs(prevValue, nextValue);
-    }
-
-    if (prevType === nextType) {
-        switch (prevType) {
-            case "string":
-                return `${prevValue} ${nextValue}`;
-            case "function":
-                return mergeCallbacks(prevValue, nextValue);
-            case "object":
-                if(Array.isArray(prevType) && Array.isArray(nextType)) {
-                    console.info("mergeBetweenArrays");
-                    return [...prevValue,...nextValue]
-                }
-                return mergeProps(prevValue, nextValue)
-        }
-    }
-
-    return nextValue;
-
+  return nextValue;
 }
 
 export type NextProp<T> =
-    Exclude<T, PropMerger<any>>
-    | PropMerger<T>
-    | (T extends object ? NextProps<T> : never);
+  | Exclude<T, PropMerger<any>>
+  | PropMerger<T>
+  | (T extends object ? NextProps<T> : never);
 
 export type NextProps<P> = {
-    [K in keyof Required<P>]?: NextProp<P[K]>
-}
+  [K in keyof Required<P>]?: NextProp<P[K]>;
+};
 
 /*
 
  */
 
-export function mergeProps<P,
-    E extends NextProps<P>>(
-    prevProps: P | undefined,
-    nextProps: E,
+export function mergeProps<P, E extends NextProps<P>>(
+  prevProps: P | undefined,
+  nextProps: E
 ): P & E {
+  let _props = { ...prevProps };
 
-    let _props = {...prevProps};
+  for (let [key, nextValue] of entries(nextProps)) {
+    _props[key] = mergeProp(_props[key], nextValue);
+  }
 
-
-    for (let [key, nextValue] of entries(nextProps)) {
-        _props[key] = mergeProp(
-            _props[key],
-            nextValue
-        )
-    }
-
-    return _props as any;
+  return _props as any;
 }
 
-
 export function isRefObject(o): o is React.RefObject<any> {
-    return o && (typeof o === "object") && ("current" in o)
+  return o && typeof o === "object" && "current" in o;
 }

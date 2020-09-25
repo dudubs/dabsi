@@ -1,4 +1,4 @@
-import {connectToRpc} from "../../Rpc";
+import {createRpcConnection} from "../../Rpc";
 import {InputErrorLoader} from "../InputLoader";
 import {TextInput} from "../TextInput";
 
@@ -8,7 +8,7 @@ it('expect to error', async () => {
     const input = InputErrorLoader<"HELLO">()(
         TextInput()
     );
-    const conn = connectToRpc(
+    const conn = createRpcConnection(
         input,
         {
             targetConfig: undefined,

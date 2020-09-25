@@ -3,7 +3,7 @@ import {Renderer} from "../../react/renderer";
 import {ViewState} from "../../react/view/ViewState";
 import {RpcConnection} from "../Rpc";
 import {TabsWidget} from "./TabsWidget";
-import {WidgetType} from "./Widget";
+import {WidgetElement, WidgetType} from "./Widget";
 import {AnyWidgetMap} from "./WidgetMap";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
@@ -19,14 +19,15 @@ export class TabsWidgetView<C extends AnyTabsWidgetConnection>
 
     @ViewState() currentTab: { key: string, element: any } | undefined;
 
-    protected updateElement(element: WidgetType<C>["Element"] | undefined) {
-        this.currentTab = element?.current;
+    protected updateElement(element: WidgetType<C>["Element"]) {
+        this.currentTab = element.current;
     }
+
 
     async switchTo<K extends string & keyof WidgetType<C>['Tabs']>(key: K) {
         this.currentTab = {
             key,
-            element:await this.props.connection.getTab(key)
+            element: await this.props.connection.getTab(key)
         }
     }
 

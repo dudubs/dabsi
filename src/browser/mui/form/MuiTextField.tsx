@@ -1,5 +1,5 @@
 import TextField, {StandardTextFieldProps, TextFieldProps} from "@material-ui/core/TextField";
-import React, {ReactElement} from "react";
+import * as React from "react"; import {ReactElement} from "react";
 import {AbstractTextField, AbstractTextFieldProps} from "../../../../common/form/AbstractTextField";
 import {mergeProps} from "../../../react/utils/mergeProps";
 

@@ -1,53 +1,74 @@
-import {NoRpc} from "../NoRpc";
-import {RpcConfig} from "../Rpc";
-import {WidgetController, WidgetElement} from "../widget/Widget";
-import {AbstractInputContext} from "./AbstractInputContext";
-import {Input, InputCheckResult, InputData, InputValue} from "./Input";
-
+import { NoRpc } from "../NoRpc";
+import { RpcConfig } from "../Rpc";
+import {
+  WidgetConfig,
+  WidgetController,
+  WidgetElement,
+} from "../widget/Widget";
+import { AbstractInputContext } from "./AbstractInputContext";
+import {
+  Input,
+  InputCheckResult,
+  InputData,
+  InputType,
+  InputValue,
+} from "./Input";
 
 export type EmptyInput = Input<{
+  Data: never;
 
-    Data: never
+  Value: never;
 
-    Value: never
+  ValueElement: never;
 
-    Props: {}
+  Props: {};
 
-    Config: undefined
+  Config: undefined;
 
-    Element: object
+  Element: object;
 
-    Controller: NoRpc
+  Controller: NoRpc;
 
-    Error: never
-}>
+  Error: never;
+}>;
 
-type T =  EmptyInput;
+type T = EmptyInput;
 
-export class EmptyInputContext
-    extends AbstractInputContext<T> {
-    getControllerConfig(): RpcConfig<WidgetController<T>> {
-        throw new Error()
-    }
+export class EmptyInputContext extends AbstractInputContext<T> {
+  protected getInputConfigForValue(
+    value: InputType<T>["Value"]
+  ): WidgetConfig<InputType<T>> {
+    throw new Error();
+  }
 
-    getElement(): Promise<WidgetElement<T>> {
-        throw new Error()
-    }
+  getControllerConfig(): RpcConfig<WidgetController<T>> {
+    throw new Error();
+  }
 
-    loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
-        throw new Error()
-    }
+  getElement(): Promise<WidgetElement<T>> {
+    throw new Error();
+  }
 
-    getDataFromValue(value: InputValue<T>): InputData<T> {
-        throw new Error()
-    }
+  loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
+    throw new Error();
+  }
 
-
+  getDataFromValue(value: InputValue<T>): InputData<T> {
+    throw new Error();
+  }
 }
 
 export function EmptyInput() {
-    return Input<EmptyInput>({
-
-        context: EmptyInputContext
-    })
+  return Input<EmptyInput>({
+    context: EmptyInputContext,
+    getValueElementFromElement(element) {
+      throw new Error();
+    },
+    getDataFromElement(element) {
+      throw new Error();
+    },
+    getElementFromValueElement() {
+      throw new Error();
+    },
+  });
 }

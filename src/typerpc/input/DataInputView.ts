@@ -1,45 +1,42 @@
-import {ReactElement} from "react";
-import {Awaitable} from "../../common/typings";
-import {ViewState} from "../../react/view/ViewState";
-import {RpcConnection} from "../Rpc";
-import {DataTableRow} from "../widget/DataTable";
-import {WidgetType} from "../widget/Widget";
-import {WidgetViewProps} from "../widget/WidgetView";
-import {AnyDataInput, DataInput} from "./DataInput";
-import {InputType} from "./Input";
-import {InputView} from "./InputView";
+import { ReactElement } from "react";
+import { Awaitable } from "../../common/typings";
+import { ViewState } from "../../react/view/ViewState";
+import { RpcConnection } from "../Rpc";
+import { DataTableRow } from "../widget/DataTable";
+import { WidgetController, WidgetElement } from "../widget/Widget";
+import { AnyDataInput } from "./DataInput";
+import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
 
 export type AnyDataInputConnection = RpcConnection<AnyDataInput>;
 
-export type DataInputViewProps<C extends AnyDataInputConnection> = WidgetViewProps<C> & {};
+export type DataInputViewProps<
+  C extends AnyDataInputConnection
+> = InputViewProps<C> & {};
 
-export class DataInputView<C extends AnyDataInputConnection>
-    extends InputView<C, DataInputViewProps<C> & {
-        children(view: DataInputView<C>): ReactElement
-    }> {
+export class DataInputView<C extends AnyDataInputConnection> extends InputView<
+  C,
+  DataInputViewProps<C> & {
+    children(view: DataInputView<C>): ReactElement;
+  }
+> {
+  @ViewState() selected?: DataTableRow<WidgetController<C>>;
 
-    @ViewState()  selected?:  DataTableRow<WidgetType<C>['Controller']>;
+  protected updateElement(element: WidgetElement<C>) {
+    this.selected = element.default;
+  }
+  freezeElement(): WidgetElement<C> {
+    return { ...this.element, default: this.selected };
+  }
 
+  select(row: DataTableRow<WidgetController<C>>) {
+    this.selected = row;
+  }
 
+  renderView(): React.ReactNode {
+    return this.props.children(this);
+  }
 
-    get selectedLabel(): string {
-        return this.selected?.label || "";
-    }
-
-    protected updateElement(element: WidgetType<C>["Element"] | undefined) {
-        this.selected = element?.default;
-    }
-
-    select(row:DataTableRow<WidgetType<C>['Controller']>) {
-        this.selected = row;
-    }
-
-    getValidData(): Awaitable<InputType<C>["Data"]> {
-        return this.selected?.$key;
-    }
-
-    renderView(): React.ReactNode {
-        return this.props.children(this)
-    }
-
+  getValidData(): Awaitable<InputErrorOrData<C>> {
+    return { value: this.selected?.$key };
+  }
 }

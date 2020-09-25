@@ -1,4 +1,4 @@
-import React, {ComponentClass, createElement, ReactElement} from "react";
+import * as React from "react"; import {ComponentClass, createElement, ReactElement} from "react";
 import {EmptyFragment} from "../../react/utils/EmptyFragment";
 
 const MuiIconMap: Record<string, string> = {

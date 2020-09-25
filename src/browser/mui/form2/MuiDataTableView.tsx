@@ -5,7 +5,7 @@ import TableFooter, {TableFooterProps} from "@material-ui/core/TableFooter";
 import TableHead, {TableHeadProps} from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
-import React, {ReactNode} from "react";
+import * as React from "react"; import {ReactNode} from "react";
 import {PartialUndefinedKeys} from "../../../common/typings";
 import {Lang} from "../../../localization/Lang";
 import {AnyRpc, RpcConnection} from "../../../typerpc/Rpc";

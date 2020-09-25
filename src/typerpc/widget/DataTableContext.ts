@@ -4,11 +4,10 @@ import {Lazy} from "../../common/patterns/lazy";
 import {DataExp} from "../../data/DataExp";
 import {DataOrder} from "../../data/DataOrder";
 import {DataRow} from "../../data/DataRow";
-import {inspect} from "../../logging";
 import {ContextualRpcContext} from "../ContextualRpc";
+import {AnyRpc, RpcConfig} from "../Rpc";
 import {AbstractWidgetContext} from "./AbstractWidgetContext";
 import {DataTable, DataTableColumnContext, DataTableQuery, DataTableQueryResult} from "./DataTable";
-import {AnyRpc, RpcConfig, RpcError} from "../Rpc";
 import {WidgetController, WidgetElement} from "./Widget";
 
 type T = DataTable<any, AnyRpc>;
@@ -118,16 +117,13 @@ export class DataTableContext<C extends T>
     }
 
     async getElement(): Promise<WidgetElement<C>> {
-        const {rows, count} = this.config.pageSize ?
-            await this.getRows({
-                getCount: true,
-                text: "",
-                take: this.config.pageSize,
-                skip: 0,
-                order: {}
-            }) : {
-                rows: [], count: 0
-            };
+        const {rows, count} = await this.getRows({
+            getCount: true,
+            text: "",
+            take: this.config.pageSize || 10,
+            skip: 0,
+            order: {}
+        });
 
         return {
             rows, count,

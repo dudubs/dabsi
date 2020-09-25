@@ -1,8 +1,8 @@
 import {RequireOptionalKeys} from "../../common/typings";
 import {RpcConfig} from "../Rpc";
-import {WidgetController, WidgetElement} from "../widget/Widget";
+import {WidgetConfig, WidgetController, WidgetElement} from "../widget/Widget";
 import {AbstractInputContext} from "./AbstractInputContext";
-import {InputCheckResult, InputData, InputValue} from "./Input";
+import {InputCheckResult, InputData, InputType, InputValue} from "./Input";
 import {loadAndCheckString} from "./StringSchema";
 import {TextInput} from "./TextInput";
 import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
@@ -18,6 +18,10 @@ type T = TextInput;
 
 export class TextInputContext
     extends AbstractInputContext<T> {
+
+    protected getInputConfigForValue(value: InputType<T>["Value"]): WidgetConfig<InputType<T>> {
+        return {...this.config, default: value};
+    }
 
 
     getControllerConfig(): RpcConfig<WidgetController<T>> {
@@ -37,7 +41,7 @@ export class TextInputContext
 
     async loadAndCheck(value: InputData<T>):
         Promise<InputCheckResult<T>> {
-        return loadAndCheckString(value, this.config)
+        return loadAndCheckString(value||"", this.config)
     }
 
     getDataFromValue(value: InputValue<T>): InputData<T> {

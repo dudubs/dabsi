@@ -1,23 +1,26 @@
-import {NoRpc} from "../NoRpc";
-import {BoolInputContext} from "./BoolInputContext";
-import {Input} from "./Input";
+import { NoRpc } from "../NoRpc";
+import { BoolInputContext } from "./BoolInputContext";
+import { Input } from "./Input";
 
 export type BoolInput = Input<{
-    Data: boolean,
-    Value: boolean,
-    Config: {
-        default?: boolean,
-    } | undefined,
-    Props: {},
-    Element: { default?: boolean }
-    Error: undefined,
-    Controller: NoRpc
+  Data: boolean;
+  Value: boolean;
+  ValueElement: boolean;
+  Config:
+    | {
+        default?: boolean;
+      }
+    | undefined;
+  Props: {};
+  Element: { default?: boolean };
+  Error: undefined;
+  Controller: NoRpc;
 }>;
 
-
 export function BoolInput(): BoolInput {
-    return Input({
-        context: BoolInputContext,
-
-    })
+  return Input({
+    context: BoolInputContext,
+    getDataFromElement: (element) => element.default ?? false,
+    getValueElementFromElement: (element) => element.default ?? false,
+  });
 }

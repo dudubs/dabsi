@@ -1,13 +1,13 @@
 import {Form} from "../widget/Form";
 import {InputMap} from "../input/InputMap";
 import {TextInput} from "../input/TextInput";
-import {connectToRpc} from "../Rpc";
+import {createRpcConnection} from "../Rpc";
 import objectContaining = jasmine.objectContaining;
 
 testm(__filename, () => {
 
     it('expect to submit', async () => {
-        expect(await connectToRpc(
+        expect(await createRpcConnection(
             Form<string>()(
                 InputMap({
                     text: TextInput()

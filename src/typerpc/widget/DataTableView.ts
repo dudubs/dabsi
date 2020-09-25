@@ -27,11 +27,12 @@ export class DataTableView<C extends RpcConnection<AnyDataTable>,
     @ViewState() rows: DataTableRow<C>[];
     @ViewState() isLoading = false;
 
-    protected updateElement(element: WidgetElement<C> | undefined) {
-        this.rows = element?.rows || [];
-        this.count = element?.count ?? 0
-        this.pageSize = element?.pageSize || element?.rows?.length || 10;
+    protected updateElement(element: WidgetElement<C>) {
+        this.rows = element.rows || [];
+        this.count = element.count ?? 0
+        this.pageSize = element.pageSize || element?.rows?.length || 10;
     }
+
 
     @ViewState() columns: Record<string, {
         sort?: "ASC" | "DESC"

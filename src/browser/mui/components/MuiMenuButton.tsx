@@ -1,6 +1,6 @@
 import Menu, {MenuProps} from "@material-ui/core/Menu";
 import {MenuItemProps} from "@material-ui/core/MenuItem";
-import React, {createElement, ReactElement, useRef, useState} from "react";
+import * as React from "react"; import {createElement, ReactElement, useRef, useState} from "react";
 import {ArrayOrValue} from "../../../common/patterns/ArrayOrValue";
 import {mergeCallback} from "../../../react/utils/mergeCallback";
 import {mergeRefs} from "../../../react/utils/mergeRefs";

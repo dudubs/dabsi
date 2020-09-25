@@ -15,6 +15,8 @@ import {Widget, WidgetType, WithWidgetType} from "./Widget";
 
 export type DataTableColumnContext<RowColumn, T, DataRow> = {
     field?: DataExp<T>
+
+    // TODO: undefined if..
     load(row: DataRow): Awaitable<RowColumn>
 
 };
@@ -137,9 +139,7 @@ export function DataTable<Row extends Record<string, any>>() {
     ): DataTable<Row, RowController> => {
         return <any>Widget<DataTable<any, AnyRpc>>({
             isGenericConfig: true,
-            props: {
-                pageSize: options.pageSize ?? 10,
-            },
+            props: {},
             handler: {
                 getRows: (context, query) =>
                     context.getRows(query)

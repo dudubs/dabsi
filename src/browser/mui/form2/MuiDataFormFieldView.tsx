@@ -2,7 +2,7 @@
 // import FormHelperText from "@material-ui/core/FormHelperText";
 // import MenuItem from "@material-ui/core/MenuItem";
 // import Select from "@material-ui/core/Select";
-// import React, {ReactNode} from "react";
+// import * as React from "react"; import {ReactNode} from "react";
 // // import {DataSelectInputView, DataInputViewProps} from "../../../rpc/input/DataSelectInputView";
 // import InputLabel from "@material-ui/core/InputLabel";
 //

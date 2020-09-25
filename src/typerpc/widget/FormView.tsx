@@ -5,7 +5,7 @@ import {InputViewError} from "../input/InputViewError";
 import {InputView, InputViewProps} from "../input/InputView";
 import {RpcConnection} from "../Rpc";
 import {AnyForm} from "./Form";
-import {WidgetType} from "./Widget";
+import {WidgetController, WidgetElement, WidgetType} from "./Widget";
 import {WidgetView, WidgetViewProps} from "./WidgetView";
 
 export type FormViewProps<C extends RpcConnection<AnyForm>,
@@ -13,6 +13,7 @@ export type FormViewProps<C extends RpcConnection<AnyForm>,
     WidgetViewProps<C> &
     {
 
+        // renderFormError
         input: Renderer<InputViewProps<RpcConnection<T['FormInput']>>>
 
         onSubmit?(result: T['FormValue']);
@@ -34,31 +35,25 @@ export class FormView<C extends RpcConnection<AnyForm>>
     }> {
 
 
-    input: InputView<C['controller']> | null = null;
+    input: InputView<RpcConnection<WidgetController<C>>>;
 
 
     reset() {
-        this.input?.reset();
+        this.input.reset();
     }
 
     async submit() {
-        let data;
-        try {
-            data = await this.input?.getValidData();
-        } catch (error) {
-            if (error instanceof InputViewError) {
-                return;
-            }
-            throw error;
-        }
-        const result = await this.props.connection.submit(data);
-        if ('inputError' in result) {
-            this.input?.setError(result.inputError);
-            this.props.onInputError?.(result.inputError);
-        } else if ('error' in result) {
-            this.props.onError?.(result.error);
+        const dataResult = await this.input!.getValidData();
+        if ('error' in dataResult)
+            return;
+        const submitResult = await this.props.connection.submit(dataResult.value);
+        if ('inputError' in submitResult) {
+            this.input?.setError(submitResult.inputError);
+            this.props.onInputError?.(submitResult.inputError);
+        } else if ('error' in submitResult) {
+            this.props.onError?.(submitResult.error);
         } else {
-            this.props.onSubmit?.(result.value);
+            this.props.onSubmit?.(submitResult.value);
         }
 
     }
@@ -67,7 +62,8 @@ export class FormView<C extends RpcConnection<AnyForm>>
         return this.props.children({
             form: this,
             input: this.props.input({
-                connection: this.props.connection.controller,
+                connection: this.controller,
+                onChange: undefined,
                 element: this.element,
                 inputRef: field => {
                     this.input = field as any;

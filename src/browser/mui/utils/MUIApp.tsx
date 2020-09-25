@@ -1,5 +1,5 @@
 import {StylesProvider as MuiJssProvider} from "@material-ui/styles";
-import React, {ReactNode} from "react";
+import * as React from "react"; import {ReactNode} from "react";
 import {MuiJss} from "./MuiJss";
 
 import {ThemeProvider as StyledThemeProvider} from "styled-components";

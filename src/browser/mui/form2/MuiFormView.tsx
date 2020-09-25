@@ -1,5 +1,5 @@
 import Grid from "@material-ui/core/Grid";
-import React, {ReactElement} from "react";
+import * as React from "react"; import {ReactElement} from "react";
 
 import {mergeProps} from "../../../react/utils/mergeProps";
 import {RpcConnection} from "../../../typerpc/Rpc";

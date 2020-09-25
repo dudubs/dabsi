@@ -26,8 +26,10 @@ export type AnyInputLoader =
     InputLoader<any, any, AnyInput>;
 
 
+export type InputErrorLoader<T extends AnyInput, E> = InputLoader<InputValue<T>, E, T>;
+
 export function InputErrorLoader<E>() {
-    return <T extends AnyInput>(target: T): InputLoader<InputValue<T>, E, T> =>
+    return <T extends AnyInput>(target: T): InputErrorLoader<T, E> =>
         <any>InputLoader<any, any>()(target)
 }
 
@@ -52,7 +54,7 @@ export function InputLoader<V, E = never>() {
                             return result;
                         const error = await config.check?.(result.value);
                         if (error !== undefined)
-                            return {error}
+                            return {...result, error}
                         if (config.load) {
                             const value = await config.load(result.value);
                             return {value}

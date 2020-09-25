@@ -1,38 +1,72 @@
-import {createElement, Fragment} from "react";
-import {mapObjectToArray} from "../../common/object/mapObjectToArray";
-import {Renderer} from "../../react/renderer";
-import {AnyInputMap, InputMap} from "../input/InputMap";
-import {InputViewProps} from "../input/InputView";
-import {RpcConnection} from "../Rpc";
-import {AnyWidget, WidgetType} from "./Widget";
-import {AnyWidgetMap, WidgetMap} from "./WidgetMap";
-import {WidgetView, WidgetViewProps} from "./WidgetView";
+import * as React from "react";
+import { createElement, Fragment, ReactElement } from "react";
+import { mapObject } from "../../common/object/mapObject";
+import { mapObjectToArray } from "../../common/object/mapObjectToArray";
+import { values } from "../../common/object/values";
+import { Renderer } from "../../react/renderer";
+import { InputViewProps } from "../input/InputView";
+import { RpcConnection } from "../Rpc";
+import { AnyRpcMap, RpcMap } from "../RpcMap";
+import {
+  AnyWidget,
+  AnyWidgetConnection,
+  WidgetController,
+  WidgetHook,
+} from "./Widget";
+import { AnyWidgetMap, WidgetMap } from "./WidgetMap";
+import { WidgetView, WidgetViewProps } from "./WidgetView";
 
-export type WidgetMapViewProps<C extends RpcConnection<WidgetMap<AnyWidgetMap>>,
-    T extends Record<string, RpcConnection<AnyWidget>> = C['controller']> =
-    WidgetViewProps<C> & {
-    fields: { [K in keyof T]: Renderer<WidgetViewProps<T[K]>> }
+export type WidgetMapViewProps<
+  C extends RpcConnection<WidgetMap<AnyWidgetMap>>,
+  T extends Record<string, AnyWidgetConnection> = RpcConnection<
+    WidgetController<C>
+  >
+> = WidgetViewProps<C> & {
+  fields: { [K in string & keyof T]: Renderer<WidgetViewProps<T[K]>> };
+  children?: Renderer<{ fields: Record<string & keyof T, ReactElement> }>;
 };
 
-// TODO: WidgetElement
-export class WidgetMapView<C extends RpcConnection<WidgetMap<AnyWidgetMap>>>
-    extends WidgetView<C, WidgetMapViewProps<C>> {
+//
+export type AnyWidgetMapConnection = RpcConnection<WidgetMap<AnyWidgetMap>>;
 
-    renderView(): React.ReactNode {
+export class WidgetMapView<C extends AnyWidgetMapConnection> extends WidgetView<
+  C,
+  WidgetMapViewProps<C>
+> {
+  fields: Record<string, WidgetView<AnyWidgetConnection>> = {};
 
-        return mapObjectToArray(this.props.fields, (
-            renderer: Renderer<WidgetViewProps<any>>, key
-        ) => {
-            return createElement(Fragment, {
-                key,
-                children: renderer({
-                    key,
-                    connection: this.props.connection.controller[key],
-                    element: this.element?.[key]
-                })
-            })
-        });
+  renderField<K extends keyof RpcConnection<WidgetController<C>>>(
+    key: string & K,
+    renderer: Renderer<WidgetViewProps<RpcConnection<WidgetController<C>>[K]>>
+  ) {
+    return createElement(
+      Fragment,
+      { key },
+      renderer({
+        key,
+        connection: this.controller[key],
+        element: this.element[key],
+      })
+    );
+  }
 
+  renderView(): React.ReactNode {
+    if (typeof this.props.children === "function") {
+      return this.props.children({
+        fields: mapObject(
+          this.props.fields,
+          (renderer: Renderer<InputViewProps<any>>, key: any) => {
+            return this.renderField(key, renderer);
+          }
+        ),
+      });
     }
 
+    return mapObjectToArray(
+      this.props.fields,
+      (renderer: Renderer<InputViewProps<any>>, key: any) => {
+        return this.renderField(key, renderer);
+      }
+    );
+  }
 }

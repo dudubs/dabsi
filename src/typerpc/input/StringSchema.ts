@@ -22,19 +22,19 @@ export function loadAndCheckString(
 
     if (!value) {
         if (schema.required)
-            return {error: "REQUIRED"}
+            return {error: "REQUIRED", value: undefined}
         return {value: ""}
     }
 
     if (schema.pattern && !schema.pattern.test(value)) {
-        return {error: "INVALID_PATTERN"}
+        return {error: "INVALID_PATTERN", value}
     }
 
     if (schema.maxLength && (value.length > schema.maxLength)) {
-        return {error: "TOO_LONG"}
+        return {error: "TOO_LONG", value}
     }
     if (schema.minLength && (value.length < schema.minLength)) {
-        return {error: "TOO_SHORT"}
+        return {error: "TOO_SHORT", value}
     }
 
     return {value}

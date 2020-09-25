@@ -18,11 +18,11 @@ export function loadAndCheckNumber(value: number, schema: NumberSchema):
     }
 
     if ((typeof schema.max === "number") && (value > schema.max)) {
-        return {error: "TOO_BIG"}
+        return {error: "TOO_BIG", value}
     }
 
     if ((typeof schema.min === "number") && (value < schema.min)) {
-        return {error: "TOO_SMALL"}
+        return {error: "TOO_SMALL", value}
     }
 
     return {value}

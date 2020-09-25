@@ -1,17 +1,22 @@
 import {RequireOptionalKeys} from "../../common/typings";
 import {RpcConfig, RpcError} from "../Rpc";
-import {WidgetController, WidgetElement} from "../widget/Widget";
+import {WidgetConfig, WidgetController, WidgetElement} from "../widget/Widget";
 import {AbstractNullableInputContext} from "./AbstractNullableInputContext";
 import {EnumInput} from "./EnumInput";
-import {InputCheckResult, InputData, InputValue} from "./Input";
+import {InputCheckResult, InputData, InputType, InputValue} from "./Input";
 import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
 
 type T =  EnumInput<string, any>;
 
 export class EnumInputContext
     extends AbstractNullableInputContext<T> {
+
     getControllerConfig(): RpcConfig<WidgetController<T>> {
         return null
+    }
+
+    protected getInputConfigForValue(value: InputType<T>["Value"]): WidgetConfig<InputType<T>> {
+        return {...this.config, default: value};
     }
 
     async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {

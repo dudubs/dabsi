@@ -1,4 +1,6 @@
 import { MetaType, MetaTypeHook, WithMetaType } from "../../common/MetaType";
+import { mergeDescriptors } from "../../common/object/mergeDescriptors";
+import { setProto } from "../../common/object/setProto";
 import {
   Fn,
   HasKeys,
@@ -170,12 +172,11 @@ export function Widget<T extends AnyWidget>(
   };
 
   return <T>ContextualRpc<AnyWidget>({
-    props: {
-      ...props,
+    props: mergeDescriptors(props, {
       isGenericConfig,
       controller,
       context,
-    },
+    }),
     createHandler: RpcMapHandler<C, H>({
       ...handler,
       controller: (context, payload) => {

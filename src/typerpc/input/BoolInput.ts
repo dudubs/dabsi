@@ -20,7 +20,6 @@ export type BoolInput = Input<{
 export function BoolInput(): BoolInput {
   return Input({
     context: BoolInputContext,
-    getDataFromElement: (element) => element.default ?? false,
     getValueElementFromElement: (element) => element.default ?? false,
   });
 }

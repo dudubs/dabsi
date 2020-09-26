@@ -4,13 +4,12 @@ import { ReactTestRenderer, ReactTestRendererJSON } from "react-test-renderer";
 import { Timeout } from "../../../common/async/Timeout";
 import { defined } from "../../../common/object/defined";
 import { IndexedSeq } from "../../../immutable2";
-import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { ReactHook } from "../../../react/utils/ReactHook";
 import { RpcConnection } from "../../Rpc";
 import { AnyWidget, AnyWidgetConnection } from "../../widget/Widget";
 import { WidgetView, WidgetViewProps } from "../../widget/WidgetView";
 import { AnyInput, AnyInputConnection, InputData, InputError } from "../Input";
-import { InputErrorOrData, InputView, InputViewProps } from "../InputView";
+import { InputView, InputViewProps } from "../InputView";
 import { AbstractReactTester } from "./AbstractReactTester";
 import { CaseTester } from "./CaseTester";
 
@@ -34,7 +33,7 @@ export class WidgetViewTester<
 
   view: V;
 
-  rendererTester: ReactTestRenderer;
+  tester: ReactTestRenderer;
 
   test(title: string, callback: () => void);
   test(callback: () => void);
@@ -51,7 +50,7 @@ export class WidgetViewTester<
 
     this.testProps.test((render) => {
       beforeEach(async () => {
-        this.rendererTester = TestRenderer.create(
+        this.tester = TestRenderer.create(
           render(this.viewClass, {
             connection: this.connection,
             element: await this.connection.getElement(),
@@ -59,13 +58,13 @@ export class WidgetViewTester<
         );
         await Timeout(0);
         this.view = defined(
-          this.rendererTester.root.findByType(this.viewClass),
+          this.tester.root.findByType(this.viewClass),
           "No view"
         ).instance;
       });
 
       afterEach(async () => {
-        this.rendererTester.unmount();
+        this.tester.unmount();
         await Timeout(0);
       });
 
@@ -109,18 +108,16 @@ export class WidgetViewTester<
   }
 
   json(): IndexedSeq<ReactTestRendererJSON> {
-    return IndexedSeq.of(this.rendererTester.toJSON()).flatMap(
-      function* callback(obj) {
-        if (!obj) return;
+    return IndexedSeq.of(this.tester.toJSON()).flatMap(function* callback(obj) {
+      if (!obj) return;
 
-        yield obj;
-        for (let child of obj.children || []) {
-          if (typeof child === "object") {
-            yield* callback(obj);
-          }
+      yield obj;
+      for (let child of obj.children || []) {
+        if (typeof child === "object") {
+          yield* callback(obj);
         }
       }
-    );
+    });
   }
 
   async act<T>(callback: () => T, afterCallback?: (value: T) => void) {
@@ -144,45 +141,39 @@ export class WidgetViewTester<
   }
 
   testInputError<T extends AnyInput>(
-    this: WidgetViewTester<T, any>,
+    this: WidgetViewTester<T, InputViewClass<T>>,
     error: InputError<T>,
     callback: () => void
   ) {
-    this.test(() => {
-      describe("input:error", () => {
-        this.testAct(
-          JSON.stringify(error),
-          () => this.view.setError(error),
-          () => {
-            callback();
-          }
-        );
-      });
+    this.test(`inputError:${JSON.stringify(error)}`, async () => {
+      await this.act(() => this.view.setError(error));
+      await callback();
     });
   }
 
-  testInputValidData<
+  testValidInputData<
     T extends AnyInput,
     V extends InputView<AnyInputConnection>
   >(
-    this: WidgetViewTester<T, any>,
-    callback: (data: InputErrorOrData<T>) => void
+    this: WidgetViewTester<T, InputViewClass<T>>,
+    callback: (data: InputData<T>) => void
   ) {
     this.test(() => {
-      it("getValidData", async () => {
-        await callback(await this.view.getValidData());
+      it("validInputData", async () => {
+        const data = await this.getValidInputData();
+        await callback(data);
       });
     });
   }
 
-  async getInputData<
+  async getValidInputData<
     T extends AnyInput,
     V extends InputView<AnyInputConnection>
   >(
     this: WidgetViewTester<T, InputViewClass<T>>
   ): Promise<InputData<RpcConnection<T>>> {
-    const result = await this.view.getValidData();
-    if ("error" in result) throw new Error(`Unexpected input error`);
-    return result.value;
+    const [isValidData, data] = await this.view.getCheckedData();
+    if (!isValidData) throw new Error(`Unexpected input error`);
+    return data;
   }
 }

@@ -19,31 +19,33 @@ export class InputMapContext extends AbstractInputContext<T> {
   }
 
   async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
-    const element: any = {};
+    const items: any = {};
     for (const [key, input] of entries(this.controllerProps.items)) {
       try {
-        element[key] = await input.getContext(this.config[key]).getElement();
+        items[key] = await input.getContext(this.config[key]).getElement();
       } catch (error) {
         throw error;
       }
     }
-    return element;
+    return { items };
   }
 
   async loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
-    const error: any = {};
-    const value: any = {};
+    const keyToError: any = {};
+    const keyToValue: any = {};
     for (const [key, field] of entries(this.controllerProps.items)) {
       const result = await field
         .getContext(this.config[key])
         .loadAndCheck(data[key]);
       if ("error" in result) {
-        error[key] = result.error;
+        keyToError[key] = result.error;
       } else {
-        value[key] = result.value;
+        keyToValue[key] = result.value;
       }
     }
-    return hasKeys(error) ? { error, value } : { value };
+    return hasKeys(keyToError)
+      ? { error: { items: keyToError }, value: keyToValue }
+      : { value: keyToValue };
   }
 
   getDataFromValue(value: InputValue<T>): InputData<T> {

@@ -1,17 +1,17 @@
 import * as React from "react";
-import { Dispatch, SetStateAction, useState } from "react";
-import { EmptyFragment } from "../../../react/utils/EmptyFragment";
-import { ReactHook } from "../../../react/utils/ReactHook";
+import { inspect } from "../../../logging";
+import { focusNextTest } from "../../../typeorm/exp/tests/focusNextTest";
 import { ArrayInput } from "../ArrayInput";
 import { ArrayInputView } from "../ArrayInputView";
 import { BoolInput } from "../BoolInput";
+import { InputError } from "../Input";
 import { InputErrorHook, InputErrorHookView } from "../InputErrorHook";
 import { InputMap } from "../InputMap";
 import { InputMapView } from "../InputMapView";
 import { TextInput } from "../TextInput";
 import { TextInputView } from "../TextInputView";
-import { CaseTester } from "./CaseTester";
 import { RpcTester } from "./RpcTester";
+import { TestInput } from "./TestInput";
 import { TestInputView } from "./TestInputView";
 
 describe("InputErrorHookView", () => {
@@ -52,132 +52,163 @@ describe("InputErrorHookView", () => {
   });
 });
 
+const TestStringInput = TestInput<{ Value: string; Error: "ERR1" | "ERR2" }>();
+describe("TestInput", () => {
+  const t = new RpcTester(TestStringInput);
+
+  t.testConfig("default", undefined);
+
+  t.testWidgetView(TestInputView, (t) => {
+    t.testPropsWithState(
+      "",
+      { error: undefined as undefined | InputError<typeof t.connection> },
+      (View, props, state) => (
+        <View
+          {...props}
+          error={state.error}
+          errorMap={{
+            ERR1: "MAPPED_ERR1",
+          }}
+        />
+      ),
+      (setState) => {
+        t.test("expect to updateError from props.", async () => {
+          await t.act(() => setState({ error: "ERR1" }));
+          expect(t.view.error).toEqual("ERR1");
+          expect(t.getStringById("error")).toEqual("MAPPED_ERR1");
+        });
+        t.test(
+          "expect to errorElement for ERR1 will be MAPPED_ERR1.",
+          async () => {
+            await t.act(() => t.view.setError("ERR1"));
+            expect(t.view.error).toEqual("ERR1");
+            expect(t.getStringById("error")).toEqual("MAPPED_ERR1");
+          }
+        );
+        t.test(
+          "expect to errorElement for ERR2 will be undefined.",
+          async () => {
+            await t.act(() => t.view.setError("ERR2"));
+            expect(t.view.error).toEqual("ERR2");
+            expect(t.getStringById("error")).toEqual("");
+          }
+        );
+      }
+    );
+  });
+});
+
 describe("TextInput", () => {
   const t = new RpcTester(TextInput());
 
-  t.testConfig("undefined", undefined);
+  t.testConfig("default", undefined);
 
-  t.testConfig("default", { default: "hello" }, () => {
+  t.testConfig("default:hello", { default: "hello" }, () => {
     t.testWidgetElement("expect to default", (e) => {
       expect(e.default).toEqual("hello");
     });
   });
 
-  t.testConfig("default+trim+pattern", {
-    trim: true,
-    default: "hello",
-    pattern: /^[^\d]+$/,
-  });
+  t.testConfig(
+    "default+trim+pattern",
+    {
+      trim: true,
+      default: "hello",
+      pattern: /^[^\d]+$/,
+    },
+    () => {
+      t.testWidgetElement("expect to default", (e) => {
+        expect(e.default).toEqual("hello");
+      });
 
-  t.testInputData("expect to trim without error", " world ", (result) => {
-    expect(result).toEqual({ value: "world" });
-  });
+      t.testInputValue(" world ", "world");
 
-  t.testInputData("expect to pattern error", "123", (result) => {
-    expect(result).toEqual({ error: "INVALID_PATTERN", value: "123" });
-  });
+      t.testWidgetView(TextInputView, (t) => {
+        t.testProps("sanity", (View, props) => (
+          <View
+            {...props}
+            errorMap={{ INVALID_PATTERN: "BAD_PATTERN" }}
+            children={(view) => (
+              <>
+                <div id={"error"}>{view.errorElement}</div>
+                <div id={"text"}>{view.text}</div>
+              </>
+            )}
+          />
+        ));
 
-  t.testWidgetView(TextInputView, (t) => {
-    t.testProps("sanity", (View, props) => (
-      <View
-        {...props}
-        errorMap={{ INVALID_PATTERN: "BAD_PATTERN" }}
-        children={(view) => (
-          <>{view.error && <div id={"error"}>{view.errorElement}</div>}</>
-        )}
-      />
-    ));
-    t.testInputError("INVALID_PATTERN", () => {
-      expect(t.getStringById("error")).toEqual("BAD_PATTERN");
-    });
-  });
+        t.test("expect text is element value", () => {
+          expect(t.view.text).toEqual("hello");
+        });
+        t.test("expect value is element value", () => {
+          expect(t.view.value).toEqual("hello");
+        });
+        t.test("expect to getCheckedData setValue to text.", async () => {
+          await t.act(() => {
+            t.view.setText("world");
+          });
+          expect(t.view.value).toEqual("hello");
+          await t.view.getCheckedData();
+          expect(t.view.value).toEqual("world");
+        });
+        // focusNextTest();
+        t.testInputError("INVALID_PATTERN", () => {
+          expect(t.getStringById("error")).toEqual("BAD_PATTERN");
+        });
+      });
+
+      t.testInputError("123", "INVALID_PATTERN");
+    }
+  );
 });
 
 describe("InputMap", () => {
   const t = new RpcTester(
     InputMap({
-      text: TextInput(),
+      text1: TextInput(),
+      text2: TextInput(),
     })
   );
 
-  t.testConfig("undefined", undefined);
+  t.testConfig("default", {
+    text1: { default: "hello" },
+    text2: { default: "world" },
+  });
+
+  let text1Input: TestInputView;
+  let text2Input: TestInputView;
 
   t.testWidgetView(InputMapView, (t) => {
-    let textInput: TestInputView | undefined;
-
-    t.testProps("empty-fields", (View, props) => (
+    t.testProps("", (View, props) => (
       <View
         {...props}
         fields={{
-          text: (props) => EmptyFragment,
+          text1: (props) => (
+            <TestInputView
+              {...props}
+              ref={(current) => (text1Input = current!)}
+            />
+          ),
+          text2: (props) => (
+            <TestInputView
+              {...props}
+              ref={(current) => (text2Input = current!)}
+            />
+          ),
         }}
       />
     ));
 
-    t.testPropsWithState(
-      "sanity",
-      true,
-      (View, props, state) => (
-        <View
-          {...props}
-          fields={{
-            text: (props) =>
-              !state ? (
-                EmptyFragment
-              ) : (
-                <TestInputView
-                  {...props}
-                  ref={(current) => {
-                    textInput = current ?? undefined;
-                  }}
-                  testErrorId={"textError"}
-                  testData={"hello"}
-                  testFreezeElement={(element) => ({
-                    ...element,
-                    default: "frozenHello",
-                  })}
-                />
-              ),
-          }}
-        />
-      ),
-      (setState) => {
-        t.test(() => {
-          beforeEach(() => {
-            expect(textInput).toBeDefined();
-          });
-          it("expect to hello before change", async () => {
-            expect(await t.getInputData().then((a) => a.text)).toEqual("hello");
-          });
-
-          it("expect to frozenHello afterChange", async () => {
-            textInput!.props.onChange!(textInput!);
-            expect(await t.getInputData().then((a) => a.text)).toEqual("hello");
-            await t.act(() => setState(false));
-            expect(await t.getInputData().then((a) => a.text)).toEqual(
-              "frozenHello"
-            );
-          });
-        });
-
-        t.testInputError(
-          {
-            text: "INVALID_PATTERN",
-          },
-          () => {
-            expect(t.getStringById("textError")).toEqual("INVALID_PATTERN");
-          }
-        );
-      }
-    );
-
-    t.testInputValidData(({ value }) => {
-      expect(value?.text).toBeInstanceOf(String);
+    t.test("", () => {
+      expect(t.view.value).toEqual({
+        text1: "hello",
+        text2: "world",
+      });
     });
   });
 });
 
-describe("ArrayInput", () => {
+fdescribe("ArrayInput", () => {
   const t = new RpcTester(
     ArrayInput(
       InputMap({
@@ -215,17 +246,13 @@ describe("ArrayInput", () => {
           onChange={undefined}
           renderNewItem={(props) => (
             <TestInputView
+              testData={() => text ?? ""}
+              testId={"new-item"}
               {...props}
-              testData={() => text || ""}
               errorMap={{
                 NOT_UNIQUE: "NOT_UNIQUE_NEW_ITEM",
-              }}>
-              {(view) => (
-                <>
-                  <div id={"new-item-error"}>{view.errorElement}</div>
-                </>
-              )}
-            </TestInputView>
+              }}
+            />
           )}
           renderItem={({ props: { itemKey, ...props } }) => (
             <InputErrorHookView
@@ -241,13 +268,13 @@ describe("ArrayInput", () => {
                         text: (props) => (
                           <TestInputView
                             {...props}
-                            testData={(e) => text ?? e?.default ?? ""}
+                            testData={() => text ?? ""}
                           />
                         ),
                         isActive: (props) => (
                           <TestInputView
                             {...props}
-                            testData={(e) => isActive ?? e?.default ?? false}
+                            testData={() => isActive ?? false}
                           />
                         ),
                       }}
@@ -272,45 +299,33 @@ describe("ArrayInput", () => {
       isActive = undefined;
     });
 
-    t.testInputValidData((data) => {
-      expect(data.value!.hello).toEqual({
+    t.testValidInputData((data) => {
+      expect(data.hello).toEqual({
         text: "hello",
         isActive: true,
       });
 
-      expect(data.value!.world).toEqual({
+      expect(data.world).toEqual({
         text: "world",
         isActive: false,
       });
     });
 
-    t.testAct(
-      "expect unique error on adding new item",
-      () => {
-        text = "hello";
-        return t.view.add();
-      },
-      () => {
-        expect(t.getStringById("item-error:hello")).toEqual("");
-        expect(t.getStringById("item-error:world")).toEqual("");
-        expect(t.getStringById("new-item-error")).toEqual(
-          "NOT_UNIQUE_NEW_ITEM"
-        );
-      }
-    );
+    t.test("expect to unique error on adding a new item", async () => {
+      text = "hello";
+      await t.act(() => t.view.add());
+      expect(t.getStringById("item-error:hello")).toEqual("");
+      expect(t.getStringById("item-error:world")).toEqual("");
+      expect(t.getStringById("new-item:error")).toEqual("NOT_UNIQUE_NEW_ITEM");
+    });
 
-    t.testAct(
-      "expect unique error on item change.",
-      () => {
-        text = "world";
-        return t.view.onItemChange("hello");
-      },
-      () => {
-        expect(t.getStringById("item-error:hello")).toEqual("NOT_UNIQUE_ITEM");
-        expect(t.getStringById("item-error:world")).toEqual("");
-        expect(t.getStringById("new-item-error")).toEqual("");
-      }
-    );
+    t.test("expect unique error on changing exists item.", async () => {
+      text = "world";
+      await t.act(() => t.view.onItemChange("hello"));
+      expect(t.getStringById("item-error:hello")).toEqual("NOT_UNIQUE_ITEM");
+      expect(t.getStringById("item-error:world")).toEqual("");
+      expect(t.getStringById("new-item:error")).toEqual("");
+    });
   });
 });
 

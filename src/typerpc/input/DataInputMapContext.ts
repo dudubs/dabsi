@@ -56,8 +56,8 @@ export class DataInputMapContext extends AbstractInputContext<T> {
   }
 
   async loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
-    const value: any = {};
-    const error: any = {};
+    const keyToValue: any = {};
+    const keyToError: any = {};
     const keys = Object.keys(data);
     for (const row of await this.config.source
       .createAsMutable()
@@ -68,13 +68,15 @@ export class DataInputMapContext extends AbstractInputContext<T> {
       );
 
       if ("error" in result) {
-        error[row.$key] = result.error;
+        keyToError[row.$key] = result.error;
       } else {
-        value[row.$key] = result.value;
+        keyToValue[row.$key] = result.value;
       }
     }
 
-    return hasKeys(error) ? { error, value } : { value };
+    return hasKeys(keyToError)
+      ? { error: { items: keyToError }, value: keyToValue }
+      : { value: keyToValue };
   }
 
   getDataFromValue(keyToValue: InputValue<T>): InputData<T> {

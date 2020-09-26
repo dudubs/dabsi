@@ -64,10 +64,8 @@ export function EmptyInput() {
     getValueElementFromElement(element) {
       throw new Error();
     },
-    getDataFromElement(element) {
-      throw new Error();
-    },
-    getElementFromValueElement() {
+
+    getDataFromValueElement() {
       throw new Error();
     },
   });

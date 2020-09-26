@@ -3,13 +3,21 @@ import { defined } from "../../common/object/defined";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { RandomId } from "../../common/patterns/RandomId";
-import { RequiredOnly } from "../../common/typings";
+import { Awaitable, RequiredOnly } from "../../common/typings";
+import { WeakId } from "../../common/WeakId";
 import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
 import { WidgetElement, WidgetType } from "../widget/Widget";
 import { AnyArrayInput } from "./ArrayInput";
-import { InputType } from "./Input";
+import {
+  AnyInput,
+  AnyInputConnection,
+  InputError,
+  InputType,
+  InputValueElement,
+} from "./Input";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
+import { InputViewChildren } from "./InputViewChildren";
 
 export type AnyArrayInputConnection = RpcConnection<AnyArrayInput>;
 
@@ -25,8 +33,9 @@ export type ArrayInputViewProps<
   C extends AnyArrayInputConnection
 > = InputViewProps<C> & {
   renderItem(props: {
-    props: InputViewProps<ItemConnection<C>> & { itemKey: string };
+    props: InputViewProps<ItemConnection<C>>;
     view: ArrayInputView<C>;
+    key: string;
     index: number;
   }): ReactElement;
 
@@ -40,39 +49,36 @@ export type ArrayInputViewProps<
 export class ArrayInputView<
   C extends AnyArrayInputConnection
 > extends InputView<C, ArrayInputViewProps<C>> {
-  protected updateElement(element: WidgetType<C>["Element"]) {
-    super.updateElement(element);
-    const id = RandomId();
-    const { getKeyFromItem } = this.props.connection.props;
-    const itemProps = this.props.connection.props.controller.props.items.item
-      .props;
-    this.itemsProps = (element?.items || []).map((element, index) => {
-      const key = getKeyFromItem?.(itemProps.getDataFromElement(element));
-      return this.getItemProps(key ?? id + index, element);
-    });
-  }
+  // protected updateElement(element: WidgetType<C>["Element"]) {
+  //   super.updateElement(element);
+  //   const id = RandomId();
+  //   const { getKeyFromItem } = this.props.connection.props;
+  //   const itemProps = this.props.connection.props.controller.props.items.item
+  //     .props;
+  //   this.itemsProps = (element?.items || []).map((element, index) => {
+  //     const key = getKeyFromItem?.(
+  //       itemProps.getDataFromValueElement(
+  //         itemProps.getValueElementFromElement(element)
+  //       )
+  //     );
+  //     return this.getItemProps(key ?? id + index, element);
+  //   });
+  // }
 
-  async getValidData(): Promise<InputErrorOrData<C>> {
-    const error = {};
-    const value = {};
-
-    for (const { itemKey: key } of this.itemsProps) {
-      const input = this.itemKeyToInput[key];
-      if (!input) continue;
-      const result = await input.getValidData();
-      value[key] = result.value;
-      if ("error" in result) {
-        error[key] = result.error;
-      }
+  protected async getError(): Promise<InputError<C> | undefined> {
+    const keyToError = {};
+    for (const [key, input, index] of entries(this.itemKeyToInput)) {
+      await input.checkError((error) => {
+        keyToError[index] = error;
+      });
     }
-
-    if (hasKeys(error)) return { error, value };
-    return { value };
+    if (hasKeys(keyToError)) return { children: keyToError };
   }
 
-  @ViewState() protected itemsProps: (InputViewProps<ItemConnection<C>> & {
-    itemKey: string;
-  })[];
+  @ViewState() protected items: {
+    props: InputViewProps<ItemConnection<C>>;
+    key: string;
+  }[];
 
   protected itemKeyToInput: Record<string, InputView<ItemConnection<C>>> = {};
 
@@ -82,12 +88,14 @@ export class ArrayInputView<
       () => `No item for key "${itemKey}"`
     );
 
-    const dataResult = await item.getValidData();
-    if ("error" in dataResult) return;
+    const itemData = await item.getCheckedData();
+    if (item.hasError) {
+      return;
+    }
 
     const { getKeyFromItem } = this.props.connection.props;
     if (getKeyFromItem) {
-      const newKey = getKeyFromItem(dataResult.value);
+      const newKey = getKeyFromItem(itemData);
       if (itemKey !== newKey) {
         if (this.itemKeyToInput[newKey]) {
           item.setError("NOT_UNIQUE");
@@ -121,91 +129,120 @@ export class ArrayInputView<
   }
 
   remove(index: number) {
-    this.itemsProps = this.itemsProps.filter((_, i) => i !== index);
+    this.setValue(this.value.filter((_, i) => i !== index));
   }
 
-  swap(index1: number, index2: number) {
-    this.itemsProps = this.itemsProps.map((item, index) => {
-      const nextIndex =
-        index === index1 ? index2 : index === index2 ? index1 : index;
-
-      if (index !== nextIndex) {
-        return this.itemsProps[nextIndex];
-      }
-
-      return item;
-    });
-  }
-
-  newItemInput?: InputView<RpcConnection<InputType<C>["NewItem"]>>;
-
-  async getUniqueNewItemData(): Promise<
-    InputErrorOrData<InputType<C>["NewItem"]>
-  > {
-    const result = await this.newItemInput!.getValidData();
-    if ("error" in result) return result;
-    const { getKeyFromNewItem } = this.props.connection.props;
-    if (getKeyFromNewItem) {
-      const key = getKeyFromNewItem(result.value);
-      if (this.itemKeyToInput[key]) {
-        this.newItemInput?.setError("NOT_UNIQUE");
-        return { ...result, error: "NOT_UNIQUE" };
-      }
-    }
-    return result;
-  }
+  newItemInput: InputView<RpcConnection<InputType<C>["NewItem"]>>;
 
   async add(): Promise<boolean> {
-    const dataResult = await this.getUniqueNewItemData();
-    if ("error" in dataResult) return false;
+    const [isValidData, itemData] = await this.newItemInput.getCheckedData();
+    if (!isValidData) return false;
 
-    const result = await this.controller.getItemElement(dataResult.value);
-    if ("error" in result) {
-      this.newItemInput?.setError(result.error);
+    const itemKey =
+      this.connectionProps.getKeyFromNewItem?.(itemData) ?? RandomId();
+
+    if (this.itemKeyToInput[itemKey]) {
+      this.newItemInput.setError("NOT_UNIQUE");
       return false;
     }
-    this.itemsProps = [
-      ...this.itemsProps,
-      this.getItemProps(RandomId(), result.value),
-    ];
-    return true;
-  }
 
-  freezeElement(): WidgetElement<C> {
-    return {
-      ...this.element,
-      items: this.itemsProps.map((itemProps) =>
-        this.itemKeyToInput[itemProps.itemKey].freezeElement()
-      ),
-    };
+    const result = await this.controller.addNewItem(itemData);
+    if ("error" in result) {
+      this.newItemInput.setError(result.error);
+      return false;
+    }
+
+    this.setValue([...this.value, result.value]);
+    return true;
   }
 
   renderNewItem() {
     return this.props.renderNewItem(
       {
-        onChange: () => {
-          this.getUniqueNewItemData();
+        onChange: async (newItemInput) => {
+          const {
+            connectionProps: { getKeyFromNewItem },
+          } = this;
+
+          if (getKeyFromNewItem) {
+            const [isValidData, data] = await newItemInput.getCheckedData();
+            if (!isValidData) return;
+
+            const key = getKeyFromNewItem(data);
+            if (key && this.itemKeyToInput[key]) {
+              newItemInput.setError("NOT_UNIQUE");
+            }
+          }
         },
         key: "add",
         connection: this.controller.newItem,
         element: this.element.newItem,
         inputRef: (input) => {
-          this.newItemInput = input;
+          this.newItemInput = input!;
         },
       },
       this
     );
   }
+  protected updateValue(value: InputValueElement<C>) {
+    this.items = value.map((element) => {
+      const key =
+        this.connectionProps.getKeyFromItem?.(
+          this.connectionProps.item.props.getDataFromValueElement(element)
+        ) ?? "i" + WeakId(element);
+      return {
+        key,
+        props: {
+          key,
+          element,
+          connection: this.controller.item,
+          onChange: () => this.onItemChange(key),
+          inputRef: (view) => {
+            if (!view) {
+              if (this.itemKeyToInput[key] === view) {
+                delete this.itemKeyToInput[key];
+              }
+            } else {
+              this.itemKeyToInput[key] = view;
+            }
+          },
+        },
+      };
+    });
+  }
 
   renderItems() {
-    return this.itemsProps.map((item, index) => {
+    const {
+      getKeyFromItem,
+      item: { props: itemProps },
+    } = this.connectionProps;
+    return this.value.map((value, index) => {
+      let key: string;
+      if (getKeyFromItem) {
+        key = getKeyFromItem(itemProps.getDataFromValueElement(value));
+      } else {
+        if (value && typeof value === "object") {
+          key = "i" + WeakId(value);
+        } else {
+          key = "i" + index.toString();
+        }
+      }
+
       return createElement(
         Fragment,
-        { key: item.key },
+        { key },
         this.props.renderItem({
-          props: item,
+          props: {
+            connection: this.controller.item,
+            element: this.element.item,
+            value,
+            onChange: (view) => {
+              this.setValue(mapIndexToValue(this.value, index, view.value));
+            },
+          },
           view: this,
           index,
+          key,
         })
       );
     });
@@ -214,4 +251,8 @@ export class ArrayInputView<
   renderView(): React.ReactNode {
     return this.props.children(this);
   }
+}
+
+export function mapIndexToValue<T>(arr: T[], index: number, newValue: T): T[] {
+  return arr.map((v, i) => (i === index ? newValue : v));
 }

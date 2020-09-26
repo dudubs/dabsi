@@ -1,6 +1,4 @@
-import { mapArrayToObject } from "../../common/array/mapArrayToObject";
 import { MetaType } from "../../common/MetaType";
-import { RandomId } from "../../common/patterns/RandomId";
 import {
   Awaitable,
   If,
@@ -18,14 +16,17 @@ import {
   ErrorOrValue,
   Input,
   InputData,
-  InputValueElement,
   InputError,
   InputValue,
+  InputValueElement,
 } from "./Input";
 import { InputErrorHook } from "./InputErrorHook";
 import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
 
-export type ArraySchemaError = "TOO_MANY_ITEMS" | "TOO_FEW_ITEMS";
+export type ArraySchemaError =
+  | "TOO_MANY_ITEMS"
+  | "TOO_FEW_ITEMS"
+  | "UNIQUE_ITEM";
 
 export type ArrayInput<
   Item extends AnyInput,
@@ -38,16 +39,16 @@ export type ArrayInput<
   Item: Item;
   NewItem: NewItem;
 
-  Data: Record<string, InputData<Item>>;
+  Data: InputData<Item>[];
 
   Value: InputValue<Item>[];
 
-  ValueElement: {
-    value: InputValueElement<Item>;
-    element: WidgetElement<Item>;
-  }[];
+  ValueElement: InputValueElement<Item>[];
 
   Props: {
+    item: Item;
+    newItem: NewItem;
+
     isUniqueItem: boolean;
     getKeyFromItem?: (data: InputData<Item>) => string;
     getKeyFromNewItem?: (data: InputData<Item>) => string;
@@ -61,8 +62,8 @@ export type ArrayInput<
 
           readonly itemConfig: RpcConfig<Item>;
 
-          getItemValue:
-            | UndefinedGetItemValue
+          getItemValue: /*FromNewItemValue*/
+          | UndefinedGetItemValue
             | ((value: InputValue<NewItem>) => Awaitable<InputValue<Item>>);
 
           // getItemKey: (value:InputValue<Item>)=>
@@ -77,7 +78,8 @@ export type ArrayInput<
       >;
 
   Element: {
-    items: WidgetElement<Item>[];
+    default?: InputValueElement<Item>[];
+    item: WidgetElement<Item>;
     newItem: WidgetElement<NewItem>;
     maxLength?: number;
     minLength?: number;
@@ -88,14 +90,19 @@ export type ArrayInput<
 
     newItem: NewItem;
 
-    getItemElement: Command<
+    // addNewItem
+    addNewItem: Command<
       (
         data: InputData<Item>
       ) => ErrorOrValue<InputError<NewItem>, WidgetElement<Item>>
     >;
   }>;
 
-  Error: ArraySchemaError | Record<string, InputError<Item>>;
+  Error:
+    | ArraySchemaError
+    | {
+        children: Record<number, InputError<Item>>;
+      };
 }>;
 
 export type AnyArrayInput = ArrayInput<AnyInput, AnyInput>;
@@ -132,8 +139,11 @@ export function ArrayInput<
 ): ArrayInput<ArrayItem<IsUniqueItem, Item>, ArrayItem<IsUniqueItem, NewItem>> {
   const getKeyFromItem =
     options && "getKeyFromItem" in options ? options.getKeyFromItem : undefined;
+  const newItem = options?.newItem ?? item;
   return <any>Input<AnyArrayInput>({
     props: {
+      item,
+      newItem,
       isUniqueItem: options?.isUniqueItem ?? false,
       getKeyFromItem,
       getKeyFromNewItem:
@@ -144,29 +154,17 @@ export function ArrayInput<
     context: ArrayInputContext,
     controller: RpcMap<MetaType<WidgetController<AnyArrayInput>>["MapItems"]>({
       item: item,
-      newItem: options?.newItem ?? item,
-      getItemElement: Command<(data: any) => any>(),
+      newItem,
+      addNewItem: Command<(data: any) => any>(),
     }),
-    getValueElementFromElement(element) {
-      return element.items.map((element) => ({
-        value: this.controller.props.items.item.props.getValueElementFromElement(
-          element
-        ),
-        element,
-      }));
-    },
-    getElementFromValueElement(element, value) {
-      return { ...element, items: value.map((item) => item.element) };
-    },
-    getDataFromElement(element) {
-      const id = RandomId();
-      return mapArrayToObject(element.items || [], (element, index) => {
-        const itemProps = this.controller.props.items.item.props;
-        const itemData = itemProps.getDataFromElement(element);
-        const itemKey =
-          this.getKeyFromItem?.(itemData) ?? id + index.toString();
 
-        return [itemKey, itemData];
+    getValueElementFromElement(element) {
+      return element.default || [];
+    },
+
+    getDataFromValueElement(items) {
+      return items.map((itemValue) => {
+        return this.item.props.getDataFromValueElement(itemValue);
       });
     },
   });

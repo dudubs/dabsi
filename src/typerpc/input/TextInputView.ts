@@ -1,20 +1,17 @@
-import { ReactElement, ReactNode } from "react";
+import { ReactElement } from "react";
 import { Timeout } from "../../common/async/Timeout";
+import { Awaitable } from "../../common/typings";
 import { Lang } from "../../localization/Lang";
 import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
-import { WidgetElement } from "../widget/Widget";
-import { InputData, InputError } from "./Input";
-import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
-import { InputViewError } from "./InputViewError";
-import { loadAndCheckString } from "./StringSchema";
+import { InputData, InputError, InputValueElement } from "./Input";
+import { InputView, InputViewProps } from "./InputView";
+import { StringSchema } from "./StringSchema";
 import { TextInput } from "./TextInput";
 
 export type TextInputViewProps<
   C extends RpcConnection<TextInput>
-> = InputViewProps<C> & {
-  checkOnChange?: boolean;
-};
+> = InputViewProps<C>;
 
 export class TextInputView<
   C extends RpcConnection<TextInput>
@@ -24,73 +21,41 @@ export class TextInputView<
     children(view: TextInputView<C>): ReactElement;
   }
 > {
-  protected isValidText = false;
+  @ViewState() protected _text: string;
 
-  @ViewState() protected text: string;
-
-  protected updateElement(element: WidgetElement<TextInput>) {
-    this.setError(undefined);
-    this.text = element.default || "";
+  protected updateValue(value: InputValueElement<C>) {
+    this._text = value;
   }
 
-  freezeElement(): WidgetElement<C> {
-    return { ...this.element, default: this.text };
-  }
-
-  async getValidData(): Promise<InputErrorOrData<C>> {
-    this.debounceId++;
-    if (!this.isValidText) {
-      await this.emit();
-      if (this.error != null) {
-        return { error: this.error, value: this.text };
-      }
-    }
-    return { value: this.text };
+  get text() {
+    return this._text;
   }
 
   protected debounceId = 0;
 
-  isChanged = false;
+  protected getError(): Awaitable<InputError<C> | undefined> {
+    return StringSchema.check(this.value, this.element);
+  }
 
-  async emit() {
+  async checkValue(value: InputValueElement<C>): Promise<void> {
+    return super.checkValue(StringSchema.get(value, this.element));
+  }
+
+  async getCheckedData(): Promise<[false] | [true, InputData<C>]> {
     this.debounceId++;
-    if (!this.isChanged) return;
-
-    const result = loadAndCheckString(this.text, this.element || {});
-    if ("error" in result) {
-      this.setError(result.error);
-      return;
-    }
-    this.text = result.value;
-
-    if (this.props.checkOnChange) {
-      const error = await this.props.connection.check(this.text);
-      if (error) {
-        this.setError(error);
-        return;
-      }
-    }
-
-    // this.setError(await this.props.connection.check(this.text))
-
-    if (this.error != null) {
-      this.isValidText = true;
-      this.isChanged = false;
-      this.props.onChange?.(this);
-    }
+    await this.checkValue(this._text);
+    return super.getCheckedData();
   }
 
   async setText(text: string) {
-    if (this.text === text) return;
-    this.isChanged = true;
+    if (this._text === text) return;
     const id = ++this.debounceId;
-    this.text = text;
-    this.isValidText = false;
-    this._error = undefined;
+    this._text = text;
+    this.setError(undefined);
     await Timeout(300);
     if (id !== this.debounceId) return;
 
-    await this.emit();
+    await this.checkValue(text);
   }
 
   protected renderErrorDefault(error: InputError<TextInput>): ReactElement {
@@ -110,10 +75,6 @@ export class TextInputView<
           min: this.element?.minLength,
         });
     }
-  }
-
-  getText(): string {
-    return this.text;
   }
 
   renderView(): React.ReactNode {

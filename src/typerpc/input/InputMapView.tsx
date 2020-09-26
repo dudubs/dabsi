@@ -5,6 +5,7 @@ import { hasKeys } from "../../common/object/hasKeys";
 import { mapObject } from "../../common/object/mapObject";
 import { mapObjectToArray } from "../../common/object/mapObjectToArray";
 import { values } from "../../common/object/values";
+import { Awaitable } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
 import { RpcConnection } from "../Rpc";
 import {
@@ -13,7 +14,7 @@ import {
   WidgetElement,
   WidgetType,
 } from "../widget/Widget";
-import { AnyInputConnection, InputError } from "./Input";
+import { AnyInputConnection, InputError, InputValueElement } from "./Input";
 import { AnyInputMap, InputMap } from "./InputMap";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
 
@@ -30,67 +31,23 @@ export type InputMapViewProps<
 export class InputMapView<
   C extends RpcConnection<InputMap<AnyInputMap>>
 > extends InputView<C, InputMapViewProps<C>> {
-  fields: Record<string, InputView<any> | undefined> = {};
+  keyToInput: Record<string, InputView<any>> = {};
 
-  freezeElement(): WidgetElement<C> {
-    return mapObject(this.fields, (field, key) => {
-      if (field) return field.freezeElement();
-
-      return this.frozenItemsElements[key] ?? this.element[key];
-    });
-  }
-
-  async getValidData(): Promise<InputErrorOrData<C>> {
-    let value = {};
-    let error = {};
-    for (let [key, input] of entries(
-      this.props.connection.props.controller.props.items
-    )) {
-      const field = this.fields[key];
-      if (field) {
-        const result = await field.getValidData();
-        value[key] = result.value;
-        if ("error" in result) {
-          error[key] = result.error;
-        }
-      } else {
-        value[key] = input.props.getDataFromElement(
-          this.frozenItemsElements[key] ?? this.element[key]
-        );
-      }
+  protected async getError(): Promise<InputError<C> | undefined> {
+    const keyToError = {};
+    for (const [key, field] of entries(this.keyToInput)) {
+      await field?.checkError((error) => {
+        keyToError[key] = error;
+      });
     }
-    if (hasKeys(error)) return { error, value };
-    return { value };
+    if (hasKeys(keyToError)) return { items: keyToError };
   }
 
-  protected updateError(keyToError: InputError<C> | undefined) {
-    if (typeof keyToError === "object") {
-      for (let [key, input] of entries(
-        this.props.connection.props.controller.props.items
-      )) {
-        const field = this.fields[key];
-        const error = keyToError[key];
-        if (field) {
-          field.setError(error);
-        } else if (error) {
-          if (error) console.warn(`No input for error ${error}.`);
-        }
-      }
-    }
-  }
+  keyToError: Record<string, any> | undefined;
 
-  reset() {
-    super.reset();
-    for (let field of values(this.fields)) {
-      field?.reset();
-    }
-  }
-
-  protected frozenItemsElements: Record<string, WidgetElement<AnyWidget>>;
-
-  protected updateElement(element: WidgetType<C>["Element"]) {
-    super.updateElement(element);
-    this.frozenItemsElements = {};
+  protected updateError(error: InputError<C> | undefined) {
+    this.keyToError =
+      typeof error === "object" && "items" in error ? error.items : undefined;
   }
 
   renderField<K extends keyof RpcConnection<WidgetController<C>>>(
@@ -103,16 +60,20 @@ export class InputMapView<
       renderer({
         key,
         connection: this.controller[key],
-        element: this.element[key],
+        element: this.element.items[key],
+        value: this.value[key],
+        error: this.keyToError?.[key],
         onChange: (view) => {
-          this.frozenItemsElements[key] = view.freezeElement();
-          this.props.onChange?.(this);
+          this.setValue({
+            ...this.value,
+            [key]: view.value,
+          });
         },
-        inputRef: (field) => {
-          if (field) {
-            this.fields[key] = field;
+        inputRef: (input) => {
+          if (input) {
+            this.keyToInput[key] = input;
           } else {
-            delete this.fields[key];
+            delete this.keyToInput[key];
           }
         },
       })

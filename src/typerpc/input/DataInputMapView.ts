@@ -2,12 +2,19 @@ import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { mapObject } from "../../common/object/mapObject";
 import { mapObjectToArray } from "../../common/object/mapObjectToArray";
+import { values } from "../../common/object/values";
 import { Awaitable } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
 import { RpcConnection } from "../Rpc";
 import { WidgetElement } from "../widget/Widget";
 import { DataInputMap } from "./DataInputMap";
-import { AnyInput, InputData, InputError, InputType } from "./Input";
+import {
+  AnyInput,
+  InputData,
+  InputError,
+  InputType,
+  InputValueElement,
+} from "./Input";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
 import { InputViewError } from "./InputViewError";
 
@@ -23,59 +30,56 @@ export type DataInputMapViewProps<
 export class DataInputMapView<
   C extends RpcConnection<DataInputMap<AnyInput>>
 > extends InputView<C, DataInputMapViewProps<C>> {
-  inputs: Record<
+  keyToInput: Record<
     string,
     InputView<RpcConnection<InputType<C>["DataInput"]>>
   > = {};
 
-  async getValidData(): Promise<InputErrorOrData<C>> {
-    const error = {};
-    const value = {};
-    for (const [key, input] of entries(this.inputs)) {
-      const result = await input.getValidData();
-      value[key] = result.value;
-      if ("error" in result) value[key] = result.error;
+  async getError() {
+    const keyToError = {};
+    for (const [key, input] of entries(this.keyToInput)) {
+      await input.checkError((error) => {
+        keyToError[key] = error;
+      });
     }
-    if (hasKeys(error)) return { error, value };
-    return { value };
+    if (hasKeys(keyToError)) return { items: keyToError };
   }
 
+  keyToError: Record<string, any> | undefined;
   protected updateError(error: InputError<C> | undefined) {
-    for (let [key, input] of entries(this.inputs)) {
-      input.setError(error?.[key]);
-    }
+    this.keyToError =
+      error && typeof error == "object" && "items" in error
+        ? error.items
+        : undefined;
   }
 
   renderView(): React.ReactNode {
     return mapObjectToArray(this.element, (element, key, index) => {
       return this.props.input(
         {
-          onChange: () => {
-            // this.element = {...element, [key]: await view.value}
-
-            // this.setValue({  ...this.value, [key]: {
-            // element:view.element, value: view.value
-            // } })
-
-            this.props.onChange?.(this);
-          },
+          /*
+          onChange({value}) {
+            this.setValue({
+                ...this.value, [key]: value
+            })
+          }
+           */
+          onChange: (view) =>
+            this.checkValue({ ...this.value, [key]: view.value }),
           connection: this.controller(key),
           key,
           element,
+          error: this.keyToError?.[key],
           inputRef: (input) => {
             if (input) {
-              this.inputs[key] = input;
+              this.keyToInput[key] = input;
             } else {
-              delete this.inputs[key];
+              delete this.keyToInput[key];
             }
           },
         },
         index
       );
     });
-  }
-
-  freezeElement(): WidgetElement<C> {
-    return <any>mapObject(this.inputs, (input) => input.freezeElement());
   }
 }

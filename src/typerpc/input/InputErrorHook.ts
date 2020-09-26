@@ -40,12 +40,8 @@ export class InputErrorHookView<
 > {
   target?: InputView<RpcConnection<InputType<C>["ErrorHookTarget"]>>;
 
-  freezeElement(): WidgetElement<C> {
-    return this.target!.freezeElement();
-  }
-
-  getValidData(): Awaitable<InputErrorOrData<C>> {
-    return this.target!.getValidData();
+  protected getError(): Awaitable<InputError<C> | undefined> {
+    return this.target?.checkError();
   }
 
   setError(error: InputType<C>["Error"] | undefined) {

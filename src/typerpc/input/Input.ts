@@ -1,5 +1,6 @@
 // TODO: Rename to *Input
 import { MetaTypeHook } from "../../common/MetaType";
+import { mergeDescriptors } from "../../common/object/mergeDescriptors";
 import {
   At,
   Awaitable,
@@ -7,6 +8,7 @@ import {
   If,
   Is,
   IsNever,
+  IsSome,
   Not,
   PartialUndefinedKeys,
 } from "../../common/typings";
@@ -76,26 +78,20 @@ export type Input<T extends TInput> = Widget<{
   };
 
   Props: T["Props"] & {
-    getDataFromElement(
+    getDataFromValueElement(
       this: ContextualRpcProps<Input<T>>,
-      element: T["Element"]
+      element: T["ValueElement"]
     ): T["Data"];
 
     getValueElementFromElement(
       this: ContextualRpcProps<Input<T>>,
       element: T["Element"]
     ): T["ValueElement"];
-
-    getElementFromValueElement(
-      this: ContextualRpcProps<Input<T>>,
-      element: T["Element"],
-      value: T["ValueElement"]
-    ): T["ValueElement"];
-
-    // getElementFromValueElement();
   };
 
-  Element: T["Element"];
+  Element: T["Element"] & {
+    // TODO: default?: T['ValueElement']
+  };
 
   Controller: T["Controller"];
 }>;
@@ -169,10 +165,17 @@ export type InputOptions<
 
   controller: T["Controller"] | If<Is<T["Controller"], NoRpc>, undefined>;
 
-  // getDataFromValueElement
-  getDataFromElement:
-    | ((this: ContextualRpcProps<I>, element: WidgetElement<I>) => InputData<I>)
-    | UndefinedIfINputElementDefaultIsInputData<I>;
+  getDataFromValueElement:
+    | ((
+        this: ContextualRpcProps<I>,
+        element: InputValueElement<I>
+      ) => InputData<I>)
+    | If<
+        // undefined if InputValueElement is InputData
+        HasDefaultForInputElement<I> &
+          IsSome<InputData<I>, InputValueElement<I>>,
+        undefined
+      >;
 
   getValueElementFromElement:
     | ((
@@ -180,18 +183,6 @@ export type InputOptions<
         element: WidgetElement<I>
       ) => InputValueElement<I>)
     | UndefinedIfINputElementDefaultIsInputData<I>;
-
-  getElementFromValueElement:
-    | ((
-        element: WidgetElement<I>,
-        value: InputValueElement<I>
-      ) => WidgetElement<I>)
-    | If<
-        // undefined if InputValueElement is InputElementDefault
-        HasDefaultForInputElement<I> &
-          Is<InputValueElement<I>, InputElementDefault<I>>,
-        undefined
-      >;
 }>;
 
 export function Input<T extends AnyInput>(
@@ -201,22 +192,16 @@ export function Input<T extends AnyInput>(
     props = {},
     controller = NoRpc,
     isGenericConfig = false,
-    getDataFromElement = (element) => element["default"],
+    getDataFromValueElement = (value) => value,
     getValueElementFromElement = (element) => element["default"],
-    getElementFromValueElement = (element, value) => ({
-      ...element,
-      default: value,
-    }),
     context,
   } = <InputOptions<AnyInput, TInput>>options;
 
   return <T>Widget<AnyInput>({
-    props: {
-      ...props,
-      getDataFromElement,
+    props: mergeDescriptors(props, {
+      getDataFromValueElement,
       getValueElementFromElement,
-      getElementFromValueElement,
-    },
+    }),
     controller,
     context,
     isGenericConfig,

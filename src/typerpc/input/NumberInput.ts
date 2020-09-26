@@ -28,7 +28,6 @@ export type NumberInput = Input<{
 export function NumberInput(): NumberInput {
   return <any>Input<NumberInput>({
     context: NumberInputContext,
-    getDataFromElement: (element) => element.default ?? element.min ?? 0,
     getValueElementFromElement: (element) =>
       element.default ?? element.min ?? 0,
   });

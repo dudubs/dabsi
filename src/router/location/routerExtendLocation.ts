@@ -1,12 +1,12 @@
-import {cloneObject} from "../../common/object/cloneObject";
-import {mergeDescriptors} from "../../common/object/mergeDescriptors";
-import {AnyRouter} from "../Router";
+import { cloneObject } from "../../common/object/cloneObject";
+import { assignAllDescriptors } from "../../common/object/assignAllDescriptors";
+import { AnyRouter } from "../Router";
 
 export function routerExtendLocation<T extends AnyRouter, U extends object>(
-    this: T,
-    locationType: U
+  this: T,
+  locationType: U
 ): T & { locationType: U } {
-    return cloneObject<any, any>(this, {
-        locationType: mergeDescriptors(this.locationType, locationType)
-    })
+  return cloneObject<any, any>(this, {
+    locationType: assignAllDescriptors(this.locationType, locationType),
+  });
 }

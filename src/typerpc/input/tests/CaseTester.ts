@@ -49,6 +49,7 @@ export function CaseTester<C>(name: string): CaseTester<C> {
       } finally {
         lock = false;
         configsToTest = _configsToTests;
+        isDefinedTestsCalled = false;
       }
     }
     return tester;

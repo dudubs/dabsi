@@ -1,10 +1,14 @@
-export function mergeDescriptors(
-    ...objects:object[]
-):object {
-    const base = {};
-    for (let object of objects) {
-        Object.defineProperties(base,
-            Object.getOwnPropertyDescriptors(object));
+import { entries } from "./entries";
+
+export function mergeDescriptors<T extends object, U extends object>(
+  base: T,
+  child: U
+): Omit<T, keyof U> & U {
+  for (const [key, desc] of entries(Object.getOwnPropertyDescriptors(base))) {
+    if (!child.hasOwnProperty(key)) {
+      Object.defineProperty(child, key, desc);
     }
-    return base;
+  }
+
+  return Object.setPrototypeOf(child, base);
 }

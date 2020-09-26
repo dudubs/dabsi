@@ -1,12 +1,15 @@
-import * as TestRenderer from "react-test-renderer";
-import { ReactTestRenderer } from "react-test-renderer";
-import { Timeout } from "../../../common/async/Timeout";
-import { defined } from "../../../common/object/defined";
+import { inspect } from "../../../logging";
 import { AnyContextualRpc, ContextualRpcContext } from "../../ContextualRpc";
 import { AnyRpc, RpcConfig, RpcConnection } from "../../Rpc";
 import { AnyWidget, WidgetElement } from "../../widget/Widget";
 import { WidgetView, WidgetViewProps } from "../../widget/WidgetView";
-import { AnyInput, InputCheckResult, InputData } from "../Input";
+import {
+  AnyInput,
+  InputCheckResult,
+  InputData,
+  InputError,
+  InputValue,
+} from "../Input";
 import { CaseTester } from "./CaseTester";
 import { WidgetViewTester } from "./WidgetViewTester";
 
@@ -20,11 +23,7 @@ export class RpcTester<T extends AnyRpc> {
     callback: (connection: RpcConnection<T>) => void
   ) {
     this.testConfig.test((config) => {
-      describe("of:connection", () => {
-        callback(
-          this.rpc.createRpcConnection(this.rpc.createRpcHandler(config))
-        );
-      });
+      callback(this.rpc.createRpcConnection(this.rpc.createRpcHandler(config)));
     });
   }
 
@@ -33,9 +32,7 @@ export class RpcTester<T extends AnyRpc> {
     callback: (context: ContextualRpcContext<T>) => void
   ) {
     this.testConfig.test((config) => {
-      describe("of:context", () => {
-        callback(this.rpc.getContext(config));
-      });
+      callback(this.rpc.getContext(config));
     });
   }
 
@@ -45,16 +42,58 @@ export class RpcTester<T extends AnyRpc> {
     callback: (element: WidgetElement<T>) => void
   ) {
     describe("widget:element", () => {
-      this.testConnection((conn) => {
-        it(title, async () => {
-          await callback(await conn.getElement());
+      describe("of:connection", () => {
+        this.testConnection((conn) => {
+          it(title, async () => {
+            await callback(await conn.getElement());
+          });
         });
       });
-
-      this.testContext((ctx) => {
-        it(title, async () => {
-          await callback(await ctx.getElement());
+      describe("of:context", () => {
+        this.testContext((ctx) => {
+          it(title, async () => {
+            await callback(await ctx.getElement());
+          });
         });
+      });
+    });
+  }
+
+  testInputValue<T extends AnyInput>(
+    this: RpcTester<T>,
+    data: InputData<T>,
+    value: InputValue<T>
+  ) {
+    describe("expect inputValue", () => {
+      this.testContext((conn) => {
+        it(`expect input value for data ${inspect(data)} will be ${inspect(
+          value
+        )}`, async () => {
+          const result = await conn.loadAndCheck(data);
+          if ("error" in result) {
+            throw new Error(`unexpected error ${result.error}`);
+          }
+          expect(result.value).toEqual(value);
+        });
+      });
+    });
+  }
+
+  testInputError<T extends AnyInput>(
+    this: RpcTester<T>,
+    data: InputData<T>,
+    error: InputError<T>
+  ) {
+    this.testContext((conn) => {
+      it(`expect input error for data ${inspect(data)} will be ${inspect(
+        error
+      )}`, async () => {
+        const result = await conn.loadAndCheck(data);
+        if ("error" in result) {
+          expect(result.error).toEqual(error);
+        } else {
+          fail(`No error`);
+        }
       });
     });
   }
@@ -83,26 +122,9 @@ export class RpcTester<T extends AnyRpc> {
     callback: (tester: WidgetViewTester<T, VC>) => void
   ) {
     this.testConnection((connection) => {
-      // let view;
-      // let reactTester: ReactTestRenderer;
-      //
-      // beforeEach(async () => {
-      //   reactTester = TestRenderer.create(
-      //     render!(viewClass, {
-      //       connection: connection,
-      //       element: await connection.getElement(),
-      //     })
-      //   );
-      //   await Timeout(0);
-      //   view = defined(reactTester.root.findByType(viewClass), "No view")
-      //     .instance;
-      // });
-      //
-      // afterEach(() => {
-      //   reactTester.unmount();
-      // });
-
-      callback(new WidgetViewTester(viewClass, connection));
+      describe("view:" + viewClass.name, () => {
+        callback(new WidgetViewTester(viewClass, connection));
+      });
     });
   }
 }

@@ -4,7 +4,7 @@ import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
 import { WidgetElement, WidgetType } from "../widget/Widget";
 import { BoolInput } from "./BoolInput";
-import { AnyInput, InputData, InputType } from "./Input";
+import { AnyInput, InputData, InputError, InputType } from "./Input";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
 
 export type BoolInputViewProps<
@@ -18,8 +18,8 @@ export class BoolInputView<
 > extends InputView<C, BoolInputViewProps<C>> {
   @ViewState() value: boolean;
 
-  freezeElement(): WidgetElement<C> {
-    return { ...this.element, default: this.value };
+  protected getError(): Awaitable<InputError<C> | undefined> {
+    return undefined;
   }
 
   protected updateElement(element: WidgetElement<BoolInput>) {
@@ -28,9 +28,5 @@ export class BoolInputView<
 
   renderView(): React.ReactNode {
     return this.props.children(this);
-  }
-
-  getValidData(): Awaitable<InputErrorOrData<C>> {
-    return { value: this.value };
   }
 }

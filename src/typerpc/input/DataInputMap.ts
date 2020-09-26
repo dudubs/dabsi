@@ -36,13 +36,15 @@ export type DataInputMap<I extends AnyInput> = Input<{
     string,
     {
       value: InputValueElement<I>;
-      item: { label: string; input: WidgetElement<I> };
+      label: string;
     }
   >;
 
   Value: Record<string, InputValue<I>>;
 
-  Props: {};
+  Props: {
+    readonly target: I;
+  };
 
   Element: Record<
     string,
@@ -56,34 +58,32 @@ export type DataInputMap<I extends AnyInput> = Input<{
     <T>(config: DataInputMapConfig<I, T>) => DataInputMapConfig<I>
   >;
 
-  Error: Record<string, InputError<I>>;
+  Error: { items: Record<string, InputError<I>> };
 
   Controller: DataParameter<I>;
 }>;
 
-export function DataInputMap<I extends AnyInput>(input: I): DataInputMap<I> {
+export function DataInputMap<I extends AnyInput>(target: I): DataInputMap<I> {
   return <any>Input<DataInputMap<AnyInput>>({
+    props: {
+      target,
+    },
     isGenericConfig: true,
-    controller: DataParameter(input),
+    controller: DataParameter(target),
     context: DataInputMapContext,
-    getDataFromElement(element) {
-      return mapObject(element, (item) =>
-        this.controller.target.props.getDataFromElement(item.input)
+    getDataFromValueElement(keyToValue) {
+      return mapObject(keyToValue, (value) =>
+        this.target.props.getDataFromValueElement(value.value)
       );
     },
     getValueElementFromElement(keyToItem) {
       return mapObject(keyToItem, (item) => {
         return {
+          label: item.label,
           value: this.controller.target.props.getValueElementFromElement(
             item.input
           ),
-          item,
         };
-      });
-    },
-    getElementFromValueElement(element, keyToValue) {
-      return mapObject(keyToValue, (value) => {
-        return value.item;
       });
     },
   });

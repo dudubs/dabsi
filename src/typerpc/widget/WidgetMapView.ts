@@ -2,17 +2,10 @@ import * as React from "react";
 import { createElement, Fragment, ReactElement } from "react";
 import { mapObject } from "../../common/object/mapObject";
 import { mapObjectToArray } from "../../common/object/mapObjectToArray";
-import { values } from "../../common/object/values";
 import { Renderer } from "../../react/renderer";
 import { InputViewProps } from "../input/InputView";
 import { RpcConnection } from "../Rpc";
-import { AnyRpcMap, RpcMap } from "../RpcMap";
-import {
-  AnyWidget,
-  AnyWidgetConnection,
-  WidgetController,
-  WidgetHook,
-} from "./Widget";
+import { AnyWidgetConnection, WidgetController } from "./Widget";
 import { AnyWidgetMap, WidgetMap } from "./WidgetMap";
 import { WidgetView, WidgetViewProps } from "./WidgetView";
 
@@ -33,8 +26,6 @@ export class WidgetMapView<C extends AnyWidgetMapConnection> extends WidgetView<
   C,
   WidgetMapViewProps<C>
 > {
-  fields: Record<string, WidgetView<AnyWidgetConnection>> = {};
-
   renderField<K extends keyof RpcConnection<WidgetController<C>>>(
     key: string & K,
     renderer: Renderer<WidgetViewProps<RpcConnection<WidgetController<C>>[K]>>
@@ -45,7 +36,7 @@ export class WidgetMapView<C extends AnyWidgetMapConnection> extends WidgetView<
       renderer({
         key,
         connection: this.controller[key],
-        element: this.element[key],
+        element: this.element.items[key],
       })
     );
   }

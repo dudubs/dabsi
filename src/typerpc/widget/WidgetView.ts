@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
 import { View } from "../../react/view/View";
 import { ViewState } from "../../react/view/ViewState";
+import { ContextualRpcProps } from "../ContextualRpc";
 import { RpcConnection } from "../Rpc";
 import {
   AnyWidget,
@@ -20,56 +21,54 @@ export type WidgetViewProps<C extends AnyWidgetConnection> = {
   connection: C;
 
   element: WidgetElement<C>;
-
-  loadOnInit?: boolean;
 };
-
-export class WidgetViewError extends Error {}
 
 export abstract class WidgetView<
   C extends AnyWidgetConnection,
   P extends WidgetViewProps<C> = WidgetViewProps<C>,
   T extends TWidget = WidgetType<C>
 > extends View<P> {
-  // TODO: reloadElement
-
-  @ViewState("forceUpdateElement") element: T["Element"];
+  @ViewState("forceUpdateElement") _element: T["Element"];
 
   protected updateElement?(element: T["Element"]): void;
+
+  get element(): T["Element"] {
+    return this._element;
+  }
+
+  setElement(element: T["Element"]) {
+    this._element = element;
+  }
 
   get controller(): RpcConnection<WidgetController<C>> {
     return this.props.connection.controller;
   }
 
+  get controllerProps(): RpcConnection<WidgetController<C>>["props"] {
+    return this.props.connection.controller.props;
+  }
+
+  get connection(): C {
+    return this.props.connection;
+  }
+
+  get connectionProps(): C["props"] {
+    return this.props.connection.props;
+  }
+
   constructor(props: P) {
     super(props);
-    if (!this.props.connection)
-      throw new WidgetViewError(`Can't render WidgetView without connection`);
-    this.element = this.props.element;
+    this._element = this.props.element;
     this.updateElement?.(this.props.element);
-
-    if (this.props.loadOnInit) {
-      this.props.connection.getElement().then((element) => {
-        this.element = element;
-      });
-    }
   }
 
   forceUpdateElement() {
     this.updateElement?.(this.element);
   }
 
-  shouldComponentUpdate(
-    nextProps: Readonly<P>,
-    nextState: Readonly<any>,
-    nextContext: any
-  ): boolean {
-    if (nextProps.element !== this.props.element) {
-      this.element = nextProps.element;
-      this.updateElement?.(nextProps.element);
-      return true;
+  updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>): void {
+    if (nextProps.element !== prevProps.element) {
+      this._element = nextProps.element;
     }
-    // TODO: return true if didSetState
-    return true;
   }
 }

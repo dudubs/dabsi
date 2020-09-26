@@ -1,10 +1,10 @@
 import { ReactNode } from "react";
 import { Awaitable } from "../../common/typings";
-import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
-import { WidgetElement, WidgetType } from "../widget/Widget";
-import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
+import { InputError, InputValueElement } from "./Input";
+import { InputView, InputViewProps } from "./InputView";
 import { NumberInput } from "./NumberInput";
+import { NumberSchema } from "./NumberSchema";
 
 export class NumberInputView<
   C extends RpcConnection<NumberInput>
@@ -14,22 +14,12 @@ export class NumberInputView<
     children(view: Readonly<NumberInputView<C>>): ReactNode;
   }
 > {
-  @ViewState() value2: number;
-
-  protected updateElement(element: WidgetType<C>["Element"]) {
-    this.value2 = element.default ?? 0;
+  protected getError(): Awaitable<InputError<C> | undefined> {
+    return NumberSchema.check(this.element, this.value);
   }
 
-  setValue(value: number) {
-    this.value2 = value;
-  }
-
-  freezeElement(): WidgetElement<C> {
-    return { ...this.element, default: this.value2 };
-  }
-
-  getValidData(): Awaitable<InputErrorOrData<C>> {
-    return { value: this.value2 };
+  async checkValue(value: InputValueElement<C>): Promise<void> {
+    return super.checkValue(NumberSchema.get(this.element, value));
   }
 
   renderView(): React.ReactNode {

@@ -4,7 +4,6 @@ import { Lazy } from "../../common/patterns/lazy";
 import { RequireOptionalKeys } from "../../common/typings";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { RpcConfig, RpcError } from "../Rpc";
-import { ConfigFactory } from "../RpcGenericConfig";
 import {
   WidgetConfig,
   WidgetController,
@@ -12,13 +11,7 @@ import {
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
 import { AnyArrayInput } from "./ArrayInput";
-import {
-  AnyInput,
-  InputCheckResult,
-  InputData,
-  InputType,
-  InputValue,
-} from "./Input";
+import { InputCheckResult, InputData, InputType, InputValue } from "./Input";
 import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
 
 type T = AnyArrayInput;
@@ -32,32 +25,30 @@ export class ArrayInputContext
     return { ...this.config, default: value };
   }
 
-  @Lazy() get defaultItemContext() {
-    return this.controllerProps.items.item.getContext(this.config.itemConfig);
+  @Lazy() get itemContext() {
+    return this.props.item.getContext(this.config.itemConfig);
   }
 
   @Lazy() get newItemContext() {
-    return this.controllerProps.items.newItem.getContext(
-      this.config.newItemConfig
-    );
+    return this.props.newItem.getContext(this.config.newItemConfig);
   }
 
   getDataFromValue(value: InputValue<T>): InputData<T> {
-    return value.map((item) => this.defaultItemContext.getDataFromValue(item));
+    return value.map((item) => this.itemContext.getDataFromValue(item));
   }
 
   getControllerConfig(): RpcConfig<WidgetController<T>> {
     return {
       item: this.config.itemConfig,
       newItem: this.config.newItemConfig,
-      getItemElement: async (data) => {
+      addNewItem: async (data) => {
         const result = await this.newItemContext.loadAndCheck(data);
         if ("error" in result) return result;
         const itemValue = this.config.getItemValue
           ? this.config.getItemValue(result.value)
           : result.value;
         return {
-          value: await this.defaultItemContext
+          value: await this.itemContext
             .getContextForValue(itemValue)
             .getElement(),
         };
@@ -68,59 +59,65 @@ export class ArrayInputContext
   protected itemConfigCache = {};
 
   async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
-    const items: object[] = [];
+    const valuesElements: object[] = [];
 
     const values =
       this.config.default && (await ValueOrAwaitableFn(this.config.default));
 
     for (const value of values || []) {
-      const context = this.defaultItemContext.getContextForValue(value);
+      const context = this.itemContext.getContextForValue(value);
+      // getValueElementFromValue
       const element = await context.getElement();
-
-      items.push(element);
+      const valueElement = this.props.item.props.getValueElementFromElement(
+        element
+      );
+      valuesElements.push(valueElement);
     }
 
     return {
-      items,
+      default: valuesElements.length ? valuesElements : undefined,
+      newItem: await this.newItemContext.getElement(),
+      item: await this.itemContext.getElement(),
       maxLength: this.config?.maxLength,
       minLength: this.config?.minLength,
-      newItem: await this.newItemContext.getElement(),
     };
   }
 
-  async loadAndCheck(keyToData: InputData<T>): Promise<InputCheckResult<T>> {
+  async loadAndCheck(itemsData: InputData<T>): Promise<InputCheckResult<T>> {
     const values: InputValue<T> = [];
-    const errors: Record<string, any> = {};
+    const indexToError: Record<number, any> = {};
 
     const maxLength = this.config?.maxLength || Infinity;
 
     const { getKeyFromItem } = this.props;
-    for (const [key, data] of entries(keyToData)) {
-      if (getKeyFromItem) {
-        const keyFromData = getKeyFromItem(data);
-        if (key !== keyFromData) {
-          throw new RpcError(
-            `Invalid data for key "${key}" != "${keyFromData}".`
-          );
-        }
+
+    const keys = new Set();
+
+    for (const [index, data] of itemsData.entries()) {
+      if (keys.size === maxLength) {
+        return { error: "TOO_MANY_ITEMS", value: values };
       }
 
-      if (values.length === maxLength)
-        return { error: "TOO_MANY_ITEMS", value: values };
+      if (getKeyFromItem) {
+        const key = getKeyFromItem(data);
+        if (keys.has(key)) {
+          return { error: "UNIQUE_ITEM", value: values };
+        }
+        keys.add(key);
+      }
 
-      const result = await this.defaultItemContext.loadAndCheck(data);
-
+      const result = await this.itemContext.loadAndCheck(data);
+      values.push(result.value);
       if ("error" in result) {
-        errors[key] = result.error;
-      } else {
-        values.push(result.value);
+        indexToError[index] = result.error;
       }
     }
 
     if (values.length < (this.config?.minLength || 0))
       return { error: "TOO_FEW_ITEMS", value: values };
 
-    if (hasKeys(errors)) return { error: errors, value: values };
+    if (hasKeys(indexToError))
+      return { error: { children: indexToError }, value: values };
     return { value: values };
   }
 }

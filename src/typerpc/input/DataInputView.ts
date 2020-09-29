@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import { Awaitable } from "../../common/typings";
 import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
-import { DataTableRow } from "../widget/DataTable";
+import { DataTableRowWithKey } from "../widget/DataTable";
 import { WidgetController, WidgetElement } from "../widget/Widget";
 import { AnyDataInput } from "./DataInput";
 import { InputError } from "./Input";

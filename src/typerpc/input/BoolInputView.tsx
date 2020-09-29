@@ -16,16 +16,6 @@ export type BoolInputViewProps<
 export class BoolInputView<
   C extends RpcConnection<BoolInput>
 > extends InputView<C, BoolInputViewProps<C>> {
-  @ViewState() value: boolean;
-
-  protected getError(): Awaitable<InputError<C> | undefined> {
-    return undefined;
-  }
-
-  protected updateElement(element: WidgetElement<BoolInput>) {
-    this.value = element.default ?? false;
-  }
-
   renderView(): React.ReactNode {
     return this.props.children(this);
   }

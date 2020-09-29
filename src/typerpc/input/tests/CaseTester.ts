@@ -1,3 +1,5 @@
+import { inspect } from "../../../logging";
+
 type CaseTester<C> = {
   (title: string, config: C, callback?: () => void): CaseTester<C>;
   case(title: string, config: C, callback?: () => void): CaseTester<C>;
@@ -68,3 +70,15 @@ CaseTester.json = function <T>(name: string, options: T[]): CaseTester<T> {
   }
   return t;
 };
+
+export function testCase<T>(
+  title: string,
+  cases: T[],
+  callback: (c: T) => void
+) {
+  for (const c of cases) {
+    describe(`${title}:${inspect(c)}`, () => {
+      callback(c);
+    });
+  }
+}

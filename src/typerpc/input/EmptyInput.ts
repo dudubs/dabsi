@@ -52,10 +52,6 @@ export class EmptyInputContext extends AbstractInputContext<T> {
   loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
     throw new Error();
   }
-
-  getDataFromValue(value: InputValue<T>): InputData<T> {
-    throw new Error();
-  }
 }
 
 export function EmptyInput() {

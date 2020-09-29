@@ -38,17 +38,17 @@ export class FormView<C extends RpcConnection<AnyForm>> extends WidgetView<
   }
 
   async submit() {
-    const data = await this.input.getCheckedData();
-    if (this.input.error != null) return;
+    await this.input.validate();
+    if (this.input.error !== null) return;
 
-    const submitResult = await this.props.connection.submit(data);
-    if ("inputError" in submitResult) {
-      this.input?.setError(submitResult.inputError);
-      this.props.onInputError?.(submitResult.inputError);
-    } else if ("error" in submitResult) {
-      this.props.onError?.(submitResult.error);
+    const result = await this.props.connection.submit(this.input.data);
+    if ("inputError" in result) {
+      this.input?.setError(result.inputError);
+      this.props.onInputError?.(result.inputError);
+    } else if ("error" in result) {
+      this.props.onError?.(result.error);
     } else {
-      this.props.onSubmit?.(submitResult.value);
+      this.props.onSubmit?.(result.value);
     }
   }
 

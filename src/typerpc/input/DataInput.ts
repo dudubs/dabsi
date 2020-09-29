@@ -9,73 +9,94 @@ import { DataSelection } from "../../data/DataSelection";
 import { DataSource } from "../../data/DataSource";
 import { NoRpc } from "../NoRpc";
 import { RpcGenericConfigFn } from "../RpcGenericConfig";
-import { DataTable, DataTableConfig, DataTableRow } from "../widget/DataTable";
+import { DataTable, DataTableConfig } from "../widget/DataTable";
 import { DataInputContext } from "./DataInputContext";
 import { Input } from "./Input";
 import { NullableInput, NullableInputOptions } from "./NullableInput";
 import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
 
-type BaseRow = { label: string };
+export type DataInputRow = {
+  $key: string;
+  label: string;
+};
 
-type BaseTableConfig<T, D, DS extends DataSelection<D>> = DataTableConfig<
-  T & BaseRow,
-  NoRpc,
+export type BaseDataInputConfigTypes<T, D, DS extends DataSelection<D>> = {
+  Table: DataTableConfig<T & OmitKeys<DataInputRow, "$key">, NoRpc, D, DS>;
+
+  Columns: BaseDataInputConfigTypes<T, D, DS>["Table"]["columns"];
+
+  ColumnsWithoutLabel: OmitKeys<
+    BaseDataInputConfigTypes<T, D, DS>["Columns"],
+    "label"
+  >;
+
+  LabelColumn: BaseDataInputConfigTypes<T, D, DS>["Columns"]["label"];
+};
+
+export type BaseDataInputConfig<
+  Row,
+  UndefinedConfig,
+  Config,
   D,
-  DS
->;
+  DS extends DataSelection<D>,
+  Types extends BaseDataInputConfigTypes<Row, D, DS> = BaseDataInputConfigTypes<
+    Row,
+    D,
+    DS
+  >
+> = PartialUndefinedKeys<
+  UndefinedConfig & {
+    columns: Types["ColumnsWithoutLabel"] | If<IsEmptyObject<Row>, undefined>;
+  },
+  Config & {
+    default?: ValueOrAwaitableFn<string | DataRow<D> | undefined>;
 
-type BaseTable<T> = DataTable<T & BaseRow, NoRpc>;
+    tableConfig?: Omit<Types["Table"], "columns" | "selection" | "source">;
+
+    source: DataSource<D>;
+    selection?: DS;
+    // TODO: undefined if
+    label: Types["LabelColumn"];
+  }
+>;
 
 export type DataInputConfig<
   T,
   D,
-  DS extends DataSelection<D>,
-  TableConfig extends BaseTableConfig<T, D, DS> = BaseTableConfig<T, D, DS>
-> = PartialUndefinedKeys<
-  {
-    columns:
-      | OmitKeys<TableConfig["columns"], "label">
-      | If<IsEmptyObject<T>, undefined>;
-  },
-  {
-    default?: ValueOrAwaitableFn<string | DataRow<D> | undefined>;
+  DS extends DataSelection<D>
+> = BaseDataInputConfig<T, {}, {}, D, DS>;
 
-    tableConfig?: Omit<TableConfig, "columns" | "selection" | "source">;
+export type AnyDataInput = DataInput<any, any>;
 
-    source: DataSource<D>;
-    selection?: DS;
-    // TODO: idColumn
-    label: TableConfig["columns"]["label"];
-  }
+export type DataInputTable<R> = DataTable<
+  R & OmitKeys<DataInputRow, "$key">,
+  NoRpc
 >;
-export type AnyDataInput = DataInput<unknown, any>;
 
-export type DataInput<
-  T,
-  N extends boolean,
-  Table extends BaseTable<T> = BaseTable<T>
-> = NullableInput<
+export type DataInput<R, N extends boolean> = NullableInput<
   N,
   {
     Data: string;
 
     Value: string;
 
-    ValueElement: DataTableRow<Table>;
+    ValueElement: DataInputRow & R;
 
-    Props: {};
+    Props: {
+      table: DataInputTable<R>;
+    };
 
     Config: RpcGenericConfigFn<
       <D, DS extends DataSelection<D> = {}>(
-        config: DataInputConfig<T, D, DS>
-      ) => DataInputConfig<T, any, any>
+        config: DataInputConfig<R, D, DS>
+      ) => DataInputConfig<R, any, any>
     >;
 
     Element: {
-      default?: DataTableRow<Table>;
+      default?: DataInputRow & R;
     };
 
-    Controller: Table;
+    Controller: DataInputTable<R>;
 
     Error: never;
   }
@@ -85,12 +106,14 @@ export function DataInput<T extends Record<string, any> = {}>() {
   return <N extends boolean = false>(
     options: NullableInputOptions<N> = {}
   ): DataInput<T, N> => {
+    const controller = DataTable<any>()();
     return <any>Input<DataInput<any, any>>({
       props: {
         nullable: options.nullable ?? false,
+        table: controller,
       },
       isGenericConfig: true,
-      controller: DataTable<any>()(),
+      controller,
       context: DataInputContext,
     });
   };

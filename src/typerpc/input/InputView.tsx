@@ -1,4 +1,10 @@
-import { createElement, Fragment, ReactElement, ReactNode } from "react";
+import {
+  createElement,
+  Fragment,
+  ReactElement,
+  ReactNode,
+  RefCallback,
+} from "react";
 import { Awaitable } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
 import { ViewState } from "../../react/view/ViewState";
@@ -11,9 +17,20 @@ import {
   InputData,
   InputError,
   InputType,
+  InputValue,
   InputValueElement,
 } from "./Input";
+import { InputViewChildren } from "./InputViewChildren";
 
+/*
+
+  - Form -> Input:
+    - validate()
+    - props.value
+
+
+
+ */
 export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   C
 > & {
@@ -21,11 +38,11 @@ export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
 
   onChange?: (view: InputView<C>) => void;
 
-  inputRef?: (input: InputView<C> | undefined) => void;
+  inputRef?: RefCallback<InputView<C>>;
 
   renderError?(error: InputError<C>): ReactElement;
 
-  onError?(error: InputError<C>): void;
+  onError?(view: InputView<C>): void;
 
   value?: InputValueElement<C>;
 
@@ -47,9 +64,24 @@ export abstract class InputView<
 > extends WidgetView<C, P> {
   protected updateError?(error: T["Error"] | undefined): void;
 
-  @ViewState("forceUpdateError") protected _error: T["Error"] | undefined;
-
   @ViewState("forceUpdateValue") protected _value: InputValueElement<C>;
+
+  @ViewState("forceUpdateError") protected _error: InputError<C>;
+
+  @ViewState() _errorElement: ReactElement | undefined;
+
+  protected _data: InputData<C>;
+  protected _isValidValue: boolean;
+
+  children?: InputViewChildren;
+
+  get errorElement(): ReactElement | undefined {
+    return this._errorElement;
+  }
+
+  get data(): InputData<C> {
+    return this._data;
+  }
 
   get error(): T["Error"] | undefined {
     return this._error;
@@ -59,129 +91,94 @@ export abstract class InputView<
     return this._value;
   }
 
-  setValue(value: InputValueElement<C>): void {
+  async setValue(value: InputValueElement<C>): Promise<void> {
+    if (this._isValidValue && this._value === value) {
+      return;
+    }
+    if (this.constructor.name === "TextInputView") console.log({ value });
     this._value = value;
+    this._error = await this.getError?.();
+    if (this._error != null) {
+      this.props.onError?.(this);
+      return;
+    }
+    this._isValidValue = value;
+    this.props.onChange?.(this);
   }
 
   setError(error: T["Error"] | undefined) {
     this._error = error;
   }
 
-  @ViewState() errorElement: ReactElement | undefined;
-
-  protected isValidValue?: boolean;
-
   protected getError?(): Awaitable<InputError<C> | undefined>;
 
   protected updateValue?(value: InputValueElement<C>): void;
 
-  // setInvalidValue?
-  async checkError(
-    onError?: (error: InputError<C>) => Awaitable
-  ): Promise<InputError<C> | undefined> {
-    if (this.isValidValue) {
-      if (this.hasError) {
-        await onError?.(this._error!);
-      }
-      return;
-    }
-    this._error = await this.getError?.();
-    if (this._error != null) {
-      await onError?.(this._error);
-      return this._error;
-    }
-  }
-
-  get hasError() {
-    return this._error != null;
-  }
-
-  forceUpdateError() {
-    this.updateError?.(this._error);
-    if (this._error != null)
-      this.errorElement = this.renderErrorToElement(this._error);
-  }
-  async getCheckedData(): Promise<[false] | [true, InputData<C>]> {
-    if (!this.hasError)
-      return [
-        true,
-        this.props.connection.props.getDataFromValueElement(this._value),
-      ];
-    return [false];
-  }
-
-  async checkValue(value: InputValueElement<C>) {
-    if (value === this._value) {
-      return;
-    }
-    this._value = value;
-    const error = await this.checkError();
-    if (error != null) {
-      this.props.onError?.(this);
-      return;
-    }
-    this.props.onChange?.(this);
-  }
-
-  updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
-    super.updateViewProps(prevProps, nextProps);
-  }
-
-  shouldComponentUpdate(
-    nextProps: Readonly<P>,
-    nextState: Readonly<any>,
-    nextContext: any
-  ): boolean {
-    if (nextProps.value !== this.props.value) {
-      this._value = nextProps.value;
-    }
-
-    if (nextProps.error !== this.props.error) {
-      this._error = nextProps.error;
-    }
-
-    return super.shouldComponentUpdate(nextProps, nextState, nextContext);
+  protected updateElement(element: WidgetType<C>["Element"]) {
+    this._value =
+      this.props.value !== undefined
+        ? this.props.value
+        : this.connectionProps.getValueElementFromElement(element);
   }
 
   forceUpdateValue() {
-    this.isValidValue = false;
     this._error = undefined;
+    this._isValidValue = false;
+    this._data = this.connectionProps.getDataFromValueElement(this._value);
     this.updateValue?.(this._value);
   }
 
-  protected updateElement(element: WidgetType<C>["Element"]) {
-    this._value =
-      this.props.value ??
-      this.connectionProps.getValueElementFromElement(element);
-  }
-
-  protected renderErrorDefault?(error: T["Error"]): ReactElement;
-
-  renderErrorToElement(error: T["Error"]): ReactElement | undefined {
+  // TODO: ["children", { ... }]
+  protected renderErrorElement(): ReactElement | undefined {
+    const { error } = this;
     // TODO: use this.error
     if (error == null) return;
-
     const element = this.props.renderError?.(error);
     if (element) return element;
-
     if (typeof error === "string") {
       if (this.props.errorMap && error in this.props.errorMap) {
         return createElement(Fragment, null, this.props.errorMap[error]);
       }
-      // TODO: try to translate with "ERROR_" prefix
     }
-
-    const defaultErrorElement = this.renderErrorDefault?.(error);
-
+    const defaultErrorElement = this.getErrorElement?.(error);
     if (defaultErrorElement != null) return defaultErrorElement;
   }
+
+  forceUpdateError() {
+    this._errorElement =
+      this._error != null ? this.renderErrorElement() : undefined;
+
+    this.children?.updateError(this._error);
+    this.updateError?.(this._error);
+  }
+
+  inputWillValidate?(): Awaitable;
+
+  async validate(): Promise<void> {
+    await this.inputWillValidate?.();
+    this._error =
+      (await this.children?.getError()) ?? (await this.getError?.());
+  }
+
+  updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
+    super.updateViewProps(prevProps, nextProps);
+    if (nextProps.value !== prevProps.value) {
+      this._value = nextProps.value;
+    }
+    if (nextProps.error !== prevProps.error) {
+      this._error = nextProps.error;
+    }
+  }
+
+  protected getErrorElement?(error: T["Error"]): ReactElement;
 
   renderError(): ReactNode {
     if (this.errorElement) return this.errorElement;
 
-    if (typeof this._error === "string") return this._error;
+    const { error } = this;
+    if (typeof error === "string") return error;
 
-    if (this._error != null) return JSON.stringify(this._error);
+    if (error != null) return JSON.stringify(error);
   }
 
   componentDidMount() {
@@ -191,7 +188,7 @@ export abstract class InputView<
 
   componentWillUnmount() {
     super.componentWillUnmount();
-    this.props.inputRef?.(undefined);
+    this.props.inputRef?.(null);
   }
 }
 

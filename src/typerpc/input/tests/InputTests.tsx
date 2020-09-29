@@ -1,60 +1,31 @@
 import * as React from "react";
-import { inspect } from "../../../logging";
-import { focusNextTest } from "../../../typeorm/exp/tests/focusNextTest";
+import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
+import { Nullable } from "../../../common/typings";
+import { TestConnection } from "../../../data/tests/TestConnection";
+import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { ArrayInput } from "../ArrayInput";
 import { ArrayInputView } from "../ArrayInputView";
 import { BoolInput } from "../BoolInput";
+import { EnumInput } from "../EnumInput";
 import { InputError } from "../Input";
 import { InputErrorHook, InputErrorHookView } from "../InputErrorHook";
 import { InputMap } from "../InputMap";
 import { InputMapView } from "../InputMapView";
+import { NullableInputView } from "../NullableInputView";
+import { OptionalInput } from "../OptionalInput";
+import { RequiredInput } from "../RequiredInput";
 import { TextInput } from "../TextInput";
 import { TextInputView } from "../TextInputView";
-import { RpcTester } from "./RpcTester";
+import { testCase } from "./CaseTester";
+import { RpcTester, testRpc } from "./RpcTester";
 import { TestInput } from "./TestInput";
 import { TestInputView } from "./TestInputView";
+import objectContaining = jasmine.objectContaining;
 
-describe("InputErrorHookView", () => {
-  const t = new RpcTester(InputErrorHook<"HOOKED_ERROR">()(TextInput()));
-
-  t.testConfig("undefined", undefined);
-
-  t.testWidgetView(InputErrorHookView, (t) => {
-    t.testProps("sanity", (View, props) => (
-      <View
-        {...props}
-        errorMap={{ HOOKED_ERROR: "ERROR_BY_HOOK" }}
-        children={(props, error) => (
-          <>
-            <div id={"hook-error"}>{error}</div>
-            <TestInputView
-              {...props}
-              errorMap={{ REQUIRED: "ERROR_BY_INPUT" }}
-              children={(view) => (
-                <div id={"input-error"}>{view.errorElement}</div>
-              )}
-            />
-          </>
-        )}
-      />
-    ));
-    t.testInputError("HOOKED_ERROR", () => {
-      expect(t.getStringById("hook-error")).toEqual("ERROR_BY_HOOK");
-
-      expect(t.getStringById("input-error")).toEqual("");
-    });
-
-    t.testInputError("REQUIRED", () => {
-      expect(t.getStringById("hook-error")).toEqual("");
-
-      expect(t.getStringById("input-error")).toEqual("ERROR_BY_INPUT");
-    });
-  });
-});
-
-const TestStringInput = TestInput<{ Value: string; Error: "ERR1" | "ERR2" }>();
-describe("TestInput", () => {
-  const t = new RpcTester(TestStringInput);
+describe("Input", () => {
+  const t = new RpcTester(
+    TestInput<{ Value: string; Error: "ERR1" | "ERR2" }>()
+  );
 
   t.testConfig("default", undefined);
 
@@ -73,26 +44,76 @@ describe("TestInput", () => {
       ),
       (setState) => {
         t.test("expect to updateError from props.", async () => {
-          await t.act(() => setState({ error: "ERR1" }));
+          setState({ error: "ERR1" });
           expect(t.view.error).toEqual("ERR1");
-          expect(t.getStringById("error")).toEqual("MAPPED_ERR1");
+          expect(t.view.errorElement).toBeDefined();
         });
         t.test(
           "expect to errorElement for ERR1 will be MAPPED_ERR1.",
           async () => {
-            await t.act(() => t.view.setError("ERR1"));
+            await t.view.setError("ERR1");
             expect(t.view.error).toEqual("ERR1");
-            expect(t.getStringById("error")).toEqual("MAPPED_ERR1");
+            expect(t.view.errorElement).toBeDefined();
           }
         );
         t.test(
           "expect to errorElement for ERR2 will be undefined.",
           async () => {
-            await t.act(() => t.view.setError("ERR2"));
+            await t.view.setError("ERR2");
             expect(t.view.error).toEqual("ERR2");
-            expect(t.getStringById("error")).toEqual("");
+            expect(t.view.errorElement).toBeUndefined();
           }
         );
+      }
+    );
+  });
+});
+
+describe("InputErrorHookView", () => {
+  const t = new RpcTester(InputErrorHook<"HOOKED_ERROR">()(TextInput()));
+
+  t.testConfig("undefined", undefined);
+
+  t.testWidgetView(InputErrorHookView, (t) => {
+    t.testProps("sanity", (View, props) => (
+      <View
+        {...props}
+        errorMap={{ HOOKED_ERROR: "ERROR_BY_HOOK" }}
+        children={(props, error) => (
+          <TestInputView {...props} errorMap={{ REQUIRED: "ERROR_BY_INPUT" }} />
+        )}
+      />
+    ));
+
+    t.testInputError("HOOKED_ERROR", () => {
+      expect(t.view.errorElement).toBeDefined();
+      expect(t.view.target!.error).toBeUndefined();
+    });
+
+    t.testInputError("REQUIRED", () => {
+      expect(t.view.errorElement).toBeUndefined();
+      expect(t.view.target!.error).toBeDefined();
+    });
+  });
+});
+
+describe("NullableInput", () => {
+  testCase("nullable", [true, false], (nullable) => {
+    testRpc(
+      EnumInput(["hello", "world"], {
+        nullable,
+      }),
+      (t) => {
+        t.testConfig("undefined", undefined);
+
+        t.testInputValue("hello", "hello");
+        t.testInputError("x" as any, "INVALID");
+
+        if (nullable) {
+          t.testInputValue(null as any, null);
+        } else {
+          t.testInputError(null as any, "REQUIRED");
+        }
       }
     );
   });
@@ -104,11 +125,18 @@ describe("TextInput", () => {
   t.testConfig("default", undefined);
 
   t.testConfig("default:hello", { default: "hello" }, () => {
-    t.testWidgetElement("expect to default", (e) => {
-      expect(e.default).toEqual("hello");
+    t.testWidgetElement((t) => {
+      it('"expect to default"', () => {
+        expect(t.element.default).toEqual("hello");
+      });
     });
   });
 
+  t.testConfig("required", { required: true, trim: true }, () => {
+    t.testInputError("", "REQUIRED");
+    t.testInputError(" ", "REQUIRED");
+    t.testInputValue("x", "x");
+  });
   t.testConfig(
     "default+trim+pattern",
     {
@@ -117,49 +145,74 @@ describe("TextInput", () => {
       pattern: /^[^\d]+$/,
     },
     () => {
-      t.testWidgetElement("expect to default", (e) => {
-        expect(e.default).toEqual("hello");
+      t.testWidgetElement((e) => {
+        it("expect to default", () => {
+          expect(e.element.default).toEqual("hello");
+        });
       });
 
       t.testInputValue(" world ", "world");
 
+      t.testInputError("123", "INVALID_PATTERN");
+
       t.testWidgetView(TextInputView, (t) => {
         t.testProps("sanity", (View, props) => (
-          <View
-            {...props}
-            errorMap={{ INVALID_PATTERN: "BAD_PATTERN" }}
-            children={(view) => (
-              <>
-                <div id={"error"}>{view.errorElement}</div>
-                <div id={"text"}>{view.text}</div>
-              </>
-            )}
-          />
+          <View {...props} children={(view) => EmptyFragment} />
         ));
 
         t.test("expect text is element value", () => {
           expect(t.view.text).toEqual("hello");
         });
-        t.test("expect value is element value", () => {
-          expect(t.view.value).toEqual("hello");
-        });
-        t.test("expect to getCheckedData setValue to text.", async () => {
-          await t.act(() => {
-            t.view.setText("world");
-          });
-          expect(t.view.value).toEqual("hello");
-          await t.view.getCheckedData();
+
+        t.test("expect to setText debounce.", async () => {
+          const p = t.view.setText("world");
+          expect(t.view.value).not.toEqual("world");
+          await p;
           expect(t.view.value).toEqual("world");
         });
-        // focusNextTest();
-        t.testInputError("INVALID_PATTERN", () => {
-          expect(t.getStringById("error")).toEqual("BAD_PATTERN");
+
+        t.test("expect to setValue on validate.", async () => {
+          const p = t.view.setText("world");
+          expect(t.view.value).not.toEqual("world");
+          await t.view.validate();
+          expect(t.view.value).toEqual("world");
         });
       });
-
-      t.testInputError("123", "INVALID_PATTERN");
     }
   );
+});
+
+describe("OptionalInput", () => {
+  const t = new RpcTester(OptionalInput(TextInput()));
+
+  t.testConfig("sanity", { required: true, trim: true });
+
+  t.testInputValue(" hello ", "hello");
+  t.testInputError(" ", "REQUIRED");
+  t.testInputValue(null, null);
+
+  t.testWidgetView(NullableInputView, (t) => {
+    t.testPropsWithState<string | Nullable>(
+      "defaultNull",
+      undefined,
+      (View, props, state) => (
+        <View
+          {...props}
+          value={state}
+          target={(props) => <TestInputView {...props} />}
+        />
+      ),
+      (setState) => {
+        t.test("expect null to be valid value", async () => {
+          setState(null);
+          expect(t.view.value).toEqual(null);
+          await t.view.validate();
+          expect(t.view.error).toBeUndefined();
+          expect(t.view.value).toEqual(null);
+        });
+      }
+    );
+  });
 });
 
 describe("InputMap", () => {
@@ -208,7 +261,7 @@ describe("InputMap", () => {
   });
 });
 
-fdescribe("ArrayInput", () => {
+describe("ArrayInput", () => {
   const t = new RpcTester(
     ArrayInput(
       InputMap({
@@ -218,8 +271,8 @@ fdescribe("ArrayInput", () => {
       {
         newItem: TextInput(),
         isUniqueItem: true,
-        getKeyFromItem: (data) => data.text,
-        getKeyFromNewItem: (data) => data,
+        getKeyFromItemData: (data) => data.text,
+        getKeyFromNewItemData: (data) => data,
       }
     )
   );
@@ -229,6 +282,7 @@ fdescribe("ArrayInput", () => {
       { text: "hello", isActive: true },
       { text: "world", isActive: false },
     ],
+
     getItemValue: (text) => ({
       text,
       isActive: false,
@@ -238,6 +292,7 @@ fdescribe("ArrayInput", () => {
   let text: string | undefined;
   let isActive: boolean | undefined;
 
+  // TODO: test remove,swap.
   t.testWidgetView(ArrayInputView, (t) => {
     t.testProps("sanity", (View, props) => {
       return (
@@ -246,7 +301,7 @@ fdescribe("ArrayInput", () => {
           onChange={undefined}
           renderNewItem={(props) => (
             <TestInputView
-              testData={() => text ?? ""}
+              testValue={() => text ?? ""}
               testId={"new-item"}
               {...props}
               errorMap={{
@@ -254,34 +309,26 @@ fdescribe("ArrayInput", () => {
               }}
             />
           )}
-          renderItem={({ props: { itemKey, ...props } }) => (
+          renderItem={({ key, props: { ...props } }) => (
             <InputErrorHookView
               {...props}
               errorMap={{ NOT_UNIQUE: "NOT_UNIQUE_ITEM" }}
-              children={(props, error) => {
-                return (
-                  <>
-                    <div id={"item-error:" + itemKey}>{error}</div>
-                    <InputMapView
-                      {...props}
-                      fields={{
-                        text: (props) => (
-                          <TestInputView
-                            {...props}
-                            testData={() => text ?? ""}
-                          />
-                        ),
-                        isActive: (props) => (
-                          <TestInputView
-                            {...props}
-                            testData={() => isActive ?? false}
-                          />
-                        ),
-                      }}
-                    />
-                  </>
-                );
-              }}
+              children={(props) => (
+                <InputMapView
+                  {...props}
+                  fields={{
+                    text: (props) => (
+                      <TestInputView {...props} testValue={() => text ?? ""} />
+                    ),
+                    isActive: (props) => (
+                      <TestInputView
+                        {...props}
+                        testValue={() => isActive ?? false}
+                      />
+                    ),
+                  }}
+                />
+              )}
             />
           )}
           children={(view) => (
@@ -300,31 +347,44 @@ fdescribe("ArrayInput", () => {
     });
 
     t.testValidInputData((data) => {
-      expect(data.hello).toEqual({
-        text: "hello",
-        isActive: true,
-      });
+      expect(data).toContain(
+        objectContaining({
+          text: "hello",
+          isActive: true,
+        })
+      );
 
-      expect(data.world).toEqual({
-        text: "world",
-        isActive: false,
-      });
+      expect(data).toContain(
+        objectContaining({
+          text: "world",
+          isActive: false,
+        })
+      );
     });
 
+    // focusNextTest();
     t.test("expect to unique error on adding a new item", async () => {
       text = "hello";
-      await t.act(() => t.view.add());
-      expect(t.getStringById("item-error:hello")).toEqual("");
-      expect(t.getStringById("item-error:world")).toEqual("");
-      expect(t.getStringById("new-item:error")).toEqual("NOT_UNIQUE_NEW_ITEM");
+      await t.view.add();
+      expect(t.view.newItemInput.error).toEqual("NOT_UNIQUE");
+      expect(
+        mapObjectToArray(t.view.children.keyToView, (v) => v.error).find(
+          (e) => !!e
+        )
+      ).toBeUndefined();
     });
 
     t.test("expect unique error on changing exists item.", async () => {
       text = "world";
-      await t.act(() => t.view.onItemChange("hello"));
-      expect(t.getStringById("item-error:hello")).toEqual("NOT_UNIQUE_ITEM");
-      expect(t.getStringById("item-error:world")).toEqual("");
-      expect(t.getStringById("new-item:error")).toEqual("");
+      await t.view.children.keyToView.hello.props.onChange?.(
+        t.view.children.keyToView.hello
+      );
+      expect(t.view.newItemInput.error).toBeUndefined();
+      expect(
+        mapObjectToArray(t.view.children.keyToView, (v) => v.error)
+          .filter((e) => e === "NOT_UNIQUE")
+          .filter((e) => e!!)
+      ).toEqual(["NOT_UNIQUE"]);
     });
   });
 });
@@ -338,8 +398,8 @@ function typingsTests() {
         isActive: BoolInput(),
       }),
       isUniqueItem: true,
-      getKeyFromItem: (data) => data,
-      getKeyFromNewItem: (data) => data.text,
+      getKeyFromItemData: (data) => data,
+      getKeyFromNewItemData: (data) => data.text,
     });
 
     // @ts-expect-error
@@ -349,12 +409,12 @@ function typingsTests() {
         isActive: BoolInput(),
       }),
       isUniqueItem: true,
-      getKeyFromItem: (data) => data,
+      getKeyFromItemData: (data) => data,
     });
 
     ArrayInput(TextInput(), {
       isUniqueItem: true,
-      getKeyFromItem: (data) => data,
+      getKeyFromItemData: (data) => data,
     });
 
     // @ts-expect-error
@@ -363,7 +423,7 @@ function typingsTests() {
     });
 
     ArrayInput(TextInput(), {
-      getKeyFromItem: (data) => data,
+      getKeyFromItemData: (data) => data,
     });
   }
 }

@@ -16,6 +16,8 @@ export type MapInputs<T extends AnyInputMap, P extends keyof TInput> = {
 export type InputMap<T extends AnyInputMap> = Input<{
   Items: T;
 
+  Children: T;
+
   Controller: RpcMap<T>;
   Props: {
     items: T;
@@ -24,7 +26,7 @@ export type InputMap<T extends AnyInputMap> = Input<{
     items: MapWidgets<T, "Element">;
   };
   Config: RpcConfig<RpcMap<T>>;
-  Error: { items: MapInputs<T, "Error"> };
+  Error: { children: MapInputs<T, "Error"> };
   Data: MapInputs<T, "Data">;
   Value: MapInputs<T, "Value">;
   ValueElement: MapInputs<T, "ValueElement">;

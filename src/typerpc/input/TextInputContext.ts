@@ -1,52 +1,41 @@
-import {RequireOptionalKeys} from "../../common/typings";
-import {RpcConfig} from "../Rpc";
-import {WidgetConfig, WidgetController, WidgetElement} from "../widget/Widget";
-import {AbstractInputContext} from "./AbstractInputContext";
-import {InputCheckResult, InputData, InputType, InputValue} from "./Input";
-import {loadAndCheckString} from "./StringSchema";
-import {TextInput} from "./TextInput";
-import {ValueOrAwaitableFn} from "./ValueOrAwaitableFn";
-
-export function mapProperties<T>(
-    obj: T,
-    mappers: { [K in keyof T]: boolean }
-) {
-
-}
+import { RequireOptionalKeys } from "../../common/typings";
+import { RpcConfig } from "../Rpc";
+import {
+  WidgetConfig,
+  WidgetController,
+  WidgetElement,
+} from "../widget/Widget";
+import { AbstractInputContext } from "./AbstractInputContext";
+import { InputCheckResult, InputData, InputType, InputValue } from "./Input";
+import { loadAndCheckString } from "./StringSchema";
+import { TextInput } from "./TextInput";
+import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
 
 type T = TextInput;
 
-export class TextInputContext
-    extends AbstractInputContext<T> {
+export class TextInputContext extends AbstractInputContext<T> {
+  protected getInputConfigForValue(
+    value: InputType<T>["Value"]
+  ): WidgetConfig<InputType<T>> {
+    return { ...this.config, default: value };
+  }
 
-    protected getInputConfigForValue(value: InputType<T>["Value"]): WidgetConfig<InputType<T>> {
-        return {...this.config, default: value};
-    }
+  getControllerConfig(): RpcConfig<WidgetController<T>> {
+    return null;
+  }
 
+  async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
+    return {
+      default: await ValueOrAwaitableFn(this.config?.default),
+      minLength: this.config.minLength,
+      maxLength: this.config.maxLength,
+      pattern: this.config.pattern,
+      trim: this.config.trim,
+      required: this.config.required,
+    };
+  }
 
-    getControllerConfig(): RpcConfig<WidgetController<T>> {
-        return null;
-    }
-
-    async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
-        return {
-            default: await ValueOrAwaitableFn(this.config?.default),
-            minLength: this.config.minLength,
-            maxLength: this.config.maxLength,
-            pattern: this.config.pattern,
-            trim: this.config.trim,
-            required: this.config.required
-        }
-    }
-
-    async loadAndCheck(value: InputData<T>):
-        Promise<InputCheckResult<T>> {
-        return loadAndCheckString(value||"", this.config)
-    }
-
-    getDataFromValue(value: InputValue<T>): InputData<T> {
-        return value
-    }
-
-
+  async loadAndCheck(value: InputData<T>): Promise<InputCheckResult<T>> {
+    return loadAndCheckString(value || "", this.config);
+  }
 }

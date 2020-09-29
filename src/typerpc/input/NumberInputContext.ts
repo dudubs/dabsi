@@ -6,7 +6,6 @@ import {
   WidgetElement,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
-import { AbstractNullableInputContext } from "./AbstractNullableInputContext";
 import { InputCheckResult, InputData, InputType, InputValue } from "./Input";
 import { NumberInput } from "./NumberInput";
 import { loadAndCheckNumber } from "./NumberSchema";
@@ -38,9 +37,5 @@ export class NumberInputContext extends AbstractInputContext<T> {
       min: this.config.min,
       step: this.config.step,
     };
-  }
-
-  getDataFromValue(value: InputValue<T>): InputData<T> {
-    return value;
   }
 }

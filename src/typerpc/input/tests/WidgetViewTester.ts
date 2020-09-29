@@ -8,7 +8,13 @@ import { ReactHook } from "../../../react/utils/ReactHook";
 import { RpcConnection } from "../../Rpc";
 import { AnyWidget, AnyWidgetConnection } from "../../widget/Widget";
 import { WidgetView, WidgetViewProps } from "../../widget/WidgetView";
-import { AnyInput, AnyInputConnection, InputData, InputError } from "../Input";
+import {
+  AnyInput,
+  AnyInputConnection,
+  InputData,
+  InputError,
+  InputValue,
+} from "../Input";
 import { InputView, InputViewProps } from "../InputView";
 import { AbstractReactTester } from "./AbstractReactTester";
 import { CaseTester } from "./CaseTester";
@@ -122,7 +128,7 @@ export class WidgetViewTester<
 
   async act<T>(callback: () => T, afterCallback?: (value: T) => void) {
     const value = await callback();
-    await Timeout(0);
+    // await Timeout(0);
     await afterCallback?.(value);
   }
 
@@ -134,10 +140,6 @@ export class WidgetViewTester<
     this.test(() => {
       it(title, () => this.act(callback, afterCallback));
     });
-  }
-
-  getStringById(id: string) {
-    return this.root.findByProps({ id }).children.join();
   }
 
   testInputError<T extends AnyInput>(
@@ -172,8 +174,8 @@ export class WidgetViewTester<
   >(
     this: WidgetViewTester<T, InputViewClass<T>>
   ): Promise<InputData<RpcConnection<T>>> {
-    const [isValidData, data] = await this.view.getCheckedData();
-    if (!isValidData) throw new Error(`Unexpected input error`);
-    return data;
+    await this.view.validate();
+    if (this.view.error != null) throw new Error(`Unexpected input error`);
+    return this.view.data;
   }
 }

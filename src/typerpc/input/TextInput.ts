@@ -34,6 +34,8 @@ export type TextInput = Input<{
 export function TextInput(): TextInput {
   return Input<TextInput>({
     context: TextInputContext,
-    getValueElementFromElement: (element) => element.default || "",
+    getValueElementFromElement(element) {
+      return element.default || "";
+    },
   });
 }

@@ -23,11 +23,11 @@ export type EnumInput<K extends string, N extends boolean> = NullableInput<
 
     Props: { keys: Set<K> };
 
-    Config: { default?: ValueOrAwaitableFn<K> };
+    Config: undefined | { default?: ValueOrAwaitableFn<K> };
 
     Element: { default?: K };
 
-    Error: never;
+    Error: "INVALID";
   }
 >;
 

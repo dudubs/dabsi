@@ -18,8 +18,8 @@ export class NumberInputView<
     return NumberSchema.check(this.element, this.value);
   }
 
-  async checkValue(value: InputValueElement<C>): Promise<void> {
-    return super.checkValue(NumberSchema.get(this.element, value));
+  async setValue(value: InputValueElement<C>): Promise<void> {
+    return super.setValue(NumberSchema.get(this.element, value));
   }
 
   renderView(): React.ReactNode {

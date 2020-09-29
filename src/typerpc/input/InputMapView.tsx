@@ -7,6 +7,7 @@ import { mapObjectToArray } from "../../common/object/mapObjectToArray";
 import { values } from "../../common/object/values";
 import { Awaitable } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
+import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
 import {
   AnyWidget,
@@ -17,6 +18,7 @@ import {
 import { AnyInputConnection, InputError, InputValueElement } from "./Input";
 import { AnyInputMap, InputMap } from "./InputMap";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
+import { InputViewChildren } from "./InputViewChildren";
 
 export type InputMapViewProps<
   C extends RpcConnection<InputMap<AnyInputMap>>,
@@ -25,30 +27,16 @@ export type InputMapViewProps<
   >
 > = InputViewProps<C> & {
   fields: { [K in string & keyof T]: Renderer<InputViewProps<T[K]>> };
-  children?: Renderer<{ fields: Record<string & keyof T, ReactElement> }>;
+  children?: Renderer<{
+    fields: Record<string & keyof T, ReactElement>;
+    view: InputMapView<C>;
+  }>;
 };
 
 export class InputMapView<
   C extends RpcConnection<InputMap<AnyInputMap>>
 > extends InputView<C, InputMapViewProps<C>> {
-  keyToInput: Record<string, InputView<any>> = {};
-
-  protected async getError(): Promise<InputError<C> | undefined> {
-    const keyToError = {};
-    for (const [key, field] of entries(this.keyToInput)) {
-      await field?.checkError((error) => {
-        keyToError[key] = error;
-      });
-    }
-    if (hasKeys(keyToError)) return { items: keyToError };
-  }
-
-  keyToError: Record<string, any> | undefined;
-
-  protected updateError(error: InputError<C> | undefined) {
-    this.keyToError =
-      typeof error === "object" && "items" in error ? error.items : undefined;
-  }
+  children = new InputViewChildren();
 
   renderField<K extends keyof RpcConnection<WidgetController<C>>>(
     key: string & K,
@@ -62,20 +50,17 @@ export class InputMapView<
         connection: this.controller[key],
         element: this.element.items[key],
         value: this.value[key],
-        error: this.keyToError?.[key],
+        error: this.children.keyToError[key],
+        onError: () => {
+          this.props.onError?.(this);
+        },
         onChange: (view) => {
           this.setValue({
             ...this.value,
             [key]: view.value,
           });
         },
-        inputRef: (input) => {
-          if (input) {
-            this.keyToInput[key] = input;
-          } else {
-            delete this.keyToInput[key];
-          }
-        },
+        inputRef: this.children.ref(key),
       })
     );
   }
@@ -83,6 +68,7 @@ export class InputMapView<
   renderView(): React.ReactNode {
     if (typeof this.props.children === "function") {
       return this.props.children({
+        view: this,
         fields: mapObject(
           this.props.fields,
           (renderer: Renderer<InputViewProps<any>>, key: any) => {

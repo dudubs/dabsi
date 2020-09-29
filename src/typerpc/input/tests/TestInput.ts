@@ -39,10 +39,6 @@ export function TestInput<T extends Partial<TInput>>({
         return context.getControllerConfig!();
       }
 
-      getDataFromValue(value: InputValue<any>): InputData<any> {
-        return context.getDataFromValue!(value);
-      }
-
       async getElement(): Promise<RequireOptionalKeys<WidgetElement<any>>> {
         return context.getElement?.() ?? {};
       }

@@ -51,8 +51,6 @@ export type TInput = {
 export type BaseInputContext<T extends TInput> = {
   loadAndCheck(data: T["Data"]): Promise<TInputCheckResult<T>>;
 
-  getDataFromValue(value: T["Value"]): T["Data"];
-
   getConfigForValue(value: T["Value"]): RpcConfig<Input<T>>;
 
   getContextForValue(value: T["Value"]): ContextualRpcContext<AnyInput>;
@@ -95,6 +93,7 @@ export type Input<T extends TInput> = Widget<{
 
   Controller: T["Controller"];
 }>;
+
 export type InputHook<
   R extends AnyInput,
   T extends Partial<TInput>,
@@ -146,7 +145,7 @@ export type IsInputElementDefault<
   U
 > = HasDefaultForInputElement<T> & Is<U, InputElementDefault<T>>;
 
-type UndefinedIfINputElementDefaultIsInputData<I extends AnyInput> = If<
+type UndefinedIfInputElementDefaultIsInputData<I extends AnyInput> = If<
   // undefined if InputElementDefault is InputData
   HasDefaultForInputElement<I> & Is<InputElementDefault<I>, InputData<I>>,
   undefined
@@ -168,7 +167,7 @@ export type InputOptions<
   getDataFromValueElement:
     | ((
         this: ContextualRpcProps<I>,
-        element: InputValueElement<I>
+        value: InputValueElement<I>
       ) => InputData<I>)
     | If<
         // undefined if InputValueElement is InputData
@@ -182,7 +181,11 @@ export type InputOptions<
         this: ContextualRpcProps<I>,
         element: WidgetElement<I>
       ) => InputValueElement<I>)
-    | UndefinedIfINputElementDefaultIsInputData<I>;
+    | If<
+        HasDefaultForInputElement<I> &
+          Is<InputElementDefault<I>, InputValueElement<I>>,
+        undefined
+      >;
 }>;
 
 export function Input<T extends AnyInput>(

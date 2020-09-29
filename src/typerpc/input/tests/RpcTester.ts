@@ -38,22 +38,18 @@ export class RpcTester<T extends AnyRpc> {
 
   testWidgetElement<T extends AnyWidget>(
     this: RpcTester<T>,
-    title: string,
-    callback: (element: WidgetElement<T>) => void
+    callback: (t: { readonly element: WidgetElement<T> }) => void
   ) {
-    describe("widget:element", () => {
-      describe("of:connection", () => {
-        this.testConnection((conn) => {
-          it(title, async () => {
-            await callback(await conn.getElement());
-          });
+    this.testContext((ctx) => {
+      describe("test:widget element", () => {
+        let element;
+        beforeAll(async () => {
+          element = await ctx.getElement();
         });
-      });
-      describe("of:context", () => {
-        this.testContext((ctx) => {
-          it(title, async () => {
-            await callback(await ctx.getElement());
-          });
+        callback({
+          get element() {
+            return element;
+          },
         });
       });
     });
@@ -64,11 +60,9 @@ export class RpcTester<T extends AnyRpc> {
     data: InputData<T>,
     value: InputValue<T>
   ) {
-    describe("expect inputValue", () => {
-      this.testContext((conn) => {
-        it(`expect input value for data ${inspect(data)} will be ${inspect(
-          value
-        )}`, async () => {
+    this.testContext((conn) => {
+      describe("test:input", () => {
+        it(`data:${inspect(data)} expectValue:${inspect(value)}`, async () => {
           const result = await conn.loadAndCheck(data);
           if ("error" in result) {
             throw new Error(`unexpected error ${result.error}`);
@@ -85,7 +79,7 @@ export class RpcTester<T extends AnyRpc> {
     error: InputError<T>
   ) {
     this.testContext((conn) => {
-      it(`expect input error for data ${inspect(data)} will be ${inspect(
+      it(`test:input data:${inspect(data)} expectError:${inspect(
         error
       )}`, async () => {
         const result = await conn.loadAndCheck(data);
@@ -94,21 +88,6 @@ export class RpcTester<T extends AnyRpc> {
         } else {
           fail(`No error`);
         }
-      });
-    });
-  }
-
-  testInputData<T extends AnyInput>(
-    this: RpcTester<T>,
-    title: string,
-    data: InputData<T>,
-    callback: (result: InputCheckResult<T>) => void
-  ) {
-    describe("input:data", () => {
-      this.testContext((conn) => {
-        it(title, async () => {
-          await callback(await conn.loadAndCheck(data));
-        });
       });
     });
   }
@@ -127,4 +106,13 @@ export class RpcTester<T extends AnyRpc> {
       });
     });
   }
+}
+
+export function testRpc<T extends AnyRpc>(
+  rpc: T,
+  callback?: (t: RpcTester<T>) => void
+): RpcTester<T> {
+  const t = new RpcTester(rpc);
+  callback?.(t);
+  return t;
 }

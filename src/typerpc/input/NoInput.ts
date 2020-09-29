@@ -52,17 +52,6 @@
 //         return null;
 //     }
 //
-//     getDataFromValue(value: InputValue<AnyNoInput>): InputData<AnyNoInput> {
-//         return this.inputContext.getDataFromValue(value);
-//     }
-//
-//     async getElement(): Promise<RequireOptionalKeys<WidgetElement<AnyNoInput>>> {
-//         return {
-//             data: this.inputContext.getDataFromValue(this.config.default),
-//             ...await this.config.getElement(this.config.default),
-//
-//         }
-//     }
 //
 //     loadAndCheck(data: InputData<AnyNoInput>): Promise<InputCheckResult<AnyNoInput>> {
 //         return this.inputContext.loadAndCheck(data)

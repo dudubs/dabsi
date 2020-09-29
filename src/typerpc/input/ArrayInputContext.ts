@@ -33,10 +33,6 @@ export class ArrayInputContext
     return this.props.newItem.getContext(this.config.newItemConfig);
   }
 
-  getDataFromValue(value: InputValue<T>): InputData<T> {
-    return value.map((item) => this.itemContext.getDataFromValue(item));
-  }
-
   getControllerConfig(): RpcConfig<WidgetController<T>> {
     return {
       item: this.config.itemConfig,
@@ -45,12 +41,13 @@ export class ArrayInputContext
         const result = await this.newItemContext.loadAndCheck(data);
         if ("error" in result) return result;
         const itemValue = this.config.getItemValue
-          ? this.config.getItemValue(result.value)
+          ? await this.config.getItemValue(result.value)
           : result.value;
+        const itemElement = await this.itemContext
+          .getContextForValue(itemValue)
+          .getElement();
         return {
-          value: await this.itemContext
-            .getContextForValue(itemValue)
-            .getElement(),
+          value: this.props.item.props.getValueElementFromElement(itemElement),
         };
       },
     };
@@ -73,7 +70,6 @@ export class ArrayInputContext
       );
       valuesElements.push(valueElement);
     }
-
     return {
       default: valuesElements.length ? valuesElements : undefined,
       newItem: await this.newItemContext.getElement(),
@@ -85,11 +81,11 @@ export class ArrayInputContext
 
   async loadAndCheck(itemsData: InputData<T>): Promise<InputCheckResult<T>> {
     const values: InputValue<T> = [];
-    const indexToError: Record<number, any> = {};
+    const keyToError: Record<string, any> = {};
 
     const maxLength = this.config?.maxLength || Infinity;
 
-    const { getKeyFromItem } = this.props;
+    const { getKeyFromItemData } = this.props;
 
     const keys = new Set();
 
@@ -98,26 +94,30 @@ export class ArrayInputContext
         return { error: "TOO_MANY_ITEMS", value: values };
       }
 
-      if (getKeyFromItem) {
-        const key = getKeyFromItem(data);
+      let key: string;
+
+      if (getKeyFromItemData) {
+        key = getKeyFromItemData(data);
         if (keys.has(key)) {
           return { error: "UNIQUE_ITEM", value: values };
         }
         keys.add(key);
+      } else {
+        key = String(index);
       }
 
       const result = await this.itemContext.loadAndCheck(data);
       values.push(result.value);
       if ("error" in result) {
-        indexToError[index] = result.error;
+        keyToError[key] = result.error;
       }
     }
 
     if (values.length < (this.config?.minLength || 0))
       return { error: "TOO_FEW_ITEMS", value: values };
 
-    if (hasKeys(indexToError))
-      return { error: { children: indexToError }, value: values };
+    if (hasKeys(keyToError))
+      return { error: { children: keyToError }, value: values };
     return { value: values };
   }
 }

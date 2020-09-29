@@ -50,8 +50,8 @@ export type ArrayInput<
     newItem: NewItem;
 
     isUniqueItem: boolean;
-    getKeyFromItem?: (data: InputData<Item>) => string;
-    getKeyFromNewItem?: (data: InputData<Item>) => string;
+    getKeyFromItemData?: (data: InputData<Item>) => string;
+    getKeyFromNewItemData?: (data: InputData<Item>) => string;
   };
 
   Config:
@@ -94,23 +94,25 @@ export type ArrayInput<
     addNewItem: Command<
       (
         data: InputData<Item>
-      ) => ErrorOrValue<InputError<NewItem>, WidgetElement<Item>>
+      ) => ErrorOrValue<InputError<NewItem>, InputValueElement<Item>>
     >;
   }>;
 
   Error:
     | ArraySchemaError
     | {
-        children: Record<number, InputError<Item>>;
+        children: Record<string, InputError<Item>>;
       };
 }>;
+
+export const NOT_UNIQUE = "NOT_UNIQUE";
 
 export type AnyArrayInput = ArrayInput<AnyInput, AnyInput>;
 
 type ArrayItem<
   IsUniqueItem extends boolean,
   Item extends AnyInput
-> = IsUniqueItem extends false ? Item : InputErrorHook<Item, "NOT_UNIQUE">;
+> = IsUniqueItem extends false ? Item : InputErrorHook<Item, typeof NOT_UNIQUE>;
 
 export function ArrayInput<
   Item extends AnyInput,
@@ -120,11 +122,11 @@ export function ArrayInput<
   item: Item,
   options?: PartialUndefinedKeys<
     {
-      getKeyFromItem:
+      getKeyFromItemData:
         | ((data: InputData<Item>) => string)
         | If<Not<IsUniqueItem>, undefined>;
 
-      getKeyFromNewItem:
+      getKeyFromNewItemData:
         | ((data: InputData<NewItem>) => string)
         | If<
             Not<IsUniqueItem> | Is<InputData<NewItem>, InputData<Item>>,
@@ -137,23 +139,25 @@ export function ArrayInput<
     }
   >
 ): ArrayInput<ArrayItem<IsUniqueItem, Item>, ArrayItem<IsUniqueItem, NewItem>> {
-  const getKeyFromItem =
-    options && "getKeyFromItem" in options ? options.getKeyFromItem : undefined;
+  const getKeyFromItemData =
+    options && "getKeyFromItemData" in options
+      ? options.getKeyFromItemData
+      : undefined;
   const newItem = options?.newItem ?? item;
   return <any>Input<AnyArrayInput>({
     props: {
       item,
       newItem,
       isUniqueItem: options?.isUniqueItem ?? false,
-      getKeyFromItem,
-      getKeyFromNewItem:
-        (options && "getKeyFromNewItem" in options
-          ? options.getKeyFromNewItem
-          : undefined) ?? getKeyFromItem,
+      getKeyFromItemData,
+      getKeyFromNewItemData:
+        (options && "getKeyFromNewItemData" in options
+          ? options.getKeyFromNewItemData
+          : undefined) ?? getKeyFromItemData,
     },
     context: ArrayInputContext,
     controller: RpcMap<MetaType<WidgetController<AnyArrayInput>>["MapItems"]>({
-      item: item,
+      item,
       newItem,
       addNewItem: Command<(data: any) => any>(),
     }),
@@ -163,7 +167,8 @@ export function ArrayInput<
     },
 
     getDataFromValueElement(items) {
-      return items.map((itemValue) => {
+      const { getKeyFromItemData } = this;
+      return items.map((itemValue, index) => {
         return this.item.props.getDataFromValueElement(itemValue);
       });
     },

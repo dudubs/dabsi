@@ -37,14 +37,13 @@ export class TextInputView<
     return StringSchema.check(this.value, this.element);
   }
 
-  async checkValue(value: InputValueElement<C>): Promise<void> {
-    return super.checkValue(StringSchema.get(value, this.element));
+  async setValue(value: InputValueElement<C>): Promise<void> {
+    return super.setValue(StringSchema.get(value, this.element));
   }
 
-  async getCheckedData(): Promise<[false] | [true, InputData<C>]> {
+  inputWillValidate(): Awaitable {
     this.debounceId++;
-    await this.checkValue(this._text);
-    return super.getCheckedData();
+    return this.setValue(this.text);
   }
 
   async setText(text: string) {
@@ -54,11 +53,11 @@ export class TextInputView<
     this.setError(undefined);
     await Timeout(300);
     if (id !== this.debounceId) return;
-
-    await this.checkValue(text);
+    console.log({ text });
+    await this.setValue(text);
   }
 
-  protected renderErrorDefault(error: InputError<TextInput>): ReactElement {
+  protected getErrorElement(error: InputError<TextInput>): ReactElement {
     switch (error) {
       case "INVALID_PATTERN":
         return Lang`INVALID_PATTERN`;
@@ -70,6 +69,7 @@ export class TextInputView<
         return Lang`REQUIRED_MAXIMUM_${"max"}_CHARACTERS`({
           max: this.element?.maxLength,
         });
+
       case "TOO_SHORT":
         return Lang`REQUIRED_MINIMUM_${"min"}_CHARACTERS`({
           min: this.element?.minLength,

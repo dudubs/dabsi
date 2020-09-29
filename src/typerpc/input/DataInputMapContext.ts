@@ -1,27 +1,27 @@
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
+import { Lazy } from "../../common/patterns/lazy";
 import { RequireOptionalKeys } from "../../common/typings";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { RpcConfig } from "../Rpc";
-import { ConfigFactory } from "../RpcGenericConfig";
+import { AnyDataTable } from "../widget/DataTable";
 import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
-  WidgetType,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
+import { getTableConfigForBaseDataInputConfig } from "./DataInputContext";
 import { DataInputMap } from "./DataInputMap";
 import {
   AnyInput,
-  Input,
   InputCheckResult,
   InputData,
   InputType,
   InputValue,
 } from "./Input";
 
-type T = DataInputMap<AnyInput>;
+type T = DataInputMap<AnyInput, any>;
 
 export class DataInputMapContext extends AbstractInputContext<T> {
   protected getInputConfigForValue(
@@ -30,40 +30,68 @@ export class DataInputMapContext extends AbstractInputContext<T> {
     return { ...this.config };
   }
 
-  getControllerConfig(): RpcConfig<WidgetController<T>> {
-    return ($) =>
-      $({
-        source: this.config.source,
-        getTargetConfig: ($, row) =>
-          $(ConfigFactory(this.config.getTargetConfig, row)),
-      });
+  @Lazy() get targetContext(): ContextualRpcContext<AnyInput> {
+    return this.props.target.getContext(this.config.targetConfig);
   }
 
-  getTargetContextFromRow(row): ContextualRpcContext<AnyInput> {
-    return this.props.controller.target.getContext(
-      ConfigFactory(this.config.getTargetConfig, row)
+  @Lazy() get tableContext(): ContextualRpcContext<AnyDataTable> {
+    return this.props.table.getContext(
+      getTableConfigForBaseDataInputConfig(this.config)
+    );
+  }
+
+  getControllerConfig(): RpcConfig<WidgetController<T>> {
+    return {
+      table: ($) => $(this.tableContext.config),
+      row: ($) =>
+        $({
+          source: this.config.source,
+          getTargetConfig: ($, row) => {
+            return $(
+              this.targetContext.getConfigForValue(
+                this.config.getTargetValue(row)
+              )
+            );
+          },
+        }),
+    };
+  }
+
+  getTargetContextForRow(row): ContextualRpcContext<AnyInput> {
+    return this.targetContext.getContextForValue(
+      this.config.getTargetValue(row)
     );
   }
 
   async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
-    const items: Record<string, any> = {};
-
+    const children: WidgetElement<T>["children"] = [];
     for (const row of await this.config.source.items()) {
-      items[row.$key] = await this.getTargetContextFromRow(row).getElement();
+      children.push({
+        row,
+        target: await this.getTargetContextForRow(row).getElement(),
+      });
     }
-
-    return items;
+    return { children };
   }
 
   async loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {
     const keyToValue: any = {};
     const keyToError: any = {};
     const keys = Object.keys(data);
+
+    if (!keys.length) {
+      return { value: {} };
+    }
+
+    const invalidKeys = new Set(keys);
+
     for (const row of await this.config.source
       .createAsMutable()
       .filter({ $is: keys })
       .items()) {
-      const result = await this.getTargetContextFromRow(row).loadAndCheck(
+      invalidKeys.delete(row.$key);
+
+      const result = await this.getTargetContextForRow(row).loadAndCheck(
         data[row.$key]
       );
 
@@ -74,20 +102,12 @@ export class DataInputMapContext extends AbstractInputContext<T> {
       }
     }
 
-    return hasKeys(keyToError)
-      ? { error: { items: keyToError }, value: keyToValue }
-      : { value: keyToValue };
-  }
-
-  getDataFromValue(keyToValue: InputValue<T>): InputData<T> {
-    const data: Record<string, any> = {};
-
-    const defaultTargetContext = this.getTargetContextFromRow(undefined);
-
-    for (const [key, value] of entries(keyToValue)) {
-      data[key] = defaultTargetContext.getDataFromValue(value);
+    if (invalidKeys.size) {
+      return { error: { invalidKeys: [...invalidKeys] }, value: keyToValue };
     }
 
-    return data;
+    return hasKeys(keyToError)
+      ? { error: { children: keyToError }, value: keyToValue }
+      : { value: keyToValue };
   }
 }

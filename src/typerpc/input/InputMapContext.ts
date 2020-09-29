@@ -44,18 +44,8 @@ export class InputMapContext extends AbstractInputContext<T> {
       }
     }
     return hasKeys(keyToError)
-      ? { error: { items: keyToError }, value: keyToValue }
+      ? { error: { children: keyToError }, value: keyToValue }
       : { value: keyToValue };
-  }
-
-  getDataFromValue(value: InputValue<T>): InputData<T> {
-    const data: InputData<T> = {};
-    for (const [key, field] of entries(this.controllerProps.items)) {
-      data[key] = field
-        .getContext(this.config?.[key])
-        .getDataFromValue(value[key]);
-    }
-    return data;
   }
 
   protected getInputConfigForValue(

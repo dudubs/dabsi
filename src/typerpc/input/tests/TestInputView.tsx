@@ -1,7 +1,12 @@
 import * as React from "react";
 import { Awaitable } from "../../../common/typings";
 import { WidgetElement } from "../../widget/Widget";
-import { AnyInputConnection, InputData, InputError } from "../Input";
+import {
+  AnyInputConnection,
+  InputData,
+  InputError,
+  InputValue,
+} from "../Input";
 import { InputView, InputViewProps } from "../InputView";
 
 export class TestInputView<
@@ -10,9 +15,9 @@ export class TestInputView<
   C,
   InputViewProps<C> & {
     testId?: string;
-    testData?:
-      | InputData<C>
-      | ((element: WidgetElement<C> | undefined) => InputData<C>);
+    testValue?:
+      | InputValue<C>
+      | ((element: WidgetElement<C> | undefined) => InputValue<C>);
     //
     // testFreezeElement?:
     //   | Partial<WidgetElement<C>>
@@ -20,13 +25,15 @@ export class TestInputView<
     children?(view: TestInputView<C>);
   }
 > {
-  async getCheckedData(): Promise<[false] | [true, InputData<C>]> {
-    return [
-      true,
-      typeof this.props.testData === "function"
-        ? this.props.testData(this.element)
-        : this.props.testData,
-    ];
+  async validate(): Promise<void> {
+    if (this.props.testValue !== undefined) {
+      await this.setValue(
+        typeof this.props.testValue === "function"
+          ? this.props.testValue(this.element)
+          : this.props.testValue
+      );
+    }
+    return super.validate();
   }
 
   renderView(): React.ReactNode {

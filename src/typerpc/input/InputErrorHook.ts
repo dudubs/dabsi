@@ -38,26 +38,20 @@ export class InputErrorHookView<
     ): ReactElement;
   }
 > {
-  target?: InputView<RpcConnection<InputType<C>["ErrorHookTarget"]>>;
+  target: InputView<RpcConnection<InputType<C>["ErrorHookTarget"]>> | null;
 
-  protected getError(): Awaitable<InputError<C> | undefined> {
-    return this.target?.checkError();
-  }
-
-  setError(error: InputType<C>["Error"] | undefined) {
-    super.setError(error);
-
-    if (!error || !this.errorElement) {
-      this.target?.setError(error);
-    }
+  inputWillValidate(): Awaitable {
+    return this.target?.validate();
   }
 
   renderView(): React.ReactNode {
     const { connection, element } = this.props;
+
     return this.props.children(
       {
         connection,
         element,
+        error: !this.errorElement ? this.error : undefined,
         inputRef: (target) => {
           this.target = target;
         },

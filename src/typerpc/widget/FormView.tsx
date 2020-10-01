@@ -38,10 +38,10 @@ export class FormView<C extends RpcConnection<AnyForm>> extends WidgetView<
   }
 
   async submit() {
-    await this.input.validate();
-    if (this.input.error !== null) return;
+    if (!(await this.input.validate())) return;
 
     const result = await this.props.connection.submit(this.input.data);
+
     if ("inputError" in result) {
       this.input?.setError(result.inputError);
       this.props.onInputError?.(result.inputError);

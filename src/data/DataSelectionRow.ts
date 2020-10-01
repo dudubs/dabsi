@@ -1,74 +1,72 @@
-import {HasKeys, IsNever, Pluck} from "../common/typings";
-import {BaseType, WithBaseType} from "./BaseType";
-import {DataFieldsRow} from "./DataFields";
+import { HasKeys, IsNever, IsUndefined, Pluck } from "../common/typings";
+import { BaseType, WithBaseType } from "./BaseType";
+
+import { DataFieldsRow } from "./DataFields";
 import {
-    DataTypeKey,
-    DataUnionChildren,
-    DataUnionChildrenKey,
-    DataUnionChildrenOf,
-    DataUnionWithChildren
+  DataTypeKey,
+  DataUnionChildren,
+  DataUnionChildrenKey,
+  DataUnionChildrenOf,
+  DataUnionWithChildren,
 } from "./DataUnion";
-import {MergeDataSelection} from "./MergeDataSelection";
-import {MapRelation, RelationKeys, RelationTypeAt} from "./Relation";
+import { MergeDataSelection } from "./MergeDataSelection";
+import { MapRelation, RelationKeys, RelationTypeAt } from "./Relation";
 
-type _Pick<T, S> =
-    S extends { pick: ReadonlyArray<infer K> } ?
-        Pick<T, Extract<K | DataTypeKey, keyof T>> :
-        T;
+type _Pick<T, S> = S extends { pick: ReadonlyArray<infer K> }
+  ? Pick<T, Extract<K | DataTypeKey, keyof T>>
+  : T;
 
-type _Children<T, S, SChildren, SWithoutChildren, UChildren> =
-    HasKeys<UChildren> extends false ? {} :
-        DataUnionWithChildren<{
-            [K in keyof UChildren]:
-            _Row<UChildren[K],//
-                MergeDataSelection<//
-                    SWithoutChildren,
-                    Pluck<SChildren, K>
-                    //
-                    >>
-        }>;
+type _Children<T, S, SChildren, SWithoutChildren, UChildren> = HasKeys<
+  UChildren
+> extends false
+  ? {}
+  : DataUnionWithChildren<
+      {
+        [K in keyof UChildren]: _Row<
+          UChildren[K], //
+          MergeDataSelection<
+            //
+            SWithoutChildren,
+            Pluck<SChildren, K>
+            //
+          >
+        >;
+      }
+    >;
 
-type _Fields<T, SFields> =
-    HasKeys<SFields> extends false ? {} :
-        DataFieldsRow<T, SFields>;
+type _Fields<T, SFields> = HasKeys<SFields> extends false
+  ? {}
+  : DataFieldsRow<T, SFields>;
 
-type _Relations<T, S, SRelations> =
-    IsNever<SRelations> extends true ? { [K in RelationKeys<T>]: T[K] } :
-        {
-            [K in RelationKeys<T>]:
-            MapRelation<T[K],
-                _Row<//
-                    RelationTypeAt<T, K>,
-                    Pluck<SRelations, K>
-                    //
-                    >
-                //
-                >
+type _Relations<T, S, SRelations> = IsNever<SRelations> extends true
+  ? { [K in RelationKeys<T>]: T[K] }
+  : {
+      [K in RelationKeys<T>]: MapRelation<
+        T[K],
+        _Row<
+          //
+          RelationTypeAt<T, K>,
+          Pluck<SRelations, K>
+          //
+        >
+        //
+      >;
+    };
 
-        };
+type NoSelectedChildren<T> = T extends DataUnionChildren<any>
+  ? Pick<T, DataUnionChildrenKey>
+  : {};
 
-type NoSelectedChildren<T> = T extends DataUnionChildren<any> ? Pick<T, DataUnionChildrenKey> : {};
+type __Row<T, S> = Omit<_Pick<T, S>, RelationKeys<T> | DataUnionChildrenKey> &
+  WithBaseType<T> &
+  (S extends { fields: infer SFields } ? _Fields<T, SFields> : {}) &
+  (S extends { relations: infer SRelations }
+    ? _Relations<T, S, SRelations>
+    : {}) &
+  (S extends { children: infer SChildren }
+    ? _Children<T, S, SChildren, Omit<S, "children">, DataUnionChildrenOf<T>>
+    : NoSelectedChildren<T>);
 
-type __Row<T, S> =
-    & (Omit<_Pick<T, S>, RelationKeys<T> | DataUnionChildrenKey>)
+type _Row<T, S> = HasKeys<S> extends false ? T : __Row<T, S>;
 
-    & WithBaseType<T>
-
-    & (S extends { fields: infer SFields } ?
-    _Fields<T, SFields> : {})
-
-    & (S extends { relations: infer SRelations } ?
-    _Relations<T, S, SRelations> : {})
-
-    & (S extends { children: infer SChildren } ?
-    _Children<T, S, SChildren, Omit<S, 'children'>, DataUnionChildrenOf<T>>
-    : NoSelectedChildren<T>)
-    ;
-
-type _Row<T, S> =
-    HasKeys<S> extends false ? T :
-        __Row<T, S>;
-
-
-export type DataSelectionRow<T, S> =
-    _Row<T, S>;
+export type DataSelectionRow<T, S> = _Row<T, S>;

@@ -63,8 +63,6 @@ export type Input<T extends TInput> = Widget<{
 
   Connection: {
     check(data: T["Data"]): Promise<T["Error"] | undefined>;
-
-    // getInputElement(data): value
   };
 
   Config: T["Config"];
@@ -145,11 +143,6 @@ export type IsInputElementDefault<
   U
 > = HasDefaultForInputElement<T> & Is<U, InputElementDefault<T>>;
 
-type UndefinedIfInputElementDefaultIsInputData<I extends AnyInput> = If<
-  // undefined if InputElementDefault is InputData
-  HasDefaultForInputElement<I> & Is<InputElementDefault<I>, InputData<I>>,
-  undefined
->;
 export type InputOptions<
   I extends AnyInput,
   T extends TInput
@@ -164,28 +157,15 @@ export type InputOptions<
 
   controller: T["Controller"] | If<Is<T["Controller"], NoRpc>, undefined>;
 
-  getDataFromValueElement:
-    | ((
-        this: ContextualRpcProps<I>,
-        value: InputValueElement<I>
-      ) => InputData<I>)
-    | If<
-        // undefined if InputValueElement is InputData
-        HasDefaultForInputElement<I> &
-          IsSome<InputData<I>, InputValueElement<I>>,
-        undefined
-      >;
+  getDataFromValueElement: (
+    this: ContextualRpcProps<I>,
+    value: InputValueElement<I>
+  ) => InputData<I>;
 
-  getValueElementFromElement:
-    | ((
-        this: ContextualRpcProps<I>,
-        element: WidgetElement<I>
-      ) => InputValueElement<I>)
-    | If<
-        HasDefaultForInputElement<I> &
-          Is<InputElementDefault<I>, InputValueElement<I>>,
-        undefined
-      >;
+  getValueElementFromElement: (
+    this: ContextualRpcProps<I>,
+    element: WidgetElement<I>
+  ) => InputValueElement<I>;
 }>;
 
 export function Input<T extends AnyInput>(
@@ -195,8 +175,8 @@ export function Input<T extends AnyInput>(
     props = {},
     controller = NoRpc,
     isGenericConfig = false,
-    getDataFromValueElement = (value) => value,
-    getValueElementFromElement = (element) => element["default"],
+    getDataFromValueElement,
+    getValueElementFromElement,
     context,
   } = <InputOptions<AnyInput, TInput>>options;
 

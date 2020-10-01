@@ -215,6 +215,11 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
   }
 
   @Mapper
+  translateBase(exp: DataExp<T>): QueryExp {
+    throw new Error();
+  }
+
+  @Mapper
   translateAnd(exps: DataExp<any>[]): QueryExp {
     throw new Error();
   }

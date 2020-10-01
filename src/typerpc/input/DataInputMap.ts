@@ -1,3 +1,4 @@
+import { mapArrayToObject } from "../../common/array/mapArrayToObject";
 import { mapObject } from "../../common/object/mapObject";
 import { Awaitable } from "../../common/typings";
 import { DataRow } from "../../data/DataRow";
@@ -100,7 +101,10 @@ export function DataInputMap<R = {}>() {
       controller,
       context: DataInputMapContext,
       getDataFromValueElement(values) {
-        return values.map((value) => value.row.$key);
+        return mapArrayToObject(values, (value) => [
+          value.row.$key,
+          this.target.props.getDataFromValueElement(value),
+        ]);
       },
       getValueElementFromElement(element) {
         return element.children.map(({ row, target }) => {

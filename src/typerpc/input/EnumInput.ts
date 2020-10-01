@@ -41,6 +41,12 @@ export function EnumInput<K extends string, N extends boolean = true>(
       keys: new Set(keys),
     },
     context: EnumInputContext,
+    getValueElementFromElement(element) {
+      return element.default;
+    },
+    getDataFromValueElement(value) {
+      return value;
+    },
   });
 }
 

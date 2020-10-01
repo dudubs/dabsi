@@ -115,6 +115,12 @@ export function DataInput<T extends Record<string, any> = {}>() {
       isGenericConfig: true,
       controller,
       context: DataInputContext,
+      getValueElementFromElement(element) {
+        return element.default;
+      },
+      getDataFromValueElement(value) {
+        return value?.$key;
+      },
     });
   };
 }

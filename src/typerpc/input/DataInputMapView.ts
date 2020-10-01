@@ -39,7 +39,6 @@ export class DataInputMapView<
           connection: this.controller.row(key),
           key,
           element: target,
-          error: this.children.keyToError[key],
           inputRef: this.children.ref(key),
         },
       });

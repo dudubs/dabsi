@@ -30,24 +30,17 @@ describe("Input", () => {
   t.testConfig("default", undefined);
 
   t.testWidgetView(TestInputView, (t) => {
-    t.testPropsWithState(
+    t.testProps(
       "",
-      { error: undefined as undefined | InputError<typeof t.connection> },
-      (View, props, state) => (
+      (View, props) => (
         <View
           {...props}
-          error={state.error}
           errorMap={{
             ERR1: "MAPPED_ERR1",
           }}
         />
       ),
-      (setState) => {
-        t.test("expect to updateError from props.", async () => {
-          setState({ error: "ERR1" });
-          expect(t.view.error).toEqual("ERR1");
-          expect(t.view.errorElement).toBeDefined();
-        });
+      () => {
         t.test(
           "expect to errorElement for ERR1 will be MAPPED_ERR1.",
           async () => {
@@ -233,7 +226,7 @@ describe("InputMap", () => {
 
   t.testWidgetView(InputMapView, (t) => {
     t.testProps("", (View, props) => (
-      <View
+      <View.Fields
         {...props}
         fields={{
           text1: (props) => (
@@ -314,7 +307,7 @@ describe("ArrayInput", () => {
               {...props}
               errorMap={{ NOT_UNIQUE: "NOT_UNIQUE_ITEM" }}
               children={(props) => (
-                <InputMapView
+                <InputMapView.Fields
                   {...props}
                   fields={{
                     text: (props) => (

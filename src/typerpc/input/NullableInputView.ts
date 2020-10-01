@@ -3,7 +3,7 @@ import { Renderer } from "../../react/renderer";
 import { RpcConnection } from "../Rpc";
 import { AnyInput, InputType, InputValueElement } from "./Input";
 import { AnyInputView, InputView, InputViewProps } from "./InputView";
-import {OptionalInput} from "./OptionalInput";
+import { OptionalInput } from "./OptionalInput";
 
 export class NullableInputView<
   C extends RpcConnection<OptionalInput<AnyInput>>
@@ -22,6 +22,10 @@ export class NullableInputView<
     }
   }
 
+  protected updateError(error: InputType<C>["Error"] | undefined) {
+    this.target?.setError(error);
+  }
+
   protected updateValue(value: InputValueElement<C>) {
     if (value === null) {
       this.target?.setError(undefined);
@@ -33,7 +37,6 @@ export class NullableInputView<
       connection: this.connection.controller,
       element: this.element,
       value: this.value != null ? this.value : undefined,
-      error: this.error,
       onChange: (view) => this.setValue(view.value),
       onError: () => {
         this.props.onError?.(this);

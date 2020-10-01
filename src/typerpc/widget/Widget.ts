@@ -2,6 +2,7 @@ import { MetaType, MetaTypeHook, WithMetaType } from "../../common/MetaType";
 import { mergeDescriptors } from "../../common/object/mergeDescriptors";
 import { setProto } from "../../common/object/setProto";
 import {
+  Expect,
   Fn,
   HasKeys,
   If,
@@ -93,6 +94,10 @@ export type WidgetHook<
 > = MetaTypeHook<R, AnyWidget, MT> &
   Widget<Extract<Omit<WidgetType<R>, keyof T> & T, TWidget>>;
 
+export type WidgetBuilder<T extends Partial<TWidget>> = Widget<
+  Extract<Omit<TEmptyWidget, keyof T> & T, TWidget>
+>;
+
 export type TWidget = {
   Connection: object;
   Config: object | undefined;
@@ -102,6 +107,18 @@ export type TWidget = {
   Element: object;
   Controller: AnyRpc;
 };
+export type TEmptyWidget = Expect<
+  TWidget,
+  {
+    Connection: {};
+    Config: undefined;
+    Context: {};
+    Props: {};
+    Handler: {};
+    Element: {};
+    Controller: NoRpc;
+  }
+>;
 
 export type WidgetProps<T extends TWidget> = T["Props"] & {
   controller: T["Controller"];

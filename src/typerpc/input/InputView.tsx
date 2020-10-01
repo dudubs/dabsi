@@ -45,8 +45,6 @@ export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   onError?(view: InputView<C>): void;
 
   value?: InputValueElement<C>;
-
-  error?: InputError<C>;
 };
 
 export type InputViewRenderer<C extends AnyInputConnection> = Renderer<
@@ -57,6 +55,8 @@ export type InputErrorOrData<
   C extends AnyInput | AnyInputConnection
 > = ErrorOrValue<InputError<C>, InputData<C>>;
 
+// TODO: AbstractInputView
+// TODO: type InputView
 export abstract class InputView<
   C extends AnyInputConnection,
   P extends InputViewProps<C> = InputViewProps<C>,
@@ -95,7 +95,7 @@ export abstract class InputView<
     if (this._isValidValue && this._value === value) {
       return;
     }
-    if (this.constructor.name === "TextInputView") console.log({ value });
+
     this._value = value;
     this._error = await this.getError?.();
     if (this._error != null) {
@@ -154,19 +154,27 @@ export abstract class InputView<
 
   inputWillValidate?(): Awaitable;
 
-  async validate(): Promise<void> {
+  async validate(): Promise<boolean> {
     await this.inputWillValidate?.();
-    this._error =
+    const error =
       (await this.children?.getError()) ?? (await this.getError?.());
+    return null == (this._error = error);
   }
 
+  /*
+    submit
+    validate
+    inputError REQUIRED
+    submit
+    validate
+    inputError  REQUIRED
+
+
+   */
   updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
     super.updateViewProps(prevProps, nextProps);
     if (nextProps.value !== prevProps.value) {
       this._value = nextProps.value;
-    }
-    if (nextProps.error !== prevProps.error) {
-      this._error = nextProps.error;
     }
   }
 

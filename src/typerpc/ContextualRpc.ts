@@ -14,13 +14,13 @@ export type TContextualRpc = {
   Props: object;
 };
 
-export type ContextualRpcProps<T extends AnyContextualRpc> = ContextualRpcType<
-  T
->["Props"];
+export type ContextualRpcProps<
+  T extends WithMetaType<{ TContextualRpc }>
+> = ContextualRpcType<T>["Props"];
 
-export type ContextualRpcType<T extends AnyContextualRpc> = MetaType<
-  T
->["TContextualRpc"];
+export type ContextualRpcType<
+  T extends WithMetaType<{ TContextualRpc }>
+> = MetaType<T>["TContextualRpc"];
 
 export type ContextualRpcContext<
   T extends AnyContextualRpc

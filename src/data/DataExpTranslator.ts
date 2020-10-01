@@ -225,11 +225,11 @@ export abstract class DataExpTranslator<T, U>
     return this.translateLength(this.translate(exp));
   }
 
-  $and(exp: DataMappedExpTypes<T>["$and"]): U {
-    if (exp.find((x) => x === false) === false) {
+  $and(exps: DataMappedExpTypes<T>["$and"]): U {
+    if (exps.find((x) => x === false) === false) {
       return this.translate(false);
     }
-    return this.translateAnd(exp.map((exp) => this.translate(exp)));
+    return this.translateAnd(exps.map((exp) => this.translate(exp)));
   }
 
   $or(exp: DataMappedExpTypes<T>["$or"]): U {
@@ -246,6 +246,12 @@ export abstract class DataExpTranslator<T, U>
   $as(exp: DataMappedExpTypes<T>["$as"]): U {
     const [childKey, childExp] = firstDefinedEntry(exp);
     return this.translateAs(childKey, childExp);
+  }
+
+  abstract translateBase(exp: DataExp<T>): U;
+
+  $base(exp: DataMappedExpTypes<any>["$base"]): U {
+    return this.translateBase(exp);
   }
 
   $at(exp: DataMappedExpTypes<any>["$at"]): U {
@@ -291,7 +297,7 @@ export abstract class DataExpTranslator<T, U>
     if (typeof exp === "string") {
       return this.translateHas(inverse, exp, undefined);
     } else if (typeof exp === "object") {
-      const [propertyName, subExp] = firstDefinedEntry(exp);
+      const [propertyName, subExp] = firstDefinedEntry(exp as any);
       return this.translateHas(inverse, propertyName, subExp);
     }
     throw new TypeError(`Invalid "has" Exp`);

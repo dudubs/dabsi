@@ -30,5 +30,8 @@ export function NumberInput(): NumberInput {
     context: NumberInputContext,
     getValueElementFromElement: (element) =>
       element.default ?? element.min ?? 0,
+    getDataFromValueElement(value) {
+      return value;
+    },
   });
 }

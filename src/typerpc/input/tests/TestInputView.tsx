@@ -25,7 +25,7 @@ export class TestInputView<
     children?(view: TestInputView<C>);
   }
 > {
-  async validate(): Promise<void> {
+  async validate(): Promise<boolean> {
     if (this.props.testValue !== undefined) {
       await this.setValue(
         typeof this.props.testValue === "function"

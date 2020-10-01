@@ -20,9 +20,13 @@ export class DataInputView<C extends AnyDataInputConnection> extends InputView<
     children(view: DataInputView<C>): ReactElement;
   }
 > {
-  protected getError(): Awaitable<InputError<C> | undefined> {
-    return undefined;
-  }
+  // protected getError(): Awaitable<InputError<C> | undefined> {
+  //   if (!this.connectionProps.nullable) {
+  //     if (this.value == null) {
+  //       return "REQUIRED";
+  //     }
+  //   }
+  // }
 
   renderView(): React.ReactNode {
     return this.props.children(this);

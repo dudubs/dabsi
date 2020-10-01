@@ -37,5 +37,8 @@ export function TextInput(): TextInput {
     getValueElementFromElement(element) {
       return element.default || "";
     },
+    getDataFromValueElement(value) {
+      return value;
+    },
   });
 }

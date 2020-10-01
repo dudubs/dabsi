@@ -1,5 +1,6 @@
 import { Connection } from "typeorm";
 import { DataExp } from "../data/DataExp";
+import { DataFieldsTranslator } from "../data/DataFieldsTranslator";
 import { Query, QueryExp } from "./QueryExp";
 import { QueryExpTranslatorToSql } from "./QueryExpTranslatorToSql";
 import { isDeepEqual } from "./utils/QueryExpBuilder";
@@ -53,6 +54,7 @@ export class QueryExpBuilder {
       }
       return (raw) => raw[aliasName];
     }
+
     this.fields[aliasName] = selection;
     return (raw) => raw[aliasName];
   }

@@ -1,8 +1,7 @@
 import { RpcError } from "../Rpc";
 import { AbstractInputContext } from "./AbstractInputContext";
 import { InputCheckResult, InputData, TInput } from "./Input";
-import {NullableInput} from "./NullableInput";
-
+import { NullableInput } from "./NullableInput";
 
 export abstract class AbstractNullableInputContext<
   T extends NullableInput<any, TInput>

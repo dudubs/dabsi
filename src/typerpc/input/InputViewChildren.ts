@@ -7,23 +7,22 @@ import { AnyInputView, InputView } from "./InputView";
 
 export class InputViewChildren {
   keyToView: Record<string, AnyInputView> = {};
-  keyToError: Record<string, any> = {};
+
   constructor() {}
 
-  updateError(error) {
-    this.keyToError = typeof error === "object" && error?.children;
+  async updateError(error) {
+    const keyToError = (typeof error === "object" && error?.children) || {};
+    for (const [key, view] of entries<AnyInputView>(this.keyToView)) {
+      view.setError(keyToError[key]);
+    }
   }
 
   ref(key: string): RefCallback<AnyInputView> {
     return (view) => {
       if (view) {
-        if (this.keyToView[key] !== view) {
-          delete this.keyToError[key];
-        }
         this.keyToView[key] = view;
       } else {
         delete this.keyToView[key];
-        delete this.keyToError[key];
       }
     };
   }

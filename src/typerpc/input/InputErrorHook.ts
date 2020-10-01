@@ -44,6 +44,12 @@ export class InputErrorHookView<
     return this.target?.validate();
   }
 
+  protected updateError(error: InputType<C>["Error"] | undefined) {
+    if (!this.errorElement) {
+      this.target?.setError(error);
+    }
+  }
+
   renderView(): React.ReactNode {
     const { connection, element } = this.props;
 
@@ -51,7 +57,6 @@ export class InputErrorHookView<
       {
         connection,
         element,
-        error: !this.errorElement ? this.error : undefined,
         inputRef: (target) => {
           this.target = target;
         },

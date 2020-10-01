@@ -1,3 +1,4 @@
+import exp from "constants";
 import { Connection, SelectQueryBuilder } from "typeorm";
 import { defined } from "../../common/object/defined";
 import { entries } from "../../common/object/entries";
@@ -94,6 +95,10 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
   }
 
   counter = 0;
+
+  translateBase(exp: DataExp<T>): string {
+    return this.translate(exp);
+  }
 
   translateField(propertyName: StringDataExp<T>): string {
     return `${this.escape(this.schema)}.${this.escape(propertyName)}`;

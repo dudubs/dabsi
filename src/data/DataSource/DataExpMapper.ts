@@ -31,6 +31,10 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
     return { $ifNull: [exp, alt_value] };
   }
 
+  translateBase(exp: DataExp<any>): DataExp<any> {
+    return { $base: exp };
+  }
+
   translateIf(
     condition: DataExp<any>,
     expIfTrue: DataExp<any>,

@@ -10,6 +10,7 @@ import { DataExp } from "../DataExp";
 import { DataExpTranslatorToQeb } from "../../typeorm/exp/DataExpTranslatorToQeb";
 import { QueryExpBuilder } from "../../typeorm/QueryExpBuilder";
 import { EntityRelation } from "../../typeorm/relations";
+import { DataFieldsTranslator } from "../DataFieldsTranslator";
 import { DataOrder } from "../DataOrder";
 import { AnyDataSelection, DataSelection } from "../DataSelection";
 import { DataTypeInfo } from "../DataTypeInfo";
@@ -27,7 +28,6 @@ export namespace EntityDataSelector {
       skip?: number;
       take?: number;
       order?: DataOrder<any>[];
-      filter?: DataExp<any>;
     },
     baseRow: object
   ): ReturnType<typeof select> {
@@ -37,9 +37,6 @@ export namespace EntityDataSelector {
 
     qb.query.skip = cursor.skip;
     qb.query.take = cursor.take;
-
-    if (cursor.filter !== undefined)
-      qb.filter(translator.translate(cursor.filter));
 
     cursor.order?.forEach((order) => {
       qb.order.push({
@@ -137,6 +134,7 @@ export namespace EntityDataSelector {
     async function loadMany(): Promise<any[]> {
       const rows: any[] = [];
 
+      // console.log(qb.getQueryAndParameters());
       for (const raw of await qb.getMany()) {
         const context = await loadOneRaw(raw);
         context && rows.push(context.row);
@@ -226,6 +224,9 @@ export namespace EntityDataSelector {
       }
 
       // select fields
+
+      const fieldsTranslator = new DataFieldsTranslator(fields);
+
       for (const [propertyName, exp] of entries(fields)) {
         if (propertyName in childEntityInfo.propertyNameToRelationMetadata) {
           throw new Error(
@@ -235,7 +236,9 @@ export namespace EntityDataSelector {
 
         const loader = qb.select(
           `${schema}${childKey ? `_as_${childKey}` : ""}_x_${propertyName}`,
-          new DataExpTranslatorToQeb(childTypeInfo, qb, schema).translate(exp)
+          new DataExpTranslatorToQeb(childTypeInfo, qb, schema).translate(
+            fieldsTranslator.translate(exp)
+          )
         );
 
         loaders.push((context) => {

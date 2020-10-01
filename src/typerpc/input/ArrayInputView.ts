@@ -77,11 +77,6 @@ export class ArrayInputView<
   }
 
   renderNewItem() {
-    console.log(
-      this.controller.newItem.props.getValueElementFromElement(
-        this.element.newItem
-      )
-    );
     return this.props.renderNewItem(
       {
         onChange: async (newItemInput) => {
@@ -124,11 +119,9 @@ export class ArrayInputView<
         { key },
         this.props.renderItem({
           props: {
-            key,
             connection: this.controller.item,
             element: this.element.item,
             value,
-            error: this.children.keyToError[key],
             onChange: (view) => {
               if (getKeyFromItemData) {
                 const key = getKeyFromItemData(view.data);

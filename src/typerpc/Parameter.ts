@@ -1,48 +1,53 @@
-import {WithMetaType} from "../common/MetaType";
-import {AnyRpc, Rpc, RpcConnection, RpcHandlerFn, RpcPayload, RpcResult} from "./Rpc";
-import {ConfigFactory, RpcConfigFactory, RpcGenericConfigFn, RpcGenericConfigHandler} from "./RpcGenericConfig";
+import { WithMetaType } from "../common/MetaType";
+import { AnyTyping, Awaitable, TypingType } from "../common/typings";
+import { ParameterHandler } from "./ParameterHandler";
+import {
+  AnyRpc,
+  Rpc,
+  RpcConnection,
+  RpcHandlerFn,
+  RpcPayload,
+  RpcResult,
+} from "./Rpc";
+import { RpcConfigFactory2, RpcGenericConfigFn } from "./RpcGenericConfig";
 
 export type ParameterConfig<R extends AnyRpc, D, V> = {
-    load(data: D): Promise<V>;
-    getTargetConfig: RpcConfigFactory<V, R>
+  load(data: D): Awaitable<V>;
+  getTargetConfig: RpcConfigFactory2<V, R>;
 };
 
-export type Parameter<R extends AnyRpc, D,BaseV=any> =
-    WithMetaType<{ ParameterRpc: R }> &
-    Rpc<{
+export type AnyParameter = Parameter<AnyRpc, any>;
 
+export type Parameter<R extends AnyRpc, D, BaseV = any> = WithMetaType<{
+  ParameterRpc: R;
+}> &
+  Rpc<{
+    Data: D;
 
-        Data: D;
+    Handler: RpcHandlerFn<[D, RpcPayload<R>], RpcResult<R>>;
 
-        Handler:
-            RpcHandlerFn<[D, RpcPayload<R>], RpcResult<R>>
+    Connection: (data: D) => RpcConnection<R>;
 
-        Connection:
-            (data: D) => RpcConnection<R>
+    Config: RpcGenericConfigFn<
+      <V extends BaseV>(
+        config: ParameterConfig<R, D, V>
+      ) => ParameterConfig<R, D, any>
+    >;
+  }> & { target: R };
 
-        Config:
-            RpcGenericConfigFn<<V extends BaseV>(config: ParameterConfig<R, D, V>) => ParameterConfig<R, D, any>>
-
-    }> & { target: R };
-
-export function Parameter<D = string>() {
-    return <R extends AnyRpc>(target: R): Parameter<R, D> => ({
-        target,
-        createRpcConnection: handler => {
-            return data => {
-                return target.createRpcConnection(payload => {
-                    return handler([data, payload])
-                })
-            }
-        },
-        createRpcHandler: RpcGenericConfigHandler(config => {
-
-            return async ([data, payload]) => {
-                const value = await config.load(data);
-                const targetConfig = ConfigFactory(config.getTargetConfig, value);
-                const targetHandler = target.createRpcHandler(targetConfig)
-                return targetHandler(payload);
-            }
-        })
-    })
+export function Parameter<DTyping extends AnyTyping, T extends AnyRpc>(
+  dataType: DTyping,
+  target: T
+): Parameter<T, TypingType<DTyping>> {
+  return <any>(<AnyParameter>{
+    target,
+    createRpcConnection: handler => {
+      return data => {
+        return target.createRpcConnection(payload => {
+          return handler([data, payload]);
+        });
+      };
+    },
+    createRpcHandler: ParameterHandler,
+  });
 }

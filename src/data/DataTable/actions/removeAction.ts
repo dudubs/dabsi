@@ -1,13 +1,13 @@
-import {Lang} from "../../../localization/Lang";
-import {DataTableAction} from "../DataTable";
+import { Lang } from "../../../localization/Lang";
+import { DataTableAction } from "../DataTable";
 
 export const removeAction: DataTableAction<any> = {
-    icon: "remove",
-    type: "multiple",
-    danger: true,
-    title: Lang`REMOVE`,
-    handleKeys: async (keys, table) => {
-        await table.source.removeAll(keys);
-        await table.reloadAfterRemove();
-    }
-}
+  icon: "remove",
+  type: "multiple",
+  danger: true,
+  title: Lang`REMOVE`,
+  handleKeys: async (keys, table) => {
+    await table.source.removeAll(keys);
+    // await table.reloadAfterRemove();
+  },
+};

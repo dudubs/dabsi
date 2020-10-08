@@ -1,6 +1,5 @@
 import { MetaType, MetaTypeHook, WithMetaType } from "../../common/MetaType";
 import { mergeDescriptors } from "../../common/object/mergeDescriptors";
-import { setProto } from "../../common/object/setProto";
 import {
   Expect,
   Fn,
@@ -23,11 +22,7 @@ import {
   RpcPayload,
   RpcResult,
 } from "../Rpc";
-import {
-  IsRpcGenericConfigFn,
-  RpcGenericConfig,
-  RpcGenericConfigFn,
-} from "../RpcGenericConfig";
+import { RpcGenericConfig, RpcGenericConfigFn } from "../RpcGenericConfig";
 import {
   RpcMapHandler,
   RpcMapHandlerFn,
@@ -82,10 +77,9 @@ export type WidgetContextClass<T extends AnyWidget> = new (
   config: WidgetConfig<WidgetType<T>>
 ) => WidgetContext<WidgetType<T>>;
 
-export type WidgetConfig<
-  T extends Pick<TWidget, "Config">,
-  C = T["Config"]
-> = C extends Fn ? If<IsRpcGenericConfigFn<C>, ReturnType<C>, C> : C;
+export type WidgetConfig<T extends TWidget, C = T["Config"]> = C extends Fn
+  ? ReturnType<C>
+  : C;
 
 export type WidgetHook<
   R extends AnyWidget,
@@ -94,6 +88,7 @@ export type WidgetHook<
 > = MetaTypeHook<R, AnyWidget, MT> &
   Widget<Extract<Omit<WidgetType<R>, keyof T> & T, TWidget>>;
 
+//
 export type WidgetBuilder<T extends Partial<TWidget>> = Widget<
   Extract<Omit<TEmptyWidget, keyof T> & T, TWidget>
 >;
@@ -152,9 +147,7 @@ export type WidgetOptions<
 
   context: WidgetContextClass<Widget>;
 
-  isGenericConfig:
-    | boolean
-    | If<Not<Is<T["Config"], RpcGenericConfigFn>>, undefined>;
+  isGenericConfig: boolean | If<Not<Is<T["Config"], Fn>>, undefined>;
 
   props: T["Props"] | If<Not<HasKeys<T["Props"]>>, undefined>;
 
@@ -200,7 +193,7 @@ export function Widget<T extends AnyWidget>(
         const controllerConfig = context.getControllerConfig();
         return controller.createRpcHandler(controllerConfig)(payload);
       },
-      getElement: (context) => {
+      getElement: context => {
         return context.getElement();
       },
     }),
@@ -210,7 +203,7 @@ export function Widget<T extends AnyWidget>(
           handler,
           props,
           getElement: () => handler("getElement"),
-          controller: controller.createRpcConnection((payload) =>
+          controller: controller.createRpcConnection(payload =>
             handler(["controller", payload])
           ),
         },

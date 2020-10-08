@@ -64,7 +64,7 @@ export abstract class AbstractDataSource<T> {
   getKeys(): Promise<string[]> {
     return this.selectKeys()
       .items()
-      .then((rows) => rows.map((row) => row.$key));
+      .then(rows => rows.map(row => row.$key));
   }
 
   // TODO: keys(): Promise<string[]>
@@ -153,9 +153,7 @@ export abstract class AbstractDataSource<T> {
   }
 
   updateKey(key: string, values: DataValues<T>): Promise<boolean> {
-    return this.updateAll([key], values).then(
-      (affectedRows) => affectedRows > 0
-    );
+    return this.updateAll([key], values).then(affectedRows => affectedRows > 0);
   }
 
   abstract insertKey(values: DataValues<T>): Promise<string>;
@@ -172,7 +170,7 @@ export abstract class AbstractDataSource<T> {
     }
 
     for await (const rows of chunks(this.selectKeys().find(), 100)) {
-      await callback(rows.map((row) => row.$key));
+      await callback(rows.map(row => row.$key));
     }
   }
 
@@ -190,22 +188,22 @@ export abstract class AbstractDataSource<T> {
       [keyOrKeys, values] = args;
     }
     let affectedRows = 0;
-    await this._each(keyOrKeys, async (keys) => {
+    await this._each(keyOrKeys, async keys => {
       affectedRows += await this.updateAll(keys, values);
     });
     return affectedRows;
   }
 
   async add(keyOrKeys?: DataKeyOrKeysInput<T>) {
-    return this._each(keyOrKeys, (keys) => this.addAll(keys));
+    return this._each(keyOrKeys, keys => this.addAll(keys));
   }
 
   async remove(keyOrKeys?: DataKeyOrKeysInput<T>) {
-    return this._each(keyOrKeys, (keys) => this.removeAll(keys));
+    return this._each(keyOrKeys, keys => this.removeAll(keys));
   }
 
   async delete(keyOrKeys?: DataKeyOrKeysInput<T>) {
-    return this._each(keyOrKeys, (keys) => this.deleteAll(keys));
+    return this._each(keyOrKeys, keys => this.deleteAll(keys));
   }
 
   async insert(values: DataValues<T>): Promise<DataRow<T>> {
@@ -367,7 +365,7 @@ export abstract class AbstractDataSource<T> {
   filter<T>(this: DataSource<T>, ...exps: DataExp<T>[]): DataSource<T> {
     const filter = DataExp({ $and: exps });
     if (typeof filter === "undefined") return this;
-    return this.updateCursor((cursor) => {
+    return this.updateCursor(cursor => {
       cursor.filter = DataExp(this.cursor.filter, filter);
       return cursor;
     });
@@ -382,3 +380,4 @@ export type DataCursorPath = {
 };
 
 export type DataSourceFactory = <T>(type: Type<T>) => DataSource<T>;
+export type DataContext = { getDataSource: DataSourceFactory };

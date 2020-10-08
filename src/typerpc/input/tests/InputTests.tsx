@@ -369,7 +369,7 @@ describe("ArrayInput", () => {
 
     t.test("expect unique error on changing exists item.", async () => {
       text = "world";
-      await t.view.children.keyToView.hello.props.onChange?.(
+      await t.view.children.keyToView.hello["props"].onChange?.(
         t.view.children.keyToView.hello
       );
       expect(t.view.newItemInput.error).toBeUndefined();

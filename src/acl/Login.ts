@@ -11,7 +11,7 @@ import {
   RpcHandlerFn,
 } from "../typerpc/Rpc";
 import { RpcConfigurator } from "../typerpc/RpcConfigurator";
-import { RpcConfigFactory } from "../typerpc/RpcGenericConfig";
+import { RpcConfigFactory2 } from "../typerpc/RpcGenericConfig";
 import { RpcMap } from "../typerpc/RpcMap";
 import {
   AnyWidget,
@@ -19,23 +19,12 @@ import {
   Widget,
   WidgetBuilder,
 } from "../typerpc/widget/Widget";
-import { User } from "./User";
-
-/*
-
-
-
- */
-
-export type AuthenticatedRpc<T extends AnyRpc> = RpcMap<{
-  getTarget: Parameter<T, { accessToken: string }>;
-  getAccessToken: Command<() => { accessToken: string }>;
-}>;
+import { UserEntity } from "./UserEntity";
 
 export type Login<T extends AnyWidget> = WidgetBuilder<{
   Config: {
-    source: DataSource<User>;
-    targetConfig: RpcConfigFactory<User, T>;
+    source: DataSource<UserEntity>;
+    targetConfig: RpcConfigFactory2<UserEntity, T>;
   };
 
   Element: {
@@ -58,9 +47,5 @@ export type AnyLogin = Login<AnyWidget>;
 
 // Session()
 // Session Rpc
-export const PasswordLogin = RpcConfigurator(
-  Command<(userName: string, password: string) => boolean>(),
-  (config) => {}
-);
 
 export function Login<T extends AnyWidget>(target: T) {}

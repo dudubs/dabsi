@@ -42,7 +42,9 @@ export type ExcludeKeys<T, V> = Exclude<
 export type PickByValue<T, V> = Pick<T, ExtractKeys<T, V>>;
 export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;
 
-export type Pluck<T, K extends PropertyKey, E = never> = IsNever<T> extends true
+export type PluckRequired<T, K extends PropertyKey, E = never> = IsNever<
+  T
+> extends true
   ? E
   : Required<T> extends Record<K, infer U>
   ? U
@@ -61,6 +63,19 @@ export function Nullable<T>(value?: T): T | Nullable {
 
 export type Type<T> = Function & { prototype: T };
 
+export type Typing<T> = (value: any) => asserts value is T;
+export type AnyTyping = Typing<any>;
+
+export type TypingType<T extends Typing<any>> = T extends Typing<infer U>
+  ? U
+  : never;
+
+export function Typing<T>(assert?: (value) => asserts value is T): Typing<T> {
+  return value => {
+    assert?.(value);
+  };
+}
+
 export function Type<T = any>(this: any): Type<T> {
   if (this instanceof Type) {
     throw new Error();
@@ -69,6 +84,7 @@ export function Type<T = any>(this: any): Type<T> {
 }
 
 export type Assign<T, U> = Omit<T, keyof Required<U>> & U;
+export type Override<T extends object, U extends object> = Omit<T, keyof U> & U;
 
 export type AssignKeys<T, U> = HasKeys<T> extends false
   ? U

@@ -1,5 +1,11 @@
 import { AsyncFn, Awaitable, Fn } from "../common/typings";
-import { Rpc, RpcConfig, RpcHandler, RpcHandlerFn } from "./Rpc";
+import {
+  createRpcConnection,
+  Rpc,
+  RpcConfig,
+  RpcHandler,
+  RpcHandlerFn,
+} from "./Rpc";
 
 export type RpcMethod<T extends Fn, C> = Rpc<{
   Handler: RpcHandler<Command<T>>;
@@ -13,7 +19,7 @@ export type Command<T extends Fn> = Rpc<{
   Config: (...args: Parameters<T>) => Awaitable<ReturnType<T>>;
 }>;
 
-export function Command<T extends Fn>(): Command<T> {
+export function Command<T extends Fn = () => void>(): Command<T> {
   return {
     createRpcConnection: (handler) =>
       async function (this: any, ...args) {

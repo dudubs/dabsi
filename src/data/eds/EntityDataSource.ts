@@ -10,7 +10,10 @@ import { DataCursor, EmptyDataCursor } from "../DataCursor";
 import { DataKey } from "../DataKey";
 import { DataBaseRow, DataRow } from "../DataRow";
 import { DataSource, DataValues } from "../DataSource";
-import { AbstractDataSource } from "../DataSource/DataSource";
+import {
+  AbstractDataSource,
+  DataSourceFactory,
+} from "../DataSource/DataSource";
 import { EntityDataCursor } from "./EntityDataCursor";
 import { EntityDataKey } from "./EntityDataKey";
 import { EntityDataSelector } from "./EntityDataSelector";
@@ -23,6 +26,10 @@ export type EntityDataSourceOptions<T> = {
 
 export class EntityDataSource<T> extends AbstractDataSource<T> {
   static getConnection: undefined | (() => Connection);
+
+  static createFactory(getConnection): DataSourceFactory {
+    return type => this.create(type, getConnection);
+  }
 
   static create<T>(
     entityType: Type<T>,
@@ -98,13 +105,19 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
       key: object;
     }[] = [];
 
-    const childParent = isInsert && this.entityCursor.parent?.child;
-    childParent && buildRelation(childParent.relation, childParent.key);
+    // build relation to parent on on insert.
+    if (isInsert) {
+      const childParent = this.entityCursor.parent?.child;
+      childParent && buildRelation(childParent.relation, childParent.key);
+    }
 
+    // check relations in value, throw error if had relation value that
+    //  override relation key.
     for (const { relation, key } of this.entityCursor.relationKeys) {
       if (relation.propertyName in values) {
         throw new Error(`Can't override relation ${relation.propertyName}.`);
       }
+      // build relation on insert.
       isInsert && buildRelation(relation, key);
     }
 
@@ -139,6 +152,9 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
     return { row, relationKeys };
 
     function buildRelation(relation: EntityRelation, key: object) {
+      if (isInsert && key == null)
+        // dont build relation on insert when the key is null.
+        return;
       if (relation.isJoinColumn() && relation.left.isOwning) {
         row[relation.propertyName] = key;
         return;
@@ -170,7 +186,11 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
       const entityKey = EntityDataKey.parse(entityMetadata, DataKey(key));
       const result = await this.entityCursor.repository.update(entityKey, row);
       for (const { relation, key } of relationKeys) {
-        await relation.update("addOrSet", entityKey, key);
+        if (key == null) {
+          await relation.update("removeOrUnset", entityKey, key);
+        } else {
+          await relation.update("addOrSet", entityKey, key);
+        }
       }
       if (result.affected) {
         affectedRows++;

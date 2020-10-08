@@ -22,6 +22,7 @@ import {
   WidgetElement,
   WidgetType,
 } from "../widget/Widget";
+import { AbstractInputView } from "./AbstractInputView";
 import { AnyInputConnection, InputError, InputValueElement } from "./Input";
 import { AnyInputMap, InputMap } from "./InputMap";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
@@ -31,7 +32,7 @@ export type AnyInputMapConnection = RpcConnection<InputMap<AnyInputMap>>;
 
 export class InputMapView<
   C extends RpcConnection<InputMap<AnyInputMap>>
-> extends InputView<
+> extends AbstractInputView<
   C,
   InputViewProps<C> & {
     children(

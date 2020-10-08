@@ -1,9 +1,10 @@
-import { RequireOptionalKeys } from "../../common/typings";
+import { Awaitable, RequireOptionalKeys } from "../../common/typings";
 import { RpcConfig } from "../Rpc";
 import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
+  WidgetType,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
 import {
@@ -22,13 +23,17 @@ export class OptionalInputContext extends AbstractInputContext<T> {
     return this.config;
   }
 
+  getDefaultValue(): Awaitable<InputValue<T> | undefined> {
+    return this.controllerContext.getDefaultValue();
+  }
+
   getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
     return this.controllerContext.getElement();
   }
 
   protected getInputConfigForValue(
     value: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>> {
+  ): WidgetConfig<WidgetType<T>> {
     return undefined;
   }
 

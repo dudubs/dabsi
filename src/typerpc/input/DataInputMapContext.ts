@@ -1,7 +1,6 @@
-import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { Lazy } from "../../common/patterns/lazy";
-import { RequireOptionalKeys } from "../../common/typings";
+import { Awaitable, RequireOptionalKeys } from "../../common/typings";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { RpcConfig } from "../Rpc";
 import { AnyDataTable } from "../widget/DataTable";
@@ -9,6 +8,7 @@ import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
+  WidgetType,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
 import { getTableConfigForBaseDataInputConfig } from "./DataInputContext";
@@ -26,7 +26,7 @@ type T = DataInputMap<AnyInput, any>;
 export class DataInputMapContext extends AbstractInputContext<T> {
   protected getInputConfigForValue(
     value: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>> {
+  ): WidgetConfig<WidgetType<T>> {
     return { ...this.config };
   }
 
@@ -42,8 +42,8 @@ export class DataInputMapContext extends AbstractInputContext<T> {
 
   getControllerConfig(): RpcConfig<WidgetController<T>> {
     return {
-      table: ($) => $(this.tableContext.config),
-      row: ($) =>
+      table: $ => $(this.tableContext.config),
+      row: $ =>
         $({
           source: this.config.source,
           getTargetConfig: ($, row) => {
@@ -72,6 +72,17 @@ export class DataInputMapContext extends AbstractInputContext<T> {
       });
     }
     return { children };
+  }
+
+  async getDefaultValue(): Promise<InputValue<T> | undefined> {
+    const value = {};
+    for (const row of await this.config.source.items()) {
+      const targetValue = await this.getTargetContextForRow(
+        row
+      ).getDefaultValue();
+      if (targetValue !== undefined) value[row.$key] = targetValue;
+    }
+    if (hasKeys(value)) return value;
   }
 
   async loadAndCheck(data: InputData<T>): Promise<InputCheckResult<T>> {

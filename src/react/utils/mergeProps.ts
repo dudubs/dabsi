@@ -3,8 +3,11 @@ import { entries } from "../../common/object/entries";
 import { setRef } from "./setRef";
 
 export const $merge = "$merge";
+const $default = "$default";
 
-export type PropMerger<T> = Record<typeof $merge, (value: T) => T>;
+export type PropMerger<T> =
+  | Record<typeof $merge, (value: T) => T>
+  | Record<typeof $default, T>;
 
 function mergeCallbacks(prevCallback: Function, nextCallback: Function) {
   return function (this: any) {
@@ -28,6 +31,10 @@ export function mergeProp(prevValue, nextValue) {
   // TODO: $reverse
 
   if (nextValue && nextType === "object") {
+    if ($default in nextValue) {
+      return prevValue ?? nextValue[$default];
+    }
+
     const merger = nextValue[$merge];
     if (typeof merger === "function") {
       return merger.call(nextValue, prevValue);

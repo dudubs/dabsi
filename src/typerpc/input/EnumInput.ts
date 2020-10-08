@@ -31,13 +31,13 @@ export type EnumInput<K extends string, N extends boolean> = NullableInput<
   }
 >;
 
-export function EnumInput<K extends string, N extends boolean = true>(
+export function EnumInput<K extends string, N extends boolean = false>(
   keys: K[],
   options?: { nullable?: N }
 ): EnumInput<K, N> {
   return <any>Input<EnumInput<any, any>>({
     props: {
-      nullable: options?.nullable ?? true,
+      nullable: options?.nullable ?? false,
       keys: new Set(keys),
     },
     context: EnumInputContext,

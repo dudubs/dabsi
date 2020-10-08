@@ -1,13 +1,14 @@
 import { Awaitable } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
 import { RpcConnection } from "../Rpc";
+import { AbstractInputView } from "./AbstractInputView";
 import { AnyInput, InputType, InputValueElement } from "./Input";
 import { AnyInputView, InputView, InputViewProps } from "./InputView";
 import { OptionalInput } from "./OptionalInput";
 
 export class NullableInputView<
   C extends RpcConnection<OptionalInput<AnyInput>>
-> extends InputView<
+> extends AbstractInputView<
   C,
   InputViewProps<C> & {
     target: Renderer<InputViewProps<RpcConnection<InputType<C>["Target"]>>>;

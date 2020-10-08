@@ -1,216 +1,186 @@
-import {MetaType, WithMetaType} from "../common/MetaType";
+import { MetaType, WithMetaType } from "../common/MetaType";
+import { FnRef } from "../common/patterns/FnRef";
 import {
-    Awaitable,
-    If,
-    Is,
-    IsEmptyObject,
-    PartialUndefinedKeys,
-    OmitKeys,
-    UndefinedIfEmptyObject
+  AnyTyping,
+  Awaitable,
+  If,
+  IsEmptyObject,
+  OmitKeys,
+  PartialUndefinedKeys,
+  TypingType,
 } from "../common/typings";
-import {DataRow} from "../data/DataRow";
-import {DataSelection} from "../data/DataSelection";
-import {DataSource} from "../data/DataSource";
-import {DataParameter} from "./DataParameter";
-import {AnyInput, InputValue} from "./input/Input";
-import {NoRpc} from "./NoRpc";
-import {AnyRpc, RpcConfig} from "./Rpc";
-import {RpcGenericConfigurator} from "./RpcConfigurator";
-import {RpcConfigFactory, ConfigFactory} from "./RpcGenericConfig";
-import {RpcMap} from "./RpcMap";
-import {DataTable, DataTableConfig, DataTableOptions} from "./widget/DataTable";
-import {ElementWidget} from "./widget/ElementWidget";
-import {Form, FormInput} from "./widget/Form";
-import {TabsWidget} from "./widget/TabsWidget";
-import {WidgetElement} from "./widget/Widget";
-import {AnyWidgetMap} from "./widget/WidgetMap";
+import { DataRow } from "../data/DataRow";
+import { DataSource } from "../data/DataSource";
+import { Command } from "./Command";
+import { DataManagerHandler } from "./DataManagerHandler";
+import { DataParameter } from "./DataParameter";
+import { AnyInput, InputValue } from "./input/Input";
+import { NoRpc } from "./NoRpc";
+import { AnyRpc, RpcConfig } from "./Rpc";
+import { RpcConfigurator, RpcGenericConfigurator } from "./RpcConfigurator";
+import { RpcConfigFactory2 } from "./RpcGenericConfig";
+import { RpcMap } from "./RpcMap";
+import {
+  DataTable,
+  DataTableConfig,
+  DataTableOptions,
+} from "./widget/DataTable";
+import { ElementWidget } from "./widget/ElementWidget";
+import { Form, FormInput } from "./widget/Form";
+import { AnyRowType, Row } from "./widget/Row";
+import { TabsWidget } from "./widget/TabsWidget";
+import { AnyWidgetMap } from "./widget/WidgetMap";
 
 // Full<Type>Stack
 export type TDataManager = {
+  EditInput: AnyInput;
 
-    EditInput: AnyInput
+  EditError: any;
 
-    EditError: any
+  AddInput: AnyInput;
 
-    AddInput: AnyInput
+  AddError: any;
 
-    AddError: any
+  Tabs: AnyWidgetMap;
 
-    Tabs: AnyWidgetMap;
+  TableRow: any;
 
-    TableRow: any
-
-    TableRowController: AnyRpc
-
-
+  TableRowController: AnyRpc;
 };
-export type DataManagerConfig<T extends TDataManager,
-    D, TableSelection extends DataSelection<D>,
-    Types extends DataManagerTypes<T> = DataManagerTypes<T>> =
-    PartialUndefinedKeys<{}, {
 
-        getTabsConfig: RpcConfigFactory<DataRow<D>, TabsWidget<T['Tabs']>>
-            | If<IsEmptyObject<T['Tabs']>, undefined>
+export type DataManagerConfig<
+  T extends TDataManager,
+  D,
+  Types extends DataManagerTypes<T> = DataManagerTypes<T>
+> = PartialUndefinedKeys<
+  {
+    getTabsConfig:
+      | RpcConfigFactory2<DataRow<D>, TabsWidget<T["Tabs"]>>
+      | If<IsEmptyObject<T["Tabs"]>, undefined>;
 
+    addInputConfig: RpcConfig<FormInput<Types["AddForm"]>>;
 
-        addInputConfig:
-            UndefinedIfEmptyObject<RpcConfig<Types['AddForm']>>['input']
+    editInputConfig: RpcConfig<FormInput<Types["EditForm"]>>;
+  },
+  {
+    getValueFromDataRow: (
+      row: DataRow<D>
+    ) => InputValue<FormInput<Types["EditForm"]>>;
 
-        editInputConfig: RpcConfigFactory<DataRow<D>,
-                FormInput<Types['EditForm']>>
-            | If<Is<RpcConfig<FormInput<Types['EditForm']>>, undefined>, undefined>
+    source: DataSource<D>;
 
-        source: DataSource<D>
+    getTitle: (row: DataRow<D>) => string;
 
-        getTitle: (row: DataRow<D>) => string;
+    tableConfig: OmitKeys<
+      DataTableConfig<T["TableRow"], T["TableRowController"], D>,
+      "source"
+    >;
 
-        tableConfig: OmitKeys<DataTableConfig<T['TableRow'],
-            T['TableRowController'],
-            D, TableSelection>,
-            "source">
+    addSubmit: RpcConfig<Types["AddForm"]>["submit"];
 
-
-        addSubmit: RpcConfig<Types['AddForm']>['submit']
-
-        editSubmit: (row: DataRow<D>, value: InputValue<FormInput<Types['EditForm']>>) => Awaitable
-
-
-    }>;
+    editSubmit: (
+      row: DataRow<D>,
+      value: InputValue<FormInput<Types["EditForm"]>>
+    ) => Awaitable;
+  }
+>;
 
 export type AnyDataManager = DataManager<TDataManager>;
 
-export type DataManagerType<T extends AnyDataManager> =
-    MetaType<T>['TDataManager'];
+export type DataManagerType<T extends AnyDataManager> = MetaType<
+  T
+>["TDataManager"];
 
 export type DataManagerTypes<T extends TDataManager> = {
+  Table: DataTable<T["TableRow"], T["TableRowController"]>;
 
+  EditForm: Form<null, T["EditError"], T["EditInput"]>;
 
-    Table: DataTable<T['TableRow'], T['TableRowController']>;
+  AddForm: Form<string, T["AddError"], T["AddInput"]>;
 
-    EditForm: Form<null, T['EditError'], T['EditInput']>
-
-    AddForm: Form<string, T['AddError'], T['AddInput']>
-
-    TabsWidget: TabsWidget<{
-        Form: DataManagerTypes<T>['EditForm']
-    } & T['Tabs']>
-
-
+  TabsWidget: TabsWidget<
+    {
+      Form: DataManagerTypes<T>["EditForm"];
+    } & T["Tabs"]
+  >;
 };
-export type DataManager<T extends TDataManager,
-    Types extends DataManagerTypes<T> = DataManagerTypes<T>> =
-    WithMetaType<{ TDataManager: T }> &
-    RpcGenericConfigurator<RpcMap<{
-        Table: DataManagerTypes<T>['Table']
-        Add: DataManagerTypes<T>['AddForm']
-        Edit: DataParameter<(
-            ElementWidget<{
-                title: string
-            }, (
-                DataManagerTypes<T>['TabsWidget']
-                )>
-            )>;
-    }>, (
 
-        <D, TableSelection extends DataSelection<D> = {}>(
-            config: DataManagerConfig<T, D, TableSelection>
-        ) => DataManagerConfig<T, any, any>
+export type DataManager<
+  T extends TDataManager,
+  Types extends DataManagerTypes<T> = DataManagerTypes<T>
+> = WithMetaType<{ TDataManager: T }> &
+  RpcGenericConfigurator<
+    RpcMap<
+      {
+        delete: Command<(key: string) => void>;
 
-        )>;
+        Table: DataManagerTypes<T>["Table"];
+        Add: DataManagerTypes<T>["AddForm"];
+        Edit: DataParameter<
+          ElementWidget<
+            {
+              title: string;
+            },
+            DataManagerTypes<T>["TabsWidget"]
+          >
+        >;
+      },
+      {
+        editInput: T["EditInput"];
+      }
+    >,
+    <D>(config: DataManagerConfig<T, D>) => DataManagerConfig<T, any, any>
+  >;
 
+export function DataManager<
+  TableRowType extends AnyRowType,
+  AddErrorType extends AnyTyping,
+  EditErrorType extends AnyTyping,
+  AddInput extends AnyInput,
+  EditInput extends AnyInput = AddInput,
+  TableRowController extends AnyRpc = NoRpc,
+  Tabs extends AnyWidgetMap = {}
+>(options: {
+  tableRowType: TableRowType;
+  tableOptions?: DataTableOptions<TableRowController>;
+  addError?: AddErrorType;
+  editError?: EditErrorType;
+  addInput: AddInput;
+  editInput?: EditInput;
+  tabs?: Tabs;
+}): DataManager<{
+  TableRow: Row<TableRowType>;
+  TableRowController: TableRowController;
+  AddError: TypingType<AddErrorType>;
+  AddInput: AddInput;
+  EditError: TypingType<EditErrorType>;
+  EditInput: EditInput;
+  Tabs: Tabs;
+}> {
+  const editInput: AnyInput = options.editInput || options.addInput;
 
-export function DataManager<T extends {
-    TableRow: TableRow
+  return <any>RpcConfigurator<AnyDataManager>(
+    RpcMap(
+      {
+        delete: Command<(key: string) => void>(),
 
-    TableRowController?: TableRowController
+        Table: DataTable(options.tableRowType, options.tableOptions),
 
-    AddError?: AddError
+        Add: Form<string>()(options.addInput as AnyInput),
 
-    EditError?: EditError
-
-
-},
-    AddError = never,
-    EditError = AddError,
-    TableRow = any,
-    TableRowController extends AnyRpc = NoRpc>() {
-    return <AddInput extends AnyInput,
-        EditInput extends AnyInput = AddInput,
-        Tabs extends AnyWidgetMap = {}>(options: {
-        add: AddInput
-        tabs?: Tabs
-        edit?: EditInput
-        tableOptions?: DataTableOptions<TableRowController>
-    }): DataManager<{
-
-        TableRow: TableRow
-
-        TableRowController: TableRowController
-
-        AddError: AddError
-
-        AddInput: AddInput
-
-        EditInput: EditInput
-
-        EditError: EditError
-
-        Tabs: Tabs
-
-
-    }> => {
-
-
-        return <any>RpcGenericConfigurator<DataManager<TDataManager>>(
-            RpcMap({
-                Table: DataTable()(options.tableOptions),
-
-                Add: Form<string>()(options.add),
-
-                Edit: DataParameter(
-                    ElementWidget<{ title: string }>()(
-                        TabsWidget({
-                            Form: Form<null>()(
-                                options.edit || options.add,
-                            ),
-                            ...options.tabs
-                        })
-                    )
-                )
-            }),
-            config => {
-
-                return ({
-                    Table: $ => $({
-                        ...config.tableConfig,
-                        source: config.source,
-                    }),
-                    Add: {
-                        input: config.addInputConfig,
-                        submit: (value) => {
-                            return config.addSubmit(value)
-                        }
-                    },
-                    Edit: $ => $({
-                        source: config.source,
-                        getTargetConfig: ($, row) => $({
-                            getElement() {
-                                return {title: config.getTitle(row)}
-                            },
-                            targetConfig: {
-                                Form: {
-                                    input: ConfigFactory(config.editInputConfig, row),
-                                    submit(value) {
-                                        return config.editSubmit(row, value)
-                                    }
-                                },
-                                ...config.getTabsConfig?.($ => ({$: $}), row).$
-                            }
-                        })
-                    })
-                });
-            }
-        );
-    }
+        Edit: DataParameter(
+          ElementWidget<{ title: string }>()(
+            TabsWidget({
+              Form: Form<null>()(editInput),
+              ...(options.tabs as {}),
+            })
+          )
+        ),
+      },
+      {
+        editInput,
+      }
+    ),
+    DataManagerHandler
+  );
 }
-

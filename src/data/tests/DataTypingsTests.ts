@@ -1,4 +1,10 @@
-import { Constructor, HasKeys, IsNever, Pluck } from "../../common/typings";
+import {
+  Constructor,
+  Expect,
+  HasKeys,
+  IsNever,
+  PluckRequired,
+} from "../../common/typings";
 
 import { DataExp } from "../DataExp";
 import { AEntity, BEntity } from "../../typeorm/relations/tests/Entities";
@@ -17,23 +23,107 @@ import { MapRelation, RelationKeys, RelationTypeAt } from "../Relation";
 import { DBase, DChild1, DUnion, EUnion } from "./BaseEntities";
 
 pass(() => {
+  // DataSelectionRow
+  {
+    type SR1 = DataSelectionRow<
+      AEntity,
+      {
+        relations: {
+          oneAToOneB: true;
+        };
+      }
+    >;
+
+    type test1 = [
+      //
+      SR1["oneAToOneC"],
+      SR1["oneAToOneC"]["oneCToOneB"],
+      SR1["oneAToOneB"]["oneBToOneA"]
+    ];
+
+    type SR2 = DataSelectionRow<
+      SR1,
+      Expect<
+        DataSelection<SR1>,
+        {
+          pick: ["aText"];
+        }
+      >
+    >;
+
+    type SR3 = DataSelectionRow<
+      AEntity,
+      Expect<
+        DataSelection<AEntity>,
+        {
+          pick: ["aText"];
+          relations: {
+            oneAToOneB: true;
+          };
+        }
+      >
+    >;
+
+    tt<
+      [
+        //
+        //
+        Expect<RelationKeys<SR1>, "oneAToOneB">,
+        Expect<RelationKeys<SR1>, "oneAToOneC">,
+        Expect<RelationKeys<SR2>, "oneAToOneB">,
+        Expect<RelationKeys<SR2>, "oneAToOneC">,
+        //
+        //
+        Expect<
+          DataSelection<AEntity>,
+          // @ts-expect-error
+          {
+            pick: ["oneBToOneA"];
+          }
+        >,
+        //
+        //
+        Expect<keyof SR1, "aText">,
+        Expect<keyof SR1, "aNumber">,
+        Expect<keyof SR1, "oneAToOneB">,
+        //
+        //
+        Expect<keyof SR2, "aText">,
+        Expect<
+          keyof SR2,
+          // @ts-expect-error
+          "aNumber"
+        >,
+        Expect<keyof SR2, "oneAToOneB">,
+        //
+        //
+        Expect<keyof SR3, "aText">,
+        Expect<
+          keyof SR3,
+          // @ts-expect-error
+          "aNumber"
+        >,
+        Expect<keyof SR3, "oneAToOneB">
+      ]
+    >();
+  }
   // DataUnion
   {
     // BaseType
     {
-      testType<DataSelectionRow<AEntity, { pick: ["aText"] }>>((t) => {
+      testType<DataSelectionRow<AEntity, { pick: ["aText"] }>>(t => {
         assertType<AEntity>(t.$baseType);
         // @ts-expect-error
         assertType<BEntity>(t.$baseType);
 
-        testType<DataRow<typeof t>>((t) => {
+        testType<DataRow<typeof t>>(t => {
           assertType<AEntity>(t.$baseType);
           // @ts-expect-error
           assertType<BEntity>(t.$baseType);
         });
       });
 
-      testType<DataSource<AEntity>>(async (t) => {
+      testType<DataSource<AEntity>>(async t => {
         (
           await t
             .pick([], {
@@ -55,7 +145,7 @@ pass(() => {
       }) {}
     }
 
-    testType<DUnion[DataUnionChildrenKey]>((d) => {
+    testType<DUnion[DataUnionChildrenKey]>(d => {
       void d.dChild1.dChild1Text;
 
       // @ts-expect-error
@@ -65,7 +155,7 @@ pass(() => {
 
   // DataRow of Union
   {
-    testType<DataRow<DUnion>>((d) => {
+    testType<DataRow<DUnion>>(d => {
       // @ts-expect-error
       assertType<DataUnionChildren<any>>(d);
 
@@ -82,7 +172,7 @@ pass(() => {
     // MergePicks
     {
       function testPicks<L, R>(
-        x: Pluck<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
+        x: PluckRequired<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
       ) {}
 
       testPicks<undefined, undefined>(undefined);
@@ -130,7 +220,7 @@ pass(() => {
     // @ts-expect-error
     testSelection(AEntity, { children: { x: {} } } as const);
 
-    testSelection(AEntity, {} as const, (row) => {
+    testSelection(AEntity, {} as const, row => {
       void row.aText;
 
       void row.aId;
@@ -142,15 +232,18 @@ pass(() => {
       : HasKeys<S> extends false
       ? T
       : Omit<T, DataUnionChildrenKey | RelationKeys<T>> & {
-          x: Pluck<S, "x">;
+          x: PluckRequired<S, "x">;
         } & {
             [K in RelationKeys<T>]: MapRelation<
               T[K],
-              X<RelationTypeAt<T, K>, Pluck<Pluck<S, "relations">, K>>
+              X<
+                RelationTypeAt<T, K>,
+                PluckRequired<PluckRequired<S, "relations">, K>
+              >
             >;
           };
 
-    testType<X<AEntity, {}>>((d) => {});
+    testType<X<AEntity, {}>>(d => {});
 
     testType<
       DataRow<
@@ -162,12 +255,12 @@ pass(() => {
           }
         >
       >
-    >((d) => {});
+    >(d => {});
 
-    assertType<IsNever<Pluck<never, "x">>>(true);
+    assertType<IsNever<PluckRequired<never, "x">>>(true);
 
     // @ts-expect-error
-    assertType<IsNever<Pluck<never, "x">>>(false);
+    assertType<IsNever<PluckRequired<never, "x">>>(false);
 
     testSelection(AEntity, { pick: ["aText"] } as const, (row, sr, s) => {
       void row.aText;
@@ -184,7 +277,7 @@ pass(() => {
       void row.aId;
     });
 
-    testSelection(AEntity, { pick: [] }, (row) => {
+    testSelection(AEntity, { pick: [] }, row => {
       // @ts-expect-error
       void row.aText;
 
@@ -408,16 +501,25 @@ pass(() => {
           };
         }
       >
-    >((s) => {
-      // @ts-expect-error
-      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("x");
+    >(s => {
+      assertType<PluckRequired<typeof s.relations.oneDToOneE.pick, number>>(
+        // @ts-expect-error
+        "x"
+      );
 
-      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("eId");
+      assertType<PluckRequired<typeof s.relations.oneDToOneE.pick, number>>(
+        "eId"
+      );
 
-      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("eText");
+      assertType<PluckRequired<typeof s.relations.oneDToOneE.pick, number>>(
+        "eText"
+      );
 
       assertType<
-        Pluck<typeof s.relations.oneDToOneE.children.eChild1.pick, number>
+        PluckRequired<
+          typeof s.relations.oneDToOneE.children.eChild1.pick,
+          number
+        >
       >(
         // @ts-expect-error
 
@@ -425,7 +527,10 @@ pass(() => {
       );
 
       assertType<
-        Pluck<typeof s.relations.oneDToOneE.children.eChild1.pick, number>
+        PluckRequired<
+          typeof s.relations.oneDToOneE.children.eChild1.pick,
+          number
+        >
       >("eChild1Text");
 
       // @ts-expect-error
@@ -620,7 +725,7 @@ pass(() => {
 
   // DataSelectionRow of Union
   {
-    test(DUnion, {}, (d) => {
+    test(DUnion, {}, d => {
       // @ts-expect-error
       assertKey(d, "x");
 
@@ -636,7 +741,7 @@ pass(() => {
           },
         },
       },
-      (d) => {
+      d => {
         // @ts-expect-error
         assertKey(d, "x");
 
@@ -677,10 +782,10 @@ pass(() => {
           }),
         },
       }),
-      (d) => {}
+      d => {}
     );
 
-    testType<DataRow<DUnion>>((d) => {
+    testType<DataRow<DUnion>>(d => {
       void d.dId;
       void d.dText;
 
@@ -963,7 +1068,7 @@ pass(() => {
 
   // DataSource.as
   {
-    testType<DataSource<DUnion>>((ds) => {
+    testType<DataSource<DUnion>>(ds => {
       // @ts-expect-error
       ds.insertKey({ dChild1Text: "" });
 
@@ -990,7 +1095,7 @@ pass(() => {
             relations: {};
           }
         >
-      >((t) => {
+      >(t => {
         // @ts-expect-error
         t.$unionChildren.x;
 
@@ -1025,7 +1130,7 @@ pass(() => {
             relations: {};
           }
         >
-      >((t) => {
+      >(t => {
         // @ts-expect-error
         t.$unionChildren.x;
 
@@ -1046,7 +1151,7 @@ pass(() => {
         fields: { dX: 1 },
       })
         .getOrFail()
-        .then((row) => {
+        .then(row => {
           // @ts-expect-error
           void (row.$type === "x");
 
@@ -1055,7 +1160,7 @@ pass(() => {
           void (row.$type === "dChild2");
         });
 
-      ds.getOrFail().then((row) => {
+      ds.getOrFail().then(row => {
         // @ts-expect-error
         void (row.$type === "x");
 
@@ -1091,7 +1196,7 @@ testType<
       // oneDToOneE:EUnion
     }
   >
->((d) => {
+>(d => {
   /*
   DataSelection<DUnion>()
       .field("", "")
@@ -1106,7 +1211,7 @@ testType<
     d,
     {} as const,
     () => {},
-    (s) => {}
+    s => {}
   );
 
   // testSelection(d, {
@@ -1145,3 +1250,5 @@ function testSelection<T, S extends DataSelection<T>>(
   ) => void,
   callback2?: (selRow: DataRow<DataSelectionRow<T, S>>) => void
 ) {}
+
+declare function tt<T>();

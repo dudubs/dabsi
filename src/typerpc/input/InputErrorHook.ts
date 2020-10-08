@@ -2,6 +2,7 @@ import { ReactElement } from "react";
 import { Awaitable } from "../../common/typings";
 import { RpcConnection } from "../Rpc";
 import { WidgetElement, WidgetType } from "../widget/Widget";
+import { AbstractInputView } from "./AbstractInputView";
 import { AnyInput, InputError, InputHook, InputType } from "./Input";
 import { InputErrorOrData, InputView, InputViewProps } from "./InputView";
 
@@ -29,7 +30,7 @@ export function InputErrorHookViewProps<
 
 export class InputErrorHookView<
   C extends RpcConnection<InputErrorHook<AnyInput, any>>
-> extends InputView<
+> extends AbstractInputView<
   C,
   InputViewProps<C> & {
     children(

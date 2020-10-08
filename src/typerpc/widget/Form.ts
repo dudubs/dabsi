@@ -1,9 +1,17 @@
 import { Awaitable, If, Is } from "../../common/typings";
+import { Command } from "../Command";
 import { AnyInput, InputData, InputError, InputValue } from "../input/Input";
 import { RpcConfig } from "../Rpc";
+import { RpcMap } from "../RpcMap";
 import { RpcMapHandlerFn } from "../RpcMapHandler";
 import { FormContext } from "./FormContext";
-import { Widget, WidgetElement, WidgetType, WithWidgetType } from "./Widget";
+import {
+  Widget,
+  WidgetBuilder,
+  WidgetElement,
+  WidgetType,
+  WithWidgetType,
+} from "./Widget";
 
 export type AnyForm = Form<any, any, AnyInput>;
 
@@ -40,7 +48,7 @@ export type Form<
     submit(data: InputData<Input>): Promise<Result>;
   };
   Config: {
-    input: RpcConfig<Input>;
+    inputConfig: RpcConfig<Input>;
 
     submit(
       value: InputValue<Input>
@@ -59,14 +67,14 @@ export type Form<
 }>;
 
 export function Form<Value = null, Error = never>() {
-  return <Input extends AnyInput>(input: Input): Form<Value, Error, Input> =>
-    <any>Widget<AnyForm>({
+  return <Input extends AnyInput>(input: Input): Form<Value, Error, Input> => {
+    return <any>Widget<AnyForm>({
       props: { input },
       controller: input,
       handler: {
         async submit(context, data) {
           const inputResult = await input
-            .getContext(context.config.input)
+            .getContext(context.config.inputConfig)
             .loadAndCheck(data);
           if ("error" in inputResult) return { inputError: inputResult.error };
 
@@ -85,4 +93,5 @@ export function Form<Value = null, Error = never>() {
       },
       context: FormContext,
     });
+  };
 }

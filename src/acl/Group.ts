@@ -1,36 +1,37 @@
-import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from "typeorm";
-import {Relation} from "../data/Relation";
-import {decorateDesignType} from "../reflect/decorateDesignType";
-import {User} from "./User";
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { Relation } from "../data/Relation";
+import { decorateDesignType } from "../reflect/decorateDesignType";
+import { UserEntity } from "./UserEntity";
 
-
-declare module "./User" {
-    interface User {
-
-        groups:Relation<Group>[];
-
-    }
+declare module "./UserEntity" {
+  interface UserEntity {
+    groups: Relation<Group>[];
+  }
 }
 
-
-@Entity()
+@Entity({ name: "group" })
 export class Group {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column()
+  name: string;
 
-    @Column()
-    name: string;
-
-    // TODO: Maybe optional?
-    @ManyToMany(() => User, user => user.groups)
-    @JoinTable()
-    users: Relation<User>[];
-
-
+  // TODO: Maybe optional?
+  @ManyToMany(() => UserEntity, user => user.groups)
+  @JoinTable()
+  users: Relation<UserEntity>[];
 }
 
-
-decorateDesignType(User, "groups", Array, [
-    ManyToMany(() => Group, group => group.users)
+decorateDesignType(UserEntity, "groups", Array, [
+  ManyToMany(
+    () => Group,
+    group => group.users
+  ),
 ]);

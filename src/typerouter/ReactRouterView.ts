@@ -8,20 +8,15 @@ import {
   useState,
 } from "react";
 import { If, IsEmptyObject, PartialUndefinedKeys } from "../common/typings";
-import { Renderer } from "../react/renderer";
 import { TReactRouter } from "./ReactRouter";
 import {
   ReactRouterLocation,
   ReactRouterRouteProps,
   ReactRouterRoutePropsContext,
 } from "./ReactRouterLocation";
-import { AnyRouter, Router, RouterPlugin } from "./Router";
+import { Router, RouterPlugin } from "./Router";
 
-export function ReactRouterView<T extends TReactRouter>({
-  router: unboundRouter,
-  history,
-  ...props
-}: PartialUndefinedKeys<
+export type ReactRouterViewProps<T extends TReactRouter> = PartialUndefinedKeys<
   {
     context: T["context"] | If<IsEmptyObject<T["context"]>, undefined>;
   },
@@ -31,28 +26,39 @@ export function ReactRouterView<T extends TReactRouter>({
     router: Router<T>;
     listen?: (callback: (path: string) => void) => () => void;
     path?: string;
-
     plugins?: RouterPlugin<T>[];
-
-    renderRoute?: Renderer<{
-      children: ReactElement;
-      route: ReactRouterRouteProps;
-    }>;
   }
->) {
-  const [route, setRoute] = useState<ReactRouterRouteProps>(() =>
-    getRoute(history.location.pathname)
-  );
+>;
+
+export function ReactRouterView<T extends TReactRouter>(
+  props: ReactRouterViewProps<T>
+) {
+  const { plugins, router: unboundRouter, context, history } = <
+    ReactRouterViewProps<TReactRouter>
+  >props;
 
   const router = useMemo(() => {
-    return unboundRouter.bind(props["context"] || {});
-  }, [unboundRouter]);
+    if (!plugins) return unboundRouter;
+    return unboundRouter.bind(context || {}, plugins);
+  }, [unboundRouter, plugins]);
+
+  const [route, setRoute] = useState<ReactRouterRouteProps>(() =>
+    getRouteFromPath(history.location.pathname)
+  );
 
   useEffect(() => {
-    return history.listen((location) => {
-      setRoute(getRoute(location.pathname));
-    });
-  }, [history]);
+    if (route.location.router !== router) {
+      setRoute(getRouteFromPath(history.location.pathname));
+    }
+  }, [router]);
+
+  useEffect(
+    () =>
+      history.listen((location) => {
+        setRoute(getRouteFromPath(location.pathname));
+      }),
+    [history, router]
+  );
 
   let children: ReactElement = createElement(
     ReactRouterRoutePropsContext.Provider,
@@ -62,16 +68,9 @@ export function ReactRouterView<T extends TReactRouter>({
     }
   );
 
-  if (props.renderRoute) {
-    children = props.renderRoute({
-      route,
-      children,
-    });
-  }
-
   return children;
 
-  function getRoute(path: string) {
+  function getRouteFromPath(path: string) {
     return new ReactRouterLocation<any>(null, null, history, router, {}).route(
       path
     );

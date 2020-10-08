@@ -35,10 +35,13 @@ testm(__filename, () => {
   });
 
   describe("DataInput", () => {
-    testCase("nullable", [false, true], (nullable) => {
-      testRpc(DataInput()({ nullable }), (t) => {
-        t.testConfig("sanity", ($) =>
-          $({ source, label: { field: "text", load: (r) => r.text } })
+    testCase("nullable", [false, true], nullable => {
+      testRpc(DataInput({ nullable }), t => {
+        t.testConfig("sanity", $ =>
+          $({
+            source,
+            columns: { label: { field: "text", load: r => r.text } },
+          })
         );
 
         t.testInputValue(rows[0].id, rows[0].id);
@@ -53,14 +56,16 @@ testm(__filename, () => {
   });
 
   describe("DataInputMap", () => {
-    testRpc(DataInputMap()(BoolInput()), (t) => {
-      t.testConfig("sanity", ($) =>
+    testRpc(DataInputMap(BoolInput()), t => {
+      t.testConfig("sanity", $ =>
         $({
           source,
-          getTargetValue: (row) => row.text.length > 3,
-          label: {
-            field: "text",
-            load: (row) => row.text,
+          getTargetValue: row => row.text.length > 3,
+          columns: {
+            label: {
+              field: "text",
+              load: row => row.text,
+            },
           },
         })
       );
@@ -74,7 +79,7 @@ testm(__filename, () => {
       );
       t.testInputError({ x: false }, { invalidKeys: ["x"] });
 
-      t.testWidgetElement((t) => {
+      t.testWidgetElement(t => {
         it("expect target default will be true", () => {
           expect(t.element.children).toContain(
             objectContaining({

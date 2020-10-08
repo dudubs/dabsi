@@ -112,11 +112,7 @@ export namespace DataSelection {
 
     const children = mergeObject(a.children, b.children, merge);
 
-    const translator = new DataFieldsTranslator(a.fields || {});
-
     const fields = mergeObject(a.fields, b.fields, (a, b) => b);
-
-    // const fields = mergeObject(a.fields, b.fields, (a, b) => translator.translate(b));
 
     return {
       ...a,

@@ -1,24 +1,26 @@
-import Dialog, { DialogProps } from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import * as React from "react";
 import { ReactNode } from "react";
+import { MuiDialog, MuiDialogProps } from "./MuiDialog";
+import { Override } from "../../../common/typings";
 import { Lang, LangNode } from "../../../localization/Lang";
-import { MuiButton } from "./MuiButton";
+import { ReactCallback } from "../../../react/ReactCallback";
+import { MuiButton, MuiCancelButton, MuiConfirmButton } from "./MuiButton";
 
-export type MuiDangerDialogProps = DialogProps & {
-  TypographyProps?: TypographyProps;
+export type MuiDangerDialogProps = Override<
+  MuiDialogProps,
+  {
+    TypographyProps?: TypographyProps;
 
-  actionTitle?: LangNode;
-  title?: ReactNode;
-  objectTitle?: LangNode;
-  text?: ReactNode;
+    actionTitle?: LangNode;
+    title?: ReactNode;
+    objectTitle?: LangNode;
+    text?: ReactNode;
 
-  onCancel?();
-  onConfirm?();
-};
+    onCancel?: ReactCallback;
+    onConfirm?: ReactCallback;
+  }
+>;
 const DEFAULT_TITLE = Lang`CONFIRM_TO_${"action"}`;
 const DEFAULT_TEXT = Lang`YOU_ARE_SURE_YOU_WANT_TO_${"action"}_${"object"}?`;
 
@@ -30,38 +32,36 @@ export function MuiDangerDialog({
   title,
   text,
   TypographyProps,
-  ...props
+  ...MuiDialogProps
 }: MuiDangerDialogProps) {
   const action = actionTitle ?? Lang`ACTION`;
   return (
-    <Dialog {...props}>
-      <DialogTitle>{title ?? DEFAULT_TITLE({ action })}</DialogTitle>
-      <DialogContent>
-        <Typography {...TypographyProps}>
-          {text ??
-            DEFAULT_TEXT({
-              action,
-              object: objectTitle ?? Lang`OBJECT`,
-            })}
-        </Typography>
-      </DialogContent>
-      <DialogActions>
-        <MuiButton
-          kind={"cancel"}
-          title={Lang`CANCEL`}
-          onClick={() => {
-            onCancel?.();
-          }}
-        />
-        <MuiButton
-          kind={"confirm"}
-          danger
-          title={Lang`CONFIRM`}
-          onClick={() => {
-            onConfirm?.();
-          }}
-        />
-      </DialogActions>
-    </Dialog>
+    <MuiDialog
+      {...MuiDialogProps}
+      title={title ?? DEFAULT_TITLE({ action })}
+      actions={
+        <>
+          <MuiCancelButton
+            onClick={(event) => {
+              onCancel?.(event);
+            }}
+          />
+          <MuiConfirmButton
+            danger
+            title={Lang`CONFIRM`}
+            onClick={(event) => {
+              onConfirm?.(event);
+            }}
+          />
+        </>
+      }>
+      <Typography {...TypographyProps}>
+        {text ??
+          DEFAULT_TEXT({
+            action,
+            object: objectTitle ?? Lang`OBJECT`,
+          })}
+      </Typography>
+    </MuiDialog>
   );
 }

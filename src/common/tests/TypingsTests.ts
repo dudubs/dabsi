@@ -1,240 +1,225 @@
 import {
-    HasKeys,
-    Is,
-    IsAny,
-    IsEmptyObject,
-    IsNever,
-    IsSome,
-    IsUndefined,
-    OptionalKeys,
-    OptionalObjectArg,
-    PartialUndefinedKeys,
-    Pluck,
-    RequireOptionalKeys
+  HasKeys,
+  Is,
+  IsAny,
+  IsEmptyObject,
+  IsNever,
+  IsSome,
+  IsUndefined,
+  OptionalKeys,
+  OptionalObjectArg,
+  PartialUndefinedKeys,
+  PluckRequired,
+  RequireOptionalKeys,
 } from "../typings";
 
+(_ => {})(() => {
+  // Bool
+  {
+    // @ts-expect-error
+    test<false & true>(false);
 
-((_) => {
-})(() => {
+    test<false | true>(false);
 
-    // Bool
-    {
+    test<false | true>(true);
+  }
+  // IsUndefined
+  {
+    test<IsUndefined<undefined & undefined>>(true);
+
+    // @ts-expect-error
+    test<IsUndefined<undefined & never>>(true);
+  }
+
+  // IsEmptyObject
+  {
+    type n = number;
+
+    test<IsEmptyObject<{ a?: n }>>(true);
+
+    test<IsEmptyObject<{ a?: n } | { a: n }>>(true);
+
+    test<IsEmptyObject<{ a: n }>>(false);
+
+    test<IsEmptyObject<{ a: n } | {}>>(true);
+
+    test<IsEmptyObject<{ a: n } | { a?: n }>>(true);
+
+    test<IsEmptyObject<{ a: n } | { a?: n } | undefined>>(true);
+  }
+
+  // PartialUndefinedKeys
+  {
+    test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(
+      { b: 1 }
+    );
+
+    test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(
+      // @ts-expect-error
+      {}
+    );
+
+    test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(
+      {
+        b: 1,
         // @ts-expect-error
-        test<false & true>(false);
+        c: 1,
+      }
+    );
+  }
+  // Is
+  {
+    const undefinedIsUndefined: Is<undefined, undefined> = true;
 
-        test<false | true>(false);
+    const undefinedIsUndefinedOrNumber: Is<
+      undefined,
+      undefined | number
+    > = true;
 
-        test<false | true>(true);
-    }
-    // IsUndefined
-    {
-        test<IsUndefined<undefined & undefined>>(true);
+    const undefinedIsUndefinedOrNever: Is<undefined, undefined | never> = true;
 
-        // @ts-expect-error
-        test<IsUndefined<undefined & never>>(true);
-    }
+    const undefinedIsUndefinedOrUnkown: Is<
+      undefined,
+      undefined | unknown
+    > = true;
 
+    const neverIsNever: Is<never, never> = true;
 
-    // IsEmptyObject
-    {
-        type n = number;
+    const neverIsUnkown: Is<never, unknown> = true;
 
+    const neverIsAny: Is<never, any> = true;
 
-        test<IsEmptyObject<{ a?: n }>>(true);
+    // @ts-expect-error
+    const unknownIsNever: Is<unknown, never> = true;
 
-        test<IsEmptyObject<{ a?: n } | { a: n }>>(true);
+    const unknownIsUnkown: Is<unknown, unknown> = true;
 
-        test<IsEmptyObject<{ a: n }>>(false);
+    const unknownIsAny: Is<unknown, any> = true;
 
-        test<IsEmptyObject<{ a: n } | {}>>(true);
+    // @ts-expect-error
+    const anyIsNever: Is<any, never> = true;
 
+    const anyIsUnkown: Is<any, unknown> = true;
 
-        test<IsEmptyObject<{ a: n } | { a?: n }>>(true);
+    const anyIsAny: Is<any, any> = true;
+  }
 
-        test<IsEmptyObject<{ a: n } | { a?: n } | undefined>>(true);
+  // IsSome
+  {
+    const neverIsNever: IsSome<never, never> = true;
 
+    // @ts-expect-error
+    const neverIsUnkown: IsSome<never, unknown> = true;
 
-    }
+    // @ts-expect-error
+    const neverIsAny: IsSome<never, any> = true;
 
+    // @ts-expect-error
+    const unknownIsNever: IsSome<unknown, never> = true;
 
-    // PartialUndefinedKeys
-    {
+    const unknownIsUnkown: IsSome<unknown, unknown> = true;
 
-        test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({b: 1});
+    const unknownIsAny: IsSome<unknown, any> = true;
 
-        // @ts-expect-error
-        test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({});
+    // @ts-expect-error
+    const anyIsNever: IsSome<any, never> = true;
 
-        // @ts-expect-error
-        test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number, b: number }>>>({b: 1, c: 1});
-    }
-    // Is
-    {
+    const anyIsUnkown: IsSome<any, unknown> = true;
 
-        const undefinedIsUndefined: Is<undefined, undefined> = true;
+    const anyIsAny: IsSome<any, any> = true;
+  }
 
-        const undefinedIsUndefinedOrNumber: Is<undefined, undefined | number> = true;
+  // RequireOptionalKeys
+  {
+    test<RequireOptionalKeys<{ foo?: string }>>({ foo: "" });
 
-        const undefinedIsUndefinedOrNever: Is<undefined, undefined | never> = true;
+    test<RequireOptionalKeys<{ foo?: string }>>({ foo: undefined });
 
-        const undefinedIsUndefinedOrUnkown: Is<undefined, undefined | unknown> = true;
+    // @ts-expect-error
+    test<RequireOptionalKeys<{ foo: string }>>({ foo: undefined });
 
-        const neverIsNever: Is<never, never> = true;
+    // @ts-expect-error
+    test<RequireOptionalKeys<{ foo?: string }>>({});
+  }
 
-        const neverIsUnkown: Is<never, unknown> = true;
+  // OptionalKeys
+  {
+    // @ts-expect-error
+    test<OptionalKeys<{ foo; bar? }>>("foo");
 
-        const neverIsAny: Is<never, any> = true;
+    test<OptionalKeys<{ foo; bar? }>>("bar");
+  }
 
+  // HasKeys
+  {
+    test<HasKeys<never>>(false);
+    // @ts-expect-error
+    test<HasKeys<never>>(true);
 
-        // @ts-expect-error
-        const unknownIsNever: Is<unknown, never> = true;
+    test<HasKeys<{}>>(false);
+    // @ts-expect-error
+    test<HasKeys<{}>>(true);
 
-        const unknownIsUnkown: Is<unknown, unknown> = true;
+    test<HasKeys<{ a }>>(true);
+    // @ts-expect-error
+    test<HasKeys<{ a }>>(false);
+  }
 
-        const unknownIsAny: Is<unknown, any> = true;
+  // OptionalObjectArg
+  {
+    test<OptionalObjectArg<never>>([]);
 
+    test<OptionalObjectArg<{ x: never }>>([]);
 
-        // @ts-expect-error
-        const anyIsNever: Is<any, never> = true;
+    test<OptionalObjectArg<{ x: never; y: number }>>([{ y: 1 }]);
+  }
+  // Pluck
+  {
+    test<IsNever<PluckRequired<never, "">>>(true);
+  }
 
-        const anyIsUnkown: Is<any, unknown> = true;
+  // IsAny
+  {
+    test<IsAny<any>>(true);
 
-        const anyIsAny: Is<any, any> = true;
+    test<IsAny<unknown>>(false);
 
+    test<IsAny<never>>(false);
 
-    }
+    test<IsAny<string>>(false);
 
-    // IsSome
-    {
+    test<IsAny<object>>(false);
 
-        const neverIsNever: IsSome<never, never> = true;
+    test<IsAny<{}>>(false);
+  }
+  // IsNever
+  {
+    test<IsNever<any>>(false);
+    test<IsNever<undefined>>(false);
+    test<IsNever<null>>(false);
+    test<IsNever<unknown>>(false);
 
-        // @ts-expect-error
-        const neverIsUnkown: IsSome<never, unknown> = true;
+    test<IsNever<never>>(true);
 
-        // @ts-expect-error
-        const neverIsAny: IsSome<never, any> = true;
+    // @ts-expect-error
+    test<IsNever<any>>(true);
 
+    // @ts-expect-error
+    test<IsNever<undefined>>(true);
 
-        // @ts-expect-error
-        const unknownIsNever: IsSome<unknown, never> = true;
+    // @ts-expect-error
+    test<IsNever<null>>(true);
 
-        const unknownIsUnkown: IsSome<unknown, unknown> = true;
+    // @ts-expect-error
+    test<IsNever<unknown>>(true);
+  }
+  // HasKeys
+  {
+    test<HasKeys<{}>>(false);
 
-        const unknownIsAny: IsSome<unknown, any> = true;
-
-
-        // @ts-expect-error
-        const anyIsNever: IsSome<any, never> = true;
-
-        const anyIsUnkown: IsSome<any, unknown> = true;
-
-        const anyIsAny: IsSome<any, any> = true;
-
-
-    }
-
-
-    // RequireOptionalKeys
-    {
-        test<RequireOptionalKeys<{ foo?: string }>>({foo: ""});
-
-        test<RequireOptionalKeys<{ foo?: string }>>({foo: undefined});
-
-        // @ts-expect-error
-        test<RequireOptionalKeys<{ foo: string }>>({foo: undefined});
-
-        // @ts-expect-error
-        test<RequireOptionalKeys<{ foo?: string }>>({});
-    }
-
-    // OptionalKeys
-    {
-        // @ts-expect-error
-        test<OptionalKeys<{ foo, bar? }>>("foo");
-
-        test<OptionalKeys<{ foo, bar? }>>("bar");
-    }
-
-    // HasKeys
-    {
-        test<HasKeys<never>>(false);
-        // @ts-expect-error
-        test<HasKeys<never>>(true);
-
-        test<HasKeys<{}>>(false);
-        // @ts-expect-error
-        test<HasKeys<{}>>(true);
-
-        test<HasKeys<{ a }>>(true);
-        // @ts-expect-error
-        test<HasKeys<{ a }>>(false);
-
-
-    }
-
-    // OptionalObjectArg
-    {
-        test<OptionalObjectArg<never>>([]);
-
-        test<OptionalObjectArg<{ x: never }>>([]);
-
-        test<OptionalObjectArg<{ x: never, y: number }>>([{y: 1}]);
-
-    }
-    // Pluck
-    {
-        test<IsNever<Pluck<never, "">>>(true);
-
-    }
-
-
-    // IsAny
-    {
-
-        test<IsAny<any>>(true);
-
-        test<IsAny<unknown>>(false);
-
-        test<IsAny<never>>(false);
-
-        test<IsAny<string>>(false);
-
-        test<IsAny<object>>(false);
-
-        test<IsAny<{}>>(false);
-
-    }
-    // IsNever
-    {
-        test<IsNever<any>>(false);
-        test<IsNever<undefined>>(false);
-        test<IsNever<null>>(false);
-        test<IsNever<unknown>>(false);
-
-        test<IsNever<never>>(true);
-
-        // @ts-expect-error
-        test<IsNever<any>>(true);
-
-        // @ts-expect-error
-        test<IsNever<undefined>>(true);
-
-        // @ts-expect-error
-        test<IsNever<null>>(true);
-
-        // @ts-expect-error
-        test<IsNever<unknown>>(true);
-    }
-    // HasKeys
-    {
-        test<HasKeys<{}>>(false);
-
-        // @ts-expect-error
-        test<HasKeys<{}>>(true);
-    }
-
+    // @ts-expect-error
+    test<HasKeys<{}>>(true);
+  }
 });
 
 declare function test<T>(value: T, callback?: (value: T) => void): T;
-

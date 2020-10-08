@@ -4,23 +4,29 @@ import {
   ReactElement,
   ReactNode,
   RefCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { Awaitable } from "../../common/typings";
+import { Awaitable, Nullable } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
-import { ViewState } from "../../react/view/ViewState";
-import { WidgetType } from "../widget/Widget";
-import { WidgetView, WidgetViewProps } from "../widget/WidgetView";
+import { WidgetElement } from "../widget/Widget";
+import {
+  useWidgetView,
+  WidgetView,
+  WidgetViewProps,
+} from "../widget/WidgetView";
 import {
   AnyInput,
   AnyInputConnection,
   ErrorOrValue,
   InputData,
   InputError,
-  InputType,
-  InputValue,
   InputValueElement,
 } from "./Input";
 import { InputViewChildren } from "./InputViewChildren";
+import set = Reflect.set;
 
 /*
 
@@ -31,6 +37,25 @@ import { InputViewChildren } from "./InputViewChildren";
 
 
  */
+
+export type _InputView<C extends AnyInputConnection> = {
+  readonly value: InputValueElement<C>;
+  readonly error: InputError<C> | undefined;
+  readonly data: InputData<C>;
+
+  validate(): void;
+
+  setValue(value: InputValueElement<C>): void;
+
+  setError(error: InputError<C> | undefined): void;
+};
+
+/*
+useInputView(props)
+
+
+ */
+
 export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   C
 > & {
@@ -47,158 +72,26 @@ export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   value?: InputValueElement<C>;
 };
 
-export type InputViewRenderer<C extends AnyInputConnection> = Renderer<
+export type InputViewFn<C extends AnyInputConnection> = Renderer<
   InputViewProps<C>
 >;
+
+export type InputView<C extends AnyInputConnection> = WidgetView<C> & {
+  readonly data: InputData<C>;
+  readonly error: InputError<C> | undefined;
+  readonly errorElement: ReactElement | undefined;
+  readonly value: InputValueElement<C>;
+  readonly isValidating: boolean;
+  readonly children?: InputViewChildren;
+  setError(error: InputError<C> | undefined): void;
+  setValue(value: InputValueElement<C>): Promise<void>;
+  validate(): Promise<boolean>;
+};
+
 export type AnyInputView = InputView<AnyInputConnection>;
 export type InputErrorOrData<
   C extends AnyInput | AnyInputConnection
 > = ErrorOrValue<InputError<C>, InputData<C>>;
-
-// TODO: AbstractInputView
-// TODO: type InputView
-export abstract class InputView<
-  C extends AnyInputConnection,
-  P extends InputViewProps<C> = InputViewProps<C>,
-  T extends InputType<C> = InputType<C>
-> extends WidgetView<C, P> {
-  protected updateError?(error: T["Error"] | undefined): void;
-
-  @ViewState("forceUpdateValue") protected _value: InputValueElement<C>;
-
-  @ViewState("forceUpdateError") protected _error: InputError<C>;
-
-  @ViewState() _errorElement: ReactElement | undefined;
-
-  protected _data: InputData<C>;
-  protected _isValidValue: boolean;
-
-  children?: InputViewChildren;
-
-  get errorElement(): ReactElement | undefined {
-    return this._errorElement;
-  }
-
-  get data(): InputData<C> {
-    return this._data;
-  }
-
-  get error(): T["Error"] | undefined {
-    return this._error;
-  }
-
-  get value(): InputValueElement<C> {
-    return this._value;
-  }
-
-  async setValue(value: InputValueElement<C>): Promise<void> {
-    if (this._isValidValue && this._value === value) {
-      return;
-    }
-
-    this._value = value;
-    this._error = await this.getError?.();
-    if (this._error != null) {
-      this.props.onError?.(this);
-      return;
-    }
-    this._isValidValue = value;
-    this.props.onChange?.(this);
-  }
-
-  setError(error: T["Error"] | undefined) {
-    this._error = error;
-  }
-
-  protected getError?(): Awaitable<InputError<C> | undefined>;
-
-  protected updateValue?(value: InputValueElement<C>): void;
-
-  protected updateElement(element: WidgetType<C>["Element"]) {
-    this._value =
-      this.props.value !== undefined
-        ? this.props.value
-        : this.connectionProps.getValueElementFromElement(element);
-  }
-
-  forceUpdateValue() {
-    this._error = undefined;
-    this._isValidValue = false;
-    this._data = this.connectionProps.getDataFromValueElement(this._value);
-    this.updateValue?.(this._value);
-  }
-
-  // TODO: ["children", { ... }]
-  protected renderErrorElement(): ReactElement | undefined {
-    const { error } = this;
-    // TODO: use this.error
-    if (error == null) return;
-    const element = this.props.renderError?.(error);
-    if (element) return element;
-    if (typeof error === "string") {
-      if (this.props.errorMap && error in this.props.errorMap) {
-        return createElement(Fragment, null, this.props.errorMap[error]);
-      }
-    }
-    const defaultErrorElement = this.getErrorElement?.(error);
-    if (defaultErrorElement != null) return defaultErrorElement;
-  }
-
-  forceUpdateError() {
-    this._errorElement =
-      this._error != null ? this.renderErrorElement() : undefined;
-
-    this.children?.updateError(this._error);
-    this.updateError?.(this._error);
-  }
-
-  inputWillValidate?(): Awaitable;
-
-  async validate(): Promise<boolean> {
-    await this.inputWillValidate?.();
-    const error =
-      (await this.children?.getError()) ?? (await this.getError?.());
-    return null == (this._error = error);
-  }
-
-  /*
-    submit
-    validate
-    inputError REQUIRED
-    submit
-    validate
-    inputError  REQUIRED
-
-
-   */
-  updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
-    super.updateViewProps(prevProps, nextProps);
-    if (nextProps.value !== prevProps.value) {
-      this._value = nextProps.value;
-    }
-  }
-
-  protected getErrorElement?(error: T["Error"]): ReactElement;
-
-  renderError(): ReactNode {
-    if (this.errorElement) return this.errorElement;
-
-    const { error } = this;
-    if (typeof error === "string") return error;
-
-    if (error != null) return JSON.stringify(error);
-  }
-
-  componentDidMount() {
-    super.componentDidMount();
-    this.props.inputRef?.(this);
-  }
-
-  componentWillUnmount() {
-    super.componentWillUnmount();
-    this.props.inputRef?.(null);
-  }
-}
 
 /*
 WidgetElement
@@ -206,3 +99,108 @@ WidgetElement
 InputElement
 
  */
+
+export function useInputView<C extends AnyInputConnection>(
+  props: InputViewProps<C>,
+  {
+    validate,
+    inputWillValidate,
+    renderDefaultError,
+    useChildren,
+  }: {
+    useChildren?: boolean;
+    validate?: (
+      value: InputValueElement<C>
+    ) => Awaitable<InputError<C> | undefined>;
+    renderDefaultError?: (error: InputError<C>) => ReactElement | undefined;
+    inputWillValidate?: () => Awaitable;
+  } = {}
+): InputView<C> {
+  const { element, setElement } = useWidgetView(props);
+
+  const [count, setCount] = useState(0);
+
+  const children = useMemo(() => {
+    if (useChildren) return new InputViewChildren();
+  }, [useChildren]);
+  const input = useMemo((): InputView<C> => {
+    let value: any = props.connection.props.getValueElementFromElement(element);
+    let error: any = undefined;
+    let data: any = props.connection.props.getDataFromValueElement(value);
+    let errorElement: ReactElement | undefined = undefined;
+    let isValidValue = false;
+    let isValidating = false;
+    return {
+      setElement,
+      children,
+      get element() {
+        return element;
+      },
+      get value() {
+        return value;
+      },
+      get error() {
+        return error;
+      },
+      get data() {
+        return data;
+      },
+      get errorElement() {
+        return errorElement;
+      },
+      get isValidating() {
+        return isValidating;
+      },
+      async setValue(nextValue) {
+        if (isValidValue && value === nextValue) return;
+        isValidValue = false;
+        value = nextValue;
+        isValidating = true;
+        update();
+        setError(await validate?.(value));
+        isValidating = false;
+        update();
+        if (error != null) {
+          props.onChange?.(input);
+        } else {
+          props.onError?.(input);
+        }
+      },
+      async validate() {
+        await inputWillValidate?.();
+        setError(children?.getError() ?? validate?.(value));
+        return error == null;
+      },
+      setError,
+    };
+
+    function setError(nextError) {
+      if (error === nextError) return;
+      error = nextError;
+      errorElement =
+        error == null
+          ? undefined
+          : props.renderError?.(error) ??
+            renderDefaultError?.(error) ??
+            createElement(
+              Fragment,
+              null,
+              typeof error === "string" ? error : JSON.stringify(error)
+            );
+      children?.updateError(error);
+      update();
+    }
+    function update() {
+      setCount(count + 1);
+    }
+  }, [element]);
+
+  useEffect(() => {
+    props.inputRef?.(input);
+    return () => {
+      props.inputRef?.(null);
+    };
+  });
+
+  return input;
+}

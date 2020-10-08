@@ -1,15 +1,14 @@
-import {
-  If,
-  IsEmptyObject,
-  OmitKeys,
-  PartialUndefinedKeys,
-} from "../../common/typings";
+import { OmitKeys, PartialUndefinedKeys } from "../../common/typings";
 import { DataRow } from "../../data/DataRow";
-import { DataSelection } from "../../data/DataSelection";
 import { DataSource } from "../../data/DataSource";
 import { NoRpc } from "../NoRpc";
 import { RpcGenericConfigFn } from "../RpcGenericConfig";
-import { DataTable, DataTableConfig } from "../widget/DataTable";
+import {
+  DataTable,
+  DataTableColumnMapConfig,
+  DataTableConfig,
+} from "../widget/DataTable";
+import { AnyRowType, Row, string } from "../widget/Row";
 import { DataInputContext } from "./DataInputContext";
 import { Input } from "./Input";
 import { NullableInput, NullableInputOptions } from "./NullableInput";
@@ -17,20 +16,10 @@ import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
 
 export type DataInputRow = {
   $key: string;
-  label: string;
 };
 
-export type BaseDataInputConfigTypes<T, D, DS extends DataSelection<D>> = {
-  Table: DataTableConfig<T & OmitKeys<DataInputRow, "$key">, NoRpc, D, DS>;
-
-  Columns: BaseDataInputConfigTypes<T, D, DS>["Table"]["columns"];
-
-  ColumnsWithoutLabel: OmitKeys<
-    BaseDataInputConfigTypes<T, D, DS>["Columns"],
-    "label"
-  >;
-
-  LabelColumn: BaseDataInputConfigTypes<T, D, DS>["Columns"]["label"];
+export type BaseDataInputConfigTypes<Row, D> = {
+  Table: DataTableConfig<Row & OmitKeys<DataInputRow, "$key">, NoRpc, D>;
 };
 
 export type BaseDataInputConfig<
@@ -38,15 +27,13 @@ export type BaseDataInputConfig<
   UndefinedConfig,
   Config,
   D,
-  DS extends DataSelection<D>,
-  Types extends BaseDataInputConfigTypes<Row, D, DS> = BaseDataInputConfigTypes<
+  Types extends BaseDataInputConfigTypes<Row, D> = BaseDataInputConfigTypes<
     Row,
-    D,
-    DS
+    D
   >
 > = PartialUndefinedKeys<
   UndefinedConfig & {
-    columns: Types["ColumnsWithoutLabel"] | If<IsEmptyObject<Row>, undefined>;
+    columns: DataTableColumnMapConfig<Row, D>;
   },
   Config & {
     default?: ValueOrAwaitableFn<string | DataRow<D> | undefined>;
@@ -54,17 +41,10 @@ export type BaseDataInputConfig<
     tableConfig?: Omit<Types["Table"], "columns" | "selection" | "source">;
 
     source: DataSource<D>;
-    selection?: DS;
-    // TODO: undefined if
-    label: Types["LabelColumn"];
   }
 >;
 
-export type DataInputConfig<
-  T,
-  D,
-  DS extends DataSelection<D>
-> = BaseDataInputConfig<T, {}, {}, D, DS>;
+export type DataInputConfig<T, D> = BaseDataInputConfig<T, {}, {}, D>;
 
 export type AnyDataInput = DataInput<any, any>;
 
@@ -73,54 +53,58 @@ export type DataInputTable<R> = DataTable<
   NoRpc
 >;
 
-export type DataInput<R, N extends boolean> = NullableInput<
+export type DataInput<Row, N extends boolean> = NullableInput<
   N,
   {
+    Row: Row;
     Data: string;
 
     Value: string;
 
-    ValueElement: DataInputRow & R;
+    ValueElement: DataInputRow & Row;
 
     Props: {
-      table: DataInputTable<R>;
+      table: DataInputTable<Row>;
     };
 
     Config: RpcGenericConfigFn<
-      <D, DS extends DataSelection<D> = {}>(
-        config: DataInputConfig<R, D, DS>
-      ) => DataInputConfig<R, any, any>
+      <D>(config: DataInputConfig<Row, D>) => DataInputConfig<Row, any>
     >;
 
     Element: {
-      default?: DataInputRow & R;
+      default?: DataInputRow & Row;
     };
 
-    Controller: DataInputTable<R>;
+    Controller: DataInputTable<Row>;
 
     Error: never;
   }
 >;
 
-export function DataInput<T extends Record<string, any> = {}>() {
-  return <N extends boolean = false>(
-    options: NullableInputOptions<N> = {}
-  ): DataInput<T, N> => {
-    const controller = DataTable<any>()();
-    return <any>Input<DataInput<any, any>>({
-      props: {
-        nullable: options.nullable ?? false,
-        table: controller,
-      },
-      isGenericConfig: true,
-      controller,
-      context: DataInputContext,
-      getValueElementFromElement(element) {
-        return element.default;
-      },
-      getDataFromValueElement(value) {
-        return value?.$key;
-      },
-    });
-  };
+export function DataInput<
+  RowType extends AnyRowType = {
+    label: typeof string;
+  },
+  N extends boolean = false
+>(
+  options: NullableInputOptions<N> & {
+    rowType?: RowType;
+  } = {}
+): DataInput<Row<RowType>, N> {
+  const controller = DataTable(options.rowType || { label: string });
+  return <any>Input<DataInput<any, any>>({
+    props: {
+      nullable: options.nullable ?? false,
+      table: controller,
+    },
+    isGenericConfig: true,
+    controller,
+    context: DataInputContext,
+    getValueElementFromElement(element) {
+      return element.default;
+    },
+    getDataFromValueElement(value) {
+      return value?.$key;
+    },
+  });
 }

@@ -1,13 +1,14 @@
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { Lazy } from "../../common/patterns/lazy";
-import { RequireOptionalKeys } from "../../common/typings";
+import { Awaitable, RequireOptionalKeys } from "../../common/typings";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { RpcConfig, RpcError } from "../Rpc";
 import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
+  WidgetType,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
 import { AnyArrayInput } from "./ArrayInput";
@@ -21,8 +22,20 @@ export class ArrayInputContext
   implements ContextualRpcContext<T> {
   protected getInputConfigForValue(
     value: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>> {
+  ): WidgetConfig<WidgetType<T>> {
     return { ...this.config, default: value };
+  }
+  async getDefaultValue(): Promise<InputValue<T> | undefined> {
+    const value: any[] = [];
+
+    for (const itemValue of (await ValueOrAwaitableFn(this.config.default)) ||
+      []) {
+      value.push(
+        await this.itemContext.getContextForValue(itemValue).getDefaultValue()
+      );
+    }
+
+    if (value.length) return value;
   }
 
   @Lazy() get itemContext() {
@@ -37,7 +50,7 @@ export class ArrayInputContext
     return {
       item: this.config.itemConfig,
       newItem: this.config.newItemConfig,
-      addNewItem: async (data) => {
+      addNewItem: async data => {
         const result = await this.newItemContext.loadAndCheck(data);
         if ("error" in result) return result;
         const itemValue = this.config.getItemValue

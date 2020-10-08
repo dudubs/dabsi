@@ -2,6 +2,7 @@ import { mapObjectToArray } from "../../common/object/mapObjectToArray";
 import { Renderer } from "../../react/renderer";
 import { RpcConnection } from "../Rpc";
 import { DataTableRowWithKey } from "../widget/DataTable";
+import { AbstractInputView } from "./AbstractInputView";
 import { AnyDataInputMap, DataInputMap } from "./DataInputMap";
 import { AnyInput, InputType } from "./Input";
 import { InputView, InputViewProps } from "./InputView";
@@ -19,10 +20,8 @@ export type DataInputMapViewProps<
 
 export class DataInputMapView<
   C extends RpcConnection<AnyDataInputMap>
-> extends InputView<C, DataInputMapViewProps<C>> {
+> extends AbstractInputView<C, DataInputMapViewProps<C>> {
   children = new InputViewChildren();
-
-  // new InputViewTarget()
 
   renderView(): React.ReactNode {
     return this.element.children.map(({ row, target }, index) => {

@@ -1,36 +1,36 @@
-import {Constructor, Type} from "../common/typings";
-import {DataSelection} from "./DataSelection";
-import {DataSelectionRow} from "./DataSelectionRow";
-import {DataSource} from "./DataSource";
-import {DataTypeInfo} from "./DataTypeInfo";
+import { Constructor, Type } from "../common/typings";
+import { AnyDataSelection, DataSelection } from "./DataSelection";
+import { DataSelectionRow } from "./DataSelectionRow";
+import { DataSource } from "./DataSource";
+import { DataTypeInfo } from "./DataTypeInfo";
 
 export function DataSelector<T, S extends DataSelection<T>>(
-    type: Constructor<T>,
-    selection: S
+  type: Constructor<T>,
+  selection: S
 ): {
-    new(): DataSelectionRow<T, S>;
+  new (): DataSelectionRow<T, S>;
 
-    select(source: DataSource<T>): DataSource<DataSelectionRow<T, S>>
+  select(source: DataSource<T>): DataSource<DataSelectionRow<T, S>>;
 } {
+  const typeInfo = DataTypeInfo.get(type);
 
+  Selector[DataTypeInfo.symbol] = {
+    ...typeInfo,
+    selection: DataSelection.merge(
+      typeInfo.selection,
+      selection as AnyDataSelection
+    ),
+  };
 
+  Selector.select = function (source: DataSource<any>) {
+    return source.updateCursor({
+      selection: DataSelection.merge(source.cursor.selection, <any>selection),
+    });
+  };
 
-    Selector[DataTypeInfo.symbol] = {
-        ...DataTypeInfo.get(type)
-    };
+  return <any>Selector;
 
-    Selector.select = function (source: DataSource<any>) {
-        return source.updateCursor({
-            selection: DataSelection.merge(
-                source.cursor.selection,
-                <any>selection
-            )
-        })
-    }
-
-    return <any>Selector
-
-    function Selector() {
-        throw new Error()
-    }
+  function Selector() {
+    throw new Error();
+  }
 }

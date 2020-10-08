@@ -4,12 +4,14 @@ import { Lazy } from "../../common/patterns/lazy";
 import { DataExp } from "../../data/DataExp";
 import { DataOrder } from "../../data/DataOrder";
 import { DataRow } from "../../data/DataRow";
+import { inspect } from "../../logging";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { AnyRpc, RpcConfig } from "../Rpc";
+import { ConfigFactory, ConfigFactory2 } from "../RpcGenericConfig";
 import { AbstractWidgetContext } from "./AbstractWidgetContext";
 import {
+  AnyDataTableColumnContext,
   DataTable,
-  DataTableColumnContext,
   DataTableQuery,
   DataTableQueryResult,
 } from "./DataTable";
@@ -20,19 +22,31 @@ type T = DataTable<any, AnyRpc>;
 export class DataTableContext<C extends T>
   extends AbstractWidgetContext<C>
   implements ContextualRpcContext<T> {
-  @Lazy() get columns(): Record<string, DataTableColumnContext<any, any, any>> {
-    return mapObject(this.config.columns, (columnConfig, key) => {
-      if (typeof columnConfig === "function") {
-        return { load: columnConfig };
-      } else {
-        return (
-          columnConfig || {
-            load(row) {
-              return row[key];
-            },
+  @Lazy() get columns(): Record<string, AnyDataTableColumnContext> {
+    return mapObject(this.config.columns || {}, (columnConfig, key) => {
+      let load;
+      let field: any = undefined;
+
+      switch (typeof columnConfig) {
+        case "function":
+          load = columnConfig;
+          break;
+        case "string":
+          field = columnConfig;
+          load = dataRow => dataRow[field];
+          break;
+        case "object":
+          ({ load, field } = columnConfig || ({} as any));
+          if (!load) {
+            load = dataRow => dataRow[key];
+            field = key;
           }
-        );
+          break;
+        default:
+          throw new TypeError(`Unexpected ${inspect({ columnConfig })}`);
       }
+
+      return { load, field };
     });
   }
 
@@ -73,7 +87,7 @@ export class DataTableContext<C extends T>
     const filters: DataExp<any> = [];
 
     if (query.text) {
-      const searchFilters = this.config.searchIn?.map((field) => {
+      const searchFilters = this.config.searchIn?.map(field => {
         return {
           $search: {
             in: field,
@@ -92,13 +106,13 @@ export class DataTableContext<C extends T>
       .skip(query.skip ?? 0)
       .filter({ $and: filters });
 
-    let count: number;
+    let totalRows: number;
     let dataRows: DataRow<any>[];
 
     if (query.getCount) {
-      [count, dataRows] = await source.countAndQuery();
+      [totalRows, dataRows] = await source.countAndQuery();
     } else {
-      [count, dataRows] = [0, await source.items()];
+      [totalRows, dataRows] = [0, await source.items()];
     }
 
     const rows: any[] = [];
@@ -106,19 +120,20 @@ export class DataTableContext<C extends T>
       rows.push(await this.getTableRowFromDataRow(dataRow));
     }
 
-    return { rows, count };
+    return { rows, totalRows };
   }
 
   getControllerConfig(): RpcConfig<WidgetController<C>> {
-    return ($) =>
+    return $ =>
       $({
-        source: this.config.source,
-        getTargetConfig: ($, row) => this.config.getRowConfig?.(row),
+        load: String,
+        getTargetConfig: ($, key) =>
+          $(ConfigFactory(this.config.getRowConfig, { key })),
       });
   }
 
   async getElement(): Promise<WidgetElement<C>> {
-    const { rows, count } = await this.getRows({
+    const { rows, totalRows } = await this.getRows({
       getCount: true,
       text: "",
       take: this.config.pageSize || 10,
@@ -128,10 +143,10 @@ export class DataTableContext<C extends T>
 
     return {
       rows,
-      count,
+      totalRows,
       pageSize: this.config.pageSize,
       searchable: !!this.config.searchIn?.length,
-      columns: mapObject(this.columns, (column) => {
+      columns: mapObject(this.columns, column => {
         if (typeof column === "function") return { sortable: false };
         return { sortable: !!column.field };
       }),

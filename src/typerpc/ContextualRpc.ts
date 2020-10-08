@@ -1,6 +1,8 @@
 import { touchMap } from "../common/map/touchMap";
 import { MetaType, WithMetaType } from "../common/MetaType";
+import { Awaitable } from "../common/typings";
 import { Rpc, RpcHandlerFn } from "./Rpc";
+import { ConfigFactory, ConfigFactory2 } from "./RpcGenericConfig";
 
 export type TContextualRpc = {
   Handler: RpcHandlerFn;
@@ -25,6 +27,10 @@ export type ContextualRpcType<
 export type ContextualRpcContext<
   T extends AnyContextualRpc
 > = ContextualRpcType<T>["Context"];
+
+export type ContextualRpcConfig<T extends AnyContextualRpc> = MetaType<
+  T
+>["TContextualRpc"]["Config"];
 
 export type ContextualRpc<T extends TContextualRpc> = WithMetaType<{
   TContextualRpc: T;
@@ -70,14 +76,14 @@ export function ContextualRpc<Rpc extends AnyContextualRpc>(
             <any>null
           ))
         );
-      return touchMap(handlers, config!, (config) =>
+      return touchMap(handlers, config!, config =>
         options.createContext(options.props, config)
       );
     },
     createRpcHandler(config) {
       return options.createHandler(this.getContext(config), options.props);
     },
-    createRpcConnection: (handler) =>
+    createRpcConnection: handler =>
       options.createConnection(handler, options.props),
   });
 }

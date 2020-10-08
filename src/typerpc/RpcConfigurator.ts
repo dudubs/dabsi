@@ -1,74 +1,73 @@
 import { MetaType } from "../common/MetaType";
 import { Fn } from "../common/typings";
-import { OmitRequiredKeys } from "../data/DataExp";
-import { AnyRpc, RpcConfig, RpcHook } from "./Rpc";
-import { RpcGenericConfig, RpcGenericConfigFn } from "./RpcGenericConfig";
+import { AnyRpc, RpcConfig } from "./Rpc";
+import { RpcConfigHook } from "./RpcConfigHook";
+import {
+  AnyConfigFactory,
+  ConfigFactory,
+  ConfigFactory2,
+  RpcConfigFactory2,
+  RpcGenericConfig,
+  RpcGenericConfigFn,
+} from "./RpcGenericConfig";
+import Any = jasmine.Any;
 
-export type RpcConfigurator<T extends AnyRpc, C> = OmitRequiredKeys<T, AnyRpc> &
-  RpcHook<
-    T,
-    {
-      Config: C;
-    },
-    {
-      Configurator: {
-        Target: T;
-        ToConfig: C;
-      };
-    }
-  >;
-// Rpc<Omit<RpcType<T>, "Config"> & { Config: C }>
-
-export type RpcGenericConfigurator<
-  T extends AnyRpc,
-  C extends Fn
-> = RpcConfigurator<T, RpcGenericConfigFn<C>>;
-
-export type AnyRpcConfigurator = RpcConfigurator<AnyRpc, any>;
-
-const baseGetConfigProp = "getConfig";
-export function RpcConfigurator<T extends AnyRpc, C>(
-  target: T,
-  getConfig: (config: C) => RpcConfig<T>
-): RpcConfigurator<T, C>;
-export function RpcConfigurator<T extends AnyRpcConfigurator>(
-  target: MetaType<T>["Configurator"]["Target"],
-  getConfig: (
-    config: MetaType<T>["Configurator"]["ToConfig"]
-  ) => RpcConfig<MetaType<T>["Configurator"]["Target"]>
-): RpcConfigurator<
-  MetaType<T>["Configurator"]["Target"],
-  MetaType<T>["Configurator"]["ToConfig"]
+export type RpcConfigurator<T extends AnyRpc, C> = RpcConfigHook<
+  T,
+  C extends Fn ? RpcGenericConfigFn<C> : C,
+  {
+    Configurator: {
+      Target: T;
+      ToConfig: C;
+    };
+  }
 >;
-export function RpcConfigurator(target, getConfig) {
-  const baseGetConfig = target.createRpcHandler[baseGetConfigProp];
 
-  if (baseGetConfig) {
-    return RpcConfigurator(Object.getPrototypeOf(target), (config) =>
-      getConfig(baseGetConfig(config))
-    );
-  }
-  createRpcHandler[baseGetConfigProp] = getConfig;
+export type RpcGenericConfigurator<T extends AnyRpc, C> = RpcConfigurator<T, C>;
 
-  return Object.setPrototypeOf({ createRpcHandler }, target);
-
-  function createRpcHandler(this, config) {
-    return target.createRpcHandler.call(this, getConfig(config));
-  }
+export function RpcConfigurator<T extends AnyRpcConfigurator>(
+  target: Target<T>,
+  getConfig: RpcConfiguratorFactory<T>
+): RpcConfigurator<Target<T>, ToConfig<T>> {
+  return RpcConfigHook(target, getConfig);
 }
 
-export type AnyRpcGenericConfigurator = RpcConfigurator<
-  AnyRpc,
-  RpcGenericConfigFn
->;
+export type Target<T extends AnyRpcConfigurator> = MetaType<
+  T
+>["Configurator"]["Target"];
 
-export function RpcGenericConfigurator<T extends AnyRpcConfigurator>(
-  target: MetaType<T>["Configurator"]["Target"],
-  getConfig: (
-    config: ReturnType<RpcConfig<T>>
-  ) => RpcConfig<MetaType<T>["Configurator"]["Target"]>
-): RpcConfigurator<MetaType<T>["Configurator"]["Target"], RpcConfig<T>> {
-  return RpcConfigurator(target, (genericConfig) => {
-    return getConfig(RpcGenericConfig(genericConfig));
-  });
+export type ToConfig<T extends AnyRpcConfigurator> = MetaType<
+  T
+>["Configurator"]["ToConfig"];
+
+export type AnyRpcConfigurator = RpcConfigurator<AnyRpc, any>;
+export type RpcConfiguratorFactory<T extends AnyRpcConfigurator> = (
+  this: T,
+  config: ToConfig<T>
+) => RpcConfig<Target<T>>;
+
+export function RpcConfiguratorFactory<
+  T extends AnyRpcConfigurator,
+  C = ToConfig<T> extends Fn ? ReturnType<ToConfig<T>> : ToConfig<T>,
+  TargetConfig = RpcConfig<Target<T>>
+>(
+  configurator: ConfigFactory<TargetConfig, [C, T]>
+): RpcConfiguratorFactory<T> {
+  return function (config) {
+    if (typeof config === "function") config = RpcGenericConfig(<any>config);
+    return ConfigFactory(configurator, config, this);
+  };
+}
+
+export function RpcConfiguratorFactory2<
+  T extends AnyRpcConfigurator,
+  C = ToConfig<T> extends Fn ? ReturnType<ToConfig<T>> : ToConfig<T>,
+  TargetConfig = RpcConfig<Target<T>>
+>(
+  configurator: ConfigFactory<TargetConfig, [C, T]>
+): RpcConfiguratorFactory<T> {
+  return function (config) {
+    if (typeof config === "function") config = RpcGenericConfig(<any>config);
+    return ConfigFactory(configurator, config, this);
+  };
 }

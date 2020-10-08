@@ -6,8 +6,10 @@ import { defined } from "../../../common/object/defined";
 import { IndexedSeq } from "../../../immutable2";
 import { ReactHook } from "../../../react/utils/ReactHook";
 import { RpcConnection } from "../../Rpc";
+import { AbstractWidgetView } from "../../widget/AbstractWidgetView";
 import { AnyWidget, AnyWidgetConnection } from "../../widget/Widget";
 import { WidgetView, WidgetViewProps } from "../../widget/WidgetView";
+import { AbstractInputView } from "../AbstractInputView";
 import {
   AnyInput,
   AnyInputConnection,
@@ -19,13 +21,13 @@ import { InputView, InputViewProps } from "../InputView";
 import { AbstractReactTester } from "./AbstractReactTester";
 import { CaseTester } from "./CaseTester";
 
-type WidgetViewClass<T extends AnyWidget> = new (
+export type WidgetViewClass<T extends AnyWidget> = new (
   props: WidgetViewProps<RpcConnection<T>>
-) => WidgetView<RpcConnection<any>>;
+) => AbstractWidgetView<RpcConnection<any>>;
 
-type InputViewClass<T extends AnyInput> = new (
+export type InputViewClass<T extends AnyInput> = new (
   props: InputViewProps<RpcConnection<T>>
-) => InputView<any>;
+) => AbstractInputView<any>;
 
 export class WidgetViewTester<
   T extends AnyWidget,

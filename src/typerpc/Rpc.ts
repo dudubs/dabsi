@@ -1,5 +1,6 @@
 import { MetaType, MetaTypeHook, WithMetaType } from "../common/MetaType";
 import { Awaitable, If, Is, IsUndefined } from "../common/typings";
+import { ConfigFactory } from "./RpcGenericConfig";
 
 export type RpcHandlerFn<Payload = any, Result = any> = {
   (payload: Payload): Promise<Result>;
@@ -45,6 +46,9 @@ export type RpcHandler<T extends AnyRpc> = RpcType<T>["Handler"];
 export type RpcConnection<T extends AnyRpc> = RpcType<T>["Connection"];
 
 export type RpcConfig<T extends AnyRpc> = RpcType<T>["Config"];
+// | {
+//     $context: ConfigFactory<RpcType<T>["Config"]>;
+//   };
 
 export type RpcUndefinedConfig<T extends AnyRpc> = If<
   IsUndefined<RpcConfig<T>>,
@@ -82,7 +86,7 @@ export function Rpc<Payload, Result, Config, Connection>(
       return createConnection(handler);
     },
     createRpcHandler(config) {
-      return async (payload) => handle(config, payload);
+      return async payload => handle(config, payload);
     },
   };
 }

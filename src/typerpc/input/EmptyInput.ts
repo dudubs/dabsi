@@ -1,9 +1,11 @@
+import { Awaitable } from "../../common/typings";
 import { NoRpc } from "../NoRpc";
 import { RpcConfig } from "../Rpc";
 import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
+  WidgetType,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
 import {
@@ -37,8 +39,12 @@ type T = EmptyInput;
 export class EmptyInputContext extends AbstractInputContext<T> {
   protected getInputConfigForValue(
     value: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>> {
+  ): WidgetConfig<WidgetType<T>> {
     throw new Error();
+  }
+
+  getDefaultValue(): Awaitable<InputValue<T> | undefined> {
+    return undefined;
   }
 
   getControllerConfig(): RpcConfig<WidgetController<T>> {

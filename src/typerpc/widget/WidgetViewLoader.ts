@@ -1,17 +1,15 @@
-import { ReactElement, ReactNode } from "react";
+import { ReactNode } from "react";
 import { View } from "../../react/view/View";
 import { ViewState } from "../../react/view/ViewState";
-import { RpcConnection } from "../Rpc";
-import { AnyWidget, AnyWidgetConnection, WidgetElement } from "./Widget";
-import { WidgetView, WidgetViewProps } from "./WidgetView";
+import { AnyWidgetConnection, WidgetElement } from "./Widget";
+import { WidgetViewProps } from "./WidgetView";
+
+// TODO: Make service for WidgetViewLoader
 
 export class WidgetViewLoader<C extends AnyWidgetConnection> extends View<{
   connection: C;
 
-  children(
-    props: WidgetViewProps<C> | undefined,
-    view: Readonly<WidgetViewLoader<C>>
-  ): ReactNode;
+  children(props: WidgetViewProps<C>, view: WidgetViewLoader<C>): ReactNode;
 }> {
   @ViewState() isLoading = false;
 
@@ -37,12 +35,13 @@ export class WidgetViewLoader<C extends AnyWidgetConnection> extends View<{
 
   renderView(): React.ReactNode {
     if (this.error) throw this.error;
-    return this.props.children(
-      this.element && {
-        element: this.element,
-        connection: this.props.connection,
-      },
-      this
-    );
+    if (this.element)
+      return this.props.children(
+        {
+          element: this.element,
+          connection: this.props.connection,
+        },
+        this
+      );
   }
 }

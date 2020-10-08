@@ -1,14 +1,14 @@
 import { mapArrayToObject } from "../../common/array/mapArrayToObject";
-import { mapObject } from "../../common/object/mapObject";
+import { WithMetaType } from "../../common/MetaType";
 import { Awaitable } from "../../common/typings";
 import { DataRow } from "../../data/DataRow";
-import { DataSelection } from "../../data/DataSelection";
-import { DataSelectionRow } from "../../data/DataSelectionRow";
 import { DataParameter } from "../DataParameter";
-import { RpcConfig } from "../Rpc";
+import { NoRpc } from "../NoRpc";
+import { AnyRpc, RpcConfig } from "../Rpc";
 import { RpcGenericConfigFn } from "../RpcGenericConfig";
 import { RpcMap } from "../RpcMap";
-import { DataTable } from "../widget/DataTable";
+import { DataTable, DataTableOptions } from "../widget/DataTable";
+import { AnyRowType, Row, string } from "../widget/Row";
 import { WidgetElement } from "../widget/Widget";
 import { BaseDataInputConfig, DataInputRow, DataInputTable } from "./DataInput";
 import { DataInputMapContext } from "./DataInputMapContext";
@@ -23,97 +23,99 @@ import {
 
 export type AnyDataInputMap = DataInputMap<AnyInput, any>;
 
-export type DataInputMap<T extends AnyInput, R> = Input<{
-  Target: T;
+export type DataInputMap<T extends AnyInput, Row> = WithMetaType<{
+  DataInputMapRow: Row;
+}> &
+  Input<{
+    Target: T;
 
-  DataInput: T;
+    DataInput: T;
 
-  Data: Record<string, InputData<T>>;
+    Data: Record<string, InputData<T>>;
 
-  Value: Record<string, InputValue<T>>;
+    Value: Record<string, InputValue<T>>;
 
-  ValueElement: {
-    value: InputValueElement<T>;
-    row: DataInputRow & R;
-  }[];
-
-  Props: {
-    target: T;
-    table: DataInputTable<R>;
-  };
-
-  Element: {
-    children: {
-      row: DataInputRow & R;
-      target: WidgetElement<T>;
+    ValueElement: {
+      value: InputValueElement<T>;
+      row: DataInputRow & Row;
     }[];
-  };
 
-  Config: RpcGenericConfigFn<
-    <D, DS extends DataSelection<D> = {}>(
-      config: DataInputMapConfig<T, R, D, DS>
-    ) => DataInputMapConfig<T, R, any, any>
-  >;
+    Props: {
+      target: T;
+      table: DataInputTable<Row>;
+    };
 
-  Error:
-    | { children: Record<string, InputError<T>> }
-    | {
-        invalidKeys: string[];
-      };
+    Element: {
+      children: {
+        row: DataInputRow & Row;
+        target: WidgetElement<T>;
+      }[];
+    };
 
-  Controller: RpcMap<{
-    table: DataInputTable<R>;
-    row: DataParameter<T>;
+    Config: RpcGenericConfigFn<
+      <D>(
+        config: DataInputMapConfig<T, Row, D>
+      ) => DataInputMapConfig<T, Row, any>
+    >;
+
+    Error:
+      | { children: Record<string, InputError<T>> }
+      | {
+          invalidKeys: string[];
+        };
+
+    Controller: RpcMap<{
+      table: DataInputTable<Row>;
+      row: DataParameter<T>;
+    }>;
   }>;
-}>;
 
-export type DataInputMapConfig<
-  T extends AnyInput,
-  R,
-  D,
-  DS extends DataSelection<D>
-> = BaseDataInputConfig<
+export type DataInputMapConfig<T extends AnyInput, R, D> = BaseDataInputConfig<
   R,
   {
     targetConfig: RpcConfig<T>;
   },
   {
-    getTargetValue: (
-      row: DataRow<DataSelectionRow<D, DS>>
-    ) => Awaitable<InputValue<InputValue<T>>>;
+    getTargetValue: (row: DataRow<D>) => Awaitable<InputValue<InputValue<T>>>;
   },
-  D,
-  DS
+  D
 >;
 
-export function DataInputMap<R = {}>() {
-  return <T extends AnyInput>(target: T): DataInputMap<T, R> => {
-    const controller = RpcMap({
-      table: DataTable()(),
-      row: DataParameter(target),
-    });
-    return <any>Input<DataInputMap<AnyInput, any>>({
-      props: {
-        target,
-        table: controller.props.items.table,
-      },
-      isGenericConfig: true,
-      controller,
-      context: DataInputMapContext,
-      getDataFromValueElement(values) {
-        return mapArrayToObject(values, (value) => [
-          value.row.$key,
-          this.target.props.getDataFromValueElement(value),
-        ]);
-      },
-      getValueElementFromElement(element) {
-        return element.children.map(({ row, target }) => {
-          return {
-            row,
-            value: this.target.props.getValueElementFromElement(target),
-          };
-        });
-      },
-    });
-  };
+export function DataInputMap<
+  T extends AnyInput,
+  RowType extends AnyRowType = {
+    label: typeof string;
+  },
+  RowController extends AnyRpc = NoRpc
+>(
+  target: T,
+  options?: { rowType?: RowType; rowController?: RowController }
+): DataInputMap<T, Row<RowType>> {
+  const controller = RpcMap({
+    table: DataTable(options?.rowType || { label: string }),
+    row: DataParameter(target),
+  });
+  return <any>Input<DataInputMap<AnyInput, any>>({
+    props: {
+      target,
+      table: controller.props.items.table,
+    },
+    isGenericConfig: true,
+    controller,
+    context: DataInputMapContext,
+    getDataFromValueElement(values) {
+      return mapArrayToObject(values, value => [
+        value.row.$key,
+        this.target.props.getDataFromValueElement(value),
+      ]);
+    },
+    getValueElementFromElement(element) {
+      return element.children.map(({ row, target }) => {
+        return {
+          row,
+          value: this.target.props.getValueElementFromElement(target),
+        };
+      });
+    },
+  });
 }

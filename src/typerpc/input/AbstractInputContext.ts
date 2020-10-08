@@ -1,7 +1,8 @@
+import { Awaitable } from "../../common/typings";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { RpcConfig } from "../Rpc";
 import { AbstractWidgetContext } from "../widget/AbstractWidgetContext";
-import { AnyWidget, WidgetConfig } from "../widget/Widget";
+import { AnyWidget, WidgetConfig, WidgetType } from "../widget/Widget";
 import {
   AnyInput,
   BaseInputContext,
@@ -18,13 +19,15 @@ export abstract class AbstractInputContext<T extends AnyInput>
 
   protected abstract getInputConfigForValue(
     value: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>>;
+  ): WidgetConfig<WidgetType<T>>;
 
   getConfigForValue(value: InputType<T>["Value"]): RpcConfig<T> {
     const config = this.getInputConfigForValue(value);
-
-    return this.props.isGenericConfig ? ($) => $(config) : config;
+    return <any>(this.props.isGenericConfig ? $ => $(config) : config);
   }
+
+  // getValue
+  abstract getDefaultValue(): Awaitable<InputValue<T> | undefined>;
 
   getContextForValue(
     value: InputType<T>["Value"]

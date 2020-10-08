@@ -1,37 +1,28 @@
+import { Typing } from "../common/typings";
 import { DataRow } from "../data/DataRow";
 import { DataSource } from "../data/DataSource";
+import { DataParameterHandler } from "./DataParameterHandler";
 import { Parameter } from "./Parameter";
-import { AnyRpc, RpcConfig } from "./Rpc";
-import { RpcConfigurator, RpcGenericConfigurator } from "./RpcConfigurator";
-import { RpcConfigFactory, RpcGenericConfigFn } from "./RpcGenericConfig";
+import { AnyRpc } from "./Rpc";
+import { RpcConfigurator } from "./RpcConfigurator";
+import { RpcConfigFactory2, RpcGenericConfigFn } from "./RpcGenericConfig";
 
 export type DataParameter<R extends AnyRpc> = RpcConfigurator<
   Parameter<R, string>,
-  RpcGenericConfigFn<
-    <T>(config: DataParameterConfig<T, R>) => DataParameterConfig<any, R>
-  >
+  <D>(config: DataParameterConfig<D, R>) => DataParameterConfig<any, R>
 >;
+export type AnyDataParameter = DataParameter<AnyRpc>;
 
 export function DataParameter<R extends AnyRpc>(target: R): DataParameter<R> {
-  return RpcGenericConfigurator<DataParameter<R>>(
-    Parameter()(target),
-    DataParameterConfig
+  return <any>(
+    RpcConfigurator<AnyDataParameter>(
+      Parameter(Typing<string>(), target),
+      DataParameterHandler
+    )
   );
 }
 
-export type DataParameterConfig<T, R extends AnyRpc> = {
-  source: DataSource<T>;
-  getTargetConfig: RpcConfigFactory<DataRow<T>, R>;
+export type DataParameterConfig<D, R extends AnyRpc> = {
+  source: DataSource<D>;
+  getTargetConfig: RpcConfigFactory2<DataRow<D>, R>;
 };
-
-export function DataParameterConfig<T, R extends AnyRpc>(
-  config: DataParameterConfig<T, R>
-): RpcConfig<Parameter<R, string>> {
-  return ($) =>
-    $({
-      load(data) {
-        return config.source.getOrFail(data);
-      },
-      getTargetConfig: config.getTargetConfig,
-    });
-}

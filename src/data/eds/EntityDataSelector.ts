@@ -8,7 +8,7 @@ import { mapObject } from "../../common/object/mapObject";
 import { Awaitable } from "../../common/typings";
 import { DataExp } from "../DataExp";
 import { DataExpTranslatorToQeb } from "../../typeorm/exp/DataExpTranslatorToQeb";
-import { QueryExpBuilder } from "../../typeorm/QueryExpBuilder";
+import { ColumnLoader, QueryExpBuilder } from "../../typeorm/QueryExpBuilder";
 import { EntityRelation } from "../../typeorm/relations";
 import { DataFieldsTranslator } from "../DataFieldsTranslator";
 import { DataOrder } from "../DataOrder";
@@ -31,6 +31,7 @@ export namespace EntityDataSelector {
     },
     baseRow: object
   ): ReturnType<typeof select> {
+    selection = DataSelection.merge(typeInfo.selection, selection);
     const loader = select(typeInfo, qb, selection, qb.alias, baseRow);
 
     const translator = new DataExpTranslatorToQeb(typeInfo, qb, qb.alias);
@@ -77,12 +78,12 @@ export namespace EntityDataSelector {
       entityMetadata.primaryColumns.length === 1
         ? entityMetadata.primaryColumns[0]
         : undefined;
-    const objectKeyLoaders = mapArrayToObject(
-      entityMetadata.primaryColumns,
-      (column) => [
-        column.propertyName,
-        qb.selectColumn(schema, column.databaseName),
-      ]
+    const objectKeyLoaders = entityMetadata.primaryColumns.map(
+      (column) =>
+        <[string, ColumnLoader]>[
+          column.propertyName,
+          qb.selectColumn(schema, column.databaseName),
+        ]
     );
 
     const entityKeys = entityInfo.nonRelationColumnKeys;
@@ -143,9 +144,13 @@ export namespace EntityDataSelector {
     }
 
     async function loadOneRaw(raw: object): Promise<RowContext | undefined> {
-      const objectKey: object = mapObject(objectKeyLoaders, (loader) =>
-        loader(raw)
-      );
+      const objectKey: object = {};
+
+      for (const [propertyName, loader] of objectKeyLoaders) {
+        const value = loader(raw);
+        if (value == null) return undefined;
+        objectKey[propertyName] = value;
+      }
 
       const row: any = Object.create(baseRow);
 
@@ -202,11 +207,11 @@ export namespace EntityDataSelector {
 
       // select non-relations-columns
       for (const columnPropertyName of selectedKeys) {
+        if (columnPropertyName in fields) continue;
         const column = definedAt(
           childEntityInfo.propertyNameToColumnMetadata,
           columnPropertyName
         );
-        if (column.propertyName in fields) continue;
 
         const loader = qb.selectColumn(schema, column.databaseName);
         loaders.push(async (context) => {

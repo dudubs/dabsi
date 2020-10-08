@@ -2,15 +2,11 @@ import { ReactElement } from "react";
 import { mapAndFilterObject } from "../../common/object/mapAndFilterObject";
 import { Debounce } from "../../react/utils/hooks/useDebounce";
 import { ViewState } from "../../react/view/ViewState";
-import { AnyRpc, RpcConnection } from "../Rpc";
-import {
-  AnyDataTable,
-  DataTable,
-  DataTableOrder,
-  DataTableRowWithKey,
-} from "./DataTable";
-import { WidgetElement, WidgetType } from "./Widget";
-import { WidgetView, WidgetViewProps } from "./WidgetView";
+import { RpcConnection } from "../Rpc";
+import { AbstractWidgetView } from "./AbstractWidgetView";
+import { AnyDataTable, DataTableOrder, DataTableRowWithKey } from "./DataTable";
+import { WidgetElement } from "./Widget";
+import { WidgetViewProps } from "./WidgetView";
 
 export type DataTableViewProps<
   C extends RpcConnection<AnyDataTable>
@@ -18,7 +14,7 @@ export type DataTableViewProps<
 
 export class DataTableView<
   C extends RpcConnection<AnyDataTable>
-> extends WidgetView<
+> extends AbstractWidgetView<
   C,
   DataTableViewProps<C> & {
     children(view: Readonly<DataTableView<C>>): ReactElement;
@@ -28,16 +24,16 @@ export class DataTableView<
 
   @ViewState("reloadWithDebounce") searchText: string = "";
   @ViewState("reload") pageSize;
-  @ViewState("reload") page = 0;
+  @ViewState("reload") pageIndex = 0;
 
-  @ViewState() count: number;
+  @ViewState() totalRows: number;
   @ViewState() rows: DataTableRowWithKey<C>[];
   @ViewState() isLoading = false;
 
   protected updateElement(element: WidgetElement<C>) {
     this.rows = element.rows || [];
-    this.count = element.count ?? 0;
-    this.pageSize = element.pageSize || element?.rows?.length || 10;
+    this.totalRows = element.totalRows ?? 0;
+    this.pageSize = element.pageSize || 10;
   }
 
   @ViewState() columns: Record<
@@ -49,16 +45,15 @@ export class DataTableView<
   > = {};
 
   get lastPage() {
-    return Math.ceil(this.count / this.pageSize);
+    return Math.ceil(this.totalRows / this.pageSize);
   }
 
-  setPage(page: number) {
-    const { lastPage } = this;
-    this.page = page > lastPage ? lastPage : 0 > page ? 0 : page;
+  setPageIndex(pageIndex: number) {
+    this.pageIndex = Math.min(this.lastPage - 1, pageIndex);
   }
 
   setRelativePage(count: number) {
-    this.setPage(this.page + count);
+    this.setPageIndex(this.pageIndex + count);
   }
 
   setPageSize(pageSize: number) {
@@ -67,7 +62,7 @@ export class DataTableView<
 
   async search(text: string) {
     this.searchText = text;
-    this.page = 0;
+    this.pageIndex = 0;
   }
 
   clearSearch() {
@@ -117,13 +112,19 @@ export class DataTableView<
     await this.reload();
   }
 
+  async reloadAfterRemove(key: string) {
+    // TODO
+    return this.reload();
+  }
+
+  // TODO: @ViewMethod() - emit only if isDidMount && !sDidUnmount
   async reload() {
     if (!this.isDidMount) {
       return;
     }
     this.isLoading = true;
-    const getCount = this.count === 0 || this.page === 0;
-    const { count, rows } = await this.props.connection.getRows({
+    const getCount = this.totalRows === 0 || this.pageIndex === 0;
+    const { totalRows, rows } = await this.props.connection.getRows({
       getCount,
       order: mapAndFilterObject(this.columns, (column) => {
         const { nulls, sort } = column;
@@ -133,11 +134,11 @@ export class DataTableView<
       }),
       text: this.searchText,
       take: this.pageSize,
-      skip: this.page * this.pageSize,
+      skip: this.pageIndex * this.pageSize,
     });
 
     if (getCount) {
-      this.count = count;
+      this.totalRows = totalRows;
     }
     this.rows = rows;
     this.isLoading = false;

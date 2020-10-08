@@ -1,5 +1,6 @@
 import { PartialKeys, UndefinedIfEmptyObject } from "../common/typings";
 import { Rpc, RpcConfig } from "./Rpc";
+import { RpcConfigHook } from "./RpcConfigHook";
 import { RpcConfigurator } from "./RpcConfigurator";
 
 const baseDefaultConfigProp = "defaultConfig";
@@ -31,15 +32,13 @@ export function RpcPartialConfig<
   const baseDefaultConfig = target.createRpcHandler[baseDefaultConfigProp];
 
   if (baseDefaultConfig) {
-    return <any>(
-      RpcPartialConfig(Object.getPrototypeOf(target), {
-        ...baseDefaultConfig,
-        ...defaultConfig,
-      })
-    );
+    return <any>RpcPartialConfig(Object.getPrototypeOf(target), {
+      ...baseDefaultConfig,
+      ...defaultConfig,
+    });
   }
 
-  const rpc = RpcConfigurator<any>(target, (config) => {
+  const rpc = RpcConfigHook(target, (config: object) => {
     return { ...defaultConfig, ...config };
   });
 

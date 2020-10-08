@@ -4,9 +4,10 @@ import { InputError, InputType } from "../input/Input";
 import { InputViewError } from "../input/InputViewError";
 import { InputView, InputViewProps } from "../input/InputView";
 import { RpcConnection } from "../Rpc";
+import { AbstractWidgetView } from "./AbstractWidgetView";
 import { AnyForm } from "./Form";
 import { WidgetController, WidgetElement, WidgetType } from "./Widget";
-import { WidgetView, WidgetViewProps } from "./WidgetView";
+import { useWidgetView, WidgetView, WidgetViewProps } from "./WidgetView";
 
 export type FormViewProps<
   C extends RpcConnection<AnyForm>,
@@ -22,7 +23,9 @@ export type FormViewProps<
   onInputError?(result: InputError<T["FormInput"]>);
 };
 
-export class FormView<C extends RpcConnection<AnyForm>> extends WidgetView<
+export class FormView<
+  C extends RpcConnection<AnyForm>
+> extends AbstractWidgetView<
   C,
   FormViewProps<C> & {
     children: (props: {
@@ -65,4 +68,14 @@ export class FormView<C extends RpcConnection<AnyForm>> extends WidgetView<
       }),
     });
   }
+}
+
+export function useFormView<C extends RpcConnection<AnyForm>>(
+  props: WidgetViewProps<C>
+) {
+  const widget = useWidgetView(props);
+
+  return {
+    async submit() {},
+  };
 }

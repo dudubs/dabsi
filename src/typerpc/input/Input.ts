@@ -54,6 +54,8 @@ export type BaseInputContext<T extends TInput> = {
   getConfigForValue(value: T["Value"]): RpcConfig<Input<T>>;
 
   getContextForValue(value: T["Value"]): ContextualRpcContext<AnyInput>;
+
+  getDefaultValue(): Awaitable<T["Value"] | undefined>;
 };
 
 //

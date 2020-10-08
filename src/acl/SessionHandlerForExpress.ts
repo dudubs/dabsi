@@ -1,4 +1,4 @@
-import crypto from "crypto";
+import * as crypto from "crypto";
 import * as express from "express";
 import { BasedType } from "../data/BaseType";
 import { DataRow } from "../data/DataRow";

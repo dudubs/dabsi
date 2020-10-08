@@ -9,6 +9,7 @@ import { WeakId } from "../../common/WeakId";
 import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
 import { WidgetElement } from "../widget/Widget";
+import { AbstractInputView } from "./AbstractInputView";
 import { AnyArrayInput, NOT_UNIQUE } from "./ArrayInput";
 import { InputError, InputType, InputValueElement } from "./Input";
 import { InputView, InputViewProps } from "./InputView";
@@ -44,7 +45,7 @@ export type ArrayInputViewProps<
 
 export class ArrayInputView<
   C extends AnyArrayInputConnection
-> extends InputView<C, ArrayInputViewProps<C>> {
+> extends AbstractInputView<C, ArrayInputViewProps<C>> {
   children = new InputViewChildren();
 
   remove(index: number) {

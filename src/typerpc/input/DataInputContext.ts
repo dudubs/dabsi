@@ -1,5 +1,5 @@
 import { Lazy } from "../../common/patterns/lazy";
-import { RequireOptionalKeys } from "../../common/typings";
+import { Awaitable, RequireOptionalKeys } from "../../common/typings";
 import { DataRow } from "../../data/DataRow";
 import { ContextualRpcContext } from "../ContextualRpc";
 import { RpcConfig, RpcError } from "../Rpc";
@@ -8,6 +8,7 @@ import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
+  WidgetType,
 } from "../widget/Widget";
 import { AbstractNullableInputContext } from "./AbstractNullableInputContext";
 import { BaseDataInputConfig, DataInputTable, DataInput } from "./DataInput";
@@ -20,22 +21,18 @@ type TTable = DataInputTable<unknown>;
 export function getTableConfigForBaseDataInputConfig(
   config: BaseDataInputConfig<any, {}, {}, any, any>
 ): RpcConfig<AnyDataTable> {
-  return ($) =>
+  return $ =>
     $({
       ...config.tableConfig,
       source: config.source,
-      selection: config.selection,
-      columns: {
-        label: config.label,
-        ...config.columns,
-      },
+      columns: config.columns,
     });
 }
 
 export class DataInputContext extends AbstractNullableInputContext<T> {
   protected getInputConfigForValue(
     value: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>> {
+  ): WidgetConfig<WidgetType<T>> {
     return { ...this.config, default: value ?? undefined };
   }
 
@@ -46,7 +43,7 @@ export class DataInputContext extends AbstractNullableInputContext<T> {
   }
 
   getControllerConfig(): RpcConfig<WidgetController<T>> {
-    return ($) => $(this.tableContext.config);
+    return $ => $(this.tableContext.config);
   }
 
   async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
@@ -77,5 +74,11 @@ export class DataInputContext extends AbstractNullableInputContext<T> {
     if (!(await this.config.source.filter({ $is: key }).has()))
       throw new RpcError(`Invalid data key "${key}".`);
     return { value: key };
+  }
+
+  async getDefaultValue(): Promise<InputValue<T> | undefined> {
+    const value = await ValueOrAwaitableFn(this.config.default);
+    if (typeof value === "object") return value.$key;
+    return String(value);
   }
 }

@@ -5,6 +5,7 @@ import { mapObjectToArray } from "../../common/object/mapObjectToArray";
 import { Renderer } from "../../react/renderer";
 import { InputViewProps } from "../input/InputView";
 import { RpcConnection } from "../Rpc";
+import { AbstractWidgetView } from "./AbstractWidgetView";
 import { AnyWidgetConnection, WidgetController } from "./Widget";
 import { AnyWidgetMap, WidgetMap } from "./WidgetMap";
 import { WidgetView, WidgetViewProps } from "./WidgetView";
@@ -22,10 +23,9 @@ export type WidgetMapViewProps<
 //
 export type AnyWidgetMapConnection = RpcConnection<WidgetMap<AnyWidgetMap>>;
 
-export class WidgetMapView<C extends AnyWidgetMapConnection> extends WidgetView<
-  C,
-  WidgetMapViewProps<C>
-> {
+export class WidgetMapView<
+  C extends AnyWidgetMapConnection
+> extends AbstractWidgetView<C, WidgetMapViewProps<C>> {
   renderField<K extends keyof RpcConnection<WidgetController<C>>>(
     key: string & K,
     renderer: Renderer<WidgetViewProps<RpcConnection<WidgetController<C>>[K]>>

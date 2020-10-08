@@ -1,108 +1,116 @@
-import {createMemoryHistory} from "history";
-import {createElement} from "react";
+import { createMemoryHistory } from "history";
+import { createElement } from "react";
 import * as TestRenderer from "react-test-renderer";
-import {Timeout} from "../../../common/async/Timeout";
-import {createRouterRoute, Route, Router} from "../../../router";
-import {routeByPath} from "../../../router/route/routeByPath";
-import {elementContaining} from "../../tests/elementContaining";
-import {provide} from "../../utils/provide";
+import { Timeout } from "../../../common/async/Timeout";
+import { createRouterRoute, Route, Router } from "../../../router";
+import { routeByPath } from "../../../router/route/routeByPath";
+import { elementContaining } from "../../tests/elementContaining";
+import { provide } from "../../utils/provide";
 
-import {AnyReactRouter, OldReactRouter, ReactRouterRenderers} from "../OldReactRouter";
-import {ReactRouterContainer} from "../ReactRouterContainer";
-import {ReactRouterContent} from "../ReactRouterContent";
-import {ReactRouterLocationOld} from "../ReactRouterLocation";
-
+import {
+  AnyReactRouterOld,
+  OldReactRouter,
+  ReactRouterRenderers,
+} from "../OldReactRouter";
+import { ReactRouterContainer } from "../ReactRouterContainer";
+import { ReactRouterContent } from "../ReactRouterContent";
+import { ReactRouterLocationOld } from "../ReactRouterLocation";
 
 testm(__filename, () => {
-    async function testRoute(route: Route<AnyReactRouter>, path: string) {
-        [path, route] = await routeByPath(route, path)
-        return TestRenderer.create(
-            provide(ReactRouterLocationOld,
-                new ReactRouterLocationOld(route, path),
-                createElement(ReactRouterContent)
-            )
-        ).toJSON()
-    }
+  async function testRoute(route: Route<AnyReactRouterOld>, path: string) {
+    [path, route] = await routeByPath(route, path);
+    return TestRenderer.create(
+      provide(
+        ReactRouterLocationOld,
+        new ReactRouterLocationOld(route, path),
+        createElement(ReactRouterContent)
+      )
+    ).toJSON();
+  }
 
+  let r = OldReactRouter.route("child", Router.route("sub-child"));
 
-    let r = OldReactRouter
-        .route("child", Router.route("sub-child"));
+  r.render((props) => createElement("main", props));
+  r.at("child").render((props) => createElement("child", props));
+  r.at("child")
+    .at("sub-child")
+    .render((props) => createElement("sub-child", props));
 
-    r.render(props => createElement("main", props));
-    r.at("child").render(props => createElement("child", props));
-    r.at("child").at("sub-child").render(props => createElement("sub-child", props));
+  it("expected data different after cloneObject.", () => {
+    expect(ReactRouterRenderers(r.extend({})).length).toEqual(0);
+    expect(ReactRouterRenderers(r.extend({}).at("child")).length).toEqual(0);
+    expect(ReactRouterRenderers(r).length).toBeGreaterThan(0);
+    expect(ReactRouterRenderers(r.at("child")).length).toBeGreaterThan(0);
+    expect(
+      ReactRouterRenderers(r.at("child").at("sub-child")).length
+    ).toBeGreaterThan(0);
+  });
 
+  it("routeByPath", async () => {
+    expect(
+      await routeByPath(createRouterRoute(r), "/child/sub-child/invalid")
+    ).toEqual(
+      jasmine.arrayContaining([
+        "/invalid",
+        jasmine.objectContaining({
+          name: "sub-child",
+          parent: jasmine.objectContaining({
+            name: "child",
+          }),
+        }),
+      ])
+    );
+  });
 
-    it('expected data different after cloneObject.', () => {
-        expect(ReactRouterRenderers(r.extend({})).length).toEqual(0);
-        expect(ReactRouterRenderers(r.extend({}).at("child")).length).toEqual(0);
-        expect(ReactRouterRenderers(r).length).toBeGreaterThan(0);
-        expect(ReactRouterRenderers(r.at("child")).length).toBeGreaterThan(0);
-        expect(ReactRouterRenderers(r.at("child").at('sub-child')).length).toBeGreaterThan(0);
-    });
+  it("expected route to child as index", async () => {
+    expect(await testRoute(createRouterRoute(r), "/child")).toEqual(
+      elementContaining(
+        "main",
+        null,
+        elementContaining("child", {
+          isIndex: true,
+          isDefault: false,
+        })
+      )
+    );
+  });
 
+  it("expected route to child as default", async () => {
+    expect(await testRoute(createRouterRoute(r), "/child/invalid")).toEqual(
+      elementContaining(
+        "main",
+        null,
+        elementContaining("child", {
+          isIndex: false,
+          isDefault: true,
+          path: "/invalid",
+        })
+      )
+    );
+  });
 
-    it('routeByPath', async () => {
-        expect(await routeByPath(createRouterRoute(r), "/child/sub-child/invalid")).toEqual(
-            jasmine.arrayContaining([
-                "/invalid",
-                jasmine.objectContaining({
-                    name: "sub-child",
-                    parent: jasmine.objectContaining({
-                        name: "child"
-                    })
-                })
-            ])
-        );
-    })
+  it("ReactRouterContainer", async () => {
+    const history = createMemoryHistory();
 
-    it('expected route to child as index', async () => {
-        expect(await testRoute(createRouterRoute(r), "/child")).toEqual(
-            elementContaining("main", null,
-                elementContaining("child", {
-                    isIndex: true,
-                    isDefault: false
-                })
-            )
-        )
-    });
+    const element = () =>
+      createElement(ReactRouterContainer, {
+        router: r,
+        history,
+        context: null,
+        children: createElement(ReactRouterContent),
+      });
 
+    const tester = TestRenderer.create(element());
+    await Timeout(10);
+    history.push("/child/sub-child/invalid");
+    await Timeout(10);
 
-    it('expected route to child as default', async () => {
-        expect(await testRoute(createRouterRoute(r), "/child/invalid")).toEqual(
-            elementContaining("main", null,
-                elementContaining("child", {
-                    isIndex: false,
-                    isDefault: true,
-                    path: "/invalid"
-                })
-            )
-        )
-    });
-
-    it('ReactRouterContainer', async () => {
-
-        const history = createMemoryHistory();
-
-        const element = () => createElement(ReactRouterContainer, {
-            router: r,
-            history,
-            context: null,
-            children: createElement(ReactRouterContent)
-        });
-
-        const tester = TestRenderer.create(element());
-        await Timeout(10);
-        history.push("/child/sub-child/invalid");
-        await Timeout(10);
-
-        expect(tester.toJSON()).toEqual(
-            elementContaining("main", null,
-                elementContaining("child", null,
-                    elementContaining("sub-child")
-                )
-            )
-        );
-    });
-
-})
+    expect(tester.toJSON()).toEqual(
+      elementContaining(
+        "main",
+        null,
+        elementContaining("child", null, elementContaining("sub-child"))
+      )
+    );
+  });
+});

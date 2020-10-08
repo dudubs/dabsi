@@ -1,120 +1,152 @@
 import Button, { ButtonProps } from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogContent from "@material-ui/core/DialogContent";
 import IconButton, { IconButtonProps } from "@material-ui/core/IconButton";
 import Tooltip, { TooltipProps } from "@material-ui/core/Tooltip";
 import * as React from "react";
-import { ReactNode, useRef, useState } from "react";
-import { assert } from "../../../common/assert";
-import { AssignKeys, Awaitable, Common } from "../../../common/typings";
+import {
+  ComponentType,
+  createElement,
+  ReactElement,
+  ReactNode,
+  useRef,
+  useState,
+} from "react";
+import { Fn, Override, PluckRequired } from "../../../common/typings";
 import { Lang } from "../../../localization/Lang";
-import { mergeProps } from "../../../react/utils/mergeProps";
-import { MuiIcon } from "../MuiIcon";
+import { updateRef } from "../../../react/HookRef";
+import { partialProps } from "../../../react/utils/partialProps";
+import { MuiIcon } from "./MuiIcon";
 
-export const MuiButtonKinds: Record<string, MuiButtonProps> = {
-  delete: {
-    icon: "delete",
-    title: Lang`DELETE`,
-    color: "secondary",
-  },
-  cancel: { icon: "cancel", title: Lang`CANCEL` },
-  submit: { icon: "send", title: Lang`SUBMIT` },
-  edit: { icon: "edit", title: Lang`EDIT` },
-  add: { icon: "add", title: Lang`ADD` },
-  reset: { icon: "reset", title: Lang`RESET` },
-  close: { icon: "close", title: Lang`CLOSE` },
-  confirm: { icon: "done", title: Lang`CONFIRM` },
-  danger: { icon: "warning" },
+export type MuiButtonProps<P = {}> =
+  | Override<ButtonProps, BaseProps & P>
+  | Override<IconButtonProps, BaseProps & P>;
+
+type BaseProps = {
+  ButtonProps?: ButtonProps;
+  IconButtonProps?: IconButtonProps;
+  renderOnClick?(close: () => void, getEl: () => any): ReactElement;
+  disableTooltip?: boolean;
+  iconOnly?: boolean;
+  TooltipProps?: Partial<TooltipProps>;
+  danger?: boolean;
+  icon?: MuiIcon;
+  title?: ReactNode;
+  buttonType?: ComponentType<MuiButtonProps>;
 };
 
-export type MuiButtonProps = AssignKeys<
-  Common<ButtonProps, IconButtonProps>,
-  {
-    iconOnly?: boolean;
-    icon?: MuiIcon;
-    title?: ReactNode;
-
-    danger?: boolean;
-
-    TooltipProps?: Partial<TooltipProps>;
-    IconButtonProps?: Partial<IconButtonProps>;
-    ButtonProps?: Partial<ButtonProps>;
-
-    onAsyncClick?(): Awaitable;
-
-    contained?: boolean;
-    fullWidth?: boolean;
-    kind?: string;
+export function MuiButton(props: MuiButtonProps) {
+  if (props.buttonType) {
+    return createElement(props.buttonType, {
+      ...props,
+      buttonType: undefined,
+    });
   }
->;
 
-function renderMuiButton({
-  title,
-  icon,
-  ButtonProps,
-  IconButtonProps,
-  iconOnly,
-  TooltipProps,
-  contained,
-  fullWidth,
-  kind,
-  onAsyncClick,
-  danger: isDanger,
-  ...props
-}: MuiButtonProps) {
-  const isClicked = useRef<boolean>(false);
+  let {
+    ButtonProps,
+    IconButtonProps,
+    renderOnClick,
+    TooltipProps,
+    disableTooltip,
+    iconOnly,
+    buttonRef: initButtonRef,
+    buttonType,
+    ...buttonProps
+  }: MuiButtonProps = props;
+
+  const [open, setOpen] = useState(false);
+  const buttonRef = useRef<unknown>(null);
+  let element: ReactElement;
+
+  let type: ComponentType;
+  if (iconOnly) {
+    type = IconButton;
+    buttonProps = {
+      ...buttonProps,
+      ...IconButtonProps,
+    };
+  } else {
+    type = Button;
+    buttonProps = {
+      ...buttonProps,
+      ...ButtonProps,
+    };
+  }
+
+  const { title, danger, icon, onClick, ...elementProps } = buttonProps as any;
+  if (danger) {
+    elementProps.color = "secondary";
+  }
+  elementProps.buttonRef = current => {
+    updateRef(initButtonRef, current);
+    updateRef(buttonRef, current);
+  };
+  elementProps.onClick = event => {
+    onClick?.(event);
+    setOpen(true);
+  };
 
   if (iconOnly) {
-    assert(icon);
-    let element = (
-      <IconButton
-        color={isDanger ? "secondary" : undefined}
-        {...IconButtonProps}
-        {...props}>
-        {MuiIcon(icon)}
-      </IconButton>
+    elementProps.children = MuiIcon(icon);
+  } else {
+    elementProps.endIcon = MuiIcon(icon);
+    elementProps.children = title;
+  }
+
+  element = createElement(type, elementProps);
+
+  if ((title || TooltipProps) && !disableTooltip) {
+    element = (
+      <Tooltip title={title} {...TooltipProps}>
+        {element}
+      </Tooltip>
     );
-
-    if ((title = title || TooltipProps?.title)) {
-      return (
-        <Tooltip title={title} {...TooltipProps}>
-          {element}
-        </Tooltip>
-      );
-    }
-    return element;
   }
 
-  return (
-    <Button
-      color={isDanger ? "secondary" : undefined}
-      {...{
-        variant: contained ? "contained" : undefined,
-        fullWidth,
-      }}
-      endIcon={MuiIcon(icon)}
-      {...mergeProps(props, {
-        async onClick() {
-          if (isClicked.current) return;
-          isClicked.current = true;
-          try {
-            await onAsyncClick?.();
-          } finally {
-            isClicked.current = false;
-          }
-        },
-      })}
-      {...ButtonProps}>
-      {title}
-    </Button>
-  );
+  if (open) {
+    element = (
+      <>
+        {element}
+        {renderOnClick?.(
+          () => setOpen(false),
+          () => buttonRef.current!
+        )}
+      </>
+    );
+  }
+  return element;
 }
 
-export function MuiButton(props: MuiButtonProps) {
-  if (props.kind) {
-    const kindProps = MuiButtonKinds[props.kind];
-    if (kindProps) props = { ...kindProps, kind: undefined, ...props };
-    return renderMuiButton({ ...kindProps, ...props });
-  }
-  return renderMuiButton(props);
-}
+export const MuiCancelButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Cancel"),
+  title: Lang`CANCEL`,
+});
+
+export const MuiConfirmButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Done"),
+  title: Lang`CONFIRM`,
+});
+
+export const MuiResetButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Clear"),
+  title: Lang`RESET`,
+});
+
+export const MuiCloseButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Close"),
+  title: Lang`CLOSE`,
+});
+
+export const MuiAddButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Add"),
+  title: Lang`ADD`,
+});
+
+export const MuiSubmitButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Send"),
+  title: Lang`Submit`,
+});
+
+export const MuiEditButton = partialProps(MuiButton, {
+  icon: require("@material-ui/icons/Edit"),
+  title: Lang`EDIT`,
+});

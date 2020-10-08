@@ -6,38 +6,46 @@
                 const isDefault = isContent && !!lastPath;
             }
  */
-import {createElement, Fragment, ReactNode} from "react";
-import {Route} from "../../router";
-import {useDefinedContext} from "../utils/hooks/useDefinedContext";
-import {AnyReactRouter, ReactRouterRenderers} from "./OldReactRouter";
-import {ReactRouterLocationOld} from "./ReactRouterLocation";
+import { createElement, Fragment, ReactNode } from "react";
+import { Route } from "../../router";
+import { useDefinedContext } from "../utils/hooks/useDefinedContext";
+import { AnyReactRouterOld, ReactRouterRenderers } from "./OldReactRouter";
+import { ReactRouterLocationOld } from "./ReactRouterLocation";
 
-export function ReactRouterContent({children = undefined}: { children?: ReactNode }) {
-    const {path, route: contentRoute} = useDefinedContext(ReactRouterLocationOld);
+export function ReactRouterContent({
+  children = undefined,
+}: {
+  children?: ReactNode;
+}) {
+  const { path, route: contentRoute } = useDefinedContext(
+    ReactRouterLocationOld
+  );
 
-    for (let route: undefined | Route<AnyReactRouter> = contentRoute;
-         !!route; route = <any>route.parent) {
+  for (
+    let route: undefined | Route<AnyReactRouterOld> = contentRoute;
+    !!route;
+    route = <any>route.parent
+  ) {
+    const { router } = route;
 
-        const {router} = route;
+    const isContent = route === contentRoute;
+    const isContainer = !isContent;
+    const isIndex = isContent && (!path || path === "/");
+    const isDefault = isContent && !isIndex;
 
-        const isContent = route === contentRoute;
-        const isContainer = !isContent;
-        const isIndex = isContent && ((!path) || (path === "/"));
-        const isDefault = isContent && !isIndex;
-
-
-        for (let render of ReactRouterRenderers(router)) {
-            children = render({
-                children,
-                route,
-                path,
-                contentRoute,
-                isContent,
-                isContainer,
-                isIndex, isDefault
-            })
-        }
+    for (let render of ReactRouterRenderers(router)) {
+      children = render({
+        children,
+        route,
+        path,
+        contentRoute,
+        isContent,
+        isContainer,
+        isIndex,
+        isDefault,
+      });
     }
+  }
 
-    return createElement(Fragment, {children})
+  return createElement(Fragment, { children });
 }

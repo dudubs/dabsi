@@ -1,11 +1,6 @@
-import {Route} from "../../router";
-import {AnyReactRoute, AnyReactRouter} from "./OldReactRouter";
+import { Route } from "../../router";
+import { AnyReactRoute, AnyReactRouterOld } from "./OldReactRouter";
 
 export class ReactRouterLocationOld {
-
-    constructor(
-        public route: AnyReactRoute,
-        public path: string
-    ) {
-    }
+  constructor(public route: AnyReactRoute, public path: string) {}
 }

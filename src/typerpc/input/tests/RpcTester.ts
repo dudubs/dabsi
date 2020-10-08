@@ -11,7 +11,7 @@ import {
   InputValue,
 } from "../Input";
 import { CaseTester } from "./CaseTester";
-import { WidgetViewTester } from "./WidgetViewTester";
+import { WidgetViewClass, WidgetViewTester } from "./WidgetViewTester";
 
 export class RpcTester<T extends AnyRpc> {
   constructor(public rpc: T) {}
@@ -92,10 +92,7 @@ export class RpcTester<T extends AnyRpc> {
     });
   }
 
-  testWidgetView<
-    T extends AnyWidget,
-    VC extends new (props: WidgetViewProps<RpcConnection<T>>) => WidgetView<any>
-  >(
+  testWidgetView<T extends AnyWidget, VC extends WidgetViewClass<T>>(
     this: RpcTester<T>,
     viewClass: VC,
     callback: (tester: WidgetViewTester<T, VC>) => void

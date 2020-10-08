@@ -1,21 +1,21 @@
-import {AnyDataTable, DataTable} from "./DataTable";
+import { AnyDataTable, DataTableOld } from "./DataTable";
 
 declare module "./DataTable" {
-    interface DataTable<T, Props> {
-        reloadAfterRemove: typeof reloadAfterRemove;
-    }
+  interface DataTable<T, Props> {
+    reloadAfterRemove: typeof reloadAfterRemove;
+  }
 }
 
-DataTable.prototype.reloadAfterRemove = reloadAfterRemove;
+// DataTableOld.prototype.reloadAfterRemove = reloadAfterRemove;
 
 async function reloadAfterRemove(this: AnyDataTable) {
-    if (this.items.length === 1) {
-        if (this.page === 0) {
-            await this.reload();
-        } else {
-            this.page--;
-        }
+  if (this.items.length === 1) {
+    if (this.page === 0) {
+      await this.reload();
     } else {
-        await this.reload();
+      this.page--;
     }
+  } else {
+    await this.reload();
+  }
 }

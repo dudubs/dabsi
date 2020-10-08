@@ -1,7 +1,8 @@
-import { RequireOptionalKeys } from "../../../common/typings";
+import { Awaitable, RequireOptionalKeys } from "../../../common/typings";
 import { NoRpc } from "../../NoRpc";
 import { RpcConfig } from "../../Rpc";
 import {
+  TWidget,
   WidgetConfig,
   WidgetController,
   WidgetElement,
@@ -38,6 +39,9 @@ export function TestInput<T extends Partial<TInput>>({
       getControllerConfig(): RpcConfig<WidgetController<any>> {
         return context.getControllerConfig!();
       }
+      getDefaultValue(): Awaitable<InputValue<any> | undefined> {
+        return undefined;
+      }
 
       async getElement(): Promise<RequireOptionalKeys<WidgetElement<any>>> {
         return context.getElement?.() ?? {};
@@ -45,7 +49,7 @@ export function TestInput<T extends Partial<TInput>>({
 
       protected getInputConfigForValue(
         value: InputType<any>["Value"]
-      ): WidgetConfig<InputType<any>> {
+      ): WidgetConfig<TWidget> {
         return context.getConfigForValue!(value);
       }
 

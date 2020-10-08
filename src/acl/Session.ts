@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Relation } from "../data/Relation";
-import { User } from "./User";
+import { UserEntity } from "./UserEntity";
 
 @Entity({ name: "session" })
 export class Session {
@@ -13,6 +13,6 @@ export class Session {
   @Column()
   timeout: number;
 
-  @ManyToOne(() => User)
-  user: Relation<User>;
+  @ManyToOne(() => UserEntity)
+  user: Relation<UserEntity>;
 }

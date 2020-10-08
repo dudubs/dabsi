@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Awaitable } from "../../../common/typings";
 import { WidgetElement } from "../../widget/Widget";
+import { AbstractInputView } from "../AbstractInputView";
 import {
   AnyInputConnection,
   InputData,
@@ -11,7 +12,7 @@ import { InputView, InputViewProps } from "../InputView";
 
 export class TestInputView<
   C extends AnyInputConnection = AnyInputConnection
-> extends InputView<
+> extends AbstractInputView<
   C,
   InputViewProps<C> & {
     testId?: string;

@@ -1,44 +1,43 @@
 import {
-    BaseEntity,
-    ChildEntity,
-    Column,
-    Entity,
-    JoinColumn,
-    OneToOne,
-    PrimaryGeneratedColumn,
-    TableInheritance
+  BaseEntity,
+  ChildEntity,
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  TableInheritance,
 } from "typeorm";
-import {Group} from "../../acl/Group";
-import {User} from "../../acl/User";
+import { Group } from "../../acl/Group";
+import { UserEntity } from "../../acl/UserEntity";
 
 @Entity()
-@TableInheritance({column: "type"})
-export class TestMessage  {
-    @PrimaryGeneratedColumn()
-    id: number;
+@TableInheritance({ column: "type" })
+export class TestMessage {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    type: string;
+  @Column()
+  type: string;
 
-    @Column()
-    text: string;
+  @Column()
+  text: string;
 
-    @OneToOne(() => User)
-    @JoinColumn()
-    from: User;
+  @OneToOne(() => UserEntity)
+  @JoinColumn()
+  from: UserEntity;
 }
 
 @ChildEntity()
 export class TestPublicMessage extends TestMessage {
-    @OneToOne(() => Group)
-    @JoinColumn()
-    group: Group;
+  @OneToOne(() => Group)
+  @JoinColumn()
+  group: Group;
 }
 
 @ChildEntity()
 export class TestPrivateMessage extends TestMessage {
-
-    @OneToOne(() => User)
-    @JoinColumn()
-    user: User;
+  @OneToOne(() => UserEntity)
+  @JoinColumn()
+  user: UserEntity;
 }

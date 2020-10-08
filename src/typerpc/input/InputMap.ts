@@ -5,8 +5,6 @@ import { MapWidgets } from "../widget/WidgetMap";
 import { AnyInput, Input, InputType, TInput } from "./Input";
 import { InputMapContext } from "./InputMapContext";
 
-// DataParameterConfig
-
 export type AnyInputMap = Record<string, AnyInput>;
 
 export type MapInputs<T extends AnyInputMap, P extends keyof TInput> = {

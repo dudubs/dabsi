@@ -1,13 +1,9 @@
-import { ReactElement } from "react";
-import { View } from "../../react/view/View";
-import { ViewState } from "../../react/view/ViewState";
-import { ContextualRpcProps } from "../ContextualRpc";
+import { ReactElement, useEffect, useState } from "react";
 import { RpcConnection } from "../Rpc";
 import {
   AnyWidget,
   AnyWidgetConnection,
   TWidget,
-  WidgetController,
   WidgetElement,
   WidgetType,
 } from "./Widget";
@@ -23,52 +19,25 @@ export type WidgetViewProps<C extends AnyWidgetConnection> = {
   element: WidgetElement<C>;
 };
 
-export abstract class WidgetView<
+export type WidgetView<
   C extends AnyWidgetConnection,
-  P extends WidgetViewProps<C> = WidgetViewProps<C>,
   T extends TWidget = WidgetType<C>
-> extends View<P> {
-  @ViewState("forceUpdateElement") _element: T["Element"];
+> = {
+  readonly element: T["Element"];
 
-  protected updateElement?(element: T["Element"]): void;
+  setElement(element: T["Element"]): void;
+};
 
-  get element(): T["Element"] {
-    return this._element;
-  }
+export function useWidgetView<C extends AnyWidgetConnection>(
+  props: WidgetViewProps<C>
+) {
+  const [element, setElement] = useState(props.element);
 
-  setElement(element: T["Element"]) {
-    this._element = element;
-  }
-
-  get controller(): RpcConnection<WidgetController<C>> {
-    return this.props.connection.controller;
-  }
-
-  get controllerProps(): RpcConnection<WidgetController<C>>["props"] {
-    return this.props.connection.controller.props;
-  }
-
-  get connection(): C {
-    return this.props.connection;
-  }
-
-  get connectionProps(): C["props"] {
-    return this.props.connection.props;
-  }
-
-  constructor(props: P) {
-    super(props);
-    this._element = this.props.element;
-    this.updateElement?.(this.props.element);
-  }
-
-  forceUpdateElement() {
-    this.updateElement?.(this.element);
-  }
-
-  updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>): void {
-    if (nextProps.element !== prevProps.element) {
-      this._element = nextProps.element;
+  useEffect(() => {
+    if (element !== props.element) {
+      setElement(props.element);
     }
-  }
+  }, [props.element]);
+
+  return { element, setElement };
 }

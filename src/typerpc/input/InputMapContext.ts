@@ -1,11 +1,12 @@
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
-import { RequireOptionalKeys } from "../../common/typings";
+import { Awaitable, RequireOptionalKeys } from "../../common/typings";
 import { RpcConfig } from "../Rpc";
 import {
   WidgetConfig,
   WidgetController,
   WidgetElement,
+  WidgetType,
 } from "../widget/Widget";
 import { AbstractInputContext } from "./AbstractInputContext";
 import { InputCheckResult, InputData, InputType, InputValue } from "./Input";
@@ -16,6 +17,14 @@ type T = InputMap<AnyInputMap>;
 export class InputMapContext extends AbstractInputContext<T> {
   getControllerConfig(): RpcConfig<WidgetController<T>> {
     return this.config;
+  }
+
+  async getDefaultValue(): Promise<InputValue<T> | undefined> {
+    const value = {};
+    for (const [key, input] of entries(this.controllerProps.items)) {
+      value[key] = await input.getContext(this.config[key]).getDefaultValue();
+    }
+    return value;
   }
 
   async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
@@ -50,7 +59,7 @@ export class InputMapContext extends AbstractInputContext<T> {
 
   protected getInputConfigForValue(
     keyToValue: InputType<T>["Value"]
-  ): WidgetConfig<InputType<T>> {
+  ): WidgetConfig<WidgetType<T>> {
     const config = {};
     for (const [key, value] of entries(keyToValue)) {
       config[key] = this.controllerProps.items[key]

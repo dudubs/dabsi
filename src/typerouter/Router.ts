@@ -6,7 +6,7 @@ import {
   Expect,
   IsNever,
   NonNullableAt,
-  Pluck,
+  PluckRequired,
 } from "../common/typings";
 import { inspect } from "../logging";
 
@@ -121,7 +121,7 @@ export type RouterAt<T extends TRouter, K extends keyof T["children"]> = Router<
     parent: T;
     routerType: T["routerType"];
     stack: T["stack"] & Record<K, T["children"][K]>;
-    root: DefaultIfNever<Pluck<T, "root">, T>;
+    root: DefaultIfNever<PluckRequired<T, "root">, T>;
     context: T["context"];
   }
 >;
@@ -154,22 +154,23 @@ export namespace RouterType {
 
   export function at<T extends TRouter, K extends keyof T["children"]>(
     this: Router<T>,
-    name: string & K
+    name: string & K,
+    callback?: (router: RouterAt<T, K>) => void
   ): RouterAt<T, K> {
     let child: AnyRouter = defined(
       this.children[name],
       () => `No router child at "${name}".`
     );
 
-    if (child.parent === this) {
-      return <any>child;
+    if (child.parent !== this) {
+      child = this.children[name] = Router(child.params, child.children)
+        .use(child.routerType)
+        .use(this.routerType);
+      child.parent = this;
+      child.name = name;
     }
 
-    child = this.children[name] = Router(child.params, child.children)
-      .use(child.routerType)
-      .use(this.routerType);
-    child.parent = this;
-    child.name = name;
+    callback?.(<any>child);
 
     return <any>child;
   }
@@ -185,16 +186,24 @@ export namespace RouterType {
     this.params.push(name);
     return <any>this;
   }
+
   export function bind<T extends TRouter>(
     this: Router<T>,
-    context: T["context"]
+    context: T["context"],
+    plugins: RouterPlugin<T>[]
   ): Router<T> {
-    const router = <Router<T>>(<any>Router(this.params, this.children));
-    this.plugins.forEach((plugin) => {
+    const router = <Router<T>>(
+      (<any>Router(this.params, this.children)).use(this.routerType)
+    );
+    this.plugins.forEach(plugin => {
+      plugin(router, context);
+    });
+    plugins.forEach(plugin => {
       plugin(router, context);
     });
     return <any>router;
   }
+
   export function apply<T extends TRouter>(
     this: Router<T>,
     plugins: RouterPlugin<T>[]
@@ -227,9 +236,11 @@ export namespace RouterType {
 }
 
 export type RouterRoot<T extends TRouter> = Extract<
-  DefaultIfNever<Pluck<T, "root">, T>,
+  DefaultIfNever<PluckRequired<T, "root">, T>,
   TRouter
 >;
+
+// TODO: Move context to render?
 export type RouterPlugin<T extends TRouter> = (
   router: Router<T>,
   context: T["context"]

@@ -4,8 +4,9 @@ import { Awaitable } from "../../common/typings";
 import { Lang } from "../../localization/Lang";
 import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
-import { InputData, InputError, InputValueElement } from "./Input";
-import { InputView, InputViewProps } from "./InputView";
+import { AbstractInputView } from "./AbstractInputView";
+import { InputError, InputValueElement } from "./Input";
+import { InputViewProps } from "./InputView";
 import { StringSchema } from "./StringSchema";
 import { TextInput } from "./TextInput";
 
@@ -15,7 +16,7 @@ export type TextInputViewProps<
 
 export class TextInputView<
   C extends RpcConnection<TextInput>
-> extends InputView<
+> extends AbstractInputView<
   C,
   TextInputViewProps<C> & {
     children(view: TextInputView<C>): ReactElement;
@@ -53,7 +54,6 @@ export class TextInputView<
     this.setError(undefined);
     await Timeout(300);
     if (id !== this.debounceId) return;
-    console.log({ text });
     await this.setValue(text);
   }
 

@@ -1,40 +1,33 @@
 import * as React from "react";
-import { useState } from "react";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { MuiButton, MuiButtonProps } from "./MuiButton";
 import { MuiDangerDialog, MuiDangerDialogProps } from "./MuiDangerDialog";
 
+export type MuiDangerButtonProps = MuiButtonProps<{
+  MuiDangerDialogProps?: Partial<MuiDangerDialogProps>;
+}>;
+
 export function MuiDangerButton({
   MuiDangerDialogProps,
-  onConfirm,
+  onClick,
   ...props
-}: MuiButtonProps & {
-  onConfirm?(): void;
-  MuiDangerDialogProps?: Partial<MuiDangerDialogProps>;
-}) {
-  const [showDialog, setShowDialog] = useState(false);
+}: MuiDangerButtonProps) {
   return (
-    <>
-      {showDialog && (
+    <MuiButton
+      danger
+      {...props}
+      renderOnClick={(close) => (
         <MuiDangerDialog
           {...mergeProps(MuiDangerDialogProps, {
-            onCancel: () => setShowDialog(false),
-            onConfirm: () => {
-              setShowDialog(false);
-              onConfirm?.();
+            onCancel: () => close(),
+            onConfirm: (event) => {
+              close();
+              onClick?.(event);
             },
           })}
           open
         />
       )}
-      <MuiButton
-        danger
-        {...mergeProps(props, {
-          onClick: () => {
-            setShowDialog(true);
-          },
-        })}
-      />
-    </>
+    />
   );
 }

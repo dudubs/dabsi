@@ -1,25 +1,34 @@
-import {BaseEntity, Column, Entity, ManyToOne, OneToMany, OneToOne} from "typeorm";
-import {User} from "./User";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from "typeorm";
+import { UserEntity } from "./UserEntity";
 
-declare module "./User" {
-    interface User {
-        friends: UserFriend[];
-    }
+declare module "./UserEntity" {
+  interface UserEntity {
+    friends: UserFriend[];
+  }
 }
 
 @Entity()
-export class UserFriend  {
+export class UserFriend {
+  @ManyToOne(() => UserEntity, user => user.friends)
+  user: UserEntity;
 
-    @ManyToOne(() => User, user => user.friends)
-    user: User;
+  @OneToOne(() => UserEntity)
+  friend: UserEntity;
 
-    @OneToOne(() => User)
-    friend: User;
-
-    @Column()
-    blocked: boolean;
+  @Column()
+  blocked: boolean;
 }
 
 {
-    OneToMany(() => UserFriend, uf => uf.user)(User);
+  OneToMany(
+    () => UserFriend,
+    uf => uf.user
+  )(UserEntity);
 }

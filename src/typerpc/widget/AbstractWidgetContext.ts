@@ -1,51 +1,54 @@
-import {Lazy} from "../../common/patterns/lazy";
-import {Pluck, RequireOptionalKeys} from "../../common/typings";
-import {AnyContextualRpc, ContextualRpcContext, ContextualRpcProps, ContextualRpcType} from "../ContextualRpc";
-import {RpcConfig} from "../Rpc";
-import {AnyWidget, BaseWidgetContext, WidgetConfig, WidgetController, WidgetElement, WidgetType} from "./Widget";
+import { Lazy } from "../../common/patterns/lazy";
+import { PluckRequired, RequireOptionalKeys } from "../../common/typings";
+import {
+  AnyContextualRpc,
+  ContextualRpcContext,
+  ContextualRpcProps,
+  ContextualRpcType,
+} from "../ContextualRpc";
+import { RpcConfig } from "../Rpc";
+import {
+  AnyWidget,
+  BaseWidgetContext,
+  WidgetConfig,
+  WidgetController,
+  WidgetElement,
+  WidgetType,
+} from "./Widget";
 
-export abstract class AbstractWidgetContext<T extends AnyWidget,
-    C = WidgetConfig<WidgetType<T>>>
-    implements BaseWidgetContext<WidgetType<T>> {
+export abstract class AbstractWidgetContext<
+  T extends AnyWidget,
+  C = WidgetConfig<WidgetType<T>>
+> implements BaseWidgetContext<WidgetType<T>> {
+  config: C extends undefined ? NonNullable<RequireOptionalKeys<C>> : C;
 
+  get controllerProps(): PluckRequired<WidgetController<T>, "props"> {
+    // @ts-expect-error
+    return this.props.controller.props;
+  }
 
-    config:
+  constructor(
+    public props: ContextualRpcProps<T>,
+    config: WidgetConfig<WidgetType<T>>
+  ) {
+    this.config = config ?? <any>{};
 
-        C extends undefined ? NonNullable<RequireOptionalKeys<C>> : C;
-
-    get controllerProps(): Pluck<WidgetController<T>, 'props'> {
-        // @ts-expect-error
-        return this.props.controller.props;
+    if (this.debug) {
+      console.log(`debugging ${this.constructor.name}:`);
+      this.debug();
     }
+  }
 
-    constructor(
-        public props: ContextualRpcProps<T>,
-        config: WidgetConfig<WidgetType<T>>
-    ) {
+  protected debug?();
 
-        this.config = config ?? <any>{};
+  @Lazy() get controllerContext(): ContextualRpcContext<
+    Extract<WidgetController<T>, AnyContextualRpc>
+  > {
+    // @ts-expect-error
+    return this.props.controller.getContext(this.getControllerConfig());
+  }
 
-        if (this.debug) {
-            console.log(`debugging ${this.constructor.name}:`);
-            this.debug();
-        }
+  abstract getControllerConfig(): RpcConfig<WidgetController<T>>;
 
-    }
-
-    protected debug?();
-
-
-    @Lazy() get controllerContext(): ContextualRpcContext<Extract<WidgetController<T>, AnyContextualRpc>> {
-        // @ts-expect-error
-        return this.props.controller.getContext(
-            this.getControllerConfig()
-        )
-    }
-
-
-    abstract getControllerConfig(): RpcConfig<WidgetController<T>> ;
-
-    abstract getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>>;
-
-
+  abstract getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>>;
 }

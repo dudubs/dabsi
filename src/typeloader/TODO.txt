@@ -1,0 +1,15 @@
+
+load(loader, value)
+
+type Loader = rxjs...
+
+
+
+TextLoader
+
+Length
+    LengthError
+    LengthOptions
+
+ArrayLoader
+

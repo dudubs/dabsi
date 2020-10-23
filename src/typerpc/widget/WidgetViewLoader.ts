@@ -14,6 +14,7 @@ export class WidgetViewLoader<C extends AnyWidgetConnection> extends View<{
   @ViewState() isLoading = false;
 
   @ViewState() element: WidgetElement<C> | undefined;
+
   @ViewState() error: any = undefined;
 
   async reload() {

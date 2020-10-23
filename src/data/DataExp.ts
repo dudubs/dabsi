@@ -216,5 +216,3 @@ export function DataExp<T>(...exps: Array<DataExp<T>>): DataExp<T> {
     .toArray();
   return exps.length > 1 ? { $and: exps } : exps[0];
 }
-
-export type OmitRequiredKeys<T extends U, U> = Omit<T, keyof Required<U>>;

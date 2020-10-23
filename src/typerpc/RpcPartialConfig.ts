@@ -1,47 +1,39 @@
-import { PartialKeys, UndefinedIfEmptyObject } from "../common/typings";
-import { Rpc, RpcConfig } from "./Rpc";
-import { RpcConfigHook } from "./RpcConfigHook";
-import { RpcConfigurator } from "./RpcConfigurator";
+import {
+  Override,
+  PartialKeys,
+  UndefinedIfEmptyObject,
+} from "../common/typings";
+import { AnyRpc, Rpc, RpcConfig, RpcUnresolvedConfig, TRpc } from "./Rpc";
+import {
+  AnyRpcConfigHook,
+  RpcConfigHook,
+  RpcConfigHookHandler,
+} from "./RpcConfigHook";
 
-const baseDefaultConfigProp = "defaultConfig";
-
-export type AnyRpcWithObjectConfig = Rpc<{
-  Connection: any;
-  Config: object | undefined;
-  Handler: any;
-}>;
+export type AnyRpcWithObjectConfig = Rpc<
+  Override<TRpc, { Config: object | undefined }>
+>;
 
 export type RpcPartialConfig<
   T extends AnyRpcWithObjectConfig,
   K extends keyof NonNullable<RpcConfig<T>>
-> = RpcConfigurator<
-  T,
-  | UndefinedIfEmptyObject<PartialKeys<NonNullable<RpcConfig<T>>, K>>
-  | RpcConfig<T>
->;
-
-// TODO: RpcDefaultConfig
+> = RpcConfigHook<{
+  Target: T;
+  Config:
+    | RpcUnresolvedConfig<T>
+    | UndefinedIfEmptyObject<PartialKeys<NonNullable<RpcConfig<T>>, K>>;
+}>;
 
 export function RpcPartialConfig<
-  T extends AnyRpcWithObjectConfig,
+  T extends AnyRpc,
   K extends keyof NonNullable<RpcConfig<T>>
 >(
   target: T,
   defaultConfig: Pick<NonNullable<RpcConfig<T>>, K>
 ): RpcPartialConfig<T, K> {
-  const baseDefaultConfig = target.createRpcHandler[baseDefaultConfigProp];
-
-  if (baseDefaultConfig) {
-    return <any>RpcPartialConfig(Object.getPrototypeOf(target), {
-      ...baseDefaultConfig,
-      ...defaultConfig,
-    });
-  }
-
-  const rpc = RpcConfigHook(target, (config: object) => {
-    return { ...defaultConfig, ...config };
+  return <any>RpcConfigHook<AnyRpcConfigHook>({
+    isGenericConfig: false,
+    target,
+    handler: config => $ => $({ ...defaultConfig, ...config }),
   });
-
-  rpc.createRpcHandler[baseDefaultConfigProp] = defaultConfig;
-  return <any>rpc;
 }

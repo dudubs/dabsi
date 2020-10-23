@@ -1,47 +1,44 @@
 import { View } from "../../react/view/View";
 import { ViewState } from "../../react/view/ViewState";
-import { RpcConnection } from "../Rpc";
+import { Rpc, RpcConnection, RpcType } from "../Rpc";
 import {
   AnyWidgetConnection,
   TWidget,
+  Widget,
   WidgetController,
+  WidgetElement,
   WidgetType,
 } from "./Widget";
 import { WidgetView, WidgetViewProps } from "./WidgetView";
 
 export abstract class AbstractWidgetView<
     C extends AnyWidgetConnection,
-    P extends WidgetViewProps<C> = WidgetViewProps<C>,
-    T extends TWidget = WidgetType<C>
+    P extends WidgetViewProps<C> = WidgetViewProps<C>
   >
   extends View<P>
   implements WidgetView<C> {
-  @ViewState("forceUpdateElement") _element: T["Element"];
+  @ViewState("forceUpdateElement") _element: WidgetElement<C>;
 
-  protected updateElement?(element: T["Element"]): void;
+  protected updateElement?(element: WidgetElement<C>): void;
 
-  get element(): T["Element"] {
+  get element(): WidgetElement<C> {
     return this._element;
   }
 
-  setElement(element: T["Element"]) {
+  setElement(element: WidgetElement<C>) {
     this._element = element;
+  }
+
+  get rpc(): Widget<WidgetType<C>> {
+    return this.props.connection.rpc as any;
   }
 
   get controller(): RpcConnection<WidgetController<C>> {
     return this.props.connection.controller;
   }
 
-  get controllerProps(): RpcConnection<WidgetController<C>>["props"] {
-    return this.props.connection.controller.props;
-  }
-
   get connection(): C {
     return this.props.connection;
-  }
-
-  get connectionProps(): C["props"] {
-    return this.props.connection.props;
   }
 
   constructor(props: P) {

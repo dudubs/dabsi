@@ -1,18 +1,21 @@
-import {Rpc, RpcHandlerFn} from "./Rpc";
-
+import { AbstractRpcHandler, IRpcHandler, Rpc, RpcCommand } from "./Rpc";
 
 export type NoRpc = Rpc<{
-    Handler: RpcHandlerFn<null, null>,
-    Connection: null,
-    Config: null
-}> ;
-export const NoRpc: NoRpc = {
-    createRpcConnection(handler) {
-        return null
-    },
-    createRpcHandler(config) {
-        return async () => {
-            throw new Error()
-        }
+  Payload: null;
+  Result: null;
+  Handler: {};
+  Connection: null;
+  Config: undefined;
+  Props: {};
+}>;
+
+export const NoRpc: NoRpc = Rpc<NoRpc>({
+  connect: () => null,
+  handler: class
+    extends AbstractRpcHandler<NoRpc>
+    implements IRpcHandler<NoRpc> {
+    async handle() {
+      return null;
     }
-};
+  },
+});

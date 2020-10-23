@@ -1,0 +1,1 @@
+testm(__filename, () => {});

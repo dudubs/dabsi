@@ -1,5 +1,6 @@
 import { RpcHandlerToExpressHandler } from "../../typerpc/RpcHandlerToExpressHandler";
-import { Service } from "../../typerpc/Service";
+import { Service } from "../../typerpc/old/Service";
+import { RpcMap } from "../../typerpc/RpcMap";
 import { ExpressTester } from "../../typerpc/tests/ExpressTests";
 import {
   AEntity,
@@ -11,7 +12,7 @@ import { RemoteDataSource } from "../RemoteDataSource";
 import { DUnion, EUnion } from "./BaseEntities";
 import { DataSourceTests } from "./DataSourceTests";
 
-export const RDSTesters = Service({
+export const RDSTesters = RpcMap({
   A: RemoteDataSource<AEntity>(),
   B: RemoteDataSource<BEntity>(),
   C: RemoteDataSource<CEntity>(),
@@ -20,7 +21,7 @@ export const RDSTesters = Service({
 });
 
 const RDSHandler = RpcHandlerToExpressHandler(
-  RDSTesters.createRpcHandler({
+  RDSTesters.createRpcCommand({
     A: EDSTesters.A,
     B: EDSTesters.B,
     C: EDSTesters.C,

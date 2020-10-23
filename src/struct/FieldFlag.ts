@@ -3,23 +3,23 @@
 FieldFlag()
 
  */
-import {Field} from "./Field";
-import {FieldDecorator} from "./FieldDecorator";
+import { Field } from "./Field";
+import { FieldDecorator } from "./FieldDecorator";
 
-export type FieldFlag<T> =
-    { get(field: Field): boolean } & (() => FieldDecorator<T>);
+export type FieldFlag<T> = {
+  get(field: Field): boolean;
+} & (() => FieldDecorator<T>);
 
-export function FieldFlag<T=any>(): FieldFlag<T> {
+export function FieldFlag<T = any>(): FieldFlag<T> {
+  const fields = new WeakSet<Field>();
 
-    const fields = new WeakSet<Field>();
+  Wrapper.load = (field) => fields.has(field);
 
-    Wrapper.get = field => fields.has(field)
+  return Wrapper;
 
-    return Wrapper
-
-    function Wrapper() {
-        return FieldDecorator(field => {
-            fields.add(field)
-        })
-    }
+  function Wrapper() {
+    return FieldDecorator((field) => {
+      fields.add(field);
+    });
+  }
 }

@@ -13,7 +13,7 @@ import { AbstractInputView } from "../AbstractInputView";
 import {
   AnyInput,
   AnyInputConnection,
-  InputData,
+  InputValueData,
   InputError,
   InputValue,
 } from "../Input";
@@ -160,7 +160,7 @@ export class WidgetViewTester<
     V extends InputView<AnyInputConnection>
   >(
     this: WidgetViewTester<T, InputViewClass<T>>,
-    callback: (data: InputData<T>) => void
+    callback: (data: InputValueData<T>) => void
   ) {
     this.test(() => {
       it("validInputData", async () => {
@@ -175,7 +175,7 @@ export class WidgetViewTester<
     V extends InputView<AnyInputConnection>
   >(
     this: WidgetViewTester<T, InputViewClass<T>>
-  ): Promise<InputData<RpcConnection<T>>> {
+  ): Promise<InputValueData<RpcConnection<T>>> {
     await this.view.validate();
     if (this.view.error != null) throw new Error(`Unexpected input error`);
     return this.view.data;

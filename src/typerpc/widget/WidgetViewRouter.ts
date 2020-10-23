@@ -3,12 +3,11 @@ import { PromiseType } from "../../common/typings";
 import { TReactRouter } from "../../typerouter/ReactRouter";
 import { ReactRouterRouteProps } from "../../typerouter/ReactRouterLocation";
 import { Router } from "../../typerouter/Router";
-import { Page } from "../Page";
+import { Page } from "./page/Page";
 import { RpcConnection } from "../Rpc";
 import {
   AnyWidget,
   AnyWidgetConnection,
-  WidgetConnection,
   WidgetElement,
   WidgetType,
 } from "./Widget";

@@ -1,0 +1,38 @@
+import { NoRpc } from "../../NoRpc";
+import { Input } from "../Input";
+import { TextInputError, TextInputOptions } from "./TextInputLoader";
+import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
+import { TextInputHandler } from "./TextInputHandler";
+
+export type TextInput = Input<{
+  Error: TextInputError;
+
+  ValueData: string;
+
+  Commands: {};
+
+  Value: string;
+
+  ValueElement: string;
+
+  Controller: NoRpc;
+
+  Props: {};
+
+  Config:
+    | undefined
+    | (TextInputOptions & {
+        default?: ValueOrAwaitableFn<string | undefined>;
+      });
+
+  Element: TextInputOptions;
+}>;
+
+export function TextInput(): TextInput {
+  return Input<TextInput>({
+    handler: TextInputHandler,
+    getValueData(value) {
+      return value;
+    },
+  });
+}

@@ -39,9 +39,9 @@ function dabsi-mon() {
 }
 
 function dabsi-test() {
-   dabsi node \
+    dabsi node \
    node_modules/jasmine/bin/jasmine.js \
-    $(find $1 -type f -path '*/tests/*' -name '*.ts*' \
+    $(find $1 -type f -name '*Tests.ts*' \
       ! -path '*/node_modules/*' | grep -v 'Old') \
     --stop-on-failure=true $JASMINE_OPTIONS
 }

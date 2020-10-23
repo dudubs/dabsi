@@ -50,13 +50,13 @@ type MuiDataTableViewColumnProps<
 type MuiDataTableActionEvent<C extends RpcConnection<AnyDataTable>> = {
   row: DataTableRowWithKey<C>;
   key: string;
-  connection: RpcConnection<WidgetType<C>["RowController"]>;
+  connection: RpcConnection<WidgetType<C>["TDataTable"]["RowController"]>;
   table: Readonly<DataTableView<C>>;
 };
 
 export type MuiDataTableViewProps<
   C extends RpcConnection<AnyDataTable>,
-  Row = WidgetType<C>["Row"]
+  Row = WidgetType<C>["TDataTable"]["Row"]
 > = DataTableViewProps<C> & {
   TableProps?: TableProps;
   TableHeadProps?: TableHeadProps;
@@ -138,7 +138,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
   onDeleteClick &&
     (actions.delete = {
       buttonType: MuiDeleteButton,
-      onClick: async (event) => {
+      onClick: async event => {
         await onDeleteClick!(event);
         await tableRef.current!.reloadAfterRemove(event.key);
       },
@@ -146,13 +146,13 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
 
   return (
     <DataTableView {...nextProps} ref={tableRef}>
-      {(table) => (
+      {table => (
         <TableLayout<{ $key: string }, { sortable: boolean }, any>
-          getRowKey={(row) => row.$key}
-          getRowData={(row) => row}
+          getRowKey={row => row.$key}
+          getRowData={row => row}
           rows={table.rows}
           columns={table.element?.columns || {}}
-          renderColumnTitle={(column) => (
+          renderColumnTitle={column => (
             <LangKey for={column.key}>{columns?.[column.key]?.title}</LangKey>
           )}
           renderColumn={(column, children) => (
@@ -216,7 +216,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                       ? undefined
                       : {
                           text: table.searchText,
-                          onSearch: async (text) => {
+                          onSearch: async text => {
                             table.search(text);
                           },
                         }
@@ -270,7 +270,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                       count={table.pageSize}
                       page={table.pageIndex}
                       rowsPerPage={table.pageSize}
-                      onChangeRowsPerPage={(event) => {
+                      onChangeRowsPerPage={event => {
                         table.setPageSize(parseInt(event.target.value));
                       }}
                       onChangePage={(event, page) => {

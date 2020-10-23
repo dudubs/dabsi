@@ -64,7 +64,7 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
 }: MuiTabsWidgetViewProps<C>) {
   return (
     <TabsWidgetView {...props}>
-      {(view) => {
+      {view => {
         const tabs: ReactElement[] = [];
 
         for (const [key, tab] of entries(keyToTab)) {

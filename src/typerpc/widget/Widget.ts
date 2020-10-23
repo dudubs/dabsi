@@ -1,237 +1,232 @@
-import { MetaType, MetaTypeHook, WithMetaType } from "../../common/MetaType";
+import { entries } from "../../common/object/entries";
 import { mergeDescriptors } from "../../common/object/mergeDescriptors";
+import { capitalize } from "../../common/string/capitalize";
 import {
-  Expect,
   Fn,
-  HasKeys,
   If,
   Is,
+  IsEmptyObject,
   Not,
+  Override,
   PartialUndefinedKeys,
+  Union,
 } from "../../common/typings";
-import {
-  ContextualRpc,
-  ContextualRpcProps,
-  ContextualRpcType,
-} from "../ContextualRpc";
 import { NoRpc } from "../NoRpc";
 import {
   AnyRpc,
-  RpcConfig,
+  BasedRpc,
+  IRpcHandler,
+  Rpc,
   RpcConnection,
-  RpcPayload,
-  RpcResult,
+  RpcCommand,
+  RpcHandlerClass,
+  RpcType,
+  RpcUnresolvedConfig,
+  TRpc,
 } from "../Rpc";
-import { RpcGenericConfig, RpcGenericConfigFn } from "../RpcGenericConfig";
-import {
-  RpcMapHandler,
-  RpcMapHandlerFn,
-  RpcMapHandlerMap,
-  TRpcMapHandlerMap,
-} from "../RpcMapHandler";
+import { IsGenericConfig } from "../GenericConfig";
 
-export type WidgetHandlerMap<T extends TWidget> = T["Handler"] & {
-  getElement: RpcMapHandlerFn.NoPayload<T["Element"]>;
-
-  controller: RpcMapHandlerFn<
-    RpcPayload<T["Controller"]>,
-    RpcResult<T["Controller"]>
-  >;
-};
-
-export type BaseWidgetContext<
-  T extends Pick<TWidget, "Controller" | "Element">
-> = {
-  getControllerConfig(): RpcConfig<T["Controller"]>;
-
-  getElement(): Promise<T["Element"]>;
-};
-
-export type WidgetHandler<T extends TWidget> = RpcMapHandler<
-  WidgetHandlerMap<T>
->;
-
-export type WidgetConnection<T extends TWidget> = WithMetaType<{
-  TWidget: T;
-}> & {
-  handler: WidgetHandler<T>;
-
-  props: Readonly<WidgetProps<T>>;
+type _WidgetConnection<T extends TWidget> = T["Connection"] & {
+  rpc: Widget<T>;
+  rpcCommand: RpcCommand;
   controller: RpcConnection<T["Controller"]>;
+
   getElement(): Promise<T["Element"]>;
+
+  command<K extends keyof T["Commands"]>(
+    key: string & K,
+    ...args: Parameters<T["Commands"][K]>
+  ): Promise<ReturnType<T["Commands"][K]>>;
 };
-
-export type WidgetContext<T extends TWidget> = BaseWidgetContext<T> &
-  T["Context"] & {
-    props: WidgetProps<T>;
-    config: WidgetConfig<T>;
-  };
-
-export type WidgetContextClass2<T extends TWidget> = new (
-  props: WidgetProps<T>,
-  config: WidgetConfig<T>
-) => WidgetContext<T>;
-
-export type WidgetContextClass<T extends AnyWidget> = new (
-  props: ContextualRpcProps<T>,
-  config: WidgetConfig<WidgetType<T>>
-) => WidgetContext<WidgetType<T>>;
-
-export type WidgetConfig<T extends TWidget, C = T["Config"]> = C extends Fn
-  ? ReturnType<C>
-  : C;
-
-export type WidgetHook<
-  R extends AnyWidget,
-  T extends Partial<TWidget>,
-  MT = {}
-> = MetaTypeHook<R, AnyWidget, MT> &
-  Widget<Extract<Omit<WidgetType<R>, keyof T> & T, TWidget>>;
-
-//
-export type WidgetBuilder<T extends Partial<TWidget>> = Widget<
-  Extract<Omit<TEmptyWidget, keyof T> & T, TWidget>
->;
 
 export type TWidget = {
   Connection: object;
-  Config: object | undefined;
-  Context: object;
-  Props: object;
-  Handler: TRpcMapHandlerMap;
+  Config: TRpc["Config"];
+  Handler: TRpc["Handler"];
+  Props: TRpc["Props"];
   Element: object;
   Controller: AnyRpc;
+  Commands: Record<string, Fn & { handler: string }>;
 };
-export type TEmptyWidget = Expect<
-  TWidget,
+
+export type Widget<
+  T extends TWidget,
+  C extends TWidget["Commands"] = T["Commands"]
+> = Rpc<{
+  TWidget: T;
+
+  Payload: [string, any];
+
+  Result;
+
+  Config: T["Config"];
+
+  Handler: T["Handler"] & {
+    getElement(): Promise<T["Element"]>;
+    getControllerConfig(): RpcUnresolvedConfig<T["Controller"]>;
+  };
+
+  Props: T["Props"] & {
+    widget: {
+      options: WidgetOptions<TWidget>;
+      commands: Record<keyof T["Commands"], string>;
+      connection: _WidgetConnection<T>;
+      controller: T["Controller"];
+    };
+  };
+
+  Connection: _WidgetConnection<T>;
+}>;
+
+export type WidgetOptions<
+  T extends TWidget,
+  C extends TWidget["Commands"] = T["Commands"]
+> = PartialUndefinedKeys<
   {
-    Connection: {};
-    Config: undefined;
-    Context: {};
-    Props: {};
-    Handler: {};
-    Element: {};
-    Controller: NoRpc;
+    isGenericConfig: boolean | If<Not<IsGenericConfig<T["Config"]>>, undefined>;
+
+    props: T["Props"] | If<IsEmptyObject<T["Props"]>, undefined>;
+
+    controller: T["Controller"] | If<Is<T["Controller"], NoRpc>, undefined>;
+
+    commands:
+      | { [K in keyof T["Commands"]]: C[K]["handler"] }
+      | If<IsEmptyObject<T["Commands"]>, undefined>;
+
+    connection:
+      | {
+          [K in keyof T["Connection"]]: (
+            this: _WidgetConnection<T>
+          ) => T["Connection"][K];
+        }
+      | If<IsEmptyObject<T["Connection"]>, undefined>;
+  },
+  {
+    handler: WidgetHandlerClass<Widget<T>>;
   }
 >;
 
-export type WidgetProps<T extends TWidget> = T["Props"] & {
-  controller: T["Controller"];
+export type WidgetHandlerClass<
+  R extends AnyWidget,
+  C extends TWidget["Commands"] = WidgetType<R>["Commands"]
+> = RpcHandlerClass<R, _WidgetCommandHandlerMap<R>>;
 
-  context: WidgetContextClass<Widget<T>>;
-
-  isGenericConfig: boolean;
-};
-export declare const WidgetController: unique symbol;
-
-export type Widget<T extends TWidget, U = {}> = WithMetaType<{ TWidget: T }> &
-  ContextualRpc<{
-    Config: T["Config"];
-
-    Context: WidgetContext<T>;
-
-    Props: WidgetProps<T>;
-
-    Handler: WidgetHandler<T>;
-
-    Connection: WidgetConnection<T> & T["Connection"];
-  }>;
-
-export type WidgetOptions<
-  Widget extends AnyWidget,
-  T extends TWidget
-> = PartialUndefinedKeys<{
-  connection:
-    | (ThisType<WidgetConnection<T>> & T["Connection"])
-    | If<Not<HasKeys<T["Connection"]>>, undefined>;
-
-  context: WidgetContextClass<Widget>;
-
-  isGenericConfig: boolean | If<Not<Is<T["Config"], Fn>>, undefined>;
-
-  props: T["Props"] | If<Not<HasKeys<T["Props"]>>, undefined>;
-
-  controller: T["Controller"] | If<Is<T["Controller"], NoRpc>, undefined>;
-
-  handler:
-    | RpcMapHandlerMap<WidgetHandlerContext<T>, T["Handler"]>
-    | If<Not<HasKeys<T["Handler"]>>, undefined>;
-}>;
-
-export type WidgetHandlerContext<T extends TWidget> = T["Context"] & {
-  props: WidgetProps<T>;
-  config: WidgetConfig<T>;
+type _WidgetCommandHandlerMap<
+  R extends BasedWidget,
+  C extends TWidget["Commands"] = WidgetType<R>["Commands"]
+> = {
+  [HK in Union<{ [K in keyof C]: C[K]["handler"] }>]: Union<
+    {
+      [K in keyof C]: C[K]["handler"] extends HK
+        ? (...args: Parameters<C[K]>) => Promise<ReturnType<C[K]>>
+        : never;
+    }
+  >;
 };
 
-export function Widget<T extends AnyWidget>(
-  options: WidgetOptions<T, WidgetType<T>>
-) {
+export type IWidgetHandler<
+  R extends AnyWidget,
+  C extends TWidget["Commands"] = WidgetType<R>["Commands"]
+> = IRpcHandler<R> & _WidgetCommandHandlerMap<R>;
+
+export const AnyWidgetConnection: _WidgetConnection<TWidget> = {
+  get rpc(): any {
+    throw new Error();
+  },
+  get rpcCommand(): any {
+    throw new Error();
+  },
+  get controller(): any {
+    throw new Error();
+  },
+  command(key, ...args) {
+    return this.rpcCommand([key, args]);
+  },
+  getElement() {
+    return this.rpcCommand(["getElement", []]);
+  },
+};
+
+export type AnyWidget = Widget<TWidget>;
+
+export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
+  options: WidgetOptions<T>
+): Widget<T> {
   const {
-    props = {},
-    handler = {},
-    connection = {},
-    controller = NoRpc,
-    context,
     isGenericConfig = false,
-  } = <WidgetOptions<AnyWidget, TWidget>>options;
+    props = {},
+    handler,
+    commands,
+    controller,
+    connection: connectionDescriptors,
+  } = options as WidgetOptions<TWidget>;
 
-  type H = WidgetHandlerMap<TWidget>;
+  let connection = Object.create(AnyWidgetConnection);
 
-  type C = ContextualRpcType<T>["Context"] & {
-    config: RpcConfig<T>;
-  };
-
-  return <T>ContextualRpc<AnyWidget>({
-    props: mergeDescriptors(props, {
-      isGenericConfig,
-      controller,
-      context,
-    }),
-    createHandler: RpcMapHandler<C, H>({
-      ...handler,
-      controller: (context, payload) => {
-        const controllerConfig = context.getControllerConfig();
-        return controller.createRpcHandler(controllerConfig)(payload);
+  for (const [key, value] of entries(connectionDescriptors)) {
+    const currentKey = "current" + capitalize(key);
+    Object.defineProperty(connection, key, {
+      get() {
+        if (!(currentKey in this)) {
+          this[currentKey] = value.apply(this);
+        }
+        return this[currentKey];
       },
-      getElement: context => {
-        return context.getElement();
+    });
+  }
+
+  return <any>Rpc<AnyWidget>({
+    handler,
+    isGenericConfig,
+    props: mergeDescriptors(props as {}, {
+      widget: {
+        controller: controller || NoRpc,
+        options: <WidgetOptions<TWidget>>options,
+        commands: commands || {},
+        connection: connection,
       },
     }),
-    createConnection: (handler, props) => {
+    connect(command) {
       return Object.setPrototypeOf(
         {
-          handler,
-          props,
-          getElement: () => handler("getElement"),
-          controller: controller.createRpcConnection(payload =>
-            handler(["controller", payload])
-          ),
+          rpc: this,
+          rpcCommand: command,
+          controller: this.widget.controller.createRpcConnection(payload => {
+            return command(["controller", payload]);
+          }),
         },
-        connection
+        this.widget.connection
       );
-    },
-    createContext: (props, config: any) => {
-      if (isGenericConfig) {
-        config = RpcGenericConfig(config);
-      }
-      return new context(props, config);
     },
   });
 }
 
 /////////////
 
-export type AnyWidget = Widget<TWidget>;
 export type AnyWidgetConnection = RpcConnection<AnyWidget>;
 
-export type WithWidgetType<T extends AnyWidget = AnyWidget> = WithMetaType<{
-  TWidget: WidgetType<T>;
-}>;
+export type BasedWidget<T extends TWidget = TWidget> = BasedRpc<
+  RpcType<Widget<T>>
+>;
 
-export type WidgetType<T extends WithWidgetType> = MetaType<T>["TWidget"];
+export type WidgetType<T extends BasedWidget> = RpcType<T>["TWidget"];
 
-export type WidgetElement<T extends WithWidgetType> = WidgetType<T>["Element"];
+export type WidgetElement<T extends BasedWidget> = WidgetType<T>["Element"];
 
-export type WidgetController<T extends WithWidgetType> = WidgetType<
+export type WidgetController<T extends BasedWidget> = WidgetType<
   T
 >["Controller"];
+
+export type WidgetHook<
+  R extends AnyWidget,
+  T extends Partial<TWidget>
+> = Widget<Extract<Override<WidgetType<R>, T>, TWidget>>;
+
+export type IWidget = Widget<
+  Override<
+    TWidget,
+    {
+      Commands: {};
+    }
+  >
+>;

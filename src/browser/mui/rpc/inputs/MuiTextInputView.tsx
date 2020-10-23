@@ -23,12 +23,12 @@ export function MuiTextInputView<C extends RpcConnection<TextInput>>({
 }: MuiTextInputViewProps<C>) {
   return (
     <TextInputView {...props}>
-      {(view) => (
+      {view => (
         <TextField
           fullWidth
           {...mergeProps(TextFieldProps, {
             onBlur: () => view.validate(),
-            onChange: (event) => view.setText(event.target.value),
+            onChange: event => view.setText(event.target.value),
           })}
           label={title}
           error={view.error != null}

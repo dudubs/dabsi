@@ -1,38 +1,71 @@
-import { OmitRequiredKeys } from "../data/DataExp";
-import { AnyRpc, RpcConfig, RpcHook } from "./Rpc";
-import { RpcConfigurator } from "./RpcConfigurator";
+import { Awaited, Fn, If, Not, PartialUndefinedKeys } from "../common/typings";
+import { ConfigFactory } from "./ConfigFactory";
+import { GenericConfig, IsGenericConfig } from "./GenericConfig";
+import { AnyRpc, RpcHook, RpcType, RpcUnresolvedConfig, TRpc } from "./Rpc";
 
-export type RpcConfigHook<T extends AnyRpc, C, MT = {}> = OmitRequiredKeys<
-  T,
-  AnyRpc
-> &
-  RpcHook<
-    T,
+export type RpcConfigHook<T extends TConfigHook> = RpcHook<
+  T["Target"],
+  { Config: T["Config"]; TConfigHook: T }
+>;
+
+export type TConfigHook = {
+  Target: AnyRpc;
+  Config: TRpc["Config"];
+};
+export type AnyRpcConfigHook = RpcConfigHook<{
+  Target: AnyRpc;
+  Config: TRpc["Config"];
+}>;
+
+type _GenericConfigHandler<T extends TConfigHook> = (
+  config: Awaited<ReturnType<Extract<T["Config"], Fn>>>,
+  target: T["Target"]
+) => RpcUnresolvedConfig<T["Target"]>;
+
+type _ConfigHandler<T extends TConfigHook> = (
+  config: T["Config"],
+  target: T["Target"]
+) => ConfigFactory<RpcUnresolvedConfig<T["Target"]>>;
+
+export type RpcConfigHookHandler<
+  R extends AnyRpcConfigHook,
+  T extends TConfigHook = RpcType<R>["TConfigHook"]
+> = IsGenericConfig<T["Config"]> extends true
+  ? _GenericConfigHandler<T>
+  : _ConfigHandler<T>;
+
+export function RpcConfigHook<
+  R extends AnyRpcConfigHook,
+  T extends TConfigHook = RpcType<R>["TConfigHook"]
+>(
+  options: PartialUndefinedKeys<
     {
-      Config: C;
+      isGenericConfig:
+        | IsGenericConfig<T["Config"]>
+        | If<Not<IsGenericConfig<T["Config"]>>, undefined>;
     },
-    MT
-  >;
-export const baseGetConfigProp = "rpcConfigHook.getConfig";
+    {
+      target: T["Target"];
+      handler: RpcConfigHookHandler<R>;
+    }
+  >
+): R {
+  const { target, handler } = options;
+  const isGenericConfig =
+    "isGenericConfig" in options ? options.isGenericConfig ?? false : false;
 
-// RpcConfigHook
-export function RpcConfigHook<T extends AnyRpc, C>(
-  target: T,
-  getConfig: (config: C, target: T) => RpcConfig<T>
-): RpcConfigurator<T, C> {
-  const baseGetConfig = target.createRpcHandler[baseGetConfigProp];
-
-  if (baseGetConfig) {
-    return RpcConfigHook(Object.getPrototypeOf(target), config =>
-      getConfig(baseGetConfig(config), target)
-    );
-  }
-
-  createRpcHandler[baseGetConfigProp] = getConfig;
-
-  return Object.setPrototypeOf({ createRpcHandler }, target);
-
-  function createRpcHandler(this, config) {
-    return target.createRpcHandler.call(this, getConfig(config, this));
-  }
+  return Object.setPrototypeOf(target, {
+    async resolveRpcConfig(this: T["Target"], config) {
+      if (isGenericConfig) {
+        config = await GenericConfig(
+          (handler as _GenericConfigHandler<T>)(config, this) as GenericConfig
+        );
+      } else {
+        config = await ConfigFactory(
+          (handler as _ConfigHandler<T>)(config, this)
+        );
+      }
+      return target.resolveRpcConfig.call(this, config);
+    },
+  });
 }

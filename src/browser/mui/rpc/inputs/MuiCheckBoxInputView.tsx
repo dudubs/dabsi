@@ -28,7 +28,7 @@ export function MuiCheckBoxInputView<C extends RpcConnection<BoolInput>>({
 }: MuiCheckBoxInputViewProps<C>) {
   return (
     <BoolInputView {...props}>
-      {(view) => {
+      {view => {
         const checkbox = (
           <Checkbox
             {...mergeProps(CheckboxProps, {

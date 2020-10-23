@@ -1,6 +1,6 @@
 import { Awaitable, RequireOptionalKeys } from "../../../common/typings";
 import { NoRpc } from "../../NoRpc";
-import { RpcConfig } from "../../Rpc";
+import { RpcConfigOld } from "../../old/Old";
 import {
   TWidget,
   WidgetConfig,
@@ -11,14 +11,14 @@ import { AbstractInputContext } from "../AbstractInputContext";
 import {
   AnyInput,
   Input,
-  InputCheckResult,
-  InputData,
-  InputHook,
+  InputCheckResultType,
+  InputValueData,
   InputOptions,
   InputType,
   InputValue,
   TInput,
 } from "../Input";
+import { InputHook } from "../InputHook";
 
 export function TestInput<T extends Partial<TInput>>({
   context = {},
@@ -26,17 +26,14 @@ export function TestInput<T extends Partial<TInput>>({
 }: {
   context?: Partial<AbstractInputContext<any>>;
 } & Partial<
-  Pick<
-    InputOptions<any, any>,
-    "getDataFromValueElement" | "getValueElementFromElement"
-  >
+  Pick<InputOptions<any, any>, "getValueData" | "getValueElementFromElement">
 > = {}): InputHook<AnyInput, T> {
   return Input<any>({
     props: {},
     isGenericConfig: false,
     controller: NoRpc,
     context: class extends AbstractInputContext<any> {
-      getControllerConfig(): RpcConfig<WidgetController<any>> {
+      getControllerConfig(): RpcConfigOld<WidgetController<any>> {
         return context.getControllerConfig!();
       }
       getDefaultValue(): Awaitable<InputValue<any> | undefined> {
@@ -53,12 +50,14 @@ export function TestInput<T extends Partial<TInput>>({
         return context.getConfigForValue!(value);
       }
 
-      loadAndCheck(data: InputData<any>): Promise<InputCheckResult<any>> {
+      loadAndCheck(
+        data: InputValueData<any>
+      ): Promise<InputCheckResultType<any>> {
         return context.loadAndCheck!(data);
       }
     },
-    getDataFromValueElement(value) {
-      throw options.getDataFromValueElement?.(value) ?? {};
+    getValueData(value) {
+      throw options.getValueData?.(value) ?? {};
     },
     getValueElementFromElement(element) {
       return options.getValueElementFromElement?.(element);

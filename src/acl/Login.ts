@@ -1,17 +1,12 @@
 import { BaseType } from "../data/BaseType";
 import { DataSource, DataSourceFactory } from "../data/DataSource/DataSource";
-import { Command } from "../typerpc/Command";
+import { RpcFn } from "../typerpc/RpcFn";
 import { NoRpc } from "../typerpc/NoRpc";
-import { Parameter } from "../typerpc/Parameter";
-import {
-  AnyRpc,
-  Rpc,
-  RpcConfig,
-  RpcHandler,
-  RpcHandlerFn,
-} from "../typerpc/Rpc";
-import { RpcConfigurator } from "../typerpc/RpcConfigurator";
-import { RpcConfigFactory2 } from "../typerpc/RpcGenericConfig";
+import { RpcConfigOld } from "../typerpc/old/Old";
+import { Parameter } from "../typerpc/parameter/Parameter";
+import { AnyRpc, Rpc, RpcHandlerTypeOld, RpcCommand } from "../typerpc/Rpc";
+import { RpcConfigurator } from "../typerpc/old/RpcConfigurator";
+import { RpcConfigFactory2 } from "../typerpc/GenericConfig";
 import { RpcMap } from "../typerpc/RpcMap";
 import {
   AnyWidget,

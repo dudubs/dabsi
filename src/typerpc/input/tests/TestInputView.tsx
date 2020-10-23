@@ -4,7 +4,7 @@ import { WidgetElement } from "../../widget/Widget";
 import { AbstractInputView } from "../AbstractInputView";
 import {
   AnyInputConnection,
-  InputData,
+  InputValueData,
   InputError,
   InputValue,
 } from "../Input";

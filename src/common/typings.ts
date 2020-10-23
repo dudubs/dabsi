@@ -9,15 +9,13 @@ export type Nullable = undefined | null;
 
 export type Awaitable<T = any> = Promise<T> | T;
 
-export type ToAwaitable<T> = Awaitable<AwaitableType<T>>;
-
 export type Fn = (...args: any[]) => any;
 
 export type PromiseType<T extends Promise<any>> = T extends Promise<infer U>
   ? U
   : never;
 
-export type AwaitableType<T extends Awaitable> = T extends Awaitable<infer U>
+export type Awaited<T extends Awaitable> = T extends Awaitable<infer U>
   ? U
   : never;
 
@@ -85,7 +83,10 @@ export function Type<T = any>(this: any): Type<T> {
 
 export type Assign<T, U> = Omit<T, keyof Required<U>> & U;
 export type Override<T extends object, U extends object> = Omit<T, keyof U> & U;
-
+export type Replace<T extends object, U extends Partial<T>> = Extract<
+  Override<T, U>,
+  T
+>;
 export type AssignKeys<T, U> = HasKeys<T> extends false
   ? U
   : HasKeys<U> extends false
@@ -222,7 +223,7 @@ export type AsyncFn<T extends (...args: any[]) => any> = (
 
 export type SyncFn<T extends (...args: any[]) => any> = (
   ...args: Parameters<T>
-) => AwaitableType<ReturnType<T>>;
+) => Awaited<ReturnType<T>>;
 
 declare global {
   interface TypeRefs {}
@@ -246,3 +247,6 @@ export type UndefinedIfIsUndefined<T> = If<IsUndefined<T>, undefined>;
 export type IsUndefined<T> = undefined extends T ? true : false;
 
 export type Defined<T> = T extends undefined ? never : T;
+
+export type OmitRequiredKeys<T extends U, U> = Omit<T, keyof Required<U>>;
+export type KeyMap<T> = Record<string, T>;

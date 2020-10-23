@@ -1,0 +1,29 @@
+import { ReactNode } from "react";
+import { Awaitable } from "../../../common/typings";
+import { RpcConnection } from "../../Rpc";
+import { AbstractInputView } from "../AbstractInputView";
+import { InputError, InputValueElement } from "../Input";
+import { InputView, InputViewProps } from "../InputView";
+import { NumberInput } from "./NumberInput";
+import { NumberInputLoader, NumberInputOptions } from "./NumberInputLoader";
+
+export class NumberInputView<
+  C extends RpcConnection<NumberInput>
+> extends AbstractInputView<
+  C,
+  InputViewProps<C> & {
+    children(view: Readonly<NumberInputView<C>>): ReactNode;
+  }
+> {
+  protected getError(): Awaitable<InputError<C> | undefined> {
+    return NumberInputLoader.check(this.element, this.value);
+  }
+
+  async setValue(value: InputValueElement<C>): Promise<void> {
+    return super.setValue(NumberInputLoader.load(this.element, value));
+  }
+
+  renderView(): React.ReactNode {
+    return this.props.children(this);
+  }
+}

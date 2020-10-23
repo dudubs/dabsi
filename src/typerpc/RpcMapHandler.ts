@@ -1,70 +1,23 @@
-import {Awaitable, Union} from "../common/typings";
-import {RpcError, RpcHandlerFn} from "./Rpc";
+import { Awaitable } from "../common/typings";
+import {
+  AbstractRpcHandler,
+  AnyRpc,
+  IRpcHandler,
+  RpcResolvedHandler,
+  RpcType,
+} from "./Rpc";
+import { AnyRpcMap } from "./RpcMap";
 
-export type TRpcMapHandlerMap = Record<string, RpcMapHandlerFn>;
+export class RpcMapHandler<R extends AnyRpcMap, T extends RpcType<R>["TRpcMap"]>
+  extends AbstractRpcHandler<R>
+  implements IRpcHandler<AnyRpcMap> {
+  handle([key, payload]: RpcType<R>["Payload"]): Awaitable<
+    RpcType<R>["Result"]
+  > {
+    return this.getTargetHandler(key).call("handle", payload);
+  }
 
-export type RpcMapHandlerFn<Payload = any, Result = any> = {
-    (payload: Payload): Result;
+  getTargetHandler(key: string): Promise<RpcResolvedHandler<AnyRpc>> {
+    return this.rpc.targetMap[key].resolveRpcHandler(this.config[key]);
+  }
 }
-
-export declare namespace RpcMapHandlerFn {
-    type NoPayload<T> = RpcMapHandlerFn<undefined, T>;
-    type NoResult<T> = RpcMapHandlerFn<T, void>;
-}
-
-export type RpcMapHandler<T extends TRpcMapHandlerMap> = {
-    <P extends Union<{
-        [K in keyof T]: [K, Parameters<T[K]>[0]]
-    }>>(
-        payload: P
-    ): Promise<ReturnType<T[P[0]]>>
-
-    <P extends Union<{
-        [K in keyof T]:
-        Parameters<T[K]>[0] extends undefined ? K :
-            never
-    }>>(
-        payload: P
-    ): Promise<ReturnType<T[P]>>
-
-}
-
-export type RpcMapHandlerMap<C, T extends TRpcMapHandlerMap> = {
-    [K in keyof T]: (
-        context: C,
-        payload: Parameters<T[K]>[0],
-    ) =>
-        Awaitable<ReturnType<T[K]>>
-};
-
-export function RpcMapHandler<C,
-    T extends TRpcMapHandlerMap>(
-    handlers: {
-        [K in keyof T]: (
-            context: C,
-            payload: Parameters<T[K]>[0],
-        ) =>
-            Awaitable<ReturnType<T[K]>>
-    }
-): (context: C) => RpcMapHandler<T> {
-    return context => async payload => {
-        return handleRpcMap(payload, handlers,
-            (payload, handler) => handler(context, payload)
-        );
-    }
-}
-
-export function handleRpcMap<T, K extends string & keyof T, U>(
-    payload: K | [K, any],
-    map: T,
-    callback: (payload: any, item: T[K], key: string) => U
-) {
-    const [key, nextPayload] = typeof payload === "string" ? [payload, undefined] : payload;
-    if (!map[key]) {
-        throw new RpcError(`No mapped key "${key}."`)
-    }
-    return callback(nextPayload, map[key], key);
-}
-
-
-

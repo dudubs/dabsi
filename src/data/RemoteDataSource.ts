@@ -1,4 +1,4 @@
-import { AwaitableType } from "../common/typings";
+import { Awaited } from "../common/typings";
 import { Rpc } from "../typerpc/Rpc";
 import { DataCursor, EmptyDataCursor } from "./DataCursor";
 import { DataBaseRow, DataRow } from "./DataRow";
@@ -64,7 +64,7 @@ export type RemoteDataSourceHandler<T> = <
   Method extends RemoteDataSourceMethod
 >(
   payload: RemoteDataSourceData<T, Method>
-) => Promise<AwaitableType<ReturnType<DataSource<T>[Method]>>>;
+) => Promise<Awaited<ReturnType<DataSource<T>[Method]>>>;
 
 export type RemoteDataSource<T> = Rpc<{
   Handler: RemoteDataSourceHandler<T>;
@@ -77,7 +77,7 @@ export function RemoteDataSource<T>(): RemoteDataSource<T> {
     createRpcConnection: (handler) => {
       return new RemoteDataSourceConnection<T>(handler);
     },
-    createRpcHandler: (source) => {
+    create: (source) => {
       return async ({ method, cursor, args }) => {
         // TODO: more safety code.
         cursor = DataCursor.concat(source.cursor, cursor);

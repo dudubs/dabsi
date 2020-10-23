@@ -1,38 +1,35 @@
 import { inspect } from "../../../logging";
-import { AnyContextualRpc, ContextualRpcContext } from "../../ContextualRpc";
-import { AnyRpc, RpcConfig, RpcConnection } from "../../Rpc";
-import { AnyWidget, WidgetElement } from "../../widget/Widget";
-import { WidgetView, WidgetViewProps } from "../../widget/WidgetView";
 import {
-  AnyInput,
-  InputCheckResult,
-  InputData,
-  InputError,
-  InputValue,
-} from "../Input";
+  AnyRpc,
+  RpcConnection,
+  RpcHandler,
+  RpcUnresolvedConfig,
+} from "../../Rpc";
+import { AnyWidget, WidgetElement } from "../../widget/Widget";
+import { AnyInput, InputError, InputValue, InputValueData } from "../Input";
 import { CaseTester } from "./CaseTester";
 import { WidgetViewClass, WidgetViewTester } from "./WidgetViewTester";
 
 export class RpcTester<T extends AnyRpc> {
   constructor(public rpc: T) {}
 
-  testConfig = CaseTester<RpcConfig<T>>("config");
+  testConfig = CaseTester<RpcUnresolvedConfig<T>>("config");
 
   testConnection<T extends AnyRpc>(
     this: RpcTester<T>,
     callback: (connection: RpcConnection<T>) => void
   ) {
-    this.testConfig.test((config) => {
-      callback(this.rpc.createRpcConnection(this.rpc.createRpcHandler(config)));
+    this.testConfig.test(config => {
+      callback(this.rpc.createRpcConnection(this.rpc.createRpcCommand(config)));
     });
   }
 
-  testContext<T extends AnyContextualRpc>(
+  testHandler<T extends AnyRpc>(
     this: RpcTester<T>,
-    callback: (context: ContextualRpcContext<T>) => void
+    callback: (handler: RpcHandler<T>) => void
   ) {
-    this.testConfig.test((config) => {
-      callback(this.rpc.getContext(config));
+    this.testConfig.test(async config => {
+      callback(await this.rpc.resolveRpcHandler(config));
     });
   }
 
@@ -40,7 +37,7 @@ export class RpcTester<T extends AnyRpc> {
     this: RpcTester<T>,
     callback: (t: { readonly element: WidgetElement<T> }) => void
   ) {
-    this.testContext((ctx) => {
+    this.testHandler(ctx => {
       describe("test:widget element", () => {
         let element;
         beforeAll(async () => {
@@ -57,10 +54,10 @@ export class RpcTester<T extends AnyRpc> {
 
   testInputValue<T extends AnyInput>(
     this: RpcTester<T>,
-    data: InputData<T>,
+    data: InputValueData<T>,
     value: InputValue<T>
   ) {
-    this.testContext((conn) => {
+    this.testHandler(conn => {
       describe("test:input", () => {
         it(`data:${inspect(data)} expectValue:${inspect(value)}`, async () => {
           const result = await conn.loadAndCheck(data);
@@ -75,10 +72,10 @@ export class RpcTester<T extends AnyRpc> {
 
   testInputError<T extends AnyInput>(
     this: RpcTester<T>,
-    data: InputData<T>,
+    data: InputValueData<T>,
     error: InputError<T>
   ) {
-    this.testContext((conn) => {
+    this.testHandler(conn => {
       it(`test:input data:${inspect(data)} expectError:${inspect(
         error
       )}`, async () => {
@@ -97,7 +94,7 @@ export class RpcTester<T extends AnyRpc> {
     viewClass: VC,
     callback: (tester: WidgetViewTester<T, VC>) => void
   ) {
-    this.testConnection((connection) => {
+    this.testConnection(connection => {
       describe("view:" + viewClass.name, () => {
         callback(new WidgetViewTester(viewClass, connection));
       });

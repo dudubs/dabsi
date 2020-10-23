@@ -13,7 +13,7 @@ import {
   RequireOptionalKeys,
 } from "../typings";
 
-(_ => {})(() => {
+((_) => {})(() => {
   // Bool
   {
     // @ts-expect-error

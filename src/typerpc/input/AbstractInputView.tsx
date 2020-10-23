@@ -7,7 +7,7 @@ import { WidgetType } from "../widget/Widget";
 // TODO: type InputView
 import {
   AnyInputConnection,
-  InputData,
+  InputValueData,
   InputError,
   InputType,
   InputValueElement,
@@ -24,7 +24,9 @@ export abstract class AbstractInputView<
   implements InputView<C> {
   protected updateError?(error: T["Error"] | undefined): void;
 
-  @ViewState("forceUpdateValue") protected _value: InputValueElement<C>;
+  @ViewState("forceUpdateValue") protected _value:
+    | InputValueElement<C>
+    | undefined;
 
   @ViewState("forceUpdateError") protected _error: InputError<C>;
 
@@ -32,7 +34,7 @@ export abstract class AbstractInputView<
 
   @ViewState() isValidating: boolean;
 
-  protected _data: InputData<C>;
+  protected _data: InputValueData<C>;
   protected _isValidValue: boolean;
 
   children?: InputViewChildren;
@@ -41,7 +43,7 @@ export abstract class AbstractInputView<
     return this._errorElement;
   }
 
-  get data(): InputData<C> {
+  get data(): InputValueData<C> {
     return this._data;
   }
 
@@ -49,7 +51,7 @@ export abstract class AbstractInputView<
     return this._error;
   }
 
-  get value(): InputValueElement<C> {
+  get value(): InputValueElement<C> | undefined {
     return this._value;
   }
 
@@ -76,19 +78,17 @@ export abstract class AbstractInputView<
 
   protected getError?(): Awaitable<InputError<C> | undefined>;
 
-  protected updateValue?(value: InputValueElement<C>): void;
+  protected updateValue?(value: InputValueElement<C> | undefined): void;
 
   protected updateElement(element: WidgetType<C>["Element"]) {
     this._value =
-      this.props.value !== undefined
-        ? this.props.value
-        : this.connectionProps.getValueElementFromElement(element);
+      this.props.value !== undefined ? this.props.value : element.value;
   }
 
   forceUpdateValue() {
     this._error = undefined;
     this._isValidValue = false;
-    this._data = this.connectionProps.getDataFromValueElement(this._value);
+    this._data = this.rpc.getValueData(this._value);
     this.updateValue?.(this._value);
   }
 

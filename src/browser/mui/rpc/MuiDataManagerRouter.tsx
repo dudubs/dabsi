@@ -17,7 +17,7 @@ import {
   DataManager,
   DataManagerTypes,
   TDataManager,
-} from "../../../typerpc/DataManager";
+} from "../../../typerpc/data/DataManager";
 import { RpcConnection } from "../../../typerpc/Rpc";
 import { ElementWidgetView } from "../../../typerpc/widget/ElementWidgetView";
 import { FormInput } from "../../../typerpc/widget/Form";

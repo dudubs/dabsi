@@ -1,9 +1,9 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { EntityDataSource } from "../../../data/eds/EntityDataSource";
 import { TestConnection } from "../../../data/tests/TestConnection";
-import { BoolInput } from "../BoolInput";
-import { DataInput } from "../DataInput";
-import { DataInputMap } from "../DataInputMap";
+import { BoolInput } from "../bool-input/BoolInput";
+import { DataInput } from "../data-input/DataInput";
+import { DataInputMap } from "../data-input-map/DataInputMap";
 import { testCase } from "./CaseTester";
 import { testRpc } from "./RpcTester";
 import objectContaining = jasmine.objectContaining;

@@ -5,6 +5,7 @@ import {
   If,
   Is,
   IsEmptyObject,
+  IsUndefined,
   Not,
   Override,
   PartialUndefinedKeys,
@@ -12,14 +13,23 @@ import {
 import { NoRpc } from "../NoRpc";
 import {
   BasedRpc,
+  RpcIsGenericConfigOption,
   RpcConnection,
   RpcHandlerClass,
   RpcResolvedHandler,
   RpcType,
   RpcUnresolvedConfig,
+  RpcPropsOption,
 } from "../Rpc";
 import { IsGenericConfig } from "../GenericConfig";
-import { TWidget, Widget, WidgetElement, WidgetType } from "../widget/Widget";
+import {
+  TWidget,
+  Widget,
+  WidgetCommandsOption,
+  WidgetControllerOption,
+  WidgetElement,
+  WidgetType,
+} from "../widget/Widget";
 
 export type IInput = Input<
   Override<
@@ -76,11 +86,14 @@ export type Input<T extends TInput> = Widget<{
   Props: T["Props"] & {
     inputOptions: InputOptions<TInput>;
 
-    getValueData(this: Input<T>, element: T["ValueElement"]): T["ValueData"];
+    getValueDataFromElement(
+      this: Input<T>,
+      element: T["ValueElement"]
+    ): T["ValueData"];
   };
 
   Element: T["Element"] & {
-    value?: T["ValueElement"];
+    value: T["ValueElement"] | undefined;
   };
 
   Controller: T["Controller"];
@@ -104,16 +117,16 @@ export type AnyInputConnection = RpcConnection<AnyInput>;
 
 export type InputOptions<T extends TInput> = PartialUndefinedKeys<
   {
-    isGenericConfig: boolean | If<Not<IsGenericConfig<T["Config"]>>, undefined>;
+    isGenericConfig: RpcIsGenericConfigOption<T>;
 
-    props: T["Props"] | If<IsEmptyObject<T["Props"]>, undefined>;
+    props: RpcPropsOption<T>;
 
-    controller: T["Controller"] | If<Is<T["Controller"], NoRpc>, undefined>;
+    controller: WidgetControllerOption<T>;
   },
   {
     handler: RpcHandlerClass<Input<T>>;
 
-    getValueData: (
+    getValueDataFromElement: (
       this: Input<T>,
       value: InputValueElement<Input<T>>
     ) => InputValueData<Input<T>>;
@@ -128,13 +141,13 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     isGenericConfig,
     controller,
     handler,
-    getValueData,
+    getValueDataFromElement,
   } = options as InputOptions<TInput>;
 
   return <any>Widget<AnyInput>({
     props: mergeDescriptors(props, {
       inputOptions: <InputOptions<TInput>>options,
-      getValueData,
+      getValueDataFromElement,
     }),
     controller,
     isGenericConfig,

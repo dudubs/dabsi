@@ -4,11 +4,12 @@ import { Awaitable } from "../../../common/typings";
 import { Lang } from "../../../localization/Lang";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
+import { WidgetType } from "../../widget/Widget";
 import { AbstractInputView } from "../AbstractInputView";
 import { InputError, InputValueElement } from "../Input";
-import { InputViewProps } from "../InputView";
+import { InputErrorElementMap, InputViewProps } from "../InputView";
 import { TextInput } from "./TextInput";
-import { TextInputLoader } from "./TextInputLoader";
+import { TextInputLoader, TextInputOptions } from "./TextInputLoader";
 
 export type TextInputViewProps<
   C extends RpcConnection<TextInput>
@@ -34,12 +35,21 @@ export class TextInputView<
 
   protected debounceId = 0;
 
+  protected _options: TextInputOptions;
+  protected updateElement(element: WidgetType<C>["Element"]) {
+    super.updateElement(element);
+    this._options = {
+      ...element,
+      pattern: element.pattern ? new RegExp(element.pattern) : undefined,
+    };
+  }
+
   protected getError(): Awaitable<InputError<C> | undefined> {
-    return TextInputLoader.check(this.element, this.value || "");
+    return TextInputLoader.check(this._options, this.value || "");
   }
 
   async setValue(value: InputValueElement<C>): Promise<void> {
-    return super.setValue(TextInputLoader.load(this.element, value));
+    return super.setValue(TextInputLoader.load(this._options, value));
   }
 
   inputWillValidate(): Awaitable {
@@ -57,21 +67,13 @@ export class TextInputView<
     await this.setValue(text);
   }
 
-  protected getErrorElement(error: InputError<TextInput>): ReactElement {
-    switch (error) {
-      case "INVALID_PATTERN":
-        return Lang`INVALID_PATTERN`;
-      case "REQUIRED":
-        return Lang`REQUIRED`;
-      case "TOO_LONG":
-        return Lang`REQUIRED_MAXIMUM_${"max"}_CHARACTERS`({
-          max: this.element?.maxLength,
-        });
-      case "TOO_SHORT":
-        return Lang`REQUIRED_MINIMUM_${"min"}_CHARACTERS`({
-          min: this.element?.minLength,
-        });
-    }
+  protected getErrorElementMap(): InputErrorElementMap<TextInput> {
+    return {
+      INVALID_PATTERN: Lang`EXPECTED_TO_PATTERN_${"pattern"}`,
+      REQUIRED: Lang`REQUIRED`,
+      MAX_LENGTH: Lang`REQUIRED_MAXIMUM_${"maxLength"}`,
+      MIN_LENGTH: Lang`REQUIRED_MINIMUM_${"minLength"}`,
+    };
   }
 
   renderView(): React.ReactNode {

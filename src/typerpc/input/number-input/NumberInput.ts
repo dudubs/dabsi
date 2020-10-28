@@ -23,7 +23,7 @@ export type NumberInput = Input<{
         default?: ValueOrAwaitableFn<number>;
       });
 
-  Element: NumberInputOptions & { default?: number };
+  Element: NumberInputOptions;
 
   Error: NumberInputError;
 }>;
@@ -31,10 +31,8 @@ export type NumberInput = Input<{
 export function NumberInput(): NumberInput {
   return <any>Input<NumberInput>({
     handler: NumberInputHandler,
-    getValueElementFromElement(element) {
-      return element.default ?? element.min ?? 0;
-    },
-    getValueData(value) {
+
+    getValueDataFromElement(value) {
       return value;
     },
   });

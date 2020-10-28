@@ -23,6 +23,6 @@ export type NullableInput<
 
     Element: T["Element"];
 
-    Error: T["Error"] | "REQUIRED";
+    Error: T["Error"] | "NOT_NULLABLE";
   }
 > = Input<Omit<T, keyof U> & U>;

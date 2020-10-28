@@ -1,3 +1,4 @@
+import { Override } from "../../../common/typings";
 import { NoRpc } from "../../NoRpc";
 import { Input } from "../Input";
 import { TextInputError, TextInputOptions } from "./TextInputLoader";
@@ -25,13 +26,18 @@ export type TextInput = Input<{
         default?: ValueOrAwaitableFn<string | undefined>;
       });
 
-  Element: TextInputOptions;
+  Element: Override<
+    TextInputOptions,
+    {
+      pattern?: string;
+    }
+  >;
 }>;
 
 export function TextInput(): TextInput {
   return Input<TextInput>({
     handler: TextInputHandler,
-    getValueData(value) {
+    getValueDataFromElement(value) {
       return value;
     },
   });

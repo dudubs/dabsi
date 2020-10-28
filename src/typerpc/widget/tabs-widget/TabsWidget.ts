@@ -1,25 +1,28 @@
 import { Union } from "../../../common/typings";
-import { RpcConfigOld } from "../../old/Old";
-import { RpcMap } from "../../RpcMap";
-import { RpcMapHandlerFn } from "../../RpcMapHandlerOld";
-import { TabsWidgetContext } from "./TabsWidgetContext";
+import { RpcUnresolvedConfig } from "../../Rpc";
+import { RpcMap } from "../../rpc-map/RpcMap";
 import { AnyWidget, Widget, WidgetElement } from "../Widget";
-import { AnyWidgetMapX } from "../widget-map/WidgetMap";
+import { AnyWidgetRecord } from "../widget-map/WidgetMap";
+import { TabsWidgetHandler } from "./TabsWidgetHandler";
 
 export type AnyTabsWidget = TabsWidget<AnyWidgetRecord>;
 
-export type TabsWidget<T extends AnyWidgetMapX> = Widget<{
-  Tabs: T;
+export type TabsWidget<T extends AnyWidgetRecord> = Widget<{
+  TabMap: T;
 
   Controller: RpcMap<T>;
 
+  Commands: {
+    getTab: {
+      (key: string): WidgetElement<AnyWidget>;
+      handler: "handleGetTab";
+    };
+  };
   Connection: {
     getTab<K extends keyof T>(key: K): WidgetElement<T[K]>;
   };
 
-  Handler: {};
-
-  Config: RpcConfigOld<RpcMap<T>>;
+  Config: RpcUnresolvedConfig<RpcMap<T>>;
 
   Element: {
     current?: Union<
@@ -32,29 +35,23 @@ export type TabsWidget<T extends AnyWidgetMapX> = Widget<{
     >;
   };
 
-  Props: {};
-
-  Handler: {
-    getTab: RpcMapHandlerFn<string, WidgetElement<AnyWidget>>;
+  Props: {
+    tabMap: T;
   };
+
+  Handler: {};
 }>;
 
-export function TabsWidget<T extends AnyWidgetMapX>(items: T): TabsWidget<T> {
-  return <any>Widget<TabsWidget<AnyWidgetMapX>>({
-    controller: RpcMap(items),
-    context: TabsWidgetContext,
+export function TabsWidget<T extends AnyWidgetRecord>(
+  tabMap: T
+): TabsWidget<T> {
+  return <any>Widget<AnyTabsWidget>({
+    controller: RpcMap(tabMap),
+    handler: TabsWidgetHandler,
+    commands: { getTab: "handleGetTab" },
+    props: { tabMap },
     connection: {
-      getTab(key) {
-        return this.handler(["getTab", key]);
-      },
-    },
-    handler: {
-      getTab(context, key) {
-        return context.props.controller
-          .getContext(context.config)
-          .call("getContext", key)
-          .call("getElement");
-      },
+      getTab: conn => key => conn.command("getTab", key),
     },
   });
 }

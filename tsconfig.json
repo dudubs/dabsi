@@ -12,6 +12,7 @@
     "node_modules",
     "./dist",
     "./src/browser",
-    "./src/data/DataTable"
+    "./src/data/DataTable",
+    "./src/struct"
   ]
 }

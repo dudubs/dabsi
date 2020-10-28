@@ -1,4 +1,4 @@
-import { AbstractWidgetHandler } from "../ AbstractWidgetHandler";
+import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { mapObjectAsync } from "../../../common/object/mapObject";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController, WidgetElement } from "../Widget";
@@ -14,43 +14,10 @@ export class WidgetMapHandler extends AbstractWidgetHandler<T> {
   async getElement(): Promise<WidgetElement<T>> {
     return {
       elementMap: await mapObjectAsync(this.rpc.targetMap, (target, key) =>
-        this.controllerHandler
+        this.controller
           .then(c => c.getTargetHandler(key))
           .then(h => h.getElement())
       ),
     };
   }
 }
-
-/*
-
-AppUserServiceConfig =
-(UserResolver:Resolver<User>) =>
-RpcConfigResolver([User],(user)=>$=>$({
-
-  PermsResolver("ALLOW_TO_ADD_COMMENT", AppPerms, "COMMENT")
-
-
-}))
-
-AppServiceConfigResolver = RpcConfigResolver([[Session]],
-
-  AppUserServiceConfig(
-    Provider()
-      .for(Type|TokenResolver, xx)
-      .for()
-      .for()
-      .
-  )
-
-],(session,appConfig)=>$=>{
-
-
-})
-
-
-()=> X.createRpcHandler($=>{
-
-})
-
- */

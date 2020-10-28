@@ -1,9 +1,9 @@
 import { View } from "../../react/view/View";
 import { ViewState } from "../../react/view/ViewState";
-import { Rpc, RpcConnection, RpcType } from "../Rpc";
+import { RpcConnection } from "../Rpc";
 import {
+  AnyWidget,
   AnyWidgetConnection,
-  TWidget,
   Widget,
   WidgetController,
   WidgetElement,
@@ -57,3 +57,7 @@ export abstract class AbstractWidgetView<
     }
   }
 }
+
+export type WidgetViewClass<T extends AnyWidget> = new (
+  props: WidgetViewProps<RpcConnection<T>>
+) => AbstractWidgetView<RpcConnection<T>>;

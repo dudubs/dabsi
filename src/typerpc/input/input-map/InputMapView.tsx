@@ -1,32 +1,15 @@
 import * as React from "react";
-import {
-  ComponentClass,
-  createElement,
-  Fragment,
-  ReactElement,
-  ReactNode,
-} from "react";
-import { entries } from "../../../common/object/entries";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { keys } from "../../../common/object/keys";
+import { createElement, Fragment, ReactElement, ReactNode } from "react";
 import { mapObject } from "../../../common/object/mapObject";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { values } from "../../../common/object/values";
-import { Awaitable } from "../../../common/typings";
 import { Renderer } from "../../../react/renderer";
-import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
-import {
-  AnyWidget,
-  WidgetController,
-  WidgetElement,
-  WidgetType,
-} from "../../widget/Widget";
+import { WidgetController } from "../../widget/Widget";
 import { AbstractInputView } from "../AbstractInputView";
-import { AnyInputConnection, InputError, InputValueElement } from "../Input";
-import { AnyInputRecord, InputMap } from "./InputMap";
-import { InputErrorOrData, InputView, InputViewProps } from "../InputView";
+import { AnyInputConnection } from "../Input";
+import { InputViewProps } from "../InputView";
 import { InputViewChildren } from "../InputViewChildren";
+import { AnyInputMap, AnyInputRecord, InputMap } from "./InputMap";
 
 export type AnyInputMapConnection = RpcConnection<InputMap<AnyInputRecord>>;
 
@@ -45,7 +28,6 @@ export class InputMapView<
 > {
   children = new InputViewChildren();
 
-  // TODO: createPropsProxy(x, ()=>{})
   getProps<K extends keyof RpcConnection<WidgetController<C>>>(
     key: string & K
   ): InputViewProps<RpcConnection<WidgetController<C>>[K]> {
@@ -61,18 +43,33 @@ export class InputMapView<
           [key]: view.value,
         }),
       inputRef: this.children.ref(key),
-    };
+    } as InputViewProps<RpcConnection<WidgetController<C>>[K]>;
   }
 
   renderView(): React.ReactNode {
     return this.props.children(this.getProps.bind(this), this);
   }
+}
 
-  static Fields<C extends AnyInputMapConnection>({
+export namespace InputMapView {
+  export type FieldsProps<
+    C extends AnyInputMapConnection,
+    T extends Record<string, AnyInputConnection> = RpcConnection<
+      WidgetController<C>
+    >
+  > = InputViewProps<C> & {
+    fields: { [K in string & keyof T]: Renderer<InputViewProps<T[K]>> };
+    children?: Renderer<{
+      fields: Record<string & keyof T, ReactElement>;
+      view: InputMapView<C>;
+    }>;
+  };
+
+  export function Fields<C extends AnyInputMapConnection>({
     children,
     fields: keyToRenderer,
     ...props
-  }: InputMapViewFieldsProps<C>) {
+  }: FieldsProps<C>) {
     return (
       <InputMapView
         {...props}
@@ -104,16 +101,3 @@ export class InputMapView<
     );
   }
 }
-
-export type InputMapViewFieldsProps<
-  C extends AnyInputMapConnection,
-  T extends Record<string, AnyInputConnection> = RpcConnection<
-    WidgetController<C>
-  >
-> = InputViewProps<C> & {
-  fields: { [K in string & keyof T]: Renderer<InputViewProps<T[K]>> };
-  children?: Renderer<{
-    fields: Record<string & keyof T, ReactElement>;
-    view: InputMapView<C>;
-  }>;
-};

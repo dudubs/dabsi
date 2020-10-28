@@ -1,20 +1,20 @@
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
 import { RpcConnection } from "../../Rpc";
-import { DataTableRowWithKey } from "../../widget/data-table/DataTable";
 import { AbstractInputView } from "../AbstractInputView";
-import { AnyDataInputMap, DataInputMap } from "./DataInputMap";
-import { AnyInput, InputType } from "../Input";
-import { InputView, InputViewProps } from "../InputView";
+import { InputType } from "../Input";
+import { InputViewProps } from "../InputView";
 import { InputViewChildren } from "../InputViewChildren";
+import { AnyDataInputMap } from "./DataInputMap";
 
 export type DataInputMapViewProps<
   C extends RpcConnection<AnyDataInputMap>
 > = InputViewProps<C> & {
   target: Renderer<{
-    props: InputViewProps<RpcConnection<InputType<C>["DataInput"]>>;
-    row: DataTableRowWithKey<InputType<C>["Props"]["table"]>;
+    props: InputViewProps<RpcConnection<InputType<C>["Types"]["Target"]>>;
+    row: InputType<C>["Types"]["Row"];
     index: number;
+    key: string;
   }>;
 };
 
@@ -24,23 +24,30 @@ export class DataInputMapView<
   children = new InputViewChildren();
 
   renderView(): React.ReactNode {
-    return this.element.children.map(({ row, target }, index) => {
-      const key = row.$key;
-      return this.props.target({
-        row,
-        index,
-        props: {
-          onChange: (view) =>
-            this.setValue({
-              ...this.value,
-              [key]: view.value,
-            }),
-          connection: this.controller.row(key),
+    return mapObjectToArray(
+      this.value! || {},
+      ({ $value, ...row }, key, index) => {
+        return this.props.target({
+          row,
+          index,
           key,
-          element: target,
-          inputRef: this.children.ref(key),
-        },
-      });
-    });
+          props: {
+            key,
+            value: $value,
+            onChange: view =>
+              this.setValue({
+                ...this.value,
+                [key]: {
+                  ...row,
+                  $value: view.value,
+                },
+              }),
+            connection: this.controller.getRowController(key),
+            element: this.element.target,
+            inputRef: this.children.ref(key),
+          },
+        });
+      }
+    );
   }
 }

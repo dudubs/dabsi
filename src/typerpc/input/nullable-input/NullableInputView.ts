@@ -1,55 +1,31 @@
-import { Awaitable } from "../../common/typings";
-import { Renderer } from "../../react/renderer";
-import { RpcConnection } from "../Rpc";
-import { AbstractInputView } from "./AbstractInputView";
-import { AnyInput, InputType, InputValueElement } from "./Input";
-import { AnyInputView, InputView, InputViewProps } from "./InputView";
-import { OptionalInput } from "./OptionalInput";
+import { ReactElement } from "react";
+import { Awaitable } from "../../../common/typings";
+import { RpcConnection } from "../../Rpc";
+import { AbstractInputView } from "../AbstractInputView";
+import { InputError, TInput } from "../Input";
+import { InputViewProps } from "../InputView";
+import { NullableInput } from "./NullableInput";
+import { AnyDataInput } from "../data-input/DataInput";
 
 export class NullableInputView<
-  C extends RpcConnection<OptionalInput<AnyInput>>
+  C extends RpcConnection<NullableInput<any, TInput>>
 > extends AbstractInputView<
   C,
   InputViewProps<C> & {
-    target: Renderer<InputViewProps<RpcConnection<InputType<C>["Target"]>>>;
-    children?: Renderer<NullableInputView<C>>;
+    children(view: NullableInputView<C>): ReactElement;
   }
 > {
-  target: AnyInputView | null;
-
-  inputWillValidate(): Awaitable {
-    if (this.value != null) {
-      return this.target?.validate();
+  protected getError(): Awaitable<InputError<C> | undefined> {
+    if (!this.rpc.nullable) {
+      if (this.value == null) {
+        return "NOT_NULLABLE";
+      }
     }
-  }
-
-  protected updateError(error: InputType<C>["Error"] | undefined) {
-    this.target?.setError(error);
-  }
-
-  protected updateValue(value: InputValueElement<C>) {
-    if (value === null) {
-      this.target?.setError(undefined);
-    }
-  }
-
-  renderTarget() {
-    return this.props.target({
-      connection: this.connection.controller,
-      element: this.element,
-      value: this.value != null ? this.value : undefined,
-      onChange: view => this.setValue(view.value),
-      onError: () => {
-        this.props.onError?.(this);
-      },
-      inputRef: target => {
-        this.target = target;
-      },
-    });
   }
 
   renderView(): React.ReactNode {
-    if (this.props.children) return this.props.children(this);
-    return this.renderTarget();
+    return this.props.children(this);
   }
 }
+
+// TOOD: InputView

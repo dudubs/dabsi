@@ -46,7 +46,7 @@ export class WidgetMapView<
       return this.props.children({
         fields: mapObject(
           this.props.fields,
-          (renderer: Renderer<InputViewProps<any>>, key: any) => {
+          (renderer: Renderer<WidgetViewProps<any>>, key: any) => {
             return this.renderField(key, renderer);
           }
         ),
@@ -55,7 +55,7 @@ export class WidgetMapView<
 
     return mapObjectToArray(
       this.props.fields,
-      (renderer: Renderer<InputViewProps<any>>, key: any) => {
+      (renderer: Renderer<WidgetViewProps<any>>, key: any) => {
         return this.renderField(key, renderer);
       }
     );

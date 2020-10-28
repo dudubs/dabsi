@@ -65,10 +65,10 @@ export abstract class AbstractDataList<
     const textFilter = !(text && searchIn)
       ? undefined
       : {
-          $and: searchIn.map((exp) => ({ $search: { in: exp, text } })),
+          $and: searchIn.map(exp => ({ $search: { in: exp, text } })),
         };
 
-    return this.source.updateCursor((cursor) => {
+    return this.source.updateCursor(cursor => {
       cursor.order = [...(!this.sort ? [] : [this.sort]), ...this.getOrder()];
       cursor.filter = DataExp(cursor.filter, textFilter);
       cursor.skip = this.pageSize * this.page;
@@ -90,9 +90,9 @@ export abstract class AbstractDataList<
       [
         this.totalCount,
         this.items,
-      ] = await this.getQuerySource().countAndQuery();
+      ] = await this.getQuerySource().getCountAndRows();
     } else {
-      this.items = await this.getQuerySource().items();
+      this.items = await this.getQuerySource().getRows();
     }
     this.isLoading = false;
   }

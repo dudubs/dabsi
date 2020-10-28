@@ -23,7 +23,7 @@ export type EnumInput<K extends string, N extends boolean> = NullableInput<
 
     Element: { default?: K };
 
-    Error: "INVALID";
+    Error: "INVALID_ENUM_KEY";
   }
 >;
 
@@ -40,7 +40,7 @@ export function EnumInput<K extends string, N extends boolean = false>(
       keys: new Set(keys),
     },
 
-    getValueData(value) {
+    getValueDataFromElement(value) {
       return value;
     },
   });

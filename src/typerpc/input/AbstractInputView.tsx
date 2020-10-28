@@ -2,17 +2,19 @@
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
 import { Awaitable } from "../../common/typings";
 import { ViewState } from "../../react/view/ViewState";
+import { RpcConnection } from "../Rpc";
 import { AbstractWidgetView } from "../widget/AbstractWidgetView";
 import { WidgetType } from "../widget/Widget";
 // TODO: type InputView
 import {
+  AnyInput,
   AnyInputConnection,
-  InputValueData,
   InputError,
   InputType,
+  InputValueData,
   InputValueElement,
 } from "./Input";
-import { InputView, InputViewProps } from "./InputView";
+import { InputErrorElementMap, InputView, InputViewProps } from "./InputView";
 import { InputViewChildren } from "./InputViewChildren";
 
 export abstract class AbstractInputView<
@@ -88,7 +90,7 @@ export abstract class AbstractInputView<
   forceUpdateValue() {
     this._error = undefined;
     this._isValidValue = false;
-    this._data = this.rpc.getValueData(this._value);
+    this._data = this.rpc.getValueDataFromElement(this._value);
     this.updateValue?.(this._value);
   }
 
@@ -99,13 +101,29 @@ export abstract class AbstractInputView<
     if (error == null) return;
     const element = this.props.renderError?.(error);
     if (element) return element;
-    if (typeof error === "string") {
-      if (this.props.errorMap && error in this.props.errorMap) {
-        return createElement(Fragment, null, this.props.errorMap[error]);
-      }
-    }
-    const defaultErrorElement = this.getErrorElement?.(error);
-    if (defaultErrorElement != null) return defaultErrorElement;
+
+    const errorMap: Record<string, ReactElement | ((error) => ReactElement)> = {
+      ...this.getErrorElementMap?.()!,
+      ...this.props.errorMap,
+    };
+
+    const errorType =
+      typeof error === "string"
+        ? error
+        : typeof error === "object" && typeof error.type === "string"
+        ? error.type
+        : undefined;
+
+    const errorElementOrFn = errorMap[errorType];
+
+    if (typeof errorElementOrFn === "function")
+      return createElement(
+        Fragment,
+        null,
+        errorElementOrFn(typeof error === "object" ? error : undefined)
+      );
+
+    if (errorElementOrFn) return errorElementOrFn;
   }
 
   forceUpdateError() {
@@ -132,7 +150,7 @@ export abstract class AbstractInputView<
     }
   }
 
-  protected getErrorElement?(error: T["Error"]): ReactElement;
+  protected getErrorElementMap?(): InputErrorElementMap<C>;
 
   renderError(): ReactNode {
     if (this.errorElement) return this.errorElement;
@@ -153,3 +171,7 @@ export abstract class AbstractInputView<
     this.props.inputRef?.(null);
   }
 }
+
+export type InputViewClass<T extends AnyInput> = new (
+  props: InputViewProps<RpcConnection<T>>
+) => AbstractInputView<RpcConnection<T>>;

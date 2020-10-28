@@ -13,6 +13,7 @@ import {
   Override,
   PartialUndefinedKeys,
 } from "../common/typings";
+import { inspect } from "../logging";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
 
@@ -32,7 +33,7 @@ export type Rpc<T extends TRpc> = WithMetaType<{
   T["Props"] & {
     readonly options: RpcOptions<TRpc>;
 
-    readonly service: RpcConnection<Rpc<T>>;
+    readonly service: _RpcConnection<T>;
 
     createRpcConnection(command: RpcCommand): T["Connection"];
 
@@ -116,15 +117,23 @@ export type RpcHandlerClass<T extends AnyRpc, P = {}> = new (
   config: _RpcResolvedConfig<RpcType<T>>
 ) => _RpcResolvedHandler<RpcType<T>> & P;
 
+export type RpcIsGenericConfigOption<T extends Pick<TRpc, "Config">> =
+  | IsGenericConfig<T["Config"]>
+  | If<Not<Is<T["Config"], Fn>>, undefined>;
+
+export type RpcPropsOption<T extends Pick<TRpc, "Props">> =
+  | T["Props"]
+  | If<IsEmptyObject<T["Props"]>, undefined>;
+
 export type RpcOptions<
   T extends TRpc,
   ConfigIsFn extends boolean = Is<T["Config"], Fn>,
   ConfigIsGenericConfig extends boolean = IsGenericConfig<T["Config"]>
 > = PartialUndefinedKeys<
   {
-    isGenericConfig: ConfigIsGenericConfig | If<Not<ConfigIsFn>, undefined>;
+    isGenericConfig: RpcIsGenericConfigOption<T>;
 
-    props: T["Props"] | If<IsEmptyObject<T["Props"]>, undefined>;
+    props: RpcPropsOption<T>;
   },
   {
     connect(this: Rpc<T>, command: RpcCommand): T["Connection"];
@@ -168,6 +177,10 @@ export const AnyRpc: AnyRpc = {
     }
 
     if (this.options.isGenericConfig) {
+      if (typeof config !== "function")
+        throw new TypeError(
+          `expected to generic config, got: ${inspect(config)}`
+        );
       config = await GenericConfig(config as GenericConfig);
     }
 

@@ -1,14 +1,13 @@
 import { ReactElement } from "react";
 import { Renderer } from "../../../react/renderer";
-import { InputError, InputType } from "../../input/Input";
-import { InputViewError } from "../../input/InputViewError";
+import { InputError } from "../../input/Input";
 import { InputView, InputViewProps } from "../../input/InputView";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
+
+import { WidgetController, WidgetType } from "../Widget";
+import { WidgetViewProps } from "../WidgetView";
 import { AnyForm, TForm } from "./Form";
-import { useWidgetView } from "../useWidgetView";
-import { WidgetController, WidgetElement, WidgetType } from "../Widget";
-import { WidgetView, WidgetViewProps } from "../WidgetView";
 
 export type FormViewProps<
   C extends RpcConnection<AnyForm>,
@@ -44,7 +43,10 @@ export class FormView<
   async submit() {
     if (!(await this.input.validate())) return;
 
-    const result = await this.props.connection.submit(this.input.data);
+    const result = await this.props.connection.command(
+      "submit",
+      this.input.data
+    );
 
     if ("inputError" in result) {
       this.input?.setError(result.inputError);
@@ -61,6 +63,7 @@ export class FormView<
       form: this,
       input: this.props.input({
         connection: this.controller,
+        value: undefined,
         onChange: undefined,
         element: this.element,
         inputRef: field => {
@@ -69,14 +72,4 @@ export class FormView<
       }),
     });
   }
-}
-
-export function useFormView<C extends RpcConnection<AnyForm>>(
-  props: WidgetViewProps<C>
-) {
-  const widget = useWidgetView(props);
-
-  return {
-    async submit() {},
-  };
 }

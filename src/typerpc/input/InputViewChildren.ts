@@ -3,39 +3,40 @@ import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { If } from "../../common/typings";
 import { AnyInputConnection } from "./Input";
+import { InputErrorMap } from "./input-map/InputMap";
 import { AnyInputView, InputView } from "./InputView";
 
 export class InputViewChildren {
-  keyToView: Record<string, AnyInputView> = {};
+  viewMap: Record<string, AnyInputView> = {};
 
   constructor() {}
 
   async updateError(error) {
-    const keyToError = (typeof error === "object" && error?.children) || {};
-    for (const [key, view] of entries<AnyInputView>(this.keyToView)) {
-      view.setError(keyToError[key]);
+    const errorMap = (typeof error === "object" && error?.errorMap) || {};
+    for (const [key, view] of entries<AnyInputView>(this.viewMap)) {
+      view.setError(errorMap[key]);
     }
   }
 
   ref(key: string): RefCallback<AnyInputView> {
-    return (view) => {
+    return view => {
       if (view) {
-        this.keyToView[key] = view;
+        this.viewMap[key] = view;
       } else {
-        delete this.keyToView[key];
+        delete this.viewMap[key];
       }
     };
   }
 
-  async getError(): Promise<{ children: Record<string, any> } | undefined> {
-    const keyToError = {};
-    for (const [key, view] of entries(this.keyToView)) {
+  async getError(): Promise<InputErrorMap<any> | undefined> {
+    const errorMap = {};
+    for (const [key, view] of entries(this.viewMap)) {
       await view.validate();
       const { error } = view;
       if (error != null) {
-        keyToError[key] = error;
+        errorMap[key] = error;
       }
     }
-    if (hasKeys(keyToError)) return { children: keyToError };
+    if (hasKeys(errorMap)) return { type: "ERROR_MAP", errorMap };
   }
 }

@@ -6,35 +6,30 @@ import { Autocomplete } from "@material-ui/lab";
 import { makeStyles } from "@material-ui/styles";
 import * as React from "react";
 import { useRef, useState } from "react";
-import { MuiDataTableView } from "../MuiDataTableView";
 import { If, Is, PartialUndefinedKeys } from "../../../../common/typings";
 import { Lang, LangNode } from "../../../../localization/Lang";
 import { useLangTranslator } from "../../../../localization/LangTranslator";
-import {
-  AnyDataInputConnection,
-  DataInputView,
-} from "../../../../typerpc/input/DataInputView";
+import { AnyDataInput } from "../../../../typerpc/input/data-input/DataInput";
+import { DataInputView } from "../../../../typerpc/input/data-input/DataInputView";
+
 import { InputType } from "../../../../typerpc/input/Input";
 import { InputViewProps } from "../../../../typerpc/input/InputView";
-import {
-  DataTableQueryResult,
-  DataTableRowWithKey,
-} from "../../../../typerpc/widget/DataTable";
-import {
-  WidgetController,
-  WidgetType,
-} from "../../../../typerpc/widget/Widget";
+import { RpcConnection } from "../../../../typerpc/Rpc";
 import { WidgetViewLoader } from "../../../../typerpc/widget/WidgetViewLoader";
 import { MuiLink } from "../../components/MuiLink";
+import { MuiDataTableView } from "../MuiDataTableView";
 
-export const useStyles = makeStyles((theme) => ({}));
+export type AnyDataInputConnection = RpcConnection<AnyDataInput>;
+
+export const useStyles = makeStyles(theme => ({}));
+
 // TODO: Load the firsts rows
 export function MuiDataInputView<C extends AnyDataInputConnection>(
   props: PartialUndefinedKeys<
     {
       getLabel:
-        | ((row: DataTableRowWithKey<WidgetController<C>>) => string)
-        | If<Is<InputType<C>["Row"], { label: string }>, undefined>;
+        | ((row: InputType<C>["Types"]["TableTypes"]["RowWithKey"]) => string)
+        | If<Is<InputType<C>["Types"]["Row"], { label: string }>, undefined>;
     },
     InputViewProps<C> & {
       title?: LangNode;
@@ -43,15 +38,14 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
     }
   >
 ) {
-  type Table = InputType<C>["Props"]["table"];
-  type TableRow = DataTableRowWithKey<Table>;
+  type Types = InputType<C>["Types"];
+  type TableTypes = Types["TableTypes"];
+  type TableRow = TableTypes["RowWithKey"];
 
   const lang = useLangTranslator();
   const inputRef = useRef<DataInputView<C>>(null);
   const [isOpen, setOpen] = useState(false);
-  const [queryResult, setQueryResult] = useState<
-    DataTableQueryResult<TableRow>
-  >();
+  const [queryResult, setQueryResult] = useState<TableTypes["QueryResult"]>();
 
   async function updateOptions(text: string) {
     setQueryResult(
@@ -68,8 +62,8 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
       <DataInputView
         {...props}
         ref={inputRef}
-        children={(view) => {
-          const options: DataTableRowWithKey<Table>[] =
+        children={view => {
+          const options: TableTypes["RowWithKey"][] =
             queryResult?.rows || (view.value ? [view.value] : []);
 
           return (
@@ -86,12 +80,12 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                 onInputChange={(_, value) => {
                   updateOptions(value);
                 }}
-                getOptionLabel={(row) =>
-                  props["getLabel"] ? props["getLabel"](row) : row.label
+                getOptionLabel={row =>
+                  props["getLabel"] ? props["getLabel"](row) : row["label"]
                 }
                 options={options}
                 getOptionSelected={(o, v) => o.$key === v.$key}
-                renderInput={(params) => (
+                renderInput={params => (
                   <TextField
                     {...params}
                     error={!!view.error}
@@ -115,7 +109,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
             </DialogTitle>
             <WidgetViewLoader
               connection={props.connection.controller}
-              children={(props) => (
+              children={props => (
                 <MuiDataTableView
                   // disableToolbar
                   {...props}
@@ -123,7 +117,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                     pick: {
                       title: Lang`PICK`,
                       icon: require("@material-ui/icons/KeyboardReturn"),
-                      onClick: (event) => {
+                      onClick: event => {
                         setQueryResult(undefined);
                         inputRef.current!.setValue(event.row);
                         setOpen(false);
@@ -139,7 +133,8 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                             setQueryResult(undefined);
                             inputRef.current!.setValue(props.row);
                             setOpen(false);
-                          }}>
+                          }}
+                        >
                           {data}
                         </MuiLink>
                       ),

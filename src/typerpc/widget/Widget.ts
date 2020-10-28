@@ -6,7 +6,6 @@ import {
   If,
   Is,
   IsEmptyObject,
-  Not,
   Override,
   PartialUndefinedKeys,
   Union,
@@ -17,14 +16,15 @@ import {
   BasedRpc,
   IRpcHandler,
   Rpc,
-  RpcConnection,
   RpcCommand,
+  RpcConnection,
   RpcHandlerClass,
+  RpcIsGenericConfigOption,
+  RpcPropsOption,
   RpcType,
   RpcUnresolvedConfig,
   TRpc,
 } from "../Rpc";
-import { IsGenericConfig } from "../GenericConfig";
 
 type _WidgetConnection<T extends TWidget> = T["Connection"] & {
   rpc: Widget<T>;
@@ -55,10 +55,6 @@ export type Widget<
 > = Rpc<{
   TWidget: T;
 
-  Payload: [string, any];
-
-  Result;
-
   Config: T["Config"];
 
   Handler: T["Handler"] & {
@@ -78,25 +74,31 @@ export type Widget<
   Connection: _WidgetConnection<T>;
 }>;
 
-export type WidgetOptions<
-  T extends TWidget,
+export type WidgetControllerOption<T extends Pick<TWidget, "Controller">> =
+  | T["Controller"]
+  | If<Is<T["Controller"], NoRpc>, undefined>;
+
+export type WidgetCommandsOption<
+  T extends Pick<TWidget, "Commands">,
   C extends TWidget["Commands"] = T["Commands"]
-> = PartialUndefinedKeys<
+> =
+  | { [K in keyof T["Commands"]]: C[K]["handler"] }
+  | If<IsEmptyObject<T["Commands"]>, undefined>;
+
+export type WidgetOptions<T extends TWidget> = PartialUndefinedKeys<
   {
-    isGenericConfig: boolean | If<Not<IsGenericConfig<T["Config"]>>, undefined>;
+    isGenericConfig: RpcIsGenericConfigOption<T>;
 
-    props: T["Props"] | If<IsEmptyObject<T["Props"]>, undefined>;
+    props: RpcPropsOption<T>;
 
-    controller: T["Controller"] | If<Is<T["Controller"], NoRpc>, undefined>;
+    controller: WidgetControllerOption<T>;
 
-    commands:
-      | { [K in keyof T["Commands"]]: C[K]["handler"] }
-      | If<IsEmptyObject<T["Commands"]>, undefined>;
+    commands: WidgetCommandsOption<T>;
 
     connection:
       | {
           [K in keyof T["Connection"]]: (
-            this: _WidgetConnection<T>
+            connection: _WidgetConnection<T>
           ) => T["Connection"][K];
         }
       | If<IsEmptyObject<T["Connection"]>, undefined>;
@@ -168,7 +170,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     Object.defineProperty(connection, key, {
       get() {
         if (!(currentKey in this)) {
-          this[currentKey] = value.apply(this);
+          this[currentKey] = value(this);
         }
         return this[currentKey];
       },

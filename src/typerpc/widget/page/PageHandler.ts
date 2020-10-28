@@ -1,8 +1,8 @@
 import { RpcConfigHookHandler } from "../../RpcConfigHook";
-import { Page } from "./Page";
+import { AnyPage, Page } from "./Page";
 import { AnyWidget } from "../Widget";
 
-export const PageHandler: RpcConfigHookHandler<Page<AnyWidget>> = config => $ =>
+export const PageHandler: RpcConfigHookHandler<AnyPage> = ({ config }) => $ =>
   $({
     targetConfig: config.targetConfig,
     getElement: async () => {

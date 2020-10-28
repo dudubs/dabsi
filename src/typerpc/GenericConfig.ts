@@ -5,6 +5,9 @@ const genericConfigCache = new WeakMap();
 
 declare const isGenericConfig: unique symbol;
 
+export type GenericConfigConfigure<
+  T extends GenericConfig<Fn>
+> = T extends GenericConfig<infer U> ? U : never;
 export type GenericConfig<T extends Fn = any> = {
   (configure: T): Awaitable<ReturnType<T>>;
   [isGenericConfig]?: true;

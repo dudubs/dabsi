@@ -22,7 +22,7 @@ export abstract class AbstractNullableInputHandler<
   ): Promise<InputErrorOrValue<T>> {
     if (valueData == null) {
       if (!this.rpc.nullable) {
-        return { error: "REQUIRED", value: undefined };
+        return { error: "NOT_NULLABLE", value: undefined };
       }
       return { value: null };
     }

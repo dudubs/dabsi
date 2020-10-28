@@ -1,3 +1,6 @@
+import { Payload } from "../../../common/typings";
+import { getLengthError, LengthError } from "../LengthError";
+
 export type TextInputOptions = {
   pattern?: RegExp;
   minLength?: number;
@@ -7,9 +10,10 @@ export type TextInputOptions = {
 };
 
 export type TextInputError =
-  | "INVALID_PATTERN"
-  | "TOO_LONG"
-  | "TOO_SHORT"
+  | Payload<{
+      INVALID_PATTERN: { pattern: string };
+    }>
+  | LengthError
   | "REQUIRED";
 
 export namespace TextInputLoader {
@@ -21,25 +25,19 @@ export namespace TextInputLoader {
   }
 
   export function check(
-    options: TextInputOptions,
+    { required, pattern, minLength, maxLength }: TextInputOptions,
     value: string
   ): TextInputError | undefined {
-    if (options.trim) value = value.trim();
-
     if (!value) {
-      if (options.required) return "REQUIRED";
+      if (required) return "REQUIRED";
       return;
     }
 
-    if (options.pattern && !options.pattern.test(value)) {
-      return "INVALID_PATTERN";
+    if (pattern && !pattern.test(value)) {
+      return { type: "INVALID_PATTERN", pattern: pattern.source };
     }
 
-    if (options.maxLength && value.length > options.maxLength) {
-      return "TOO_LONG";
-    }
-    if (options.minLength && value.length < options.minLength) {
-      return "TOO_SHORT";
-    }
+    const lengthError = getLengthError(value, { maxLength, minLength });
+    if (lengthError) return lengthError;
   }
 }

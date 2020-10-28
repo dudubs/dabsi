@@ -13,15 +13,13 @@ import { Awaitable, PartialUndefinedKeys } from "../../../common/typings";
 import { Lang } from "../../../localization/Lang";
 import { LangKey } from "../../../localization/LangKey";
 import { TableLayout } from "../../../react/TableLayout";
-import { AnyRpc, RpcConnection } from "../../../typerpc/Rpc";
-import {
-  AnyDataTable,
-  DataTableRowWithKey,
-} from "../../../typerpc/widget/DataTable";
+import { RpcConnection } from "../../../typerpc/Rpc";
+import { AnyDataTable } from "../../../typerpc/widget/data-table/DataTable";
 import {
   DataTableView,
   DataTableViewProps,
-} from "../../../typerpc/widget/DataTableView";
+} from "../../../typerpc/widget/data-table/DataTableView";
+
 import { WidgetType } from "../../../typerpc/widget/Widget";
 import { MuiButton, MuiButtonProps } from "../components/MuiButton";
 import { MuiDeleteButton } from "../components/MuiDeleteButton";
@@ -42,21 +40,21 @@ type MuiDataTableViewColumnProps<
     data: RowColumn,
     props: {
       key: string;
-      row: DataTableRowWithKey<C>;
+      row: WidgetType<C>["Types"]["RowWithKey"];
     }
   ): ReactNode;
 };
 
 type MuiDataTableActionEvent<C extends RpcConnection<AnyDataTable>> = {
-  row: DataTableRowWithKey<C>;
+  row: WidgetType<C>["Types"]["RowWithKey"];
   key: string;
-  connection: RpcConnection<WidgetType<C>["TDataTable"]["RowController"]>;
+  connection: RpcConnection<WidgetType<C>["Types"]["RowController"]>;
   table: Readonly<DataTableView<C>>;
 };
 
 export type MuiDataTableViewProps<
   C extends RpcConnection<AnyDataTable>,
-  Row = WidgetType<C>["TDataTable"]["Row"]
+  Row = WidgetType<C>["Types"]["Row"]
 > = DataTableViewProps<C> & {
   TableProps?: TableProps;
   TableHeadProps?: TableHeadProps;
@@ -158,7 +156,8 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
           renderColumn={(column, children) => (
             <TableCell
               key={column.key}
-              {...columns?.[column.key]?.MuiTableColumnProps}>
+              {...columns?.[column.key]?.MuiTableColumnProps}
+            >
               {children}
             </TableCell>
           )}
@@ -181,7 +180,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                             onClick?.({
                               row: row.data,
                               key: row.key,
-                              connection: table.props.connection.controller(
+                              connection: table.props.connection.controller.getRowController(
                                 row.key
                               ),
                               table,

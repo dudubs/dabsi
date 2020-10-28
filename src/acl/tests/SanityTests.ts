@@ -36,7 +36,7 @@ testm(__filename, () => {
         u1InGroup: { $has: { users: { $is: u1 } } },
         u2InGroup: { $has: { users: { $is: u2 } } },
         u3InGroup: { $has: { users: { $is: u3 } } },
-      }).items()
+      }).getRows()
     ).map(item => ({
       ...item,
       u1InGroup: !!item.u1InGroup,
@@ -48,7 +48,7 @@ testm(__filename, () => {
   let items: any[];
 
   it("$is", async () => {
-    const result = await Users.filter({ $is: [u1, u2] }).items();
+    const result = await Users.filter({ $is: [u1, u2] }).getRows();
     expect(result).toEqual(
       jasmine.arrayContaining([
         jasmine.objectContaining({ $key: u1 }),

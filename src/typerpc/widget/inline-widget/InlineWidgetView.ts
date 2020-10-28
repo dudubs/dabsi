@@ -15,10 +15,13 @@ export class InlineWidgetView<
     children(view: InlineWidgetView<C>): ReactNode;
   }
 > {
+  get inlineElement(): T["Element"] {
+    return this.element[0];
+  }
   get targetProps(): WidgetViewProps<RpcConnection<Target>> {
     return {
       connection: this.connection.target!,
-      element: this.element.target!,
+      element: this.element[1]!,
     };
   }
 

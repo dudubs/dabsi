@@ -2,11 +2,12 @@ import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import * as React from "react";
 import { ReactNode } from "react";
 import { mergeProps } from "../../../../react/utils/mergeProps";
-import { TextInput } from "../../../../typerpc/input/TextInput";
+import { TextInput } from "../../../../typerpc/input/text-input/TextInput";
 import {
   TextInputView,
   TextInputViewProps,
-} from "../../../../typerpc/input/TextInputView";
+} from "../../../../typerpc/input/text-input/TextInputView";
+
 import { RpcConnection } from "../../../../typerpc/Rpc";
 
 export type MuiTextInputViewProps<
@@ -22,8 +23,9 @@ export function MuiTextInputView<C extends RpcConnection<TextInput>>({
   ...props
 }: MuiTextInputViewProps<C>) {
   return (
-    <TextInputView {...props}>
-      {view => (
+    <TextInputView
+      {...props}
+      children={view => (
         <TextField
           fullWidth
           {...mergeProps(TextFieldProps, {
@@ -36,6 +38,6 @@ export function MuiTextInputView<C extends RpcConnection<TextInput>>({
           value={view.text}
         />
       )}
-    </TextInputView>
+    />
   );
 }

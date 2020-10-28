@@ -1,4 +1,4 @@
-import { AnyDataTable, DataTableOld } from "./DataTable";
+import { OldAnyDataTable, DataTableOld } from "./DataTable";
 
 declare module "./DataTable" {
   interface DataTable<T, Props> {
@@ -8,7 +8,7 @@ declare module "./DataTable" {
 
 // DataTableOld.prototype.toggleSort = toggleSort;
 
-function toggleSort(this: AnyDataTable, columnIndex: number) {
+function toggleSort(this: OldAnyDataTable, columnIndex: number) {
   this.sort = undefined;
   this.columns = this.columns.map((column, index) => {
     if (index === columnIndex) {

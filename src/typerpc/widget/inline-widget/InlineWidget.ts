@@ -1,7 +1,6 @@
 import {
   Awaitable,
   If,
-  Is,
   IsUndefined,
   PartialUndefinedKeys,
   Typing,
@@ -9,17 +8,18 @@ import {
 import { NoRpc } from "../../NoRpc";
 import {
   AnyRpc,
-  RpcConnection,
   RpcCommand,
+  RpcConnection,
   RpcUnresolvedConfig,
 } from "../../Rpc";
-import { InlineWidgetHandler } from "./InlineWidgetHandler";
 import {
   AnyWidget,
+  TWidget,
   Widget,
   WidgetElement,
   WidgetHandlerClass,
 } from "../Widget";
+import { InlineWidgetHandler } from "./InlineWidgetHandler";
 
 export type TInlineWidget = {
   Target: AnyWidget | undefined;
@@ -29,6 +29,12 @@ export type TInlineWidget = {
 
 export type AnyInlineWidget = InlineWidget<TInlineWidget>;
 
+export declare namespace InlineWidget {
+  type WithElement<
+    Target extends AnyWidget,
+    Element extends object
+  > = InlineWidget<{ Controller: NoRpc; Target: Target; Element: Element }>;
+}
 export type InlineWidget<
   T extends TInlineWidget,
   Target extends AnyWidget = NonNullable<T["Target"]>,
@@ -39,9 +45,7 @@ export type InlineWidget<
     target: RpcConnection<Target> | UndefinedTarget;
   };
   Config: PartialUndefinedKeys<{
-    controllerConfig:
-      | RpcUnresolvedConfig<T["Controller"]>
-      | If<Is<T["Controller"], NoRpc>, undefined>;
+    controllerConfig: RpcUnresolvedConfig<T["Controller"]>;
 
     getElement:
       | (() => Awaitable<T["Element"]>)
@@ -50,11 +54,9 @@ export type InlineWidget<
   }>;
   Handler: {};
   Props: {
-    target: T["Target"];
+    inlineTarget: T["Target"];
   };
-  Element: T["Element"] & {
-    target: WidgetElement<Target> | UndefinedTarget;
-  };
+  Element: [T["Element"], WidgetElement<Target> | UndefinedTarget];
   Controller: T["Controller"];
   Commands: {
     target: RpcCommand & { handler: "handleTarget" };
@@ -79,13 +81,13 @@ export function InlineWidget<
   return Widget<InlineWidget<T>>({
     isGenericConfig: false,
     handler: InlineWidgetHandler as WidgetHandlerClass<InlineWidget<T>>,
-    props: { target },
+    props: { inlineTarget: target },
     controller: controller || NoRpc,
     commands: { target: "handleTarget" },
     connection: {
-      target() {
-        return this.rpc.target?.createRpcConnection((payload) => {
-          return this.command("target", payload);
+      target(conn) {
+        return conn.rpc.inlineTarget?.createRpcConnection(payload => {
+          return conn.command("target", payload);
         })!;
       },
     },

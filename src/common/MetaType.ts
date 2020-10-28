@@ -1,8 +1,13 @@
 import { NonNullableAt } from "./typings";
 
-export type WithMetaType<T> = { TMetaType?: T };
+export declare const TMetaType: unique symbol;
 
-export type MetaType<T extends { TMetaType? }> = NonNullableAt<T, "TMetaType">;
+export type WithMetaType<T> = { [TMetaType]?: T };
+
+export type MetaType<T extends { [TMetaType]? }> = NonNullableAt<
+  T,
+  typeof TMetaType
+>;
 
 export type MetaTypeHook<
   T extends AnyT,

@@ -1,21 +1,21 @@
 import React, { ReactNode, useState } from "react";
+import { HookRef, useUpdateRef } from "../../../../react/HookRef";
 import { mergeProps } from "../../../../react/utils/mergeProps";
 import {
   AnyArrayInputConnection,
   ArrayInputView,
   ArrayInputViewProps,
-} from "../../../../typerpc/input/ArrayInputView";
-import { WidgetViewProps } from "../../../../typerpc/widget/WidgetView";
-import { MuiDialog, MuiDialogProps } from "../../components/MuiDialog";
-import { HookRef, useUpdateRef } from "../../../../react/HookRef";
+} from "../../../../typerpc/input/array-input/ArrayInputView";
+import { InputViewProps } from "../../../../typerpc/input/InputView";
 import { MuiAddButton } from "../../components/MuiButton";
+import { MuiDialog, MuiDialogProps } from "../../components/MuiDialog";
 
 export function MuiArrayInputView<C extends AnyArrayInputConnection>({
   hookRef,
   MuiDialogProps,
   debug,
   ...props
-}: WidgetViewProps<C> &
+}: InputViewProps<C> &
   Pick<ArrayInputViewProps<C>, "renderNewItem" | "renderItem"> & {
     renderActions?: (view: ArrayInputView<C>, itemIndex: number) => ReactNode;
     debug?: boolean;
@@ -35,7 +35,7 @@ export function MuiArrayInputView<C extends AnyArrayInputConnection>({
   return (
     <ArrayInputView
       {...props}
-      children={(view) => (
+      children={view => (
         <>
           {view.renderItems()}
           {open && (
@@ -51,7 +51,8 @@ export function MuiArrayInputView<C extends AnyArrayInputConnection>({
                   setOpen(false);
                 },
               })}
-              open>
+              open
+            >
               {view.renderNewItem()}
             </MuiDialog>
           )}

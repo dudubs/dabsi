@@ -15,8 +15,12 @@ export class NumberInputView<
     children(view: Readonly<NumberInputView<C>>): ReactNode;
   }
 > {
+  get defaultValue(): number {
+    return this.value ?? this.element.minValue ?? 0;
+  }
+
   protected getError(): Awaitable<InputError<C> | undefined> {
-    return NumberInputLoader.check(this.element, this.value);
+    return NumberInputLoader.check(this.element, this.defaultValue);
   }
 
   async setValue(value: InputValueElement<C>): Promise<void> {

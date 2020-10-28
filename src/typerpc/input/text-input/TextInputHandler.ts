@@ -30,7 +30,7 @@ export class TextInputHandler extends AbstractInputHandler<T> {
     return {
       minLength: this.config.minLength,
       maxLength: this.config.maxLength,
-      pattern: this.config.pattern,
+      pattern: this.config.pattern?.source,
       trim: this.config.trim,
       required: this.config.required,
     };

@@ -26,7 +26,6 @@ function dabsi-node() {
   NODE_OPTIONS=$(echo "$C --preserve-symlinks" \
   " -r source-map-support/register" \
   " -r ts-node/register" \
-  " -r $DABSI_PATH/src/jasmine/register.ts" \
   " -r $DABSI_PATH/src/common/register.ts" \
   ) \
      $_node $C $*
@@ -41,6 +40,7 @@ function dabsi-mon() {
 function dabsi-test() {
     dabsi node \
    node_modules/jasmine/bin/jasmine.js \
+   --helper=$DABSI_PATH/src/jasmine/register.ts \
     $(find $1 -type f -name '*Tests.ts*' \
       ! -path '*/node_modules/*' | grep -v 'Old') \
     --stop-on-failure=true $JASMINE_OPTIONS

@@ -1,29 +1,30 @@
-export type NumberInputError = "TOO_SMALL" | "TOO_BIG";
+import { Payload } from "../../../common/typings";
+
+export type NumberInputError = Payload<{
+  MAX_VALUE: { maxValue: number };
+  MIN_VALUE: { minValue: number };
+}>;
 
 export type NumberInputOptions = {
-  max?: number;
-  min?: number;
-  step?: number;
+  maxValue?: number;
+  minValue?: number;
 };
 
 export namespace NumberInputLoader {
   export function load(options: NumberInputOptions, value: number): number {
-    if (options.step) {
-      value = (value / options.step) * options.step;
-    }
     return value;
   }
 
   export function check(
-    options: NumberInputOptions,
+    { maxValue, minValue }: NumberInputOptions,
     value: number
   ): NumberInputError | undefined {
-    if (typeof options.max === "number" && value > options.max) {
-      return "TOO_BIG";
+    if (typeof maxValue === "number" && value > maxValue) {
+      return { type: "MAX_VALUE", maxValue };
     }
 
-    if (typeof options.min === "number" && value < options.min) {
-      return "TOO_SMALL";
+    if (typeof minValue === "number" && value < minValue) {
+      return { type: "MIN_VALUE", minValue };
     }
   }
 }

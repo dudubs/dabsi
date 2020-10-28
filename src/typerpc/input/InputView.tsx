@@ -1,9 +1,12 @@
 import { ReactElement, ReactNode, RefCallback } from "react";
+import { Payload } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
+import { EmptyFragment } from "../../react/utils/EmptyFragment";
 import { WidgetView, WidgetViewProps } from "../widget/WidgetView";
 import {
   AnyInput,
   AnyInputConnection,
+  BasedInput,
   ErrorOrValue,
   InputError,
   InputValueData,
@@ -11,10 +14,16 @@ import {
 } from "./Input";
 import { InputViewChildren } from "./InputViewChildren";
 
+export type InputErrorElementMap<R extends BasedInput, T = InputError<R>> = {
+  [K in Extract<T, string> | Extract<T, { type: string }>["type"]]?:
+    | ReactElement
+    | ((error: Extract<T, { type: K }>) => ReactElement);
+};
+
 export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   C
 > & {
-  errorMap?: { [K in Extract<InputError<C>, string>]?: ReactNode /* Or Fn*/ };
+  errorMap?: InputErrorElementMap<InputError<C>>;
 
   onChange?: (view: InputView<C>) => void;
 

@@ -5,35 +5,36 @@ import { AbstractInputView } from "./AbstractInputView";
 import { AnyInput, Input, InputError, InputType } from "./Input";
 import { InputView, InputViewProps } from "./InputView";
 
-export type AnyInputErrorHook = InputErrorHook<AnyInput, any>;
+export type AnyInputErrorHook = InputErrorHook<TInputErrorHook>;
 
-export type InputErrorHook<T extends AnyInput, E> = Input<
-  Omit<InputType<T>, "Error"> & {
-    TErrorHook: {
-      Target: T;
-      Error: E;
-      TargetError: InputError<T>;
-    };
-    Error: InputError<T> | E;
+export type TInputErrorHook = { Target: AnyInput; Error: any };
+export type InputErrorHook<T extends TInputErrorHook> = Input<
+  Omit<InputType<T["Target"]>, "Error"> & {
+    TInputErrorHook: T;
+    Error: InputError<T["Target"]> | T["Error"];
   }
 >;
 
 export function InputErrorHook<E>() {
-  return <T extends AnyInput>(input: T): InputErrorHook<T, E> => {
+  return <T extends AnyInput>(
+    input: T
+  ): InputErrorHook<{ Target: T; Error: E }> => {
     return <any>input;
   };
 }
 
 export function InputErrorHookViewProps<
   C extends RpcConnection<AnyInputErrorHook>,
-  T extends AnyInput = InputType<C>["TErrorHook"]["Target"]
->(props: InputViewProps<C>): InputViewProps<RpcConnection<T>> {
+  T extends TInputErrorHook = InputType<C>["TInputErrorHook"]
+  // T extends AnyInput = InputType<C>["TErrorHook"]["Target"]
+>(props: InputViewProps<C>): InputViewProps<RpcConnection<T["Target"]>> {
   return <any>props;
 }
 
 export class InputErrorHookView<
-  C extends RpcConnection<InputErrorHook<AnyInput, any>>,
-  Target extends AnyInput = InputType<C>["TErrorHook"]["Target"]
+  C extends RpcConnection<AnyInputErrorHook>,
+  T extends TInputErrorHook = InputType<C>["TInputErrorHook"],
+  Target extends AnyInput = T["Target"]
 > extends AbstractInputView<
   C,
   InputViewProps<C> & {
@@ -62,9 +63,10 @@ export class InputErrorHookView<
       {
         connection,
         element,
-        inputRef: (target) => {
+        inputRef: target => {
           this.target = target;
         },
+        value: this.value,
       },
       this.errorElement
     );

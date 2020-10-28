@@ -1,4 +1,4 @@
-import { AnyDataTable, DataTableOld } from "./DataTable";
+import { OldAnyDataTable, DataTableOld } from "./DataTable";
 
 declare module "./DataTable" {
   interface DataTable<T, Props> {
@@ -8,7 +8,7 @@ declare module "./DataTable" {
 
 // DataTableOld.prototype.reloadAfterRemove = reloadAfterRemove;
 
-async function reloadAfterRemove(this: AnyDataTable) {
+async function reloadAfterRemove(this: OldAnyDataTable) {
   if (this.items.length === 1) {
     if (this.page === 0) {
       await this.reload();

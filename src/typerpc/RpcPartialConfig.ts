@@ -4,11 +4,7 @@ import {
   UndefinedIfEmptyObject,
 } from "../common/typings";
 import { AnyRpc, Rpc, RpcConfig, RpcUnresolvedConfig, TRpc } from "./Rpc";
-import {
-  AnyRpcConfigHook,
-  RpcConfigHook,
-  RpcConfigHookHandler,
-} from "./RpcConfigHook";
+import { AnyRpcConfigHook, RpcConfigHook } from "./RpcConfigHook";
 
 export type AnyRpcWithObjectConfig = Rpc<
   Override<TRpc, { Config: object | undefined }>
@@ -34,6 +30,6 @@ export function RpcPartialConfig<
   return <any>RpcConfigHook<AnyRpcConfigHook>({
     isGenericConfig: false,
     target,
-    handler: config => $ => $({ ...defaultConfig, ...config }),
+    handler: ({ config }) => $ => $({ ...defaultConfig, ...config }),
   });
 }

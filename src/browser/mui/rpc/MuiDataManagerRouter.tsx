@@ -1,7 +1,6 @@
 import Typography from "@material-ui/core/Typography";
 import React from "react";
 
-import { TDataManagerRouter } from "../../../../server/handlers/DataManagerRouter";
 import { MetaType } from "../../../common/MetaType";
 import {
   If,
@@ -9,60 +8,57 @@ import {
   IsEmptyObject,
   PartialUndefinedKeys,
 } from "../../../common/typings";
-import { Lang } from "../../../localization/Lang";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { Router } from "../../../typerouter/Router";
-import { Command } from "../../../typerpc/Command";
 import {
   DataManager,
   DataManagerTypes,
   TDataManager,
-} from "../../../typerpc/data/DataManager";
+} from "../../../typerpc/data-manager/DataManager";
+import { TDataManagerRouter } from "../../../typerpc/data-manager/DataManagerRouter";
+
 import { RpcConnection } from "../../../typerpc/Rpc";
-import { ElementWidgetView } from "../../../typerpc/widget/ElementWidgetView";
-import { FormInput } from "../../../typerpc/widget/Form";
-import { FormViewProps } from "../../../typerpc/widget/FormView";
-import { TabsWidget } from "../../../typerpc/widget/TabsWidget";
+import { FormViewProps } from "../../../typerpc/widget/form/FormView";
+import { InlineWidgetView } from "../../../typerpc/widget/inline-widget/InlineWidgetView";
+import { TabsWidget } from "../../../typerpc/widget/tabs-widget/TabsWidget";
 import { TWidgetViewRouter } from "../../../typerpc/widget/WidgetViewRouter";
 import { MuiAddButton, MuiButtonProps } from "../components/MuiButton";
 import { MuiDataTableView, MuiDataTableViewProps } from "./MuiDataTableView";
 import { MuiFormView, MuiFormViewProps } from "./MuiFormView";
 import { MuiTabsWidgetView, MuiTabsWidgetViewProps } from "./MuiTabsWidgetView";
 
+type _Types<T extends TDataManager> = DataManagerTypes<T> & {};
+
 export type MuiDataManagerRouterViewProps<
   T extends TDataManager,
-  P,
-  Types extends DataManagerTypes<T> = DataManagerTypes<T>
+  P
 > = PartialUndefinedKeys<
   {
     renderEditInput:
-      | FormViewProps<RpcConnection<Types["EditForm"]>>["input"]
-      | If<
-          Is<FormInput<Types["EditForm"]>, FormInput<Types["AddForm"]>>,
-          undefined
-        >;
+      | FormViewProps<RpcConnection<_Types<T>["EditForm"]>>["input"]
+      | If<Is<T["EditInput"], T["EditInput"]>, undefined>;
 
     tabs:
-      | MuiTabsWidgetViewProps<RpcConnection<TabsWidget<T["Tabs"]>>>["tabs"]
-      | If<IsEmptyObject<T["Tabs"]>, undefined>;
+      | MuiTabsWidgetViewProps<RpcConnection<TabsWidget<T["EditTabs"]>>>["tabs"]
+      | If<IsEmptyObject<T["EditTabs"]>, undefined>;
   },
   P & {
     connection: RpcConnection<DataManager<T>>;
 
-    renderAddInput: FormViewProps<RpcConnection<Types["AddForm"]>>["input"];
+    renderAddInput: FormViewProps<RpcConnection<_Types<T>["AddForm"]>>["input"];
 
     FormTabProps?: MuiTabsWidgetViewProps.Tab;
 
     MuiDataTableViewProps?: Partial<
-      MuiDataTableViewProps<RpcConnection<Types["Table"]>>
+      MuiDataTableViewProps<RpcConnection<_Types<T>["Table"]>>
     >;
 
     AddMuiFormViewProps?: Partial<
-      MuiFormViewProps<RpcConnection<Types["AddForm"]>>
+      MuiFormViewProps<RpcConnection<_Types<T>["AddForm"]>>
     >;
 
     EditMuiFormViewProps?: Partial<
-      MuiFormViewProps<RpcConnection<Types["EditForm"]>>
+      MuiFormViewProps<RpcConnection<_Types<T>["EditForm"]>>
     >;
 
     MuiAddButtonProps?: MuiButtonProps;
@@ -98,7 +94,7 @@ export function MuiDataManagerRouter<
   >;
 
   router.renderWidget(
-    () => connection.Table,
+    () => connection.table,
     props => {
       return (
         <MuiDataTableView
@@ -130,7 +126,7 @@ export function MuiDataManagerRouter<
   );
 
   router.at("add").renderWidget(
-    () => connection.Add,
+    () => connection.add,
     props => {
       return (
         <MuiFormView
@@ -147,18 +143,18 @@ export function MuiDataManagerRouter<
   );
 
   router.at("edit").renderWidget(
-    params => connection.Edit(params.id),
+    params => connection.edit(params.id),
     props => {
       return (
-        <ElementWidgetView
+        <InlineWidgetView
           {...props.widget}
-          children={([element, props]) => (
+          children={({ targetProps, inlineElement: page }) => (
             <>
-              <Typography>{element.title}</Typography>
+              <Typography>{page.title}</Typography>
               <MuiTabsWidgetView
-                {...props}
+                {...targetProps}
                 tabs={{
-                  Form: [
+                  form: [
                     FormTabProps || {},
                     props => (
                       <MuiFormView

@@ -47,13 +47,13 @@ export abstract class AbstractDataSource<T> {
 
   TData?: T;
 
-  async countAndQuery(): Promise<[number, DataRow<T>[]]> {
+  async getCountAndRows(): Promise<[number, DataRow<T>[]]> {
     // TODO: Optimizing
-    return [await this.count(), await this.items()];
+    return [await this.getCount(), await this.getRows()];
   }
 
   // TODO: rename to getRows()
-  abstract items(): Promise<DataRow<T>[]>;
+  abstract getRows(): Promise<DataRow<T>[]>;
 
   next(pageSize: number): DataSource<T> {
     return this.updateCursor({
@@ -63,7 +63,7 @@ export abstract class AbstractDataSource<T> {
 
   getKeys(): Promise<string[]> {
     return this.selectKeys()
-      .items()
+      .getRows()
       .then(rows => rows.map(row => row.$key));
   }
 
@@ -86,16 +86,16 @@ export abstract class AbstractDataSource<T> {
     });
 
     while (true) {
-      const rows = await source.items();
+      const rows = await source.getRows();
       yield* rows;
       if (pageSize > rows.length) break;
       source = source.next(rows.length);
     }
   }
 
-  abstract count(): Promise<number>;
+  abstract getCount(): Promise<number>;
 
-  abstract has(): Promise<boolean>;
+  abstract hasRows(): Promise<boolean>;
 
   async getOrFail(key?: string | number): Promise<DataRow<T>> {
     return defined(await this.get(key?.toString()), () =>
@@ -109,7 +109,7 @@ export abstract class AbstractDataSource<T> {
       typeof key === "string" ? { $is: key } : undefined
     )
       .take(1)
-      .items();
+      .getRows();
     return result[0];
   }
 

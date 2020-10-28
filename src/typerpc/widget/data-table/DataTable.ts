@@ -1,123 +1,118 @@
 import {
-  Awaitable,
   If,
   Is,
   Override,
   PartialUndefinedKeys,
-  Typing,
   UndefinedIfEmptyObject,
+  UndefinedIfIsUndefined,
 } from "../../../common/typings";
 import { DataExp } from "../../../data/DataExp";
 import { DataRow } from "../../../data/DataRow";
 import { DataSource } from "../../../data/DataSource";
 import { NonRelationKeys } from "../../../data/Relation";
+import { ConfigFactory } from "../../ConfigFactory";
+import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
-import { Parameter } from "../../parameter/Parameter";
-import { AnyRpc } from "../../Rpc";
-import { RpcConfigFactory2, GenericConfig } from "../../GenericConfig";
-import { RpcMapHandlerFn } from "../../RpcMapHandlerOld";
-import { DataTableContext } from "./DataTableContext";
-import { AnyRowType, Row } from "../Row";
-import { Widget, WidgetType, WithWidgetType } from "../Widget";
+import { RpcParameter } from "../../rpc-parameter/RpcParameter";
+import {
+  AnyRpc,
+  RpcConfig,
+  RpcConnection,
+  RpcUnresolvedConfig,
+} from "../../Rpc";
+import { RpcFn } from "../../rpc-fn/RpcFn";
+import { RpcMap } from "../../rpc-map/RpcMap";
+import { AnyRowType, Column, Row } from "../Row";
+import { Widget, WidgetController } from "../Widget";
+import { DataTableHandler } from "./DataTableHandler";
 
-export type AnyDataTableColumnContext = {
-  load(dataRow: any): Awaitable<any>;
-  field?: DataExp<any>;
-};
-
-type _Loader<D> = ((row: DataRow<D>) => any) | NonRelationKeys<D>;
-
-export type DataTableColumnConfig<
-  T extends TDataTable,
-  ColumnKey extends keyof T["Row"],
-  Row = T["Row"],
-  Data = T["Data"],
+export type DataTableTypes<T extends TDataTable> = _Types<T>;
+type _ColumnTypes<
+  T extends TDataTable & {
+    ColumnKey: string;
+    ColumnType;
+  },
   UndefinedIfColumnKeyIsDataKey extends undefined = If<
-    Is<ColumnKey, keyof Required<Data>>,
+    Is<T["ColumnKey"], keyof Required<T["Data"]>>,
     undefined
   >
-> =
-  | PartialUndefinedKeys<
+> = {
+  ColumnLoader: ((row: DataRow<T["Data"]>) => any) | NonRelationKeys<T["Data"]>;
+
+  ColumnConfig:
+    | _ColumnTypes<T>["ColumnLoader"]
+    | PartialUndefinedKeys<
+        {
+          load: _ColumnTypes<T>["ColumnLoader"] | UndefinedIfColumnKeyIsDataKey;
+        },
+        {
+          field?: DataExp<T["Data"]>;
+        }
+      >
+    | UndefinedIfColumnKeyIsDataKey;
+};
+export type _Types<T extends TDataTable, D = T["Data"], Row = T["Row"]> = T & {
+  RowWithKey: Row & { $key: string };
+
+  Query: {
+    getCount?: boolean;
+    order?: Record<
+      keyof Row,
+      { sort?: "ASC" | "DESC"; nulls?: "FIRST" | "LAST" } | "ASC" | "DESC"
+    >;
+    text?: string;
+    skip?: number;
+    take?: number;
+  };
+
+  QueryResult: { totalRows: number; rows: ({ $key: string } & Row)[] };
+
+  ColumnConfigMap: UndefinedIfEmptyObject<
+    PartialUndefinedKeys<
       {
-        load: _Loader<Data> | UndefinedIfColumnKeyIsDataKey;
-      },
-      {
-        field?: DataExp<Data>;
+        [K in string & keyof Row]: _ColumnTypes<
+          T & {
+            ColumnKey: K;
+            ColumnType: Row[K];
+          }
+        >["ColumnConfig"];
       }
     >
-  | _Loader<Data>
-  | UndefinedIfColumnKeyIsDataKey;
+  >;
 
-export type DataTableColumnMapConfig<
-  T extends TDataTable
-> = UndefinedIfEmptyObject<
-  PartialUndefinedKeys<
-    {
-      [ColumnKey in keyof T["Row"]]: UndefinedIfEmptyObject<
-        DataTableColumnConfig<T, ColumnKey>
-      >;
-    }
-  >
->;
-
-export type DataTableConfig<
-  T extends TDataTable,
-  Row = T["Row"],
-  RowController extends AnyRpc = T["RowController"],
-  D = T["Data"]
-> = PartialUndefinedKeys<
-  {
-    getRowConfig:
-      | RpcConfigFactory2<
-          {
-            key: string;
-            // TODO: row: DataRow<{}>
-          },
-          RowController
+  OptionalConfig: {
+    getRowControllerConfig:
+      | ConfigFactory<
+          RpcUnresolvedConfig<T["RowController"]>,
+          [
+            {
+              key: string;
+              source: DataSource<D>;
+            }
+          ]
         >
-      | If<Is<RowController, NoRpc>, undefined>;
+      | UndefinedIfIsUndefined<RpcConfig<T["RowController"]>>;
 
-    columns: DataTableColumnMapConfig<T>;
-  },
-  {
-    pageSize?: number;
+    columns: _Types<T>["ColumnConfigMap"];
+  };
+
+  RequiredConfig: {
     source: DataSource<D>;
-
+    pageSize?: number;
     searchIn?: DataExp<D>[];
     maxRows?: number;
-  }
+  };
+};
+
+export type DataTableConfig<T extends TDataTable> = PartialUndefinedKeys<
+  _Types<T>["OptionalConfig"],
+  _Types<T>["RequiredConfig"]
 >;
-
-export type DataTableOrder = {
-  sort?: "ASC" | "DESC";
-  nulls?: "FIRST" | "LAST";
-};
-
-export type DataTableQuery<Row> = {
-  getCount?: boolean;
-  order?: Record<keyof Row, DataTableOrder | "ASC" | "DESC">;
-  text?: string;
-  skip?: number;
-  take?: number;
-};
-
-export type DataTableQueryResult<Row> = {
-  totalRows: number;
-  rows: ({ $key: string } & Row)[];
-};
-
-export type DataTableRowWithKey<T extends WithWidgetType<AnyDataTable>> = {
-  $key: string;
-} & WidgetType<T>["TDataTable"]["Row"];
-
-export type DataTableRow<T extends WithWidgetType<AnyDataTable>> = WidgetType<
-  T
->["TDataTable"]["Row"];
 
 export type AnyDataTable = DataTable<TDataTable>;
 
 export type TDataTable = {
-  Row: object;
+  Row: any;
   RowController: AnyRpc;
   Data: any;
 };
@@ -126,20 +121,21 @@ export type DataTable<
   T extends TDataTable,
   Row = T["Row"],
   RowController extends AnyRpc = T["RowController"],
-  D = T["Data"]
+  D = T["Data"],
+  GetRowsFn = (query: _Types<T>["Query"]) => Promise<_Types<T>["QueryResult"]>
 > = Widget<{
-  TDataTable: T;
+  Types: _Types<T>;
 
   Config: GenericConfig<
     <D>(config: DataTableConfig<Override<T, { Data: D }>>) => DataTableConfig<T>
   >;
+  Commands: {};
 
-  Handler: {
-    getRows: RpcMapHandlerFn<DataTableQuery<Row>, DataTableQueryResult<Row>>;
-  };
   Connection: {
-    getRows(query: DataTableQuery<Row>): Promise<DataTableQueryResult<Row>>;
+    getRows: GetRowsFn;
+    getRowController(key: string): RpcConnection<RowController>;
   };
+
   Element: {
     // TODO: move to Props
     searchable: boolean;
@@ -149,21 +145,31 @@ export type DataTable<
       };
     };
     totalRows: number;
-    rows: DataTableRowWithKey<Row>[];
+    rows: _Types<T>["RowWithKey"][];
     pageSize?: number;
   };
   Props: {};
   Handler: {
-    getRows(query: DataTableQuery<Row>): Promise<DataTableQueryResult<Row>>;
+    getRows: GetRowsFn;
 
-    getTableRowFromDataRow(dataRow: any): Promise<{ $key: string } & Row>;
+    loadRow(dataRow: any): Promise<{ $key: string } & Row>;
+    loadRow(dataRow: any, noKey: true): Promise<Row>;
 
-    columns: Record<string, AnyDataTableColumnContext>;
+    columns: Record<
+      string,
+      {
+        load: (row: DataRow<D>) => any;
+        field?: DataExp<D>;
+      }
+    >;
   };
-  Controller: Parameter<{
-    Target: RowController;
-    Data: string;
-    Value: string;
+  Controller: RpcMap<{
+    getRowController: RpcParameter<{
+      Target: RowController;
+      Data: string;
+      Value: string;
+    }>;
+    getRows: RpcFn<(query: _Types<T>["Query"]) => _Types<T>["QueryResult"]>;
   }>;
 }>;
 
@@ -186,16 +192,14 @@ export function DataTable<
 }> {
   return <any>Widget<AnyDataTable>({
     isGenericConfig: true,
-    props: {},
-    handler: {
-      getRows: (context, query) => context.getRows(query),
-    },
-    controller: Parameter(Typing<string>(), options.rowController ?? NoRpc),
-    context: DataTableContext,
     connection: {
-      getRows(query) {
-        return this.handler(["getRows", query]);
-      },
+      getRows: conn => query => conn.controller.getRows(query),
+      getRowController: conn => key => conn.controller.getRowController(key),
     },
+    controller: RpcMap({
+      getRowController: RpcParameter(String, options.rowController || NoRpc),
+      getRows: RpcFn<any>(),
+    }) as WidgetController<AnyDataTable>,
+    handler: DataTableHandler,
   });
 }

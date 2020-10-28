@@ -1,124 +1,94 @@
-import { WithMetaType } from "../../../common/MetaType";
 import {
-  Expect,
   OmitKeys,
   Override,
   PartialUndefinedKeys,
 } from "../../../common/typings";
 import { DataRow } from "../../../data/DataRow";
 import { DataSource } from "../../../data/DataSource";
-import { NoRpc } from "../../NoRpc";
 import { GenericConfig } from "../../GenericConfig";
-import {
-  DataTable,
-  DataTableColumnMapConfig,
-  DataTableConfig,
-  TDataTable,
-} from "../../widget/data-table/DataTable";
+import { NoRpc } from "../../NoRpc";
+import { DataTable, DataTableTypes } from "../../widget/data-table/DataTable";
 import { AnyRowType, Row, string } from "../../widget/Row";
-import { DataInputContext } from "./DataInputContext";
+import { WidgetType } from "../../widget/Widget";
 import { Input } from "../Input";
-import { NullableInput, NullableInputOptions } from "../NullableInput";
+import { NullableInput } from "../nullable-input/NullableInput";
+
 import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
+import { DataInputHandler } from "./DataInputHandler";
 
 export type DataInputRow = {
   $key: string;
 };
 
-export type BaseDataInputConfigTypes<
-  T extends TBaseDataInput,
-  Row = T["Row"],
-  D = T["Data"]
-> = {
-  TTable: Expect<
-    TDataTable,
-    {
-      Row: Row & OmitKeys<DataInputRow, "$key">;
-      RowController: NoRpc;
-      Data: D;
-    }
-  >;
+export type DataInputTypes<T extends TDataInput> = _Types<T>;
 
-  Table: DataTableConfig<BaseDataInputConfigTypes<T>["TTable"]>;
-};
+type _Types<T extends TDataInput> = T & {
+  Table: DataTable<{
+    Row: T["Row"];
+    Data: T["Data"];
+    RowController: NoRpc;
+  }>;
 
-export type TBaseDataInput = {
-  Row: object;
-  Data: any;
-};
-export type BaseDataInputConfig<
-  T extends TBaseDataInput,
-  UndefinedConfig,
-  Config,
-  Row = T["Row"],
-  D = T["Data"]
-> = PartialUndefinedKeys<
-  UndefinedConfig & {
-    columns: DataTableColumnMapConfig<BaseDataInputConfigTypes<T>["TTable"]>;
-  },
-  Config & {
-    default?: ValueOrAwaitableFn<string | DataRow<D> | undefined>;
+  TableTypes: WidgetType<_Types<T>["Table"]>["Types"];
 
-    tableConfig?: Omit<
-      BaseDataInputConfigTypes<T>["Table"],
-      "columns" | "selection" | "source"
+  OptionalConfig: {
+    columns: _Types<T>["TableTypes"]["ColumnConfigMap"];
+  };
+
+  RequiredConfig: {
+    default?: ValueOrAwaitableFn<string | DataRow<T["Data"]> | undefined>;
+
+    tableConfig?: OmitKeys<
+      _Types<T>["TableTypes"]["RequiredConfig"] &
+        _Types<T>["TableTypes"]["OptionalConfig"],
+      "columns" | "source"
     >;
 
-    source: DataSource<D>;
+    source: DataSource<T["Data"]>;
+  };
+};
+
+export type DataInputConfig<T extends TDataInput> = PartialUndefinedKeys<
+  _Types<T>["OptionalConfig"],
+  _Types<T>["RequiredConfig"]
+>;
+
+export type AnyDataInput = DataInput<any, TDataInput>;
+
+export type TDataInput = { Row: any; Data: any };
+
+export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
+  N,
+  {
+    TDataInput: T;
+
+    Types: _Types<T>;
+
+    Commands: {};
+
+    ValueData: string;
+
+    Value: string;
+
+    ValueElement: _Types<T>["TableTypes"]["RowWithKey"];
+
+    Props: {
+      table: _Types<T>["Table"];
+    };
+
+    Config: GenericConfig<
+      <D>(
+        config: DataInputConfig<Override<T, { Data: D }>>
+      ) => DataInputConfig<T>
+    >;
+
+    Element: {};
+
+    Controller: _Types<T>["Table"];
+
+    Error: "INVALID_DATA_KEY";
   }
 >;
-
-export type DataInputConfig<T extends TDataInput> = BaseDataInputConfig<
-  T,
-  {},
-  {}
->;
-
-export type AnyDataInput = DataInput<TDataInput>;
-
-export type DataInputTable<R> = DataTable<{
-  Row: R & OmitKeys<DataInputRow, "$key">;
-  RowController: NoRpc;
-  Data: any;
-}>;
-export type TDataInput = { Row: object; Nullable: boolean; Data: any };
-
-export type DataInput<
-  T extends TDataInput,
-  Row = T["Row"],
-  N extends boolean = T["Nullable"]
-> = WithMetaType<{
-  TDataInput: T;
-}> &
-  NullableInput<
-    N,
-    {
-      Row: Row;
-      Data: string;
-
-      Value: string;
-
-      ValueElement: DataInputRow & Row;
-
-      Props: {
-        table: DataInputTable<Row>;
-      };
-
-      Config: GenericConfig<
-        <D>(
-          config: DataInputConfig<Override<T, { Data: D }>>
-        ) => DataInputConfig<T>
-      >;
-
-      Element: {
-        default?: DataInputRow & Row;
-      };
-
-      Controller: DataInputTable<Row>;
-
-      Error: never;
-    }
-  >;
 
 export function DataInput<
   RowType extends AnyRowType = {
@@ -126,27 +96,27 @@ export function DataInput<
   },
   N extends boolean = false
 >(
-  options: NullableInputOptions<N> & {
+  options: {
+    nullable?: N;
     rowType?: RowType;
   } = {}
-): DataInput<{
-  Row: Row<RowType>;
-  Nullable: N;
-  Data: any;
-}> {
-  const controller = DataTable(options.rowType || { label: string });
+): DataInput<
+  N,
+  {
+    Row: Row<RowType>;
+    Data: any;
+  }
+> {
+  const table = DataTable(options.rowType || { label: string });
   return <any>Input<AnyDataInput>({
     props: {
       nullable: options.nullable ?? false,
-      table: controller,
+      table,
     },
     isGenericConfig: true,
-    controller,
-    context: DataInputContext,
-    getValueElementFromElement(element) {
-      return element.default;
-    },
-    getValueData(value) {
+    controller: table,
+    handler: DataInputHandler,
+    getValueDataFromElement(value) {
       return value?.$key;
     },
   });

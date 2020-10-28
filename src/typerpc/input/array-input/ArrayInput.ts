@@ -5,12 +5,8 @@ import {
   Not,
   PartialUndefinedKeys,
 } from "../../../common/typings";
-import {
-  AbstractRpcHandler,
-  RpcUndefinedConfig,
-  RpcUnresolvedConfig,
-} from "../../Rpc";
-import { RpcMap } from "../../RpcMap";
+import { RpcUndefinedConfig, RpcUnresolvedConfig } from "../../Rpc";
+import { RpcMap } from "../../rpc-map/RpcMap";
 import { WidgetElement } from "../../widget/Widget";
 import {
   AnyInput,
@@ -21,27 +17,26 @@ import {
   InputValueData,
   InputValueElement,
 } from "../Input";
+import { InputErrorMap } from "../input-map/InputMap";
 import { InputErrorHook } from "../InputErrorHook";
+import { LengthError } from "../LengthError";
 import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
-import { ArrayInputContext } from "./ArrayInputContext";
 import { ArrayInputHandler } from "./ArrayInputHandler";
 
-export type ArraySchemaError =
-  | "TOO_MANY_ITEMS"
-  | "TOO_FEW_ITEMS"
-  | "UNIQUE_ITEM";
+export type TArrayInput = { NewItem: AnyInput; Item: AnyInput };
 
 export type ArrayInput<
-  Item extends AnyInput,
-  NewItem extends AnyInput,
+  T extends TArrayInput,
+  Item extends AnyInput = T["Item"],
+  NewItem extends AnyInput = T["NewItem"],
   UndefinedGetItemValue extends undefined = If<
     Is<InputValue<NewItem>, InputValue<Item>>,
     undefined
   >
 > = Input<{
-  Item: Item;
-  NewItem: NewItem;
+  TArrayInput: T;
 
+  ItemDataValue: InputValueData<Item>;
   Commands: {
     addNewItem: {
       (data: InputValueData<Item>): ErrorOrValue<
@@ -62,9 +57,10 @@ export type ArrayInput<
     item: Item;
     newItem: NewItem;
     // TODO: uniqueItem?: {...}
-    isUniqueItem: boolean;
-    getKeyFromItemData?: (data: InputValueData<Item>) => string;
-    getKeyFromNewItemData?: (data: InputValueData<Item>) => string;
+    uniqueItem?: {
+      getItemDataKey: (data: InputValueData<Item>) => string;
+      getNewItemDataKey: (data: InputValueData<Item>) => string;
+    };
   };
 
   Config:
@@ -75,11 +71,9 @@ export type ArrayInput<
 
           readonly itemConfig: RpcUnresolvedConfig<Item>;
 
-          getItemValue: /*FromNewItemValue*/
-          | UndefinedGetItemValue
-            | ((value: InputValue<NewItem>) => Awaitable<InputValue<Item>>);
-
-          // getItemKey: (value:InputValue<Item>)=>
+          addNewItem:
+            | ((value: InputValue<NewItem>) => Awaitable<InputValue<Item>>)
+            | UndefinedGetItemValue;
         },
         {
           // TODO: DO NOT USE ConfigFactory -> ValueOrAwaitableFn
@@ -91,7 +85,6 @@ export type ArrayInput<
       >;
 
   Element: {
-    default?: InputValueElement<Item>[];
     item: WidgetElement<Item>;
     newItem: WidgetElement<NewItem>;
     maxLength?: number;
@@ -104,23 +97,17 @@ export type ArrayInput<
     newItem: NewItem;
   }>;
 
-  Error:
-    | ArraySchemaError
-    | {
-        children: Record<string, InputError<Item>>;
-      };
+  Error: LengthError | "UNIQUE_ITEM" | InputErrorMap<Record<string, Item>>;
 }>;
 
-export const UniqueItemError = "NOT_UNIQUE";
+export type AnyArrayInput = ArrayInput<TArrayInput>;
 
-export type AnyArrayInput = ArrayInput<AnyInput, AnyInput>;
-
-type InputUniqueItemErrorHook<
+type _InputUniqueItemErrorHook<
   IsUniqueItem extends boolean,
   Item extends AnyInput
 > = IsUniqueItem extends false
   ? Item
-  : InputErrorHook<Item, typeof UniqueItemError>;
+  : InputErrorHook<{ Target: Item; Error: "NOT_UNIQUE" }>;
 
 export function ArrayInput<
   Item extends AnyInput,
@@ -130,11 +117,11 @@ export function ArrayInput<
   item: Item,
   options?: PartialUndefinedKeys<
     {
-      getKeyFromItemData:
+      getItemDataKey:
         | ((data: InputValueData<Item>) => string)
         | If<Not<IsUniqueItem>, undefined>;
 
-      getKeyFromNewItemData:
+      getNewItemDataKey:
         | ((data: InputValueData<NewItem>) => string)
         | If<
             | Not<IsUniqueItem>
@@ -147,25 +134,28 @@ export function ArrayInput<
       newItem?: NewItem;
     }
   >
-): ArrayInput<
-  InputUniqueItemErrorHook<IsUniqueItem, Item>,
-  InputUniqueItemErrorHook<IsUniqueItem, NewItem>
-> {
-  const getKeyFromItemData =
-    options && "getKeyFromItemData" in options
-      ? options.getKeyFromItemData
-      : undefined;
+): ArrayInput<{
+  Item: _InputUniqueItemErrorHook<IsUniqueItem, Item>;
+  NewItem: _InputUniqueItemErrorHook<IsUniqueItem, NewItem>;
+}> {
+  const getItemDataKey =
+    options && "getItemDataKey" in options ? options.getItemDataKey : undefined;
+
+  const getNewItemDataKey =
+    (options && "getNewItemDataKey" in options
+      ? options.getNewItemDataKey
+      : undefined) ?? getItemDataKey;
+
   const newItem = options?.newItem ?? item;
   return <any>Input<AnyArrayInput>({
     props: {
       item,
       newItem,
-      isUniqueItem: options?.isUniqueItem ?? false,
-      getKeyFromItemData,
-      getKeyFromNewItemData:
-        (options && "getKeyFromNewItemData" in options
-          ? options.getKeyFromNewItemData
-          : undefined) ?? getKeyFromItemData,
+      uniqueItem: getItemDataKey &&
+        getNewItemDataKey && {
+          getNewItemDataKey,
+          getItemDataKey,
+        },
     },
     handler: ArrayInputHandler,
     controller: RpcMap({
@@ -173,10 +163,9 @@ export function ArrayInput<
       newItem,
     }),
 
-    getValueData(items) {
-      const { getKeyFromItemData } = this;
-      return items.map((itemValue, index) => {
-        return this.item.getValueData(itemValue);
+    getValueDataFromElement(items) {
+      return items.map(itemValue => {
+        return this.item.getValueDataFromElement(itemValue);
       });
     },
   });

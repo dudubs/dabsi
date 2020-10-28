@@ -24,7 +24,7 @@ export class InputMapHandler extends AbstractInputHandler<T> {
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     return mapObjectAsync(this.rpc.targetMap, (target, key) =>
-      this.controllerHandler
+      this.controller
         .then(c => c.getTargetHandler(key))
         .then(h => h.getValueElement(value?.[key]))
     );
@@ -33,7 +33,7 @@ export class InputMapHandler extends AbstractInputHandler<T> {
   async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
     return {
       elementMap: await mapObjectAsync(this.rpc.targetMap, (target, key) =>
-        this.controllerHandler
+        this.controller
           .then(c => c.getTargetHandler(key))
           .then(h => h.getInputElement())
       ),
@@ -45,7 +45,7 @@ export class InputMapHandler extends AbstractInputHandler<T> {
   ): Promise<InputErrorOrValue<T>> {
     const errorMap: any = {};
     const valueMap = await mapObjectAsync(this.rpc.targetMap, (target, key) =>
-      this.controllerHandler
+      this.controller
         .then(c => c.getTargetHandler(key))
         .then(h => h.loadAndCheck(dataMap[key]))
         .then(result => {
@@ -55,8 +55,9 @@ export class InputMapHandler extends AbstractInputHandler<T> {
           return result.value;
         })
     );
+
     if (hasKeys(errorMap)) {
-      return { value: valueMap, error: { errorMap } };
+      return { value: valueMap, error: { type: "ERROR_MAP", errorMap } };
     }
     return { value: valueMap };
   }

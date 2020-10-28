@@ -7,13 +7,7 @@ import {
 } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
 import { RpcUnresolvedConfig } from "../../Rpc";
-import {
-  BasedWidget,
-  Widget,
-  WidgetElement,
-  WidgetHandlerClass,
-  WidgetType,
-} from "../Widget";
+import { BasedWidget, Widget, WidgetElement, WidgetType } from "../Widget";
 import { FormHandler } from "./FormHandler";
 
 export type TForm = {
@@ -24,12 +18,8 @@ export type TForm = {
 export type AnyForm = Form<TForm>;
 
 export type BasedForm = BasedWidget<WidgetType<AnyForm>>;
+
 export type FormType<T extends BasedForm> = WidgetType<T>["TForm"];
-export type FormValue<T extends BasedForm> = FormType<T>["Value"];
-
-export type FormInput<T extends BasedForm> = FormType<T>["Input"];
-
-export type FormError<T extends BasedForm> = FormType<T>["Error"];
 
 export type Form<
   T extends TForm,
@@ -65,6 +55,7 @@ export type Form<
       | If<Is<Value, string | number | boolean | any[]>, Value>
     >;
   };
+
   Element: WidgetElement<Input>;
 
   Controller: Input;
@@ -95,21 +86,5 @@ export function Form<
     controller: input,
     handler: FormHandler,
     commands: { submit: "handleSubmit" },
-    // handler: {
-    //   async submit(context, data) {
-    //     const inputResult = await input
-    //       .getContext(context.config.inputConfig)
-    //       .call("loadAndCheck", data);
-    //     if ("error" in inputResult) return { inputError: inputResult.error };
-    //
-    //     const submitResult = await context.config.submit(inputResult.value);
-    //     if (submitResult == null) return { value: null };
-    //     if (typeof submitResult !== "object" || Array.isArray(submitResult))
-    //       return { value: submitResult };
-    //
-    //     return submitResult;
-    //   },
-    // },
-    // context: FormContext,
   });
 }

@@ -1,19 +1,22 @@
-import { InputValueData } from "../../input/Input";
+import { RequireOptionalKeys } from "../../../common/typings";
+import { AnyInput, InputValueData } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
 import { RpcUnresolvedConfig } from "../../Rpc";
-import { AbstractWidgetHandler } from "../ AbstractWidgetHandler";
-import { AnyForm, FormInput } from "./Form";
+import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
+import { AnyForm } from "./Form";
 import { IWidgetHandler, WidgetController, WidgetElement } from "../Widget";
 
-export class FormHandler<T extends AnyForm>
+type T = AnyForm;
+
+export class FormHandler
   extends AbstractWidgetHandler<T>
   implements IWidgetHandler<AnyForm> {
   getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
     return this.config.inputConfig;
   }
 
-  async handleSubmit(valueData: InputValueData<FormInput<T>>) {
-    const inputResult = await this.controllerHandler.then(input =>
+  async handleSubmit(valueData: InputValueData<AnyInput>) {
+    const inputResult = await this.controller.then(input =>
       input.loadAndCheck(valueData)
     );
     if ("error" in inputResult) return { inputError: inputResult.error };
@@ -25,12 +28,12 @@ export class FormHandler<T extends AnyForm>
     return submitResult;
   }
 
-  async getElement(): Promise<WidgetElement<T>> {
+  async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
     const value = await ValueOrAwaitableFn(this.config.default);
-    const element = await this.controllerHandler.then(c => c.getInputElement());
     if (value !== undefined) {
+      const element = await this.controller.then(c => c.getInputElement());
       return { ...element, value };
     }
-    return element;
+    return this.controller.then(c => c.getElement());
   }
 }

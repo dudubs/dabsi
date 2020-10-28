@@ -1,42 +1,28 @@
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
-import { defined } from "../../../common/object/defined";
-import { entries } from "../../../common/object/entries";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { values } from "../../../common/object/values";
 import { RandomId } from "../../../common/patterns/RandomId";
 import { RequiredOnly } from "../../../common/typings";
-import { WeakId } from "../../../common/WeakId";
-import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
-import { WidgetElement } from "../../widget/Widget";
 import { AbstractInputView } from "../AbstractInputView";
-import { AnyArrayInput, UniqueItemError } from "./ArrayInput";
-import { InputError, InputType, InputValueElement } from "../Input";
+import { InputType } from "../Input";
 import { InputView, InputViewProps } from "../InputView";
 import { InputViewChildren } from "../InputViewChildren";
+import { AnyArrayInput, TArrayInput } from "./ArrayInput";
 
 export type AnyArrayInputConnection = RpcConnection<AnyArrayInput>;
 
-type ItemConnection<T extends AnyArrayInputConnection> = RpcConnection<
-  InputType<T>["Item"]
->;
-
-type NewItemConnection<T extends AnyArrayInputConnection> = RpcConnection<
-  InputType<T>["NewItem"]
->;
-
 export type ArrayInputViewProps<
-  C extends AnyArrayInputConnection
+  C extends AnyArrayInputConnection,
+  T extends TArrayInput = InputType<C>["TArrayInput"]
 > = InputViewProps<C> & {
   renderItem(props: {
-    props: InputViewProps<ItemConnection<C>>;
+    props: InputViewProps<RpcConnection<T["Item"]>>;
     view: ArrayInputView<C>;
     key: string;
     index: number;
   }): ReactElement;
 
   renderNewItem(
-    props: InputViewProps<NewItemConnection<C>>,
+    props: InputViewProps<RpcConnection<T["NewItem"]>>,
     view: ArrayInputView<C>
   ): ReactElement;
 
@@ -44,51 +30,58 @@ export type ArrayInputViewProps<
 };
 
 export class ArrayInputView<
-  C extends AnyArrayInputConnection
+  C extends AnyArrayInputConnection,
+  T extends TArrayInput = InputType<C>["TArrayInput"]
 > extends AbstractInputView<C, ArrayInputViewProps<C>> {
   children = new InputViewChildren();
 
   remove(index: number) {
-    this.setValue(this.value.filter((_, i) => i !== index));
+    this.setValue(this.value?.filter((_, i) => i !== index) || []);
   }
 
-  newItemInput: InputView<RpcConnection<InputType<C>["NewItem"]>>;
+  newItemInput: InputView<RpcConnection<T["NewItem"]>>;
 
   async add(): Promise<boolean> {
     await this.newItemInput.validate();
     if (this.newItemInput.error != null) return false;
 
     const itemKey =
-      this.connectionProps.getKeyFromNewItemData?.(this.newItemInput.data) ??
+      this.rpc.uniqueItem?.getNewItemDataKey(this.newItemInput.data) ??
       RandomId();
 
-    if (this.children.keyToView[itemKey]) {
-      this.newItemInput.setError(UniqueItemError);
+    if (this.children.viewMap[itemKey]) {
+      this.newItemInput.setError("UNIQUE_ITEM");
       return false;
     }
 
-    const result = await this.controller.addNewItem(this.newItemInput.data);
+    const result = await this.connection.command(
+      "addNewItem",
+      this.newItemInput.data
+    );
     if ("error" in result) {
       this.newItemInput.setError(result.error);
       return false;
     }
 
-    await this.setValue([...this.value, result.value]);
+    await this.setValue([...(this.value || []), result.value]);
     return true;
   }
 
   renderNewItem() {
     return this.props.renderNewItem(
       {
+        value: undefined,
         onChange: async newItemInput => {
           const {
-            connectionProps: { getKeyFromNewItemData },
+            connection: {
+              rpc: { uniqueItem },
+            },
           } = this;
 
-          if (getKeyFromNewItemData) {
-            const key = getKeyFromNewItemData(newItemInput.data);
-            if (key && this.children.keyToView[key]) {
-              newItemInput.setError(UniqueItemError);
+          if (uniqueItem) {
+            const key = uniqueItem.getNewItemDataKey(newItemInput.data);
+            if (key && this.children.viewMap[key]) {
+              newItemInput.setError("UNIQUE_ITEM");
             }
           }
         },
@@ -104,14 +97,14 @@ export class ArrayInputView<
   }
 
   renderItems() {
-    const {
-      getKeyFromItemData,
-      item: { props: itemProps },
-    } = this.connectionProps;
-    return this.value.map((value, index) => {
+    const { uniqueItem } = this.rpc;
+
+    return this.value?.map((value, index) => {
       let key: string;
-      if (getKeyFromItemData) {
-        key = getKeyFromItemData(itemProps.getValueData(value));
+      if (uniqueItem) {
+        key = uniqueItem.getItemDataKey(
+          this.rpc.item.getValueDataFromElement(value)
+        );
       } else {
         key = String(index);
       }
@@ -124,15 +117,15 @@ export class ArrayInputView<
             element: this.element.item,
             value,
             onChange: view => {
-              if (getKeyFromItemData) {
-                const key = getKeyFromItemData(view.data);
-                if (this.children.keyToView[key]) {
-                  view.setError(UniqueItemError);
+              if (uniqueItem) {
+                const key = uniqueItem.getItemDataKey(view.data);
+                if (this.children.viewMap[key]) {
+                  view.setError("UNIQUE_ITEM");
                   return;
                 }
               }
               return this.setValue(
-                mapIndexToValue(this.value, index, view.value)
+                mapIndexToValue(this.value || [], index, view.value)
               );
             },
             inputRef: this.children.ref(key),

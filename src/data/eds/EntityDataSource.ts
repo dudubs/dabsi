@@ -9,7 +9,7 @@ import { EntityRelation } from "../../typeorm/relations";
 import { DataCursor, EmptyDataCursor } from "../DataCursor";
 import { DataKey } from "../DataKey";
 import { DataBaseRow, DataRow } from "../DataRow";
-import { DataSource, DataValues } from "../DataSource";
+import { DataValues } from "../DataSource";
 import {
   AbstractDataSource,
   DataSourceFactory,
@@ -86,16 +86,16 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
     );
   }
 
-  items(): Promise<DataRow<T>[]> {
+  getRows(): Promise<DataRow<T>[]> {
     return this.createEntityLoader().loadMany();
   }
 
-  count(): Promise<number> {
-    return this.createQueryExpBuilder().count();
+  getCount(): Promise<number> {
+    return this.createQueryExpBuilder().getCount();
   }
 
-  has(): Promise<boolean> {
-    return this.createQueryExpBuilder().has();
+  hasRows(): Promise<boolean> {
+    return this.createQueryExpBuilder().hasRows();
   }
 
   protected _createEntityValues(values, isInsert: boolean) {

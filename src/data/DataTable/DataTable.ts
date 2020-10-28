@@ -16,7 +16,7 @@ import { removeAction } from "./actions/removeAction";
 
 export type DataTableActionType = "single" | "multiple" | "both";
 
-export type AnyDataTable<T = any> = DataTableOld<
+export type OldAnyDataTable<T = any> = DataTableOld<
   T,
   DataTableProps<T, DataTableColumnProps<T>>
 >;
@@ -25,7 +25,7 @@ export type DataTableAction<T> = {
   icon?: MuiIcon;
   title: LangNode;
   type?: DataTableActionType;
-  handleKeys?(keys: string[], table: AnyDataTable<T>): Awaitable;
+  handleKeys?(keys: string[], table: OldAnyDataTable<T>): Awaitable;
   handleItem?(item: DataRow<T>, table: DataTableOld<T, any>): Awaitable;
   danger?: boolean;
   visible?: (item: DataRow<T>) => boolean;
@@ -152,8 +152,8 @@ export abstract class DataTableOld<
   getOrder(): DataOrder<T>[] {
     return this.columns
       .toSeq()
-      .filter((c) => c.field && c.sort)
-      .map((c) => ({
+      .filter(c => c.field && c.sort)
+      .map(c => ({
         by: <DataExp<T>>c.field,
         sort: <DataSortType>c.sort,
         nulls: c.sortNulls === "first" ? ("FIRST" as const) : ("LAST" as const),

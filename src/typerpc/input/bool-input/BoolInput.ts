@@ -22,7 +22,7 @@ export type BoolInput = Input<{
 export function BoolInput(): BoolInput {
   return Input({
     handler: BoolInputHandler,
-    getValueData(value) {
+    getValueDataFromElement(value) {
       return value;
     },
   });

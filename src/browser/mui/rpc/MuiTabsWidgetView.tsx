@@ -3,20 +3,19 @@ import Tabs, { TabsProps } from "@material-ui/core/Tabs";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
 import { entries } from "../../../common/object/entries";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
+import { LangKey } from "../../../localization/LangKey";
 import { Renderer } from "../../../react/renderer";
 import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { RpcConnection } from "../../../typerpc/Rpc";
-import { TabsWidget } from "../../../typerpc/widget/TabsWidget";
-import { TabsWidgetView } from "../../../typerpc/widget/TabsWidgetView";
-import { AnyWidget, WidgetType } from "../../../typerpc/widget/Widget";
-import { AnyWidgetMap } from "../../../typerpc/widget/WidgetMap";
+import { AnyTabsWidget } from "../../../typerpc/widget/tabs-widget/TabsWidget";
+import { TabsWidgetView } from "../../../typerpc/widget/tabs-widget/TabsWidgetView";
+import { WidgetType } from "../../../typerpc/widget/Widget";
+import { AnyWidgetRecord } from "../../../typerpc/widget/widget-map/WidgetMap";
 import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
-import { LangKey } from "../../../localization/LangKey";
 import { MuiIcon } from "../components/MuiIcon";
 
-export type AnyTabsWidgetConnection = RpcConnection<TabsWidget<AnyWidgetMap>>;
+export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 
 export type RendererOrProps<T, P> = [Partial<T>, Renderer<P>] | Renderer<P>;
 
@@ -37,7 +36,8 @@ export declare namespace MuiTabsWidgetViewProps {
   };
 }
 export type MuiTabsWidgetViewProps<
-  C extends AnyTabsWidgetConnection
+  C extends AnyTabsWidgetConnection,
+  T extends AnyWidgetRecord = WidgetType<C>["TabMap"]
 > = WidgetViewProps<C> & {
   TabsProps?: TabsProps;
 
@@ -47,9 +47,9 @@ export type MuiTabsWidgetViewProps<
   renderTabPanel?: Renderer<{ children: ReactElement | undefined }>;
 
   tabs: {
-    [K in keyof WidgetType<C>["Tabs"]]: RendererOrProps<
+    [K in keyof T]: RendererOrProps<
       MuiTabsWidgetViewProps.Tab,
-      WidgetViewProps<RpcConnection<WidgetType<C>["Tabs"][K]>>
+      WidgetViewProps<RpcConnection<T[K]>>
     >;
   };
 };
@@ -66,16 +66,17 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
     <TabsWidgetView {...props}>
       {view => {
         const tabs: ReactElement[] = [];
+        const { tabProps } = view;
 
         for (const [key, tab] of entries(keyToTab)) {
-          const isSelected = view.currentTab?.key === key;
-          const [tabProps] = RendererOrProps(tab);
+          const isSelected = tabProps?.key === key;
+          const [tabRenderProps] = RendererOrProps(tab);
           tabs.push(
             <Tab
               key={key}
               {...TabProps}
               {...(isSelected ? SelectedTabProps : null)}
-              label={<LangKey for={key}>{tabProps.title}</LangKey>}
+              label={<LangKey for={key}>{tabRenderProps.title}</LangKey>}
               value={key}
             />
           );
@@ -83,15 +84,11 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
 
         let tabContent: ReactElement | undefined = undefined;
 
-        const { currentTab } = view;
-        if (currentTab) {
-          const tab = keyToTab[currentTab.key];
+        if (tabProps) {
+          const tab = keyToTab[tabProps.key!];
           if (tab) {
             const [_, tabRenderer] = RendererOrProps(tab);
-            tabContent = tabRenderer({
-              ...currentTab,
-              connection: view.props.connection.controller[currentTab.key],
-            });
+            tabContent = tabRenderer(tabProps);
           }
         }
 
@@ -103,7 +100,8 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
               {...mergeProps(TabsProps, {
                 onChange: (_, key) => view.switchTo(key),
               })}
-              value={currentTab?.key}>
+              value={tabProps?.key}
+            >
               {tabs}
             </Tabs>
             {renderTabPanel

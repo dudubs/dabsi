@@ -52,11 +52,11 @@ export class QueryExpBuilder {
       if (!isDeepEqual(selection, prevSelection)) {
         throw new Error(`Can't override selection ${aliasName}.`);
       }
-      return (raw) => raw[aliasName];
+      return raw => raw[aliasName];
     }
 
     this.fields[aliasName] = selection;
-    return (raw) => raw[aliasName];
+    return raw => raw[aliasName];
   }
 
   createTranslator() {
@@ -73,7 +73,7 @@ export class QueryExpBuilder {
     return this.connection.query(query, parameters);
   }
 
-  async count(): Promise<number> {
+  async getCount(): Promise<number> {
     const translator = this.createTranslator();
     const query = translator.translateQuery(this.query);
 
@@ -82,18 +82,18 @@ export class QueryExpBuilder {
         `SELECT COUNT(*) value FROM (${query}) _rec`,
         translator.parameters
       )
-      .then((rows) => {
+      .then(rows => {
         return rows[0]?.value ?? 0;
       });
   }
 
-  has(): Promise<boolean> {
+  hasRows(): Promise<boolean> {
     const translator = this.createTranslator();
     const query = `SELECT COUNT(*) value FROM (${translator.translateQuery({
       ...this.query,
       take: 1,
     })}) _rec`;
-    return this.connection.query(query, translator.parameters).then((rows) => {
+    return this.connection.query(query, translator.parameters).then(rows => {
       return (rows[0]?.value ?? 0) > 0;
     });
   }

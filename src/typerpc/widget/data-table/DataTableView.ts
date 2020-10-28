@@ -4,8 +4,8 @@ import { Debounce } from "../../../react/utils/hooks/useDebounce";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyDataTable, DataTableOrder, DataTableRowWithKey } from "./DataTable";
-import { WidgetElement } from "../Widget";
+import { AnyDataTable } from "./DataTable";
+import { WidgetElement, WidgetType } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
 
 export type DataTableViewProps<
@@ -27,7 +27,7 @@ export class DataTableView<
   @ViewState("reload") pageIndex = 0;
 
   @ViewState() totalRows: number;
-  @ViewState() rows: DataTableRowWithKey<C>[];
+  @ViewState() rows: WidgetType<C>["Types"]["RowWithKey"][];
   @ViewState() isLoading = false;
 
   protected updateElement(element: WidgetElement<C>) {
@@ -72,8 +72,8 @@ export class DataTableView<
   protected _toggleSortOrNulls<K extends "sort" | "nulls">(
     key: string,
     p: K,
-    v1: DataTableOrder[K],
-    v2: DataTableOrder[K]
+    v1: { sort: "ASC" | "DESC"; nulls: "FIRST" | "LAST" }[K],
+    v2: { sort: "ASC" | "DESC"; nulls: "FIRST" | "LAST" }[K]
   ) {
     const column = this.columns[key];
     let value: typeof column[typeof p] = column[p];
@@ -124,9 +124,9 @@ export class DataTableView<
     }
     this.isLoading = true;
     const getCount = this.totalRows === 0 || this.pageIndex === 0;
-    const { totalRows, rows } = await this.props.connection.getRows({
+    const { totalRows, rows } = await this.props.connection.controller.getRows({
       getCount,
-      order: mapAndFilterObject(this.columns, (column) => {
+      order: mapAndFilterObject(this.columns, column => {
         const { nulls, sort } = column;
         if (nulls || sort) {
           return { nulls, sort };

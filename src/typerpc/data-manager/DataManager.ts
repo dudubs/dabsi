@@ -1,15 +1,13 @@
 import {
-  AnyTyping,
   Awaitable,
   If,
   IsEmptyObject,
   OmitKeys,
   Override,
   PartialUndefinedKeys,
-  TypingType,
 } from "../../common/typings";
-import { DataRow } from "../../data/DataRow";
-import { DataSource } from "../../data/DataSource";
+import { DataRow } from "../../typedata/DataRow";
+import { DataSource } from "../../typedata/DataSource";
 import { ConfigFactory } from "../ConfigFactory";
 import { GenericConfig } from "../GenericConfig";
 
@@ -18,16 +16,13 @@ import { NoRpc } from "../NoRpc";
 import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "../Rpc";
 import { RpcFn } from "../rpc-fn/RpcFn";
 import { RpcMap } from "../rpc-map/RpcMap";
-import { RpcParameter, TRpcParameter } from "../rpc-parameter/RpcParameter";
+import { RpcParameter } from "../rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "../RpcConfigHook";
 import { DataTable, DataTableOptions } from "../widget/data-table/DataTable";
 import { Form, FormType } from "../widget/form/Form";
-import {
-  InlineWidget,
-  TInlineWidget,
-} from "../widget/inline-widget/InlineWidget";
+import { InlineWidget } from "../widget/inline-widget/InlineWidget";
 import { AnyRowType, Row } from "../widget/Row";
-import { AnyTabsWidget, TabsWidget } from "../widget/tabs-widget/TabsWidget";
+import { TabsWidget } from "../widget/tabs-widget/TabsWidget";
 import { WidgetType } from "../widget/Widget";
 import { AnyWidgetRecord } from "../widget/widget-map/WidgetMap";
 import { DataManagerHandler } from "./DataManagerHandler";
@@ -154,8 +149,8 @@ export type DataManager<T extends TDataManager> = RpcConfigHook<{
 
 export function DataManager<
   TableRowType extends AnyRowType,
-  AddErrorType extends AnyTyping,
-  EditErrorType extends AnyTyping,
+  AddError,
+  EditError,
   AddInput extends AnyInput,
   EditInput extends AnyInput = AddInput,
   TableRowController extends AnyRpc = NoRpc,
@@ -163,8 +158,8 @@ export function DataManager<
 >(options: {
   tableRowType: TableRowType;
   tableOptions?: DataTableOptions<TableRowController>;
-  addError?: AddErrorType;
-  editError?: EditErrorType;
+  addError?: AddError;
+  editError?: EditError;
   addInput: AddInput;
   editInput?: EditInput;
   editTabs?: EditTabs;
@@ -172,9 +167,9 @@ export function DataManager<
   TableRowController: TableRowController;
   TableRow: Row<TableRowType>;
   Data: any;
-  AddError: TypingType<AddErrorType>;
+  AddError: AddError;
   AddInput: AddInput;
-  EditError: TypingType<EditErrorType>;
+  EditError: EditError;
   EditInput: EditInput;
   EditTabs: EditTabs;
 }> {

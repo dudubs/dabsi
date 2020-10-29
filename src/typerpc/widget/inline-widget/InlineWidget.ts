@@ -3,7 +3,6 @@ import {
   If,
   IsUndefined,
   PartialUndefinedKeys,
-  Typing,
 } from "../../../common/typings";
 import { NoRpc } from "../../NoRpc";
 import {
@@ -75,7 +74,7 @@ export function InlineWidget<
 >(options: {
   target?: Target;
   controller?: Controller;
-  element?: Typing<Element>;
+  element?: Element;
 }): InlineWidget<T> {
   const { target, controller } = options;
   return Widget<InlineWidget<T>>({

@@ -14,6 +14,7 @@ export type AnyRpcFn = RpcFn<Fn>;
 export function RpcFn<T extends Fn = () => void>(): RpcFn<T> {
   return <any>Rpc<AnyRpcFn>({
     isGenericConfig: false,
+    isConfigFn: true,
     handler: RpcFnHandler,
     connect(handler) {
       return async (...args) => <Awaited<ReturnType<T>>>await handler(args);

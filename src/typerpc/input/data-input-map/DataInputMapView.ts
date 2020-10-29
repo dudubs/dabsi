@@ -12,7 +12,7 @@ export type DataInputMapViewProps<
 > = InputViewProps<C> & {
   target: Renderer<{
     props: InputViewProps<RpcConnection<InputType<C>["Types"]["Target"]>>;
-    row: InputType<C>["Types"]["Row"];
+    row: InputType<C>["Types"]["TableRow"];
     index: number;
     key: string;
   }>;

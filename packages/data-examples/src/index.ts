@@ -1,6 +1,6 @@
 import { Connection, createConnection } from "typeorm/index";
 import { defined } from "../../../src/common/object/defined";
-import { EntityDataSource } from "../../../src/data/eds/EntityDataSource";
+import { EntityDataSource } from "../../../src/typedata/eds/EntityDataSource";
 import { Animal } from "./Animal";
 import { BaseAnimal } from "./entities/BaseAnimal";
 import { Cat } from "./entities/Cat";

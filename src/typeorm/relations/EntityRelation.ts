@@ -5,8 +5,8 @@ import { defined } from "../../common/object/defined";
 import { definedAt } from "../../common/object/definedAt";
 import { Lazy } from "../../common/patterns/lazy";
 import { ArrayTypeOrObject } from "../../common/typings";
-import { DataExp } from "../../data/DataExp";
-import { QueryExpBuilder } from "../QueryExpBuilder";
+import { DataExp } from "../../typedata/DataExp";
+import { DataQueryBuilder, DataQueryBuilderOld } from "../DataQueryBuilder";
 import { ByTableOrColumn, EntityRelationSide } from "./EntityRelationSide";
 
 export class EntityRelation<T = any> {
@@ -46,7 +46,7 @@ export class EntityRelation<T = any> {
 
   relationMetadata = defined(
     this.entityMetadata.relations.find(
-      (r) => r.propertyName === this.propertyName
+      r => r.propertyName === this.propertyName
     ),
     () =>
       `No relation metadata for ${this.entityType.name}.${this.propertyName}`
@@ -73,7 +73,7 @@ export class EntityRelation<T = any> {
 
   joinQeb(
     joinType: JoinType,
-    qeb: QueryExpBuilder,
+    qeb: DataQueryBuilder,
     leftSchema: string,
     rightKey: object | null
   ): string {
@@ -124,7 +124,7 @@ export class EntityRelation<T = any> {
     const rightSchema = this.getRightSchema(leftSchema);
 
     const joinAttribute = sqb.expressionMap.joinAttributes.find(
-      (ja) => ja.alias?.name === rightSchema
+      ja => ja.alias?.name === rightSchema
     );
 
     if (joinAttribute) {
@@ -194,7 +194,7 @@ export class EntityRelation<T = any> {
     rightSchema
   ) {
     return {
-      $and: joinColumns.map((c) => [
+      $and: joinColumns.map(c => [
         {
           $at: { [leftSchema]: this.left.getJoinColumn(by, c).databaseName },
         },
@@ -219,7 +219,7 @@ export class EntityRelation<T = any> {
     return joinColumns
       .toSeq()
       .map(
-        (c) =>
+        c =>
           `${this.escape(leftSchema)}.${this.escape(
             this.left.getJoinColumn(by, c).databaseName
           )}=${this.escape(rightSchema)}.${

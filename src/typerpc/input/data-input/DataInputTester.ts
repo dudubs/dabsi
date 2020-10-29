@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { EntityDataSource } from "../../../data/eds/EntityDataSource";
-import { TestConnection } from "../../../data/tests/TestConnection";
+import { EntityDataSource } from "../../../typedata/eds/EntityDataSource";
+import { TestConnection } from "../../../typedata/tests/TestConnection";
 
 export namespace DataInputTester {
   @Entity()

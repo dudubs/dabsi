@@ -58,8 +58,8 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
     let elementMap: Record<string, { $value }> = {};
     for (const dataRow of await this.config.source.getRows()) {
       const value =
-        valueMap?.[dataRow.$key] ?? (await this.config.getTargetValue(dataRow));
-      elementMap[dataRow.$key] = {
+        valueMap?.[dataRow.$id] ?? (await this.config.getTargetValue(dataRow));
+      elementMap[dataRow.$id] = {
         ...(await table.loadRow(dataRow, true)),
         $value: await target.getValueElement(value),
       };
@@ -83,14 +83,14 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
       .createAsMutable()
       .filter({ $is: keys })
       .getRows()) {
-      invalidKeys.delete(row.$key);
+      invalidKeys.delete(row.$id);
 
-      const result = await target.loadAndCheck(dataMap[row.$key]);
+      const result = await target.loadAndCheck(dataMap[row.$id]);
       if ("error" in result) {
-        errorMap[row.$key] = result.error;
+        errorMap[row.$id] = result.error;
       }
       if (result.value !== undefined) {
-        valueMap[row.$key] = result.value;
+        valueMap[row.$id] = result.value;
       }
     }
     if (invalidKeys.size) {

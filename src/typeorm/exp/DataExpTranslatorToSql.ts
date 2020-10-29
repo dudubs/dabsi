@@ -8,9 +8,9 @@ import {
   NamedCompareOperator,
   Parameter,
   StringDataExp,
-} from "../../data/DataExp";
-import { DataExpTranslator } from "../../data/DataExpTranslator";
-import { Query } from "../QueryExp";
+} from "../../typedata/DataExp";
+import { DataExpTranslator } from "../../typedata/DataExpTranslator";
+import { DataQuery } from "../DataQueryExp";
 
 const SqlOperators: Record<NamedCompareOperator, string> = {
   $equals: "=",
@@ -55,7 +55,7 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
   translateAnd(exps: string[]): string {
     exps =
       // optimization
-      exps.filter((exp) => exp !== this.True);
+      exps.filter(exp => exp !== this.True);
     if (1 >= exps.length) return exps[0] ?? this.True;
     return `(${exps.join(" AND ")})`;
   }
@@ -163,13 +163,13 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
     throw new Error("Not support.");
   }
 
-  translateQueryCount(query: Query): string {
+  translateQueryCount(query: DataQuery): string {
     return `(SELECT COUNT(*) AS value FROM (${this.translateQuery(
       query
     )}) AS _rec)`;
   }
 
-  translateQueryHas(inverse: boolean, query: Query): string {
+  translateQueryHas(inverse: boolean, query: DataQuery): string {
     return this.translateCompare(
       inverse ? "$equals" : "$greaterThan",
       this.translateQueryCount({
@@ -180,7 +180,7 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
     );
   }
 
-  translateQuerySelect(query: Query) {
+  translateQuerySelect(query: DataQuery) {
     let sql = "";
     for (let [aliasName, selection] of entries(query.fields)) {
       sql +=
@@ -192,7 +192,7 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
     return sql || "*";
   }
 
-  translateQueryJoins(query: Query) {
+  translateQueryJoins(query: DataQuery) {
     let sql = "";
     for (let [aliasName, join] of entries(query.joins)) {
       switch (join.type) {
@@ -212,7 +212,7 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
     return sql;
   }
 
-  translateQuery(query: Query): string {
+  translateQuery(query: DataQuery): string {
     return (
       "SELECT " +
       this.translateQuerySelect(query) +
@@ -228,7 +228,7 @@ export abstract class DataExpTranslatorToSql<T> extends DataExpTranslator<
         ? " ORDER BY " +
           query.order
             .toSeq()
-            .map((order) => {
+            .map(order => {
               let sql = this.translate(order.by);
               switch (order.sort) {
                 case "ASC":

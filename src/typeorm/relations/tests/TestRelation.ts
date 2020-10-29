@@ -11,7 +11,7 @@ import { JoinColumnOptions, JoinTableOptions } from "typeorm";
 import { MapFactory } from "../../../common/map/mapFactory";
 import { definedAt } from "../../../common/object/definedAt";
 import { Type } from "../../../common/typings";
-import { Relation } from "../../../data/Relation";
+import { Relation } from "../../../typedata/Relation";
 
 const targetToRelationKeys = MapFactory(
   (target: Function) => new Set<string>()

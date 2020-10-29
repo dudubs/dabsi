@@ -24,6 +24,7 @@ testm(__dirname, () => {
   testRpc(
     Rpc<AnyRpcWithGenericConfig>({
       isGenericConfig: true,
+      isConfigFn: false,
       connect() {
         return {};
       },
@@ -46,6 +47,14 @@ testm(__dirname, () => {
     describe("rpc service >", () => {
       it("expect to use service config", done => {
         const c = RpcFn();
+        /*
+          {$context($){
+            return $(()=>{
+
+            })
+          }}
+
+         */
         configureRpcService(c, () => {
           done();
         });
@@ -59,7 +68,7 @@ testm(__dirname, () => {
     });
   });
 
-  fit("RpcConfigHook", async () => {
+  it("RpcConfigHook", async () => {
     expect(
       await RpcConfigHook({
         isGenericConfig: false,

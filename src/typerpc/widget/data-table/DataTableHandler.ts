@@ -3,9 +3,9 @@ import { entries } from "../../../common/object/entries";
 import { mapObject } from "../../../common/object/mapObject";
 import { Lazy } from "../../../common/patterns/lazy";
 import { RequireOptionalKeys } from "../../../common/typings";
-import { DataExp } from "../../../data/DataExp";
-import { DataOrder } from "../../../data/DataOrder";
-import { DataRow } from "../../../data/DataRow";
+import { DataExp } from "../../../typedata/DataExp";
+import { DataOrder } from "../../../typedata/DataOrder";
+import { DataRow } from "../../../typedata/DataRow";
 import { inspect } from "../../../logging";
 import { ConfigFactory } from "../../ConfigFactory";
 import { RpcUnresolvedConfig } from "../../Rpc";
@@ -51,7 +51,7 @@ export class DataTableHandler
   async loadRow(dataRow, noKey?: boolean) {
     const row: any = {};
     if (!noKey) {
-      row.$key = dataRow.$key;
+      row.$id = dataRow.$id;
     }
     for (const [key, column] of entries(this.columns)) {
       row[key] = await column.load(dataRow);

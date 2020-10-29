@@ -131,7 +131,10 @@ export type RpcOptions<
   ConfigIsGenericConfig extends boolean = IsGenericConfig<T["Config"]>
 > = PartialUndefinedKeys<
   {
+    // TODO: configType: 'function' | 'generic' | 'object'
     isGenericConfig: RpcIsGenericConfigOption<T>;
+
+    isConfigFn: boolean | If<Not<Is<T["Config"], Fn>>, undefined>;
 
     props: RpcPropsOption<T>;
   },
@@ -176,12 +179,23 @@ export const AnyRpc: AnyRpc = {
       config = await ConfigFactory(config.$context, this);
     }
 
+    if (
+      config &&
+      Array.isArray(config) &&
+      config.length === 1 &&
+      typeof config[0] === "function"
+    ) {
+      config = await ConfigFactory(config[0], this);
+    }
+
     if (this.options.isGenericConfig) {
       if (typeof config !== "function")
         throw new TypeError(
           `expected to generic config, got: ${inspect(config)}`
         );
       config = await GenericConfig(config as GenericConfig);
+    } else if (!this.options.isConfigFn && typeof config === "function") {
+      config = await ConfigFactory(config as ConfigFactory<any>);
     }
 
     return config || {};
@@ -215,14 +229,13 @@ export type RpcHook<R extends BasedRpc, T extends Partial<TRpc>> = Rpc<
   Extract<Override<RpcType<R>, T>, TRpc>
 >;
 
-export type RpcContextConfig<T extends TRpc> = {
-  $context: ConfigFactory<T["Config"], [Rpc<T>]>;
-};
-
 type _RpcUnresolvedConfig<T extends TRpc> =
   | T["Config"]
+  | If<Not<Is<T["Config"], Fn>>, ConfigFactory<T["Config"]>>
   // TODO: $configContext, $genericConfigContext
-  | RpcContextConfig<T>;
+  | {
+      $context: ConfigFactory<T["Config"], [Rpc<T>]>;
+    };
 
 export type RpcUnresolvedConfig<T extends BasedRpc> = _RpcUnresolvedConfig<
   RpcType<T>
@@ -257,4 +270,11 @@ export function configureRpcService<T extends AnyRpc>(
   config: RpcUnresolvedConfig<T>
 ): RpcConnection<T> {
   return handleRpcService(rpc, rpc.createRpcCommand(config));
+}
+
+export function RpcConfig<T extends AnyRpc>(
+  rpc: T,
+  config: RpcUnresolvedConfig<T>
+): RpcUnresolvedConfig<T> {
+  return config;
 }

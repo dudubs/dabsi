@@ -61,19 +61,21 @@ export function Nullable<T>(value?: T): T | Nullable {
 
 export type Type<T> = Function & { prototype: T };
 
-export type Typing<T> = (value: any) => asserts value is T;
-export type AnyTyping = Typing<any>;
-
-export type TypingType<T extends Typing<any>> = T extends Typing<infer U>
-  ? U
-  : never;
-
-export function Typing<T>(assert?: (value) => asserts value is T): Typing<T> {
-  return value => {
-    assert?.(value);
-  };
+export function Typing<T>(): T {
+  return <any>(() => {
+    throw new Error();
+  });
 }
-
+declare global {
+  interface TypeRefs {}
+}
+export function TypeRef<K extends PropertyKey>(
+  cb: () => K
+): K extends keyof TypeRefs ? TypeRefs[K] : never {
+  return <any>(() => {
+    throw new Error();
+  });
+}
 export function Type<T = any>(this: any): Type<T> {
   if (this instanceof Type) {
     throw new Error();

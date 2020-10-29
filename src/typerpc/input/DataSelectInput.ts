@@ -38,18 +38,18 @@
 //                 default: () => ValueOrAwaitableFn(config.default)
 //                     .then(value => {
 //                         if (typeof value === "object")
-//                             return value?.$key;
+//                             return value?.$id;
 //                         return value
 //                     }),
 //                 load: key => config.source.get(key),
-//                 getKey: row=>row.$key,
+//                 getKey: row=>row.$id,
 //                 options: () => config.source
 //                     .createAsMutable()
 //                     .select(config.selection)
 //                     .getRows()
 //                     .then(rows => {
 //                         return rows.map(row => ({
-//                             key: row.$key,
+//                             key: row.$id,
 //                             label: config.getLabel(row)
 //                         }))
 //                     })

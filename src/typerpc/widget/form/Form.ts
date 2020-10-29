@@ -1,4 +1,4 @@
-import { Awaitable, If, Is, Typing } from "../../../common/typings";
+import { Awaitable, If, Is } from "../../../common/typings";
 import {
   AnyInput,
   InputError,
@@ -74,13 +74,7 @@ export function Form<
     Value: Value;
     Error: Error;
   }
->({
-  input,
-}: {
-  value?: Typing<Value>;
-  error?: Typing<Error>;
-  input: Input;
-}): Form<T> {
+>({ input }: { value?: Value; error?: Error; input: Input }): Form<T> {
   return <any>Widget<AnyForm>({
     props: { input },
     controller: input,

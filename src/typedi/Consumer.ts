@@ -1,37 +1,30 @@
 import { CustomResolver, Resolver, ResolverType } from "./Resolver";
 
-type Arg<U extends (Resolver | undefined)[], N extends number> = ResolverType<
+type A<U extends (Resolver | undefined)[], N extends number> = ResolverType<
   NonNullable<U[N]>
 >;
 
+type R = Resolver;
+
+// prettier-ignore
 export function Consumer<
   T,
   U extends [
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?,
-    Resolver?
+      R?, R?, R?, R?, R?, R?, R?, R?, R?, R?,
+      R?, R?, R?, R?, R?, R?, R?, R?, R?, R?,
+      R?, R?, R?, R?, R?, R?, R?, R?, R?, R?,
+      R?, R?, R?, R?, R?, R?, R?, R?, R?, R?,
+      R?, R?, R?, R?, R?, R?, R?, R?, R?, R?,
   ]
 >(
   deps: U,
   create: (
     ...args: [
-      Arg<U, 0>,
-      Arg<U, 1>,
-      Arg<U, 2>,
-      Arg<U, 3>,
-      Arg<U, 4>,
-      Arg<U, 5>,
-      Arg<U, 6>,
-      Arg<U, 7>,
-      Arg<U, 8>,
-      Arg<U, 9>
+        A<U, 0>,  A<U, 1>,  A<U, 2>,  A<U, 3>,  A<U, 4>,  A<U, 5>,  A<U, 6>,  A<U, 7>,  A<U, 8>,  A<U, 9>,
+        A<U, 10>, A<U, 11>, A<U, 12>, A<U, 13>, A<U, 14>, A<U, 15>, A<U, 16>, A<U, 17>, A<U, 18>, A<U, 19>,
+        A<U, 20>, A<U, 21>, A<U, 22>, A<U, 23>, A<U, 24>, A<U, 25>, A<U, 26>, A<U, 27>, A<U, 28>, A<U, 29>,
+        A<U, 30>, A<U, 31>, A<U, 32>, A<U, 33>, A<U, 34>, A<U, 35>, A<U, 36>, A<U, 37>, A<U, 38>, A<U, 39>,
+        A<U, 40>, A<U, 41>, A<U, 42>, A<U, 43>, A<U, 44>, A<U, 45>, A<U, 46>, A<U, 47>, A<U, 48>, A<U, 49>,
     ]
   ) => T
 ): CustomResolver<T> {

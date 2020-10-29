@@ -1,14 +1,7 @@
 import { Awaited, Fn, If, Not, PartialUndefinedKeys } from "../common/typings";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
-import {
-  AnyRpc,
-  RpcConfig,
-  RpcHook,
-  RpcType,
-  RpcUnresolvedConfig,
-  TRpc,
-} from "./Rpc";
+import { AnyRpc, RpcHook, RpcType, RpcUnresolvedConfig, TRpc } from "./Rpc";
 
 export type RpcConfigHook<
   T extends TConfigHook & {

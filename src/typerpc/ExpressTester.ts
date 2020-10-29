@@ -1,4 +1,4 @@
-import * as express from "express";
+import express from "express";
 import { Handler, Request } from "express";
 import * as http from "http";
 import fetch, { RequestInit } from "node-fetch";

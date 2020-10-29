@@ -3,6 +3,7 @@
   "compilerOptions": {
     "sourceMap": true,
     "preserveSymlinks": false,
+    "esModuleInterop": true,
     "jsx": "react"
   },
   "include": [
@@ -12,7 +13,7 @@
     "node_modules",
     "./dist",
     "./src/browser",
-    "./src/data/DataTable",
+    "./src/typedata/DataTable",
     "./src/struct"
   ]
 }

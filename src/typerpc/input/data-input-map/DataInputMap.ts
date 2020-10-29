@@ -6,7 +6,7 @@ import {
   PartialUndefinedKeys,
   Payload,
 } from "../../../common/typings";
-import { DataRow } from "../../../data/DataRow";
+import { DataRow } from "../../../typedata/DataRow";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
 
@@ -17,7 +17,7 @@ import { DataTable } from "../../widget/data-table/DataTable";
 import { AnyRowType, Row, string } from "../../widget/Row";
 import { WidgetElement } from "../../widget/Widget";
 import {
-  DataInputRow,
+  WithDataKey,
   DataInputTypes,
   TDataInput,
 } from "../data-input/DataInput";
@@ -52,7 +52,7 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
     string,
     {
       $value: InputValueElement<T["Target"]>;
-    } & T["Row"]
+    } & T["TableRow"]
   >;
 
   Props: {
@@ -65,8 +65,8 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
   };
 
   Config: GenericConfig<
-    <Data>(
-      config: DataInputMapConfig<Override<T, { Data: Data }>>
+    <TableData>(
+      config: DataInputMapConfig<Override<T, { TableData: TableData }>>
     ) => DataInputMapConfig<T>
   >;
 
@@ -93,7 +93,9 @@ export type DataInputMapConfig<
     targetConfig: RpcUnresolvedConfig<Target>;
   },
   DataInputTypes<T>["RequiredConfig"] & {
-    getTargetValue: (row: DataRow<T["Data"]>) => Awaitable<InputValue<Target>>;
+    getTargetValue: (
+      row: DataRow<T["TableData"]>
+    ) => Awaitable<InputValue<Target>>;
   }
 >;
 
@@ -108,8 +110,11 @@ export function DataInputMap<
   options?: { rowType?: RowType; rowController?: RowController }
 ): DataInputMap<{
   Target: Target;
-  Row: Row<RowType>;
-  Data: any;
+  TableRow: Row<RowType>;
+  TableData: any;
+  LoadData: any;
+  LoadRow: any;
+  Value: string;
 }> {
   const table = DataTable(
     (options?.rowType as AnyRowType) || { label: string }

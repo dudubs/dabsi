@@ -84,7 +84,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                   props["getLabel"] ? props["getLabel"](row) : row["label"]
                 }
                 options={options}
-                getOptionSelected={(o, v) => o.$key === v.$key}
+                getOptionSelected={(o, v) => o.$id === v.$id}
                 renderInput={params => (
                   <TextField
                     {...params}

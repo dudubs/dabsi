@@ -1,40 +1,44 @@
 import { inspect } from "util";
 import { defined } from "../../common/object/defined";
-import { DataExpMapper } from "../../data/DataSource/DataExpMapper";
-import { DataTypeInfo } from "../../data/DataTypeInfo";
-import { EntityDataKey } from "../../data/eds/EntityDataKey";
+import { DataExpMapper } from "../../typedata/DataSource/DataExpMapper";
+import { DataTypeInfo } from "../../typedata/DataTypeInfo";
+import { EntityDataKey } from "../../typedata/eds/EntityDataKey";
 import {
   DataExp,
   NamedCompareOperator,
   Parameter,
   StringDataExp,
-} from "../../data/DataExp";
-import { DataExpTranslator } from "../../data/DataExpTranslator";
-import { Query, QueryExp } from "../QueryExp";
-import { QueryExpBuilder } from "../QueryExpBuilder";
+} from "../../typedata/DataExp";
+import { DataExpTranslator } from "../../typedata/DataExpTranslator";
+import { DataQuery, DataQueryExp } from "../DataQueryExp";
+import { DataQueryBuilderOld } from "../DataQueryBuilder";
 import { EntityRelation } from "../relations";
+
+const mapper = Object.seal(new DataExpMapper());
 
 function Mapper(target, propertyName, desc) {
   desc.value = function () {
-    const mapper = new DataExpMapper();
     return mapper[propertyName].apply(mapper, arguments);
   };
 }
 
-export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
+export class DataExpTranslatorToQeb<T> extends DataExpTranslator<
+  T,
+  DataQueryExp
+> {
   False: DataExp<any> = false;
   Null: DataExp<any> = null;
   True: DataExp<any> = true;
 
   constructor(
     public typeInfo: DataTypeInfo,
-    public qb: QueryExpBuilder,
+    public qb: DataQueryBuilderOld,
     public schema: string
   ) {
     super();
   }
 
-  translateAs(childKey: string, exp: DataExp<any>): QueryExp {
+  translateAs(childKey: string, exp: DataExp<any>): DataQueryExp {
     const childTypeInfo = defined(
       this.typeInfo.children?.[childKey],
       () =>
@@ -50,7 +54,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
       [childMetadata.discriminatorColumn!.propertyName]: {
         $in: childMetadata.childEntityMetadatas
           .toSeq()
-          .map((child) => child.discriminatorValue!)
+          .map(child => child.discriminatorValue!)
           .concat([childMetadata.discriminatorValue!])
           .toArray(),
       },
@@ -65,7 +69,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     return childTranslator.translate({ $and: [childExp, exp] });
   }
 
-  translateAt(propertyName: string, exp: DataExp<any>): QueryExp {
+  translateAt(propertyName: string, exp: DataExp<any>): DataQueryExp {
     const relation = new EntityRelation(
       this.qb.connection,
       this.typeInfo.type,
@@ -89,7 +93,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
 
   counter = 0;
 
-  getSubSelect(propertyName: string, whereExp: DataExp<any>): Query {
+  getSubSelect(propertyName: string, whereExp: DataExp<any>): DataQuery {
     const relation = new EntityRelation(
       this.qb.connection,
       this.typeInfo.type,
@@ -106,7 +110,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
       whereExp === undefined ? "all" : ++this.counter
     }`;
 
-    let subSelect: Query;
+    let subSelect: DataQuery;
 
     if (relation.ownerRelationMetadata.joinTableName) {
       const joinSchema = rightSchema + "_join";
@@ -148,7 +152,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
 
       const subTranslator = new DataExpTranslatorToQeb(
         subTypeInfo,
-        new QueryExpBuilder(this.qb.connection, subSelect),
+        new DataQueryBuilderOld(this.qb.connection, subSelect),
         rightSchema
       );
 
@@ -159,7 +163,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     return subSelect;
   }
 
-  translateCount(propertyName: string, whereExp: DataExp<any>): QueryExp {
+  translateCount(propertyName: string, whereExp: DataExp<any>): DataQueryExp {
     return { $queryCount: this.getSubSelect(propertyName, whereExp) };
   }
 
@@ -167,7 +171,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     inverse: boolean,
     propertyName: string,
     exp: DataExp<any>
-  ): QueryExp {
+  ): DataQueryExp {
     return {
       [inverse ? "$queryNotHas" : "$queryHas"]: this.getSubSelect(
         propertyName,
@@ -176,7 +180,7 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     };
   }
 
-  translateIs(inverse: boolean, keys: string[]): QueryExp {
+  translateIs(inverse: boolean, keys: string[]): DataQueryExp {
     keys = [...new Set(keys)];
 
     if (!keys.length) {
@@ -189,10 +193,10 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     }
     const exp = {
       $or: this.translateOr(
-        keys.map((textKey) => {
+        keys.map(textKey => {
           const key = EntityDataKey.parse(entityMetadata, textKey);
           return {
-            $and: entityMetadata.primaryColumns.map((column) => [
+            $and: entityMetadata.primaryColumns.map(column => [
               column.databaseName,
               "=",
               [key[column.referencedColumn!.propertyName]],
@@ -204,23 +208,22 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     return inverse ? { $not: exp } : exp;
   }
 
+  translateField(propertyName: StringDataExp<T>): DataQueryExp {
+    return { $at: { [this.schema]: propertyName } };
+  }
+
   @Mapper
-  translateField(propertyName: StringDataExp<T>): QueryExp {
+  translateParameter(value: Parameter): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateParameter(value: Parameter): QueryExp {
+  translateBase(exp: DataExp<T>): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateBase(exp: DataExp<T>): QueryExp {
-    throw new Error();
-  }
-
-  @Mapper
-  translateAnd(exps: DataExp<any>[]): QueryExp {
+  translateAnd(exps: DataExp<any>[]): DataQueryExp {
     throw new Error();
   }
 
@@ -229,12 +232,12 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     op: NamedCompareOperator,
     left: DataExp<any>,
     right: DataExp<any>
-  ): QueryExp {
+  ): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateConcat(exps: DataExp<any>[]): QueryExp {
+  translateConcat(exps: DataExp<any>[]): DataQueryExp {
     throw new Error();
   }
 
@@ -243,12 +246,12 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     condition: DataExp<any>,
     then: DataExp<any>,
     _else: DataExp<any>
-  ): QueryExp {
+  ): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateIfNull(exp: DataExp<any>, alt_value: DataExp<any>): QueryExp {
+  translateIfNull(exp: DataExp<any>, alt_value: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
@@ -257,27 +260,27 @@ export class DataExpTranslatorToQeb<T> extends DataExpTranslator<T, QueryExp> {
     inverse: boolean,
     where: DataExp<any>,
     values: DataExp<any>[]
-  ): QueryExp {
+  ): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateIsNull(inverse: boolean, exp: DataExp<any>): QueryExp {
+  translateIsNull(inverse: boolean, exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateLength(exp: DataExp<any>): QueryExp {
+  translateLength(exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateNot(exp: DataExp<any>): QueryExp {
+  translateNot(exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
   @Mapper
-  translateOr(exps: DataExp<any>[]): QueryExp {
+  translateOr(exps: DataExp<any>[]): DataQueryExp {
     throw new Error();
   }
 }

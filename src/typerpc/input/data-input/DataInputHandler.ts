@@ -1,5 +1,5 @@
 import { RequireOptionalKeys } from "../../../common/typings";
-import { DataRow } from "../../../data/DataRow";
+import { DataRow } from "../../../typedata/DataRow";
 import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
 import {
@@ -52,6 +52,13 @@ export class DataInputHandler extends AbstractNullableInputHandler<T> {
   async loadAndCheckNotNull(
     key: NonNullable<InputValueData<T>>
   ): Promise<ErrorOrValue<InputError<T>, NonNullable<InputValue<T>>>> {
+    if (this.config.loadSource) {
+      const row = await this.config.loadSource.get(String(key));
+      if (!row) {
+        return { error: "INVALID_DATA_KEY", value: undefined };
+      }
+      return { value: row };
+    }
     if (!(await this.config.source.filter({ $is: key }).hasRows())) {
       return { error: "INVALID_DATA_KEY", value: undefined };
     }

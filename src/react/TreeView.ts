@@ -1,56 +1,52 @@
-import {createElement} from "react";
-import {toIndexedSeq} from "../data/toIndexedSeq";
-import {IndexedSeq} from "../immutable2";
-import {createUndefinedContext} from "./utils/hooks/createUndefinedContext";
-import {View} from "./view/View";
-
+import { createElement } from "react";
+import { toIndexedSeq } from "../typedata/toIndexedSeq";
+import { IndexedSeq } from "../immutable2";
+import { createUndefinedContext } from "./utils/hooks/createUndefinedContext";
+import { View } from "./view/View";
 
 export const TreeViewContext = createUndefinedContext<TreeView>();
 
 export abstract class TreeView<P = any> extends View<P> {
+  static contextType = TreeViewContext;
 
-    static contextType = TreeViewContext;
+  context: TreeView | undefined;
 
-    context: TreeView | undefined;
+  children = new Set<TreeView>();
 
-    children = new Set<TreeView>();
+  componentDidMount() {
+    super.componentDidMount();
+    this.context?.mountChild(this);
+  }
 
+  componentWillUnmount() {
+    super.componentWillUnmount();
+    this.context?.unmountChild(this);
+  }
 
-    componentDidMount() {
-        super.componentDidMount();
-        this.context?.mountChild(this);
-    }
+  mountChild(child: TreeView) {
+    this.children.add(child);
+  }
 
-    componentWillUnmount() {
-        super.componentWillUnmount();
-        this.context?.unmountChild(this);
-    }
+  unmountChild(child: TreeView) {
+    this.children.delete(child);
+  }
 
-    mountChild(child: TreeView) {
-        this.children.add(child)
-    }
+  parents(): IndexedSeq<TreeView> {
+    return toIndexedSeq<TreeView>(this, view => view.context);
+  }
 
-    unmountChild(child: TreeView) {
-        this.children.delete(child)
-    }
+  allChildren() {
+    return IndexedSeq.of(this).flatMap(function flat(child) {
+      return IndexedSeq.of(child).concat(
+        IndexedSeq(child.children).flatMap(flat)
+      );
+    });
+  }
 
-    parents(): IndexedSeq<TreeView> {
-        return toIndexedSeq<TreeView>(this, view => view.context)
-    }
-
-    allChildren() {
-        return IndexedSeq.of(this).flatMap(function flat(child) {
-            return IndexedSeq
-                .of(child)
-                .concat(IndexedSeq(child.children)
-                    .flatMap(flat))
-        })
-    }
-
-    render() {
-        return createElement(TreeViewContext.Provider, {
-            value: this,
-            children: super.render()
-        })
-    }
+  render() {
+    return createElement(TreeViewContext.Provider, {
+      value: this,
+      children: super.render(),
+    });
+  }
 }

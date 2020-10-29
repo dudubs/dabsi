@@ -1,13 +1,16 @@
 import {
+  If,
+  Is,
+  IsNever,
   OmitKeys,
   Override,
   PartialUndefinedKeys,
 } from "../../../common/typings";
-import { DataRow } from "../../../data/DataRow";
-import { DataSource } from "../../../data/DataSource";
+import { DataRow } from "../../../typedata/DataRow";
+import { DataSource } from "../../../typedata/DataSource";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
-import { DataTable, DataTableTypes } from "../../widget/data-table/DataTable";
+import { DataTable } from "../../widget/data-table/DataTable";
 import { AnyRowType, Row, string } from "../../widget/Row";
 import { WidgetType } from "../../widget/Widget";
 import { Input } from "../Input";
@@ -15,17 +18,18 @@ import { NullableInput } from "../nullable-input/NullableInput";
 
 import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { DataInputHandler } from "./DataInputHandler";
+import { DataInputTester } from "./DataInputTester";
 
-export type DataInputRow = {
-  $key: string;
+export type WithDataKey = {
+  $id: string;
 };
 
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
 
 type _Types<T extends TDataInput> = T & {
   Table: DataTable<{
-    Row: T["Row"];
-    Data: T["Data"];
+    Row: T["TableRow"];
+    Data: T["TableData"];
     RowController: NoRpc;
   }>;
 
@@ -36,7 +40,7 @@ type _Types<T extends TDataInput> = T & {
   };
 
   RequiredConfig: {
-    default?: ValueOrAwaitableFn<string | DataRow<T["Data"]> | undefined>;
+    default?: ValueOrAwaitableFn<string | DataRow<T["TableData"]> | undefined>;
 
     tableConfig?: OmitKeys<
       _Types<T>["TableTypes"]["RequiredConfig"] &
@@ -44,31 +48,44 @@ type _Types<T extends TDataInput> = T & {
       "columns" | "source"
     >;
 
-    source: DataSource<T["Data"]>;
+    source: DataSource<T["TableData"]>;
   };
 };
 
 export type DataInputConfig<T extends TDataInput> = PartialUndefinedKeys<
-  _Types<T>["OptionalConfig"],
+  _Types<T>["OptionalConfig"] & {
+    loadSource:
+      | DataSource<T["LoadData"]>
+      | If<
+          Is<T["Value"], string> | Is<T["TableData"], T["LoadRow"]>,
+          undefined
+        >;
+  },
   _Types<T>["RequiredConfig"]
 >;
 
 export type AnyDataInput = DataInput<any, TDataInput>;
 
-export type TDataInput = { Row: any; Data: any };
+export type TDataInput = {
+  TableRow: any;
+  TableData: any;
+
+  LoadData: any;
+  LoadRow: any;
+
+  Value: any;
+};
 
 export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
   N,
   {
-    TDataInput: T;
-
     Types: _Types<T>;
 
     Commands: {};
 
     ValueData: string;
 
-    Value: string;
+    Value: T["Value"];
 
     ValueElement: _Types<T>["TableTypes"]["RowWithKey"];
 
@@ -77,8 +94,16 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
     };
 
     Config: GenericConfig<
-      <D>(
-        config: DataInputConfig<Override<T, { Data: D }>>
+      <TableData, LoadData = TableData>(
+        config: DataInputConfig<
+          Override<
+            T,
+            {
+              TableData: TableData;
+              LoadData: LoadData;
+            }
+          >
+        >
       ) => DataInputConfig<T>
     >;
 
@@ -91,23 +116,31 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
 >;
 
 export function DataInput<
-  RowType extends AnyRowType = {
+  TableRowType extends AnyRowType = {
     label: typeof string;
   },
-  N extends boolean = false
+  N extends boolean = false,
+  LoadType = never,
+  S extends PropertyKey = any
 >(
   options: {
     nullable?: N;
-    rowType?: RowType;
+    tableRowType?: TableRowType;
+    loadType?: LoadType;
   } = {}
 ): DataInput<
   N,
   {
-    Row: Row<RowType>;
+    TableRow: Row<TableRowType>;
     Data: any;
+    LoadRow: LoadType;
+    TableData: any;
+    LoadData: any;
+    Value: IsNever<LoadType> extends true ? string : DataRow<LoadType>;
+    Row: any;
   }
 > {
-  const table = DataTable(options.rowType || { label: string });
+  const table = DataTable(options.tableRowType || { label: string });
   return <any>Input<AnyDataInput>({
     props: {
       nullable: options.nullable ?? false,
@@ -117,7 +150,12 @@ export function DataInput<
     controller: table,
     handler: DataInputHandler,
     getValueDataFromElement(value) {
-      return value?.$key;
+      return value?.$id;
     },
   });
 }
+
+// DataInput({
+//    tableRow: {}
+//    row: Typing<User>()
+// })

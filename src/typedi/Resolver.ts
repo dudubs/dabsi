@@ -1,6 +1,9 @@
+import { readFileSync, realpathSync } from "fs";
+import path from "path";
 import { WeakMapFactory } from "../common/map/mapFactory";
-import { Constructor, Expect, Type } from "../common/typings";
-import { inspect } from "../logging";
+import { Constructor, Type } from "../common/typings";
+import { WeakId } from "../common/WeakId";
+import { StackLinePoint } from "./StackLinePoint";
 
 export const check = Symbol();
 export const resolve = Symbol();
@@ -15,24 +18,26 @@ declare global {
     ): CustomResolver<T>;
 
     provide<T>(this: Type<T>, resolver: Resolver<T>): Context<T>;
+
+    asResolver<T>(this: Type<T>): ConstructorResolver<T>;
   }
 }
 
 export type FnResolver<T> = (context: Context<any>) => T;
+export type ConstructorResolver<T> = Constructor<T>;
 
 export type Resolver<T = any> =
   | CustomResolver<T>
   | FnResolver<T>
-  | TypeResolver<T>
+  | ConstructorResolver<T>
   | string
   | number
   | boolean
   | Date;
 
-export type TypeResolver<T> = [Type<T>];
-
 export type TokenResolver<T> = CustomResolver<T> & {
   token: string;
+  stack?: StackLinePoint;
   provide(value: Resolver<T>): Context<T>;
 };
 
@@ -45,42 +50,35 @@ export type ResolverType<T extends Resolver> = T extends Resolver<infer U>
   ? U
   : never;
 
-function createTypeResolver(type: Type<any>, context: Context<any>) {
-  const resolver = context[getTypeToken(type)];
-  return resolver[resolve](context);
-}
+export const getTypeToken = WeakMapFactory((type: Type<any>) => {
+  return `typed:${type.name}:${WeakId(type)}`;
+});
+
+Function.prototype.asResolver = function () {
+  return this as Constructor<any>;
+};
+
 Function.prototype[resolve] = function (context) {
   if (this.prototype) {
-    throw new Error(`Cant' resolve class ${getTypeToken(this)}, use [class]`);
+    return Resolver.resolveType(this, context);
   } else {
     return this(context);
   }
 };
 
-function checkTypeResolver(type, context) {
-  for (
-    let baseType = type;
-    typeof baseType === "function";
-    baseType = Object.getPrototypeOf(baseType)
-  ) {
-    const token = getTypeToken(type);
-    if (token in context) {
-      return;
-    }
-  }
-  throw new ResolverError(`Can't resolve ${getTypeToken(type)}`);
-}
 Function.prototype[check] = function (context) {
   if (this.prototype) {
-    throw new ResolverError(`Can't resolve class`);
+    Resolver.checkType(this, context);
   }
 };
+
 Function.prototype.toCheck = function (checkFn) {
   return {
     [resolve]: this,
     [check]: checkFn,
   };
 };
+
 Function.prototype.provide = function (value) {
   const context = {};
   for (
@@ -92,21 +90,11 @@ Function.prototype.provide = function (value) {
   }
   return context;
 };
-Array.prototype[resolve] = function (context) {
-  if (this.length !== 1 || typeof this[0] !== "function")
-    throw new ResolverError(`Can't resolve ${inspect(this)}`);
-  return createTypeResolver(this[0], context);
-};
-
-Array.prototype[check] = function (context) {
-  if (this.length !== 1 || typeof this[0] !== "function")
-    throw new ResolverError(`Can't resolve ${inspect(this)}`);
-  checkTypeResolver(this[0], context);
-};
 
 export function Resolver<T>(name?: string): TokenResolver<T> {
+  const { stack } = new Error();
   return Object.setPrototypeOf(
-    { token: `token:${count++}_${name || "unknown"}` },
+    { token: `token:${count++}_${name || "unknown"}`, stack },
     AnyTokenResolver
   );
 }
@@ -123,37 +111,65 @@ Resolver.check = function <T>(
 ): void {
   resolver[check]?.(context);
 };
+
 Resolver.checkAndResolve = function <T>(
   resolver: Resolver<T>,
   context: Context<any> = {}
-) {
+): T {
   this.check(resolver, context);
   return this.resolve(resolver, context);
+};
+
+Resolver.checkType = function (type: Type<any>, context: Context<any>) {
+  for (
+    let baseType = type;
+    typeof baseType === "function";
+    baseType = Object.getPrototypeOf(baseType)
+  ) {
+    const token = getTypeToken(type);
+    if (token in context) {
+      return;
+    }
+  }
+  throw new ResolverError(`Can't resolve ${getTypeToken(type)}`);
+};
+Resolver.resolveType = function (type: Type<any>, context: Context<any>) {
+  const resolver = context[getTypeToken(type)];
+  return Resolver.resolve(resolver, context);
 };
 
 export class ResolverError extends Error {}
 let count = 0;
 
 const AnyTokenResolver: TokenResolver<any> = {
-  provide(value) {
-    return { [this.token]: value };
+  provide(resolver) {
+    return { [this.token]: resolver };
   },
   get token(): string {
-    throw new Error();
+    throw new Error("No token");
+  },
+  get stack(): any {
+    throw new Error("No stack");
   },
   [resolve](context) {
-    return context[this.token];
+    return context[this.token][resolve]();
   },
   [check](context) {
     if (!(this.token in context)) {
-      throw new ResolverError(`Can't resolve ${this.token}`);
+      const { sourceFileName, lineNumber, column, line } = this.stack!();
+
+      throw new ResolverError(
+        `Can't resolve ${this.token}${
+          line &&
+          `: at ${path.relative(
+            realpathSync("."),
+            sourceFileName
+          )}:${lineNumber}:\n\t ${line.trim()}`
+        }`
+      );
     }
   },
 };
-
-const getTypeToken = WeakMapFactory((type: Type<any>) => {
-  return `typed:${type.name}:${count++}`;
-});
 
 [String, Number, Boolean, Date].forEach(type => {
   type.prototype[resolve] = function () {

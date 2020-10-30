@@ -14,3 +14,8 @@ export type MetaTypeHook<
   AnyT extends WithMetaType<any>,
   U
 > = WithMetaType<Omit<MetaType<T>, keyof MetaType<AnyT> | keyof U> & U>;
+
+export declare function testMetaType<T>(
+  obj: WithMetaType<T>,
+  callback: (type: T) => void
+);

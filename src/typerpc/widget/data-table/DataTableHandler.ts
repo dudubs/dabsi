@@ -3,7 +3,7 @@ import { entries } from "../../../common/object/entries";
 import { mapObject } from "../../../common/object/mapObject";
 import { Lazy } from "../../../common/patterns/lazy";
 import { RequireOptionalKeys } from "../../../common/typings";
-import { DataExp } from "../../../typedata/DataExp";
+import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataOrder } from "../../../typedata/DataOrder";
 import { DataRow } from "../../../typedata/DataRow";
 import { inspect } from "../../../logging";
@@ -51,7 +51,7 @@ export class DataTableHandler
   async loadRow(dataRow, noKey?: boolean) {
     const row: any = {};
     if (!noKey) {
-      row.$id = dataRow.$id;
+      row.$key = dataRow.$key;
     }
     for (const [key, column] of entries(this.columns)) {
       row[key] = await column.load(dataRow);

@@ -1,6 +1,9 @@
 import { Constructor, Type } from "../common/typings";
-import { AnyDataSelection, DataSelection } from "./DataSelection";
-import { DataSelectionRow } from "./DataSelectionRow";
+import {
+  AnyDataSelection,
+  DataSelection,
+} from "./data-selection/DataSelection";
+import { DataSelectionRow } from "./data-selection/DataSelectionRow";
 import { DataSource } from "./DataSource";
 import { DataTypeInfo } from "./DataTypeInfo";
 

@@ -6,7 +6,7 @@ import {
   UndefinedIfEmptyObject,
   UndefinedIfIsUndefined,
 } from "../../../common/typings";
-import { DataExp } from "../../../typedata/DataExp";
+import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataRow } from "../../../typedata/DataRow";
 import { DataSource } from "../../../typedata/DataSource";
 import { NonRelationKeys } from "../../../typedata/Relation";
@@ -52,7 +52,7 @@ type _ColumnTypes<
     | UndefinedIfColumnKeyIsDataKey;
 };
 export type _Types<T extends TDataTable, D = T["Data"], Row = T["Row"]> = T & {
-  RowWithKey: Row & { $id: string };
+  RowWithKey: Row & { $key: string };
 
   Query: {
     getCount?: boolean;
@@ -65,7 +65,7 @@ export type _Types<T extends TDataTable, D = T["Data"], Row = T["Row"]> = T & {
     take?: number;
   };
 
-  QueryResult: { totalRows: number; rows: ({ $id: string } & Row)[] };
+  QueryResult: { totalRows: number; rows: ({ $key: string } & Row)[] };
 
   ColumnConfigMap: UndefinedIfEmptyObject<
     PartialUndefinedKeys<
@@ -152,7 +152,7 @@ export type DataTable<
   Handler: {
     getRows: GetRowsFn;
 
-    loadRow(dataRow: any): Promise<{ $id: string } & Row>;
+    loadRow(dataRow: any): Promise<{ $key: string } & Row>;
     loadRow(dataRow: any, noKey: true): Promise<Row>;
 
     columns: Record<

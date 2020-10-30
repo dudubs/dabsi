@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DataExp } from "../../../typedata/DataExp";
+import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { Relation } from "../../../typedata/Relation";
 import { Group } from "./Group";
 

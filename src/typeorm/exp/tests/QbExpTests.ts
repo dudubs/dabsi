@@ -1,5 +1,5 @@
-import { buildTestEntities } from "../../../typedata/eds/tests/buildTestEntities";
-import { buildTestRelations } from "../../../typedata/eds/tests/buildTestRelations";
+import { buildTestEntities } from "../../../typedata/entity-data/tests/buildTestEntities";
+import { buildTestRelations } from "../../../typedata/entity-data/tests/buildTestRelations";
 import {
   DBase,
   DChild1,
@@ -12,7 +12,7 @@ import {
   EChild2,
 } from "../../../typedata/tests/BaseEntities";
 import { TestConnection } from "../../../typedata/tests/TestConnection";
-import { DataExp } from "../../../typedata/DataExp";
+import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { AEntity, BEntity, CEntity } from "../../relations/tests/Entities";
 import { useQueryBuilderExp } from "../useQueryBuilderExp";
 import { QbExpTester } from "./QbExpTester";

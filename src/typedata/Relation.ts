@@ -1,7 +1,7 @@
 import { PluckRequired, Union } from "../common/typings";
 
 export const Relation = Symbol();
-export type RelationToOneOrMany<T> = Relation<T> | Relation<T>[];
+
 export type Relation<T = {}> = T & { [Relation]?: true };
 
 type RelationType<T> =
@@ -15,11 +15,6 @@ export type RelationTypeAt<T, K extends RelationKeys<T>> = RelationType<
 export type MapRelation<T, U> =
   | IfRelationToOne<T, Relation<U>>
   | IfRelationToMany<T, Relation<U>[]>;
-
-export type MapRelations<T, U> = Omit<T, RelationKeys<T>> &
-  {
-    [K in RelationKeys<T>]: MapRelation<T[K], K extends keyof U ? U[K] : T[K]>;
-  };
 
 export type IfRelationToOne<T, U> = Required<NonNullable<T>> extends Required<
   Relation
@@ -52,7 +47,3 @@ export type RelationToOneKeys<T> = Union<
 
 export type NonRelationKeys<T> = string &
   Exclude<keyof Required<T>, RelationKeys<T>>;
-
-export type OmitRelations<T> = Omit<T, RelationKeys<T>>;
-
-export type PickRelations<T> = Pick<T, RelationKeys<T>>;

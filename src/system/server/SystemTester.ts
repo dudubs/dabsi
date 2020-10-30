@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { createConnection } from "typeorm";
 import { DataRow } from "../../typedata/DataRow";
-import { EntityDataSource } from "../../typedata/eds/EntityDataSource";
+import { EntityDataSource } from "../../typedata/entity-data/EntityDataSource";
 import { Provider } from "../../typedi/Provider";
 import { Resolver } from "../../typedi/Resolver";
 import { configureRpcService } from "../../typerpc/Rpc";
@@ -48,18 +48,18 @@ export namespace SystemTester {
     });
 
     // await perms.as("USER").insert({
-    //   user: testAdmin.$id,
+    //   user: testAdmin.$key,
     //   token: ":ADMIN:",
     // });
 
     testSessionAsUser = await sessions.insert({
-      user: testUser.$id,
+      user: testUser.$key,
       timeout: new Date().getTime(),
       token: generateRandomToken(),
     });
 
     testSessionAsAdmin = await sessions.insert({
-      user: testAdmin.$id,
+      user: testAdmin.$key,
       timeout: new Date().getTime(),
       token: generateRandomToken(),
     });

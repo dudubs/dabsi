@@ -19,13 +19,13 @@ export const AdminAppConfig = Consumer(
         //       {
         //         $or: [
         //           {
-        //             $as: { USER: { $at: { user: { $is: user.$id } } } },
+        //             $as: { USER: { $at: { user: { $is: user.$key } } } },
         //           },
         //           {
         //             $as: {
         //               GROUP: {
         //                 $at: {
-        //                   group: { $has: { users: { $is: user.$id } } },
+        //                   group: { $has: { users: { $is: user.$key } } },
         //                 },
         //               },
         //             },

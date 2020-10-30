@@ -145,8 +145,8 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
   return (
     <DataTableView {...nextProps} ref={tableRef}>
       {table => (
-        <TableLayout<{ $id: string }, { sortable: boolean }, any>
-          getRowKey={row => row.$id}
+        <TableLayout<{ $key: string }, { sortable: boolean }, any>
+          getRowKey={row => row.$key}
           getRowData={row => row}
           rows={table.rows}
           columns={table.element?.columns || {}}

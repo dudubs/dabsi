@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { EntityDataSource } from "../../../typedata/eds/EntityDataSource";
+import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
 import { TestConnection } from "../../../typedata/tests/TestConnection";
 
 export namespace DataInputTester {

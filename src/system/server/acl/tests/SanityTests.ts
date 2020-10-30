@@ -1,4 +1,4 @@
-import { EntityDataSource } from "../../../../typedata/eds/EntityDataSource";
+import { EntityDataSource } from "../../../../typedata/entity-data/EntityDataSource";
 import { TestConnection } from "../../../../typedata/tests/TestConnection";
 import { Group } from "../Group";
 import { User } from "../User";
@@ -53,14 +53,14 @@ testm(__filename, () => {
     const result = await Users.filter({ $is: [u1, u2] }).getRows();
     expect(result).toEqual(
       jasmine.arrayContaining([
-        jasmine.objectContaining({ $id: u1 }),
-        jasmine.objectContaining({ $id: u2 }),
+        jasmine.objectContaining({ $key: u1 }),
+        jasmine.objectContaining({ $key: u2 }),
       ])
     );
 
     expect(result).not.toEqual(
       jasmine.objectContaining(
-        jasmine.arrayContaining([jasmine.objectContaining({ $id: u3 })])
+        jasmine.arrayContaining([jasmine.objectContaining({ $key: u3 })])
       )
     );
   });
@@ -69,7 +69,7 @@ testm(__filename, () => {
     expect(items).toEqual(
       jasmine.arrayContaining([
         jasmine.objectContaining({
-          $id: g,
+          $key: g,
           ...{
             [u + "InGroup"]: exists,
           },

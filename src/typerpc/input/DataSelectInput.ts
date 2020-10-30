@@ -1,7 +1,7 @@
 // import {DataRow} from "../../data/DataRow";
 // import {DataSelection} from "../../data/DataSelection";
 // import {DataSelectionRow} from "../../data/DataSelectionRow";
-// import {DataSource} from "../../data/DataSource";
+// import {DataSource} from "../../data/DataSource/DataSource";
 // import {RpcGenericConfigurator} from "../RpcConfigurator";
 // import {NullableInputOptions} from "./NullableInput";
 // import {SelectInput} from "./SelectInput";
@@ -38,18 +38,18 @@
 //                 default: () => ValueOrAwaitableFn(config.default)
 //                     .then(value => {
 //                         if (typeof value === "object")
-//                             return value?.$id;
+//                             return value?.$key;
 //                         return value
 //                     }),
 //                 load: key => config.source.get(key),
-//                 getKey: row=>row.$id,
+//                 getKey: row=>row.$key,
 //                 options: () => config.source
 //                     .createAsMutable()
 //                     .select(config.selection)
 //                     .getRows()
 //                     .then(rows => {
 //                         return rows.map(row => ({
-//                             key: row.$id,
+//                             key: row.$key,
 //                             label: config.getLabel(row)
 //                         }))
 //                     })

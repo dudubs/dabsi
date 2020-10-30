@@ -3,11 +3,11 @@ import express from "express";
 import { watch } from "fs";
 import reload from "reload";
 import { createConnection, getConnection } from "typeorm";
-import { EntityDataSource } from "../../typedata/eds/EntityDataSource";
+import { EntityDataSource } from "../../typedata/entity-data/EntityDataSource";
 import { Resolver } from "../../typedi/Resolver";
 import { RpcRequest } from "../../typerpc/RpcRequest";
 import { SystemApp } from "../common/SystemApp";
-import { AclRequest } from "./acl/AclRequest";
+// import { AclRequest } from "./acl/AclRequest";
 import { getSession } from "./acl/getSession";
 import { SystemAppConfig } from "./SystemAppConfig";
 import {
@@ -35,7 +35,7 @@ app.post("/service", async (req, res) => {
   });
 
   const rpcReq = new RpcRequest();
-  const aclReq = new AclRequest(getConnection);
+  // const aclReq = new AclRequest(getConnection);
 
   rpcReq.push(async next => {
     // await aclReq.assert();
@@ -48,7 +48,7 @@ app.post("/service", async (req, res) => {
       EntityDataSource.create(type)
     ),
     ...RpcRequest.provide(() => rpcReq),
-    ...AclRequest.provide(() => aclReq),
+    // ...AclRequest.provide(() => aclReq),
   });
   const command = SystemApp.createRpcCommand(config);
   const result = await rpcReq.handle(() => command(req.body));

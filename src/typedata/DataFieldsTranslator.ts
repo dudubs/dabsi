@@ -1,7 +1,7 @@
 import { mapObject } from "../common/object/mapObject";
-import { DataExp, StringDataExp } from "./DataExp";
+import { DataExp, StringDataExp } from "./data-exp/DataExp";
 import { DataFields } from "./DataFields";
-import { DataExpMapper } from "./DataSource/DataExpMapper";
+import { DataExpMapper } from "./data-exp/DataExpMapper";
 
 export class DataFieldsTranslator extends DataExpMapper<any> {
   constructor(public fields: DataFields<any>, public isBase = false) {
@@ -31,6 +31,6 @@ export class DataFieldsTranslator extends DataExpMapper<any> {
   ) {
     if (!(baseFields && fields)) return fields;
     const translator = new DataFieldsTranslator(baseFields);
-    return mapObject(fields, (exp) => translator.translate(exp));
+    return mapObject(fields, exp => translator.translate(exp));
   }
 }

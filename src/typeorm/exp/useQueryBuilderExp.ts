@@ -2,10 +2,10 @@ import { SelectQueryBuilder } from "typeorm";
 import { Lazy } from "../../common/patterns/lazy";
 import { DataSort } from "../../typedata/DataOrder";
 import { DataTypeInfo } from "../../typedata/DataTypeInfo";
-import { DataExp } from "../../typedata/DataExp";
-import { DataQueryBuilderOld } from "../DataQueryBuilder";
-import { QueryExpTranslatorToSqb } from "../QueryExpTranslatorToSqb";
-import { DataExpTranslatorToQeb } from "./DataExpTranslatorToQeb";
+import { DataExp } from "../../typedata/data-exp/DataExp";
+import { DataQueryBuilder } from "../../typedata/data-query/DataQueryBuilder";
+import { DataQueryExpToSqbTranslator } from "../../typedata/data-query/DataQueryExpToSqbTranslator";
+import { EntityDataExpToQebTranslator } from "../../typedata/entity-data/EntityDataExpToQebTranslator";
 
 declare module "typeorm" {
   interface SelectQueryBuilder<Entity> {
@@ -46,21 +46,22 @@ export const useQueryBuilderExp = Lazy(() => {
     const metadata = this.expressionMap.mainAlias!.metadata;
     const query = {
       from: metadata.tableName,
-      as: this.alias,
+      alias: this.alias,
     };
-    const qebTranslator = new DataExpTranslatorToQeb(
+    const qebTranslator = new EntityDataExpToQebTranslator(
+      metadata.connection,
       DataTypeInfo.get(<Function>metadata.target),
-      new DataQueryBuilderOld(this.connection, query, this.alias),
+      new DataQueryBuilder(query),
       this.alias
     );
 
-    const sqbTranslator = new QueryExpTranslatorToSqb(this, this.alias);
+    const sqbTranslator = new DataQueryExpToSqbTranslator(this, this.alias);
 
     const queryExp = qebTranslator.translate(exp);
 
     const sqlExp = sqbTranslator.translate(queryExp);
 
-    QueryExpTranslatorToSqb.build(this, query);
+    DataQueryExpToSqbTranslator.build(this, query);
 
     return sqlExp;
   };

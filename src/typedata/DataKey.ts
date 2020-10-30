@@ -1,10 +1,12 @@
-export type DataKey = "$id";
-DataKey.symbol = "$id" as const;
+export type DataKey = "$key";
+export type WithDataKey = Record<DataKey, string>;
 
-export type DataKeyInput<T = {}> = { $id: string } | string | number;
+DataKey.symbol = "$key" as const;
+
+export type DataKeyInput<T = {}> = { $key: string } | string | number;
 
 export function DataKey<T = {}>(value: DataKeyInput<T>): string;
 export function DataKey(value) {
   if (value !== undefined)
-    return typeof value == "object" ? value.$id : String(value);
+    return typeof value == "object" ? value.$key : String(value);
 }

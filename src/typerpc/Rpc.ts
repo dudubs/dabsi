@@ -1,5 +1,5 @@
 import { touchMap } from "../common/map/touchMap";
-import { MetaType, WithMetaType } from "../common/MetaType";
+import { MetaType, TMetaType, WithMetaType } from "../common/MetaType";
 import { mergeDescriptors } from "../common/object/mergeDescriptors";
 import {
   Awaitable,
@@ -25,6 +25,7 @@ export type TRpc = {
   Config: object | undefined;
   Props: object;
 };
+
 export type AnyRpc = Rpc<TRpc>;
 
 export type Rpc<T extends TRpc> = WithMetaType<{

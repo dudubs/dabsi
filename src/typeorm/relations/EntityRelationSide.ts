@@ -1,7 +1,7 @@
 import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { definedAt } from "../../common/object/definedAt";
-import { DataQueryBuilder, DataQueryBuilderOld } from "../DataQueryBuilder";
+import { DataQueryBuilder } from "../../typedata/data-query/DataQueryBuilder";
 import { EntityRelation } from "./EntityRelation";
 import { isSubClass } from "./isSubClass";
 

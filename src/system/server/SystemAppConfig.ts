@@ -42,7 +42,7 @@ export const SystemAppConfig = Consumer(
               columns: { label: "fullName" },
             }),
           async submit(user) {
-            await session.update({ user: user.$id });
+            await session.update({ user: user.$key });
             return { value: { helloTo: user.fullName } };
           },
         });

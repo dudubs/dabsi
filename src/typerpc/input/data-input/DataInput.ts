@@ -21,7 +21,7 @@ import { DataInputHandler } from "./DataInputHandler";
 import { DataInputTester } from "./DataInputTester";
 
 export type WithDataKey = {
-  $id: string;
+  $key: string;
 };
 
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
@@ -150,7 +150,7 @@ export function DataInput<
     controller: table,
     handler: DataInputHandler,
     getValueDataFromElement(value) {
-      return value?.$id;
+      return value?.$key;
     },
   });
 }

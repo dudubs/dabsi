@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { DataUnion } from "../../../typedata/DataUnion";
-import { EntityDataSource } from "../../../typedata/eds/EntityDataSource";
+import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
 import { Relation } from "../../../typedata/Relation";
 import { Owner, OwnerColumn, OwnerData } from "../acl/Owner";
 import { User } from "../acl/User";

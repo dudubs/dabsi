@@ -1,6 +1,6 @@
 export type Union<T> = T[keyof T];
 
-export type Expression<T> = Union<
+export type ExpMap<T> = Union<
   {
     [K in keyof T]: Record<K, T[K]>;
   }

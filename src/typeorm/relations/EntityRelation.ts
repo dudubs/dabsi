@@ -5,8 +5,8 @@ import { defined } from "../../common/object/defined";
 import { definedAt } from "../../common/object/definedAt";
 import { Lazy } from "../../common/patterns/lazy";
 import { ArrayTypeOrObject } from "../../common/typings";
-import { DataExp } from "../../typedata/DataExp";
-import { DataQueryBuilder, DataQueryBuilderOld } from "../DataQueryBuilder";
+import { DataExp } from "../../typedata/data-exp/DataExp";
+import { DataQueryBuilder } from "../../typedata/data-query/DataQueryBuilder";
 import { ByTableOrColumn, EntityRelationSide } from "./EntityRelationSide";
 
 export class EntityRelation<T = any> {

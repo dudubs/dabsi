@@ -1,6 +1,6 @@
 // TODO: rename to EntityRelationTests.
 import { Connection, Repository } from "typeorm";
-import { EntityDataKey } from "../../../typedata/eds/EntityDataKey";
+import { EntityDataKey } from "../../../typedata/entity-data/EntityDataKey";
 import {
   DBase,
   DChild1,

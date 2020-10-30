@@ -3,7 +3,7 @@ import express from "express";
 import { BasedType } from "../../../typedata/BaseType";
 import { DataRow } from "../../../typedata/DataRow";
 import { DataSource } from "../../../typedata/DataSource";
-import { BasedDataSource } from "../../../typedata/DataSource/DataSource";
+import { BasedDataSource } from "../../../typedata/DataSource";
 import { Session } from "./Session";
 
 export async function getSession<T extends BasedType<Session>>({

@@ -1,7 +1,10 @@
 import { ArrayTypeOrObject, ExtractKeys } from "../common/typings";
-import { DataExp } from "./DataExp";
+import { DataExp } from "./data-exp/DataExp";
 import { DataOrder } from "./DataOrder";
-import { AnyDataSelection, DataSelection } from "./DataSelection";
+import {
+  AnyDataSelection,
+  DataSelection,
+} from "./data-selection/DataSelection";
 
 export type DataLoadMapValue<T> = boolean | RelationMap<T>;
 

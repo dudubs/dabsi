@@ -1,4 +1,7 @@
-import { AnyDataSelection, DataSelection } from "../DataSelection";
+import {
+  AnyDataSelection,
+  DataSelection,
+} from "../data-selection/DataSelection";
 
 testm(__filename, () => {
   describe("childAt sanity:", () => {

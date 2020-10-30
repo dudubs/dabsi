@@ -6,11 +6,11 @@ import {
   PluckRequired,
 } from "../../common/typings";
 
-import { DataExp } from "../DataExp";
+import { DataExp } from "../data-exp/DataExp";
 import { AEntity, BEntity } from "../../typeorm/relations/tests/Entities";
 import { DataRow } from "../DataRow";
-import { DataSelection } from "../DataSelection";
-import { DataSelectionRow } from "../DataSelectionRow";
+import { DataSelection } from "../data-selection/DataSelection";
+import { DataSelectionRow } from "../data-selection/DataSelectionRow";
 import { DataSource } from "../DataSource";
 
 import {
@@ -18,7 +18,7 @@ import {
   DataUnionChildren,
   DataUnionChildrenKey,
 } from "../DataUnion";
-import { MergeDataSelection } from "../MergeDataSelection";
+import { MergeDataSelection } from "../data-selection/DataSelectionMerger";
 import { MapRelation, RelationKeys, RelationTypeAt } from "../Relation";
 import { DBase, DChild1, DUnion, EUnion } from "./BaseEntities";
 

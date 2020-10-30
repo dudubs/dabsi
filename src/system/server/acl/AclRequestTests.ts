@@ -1,8 +1,9 @@
 import { Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { EntityDataSource } from "../../../typedata/eds/EntityDataSource";
+import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
 import { Relation } from "../../../typedata/Relation";
 import { TestConnection } from "../../../typedata/tests/TestConnection";
-import { AclRequest } from "./AclRequest";
+import { AclCriterion, AclRequest } from "./AclRequest";
+import { buildBeforeAll } from "./buildBeforeAll";
 import { Group } from "./Group";
 import { User } from "./User";
 
@@ -17,9 +18,9 @@ class Forum {
 
   @JoinTable()
   @ManyToMany(() => User)
-  blacklist: Relation<User>[];
+  blocked: Relation<User>[];
 }
-
+//
 describe(__filename, () => {
   const getConnection = TestConnection([User, Group, Forum]);
 
@@ -27,66 +28,78 @@ describe(__filename, () => {
   const groups = EntityDataSource.create(Group, getConnection);
   const forums = EntityDataSource.create(Forum, getConnection);
 
-  it("", async () => {
-    const f1 = await forums.insert({});
-    const notBlockedAndNotMember = await users.insertKey({});
-    const notBlockedAndMember = await users.insertKey({});
+  const t = buildBeforeAll(
+    buildBeforeAll(
+      buildBeforeAll(async t => ({
+        connection: getConnection(),
+        forum1: await forums.insert({}),
+        notBlockedAndNotMember: await users.insertKey({}),
+        notBlockedAndMember: await users.insertKey({}),
+        blockedAndNotMember: await users.insertKey({}),
+        blockedAndMember: await users.insertKey({}),
+      })),
+      async t => {
+        await t.forum1.at("members").add(t.notBlockedAndMember);
+        await t.forum1.at("members").add(t.blockedAndMember);
 
-    const blockedAndNotMember = await users.insertKey({});
-    const blockedAndMember = await users.insertKey({});
+        await t.forum1.at("blocked").add(t.blockedAndNotMember);
+        await t.forum1.at("blocked").add(t.blockedAndMember);
 
-    await f1.at("members").add(notBlockedAndMember);
-    await f1.at("members").add(blockedAndMember);
-
-    await f1.at("blacklist").add(blockedAndNotMember);
-    await f1.at("blacklist").add(blockedAndMember);
-
-    /*
-
-    AclRequestTokens({
-
-      MAKE_POST: req => req
-        .allow()
-        .deny()
-        .aaa
-
-
-
+        return {
+          memberCriterion: AclCriterion.create(t.connection, {
+            for: [Forum, t.forum1.$key],
+            hasUser: "members",
+          }),
+          blockedCriterion: AclCriterion.create(t.connection, {
+            for: [Forum, t.forum1.$key],
+            hasUser: "blocked",
+          }),
+          members: [t.notBlockedAndMember, t.blockedAndMember],
+          blocked: [t.blockedAndMember, t.blockedAndNotMember],
+          notMembers: [t.notBlockedAndNotMember, t.blockedAndNotMember],
+          notBlocked: [t.notBlockedAndNotMember, t.notBlockedAndMember],
+        };
+      }
+    ),
+    t => ({
+      request: new AclRequest(t.connection)
+        // .denyAll
+        .allow(t.memberCriterion.options)
+        .deny(t.blockedCriterion.options),
     })
+  );
 
-      allow.
-     */
+  /*
 
-    const req = new AclRequest(getConnection)
-      .allow(({ user }, ds) =>
-        ds(Forum)
-          .filter({ $is: f1.$id })
-          .filter({
-            $and: [
-              {
-                $has: { members: user },
-              },
-            ],
-          })
-      )
+    .or()
 
-      .deny(({ user }, ds) =>
-        ds(Forum)
-          .filter({ $is: f1.$id })
-          .filter({
-            $has: { blacklist: user },
-          })
+   */
+
+  it("", async () => {
+    for (const notMemberOrBlocked of new Set([...t.notMembers, ...t.blocked])) {
+      console.log(
+        { notMemberOrBlocked },
+        await t.request.ask(notMemberOrBlocked)
       );
-    expect(await req.ask(notBlockedAndMember)).toBeTrue();
-    expect(await req.ask(notBlockedAndNotMember)).toBeFalse();
-    expect(await req.ask(blockedAndNotMember)).toBeFalse();
-    expect(await req.ask(blockedAndMember)).toBeFalse();
+    }
+    console.log(
+      { notBlockedAndMember: t.notBlockedAndMember },
+      await t.request.ask(t.notBlockedAndMember),
+      await t.memberCriterion.ask(t.notBlockedAndMember)
+    );
+  });
+  it("sanity", async () => {
+    for (let member of t.members) {
+      expect(await t.memberCriterion.ask(member)).toBeTrue();
+    }
+    for (let blocked of t.blocked) {
+      expect(await t.blockedCriterion.ask(blocked)).toBeTrue();
+    }
+    for (let notMember of t.notMembers) {
+      expect(await t.memberCriterion.ask(notMember)).toBeFalse();
+    }
+    for (let notBlocked of t.notBlocked) {
+      expect(await t.blockedCriterion.ask(notBlocked)).toBeFalse();
+    }
   });
 });
-
-/*
-
-  EntityUnionSource.create({
-      a: ds=>ds(aaa)
-  })
- */

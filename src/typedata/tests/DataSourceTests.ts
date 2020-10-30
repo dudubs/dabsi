@@ -123,11 +123,11 @@ export function DataSourceTests(
           expect(await ds.get()).toBeFalsy();
           expect(await inverseDs.get()).toBeFalsy();
 
-          await ds.addKey(key);
+          await ds.add(key);
           expect(await ds.get()).toBeTruthy();
           expect(await inverseDs.get()).toBeTruthy();
 
-          await ds.removeKey(key);
+          await ds.remove(key);
           expect(await ds.get()).toBeFalsy();
           expect(await inverseDs.get()).toBeFalsy();
         }
@@ -266,7 +266,7 @@ export function DataSourceTests(
     await aChildAtA.add(childKeys);
 
     expect(await aChildAtA.getCount()).toEqual(2);
-    expect((await aChildAtA.getRows()).map(child => child.$id)).toEqual(
+    expect((await aChildAtA.getRows()).map(child => child.$key)).toEqual(
       arrayContaining(childKeys)
     );
   });

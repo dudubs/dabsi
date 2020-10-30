@@ -1,7 +1,7 @@
 import { touchMap } from "../common/map/touchMap";
 import { mapObject } from "../common/object/mapObject";
 import { Type } from "../common/typings";
-import { AnyDataSelection } from "./DataSelection";
+import { AnyDataSelection } from "./data-selection/DataSelection";
 import { DataUnion } from "./DataUnion";
 
 export type DataTypeInfo = {

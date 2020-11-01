@@ -318,7 +318,7 @@ function DataExpSanityTests<T>(t: { run(exp: DataExp<T>): Promise<any> }) {
   test(["hello"], ["llo"], "$endsWith", "$notEndsWith");
 
   function test(x, y, truthy, falsy) {
-    describe("compare", async () => {
+    describe("compare", () => {
       it(`${x} ${truthy} ${y}`, async () => {
         expect(await t.run([x, truthy, y])).toBeTruthy();
       });

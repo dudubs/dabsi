@@ -100,7 +100,6 @@ export class DataTableHandler
       }
     }
     let source = this.config.source
-      .createAsMutable()
       .order(orders)
       .take(Math.min(query.take ?? maxRows, maxRows))
       .skip(query.skip ?? 0)

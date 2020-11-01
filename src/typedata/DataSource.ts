@@ -87,7 +87,7 @@ export abstract class AbstractDataSource<T> {
   }
 
   async *find(pageSize = 10): AsyncIterableIterator<DataRow<T>> {
-    let source: DataSource<T> = this.createAsMutable().updateCursor({
+    let source: DataSource<T> = this.updateCursor({
       skip: 0,
       take: pageSize,
     });
@@ -213,47 +213,14 @@ export abstract class AbstractDataSource<T> {
   // asMutable()
   // asImmutable()
 
-  protected isImmutable = true;
-
-  asImmutable() {
-    if (this.isImmutable) return this;
-    const source = this.clone();
-    source.isImmutable = true;
-    return source;
-  }
-
-  clone(): DataSource<T> {
-    return this.withCursor({ ...this.cursor });
-  }
-
-  createAsMutable(): DataSource<T> {
-    return this.clone().asMutable();
-  }
-
-  asMutable() {
-    if (!this.isImmutable) return this;
-    const source = this.clone();
-    source.isImmutable = false;
-    return source;
-  }
-
   updateCursor<U = T>(
     callbackOrCursor: ((cursor: DataCursor) => DataCursor) | Partial<DataCursor>
   ): DataSource<U> {
-    if (this.isImmutable) {
-      return this.withCursor<U>(
-        typeof callbackOrCursor === "function"
-          ? callbackOrCursor({ ...this.cursor })
-          : { ...this.cursor, ...callbackOrCursor }
-      );
-    } else {
-      if (typeof callbackOrCursor === "function") {
-        this.cursor = callbackOrCursor(this.cursor);
-      } else {
-        Object.assign(this.cursor, callbackOrCursor);
-      }
-      return <any>this;
-    }
+    return this.withCursor<U>(
+      typeof callbackOrCursor === "function"
+        ? callbackOrCursor({ ...this.cursor })
+        : { ...this.cursor, ...callbackOrCursor }
+    );
   }
 
   as<K extends string & keyof Children, Children>(

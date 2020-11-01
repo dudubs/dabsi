@@ -31,7 +31,7 @@ export class EntityRelation<T = any> {
     public connection: Connection,
     public entityType: ObjectType<any>, // TODO: Function|string
     public propertyName: string,
-    public invert: boolean // TODO: better name
+    public invert: boolean
   ) {}
 
   get propertyNameAtType() {

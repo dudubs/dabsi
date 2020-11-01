@@ -1,5 +1,7 @@
 // TODO: rename to EntityRelationTests.
 import { Connection, Repository } from "typeorm";
+import { getJasmineSpecReporterResult } from "../../../jasmine/getJasmineSpecReporterResult";
+import { buildBeforeAll } from "../../../system/server/acl/buildBeforeAll";
 import { EntityDataKey } from "../../../typedata/entity-data/EntityDataKey";
 import {
   DBase,
@@ -40,29 +42,104 @@ testm(__filename, () => {
     BRepo = connection.getRepository(BEntity);
   });
 
+  fdescribe("sanity", () => {
+    // To AEntity
+
+    // test3("manyAToManyA");
+    // test2({ ownerProperty: "manyAToOneA", notOwnerProperty: "oneAToManyA" });
+
+    test4("A");
+
+    test4("B");
+
+    function test4(target: "A" | "B") {
+      describe(`to:${target}`, () => {
+        test3("oneAToOne" + target);
+        test3("manyAToMany" + target);
+        test2({
+          ownerProperty: "manyAToOne" + target,
+          notOwnerProperty: "oneAToMany" + target,
+        });
+      });
+    }
+
+    beforeEach(() => {
+      console.log(`--- ${getJasmineSpecReporterResult().fullName}`);
+    });
+
+    function test3(propertyName) {
+      test2({
+        ownerProperty: propertyName + "Owner",
+        notOwnerProperty: propertyName,
+      });
+    }
+    function test2({ ownerProperty, notOwnerProperty }) {
+      test({ ownerSide: "left", propertyName: ownerProperty });
+      test({ ownerSide: "right", propertyName: notOwnerProperty });
+    }
+
+    function test({
+      ownerSide,
+      propertyName,
+    }: {
+      ownerSide: "left" | "right";
+      propertyName;
+    }) {
+      describe(`property:${propertyName}`, () => {
+        const notOwnerSide = ownerSide === "left" ? "right" : "left";
+
+        const t = buildBeforeAll(() => ({
+          ofRelation: EntityRelation.of(connection, AEntity, propertyName),
+          atRelation: EntityRelation.at(connection, AEntity, propertyName),
+        }));
+
+        test("of");
+        test("at");
+
+        function test(relationType: "of" | "at") {
+          const inverse = relationType === "at";
+          const rOwnerSide = inverse ? notOwnerSide : ownerSide;
+          const rNotOwnerSide = inverse ? ownerSide : notOwnerSide;
+
+          describe("relation:" + relationType, () => {
+            it(`expect ${ownerSide} is owning`, () => {
+              const r = new EntityRelation(
+                connection,
+                AEntity,
+                propertyName,
+                inverse
+              );
+              expect(r[rOwnerSide].isOwning).toBeTrue();
+              expect(r[rNotOwnerSide].isOwning).toBeFalse();
+            });
+          });
+        }
+      });
+    }
+  });
   it("sanity", async () => {
-    await assert(
+    await test(
       EntityRelation.of(connection, AEntity, "oneAToOneBOwner"),
       EntityRelation.of(connection, AEntity, "oneAToOneB"),
       EntityRelation.at(connection, AEntity, "oneAToOneBOwner"),
       EntityRelation.at(connection, AEntity, "oneAToOneB")
     );
 
-    await assert(
+    await test(
       EntityRelation.of(connection, AEntity, "manyAToManyBOwner"),
       EntityRelation.of(connection, AEntity, "manyAToManyB"),
       EntityRelation.at(connection, AEntity, "manyAToManyBOwner"),
       EntityRelation.at(connection, AEntity, "manyAToManyB")
     );
 
-    await assert(
+    await test(
       EntityRelation.of(connection, AEntity, "manyAToOneB"),
       EntityRelation.of(connection, AEntity, "oneAToManyB"),
       EntityRelation.at(connection, AEntity, "manyAToOneB"),
       EntityRelation.at(connection, AEntity, "oneAToManyB")
     );
 
-    async function assert(aOfBOwner, aOfB, bOwnerAtA, bAtA) {
+    async function test(aOfBOwner, aOfB, bOwnerAtA, bAtA) {
       expect(aOfBOwner).toEqual(
         jasmine.objectContaining({
           left: jasmine.objectContaining({

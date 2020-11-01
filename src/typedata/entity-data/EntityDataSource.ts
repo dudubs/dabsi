@@ -1,4 +1,5 @@
 import { Connection, getConnection } from "typeorm";
+import { Timeout } from "../../common/async/Timeout";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { Lazy } from "../../common/patterns/lazy";
@@ -108,8 +109,8 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
 
     // build relation to parent on on insert.
     if (isInsert) {
-      const childParent = this.entityCursor.parent?.child;
-      childParent && buildRelation(childParent.relation, childParent.key);
+      const { parent } = this.entityCursor;
+      parent && buildRelation(parent.relation, parent.relationKey);
     }
 
     // check relations in value, throw error if had relation value that
@@ -156,11 +157,21 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
       if (isInsert && key == null)
         // dont build relation on insert when the key is null.
         return;
-      if (relation.isJoinColumn() && relation.left.isOwning) {
+
+      console.log({
+        relationIsJoinColumn: relation.isJoinColumn(),
+        leftIsOwning: relation.left.isOwning,
+        isToOne: relation.isToOne,
+      });
+
+      if (
+        relation.left.isOwning &&
+        (relation.relationMetadata.isManyToOne ||
+          relation.relationMetadata.isOneToOneOwner)
+      ) {
         row[relation.propertyName] = key;
         return;
       }
-      if (!relation.isToOne) throw new Error(`Not support.`);
       relationKeys.push({ relation, key });
     }
   }
@@ -216,10 +227,10 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
     );
 
     if (this.entityCursor.parent) {
-      await this.entityCursor.parent.child.relation.update(
+      await this.entityCursor.parent.relation.update(
         method,
         entityKey,
-        this.entityCursor.parent.child.key!
+        this.entityCursor.parent.relationKey!
       );
     }
 

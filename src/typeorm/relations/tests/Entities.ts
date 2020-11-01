@@ -3,8 +3,11 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
 } from "typeorm";
@@ -60,22 +63,23 @@ export class AEntity {
   @TestRelation(() => CEntity)
   manyAToManyCOwner: Relation<CEntity>[];
 
-  @TestRelation(() => AEntity, {
-    joinTable: {
-      joinColumn: {
-        name: "aOwnerId",
-        // referencedColumnName: "xxx"
-      },
-      inverseJoinColumn: {
-        name: "aChildId",
-        // referencedColumnName:"xxx4"
-      },
-    },
-  })
+  @TestRelation(() => AEntity)
   manyAToManyAOwner: Relation<AEntity>[];
 
   @TestRelation(() => AEntity)
   manyAToManyA: Relation<AEntity>[];
+
+  @TestRelation(() => AEntity)
+  oneAToOneA: Relation<AEntity>;
+
+  @TestRelation(() => AEntity)
+  oneAToOneAOwner: Relation<AEntity>;
+
+  @TestRelation(() => AEntity)
+  oneAToManyA: Relation<AEntity>[];
+
+  @TestRelation(() => AEntity)
+  manyAToOneA: Relation<AEntity>[];
 }
 
 @Entity("B")

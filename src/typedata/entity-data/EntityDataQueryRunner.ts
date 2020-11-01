@@ -17,7 +17,11 @@ export class EntityDataQueryRunner extends AbstractDataQueryRunner {
 
   getRows(): Promise<any> {
     const [query, parameters] = this.getQueryAndParameters();
-    return this.connection.query(query, parameters);
+    // console.log({ query, parameters });
+    return this.connection.query(query, parameters).then(x => {
+      // console.log({ x });
+      return x;
+    });
   }
 
   hasRows(): Promise<boolean> {

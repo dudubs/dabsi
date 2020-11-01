@@ -44,7 +44,6 @@
 //                 load: key => config.source.get(key),
 //                 getKey: row=>row.$key,
 //                 options: () => config.source
-//                     .createAsMutable()
 //                     .select(config.selection)
 //                     .getRows()
 //                     .then(rows => {

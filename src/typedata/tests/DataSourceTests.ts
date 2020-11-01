@@ -1,3 +1,4 @@
+import { getJasmineSpecReporterResult } from "../../jasmine/getJasmineSpecReporterResult";
 import { subTest } from "../../jasmine/subTest";
 import { inspect } from "../../logging";
 import {
@@ -5,7 +6,9 @@ import {
   BEntity,
   CEntity,
 } from "../../typeorm/relations/tests/Entities";
+import { DataRow } from "../DataRow";
 import { DataSource } from "../DataSource";
+import { EntityDataSource } from "../entity-data/EntityDataSource";
 import { RelationKeys } from "../Relation";
 import { DUnion, EUnion } from "./BaseEntities";
 import arrayContaining = jasmine.arrayContaining;
@@ -278,6 +281,21 @@ export function DataSourceTests(
     expect(await a.at("oneAToOneBOwner").getCount()).toEqual(0);
     await a.at("oneAToOneBOwner").add(b);
     expect(await a.at("oneAToOneBOwner").getCount()).toEqual(1);
+  });
+
+  describe("expect to get row after insert", () => {
+    let a: DataRow<AEntity>;
+    beforeAll(async () => {
+      a = await ADS.insert({});
+    });
+    beforeEach(() => {
+      console.log("-----", getJasmineSpecReporterResult().description);
+    });
+    xit("many-to-many", () => a.at("manyAToManyB").insert({}));
+    xit("many-to-many-owner", () => a.at("manyAToManyBOwner").insert({}));
+    it("many-to-one", () => a.at("manyAToOneB").insert({}));
+    it("one-to-one-owner", () => a.at("oneAToOneBOwner").insert({}));
+    it("one-to-many", () => a.at("oneAToManyB").insert({}));
   });
   it("expect to select field in relation", async () => {
     const aKey = await ADS.insertKey({

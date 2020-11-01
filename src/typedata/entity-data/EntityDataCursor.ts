@@ -12,12 +12,12 @@ import { DataTypeInfo } from "../DataTypeInfo";
 import { EntityDataKey } from "./EntityDataKey";
 import { EntityDataInfo, getEntityDataInfo } from "./EntityDataInfo";
 
-export type BaseEntityDataCursorPath = {
+export type EntityDataCursorBase = {
   typeInfo: DataTypeInfo;
 
   filter: DataExp<any>;
 
-  parent: EntityDataCursorPath | undefined;
+  parent: EntityDataCursorParent | undefined;
 
   relationKeys: {
     relation: EntityRelation;
@@ -27,11 +27,12 @@ export type BaseEntityDataCursorPath = {
   columnKeys: { metadata: ColumnMetadata; key: any }[];
 };
 
-export type EntityDataCursorPath = BaseEntityDataCursorPath & {
-  child: { relation: EntityRelation; key: object };
+export type EntityDataCursorParent = EntityDataCursorBase & {
+  relation: EntityRelation;
+  relationKey: object;
 };
 
-export type EntityDataCursor = BaseEntityDataCursorPath & {
+export type EntityDataCursor = EntityDataCursorBase & {
   connection: Connection;
 
   cursor: DataCursor;
@@ -55,9 +56,9 @@ export namespace EntityDataCursor {
     let parent: EntityDataCursor["parent"] = undefined;
 
     for (const path of cursor.location) {
-      setChildTypeInfo(path.type);
+      updateTypeInfo(path.type);
 
-      const ownerRelation = new EntityRelation(
+      const relation = new EntityRelation(
         connection,
         typeInfo.type,
         path.propertyName,
@@ -66,23 +67,21 @@ export namespace EntityDataCursor {
 
       parent = {
         filter: __doNotTranslateFilter
-          ? cursor.filter
+          ? path.filter
           : new DataFieldsTranslator(cursor.selection.fields || {}).translate(
-              cursor.filter
+              path.filter
             ),
         typeInfo,
-        child: {
-          relation: ownerRelation,
-          key: EntityDataKey.parse(
-            ownerRelation.right.entityMetadata,
-            path.key
-          ),
-        },
         parent,
+        relation,
+        relationKey: EntityDataKey.parse(
+          relation.right.entityMetadata,
+          path.key
+        ),
         ...getChildKeys(typeInfo.type, path.keys),
       };
 
-      const entityType = ownerRelation.left.entityType;
+      const entityType = relation.left.entityType;
       const relationTypeInfo = typeInfo.relations?.[path.propertyName];
 
       if (relationTypeInfo) {
@@ -95,9 +94,10 @@ export namespace EntityDataCursor {
       }
     }
 
-    setChildTypeInfo(cursor.type);
+    updateTypeInfo(cursor.type);
 
     const entityMetadata = connection.getMetadata(typeInfo.type);
+
     return {
       connection,
       cursor,
@@ -115,13 +115,14 @@ export namespace EntityDataCursor {
       ...getChildKeys(typeInfo.type, cursor.keys),
     };
 
-    function setChildTypeInfo(type: string) {
-      if (!type) return typeInfo;
-
-      const childType = typeInfo.children?.[type];
-      if (!childType)
-        throw new Error(`No have childType "${type}" for "${typeInfo.name}".`);
-      typeInfo = childType;
+    function updateTypeInfo(childTypeName: string) {
+      if (!childTypeName) return typeInfo;
+      const childTypeInfo = typeInfo.children?.[childTypeName];
+      if (!childTypeInfo)
+        throw new Error(
+          `No have childType "${childTypeName}" for "${typeInfo.name}".`
+        );
+      typeInfo = childTypeInfo;
     }
 
     function getChildKeys(
@@ -167,12 +168,7 @@ export namespace EntityDataCursor {
 
     let schema = qb.query.alias;
     for (let path = cursor.parent; path; path = path.parent) {
-      schema = path.child.relation.joinQeb(
-        "INNER",
-        qb,
-        schema,
-        path.child.key!
-      );
+      schema = path.relation.joinQeb("INNER", qb, schema, path.relationKey!);
       join(schema, path);
     }
 
@@ -180,7 +176,7 @@ export namespace EntityDataCursor {
 
     function join(
       schema: string,
-      path: EntityDataCursorPath | EntityDataCursor
+      path: EntityDataCursorParent | EntityDataCursor
     ) {
       if (path.filter !== undefined) {
         qb.filter({

@@ -80,7 +80,6 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
       c.getTargetHandler("target")
     );
     for (const row of await this.config.source
-      .createAsMutable()
       .filter({ $is: keys })
       .getRows()) {
       invalidKeys.delete(row.$key);

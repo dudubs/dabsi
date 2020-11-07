@@ -1,7 +1,7 @@
 import { SelectQueryBuilder } from "typeorm";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
-import { DataExp, Parameter } from "../data-exp/DataExp";
+import { DataExp, DataParameterExp } from "../data-exp/DataExp";
 import { EntityDataExpTranslator } from "../entity-data/EntityDataExpTranslator";
 import { DataQuery } from "./DataQueryExp";
 import { DataQueryExpTranslator } from "./DataQueryExpTranslator";
@@ -26,7 +26,7 @@ export class DataQueryExpToSqbTranslator
     return new DataQueryExpToSqbTranslator(this.qb, propertyKey).translate(exp);
   }
 
-  translateParameter(value: Parameter): string {
+  translateParameter(value: DataParameterExp): string {
     const id = "p_" + ++counter;
     this.qb.setParameter(id, value);
     return ":" + id;

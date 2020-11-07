@@ -1,5 +1,5 @@
 import { mapObject } from "../common/object/mapObject";
-import { DataExp, StringDataExp } from "./data-exp/DataExp";
+import { DataExp, DataStringExp } from "./data-exp/DataExp";
 import { DataFields } from "./DataFields";
 import { DataExpMapper } from "./data-exp/DataExpMapper";
 

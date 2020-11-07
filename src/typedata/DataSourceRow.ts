@@ -1,41 +1,48 @@
+import { GetBaseType, WithBaseType } from "./BaseType";
 import { WithDataKey } from "./DataKey";
-import { BaseDataRow, BaseDataRowType } from "./DataRow";
+import { DataRow } from "./DataRow";
 import { DataSource, DataSourceAt } from "./DataSource";
 import { DataValues } from "./DataValues";
 import { RelationKeys } from "./Relation";
 
-export type AnyDataSourceRow = WithDataKey & BaseDataRow<any> & DataSourceRow;
+export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
+
+export type AnyBasedDataRow = BasedDataRow<any>;
+
+const source = Symbol("dataSource");
 
 export class DataSourceRow {
-  constructor(
-    public getSource: <T extends AnyDataSourceRow>(
-      this: T
-    ) => DataSource<BaseDataRowType<T>>
-  ) {}
+  constructor(protected _source: DataSource<any>) {
+    this[source] = _source;
+  }
 
-  at<T extends AnyDataSourceRow, K extends RelationKeys<BaseDataRowType<T>>>(
+  getSource<T extends AnyBasedDataRow>(this: T): DataSource<GetBaseType<T>> {
+    return this[source];
+  }
+
+  at<T extends AnyBasedDataRow, K extends RelationKeys<GetBaseType<T>>>(
     this: T,
     propertyName: K
-  ): DataSourceAt<BaseDataRowType<T>, K> {
+  ): DataSourceAt<GetBaseType<T>, K> {
     return this.getSource().at(propertyName, this.$key);
   }
 
-  delete<T extends AnyDataSourceRow>(this: T) {
+  delete<T extends AnyBasedDataRow>(this: T) {
     return this.getSource().delete(this.$key);
   }
 
-  remove<T extends AnyDataSourceRow>(this: T) {
+  remove<T extends AnyBasedDataRow>(this: T) {
     return this.getSource().remove(this.$key);
   }
 
-  update<T extends AnyDataSourceRow>(
+  update<T extends AnyBasedDataRow>(
     this: T,
-    values: DataValues<BaseDataRowType<T>>
+    values: DataValues<GetBaseType<T>>
   ) {
     return this.getSource().remove(this.$key);
   }
 
-  reload<T extends AnyDataSourceRow>(this: T): Promise<T> {
+  reload<T extends AnyBasedDataRow>(this: T): Promise<DataRow<GetBaseType<T>>> {
     return this.getSource().getOrFail(this.$key);
   }
 }

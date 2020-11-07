@@ -4,7 +4,7 @@ export const Relation = Symbol();
 
 export type Relation<T = {}> = T & { [Relation]?: true };
 
-type RelationType<T> =
+export type RelationType<T> =
   | IfRelationToOne<T, T extends Relation<infer U> ? U : never>
   | IfRelationToMany<T, T extends Relation<infer U>[] ? U : never>;
 

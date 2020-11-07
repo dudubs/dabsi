@@ -1,8 +1,9 @@
-import { readFileSync } from "fs";
+import { readFileSync, realpathSync } from "fs";
+import path from "path";
 
-export type StackLinePoint = ReturnType<typeof StackLinePoint>;
+export type StackLastLine = ReturnType<typeof getStackLastLine>;
 
-export function StackLinePoint() {
+export function getStackLastLine() {
   const error = new Error();
 
   return () => {
@@ -24,6 +25,12 @@ export function StackLinePoint() {
       sourceFileName,
       lineNumber,
       column,
+      get relativeSourceFileName() {
+        return path.relative(realpathSync("."), sourceFileName);
+      },
+      get description() {
+        return `At ${this.relativeSourceFileName}, line: ${lineNumber}`;
+      },
       get line() {
         return (
           sourceFileName &&

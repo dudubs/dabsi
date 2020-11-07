@@ -59,7 +59,7 @@ export class DataInputHandler extends AbstractNullableInputHandler<T> {
       }
       return { value: row };
     }
-    if (!(await this.config.source.filter({ $is: key }).hasRows())) {
+    if (!(await this.config.source.filter({ $is: key }).hasRow())) {
       return { error: "INVALID_DATA_KEY", value: undefined };
     }
     return { value: key };

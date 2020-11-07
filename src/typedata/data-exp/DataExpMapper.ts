@@ -1,8 +1,9 @@
 import {
   DataExp,
-  NamedCompareOperator,
-  Parameter,
-  StringDataExp,
+  DataExpTypes,
+  DataNamedCompareOperator,
+  DataParameterExp,
+  DataStringExp,
 } from "./DataExp";
 import { DataExpTranslator } from "./DataExpTranslator";
 
@@ -64,7 +65,7 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
   }
 
   translateCompare(
-    op: NamedCompareOperator,
+    op: DataNamedCompareOperator,
     left: DataExp<any>,
     right: DataExp<any>
   ): DataExp<any> {
@@ -101,7 +102,7 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
     return { $not: exp };
   }
 
-  translateParameter(value: Parameter): DataExp<any> {
+  translateParameter(value: DataParameterExp): DataExp<any> {
     switch (typeof value) {
       case "boolean":
       case "number":

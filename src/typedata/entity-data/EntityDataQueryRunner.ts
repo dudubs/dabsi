@@ -24,7 +24,7 @@ export class EntityDataQueryRunner extends AbstractDataQueryRunner {
     });
   }
 
-  hasRows(): Promise<boolean> {
+  hasRow(): Promise<boolean> {
     const [sql, params] = this.getQueryAndParameters();
     const query = `SELECT COUNT(*) value FROM (SELECT * FROM (${sql}) x LIMIT 1) _rec`;
     return this.connection.query(query, params).then(rows => {

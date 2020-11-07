@@ -38,8 +38,10 @@ export class EntityRelation<T = any> {
     return `${this.entityType.name}.${this.propertyName}`;
   }
 
-  isJoinColumn() {
-    return !this.ownerRelationMetadata.joinTableName;
+  get isJoinColumn() {
+    return (
+      this.relationMetadata.isOneToOneOwner || this.relationMetadata.isManyToOne
+    );
   }
 
   entityMetadata = this.connection.getMetadata(this.entityType);
@@ -267,10 +269,6 @@ export class EntityRelation<T = any> {
 
   @Lazy() get rightEntityType(): ObjectType<any> {
     return !this.invert ? this.getRelationType() : this.entityType;
-  }
-
-  get isTree() {
-    return this.leftEntityType === this.rightEntityType;
   }
 
   inspect() {

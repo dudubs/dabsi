@@ -16,36 +16,38 @@ declare global {
 export const SystemAppConfig = Consumer(
   [SystemContextResolver, UserAppConfig, AdminAppConfig],
   ({ session, getDataSource }, userConfig, adminConfig) =>
-    RpcConfig(SystemApp, {
-      async logout() {
-        await session.update({ user: null });
-      },
-      async getLoginInfo() {
-        if (!session.user) {
-          return { type: "FAILED" };
-        }
-        return {
-          type: "SUCCESS",
-          fullName: session.user.fullName,
-        };
-      },
-      user: userConfig,
-      admin: adminConfig,
-      devLogin: $ => {
-        const users = getDataSource(User).pick({
-          fullName: UserFullName,
-        });
-        return $({
-          inputConfig: $ =>
-            $({
-              source: users,
-              columns: { label: "fullName" },
-            }),
-          async submit(user) {
-            await session.update({ user: user.$key });
-            return { value: { helloTo: user.fullName } };
-          },
-        });
-      },
+    RpcConfig(SystemApp, $ => {
+      return $({
+        async logout() {
+          await session.update({ user: null });
+        },
+        async getLoginInfo() {
+          if (!session.user) {
+            return { type: "FAILED" };
+          }
+          return {
+            type: "SUCCESS",
+            fullName: session.user.fullName,
+          };
+        },
+        user: userConfig,
+        admin: adminConfig,
+        devLogin: $ => {
+          const users = getDataSource(User).pick({
+            fullName: UserFullName,
+          });
+          return $({
+            inputConfig: $ =>
+              $({
+                source: users,
+                columns: { label: "fullName" },
+              }),
+            async submit(user) {
+              await session.update({ user: user.$key });
+              return { value: { helloTo: user.fullName } };
+            },
+          });
+        },
+      });
     })
 );

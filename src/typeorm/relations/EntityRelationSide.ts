@@ -1,5 +1,7 @@
+import { is } from "immutable";
 import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { definedAt } from "../../common/object/definedAt";
 import { DataQueryBuilder } from "../../typedata/data-query/DataQueryBuilder";
 import { EntityRelation } from "./EntityRelation";
@@ -29,21 +31,14 @@ export class EntityRelationSide<T> {
   get isOwning() {
     if (!this.isLeft) return !this.relation.left.isOwning;
 
-    if (this.relation.isTree) {
-      if (this.relation.relationMetadata.isManyToMany)
-        return this.relation.relationMetadata.isOwning
-          ? !this.relation.invert
-          : this.relation.invert;
+    const {
+      relation: {
+        relationMetadata: { isOwning },
+        invert,
+      },
+    } = this;
 
-      throw new Error(
-        `Not supported relation (${this.relation.relationMetadata.relationType})`
-      );
-    }
-
-    return isSubClass(
-      this.entityType,
-      <Function>this.relation.ownerRelationMetadata.target
-    );
+    return invert ? !isOwning : isOwning;
   }
 
   joinColumns = this.isOwning

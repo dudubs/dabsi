@@ -1,10 +1,5 @@
-import {
-  ExpMap,
-  ExtractKeys,
-  IsEmptyObject,
-  Union,
-} from "../../common/typings";
-import { RebaseType } from "../BaseType";
+import { ExpMap, ExtractKeys, Union } from "../../common/typings";
+import { GetBaseType } from "../BaseType";
 import { DataUnionChildren } from "../DataUnion";
 import {
   NonRelationKeys,
@@ -13,18 +8,8 @@ import {
   RelationToOneKeys,
   RelationTypeAt,
 } from "../Relation";
-import { IndexedSeq } from "../../immutable2";
 
-/*
-TODO: type hinit for
-    $boolean:
-    $string:
-    $number:
-
-
- */
-
-export type SymbolicCompareOperator = keyof {
+export type DataSymbolicCompareOperator = keyof {
   "^=";
   "$=";
   "*=";
@@ -36,7 +21,7 @@ export type SymbolicCompareOperator = keyof {
   ">=";
 };
 
-export type NamedCompareOperator = keyof {
+export type DataNamedCompareOperator = keyof {
   $startsWith;
   $endsWith;
   $contains;
@@ -51,23 +36,29 @@ export type NamedCompareOperator = keyof {
   $greaterThanOrEqual;
 };
 
-export type CompareOperator = NamedCompareOperator | SymbolicCompareOperator;
+export type DataCompareOperator =
+  | DataNamedCompareOperator
+  | DataSymbolicCompareOperator;
 
-export type Parameter = string | number | boolean;
+export type DataParameterExp = string | number | boolean;
 
-export type CompareToParameter<P> =
-  | ExpMap<Record<CompareOperator, P>>
+export type DataCompareToParameterExp<P> =
+  | ExpMap<Record<DataCompareOperator, P>>
   // equal to many parameters
-  | Record<"$in" | "$notIn", P[]>;
+  | Record<"$in", P[]>
+  | Record<"$notIn", P[]>;
 
-export type CompareToExp<T> = [CompareOperator, DataExp<T>];
+export type DataCompareToExpExp<T> = [DataCompareOperator, DataExp<T>];
 
-export type Comparator<T, P extends Parameter> /* equal to parameter */ =
+export type DataComparatorExp<
+  T,
+  P extends DataParameterExp
+> /* equal to parameter */ =
   | P
-  | CompareToExp<T>
-  | CompareToParameter<P>;
+  | DataCompareToExpExp<T>
+  | DataCompareToParameterExp<P>;
 
-export type IfExp<Condition, Then, Else> =
+export type DataIfExp<Condition, Then, Else> =
   | [Condition, Then, Else]
   | {
       condition: Condition;
@@ -75,17 +66,17 @@ export type IfExp<Condition, Then, Else> =
       else?: Else;
     };
 
-export type CaseExp<T> = (
+export type DataCaseExp<T> = (
   | { if: DataExp<T>; then: DataExp<T> }
   | [DataExp<T>, DataExp<T>]
 )[];
 
-export type DataMappedExpTypes<T> = {
-  $if: IfExp<DataExp<T>, DataExp<T>, DataExp<T>>;
+export type DataExpTypes<T> = {
+  $if: DataIfExp<DataExp<T>, DataExp<T>, DataExp<T>>;
 
-  $case: CaseExp<T>;
+  $case: DataCaseExp<T>;
 
-  $base: DataExp<RebaseType<T>>;
+  $base: DataExp<GetBaseType<T>>;
 
   // TODO: $is: string | number | { $key: str... }
   $is: string[] | string;
@@ -96,7 +87,7 @@ export type DataMappedExpTypes<T> = {
 
   $or: DataExp<T>[];
 
-  $parameter: Parameter;
+  $parameter: DataParameterExp;
 
   $length: DataExp<T>;
 
@@ -146,7 +137,6 @@ export type HasExp<T> =
 type RelationAtExp<T, K extends RelationKeys<T>> = DataExp<
   Required<RelationTypeAt<T, K>>
 >;
-// DataExp<RelationTypeAt<T, K>>;
 
 export type AtExp<T> = Union<
   {
@@ -164,55 +154,57 @@ export type AsExp<T> = T extends DataUnionChildren<infer Children> //
 
 export type DataExpType<T, E> = E extends keyof T ? T[E] : any;
 
-export type DataMappedExp<T> = Union<
+export type DataUnionExp<T> = Union<
   {
-    [K in keyof DataMappedExpTypes<T>]: Pick<DataMappedExpTypes<T>, K>;
+    [K in keyof DataExpTypes<T>]: Pick<DataExpTypes<T>, K>;
   }
 >;
 
-export type CompareMap<T> = {
-  [K in ExtractKeys<Required<T>, Parameter>]?: Comparator<
+export type DataCompareExp<T> = {
+  [K in ExtractKeys<Required<T>, DataParameterExp>]?: DataComparatorExp<
     T,
-    Extract<T[K], Parameter>
+    Extract<Required<T>[K], DataParameterExp>
   >;
 };
 
-export type ObjectDataExp<T> =
-  | DataMappedExp<T>
-  | CompareMap<T>
-  | ArrayDataExp<T>;
+export type DataObjectExp<T> =
+  | DataUnionExp<T>
+  | DataCompareExp<T>
+  | DataArrayExp<T>;
 
-export type ArrayDataExp<T> =
-  | readonly [Parameter]
+export type DataArrayExp<T> =
+  | readonly [DataParameterExp]
 
   // compare exp to parameter
-  | readonly [DataExp<T>, CompareToParameter<Parameter>]
+  | readonly [DataExp<T>, DataCompareToParameterExp<DataParameterExp>]
 
   // compare between two expressions
-  | readonly [DataExp<T>, CompareOperator, DataExp<T>]
+  | readonly [DataExp<T>, DataCompareOperator, DataExp<T>]
 
   // compare one expression to many expressions
   | readonly [DataExp<T>, "$in" | "$notIn", DataExp<T>[]];
 
-export type StringDataExp<T> = NonRelationKeys<T>;
+export type DataStringExp<T> = NonRelationKeys<T>;
 
 export type DataExp<T> =
   | undefined
   | boolean
   | number
   | null
-  | StringDataExp<T>
-  | ObjectDataExp<T>;
+  | DataStringExp<T>
+  | DataObjectExp<T>;
 
 export function DataExp<T>(...exps: Array<DataExp<T>>): DataExp<T> {
-  exps = IndexedSeq(exps)
-    .flatMap(function* mapper(exp: any): Iterable<DataExp<T>> {
-      if (exp && typeof exp == "object" && "$and" in exp) {
-        yield* IndexedSeq(<any>exp.$and).flatMap(mapper);
-      } else if (typeof exp !== "undefined") {
-        yield exp;
-      }
-    })
-    .toArray();
+  exps = [...flat({ $and: exps })];
   return exps.length > 1 ? { $and: exps } : exps[0];
+
+  function* flat(exp) {
+    if (Array.isArray(exp?.$and)) {
+      for (let subExp of exp.$and) {
+        yield* flat(subExp);
+      }
+      return;
+    }
+    if (exp !== undefined) yield exp;
+  }
 }

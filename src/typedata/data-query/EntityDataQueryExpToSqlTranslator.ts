@@ -1,6 +1,5 @@
 import { Connection } from "typeorm";
-import { DataExp, Parameter } from "../data-exp/DataExp";
-import { EntityDataCursor } from "../entity-data/EntityDataCursor";
+import { DataExp, DataParameterExp } from "../data-exp/DataExp";
 import { EntityDataExpTranslator } from "../entity-data/EntityDataExpTranslator";
 import { EntityDataLoader } from "../entity-data/EntityDataLoader";
 import { DataQuery } from "./DataQueryExp";
@@ -11,11 +10,19 @@ export class EntityDataQueryExpToSqlTranslator
   extends EntityDataExpTranslator<any>
   implements DataQueryExpTranslator<string> {
   constructor(
-    public parameters: any[],
     public connection: Connection,
-    public schema: string
+    public schema: string,
+    public parameters: any[]
   ) {
     super();
+  }
+
+  static createFromEntityLoader(loader: EntityDataLoader, parameters: any[]) {
+    return new EntityDataQueryExpToSqlTranslator(
+      loader.connection,
+      loader.qb.query.alias,
+      parameters
+    );
   }
 
   static getQueryAndParameters(
@@ -24,23 +31,23 @@ export class EntityDataQueryExpToSqlTranslator
     parameters: any[] = []
   ): [sql: string, parameters: any[]] {
     const sql = new EntityDataQueryExpToSqlTranslator(
-      parameters,
       connection,
-      query.alias
+      query.alias,
+      parameters
     ).translateQuery(query);
     return [sql, parameters];
   }
 
-  translateParameter(value: Parameter): string {
+  translateParameter(value: DataParameterExp): string {
     this.parameters.push(value);
     return "?";
   }
 
   translateAt(propertyKey: string, exp: DataExp<any>): string {
     return new EntityDataQueryExpToSqlTranslator(
-      this.parameters,
       this.connection,
-      propertyKey
+      propertyKey,
+      this.parameters
     ).translate(exp);
   }
 }

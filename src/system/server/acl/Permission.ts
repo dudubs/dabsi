@@ -1,46 +1,32 @@
 import {
-  ChildEntity,
   Column,
   Entity,
+  Index,
   ManyToOne,
   PrimaryGeneratedColumn,
-  TableInheritance,
 } from "typeorm";
-import { DataUnion } from "../../../typedata/DataUnion";
 import { Relation } from "../../../typedata/Relation";
 import { Group } from "./Group";
 import { User } from "./User";
 
 @Entity()
-@TableInheritance({
-  column: "type",
-})
+@Index(["token", "ownerToken", "user"], { unique: true })
+@Index(["token", "ownerToken", "group"], { unique: true })
 export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column()
   token: string;
 
+  @Index()
   @Column()
-  type: string;
-}
+  ownerToken: string;
 
-@ChildEntity()
-export class UserPermission extends Permission {
-  // @ManyToOne(() => User, user => user.permissions)
-  // user: Relation<User>;
-}
+  @ManyToOne(() => User, user => user.permissions)
+  user: Relation<User>;
 
-@ChildEntity()
-export class GroupPermission extends Permission {
-  // @ManyToOne(() => Group, group => group.permissions)
-  // group: Relation<Group>;
+  @ManyToOne(() => Group, group => group.permissions)
+  group: Relation<Group>;
 }
-
-export class PermissionData extends DataUnion(Permission, {
-  children: {
-    USER: UserPermission,
-    GROUP: GroupPermission,
-  },
-} as const) {}

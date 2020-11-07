@@ -5,9 +5,9 @@ import { isDeepEqual } from "../../typeorm/utils/QueryExpBuilder";
 export type ColumnLoader = (raw: object) => any;
 
 export class DataQueryBuilder {
-  static createRoot(tableName: string): DataQueryBuilder {
+  static createRoot(tableName: string, aliasName?: string): DataQueryBuilder {
     return new DataQueryBuilder({
-      alias: "r_" + tableName,
+      alias: aliasName ?? "r_" + tableName,
       from: tableName,
     });
   }

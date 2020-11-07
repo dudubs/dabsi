@@ -1,53 +1,15 @@
 import { Consumer } from "../../typedi/Consumer";
-import { RpcConfig, RpcError } from "../../typerpc/Rpc";
+import { RpcConfig } from "../../typerpc/Rpc";
 import { AdminApp } from "../common/AdminApp";
-import { PermissionData } from "./acl/Permission";
-import { SystemContextResolver } from "./SystemContextResolver";
+// import { AclRequestResolver } from "./acl/old/AclRequestResolver";
+import { GetDataSourceResolver } from "./SystemContextResolver";
 
-export const AdminAppConfig = Consumer(
-  [SystemContextResolver],
+export const ADMIN_PERMISSION = "ADMIN";
 
-  //
-  ({ session: { user }, getDataSource }) =>
-    RpcConfig(AdminApp, [
-      async $ => {
-        if (!user) throw new RpcError(`ACCESS_DENIED`);
+export const AdminAppConfig = Consumer([GetDataSourceResolver], getDataSource =>
+  RpcConfig(AdminApp, async $ => {
+    // aclReq.permission(ADMIN_PERMISSION);
 
-        // await getDataSource(PermissionData)
-        //   .filter({
-        //     $and: [
-        //       {
-        //         $or: [
-        //           {
-        //             $as: { USER: { $at: { user: { $is: user.$key } } } },
-        //           },
-        //           {
-        //             $as: {
-        //               GROUP: {
-        //                 $at: {
-        //                   group: { $has: { users: { $is: user.$key } } },
-        //                 },
-        //               },
-        //             },
-        //           },
-        //         ],
-        //       },
-        //       { token: { $startsWith: ":ADMIN:" } },
-        //     ],
-        //   })
-        //   .get();
-        // expectToAccess("ADMIN")
-        //
-
-        /*
-
-        add UserPermission to user ":ADMIN:"
-        // SystemPermission
-        ACL.userHasAccessTo("ADMIN"
-
-       */
-
-        return $({});
-      },
-    ])
+    return $({});
+  })
 );

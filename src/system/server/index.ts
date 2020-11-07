@@ -11,7 +11,7 @@ import { SystemApp } from "../common/SystemApp";
 import { getSession } from "./acl/getSession";
 import { SystemAppConfig } from "./SystemAppConfig";
 import {
-  GetDataSourceResolver,
+  ConnectionResolver,
   SystemSession,
   SystemSessionResolver,
 } from "./SystemContextResolver";
@@ -35,20 +35,11 @@ app.post("/service", async (req, res) => {
   });
 
   const rpcReq = new RpcRequest();
-  // const aclReq = new AclRequest(getConnection);
-
-  rpcReq.push(async next => {
-    // await aclReq.assert();
-    await next();
-  });
 
   const config = Resolver.resolve(SystemAppConfig, {
     ...SystemSessionResolver.provide(() => session),
-    ...GetDataSourceResolver.provide(() => type =>
-      EntityDataSource.create(type)
-    ),
+    ...ConnectionResolver.provide(() => getConnection()),
     ...RpcRequest.provide(() => rpcReq),
-    // ...AclRequest.provide(() => aclReq),
   });
   const command = SystemApp.createRpcCommand(config);
   const result = await rpcReq.handle(() => command(req.body));

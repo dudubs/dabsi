@@ -1,7 +1,14 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { Relation } from "../../../typedata/Relation";
 import { Group } from "./Group";
+import { Permission } from "./Permission";
 
 @Entity({ name: "user" })
 export class User {
@@ -29,8 +36,8 @@ export class User {
   @ManyToMany(() => Group, group => group.users)
   groups: Relation<Group>[];
 
-  // @ManyToOne(() => UserPermission, p => p.user)
-  // permissions: Relation<UserPermission>[];
+  @ManyToOne(() => Permission, p => p.user)
+  permissions: Relation<Permission>[];
 }
 
 export const UserFullName: DataExp<User> = {

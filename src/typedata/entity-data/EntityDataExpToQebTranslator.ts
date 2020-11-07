@@ -6,9 +6,10 @@ import { DataTypeInfo } from "../DataTypeInfo";
 import { EntityDataKey } from "./EntityDataKey";
 import {
   DataExp,
-  NamedCompareOperator,
-  Parameter,
-  StringDataExp,
+  DataExpTypes,
+  DataNamedCompareOperator,
+  DataParameterExp,
+  DataStringExp,
 } from "../data-exp/DataExp";
 import { DataExpTranslator } from "../data-exp/DataExpTranslator";
 import { DataQuery, DataQueryExp } from "../data-query/DataQueryExp";
@@ -213,12 +214,12 @@ export class EntityDataExpToQebTranslator<T> extends DataExpTranslator<
     return inverse ? { $not: exp } : exp;
   }
 
-  translateField(propertyName: StringDataExp<T>): DataQueryExp {
+  translateField(propertyName: DataStringExp<T>): DataQueryExp {
     return { $at: { [this.schema]: propertyName } };
   }
 
   @Mapper
-  translateParameter(value: Parameter): DataQueryExp {
+  translateParameter(value: DataParameterExp): DataQueryExp {
     throw new Error();
   }
 
@@ -234,7 +235,7 @@ export class EntityDataExpToQebTranslator<T> extends DataExpTranslator<
 
   @Mapper
   translateCompare(
-    op: NamedCompareOperator,
+    op: DataNamedCompareOperator,
     left: DataExp<any>,
     right: DataExp<any>
   ): DataQueryExp {

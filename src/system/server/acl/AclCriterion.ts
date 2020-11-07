@@ -1,158 +1,140 @@
-import { Connection } from "typeorm";
-import { ExtractKeys, Type } from "../../../common/typings";
-import { BasedType } from "../../../typedata/BaseType";
+import { ExtractKeys } from "../../../common/typings";
+import { BasedType, GetBaseType } from "../../../typedata/BaseType";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { EntityDataQueryExpToSqlTranslator } from "../../../typedata/data-query/EntityDataQueryExpToSqlTranslator";
-import { DataSource } from "../../../typedata/DataSource";
-import { EntityDataCursor } from "../../../typedata/entity-data/EntityDataCursor";
-import { EntityDataLoader } from "../../../typedata/entity-data/EntityDataLoader";
+import { DataCursor } from "../../../typedata/DataCursor";
+import { BasedDataRow } from "../../../typedata/DataSourceRow";
 import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
-import { Relation } from "../../../typedata/Relation";
+import {
+  Relation,
+  RelationToManyKeys,
+  RelationToOneKeys,
+  RelationType,
+} from "../../../typedata/Relation";
 import { Group } from "./Group";
 import { User } from "./User";
 
-type _WithFor<T> = {
-  for: [Type<T>, string];
-};
-type _ForOptions<T> = {
-  byFilter?(exps: {
-    user: DataExp<BasedType<User>>;
-    group: DataExp<BasedType<Group>>;
-  }): DataExp<T>;
+export class AclCriterionExps {
+  protected _isUsed = false;
 
-  isUser?: ExtractKeys<T, Relation<BasedType<User>>>;
-  hasUser?: ExtractKeys<T, Relation<BasedType<User>>[]>;
-
-  isGroup?: ExtractKeys<T, Relation<BasedType<Group>>>;
-  hasGroup?: ExtractKeys<T, Relation<BasedType<Group>>[]>;
-};
-type _WithBySource<T, U> = _WithFor<T> & {
-  bySource(source: DataSource<T>): DataSource<U>;
-} & _ForOptions<U>;
-type _WithoutBySource<T> = _WithFor<T> & {
-  bySource?: never;
-} & _ForOptions<T>;
-export type AclCriterionOptionsTypes<T, U> = {
-  WithFor: {
-    for: [Type<T>, string];
-  };
-
-  ForOptions: {
-    byFilter?(exps: {
-      user: DataExp<BasedType<User>>;
-      group: DataExp<BasedType<Group>>;
-    }): DataExp<T>;
-
-    byUser?: ExtractKeys<
-      T,
-      Relation<BasedType<User>> | Relation<BasedType<User>>[]
-    >;
-
-    byGroup?: ExtractKeys<
-      T,
-      Relation<BasedType<Group>> | Relation<BasedType<Group>>[]
-    >;
-  };
-
-  WithBySource: AclCriterionOptionsTypes<T, U>["WithFor"] & {
-    bySource(source: DataSource<T>): DataSource<U>;
-  } & AclCriterionOptionsTypes<T, U>["ForOptions"];
-
-  WithoutBySource: AclCriterionOptionsTypes<T, U>["WithFor"] & {
-    bySource?: never;
-  } & AclCriterionOptionsTypes<T, U>["ForOptions"];
-};
-export type AnyAclCriterion = AclCriterion<any, any>;
-export type AclCriterion<T, U, B = {}> =
-  | (B & _WithBySource<T, U>)
-  | (B & _WithoutBySource<T>);
-
-export function AclCriterion<T, U = T>(
-  options: AclCriterion<T, U>
-): AnyAclCriterion {
-  return options as AnyAclCriterion;
-}
-
-export namespace AclCriterion {
-  export function ask(
-    connection: Connection,
-    options: AnyAclCriterion,
-    userKey: string
-  ): Promise<boolean> {
-    const [sql, params] = getQueryAndParameters(connection, options, userKey);
-    return connection
-      .query(`SELECT (${sql}) cx`, params)
-      .then(rows => !!rows[0]?.cx);
+  get isUsed(): boolean {
+    return this._isUsed;
   }
 
-  export function getQueryAndParameters(
-    connection: Connection,
-    criterion: AnyAclCriterion,
-    userKey: string,
-    parameters: any[] = []
-  ): [string, any[]] {
-    const allSql: string[] = [];
-    if (criterion.for) {
-      const [entityType, entityKey] = criterion.for;
+  constructor(protected userKey: string) {}
 
-      let source: DataSource<any> = EntityDataSource.create(
-        entityType,
-        () => connection
-      ).filter({ $is: entityKey });
+  get user(): DataExp<BasedType<User>> {
+    this._isUsed = true;
+    return { $is: this.userKey };
+  }
 
-      if (criterion.bySource)
-        source = criterion.bySource(source as DataSource<any>);
+  get group(): DataExp<BasedType<Group>> {
+    return { $has: { users: this.user } };
+  }
+}
 
-      const user = { $is: userKey };
-      const group: DataExp<Group> = { $has: { users: user } };
+export class AclCriterion<T> {
+  static create<T extends BasedDataRow<any>>(
+    dataRow: T
+  ): AclCriterion<GetBaseType<T>> {
+    const source = dataRow.getSource();
+    if (!(source instanceof EntityDataSource))
+      throw new Error(`Expect to ${EntityDataSource.name}.`);
+    return new AclCriterion(source.mainEntityType, source.cursor);
+  }
 
-      if (criterion.byFilter)
-        source = source.filter(
-          criterion.byFilter({
-            user,
-            group,
-          })
-        );
+  constructor(
+    public entityType: Function,
+    public cursor: DataCursor,
+    public root?: AclCriterion<any>
+  ) {}
 
-      if (criterion.hasUser) {
-        source = source.filter({ $has: { [criterion.hasUser]: user } });
-      }
+  getFilterRef?: (exp: AclCriterionExps) => DataExp<any>;
 
-      if (criterion.isUser) {
-        source = source.filter({ $at: { [criterion.isUser]: user } });
-      }
+  getFilter(exps: AclCriterionExps): DataExp<any> {
+    if (this.root) return this.root.getFilter(exps);
+    return this.getFilterRef?.(exps);
+  }
 
-      if (criterion.hasGroup) {
-        source = source.filter({ $has: { [criterion.hasGroup]: group } });
-      }
+  createChild() {
+    return new AclCriterion(this.entityType, this.cursor, this.root);
+  }
 
-      if (criterion.isGroup) {
-        source = source.filter({ $at: { [criterion.isGroup]: group } });
-      }
+  at<K extends RelationToOneKeys<T>>(
+    propertyName: K
+  ): AclCriterion<RelationType<T[K]>> {
+    const child = this.createChild();
 
-      source = source.pick([], { x: 1 });
+    this._filter(
+      exps =>
+        child.getFilterRef && {
+          $at: { [propertyName]: child.getFilterRef(exps) },
+        }
+    );
 
-      const cursor = EntityDataCursor.create(
-        connection,
-        source.cursor,
-        entityType
-      );
+    return child as any;
+  }
 
-      const loader = EntityDataLoader.createFromCursor(cursor);
+  hasAt<K extends RelationToManyKeys<T>>(
+    propertyName: K
+  ): AclCriterion<RelationType<T[K]>> {
+    const child = new AclCriterion(this.entityType, this.cursor);
 
-      loader.qb.query.take = 1;
+    this._filter(
+      exps =>
+        child.getFilterRef && {
+          $hasAt: { [propertyName]: child.getFilterRef(exps) },
+        }
+    );
 
-      let [query] = EntityDataQueryExpToSqlTranslator.getQueryAndParameters(
-        connection,
-        loader.qb.query,
-        parameters
-      );
+    return child as any;
+  }
 
-      allSql.push(`IFNULL((SELECT (${query}) cx), 0)`);
-    }
+  protected _filter(callback: (exps: AclCriterionExps) => DataExp<any>): this {
+    const { getFilter } = this;
+    this.getFilterRef = exps => {
+      return DataExp(getFilter(exps), callback(exps));
+    };
+    return this;
+  }
 
-    if (!allSql.length) return ["1", parameters];
-    if (allSql.length === 1) return [allSql[0], parameters];
-    return [allSql.join(" AND "), parameters];
+  filter(
+    callback: (
+      $: (exp: DataExp<T>) => DataExp<T>,
+      exps: AclCriterionExps
+    ) => DataExp<T>
+  ): this;
+
+  filter(exp: DataExp<T>): this;
+
+  filter(expOrCallback) {
+    return this._filter(exps => {
+      if (typeof expOrCallback === "function")
+        return expOrCallback($ => $, exps);
+      return expOrCallback;
+    });
+  }
+
+  userIs<K extends ExtractKeys<T, Relation<User>>>(propertyName: K): this {
+    return this._filter(({ user }) => ({
+      $at: { [propertyName]: user },
+    }));
+  }
+
+  hasUser<K extends ExtractKeys<T, Relation<User>[]>>(propertyName: K) {
+    return this._filter(({ user }) => ({
+      $has: { [propertyName]: user },
+    }));
+  }
+
+  userGroupIs<K extends ExtractKeys<T, Relation<Group>>>(propertyName: K) {
+    return this._filter(({ group }) => ({
+      $at: { [propertyName]: group },
+    }));
+  }
+
+  hasUserGroup<K extends ExtractKeys<T, Relation<Group>[]>>(propertyName: K) {
+    return this._filter(({ group }) => ({
+      $has: { [propertyName]: group },
+    }));
   }
 }

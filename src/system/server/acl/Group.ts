@@ -7,8 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Relation } from "../../../typedata/Relation";
-import { decorateDesignType } from "../../../reflect/decorateDesignType";
-import { GroupPermission, UserPermission } from "./Permission";
+import { Permission } from "./Permission";
 import { User } from "./User";
 
 @Entity({ name: "group" })
@@ -23,6 +22,6 @@ export class Group {
   @ManyToMany(() => User, user => user.groups)
   users: Relation<User>[];
 
-  // @ManyToOne(() => GroupPermission, p => p.group)
-  // permissions: Relation<GroupPermission>[];
+  @ManyToOne(() => Permission, p => p.group)
+  permissions: Relation<Permission>[];
 }

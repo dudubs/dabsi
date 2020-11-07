@@ -28,7 +28,7 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
         $({
           load: async key => {
             if (
-              !(await this.config.source.filter({ $is: String(key) }).hasRows())
+              !(await this.config.source.filter({ $is: String(key) }).hasRow())
             ) {
               throw new RpcError(`No have a key "${key}".`);
             }

@@ -1,9 +1,9 @@
-import { readFileSync, realpathSync } from "fs";
+import { realpathSync } from "fs";
 import path from "path";
 import { WeakMapFactory } from "../common/map/mapFactory";
 import { Constructor, Type } from "../common/typings";
 import { WeakId } from "../common/WeakId";
-import { StackLinePoint } from "./StackLinePoint";
+import { StackLastLine } from "./GetStackLastLine";
 
 export const check = Symbol();
 export const resolve = Symbol();
@@ -37,7 +37,7 @@ export type Resolver<T = any> =
 
 export type TokenResolver<T> = CustomResolver<T> & {
   token: string;
-  stack?: StackLinePoint;
+  stack?: StackLastLine;
   provide(value: Resolver<T>): Context<T>;
 };
 
@@ -139,6 +139,7 @@ Resolver.resolveType = function (type: Type<any>, context: Context<any>) {
 };
 
 export class ResolverError extends Error {}
+
 let count = 0;
 
 const AnyTokenResolver: TokenResolver<any> = {

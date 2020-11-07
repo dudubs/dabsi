@@ -154,6 +154,7 @@ export namespace EntityDataLoader {
     }
 
     return {
+      connection,
       loadOneRaw,
       loadRows,
       qb,

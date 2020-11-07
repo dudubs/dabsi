@@ -1,7 +1,5 @@
 // TODO: rename to EntityRelationTests.
 import { Connection, Repository } from "typeorm";
-import { getJasmineSpecReporterResult } from "../../../jasmine/getJasmineSpecReporterResult";
-import { buildBeforeAll } from "../../../system/server/acl/buildBeforeAll";
 import { EntityDataKey } from "../../../typedata/entity-data/EntityDataKey";
 import {
   DBase,
@@ -42,7 +40,7 @@ testm(__filename, () => {
     BRepo = connection.getRepository(BEntity);
   });
 
-  fdescribe("sanity", () => {
+  describe("sanity", () => {
     // To AEntity
 
     // test3("manyAToManyA");
@@ -63,9 +61,9 @@ testm(__filename, () => {
       });
     }
 
-    beforeEach(() => {
-      console.log(`--- ${getJasmineSpecReporterResult().fullName}`);
-    });
+    // beforeEach(() => {
+    //   console.log(`--- ${getJasmineSpecReporterResult().fullName}`);
+    // });
 
     function test3(propertyName) {
       test2({
@@ -73,6 +71,7 @@ testm(__filename, () => {
         notOwnerProperty: propertyName,
       });
     }
+
     function test2({ ownerProperty, notOwnerProperty }) {
       test({ ownerSide: "left", propertyName: ownerProperty });
       test({ ownerSide: "right", propertyName: notOwnerProperty });
@@ -87,11 +86,6 @@ testm(__filename, () => {
     }) {
       describe(`property:${propertyName}`, () => {
         const notOwnerSide = ownerSide === "left" ? "right" : "left";
-
-        const t = buildBeforeAll(() => ({
-          ofRelation: EntityRelation.of(connection, AEntity, propertyName),
-          atRelation: EntityRelation.at(connection, AEntity, propertyName),
-        }));
 
         test("of");
         test("at");
@@ -239,9 +233,6 @@ testm(__filename, () => {
       "manyAToManyAOwner"
     );
 
-    expect(aOfA.isTree).toBeTruthy();
-    expect(aAtA.isTree).toBeTruthy();
-
     expect(aOfA.left.isOwning).toBeFalsy();
     expect(aOfA.right.isOwning).toBeTruthy();
     expect(aOfAOwner.left.isOwning).toBeTruthy();
@@ -270,23 +261,3 @@ testm(__filename, () => {
     expect(eOwnerOfD.left.isOwning).toEqual(eOwnerOfDChild1.left.isOwning);
   });
 });
-
-/*
-
-    class MyDB extends DataBase({
-        users: User
-    }) {
-
-
-
-
-    }
-
-    MyDB.users.insertKey({
-        userName
-    })
-
-
-
-
- */

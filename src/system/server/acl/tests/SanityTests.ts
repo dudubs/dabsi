@@ -6,12 +6,8 @@ import { User } from "../User";
 testm(__filename, () => {
   const getConnection = TestConnection([User, Group]);
 
-  const Users = EntityDataSource.create(User, {
-    connection: getConnection,
-  });
-  const Groups = EntityDataSource.create(Group, {
-    connection: getConnection,
-  });
+  const Users = EntityDataSource.create(User, getConnection);
+  const Groups = EntityDataSource.create(Group, getConnection);
 
   let g1: string;
   let g2: string;

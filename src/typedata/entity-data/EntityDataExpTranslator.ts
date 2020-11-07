@@ -2,15 +2,15 @@ import { Connection, SelectQueryBuilder } from "typeorm";
 import { defined } from "../../common/object/defined";
 import { entries } from "../../common/object/entries";
 import {
-  CompareOperator,
+  DataCompareOperator,
   DataExp,
-  NamedCompareOperator,
-  StringDataExp,
+  DataNamedCompareOperator,
+  DataStringExp,
 } from "../data-exp/DataExp";
 import { DataExpTranslator } from "../data-exp/DataExpTranslator";
 import { DataQuery } from "../data-query/DataQueryExp";
 
-const SqlOperators: Record<NamedCompareOperator, string> = {
+const SqlOperators: Record<DataNamedCompareOperator, string> = {
   $equals: "=",
   $notEquals: "!=",
   $lessThan: "<",
@@ -69,7 +69,11 @@ export abstract class EntityDataExpTranslator<T> extends DataExpTranslator<
     return `(${exps.join(" OR ")})`;
   }
 
-  translateCompare(op: CompareOperator, left: string, right: string): string {
+  translateCompare(
+    op: DataCompareOperator,
+    left: string,
+    right: string
+  ): string {
     switch (op) {
       case "$startsWith":
       case "$notStartsWith":
@@ -98,7 +102,7 @@ export abstract class EntityDataExpTranslator<T> extends DataExpTranslator<
     return this.translate(exp);
   }
 
-  translateField(propertyName: StringDataExp<T>): string {
+  translateField(propertyName: DataStringExp<T>): string {
     return `${this.escape(this.schema)}.${this.escape(propertyName)}`;
   }
 
@@ -162,9 +166,9 @@ export abstract class EntityDataExpTranslator<T> extends DataExpTranslator<
   }
 
   translateQueryCount(query: DataQuery): string {
-    return `(SELECT COUNT(*) AS value FROM (${this.translateQuery(
+    return `(SELECT COUNT(*) AS value ${this.translateQueryWithoutFields(
       query
-    )}) AS _rec)`;
+    )})`;
   }
 
   translateQueryHas(inverse: boolean, query: DataQuery): string {
@@ -178,7 +182,7 @@ export abstract class EntityDataExpTranslator<T> extends DataExpTranslator<
     );
   }
 
-  translateQuerySelect(query: DataQuery) {
+  translateQueryFields(query: DataQuery) {
     let sql = "";
     for (let [aliasName, selection] of entries(query.fields)) {
       sql +=
@@ -213,7 +217,13 @@ export abstract class EntityDataExpTranslator<T> extends DataExpTranslator<
   translateQuery(query: DataQuery): string {
     return (
       "SELECT " +
-      this.translateQuerySelect(query) +
+      this.translateQueryFields(query) +
+      this.translateQueryWithoutFields(query)
+    );
+  }
+
+  translateQueryWithoutFields(query: DataQuery): string {
+    return (
       " FROM " +
       this.escape(query.from) +
       " AS " +

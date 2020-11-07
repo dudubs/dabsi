@@ -1,4 +1,5 @@
 import { getJasmineSpecReporterResult } from "../../jasmine/getJasmineSpecReporterResult";
+import { logBeforeEach } from "../../jasmine/logBeforeEach";
 import { subTest } from "../../jasmine/subTest";
 import { inspect } from "../../logging";
 import {
@@ -6,6 +7,7 @@ import {
   BEntity,
   CEntity,
 } from "../../typeorm/relations/tests/Entities";
+import { forEachTestRelation } from "../../typeorm/relations/tests/TestRelation";
 import { DataRow } from "../DataRow";
 import { DataSource } from "../DataSource";
 import { EntityDataSource } from "../entity-data/EntityDataSource";
@@ -219,9 +221,9 @@ export function DataSourceTests(
   it("of relation key", async () => {
     const aKey = await ADS.insertKey({});
     const bOfA = BDS.of("oneBToOneA", aKey);
-    expect(await bOfA.hasRows()).toBeFalsy();
+    expect(await bOfA.hasRow()).toBeFalsy();
     await bOfA.insertKey({});
-    expect(await bOfA.hasRows()).toBeTruthy();
+    expect(await bOfA.hasRow()).toBeTruthy();
   });
 
   it("of data key", async () => {
@@ -230,33 +232,33 @@ export function DataSourceTests(
     const bOfA = BDS.of("oneBToOneA", aKey);
 
     const bOfAOfHello = bOfA.of("bText", "bHello");
-    expect(await bOfAOfHello.hasRows()).toBeFalsy();
+    expect(await bOfAOfHello.hasRow()).toBeFalsy();
 
     const bOfAOfHelloKey = await bOfAOfHello.insertKey({});
-    expect(await bOfAOfHello.hasRows()).toBeTruthy();
+    expect(await bOfAOfHello.hasRow()).toBeTruthy();
 
     const bOfAOfWorld = bOfA.of("bText", "bWorld");
-    expect(await bOfAOfWorld.hasRows()).toBeFalsy();
+    expect(await bOfAOfWorld.hasRow()).toBeFalsy();
 
     const cOfbOfA = CDS.of("oneCToOneB", bOfAOfHelloKey);
 
     const cOfbOfAOfHello = cOfbOfA.of("cText", "cHello");
-    expect(await cOfbOfAOfHello.hasRows()).toBeFalsy();
+    expect(await cOfbOfAOfHello.hasRow()).toBeFalsy();
 
     const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insertKey({});
 
-    expect(await cOfbOfAOfHello.hasRows()).toBeTruthy();
+    expect(await cOfbOfAOfHello.hasRow()).toBeTruthy();
 
     expect(
       await BDS.of("bText", "bHello")
         .at("oneBToOneCOwner", bOfAOfHelloKey)
-        .hasRows()
+        .hasRow()
     ).toBeTruthy();
 
     expect(
       await BDS.of("bText", "bWorld")
         .at("oneBToOneCOwner", bOfAOfHelloKey)
-        .hasRows()
+        .hasRow()
     ).toBeFalsy();
   });
 
@@ -288,14 +290,18 @@ export function DataSourceTests(
     beforeAll(async () => {
       a = await ADS.insert({});
     });
-    beforeEach(() => {
-      console.log("-----", getJasmineSpecReporterResult().description);
-    });
-    xit("many-to-many", () => a.at("manyAToManyB").insert({}));
-    xit("many-to-many-owner", () => a.at("manyAToManyBOwner").insert({}));
-    it("many-to-one", () => a.at("manyAToOneB").insert({}));
-    it("one-to-one-owner", () => a.at("oneAToOneBOwner").insert({}));
-    it("one-to-many", () => a.at("oneAToManyB").insert({}));
+
+    forEachTestRelation(
+      [
+        ["A", "B"],
+        ["A", "A"],
+      ],
+      relationName => {
+        it(`relation:` + relationName, () =>
+          a.at(relationName as any).insert({})
+        );
+      }
+    );
   });
   it("expect to select field in relation", async () => {
     const aKey = await ADS.insertKey({

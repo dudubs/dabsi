@@ -1,3 +1,5 @@
+import { touchMap } from "../common/map/touchMap";
+
 export class RpcRequest {
   protected handler = firstHandler => firstHandler();
 
@@ -5,6 +7,12 @@ export class RpcRequest {
     let result: T;
     await this.handler(async () => (result = await callback()));
     return result!;
+  }
+
+  protected cacheMap = new Map<any, any>();
+
+  init<T>(id, callback: () => T): T {
+    return touchMap(this.cacheMap, id, () => callback());
   }
 
   push(nextHandler: (next: () => Promise<void>) => Promise<void>) {

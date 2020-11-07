@@ -11,7 +11,7 @@ import { DataKey } from "../DataKey";
 import { DataRow } from "../DataRow";
 import { DataSourceRow } from "../DataSourceRow";
 import { DataValues } from "../DataValues";
-import { AbstractDataSource, GetDataSource } from "../DataSource";
+import { DataSource, GetDataSource } from "../DataSource";
 import { EntityDataCursor } from "./EntityDataCursor";
 import { EntityDataKey } from "./EntityDataKey";
 import { EntityDataQueryRunner } from "./EntityDataQueryRunner";
@@ -21,7 +21,7 @@ export type EntityDataSourceOptions<T> = {
   connection?: (() => Connection) | string | Connection;
 };
 
-export class EntityDataSource<T> extends AbstractDataSource<T> {
+export class EntityDataSource<T> extends DataSource<T> {
   static getConnection: undefined | (() => Connection);
 
   static createFactory(getConnection): GetDataSource {
@@ -30,24 +30,11 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
 
   static create<T>(
     entityType: Type<T>,
-    getConnection: () => Connection
+    connection?: (() => Connection) | string | Connection
   ): EntityDataSource<T>;
 
-  static create<T>(
-    entityType: Type<T>,
-    options?: EntityDataSourceOptions<T>
-  ): EntityDataSource<T>;
-
-  static create(entityType, optionsOrGetConnection) {
-    return new EntityDataSource(
-      entityType,
-      typeof optionsOrGetConnection === "function"
-        ? {
-            connection: optionsOrGetConnection,
-          }
-        : optionsOrGetConnection,
-      EmptyDataCursor
-    );
+  static create(entityType, connection?) {
+    return new EntityDataSource(entityType, { connection }, EmptyDataCursor);
   }
 
   constructor(
@@ -80,7 +67,7 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
   createEntityLoader() {
     const loader = EntityDataLoader.createFromCursor(
       this.entityCursor,
-      new DataSourceRow(() => this as any)
+      new DataSourceRow(this)
     );
 
     EntityDataLoader.buildCursor(loader, this.cursor);
@@ -96,8 +83,8 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
     return this.createRunner().getCount();
   }
 
-  hasRows(): Promise<boolean> {
-    return this.createRunner().hasRows();
+  hasRow(): Promise<boolean> {
+    return this.createRunner().hasRow();
   }
 
   protected _createEntityValues(values, isInsert: boolean) {
@@ -158,17 +145,7 @@ export class EntityDataSource<T> extends AbstractDataSource<T> {
         // dont build relation on insert when the key is null.
         return;
 
-      console.log({
-        relationIsJoinColumn: relation.isJoinColumn(),
-        leftIsOwning: relation.left.isOwning,
-        isToOne: relation.isToOne,
-      });
-
-      if (
-        relation.left.isOwning &&
-        (relation.relationMetadata.isManyToOne ||
-          relation.relationMetadata.isOneToOneOwner)
-      ) {
+      if (relation.left.isOwning && relation.isJoinColumn) {
         row[relation.propertyName] = key;
         return;
       }

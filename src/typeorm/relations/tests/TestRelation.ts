@@ -1,4 +1,5 @@
 import {
+  getMetadataArgsStorage,
   JoinColumn,
   JoinTable,
   ManyToMany,
@@ -8,9 +9,11 @@ import {
 } from "typeorm";
 import { JoinTableMultipleColumnsOptions } from "typeorm/decorator/options/JoinTableMultipleColumnsOptions";
 import { JoinColumnOptions, JoinTableOptions } from "typeorm";
+import { MetadataArgsStorage } from "typeorm/metadata-args/MetadataArgsStorage";
 import { MapFactory } from "../../../common/map/mapFactory";
 import { definedAt } from "../../../common/object/definedAt";
 import { Type } from "../../../common/typings";
+import { logBeforeEach } from "../../../jasmine/logBeforeEach";
 import { Relation } from "../../../typedata/Relation";
 
 const targetToRelationKeys = MapFactory(
@@ -141,36 +144,41 @@ const inverseWords = {
   "": "Owner",
 };
 
-describe("inverseRelationName", () => {
-  test("A", "B");
-  test("AChild1", "B");
-
-  function test(A, B) {
-    test("one", A, "Many", B, "");
-    test("many", A, "One", B, "");
-    test("many", A, "Many", B, "Owner");
-    test("one", A, "One", B, "Owner");
-
-    function test(fromType, fromName, toType, toName, owner) {
-      test(
-        fromType + fromName + "To" + toType + toName + owner,
-        (owner ? fromType : inverseWords[fromType]) +
-          toName +
-          "To" +
-          (owner ? toType : inverseWords[toType]) +
-          fromName
-      );
-
-      function test(relationName: string, inverseRelationName: string) {
-        it(`${relationName} <-> ${inverseRelationName}`, () => {
-          expect(
-            getInverseRelationName(parseRelationName(relationName))
-          ).toEqual(inverseRelationName);
-          expect(
-            getInverseRelationName(parseRelationName(inverseRelationName))
-          ).toEqual(relationName);
-        });
-      }
+export function forEachTestRelation(
+  directions: [string, string][],
+  callback: (propertyName: string) => void
+) {
+  for (let [source, target] of directions) {
+    {
+      const notOwner = `one${source}ToOne${target}`;
+      callback(notOwner);
+      callback(notOwner + "Owner");
     }
+    {
+      const notOwner = `many${source}ToMany${target}`;
+      callback(notOwner);
+      callback(notOwner + "Owner");
+    }
+    callback(`one${source}ToMany${target}`);
+    callback(`many${source}ToOne${target}`);
   }
+}
+
+testm(__filename, () => {
+  forEachTestRelation(
+    [
+      ["A", "B"],
+      ["A", "A"],
+    ],
+    relationName => {
+      it(`expect to inverse ${relationName}`, () => {
+        const inverseRelationName = getInverseRelationName(
+          parseRelationName(relationName)
+        );
+        expect(relationName).toEqual(
+          getInverseRelationName(parseRelationName(inverseRelationName))
+        );
+      });
+    }
+  );
 });

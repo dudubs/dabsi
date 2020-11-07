@@ -1,30 +1,37 @@
 // TODO: DataSource.clone(), DataSource.freeze()
-import { WithMetaType } from "../common/MetaType";
+import { reversed } from "../common/array/reversed";
 import { defined } from "../common/object/defined";
 import { entries } from "../common/object/entries";
 import { hasKeys } from "../common/object/hasKeys";
-import { ArrayTypeOrObject, NonNullableAt, Type } from "../common/typings";
-import { BaseType, BaseTypeKey, WithBaseType } from "./BaseType";
+import { ArrayTypeOrObject, ExtractKeys, Type } from "../common/typings";
+import { BaseType } from "./BaseType";
 import { chunks } from "./chunks";
-import { DataCursor } from "./DataCursor";
 import { DataExp } from "./data-exp/DataExp";
-import { DataFields, DataFieldsRow } from "./DataFields";
-import { DataKey, DataKeyInput } from "./DataKey";
-import { DataNullsSort, DataOrder, DataSort } from "./DataOrder";
-import { DataRow } from "./DataRow";
 import {
   AnyDataSelection,
   DataPickableKeys,
   DataSelection,
 } from "./data-selection/DataSelection";
 import { DataSelectionRow } from "./data-selection/DataSelectionRow";
+import { DataCursor } from "./DataCursor";
+import { DataFields, DataFieldsRow } from "./DataFields";
+import { DataKey, DataKeyInput } from "./DataKey";
+import { DataNullsSort, DataOrder, DataSort } from "./DataOrder";
+import { DataRow } from "./DataRow";
+import { DataSourceRow } from "./DataSourceRow";
 import { DataUnionChildren } from "./DataUnion";
-import { RelationKeys } from "./Relation";
 import { DataValues } from "./DataValues";
+import {
+  Relation,
+  RelationKeys,
+  RelationToManyKeys,
+  RelationToOneKeys,
+  RelationType,
+} from "./Relation";
 
 export type DataKeyOrKeysInput<T> = DataKeyInput<T>[] | DataKeyInput<T>;
 export type DataSourceAt<T, K extends RelationKeys<T>> = DataSource<
-  ArrayTypeOrObject<Required<T>[K]>
+  RelationType<Required<T>[K]>
 >;
 
 export function DataKeyOrKeys<T>(keyOrKeys: DataKeyOrKeysInput<T>): string[] {
@@ -38,19 +45,16 @@ export type DataSourceOf<T extends DataSource<any>> = T extends DataSource<
   ? U
   : never;
 
-export type DataRowOfSource<T extends DataSource<any>> = DataRow<
-  DataSourceOf<T>
->;
-
-export type DataSource<T> = AbstractDataSource<T>;
-export type DataSourceType<T extends DataSource<any>> = T extends DataSource<
-  infer U
->
-  ? U
-  : never;
 export type BasedDataSource<T> = DataSource<BaseType<T> & { _ }>;
 
-export abstract class AbstractDataSource<T> {
+type _Path = {
+  type: "at" | "hasAt";
+  parent?: _Path;
+  filter?: DataExp<any>;
+  propertyName: string;
+};
+
+export abstract class DataSource<T> {
   // TODO: rename to getCountAndRows
 
   TData?: T;
@@ -102,7 +106,7 @@ export abstract class AbstractDataSource<T> {
 
   abstract getCount(): Promise<number>;
 
-  abstract hasRows(): Promise<boolean>;
+  abstract hasRow(): Promise<boolean>;
 
   async getOrFail(key?: string | number): Promise<DataRow<T>> {
     return defined(await this.get(key?.toString()), () =>
@@ -117,7 +121,10 @@ export abstract class AbstractDataSource<T> {
     )
       .take(1)
       .getRows();
-    return result[0];
+
+    return (
+      result[0] && Object.setPrototypeOf(result[0], new DataSourceRow(this))
+    );
   }
 
   // relation
@@ -232,7 +239,8 @@ export abstract class AbstractDataSource<T> {
     });
   }
 
-  of<K extends keyof Required<T>>(
+  of<T, K extends keyof Required<T>>(
+    this: DataSource<T>,
     propertyName: string & K,
     value: DataKeyInput<T[K]>
   ): DataSource<T> {
@@ -241,9 +249,10 @@ export abstract class AbstractDataSource<T> {
     );
   }
 
-  at<K extends RelationKeys<T>>(
+  at<T, K extends RelationKeys<T>>(
+    this: DataSource<T>,
     propertyName: string & K,
-    key: DataKeyInput<ArrayTypeOrObject<T[K]>>
+    key: DataKeyInput<RelationType<T[K]>>
   ): DataSourceAt<T, K> {
     return this.withCursor(
       DataCursor.at(this.cursor, propertyName, DataKey(key))
@@ -270,6 +279,7 @@ export abstract class AbstractDataSource<T> {
       });
     return this.updateCursor({ order: expOrOrders });
   }
+
   select<T, S extends DataSelection<T> = {}>(
     this: DataSource<T>,
     selection: S | undefined
@@ -289,6 +299,7 @@ export abstract class AbstractDataSource<T> {
   ): DataSource<
     DataSelectionRow<T, { pick: readonly never[]; fields: Fields }>
   >;
+
   pick<T, K extends DataPickableKeys<T>>(
     this: DataSource<T>,
     keys: readonly K[]

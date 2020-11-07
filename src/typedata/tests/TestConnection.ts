@@ -1,5 +1,11 @@
-import { Connection, createConnection, ObjectType } from "typeorm";
+import {
+  Connection,
+  createConnection,
+  getMetadataArgsStorage,
+  ObjectType,
+} from "typeorm";
 import { defined } from "../../common/object/defined";
+import { findEntities } from "../../typeorm/findEntities";
 
 let counter = 0;
 
@@ -12,7 +18,7 @@ export function createTestConnection(
     database: ":memory:",
     synchronize: true,
     // logging: "all",
-    entities,
+    entities: findEntities(entities),
   });
 }
 

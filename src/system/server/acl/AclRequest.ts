@@ -1,45 +1,57 @@
 import { Connection } from "typeorm";
-import { AclCriterion, AnyAclCriterion } from "./AclCriterion";
-import { AclPrivilege } from "./AclPrivilege";
+import { AclExp } from "./AclExp";
+import { AclQuery } from "./AclQuery";
+import { AclTokenTree } from "./AclTokenTree";
 
-export class AclRequest extends AclPrivilege {
-  constructor(public connection: Connection) {
-    super();
+export class AclRequest {
+  protected allowed: AclExp[] = [];
+  protected denied: AclExp[] = [];
+
+  protected tokenTree = new AclTokenTree();
+
+  constructor(protected connection: Connection, protected userKey: string) {}
+
+  allow(...exps: AclExp[]): this {
+    exps = exps.filter(exp => {
+      if (typeof exp === "string") {
+        this.tokenTree.add(exp);
+        return false;
+      }
+      return true;
+    });
+
+    this.allowed.push(...exps);
+    return this;
   }
 
-  async ask(userKey: string) {
-    const parameters: any[] = [];
+  deny(...exps: AclExp[]): this {
+    this.denied.push(...exps);
+    return this;
+  }
 
-    const allowQuery = this.allowCriterions
-      .toSeq()
-      .map(
-        criterion =>
-          AclCriterion.getQueryAndParameters(
-            this.connection,
-            criterion,
-            userKey,
-            parameters
-          )[0]
-      )
-      .join(" AND ");
-
-    const denyQuery = this.denyCriterions
-      .toSeq()
-      .map(
-        criterion =>
-          AclCriterion.getQueryAndParameters(
-            this.connection,
-            criterion,
-            userKey,
-            parameters
-          )[0]
-      )
-      .join(" OR ");
-
-    return this.connection
-      .query(`SELECT NOT (${denyQuery}) AND ((${allowQuery})) cx`, parameters)
-      .then(rows => {
-        return !!rows[0].cx;
-      });
+  ask(): Promise<boolean> {
+    return new AclQuery(this.connection).askFor(this.userKey).ask({
+      $all: [
+        ...this.tokenTree.getBases(),
+        {
+          $privilege: {
+            allow: this.allowed,
+            deny: this.denied,
+          },
+        },
+      ],
+    });
   }
 }
+
+/*
+
+  ADMIN/
+
+  ADMIN/FORUMS
+
+  ADMIN/BLOGS
+
+  `PERMISSION:ADMIN/BLOGS` OR `PERMISSION/ADMIN`
+
+ */

@@ -1,16 +1,16 @@
-import {defined} from "../common/object/defined";
+import { defined } from "../common/object/defined";
 
 export let currentJasmineSpecReporterResult: jasmine.CustomReporterResult | null = null;
 
 export function getJasmineSpecReporterResult(): jasmine.CustomReporterResult {
-    return defined(currentJasmineSpecReporterResult)
+  return defined(currentJasmineSpecReporterResult);
 }
 
 jasmine.getEnv().addReporter({
-    specStarted(result: jasmine.CustomReporterResult) {
-        currentJasmineSpecReporterResult = result;
-    },
-    specDone(result: jasmine.CustomReporterResult) {
-        currentJasmineSpecReporterResult = null;
-    }
-})
+  specStarted(result: jasmine.CustomReporterResult) {
+    currentJasmineSpecReporterResult = result;
+  },
+  specDone(result: jasmine.CustomReporterResult) {
+    currentJasmineSpecReporterResult = null;
+  },
+});

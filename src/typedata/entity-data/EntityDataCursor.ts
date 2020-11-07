@@ -160,9 +160,13 @@ export namespace EntityDataCursor {
     }
   }
 
-  export function createQueryBuilder(cursor: EntityDataCursor) {
+  export function createQueryBuilder(
+    cursor: EntityDataCursor,
+    aliasName?: string
+  ) {
     const qb = DataQueryBuilder.createRoot(
-      cursor.repository.metadata.tableName
+      cursor.repository.metadata.tableName,
+      aliasName
     );
     join(qb.query.alias, cursor);
 

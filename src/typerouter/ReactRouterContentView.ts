@@ -1,26 +1,15 @@
-import { ReactElement, ReactNode } from "react";
+import { createElement, ReactElement } from "react";
 import { flatToSeq } from "../common/flatToSeq";
 import { EmptyFragment } from "../react/utils/EmptyFragment";
 import { useDefinedContext } from "../react/utils/hooks/useDefinedContext";
 import { getReactRouterProps } from "./ReactRouter";
-import {
-  ReactRouterRouteProps,
-  ReactRouterRoutePropsContext,
-} from "./ReactRouterLocation";
+import { ReactRouterContext } from "./ReactRouterLocation";
 
-export function ReactRouterContentView(props: {
-  renderEffect?(props: {
-    direct: "nextToBack" | "backToNext";
-    next: ReactNode;
-    back: ReactNode;
-  });
-}) {
-  return renderReactRouterContainer(
-    useDefinedContext(ReactRouterRoutePropsContext)
-  );
+export function ReactRouterContentView() {
+  return renderReactRouterContainer(useDefinedContext(ReactRouterContext));
 }
 
-export function renderReactRouterContainer(routeProps: ReactRouterRouteProps) {
+export function renderReactRouterContainer(routeProps: ReactRouterContext) {
   const routerProps = getReactRouterProps(routeProps.location.router);
 
   let children: ReactElement;
@@ -30,10 +19,10 @@ export function renderReactRouterContainer(routeProps: ReactRouterRouteProps) {
   } else {
     const defaultRenderer = flatToSeq(
       routeProps.location,
-      (location) => location.parent
+      location => location.parent
     )
-      .map((location) => location.router.reactProps.defaultRenderer)
-      .find((defaultRenderer) => !!defaultRenderer);
+      .map(location => location.router.reactProps.defaultRenderer)
+      .find(defaultRenderer => !!defaultRenderer);
 
     if (defaultRenderer) {
       children = defaultRenderer(routeProps);
@@ -43,20 +32,22 @@ export function renderReactRouterContainer(routeProps: ReactRouterRouteProps) {
   }
 
   for (
-    let parent = routeProps.location.parent;
-    parent;
-    parent = parent.parent
+    let location = routeProps.location;
+    location;
+    location = location.parent
   ) {
-    const props = getReactRouterProps(parent.router);
+    const props = getReactRouterProps(location.router);
     const wrapperProps = {
-      location: parent,
+      location: location,
       route: routeProps,
       children,
     };
     for (const wrapper of props.wrappers) {
-      children = wrapper(wrapperProps);
+      children = createElement(wrapper, wrapperProps);
     }
   }
 
   return children;
 }
+// OuterWrappers
+// InnerWrappers

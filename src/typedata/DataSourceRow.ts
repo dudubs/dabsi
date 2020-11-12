@@ -2,7 +2,7 @@ import { GetBaseType, WithBaseType } from "./BaseType";
 import { WithDataKey } from "./DataKey";
 import { DataRow } from "./DataRow";
 import { DataSource, DataSourceAt } from "./DataSource";
-import { DataValues } from "./DataValues";
+import { DataUpdate } from "./DataValue";
 import { RelationKeys } from "./Relation";
 
 export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
@@ -37,7 +37,7 @@ export class DataSourceRow {
 
   update<T extends AnyBasedDataRow>(
     this: T,
-    values: DataValues<GetBaseType<T>>
+    value: DataUpdate<GetBaseType<T>>
   ) {
     return this.getSource().remove(this.$key);
   }

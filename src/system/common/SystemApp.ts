@@ -8,7 +8,6 @@ import { UserApp } from "./UserApp";
 
 export declare const DevLoginUser: unique symbol;
 
-// Typing()
 export const DevLogin = Form({
   input: DataInput({
     loadType: TypeRef(() => DevLoginUser),
@@ -24,6 +23,7 @@ export const SystemApp = RpcMap({
       FAILED: {};
       SUCCESS: {
         fullName: string;
+        isAdmin: boolean;
       };
     }>
   >(),

@@ -4,7 +4,7 @@ import { DataTypeInfo } from "../../../typedata/DataTypeInfo";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "../../../typedata/data-query/DataQueryBuilder";
 import { DataQueryExpToSqbTranslator } from "../../../typedata/data-query/DataQueryExpToSqbTranslator";
-import { EntityDataExpToQebTranslator } from "../../../typedata/entity-data/EntityDataExpToQebTranslator";
+import { EntityDataExpTranslatorToDataQueryExp } from "../../../typedata/entity-data/EntityDataExpTranslatorToDataQueryExp";
 
 export class QbExpTester<T> {
   constructor(
@@ -26,7 +26,7 @@ export class QbExpTester<T> {
       alias: qb.alias,
     };
 
-    const qebTranslator = new EntityDataExpToQebTranslator(
+    const qebTranslator = new EntityDataExpTranslatorToDataQueryExp(
       this.getConnection(),
       this.typeInfo,
       new DataQueryBuilder(query),

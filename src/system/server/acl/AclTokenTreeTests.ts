@@ -4,7 +4,7 @@ import { AclTokenTree } from "./AclTokenTree";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 
-describe(__filename, () => {
+testm(__filename, () => {
   const t = Tester.beforeAll(() => ({
     tree: new AclTokenTree()
       .add("ADMIN")
@@ -38,8 +38,4 @@ describe(__filename, () => {
       );
     });
   }
-
-  it("", () => {
-    console.log(inspect(t.table));
-  });
 });

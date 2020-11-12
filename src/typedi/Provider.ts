@@ -1,6 +1,8 @@
 import { flatObject } from "../common/object/flatObject";
 import { Type } from "../common/typings";
-import { check, Context, resolve, CustomResolver, Resolver } from "./Resolver";
+import { checkSymbol } from "./internal/_check";
+import { resolveSymbol } from "./internal/_resolve";
+import { Context, CustomResolver, Resolver } from "./Resolver";
 
 export function Provider(
   context: Context<any>
@@ -10,11 +12,13 @@ export function Provider(context) {
 
   return resolver => {
     return (parentContext => {
-      return resolver[resolve](
+      return resolver[resolveSymbol](
         Object.setPrototypeOf({ ...context }, parentContext)
       );
     }).toCheck(parentContext => {
-      resolver[check]?.(Object.setPrototypeOf({ ...context }, parentContext));
+      resolver[checkSymbol]?.(
+        Object.setPrototypeOf({ ...context }, parentContext)
+      );
     });
   };
 }

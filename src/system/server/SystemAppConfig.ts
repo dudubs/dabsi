@@ -1,10 +1,13 @@
-import { Consumer } from "../../typedi/Consumer";
+import { Resolver } from "../../typedi";
+import { _consume } from "../../typedi/internal/_consume";
 import { RpcConfig } from "../../typerpc/Rpc";
 import { DevLoginUser, SystemApp } from "../common/SystemApp";
+import { AclRequest } from "./acl/AclRequest";
 
 import { User, UserFullName } from "./acl/User";
-import { AdminAppConfig } from "./AdminAppConfig";
-import { SystemContextResolver } from "./SystemContextResolver";
+import { ADMIN_TOKEN, AdminAppConfig } from "./AdminAppConfig";
+import { DataContext } from "../../typedata/DataContext";
+import { SystemSession } from "./SystemSession";
 import { UserAppConfig } from "./UserAppConfig";
 
 declare global {
@@ -13,41 +16,52 @@ declare global {
   }
 }
 
-export const SystemAppConfig = Consumer(
-  [SystemContextResolver, UserAppConfig, AdminAppConfig],
-  ({ session, getDataSource }, userConfig, adminConfig) =>
+export const SystemAppConfig = Resolver.consume(
+  {
+    userConfig: UserAppConfig,
+    adminConfig: AdminAppConfig,
+    aclReq: AclRequest,
+    ...DataContext({
+      users: User,
+      session: [SystemSession],
+    }),
+  },
+  c =>
     RpcConfig(SystemApp, $ => {
       return $({
         async logout() {
-          await session.update({ user: null });
+          await c.session.update({ user: null });
         },
         async getLoginInfo() {
-          if (!session.user) {
+          if (!c.session.user) {
             return { type: "FAILED" };
           }
+          const { fullName } = await c.session.user
+            .getSource()
+            .pick({ fullName: UserFullName })
+            .getOrFail();
           return {
             type: "SUCCESS",
-            fullName: session.user.fullName,
+            fullName,
+            ...(await c.aclReq.review({ isAdmin: ADMIN_TOKEN })),
           };
         },
-        user: userConfig,
-        admin: adminConfig,
-        devLogin: $ => {
-          const users = getDataSource(User).pick({
-            fullName: UserFullName,
-          });
-          return $({
+        user: c.userConfig,
+        admin: c.adminConfig,
+        devLogin: $ =>
+          $({
             inputConfig: $ =>
               $({
-                source: users,
+                source: c.users.pick({
+                  fullName: UserFullName,
+                }),
                 columns: { label: "fullName" },
               }),
             async submit(user) {
-              await session.update({ user: user.$key });
+              await c.session.update({ user: user.$key });
               return { value: { helloTo: user.fullName } };
             },
-          });
-        },
+          }),
       });
     })
 );

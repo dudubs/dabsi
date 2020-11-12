@@ -1,4 +1,4 @@
-import { getStackLastLine } from "../typedi/GetStackLastLine";
+import { getStackLastLine } from "../typedi/getStackLastLine";
 import { getJasmineSpecReporterResult } from "./getJasmineSpecReporterResult";
 
 export function logBeforeEach(

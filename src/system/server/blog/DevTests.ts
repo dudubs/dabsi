@@ -1,1 +1,1 @@
-describe(__filename, () => {});
+testm(__filename, () => {});

@@ -9,11 +9,7 @@ import {
 } from "react";
 import { If, IsEmptyObject, PartialUndefinedKeys } from "../common/typings";
 import { TReactRouter } from "./ReactRouter";
-import {
-  ReactRouterLocation,
-  ReactRouterRouteProps,
-  ReactRouterRoutePropsContext,
-} from "./ReactRouterLocation";
+import { ReactRouterLocation, ReactRouterContext } from "./ReactRouterLocation";
 import { Router, RouterPlugin } from "./Router";
 
 export type ReactRouterViewProps<T extends TReactRouter> = PartialUndefinedKeys<
@@ -42,7 +38,7 @@ export function ReactRouterView<T extends TReactRouter>(
     return unboundRouter.bind(context || {}, plugins);
   }, [unboundRouter, plugins]);
 
-  const [route, setRoute] = useState<ReactRouterRouteProps>(() =>
+  const [route, setRoute] = useState<ReactRouterContext>(() =>
     getRouteFromPath(history.location.pathname)
   );
 
@@ -54,19 +50,16 @@ export function ReactRouterView<T extends TReactRouter>(
 
   useEffect(
     () =>
-      history.listen((location) => {
+      history.listen(location => {
         setRoute(getRouteFromPath(location.pathname));
       }),
     [history, router]
   );
 
-  let children: ReactElement = createElement(
-    ReactRouterRoutePropsContext.Provider,
-    {
-      value: route,
-      children: props.children,
-    }
-  );
+  let children: ReactElement = createElement(ReactRouterContext.Provider, {
+    value: route,
+    children: props.children,
+  });
 
   return children;
 

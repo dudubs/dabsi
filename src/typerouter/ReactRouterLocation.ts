@@ -14,7 +14,7 @@ import {
 } from "../common/typings";
 import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
 import { useDefinedContext } from "../react/utils/hooks/useDefinedContext";
-import { getNextPath } from "../router/utils/getNextPath";
+import { getNextPath } from "../common/getNextPath";
 import { TReactRouter } from "./ReactRouter";
 import { ReactRouterError } from "./ReactRouterError";
 import { Router, RouterAt, RouterType, TRouter } from "./Router";
@@ -102,7 +102,7 @@ export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
     this.history.push(this.path);
   }
 
-  route(path: string): ReactRouterRouteProps {
+  route(path: string): ReactRouterContext {
     const rootPath = path;
     let location: ReactRouterLocation = this;
     while (true) {
@@ -136,17 +136,15 @@ export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
   }
 }
 
-export const ReactRouterRoutePropsContext = createUndefinedContext<
-  ReactRouterRouteProps
->();
+export const ReactRouterContext = createUndefinedContext<ReactRouterContext>();
 
-export function useRouterRouteProps<T extends TRouter>(): ReactRouterRouteProps<
+export function useReactRouterContext<T extends TRouter>(): ReactRouterContext<
   T & TReactRouter
 > {
-  return <any>useDefinedContext(ReactRouterRoutePropsContext);
+  return <any>useDefinedContext(ReactRouterContext);
 }
 
-export type ReactRouterRouteProps<
+export type ReactRouterContext<
   T extends TReactRouter = TReactRouter,
   Base = {
     rootPath: string;

@@ -5,7 +5,10 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { BasedType, BaseType } from "../../../typedata/BaseType";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
+import { DataRow } from "../../../typedata/DataRow";
+import { BasedDataRow } from "../../../typedata/DataSourceRow";
 import { Relation } from "../../../typedata/Relation";
 import { Group } from "./Group";
 import { Permission } from "./Permission";
@@ -40,6 +43,6 @@ export class User {
   permissions: Relation<Permission>[];
 }
 
-export const UserFullName: DataExp<User> = {
-  $join: [["firstName", "lastName"], " "],
+export const UserFullName: { $base: DataExp<User> } = {
+  $base: { $join: [["firstName", "lastName"], " "] },
 } as const;

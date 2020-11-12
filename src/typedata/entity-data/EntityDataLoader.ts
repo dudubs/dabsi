@@ -7,7 +7,7 @@ import { Awaitable } from "../../common/typings";
 import { inspect } from "../../logging";
 import { EntityDataCursor } from "./EntityDataCursor";
 import { EntityDataQueryRunner } from "./EntityDataQueryRunner";
-import { EntityDataExpToQebTranslator } from "./EntityDataExpToQebTranslator";
+import { EntityDataExpTranslatorToDataQueryExp } from "./EntityDataExpTranslatorToDataQueryExp";
 import { ColumnLoader, DataQueryBuilder } from "../data-query/DataQueryBuilder";
 import { EntityRelation } from "../../typeorm/relations";
 import { DataExp } from "../data-exp/DataExp";
@@ -47,14 +47,19 @@ export namespace EntityDataLoader {
 
   export function createFromCursor(
     entityCursor: EntityDataCursor,
-    baseRow: any = {}
+    {
+      baseRow = {},
+      qb = EntityDataCursor.createQueryBuilder(entityCursor),
+      disableKeyLoader = false,
+    } = {}
   ) {
     return createRoot({
       connection: entityCursor.connection,
       typeInfo: entityCursor.typeInfo,
-      qb: EntityDataCursor.createQueryBuilder(entityCursor),
+      qb,
       selection: entityCursor.cursor.selection,
       baseRow,
+      disableKeyLoader,
     });
   }
 
@@ -64,6 +69,7 @@ export namespace EntityDataLoader {
     qb: DataQueryBuilder;
     selection: AnyDataSelection;
     baseRow: object;
+    disableKeyLoader?: boolean;
   }): EntityDataLoader {
     return create({ ...options, schema: options.qb.query.alias });
   }
@@ -75,11 +81,13 @@ export namespace EntityDataLoader {
     selection,
     schema,
     baseRow,
+    disableKeyLoader,
   }: {
     connection: Connection;
     typeInfo: DataTypeInfo;
     qb: DataQueryBuilder;
     selection: AnyDataSelection;
+    disableKeyLoader?: boolean;
     //
     schema: string;
     baseRow: object;
@@ -106,13 +114,16 @@ export namespace EntityDataLoader {
       entityMetadata.primaryColumns.length === 1
         ? entityMetadata.primaryColumns[0]
         : undefined;
-    const objectKeyLoaders = entityMetadata.primaryColumns.map(
-      column =>
-        <[string, ColumnLoader]>[
-          column.propertyName,
-          qb.selectColumn(schema, column.databaseName),
-        ]
-    );
+
+    const objectKeyLoaders = disableKeyLoader
+      ? []
+      : entityMetadata.primaryColumns.map(
+          column =>
+            <[string, ColumnLoader]>[
+              column.propertyName,
+              qb.selectColumn(schema, column.databaseName),
+            ]
+        );
 
     const entityKeys = entityInfo.nonRelationColumnKeys;
 
@@ -158,7 +169,7 @@ export namespace EntityDataLoader {
       loadOneRaw,
       loadRows,
       qb,
-      translator: new EntityDataExpToQebTranslator(
+      translator: new EntityDataExpTranslatorToDataQueryExp(
         connection,
         typeInfo,
         qb,
@@ -277,7 +288,7 @@ export namespace EntityDataLoader {
 
         const loader = qb.select(
           `${schema}${childKey ? `_as_${childKey}` : ""}_x_${propertyName}`,
-          new EntityDataExpToQebTranslator(
+          new EntityDataExpTranslatorToDataQueryExp(
             connection,
             childTypeInfo,
             qb,

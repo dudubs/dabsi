@@ -1,14 +1,15 @@
 import {
   DataExp,
   DataExpTypes,
-  DataNamedCompareOperator,
+  DataCompareOperators,
   DataParameterExp,
   DataStringExp,
 } from "./DataExp";
 import { DataExpTranslator } from "./DataExpTranslator";
 
-export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
+export class DataExpMapper extends DataExpTranslator<DataExp<any>> {
   False: DataExp<any> = false;
+
   True: DataExp<any> = true;
 
   Null: DataExp<any> = null;
@@ -65,7 +66,7 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
   }
 
   translateCompare(
-    op: DataNamedCompareOperator,
+    op: DataCompareOperators,
     left: DataExp<any>,
     right: DataExp<any>
   ): DataExp<any> {
@@ -112,16 +113,3 @@ export class DataExpMapper<T> extends DataExpTranslator<any, DataExp<any>> {
     }
   }
 }
-
-/*
-
-
-    EntityDataSource.create(DUnion)
-        .as("aChild1")
-
-
-
-
-
-
- */

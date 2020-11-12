@@ -8,6 +8,7 @@ import {
   RelationToOneKeys,
   RelationTypeAt,
 } from "../Relation";
+import { Exp } from "./ExpTranslator";
 
 export type DataSymbolicCompareOperator = keyof {
   "^=";
@@ -21,7 +22,7 @@ export type DataSymbolicCompareOperator = keyof {
   ">=";
 };
 
-export type DataNamedCompareOperator = keyof {
+export type DataCompareOperators = keyof {
   $startsWith;
   $endsWith;
   $contains;
@@ -37,7 +38,7 @@ export type DataNamedCompareOperator = keyof {
 };
 
 export type DataCompareOperator =
-  | DataNamedCompareOperator
+  | DataCompareOperators
   | DataSymbolicCompareOperator;
 
 export type DataParameterExp = string | number | boolean;
@@ -50,7 +51,7 @@ export type DataCompareToParameterExp<P> =
 
 export type DataCompareToExpExp<T> = [DataCompareOperator, DataExp<T>];
 
-export type DataComparatorExp<
+export type DataCompareExp<
   T,
   P extends DataParameterExp
 > /* equal to parameter */ =
@@ -154,14 +155,10 @@ export type AsExp<T> = T extends DataUnionChildren<infer Children> //
 
 export type DataExpType<T, E> = E extends keyof T ? T[E] : any;
 
-export type DataUnionExp<T> = Union<
-  {
-    [K in keyof DataExpTypes<T>]: Pick<DataExpTypes<T>, K>;
-  }
->;
+export type DataUnionExp<T> = Exp<DataExpTypes<T>>;
 
-export type DataCompareExp<T> = {
-  [K in ExtractKeys<Required<T>, DataParameterExp>]?: DataComparatorExp<
+export type DataCompareMapExp<T> = {
+  [K in ExtractKeys<Required<T>, DataParameterExp>]?: DataCompareExp<
     T,
     Extract<Required<T>[K], DataParameterExp>
   >;
@@ -169,7 +166,7 @@ export type DataCompareExp<T> = {
 
 export type DataObjectExp<T> =
   | DataUnionExp<T>
-  | DataCompareExp<T>
+  | DataCompareMapExp<T>
   | DataArrayExp<T>;
 
 export type DataArrayExp<T> =

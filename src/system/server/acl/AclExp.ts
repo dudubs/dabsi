@@ -1,11 +1,11 @@
 import { Union } from "../../../common/typings";
 import { GetBaseType } from "../../../typedata/BaseType";
+import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { BasedDataRow } from "../../../typedata/DataSourceRow";
-import { AclCriterion } from "./AclCriterion";
+import { AclCriterion, AclRow, AclRowType } from "./AclCriterion";
+import { User } from "./User";
 export type AclCriterionExp = (
-  callback: <T extends BasedDataRow<any>>(
-    dataRow: T
-  ) => AclCriterion<GetBaseType<T>>
+  callback: <T extends AclRow<any>>(dataRow: T) => AclCriterion<AclRowType<T>>
 ) => AclCriterion<any>;
 
 export interface AclExpMap {
@@ -16,9 +16,13 @@ export interface AclExpMap {
     allow?: AclExp[];
     deny?: AclExp[];
   };
+  $user: DataExp<User>;
 }
 
 export type AclExp =
+  | true
+  | false
+  | undefined
   | AclCriterionExp
   | string
   | Union<

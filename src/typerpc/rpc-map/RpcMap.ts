@@ -7,7 +7,6 @@ import {
   AnyRpc,
   Rpc,
   RpcConnection,
-  RpcHandlerClass,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
 } from "../Rpc";

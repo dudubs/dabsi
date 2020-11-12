@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 import { Fn, Override, PluckRequired } from "../../../common/typings";
-import { Lang } from "../../../localization/Lang";
+import { Lang } from "../../../lang/Lang";
 import { updateRef } from "../../../react/HookRef";
 import { partialProps } from "../../../react/utils/partialProps";
 import { MuiIcon } from "./MuiIcon";

@@ -38,6 +38,8 @@ export type Rpc<T extends TRpc> = WithMetaType<{
 
     createRpcConnection(command: RpcCommand): T["Connection"];
 
+    // TODO: rename:
+    //  - *Rpc* to **
     createRpcCommand(unresolvedConfig: _RpcUnresolvedConfig<T>): RpcCommand;
 
     resolveRpcConfig(

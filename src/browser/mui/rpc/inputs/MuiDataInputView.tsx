@@ -7,8 +7,8 @@ import { makeStyles } from "@material-ui/styles";
 import * as React from "react";
 import { useRef, useState } from "react";
 import { If, Is, PartialUndefinedKeys } from "../../../../common/typings";
-import { Lang, LangNode } from "../../../../localization/Lang";
-import { useLangTranslator } from "../../../../localization/LangTranslator";
+import { Lang, LangNode } from "../../../../lang/Lang";
+import { useLangTranslator } from "../../../../lang/LangTranslator";
 import { AnyDataInput } from "../../../../typerpc/input/data-input/DataInput";
 import { DataInputView } from "../../../../typerpc/input/data-input/DataInputView";
 

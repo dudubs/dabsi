@@ -3,7 +3,7 @@ import * as React from "react";
 import { ReactNode } from "react";
 import { MuiDialog, MuiDialogProps } from "./MuiDialog";
 import { Override } from "../../../common/typings";
-import { Lang, LangNode } from "../../../localization/Lang";
+import { Lang, LangNode } from "../../../lang/Lang";
 import { ReactCallback } from "../../../react/ReactCallback";
 import { MuiButton, MuiCancelButton, MuiConfirmButton } from "./MuiButton";
 

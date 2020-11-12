@@ -15,7 +15,6 @@
     "./src/browser",
     "./src/typedata/old",
     "./src/typedata/DataTable",
-    "./src/struct",
     "./src/system/server/acl/old/**"
   ]
 }

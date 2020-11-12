@@ -3,7 +3,7 @@ import { DataExp, DataStringExp } from "./data-exp/DataExp";
 import { DataFields } from "./DataFields";
 import { DataExpMapper } from "./data-exp/DataExpMapper";
 
-export class DataFieldsTranslator extends DataExpMapper<any> {
+export class DataFieldsTranslator extends DataExpMapper {
   constructor(public fields: DataFields<any>, public isBase = false) {
     super();
   }

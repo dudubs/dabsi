@@ -1,20 +1,19 @@
 import { firstDefinedEntry } from "../../common/object/firstDefinedEntry";
 import { mapObjectToArray } from "../../common/object/mapObjectToArray";
 import {
-  DataComparatorExp,
+  DataCompareExp,
   DataCompareOperator,
   DataExp,
   DataExpTypes,
-  DataNamedCompareOperator,
+  DataCompareOperators,
   DataParameterExp,
-  DataStringExp,
   DataSymbolicCompareOperator,
 } from "./DataExp";
-import { ExpNode } from "./getExpNode";
+import { IExpTranslator } from "./ExpTranslator";
 
 const SymbolicToNamedOperator: Record<
   DataSymbolicCompareOperator,
-  DataNamedCompareOperator
+  DataCompareOperators
 > = {
   "^=": "$startsWith",
   "$=": "$endsWith",
@@ -27,25 +26,55 @@ const SymbolicToNamedOperator: Record<
   ">=": "$greaterThanOrEqual",
 };
 
-export type DataExpTranslatorMethods<T, U> = {
-  [K in keyof DataExpTypes<T>]: (exp: DataExpTypes<T>[K]) => U;
-};
+type T = any;
+type O = DataExpTypes<T>;
 
-export abstract class DataExpTranslator<T, U>
-  implements DataExpTranslatorMethods<T, U> {
-  abstract translateCompare(op: DataNamedCompareOperator, left: U, right: U): U;
-
+export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
   abstract True: U;
 
   abstract False: U;
 
   abstract Null: U;
 
+  abstract translateCompare(op: DataCompareOperators, left: U, right: U): U;
+
   abstract translateParameter(value: DataParameterExp): U;
 
-  abstract translateField(propertyName: DataStringExp<T>): U;
+  abstract translateField(propertyName: string): U;
 
   abstract translateIn(inverse: boolean, where: U, values: U[]): U;
+
+  abstract translateConcat(exps: U[]): U;
+
+  abstract translateAnd(exps: U[]): U;
+
+  abstract translateOr(exps: U[]): U;
+
+  abstract translateIs(inverse: boolean, keys: string[]): U;
+
+  abstract translateCount(propertyName: string, subExp: DataExp<any>): U;
+
+  abstract translateAt(propertyKey: string, exp: DataExp<any>): U;
+
+  abstract translateLength(exp: U): U;
+
+  abstract translateNot(exp: U): U;
+
+  abstract translateIsNull(inverse: boolean, exp: U): U;
+
+  abstract translateAs(childKey: string, exp: DataExp<any>): U;
+
+  abstract translateBase(exp: DataExp<T>): U;
+
+  abstract translateIfNull(exp: U, alt_value: U): U;
+
+  abstract translateHas(
+    inverse: boolean,
+    propertyName: string,
+    exp: DataExp<any>
+  ): U;
+
+  abstract translateIf(condition: U, then: U, _else: U): U;
 
   translateInExp(inverse: boolean, where: DataExp<T>, values: DataExp<T>[]): U {
     if (values.length === 0) return this.True;
@@ -65,7 +94,7 @@ export abstract class DataExpTranslator<T, U>
   }
 
   translateCompareExp(
-    op: DataNamedCompareOperator,
+    op: DataCompareOperators,
     left: DataExp<T>,
     right: DataExp<T>
   ): U {
@@ -76,7 +105,7 @@ export abstract class DataExpTranslator<T, U>
     );
   }
 
-  translateArrayExp(exp: DataExp<T> & any[]): U {
+  translateArray(exp: any[]): U {
     if (exp.length === 1) return this.translateParameter(exp[0]);
 
     if (exp.length === 3) {
@@ -120,18 +149,22 @@ export abstract class DataExpTranslator<T, U>
     throw new TypeError(`Invalid JSONArrayExp ${exp}`);
   }
 
-  translateObjectExp(exp: DataExp<T> & object): U {
+  translateOperator(type, value) {
+    return this[type](value);
+  }
+
+  translateObject(exp: object): U {
     if (Array.isArray(exp)) {
-      return this.translateArrayExp(exp);
+      return this.translateArray(exp);
     }
     const [key, value] = firstDefinedEntry(<Record<string, any>>exp);
     if (key.startsWith("$")) {
-      return this[key](value);
+      return this.translateOperator(key, value);
     }
 
     return this.translateAnd(
       mapObjectToArray(<any>exp, (exp, key) =>
-        this.translateAtFieldExp(<any>key, <any>exp)
+        this.translateFieldComparator(<any>key, <any>exp)
       )
     );
   }
@@ -152,22 +185,24 @@ export abstract class DataExpTranslator<T, U>
 
       case "object":
         if (!exp) return this.Null;
-        return this.translateObjectExp(exp);
+        return this.translateObject(exp);
     }
     throw new Error(`Can't translate ${JSON.stringify(exp)}`);
   }
 
-  translateAtFieldExp<K extends DataStringExp<T>>(
-    key: K,
-    fieldExp: DataComparatorExp<T, Extract<T[K], DataParameterExp>>
+  translateFieldComparator(
+    key: string,
+    compareExp: DataCompareExp<any, DataParameterExp>
   ): U {
-    switch (typeof fieldExp) {
+    switch (typeof compareExp) {
       case "object":
-        if (Array.isArray(fieldExp)) {
-          const [op, exp] = fieldExp;
+        if (Array.isArray(compareExp)) {
+          const [op, exp] = compareExp;
           return this.translate([key, <DataCompareOperator>op, exp]);
         } else {
-          const [op, value] = firstDefinedEntry(<Record<string, any>>fieldExp);
+          const [op, value] = firstDefinedEntry(
+            <Record<string, any>>compareExp
+          );
 
           switch (op) {
             case "$in":
@@ -185,7 +220,7 @@ export abstract class DataExpTranslator<T, U>
           }
 
           return this.translate([
-            <DataStringExp<T>>key,
+            key,
             <DataCompareOperator>op,
             { $parameter: value },
           ]);
@@ -194,68 +229,46 @@ export abstract class DataExpTranslator<T, U>
       case "string":
       case "number":
         return this.translateCompareExp("$equals", key, {
-          $parameter: fieldExp,
+          $parameter: compareExp,
         });
     }
-    throw new TypeError(`Invalid FieldExp ${key}: ${JSON.stringify(fieldExp)}`);
+    throw new TypeError(
+      `Invalid FieldExp ${key}: ${JSON.stringify(compareExp)}`
+    );
   }
 
-  abstract translateConcat(exps: U[]): U;
-
-  abstract translateAnd(exps: U[]): U;
-
-  abstract translateOr(exps: U[]): U;
-
-  abstract translateIs(inverse: boolean, keys: string[]): U;
-
-  $is(exp: DataExpTypes<T>["$is"]): U {
+  $is(exp: O["$is"]): U {
     if (typeof exp === "string") return this.translateIs(false, [exp]);
     return this.translateIs(false, exp);
   }
 
-  $isNot(exp: DataExpTypes<T>["$is"]): U {
+  $isNot(exp: O["$is"]): U {
     if (typeof exp === "string") return this.translateIs(true, [exp]);
     return this.translateIs(true, exp);
   }
 
-  abstract translateCount(propertyName: string, subExp: DataExp<any>): U;
-
-  abstract translateAt(propertyKey: string, exp: DataExp<any>): U;
-
-  abstract translateLength(exp: U): U;
-
-  abstract translateNot(exp: U): U;
-
-  translateNode() {}
-
-  $length(exp: DataExpTypes<T>["$length"]): U {
+  $length(exp: O["$length"]): U {
     return this.translateLength(this.translate(exp));
   }
 
-  $and(exps: DataExpTypes<T>["$and"]): U {
+  $and(exps: O["$and"]): U {
     if (exps.find(x => x === false) === false) {
       return this.translate(false);
     }
     return this.translateAnd(exps.map(exp => this.translate(exp)));
   }
 
-  $or(exp: DataExpTypes<T>["$or"]): U {
+  $or(exp: O["$or"]): U {
     if (exp.find(x => x === true) === true) {
       return this.translate(true);
     }
     return this.translateOr(exp.map(exp => this.translate(exp)));
   }
 
-  abstract translateIsNull(inverse: boolean, exp: U): U;
-
-  abstract translateAs(childKey: string, exp: DataExp<any>): U;
-
-  $as(exp: DataExpTypes<T>["$as"]): U {
+  $as(exp: O["$as"]): U {
     const [childKey, childExp] = firstDefinedEntry(exp);
     return this.translateAs(childKey, childExp);
   }
-
-  abstract translateBase(exp: DataExp<T>): U;
 
   $base(exp: DataExpTypes<any>["$base"]): U {
     return this.translateBase(exp);
@@ -266,25 +279,23 @@ export abstract class DataExpTranslator<T, U>
     return this.translateAt(<any>key, subExp);
   }
 
-  $isNull(exp: DataExpTypes<T>["$isNull"]): U {
+  $isNull(exp: O["$isNull"]): U {
     return this.translateIsNull(false, this.translate(exp));
   }
 
-  $isNotNull(exp: DataExpTypes<T>["$isNotNull"]): U {
+  $isNotNull(exp: O["$isNotNull"]): U {
     return this.translateIsNull(true, this.translate(exp));
   }
 
-  abstract translateIfNull(exp: U, alt_value: U): U;
-
-  $ifNull([left, _else]: DataExpTypes<T>["$ifNull"]): U {
+  $ifNull([left, _else]: O["$ifNull"]): U {
     return this.translateIfNull(this.translate(left), this.translate(_else));
   }
 
-  $concat(exp: DataExpTypes<T>["$concat"]): U {
+  $concat(exp: O["$concat"]): U {
     return this.translateConcat(exp.map(exp => this.translate(exp)));
   }
 
-  $count(exp: DataExpTypes<T>["$count"]): U {
+  $count(exp: O["$count"]): U {
     if (typeof exp === "string") {
       return this.translateCount(exp, undefined);
     } else if (typeof exp === "object") {
@@ -294,13 +305,7 @@ export abstract class DataExpTranslator<T, U>
     throw new TypeError();
   }
 
-  abstract translateHas(
-    inverse: boolean,
-    propertyName: string,
-    exp: DataExp<any>
-  ): U;
-
-  $has(exp: DataExpTypes<T>["$has"], inverse = false): U {
+  $has(exp: O["$has"], inverse = false): U {
     if (typeof exp === "string") {
       return this.translateHas(inverse, exp, undefined);
     } else if (typeof exp === "object") {
@@ -311,11 +316,11 @@ export abstract class DataExpTranslator<T, U>
   }
 
   // TODO: translateHas(inverse, ...
-  $notHas(exp: DataExpTypes<T>["$has"]): U {
+  $notHas(exp: O["$has"]): U {
     return this.$has(exp, true);
   }
 
-  $search(exp: DataExpTypes<T>["$search"]): U {
+  $search(exp: O["$search"]): U {
     const words = exp.text.split(/[\s\t\r\n]+/g).filter(text => text);
     if (words.length === 0) return this.True;
 
@@ -339,11 +344,11 @@ export abstract class DataExpTranslator<T, U>
     });
   }
 
-  $parameter(exp: DataExpTypes<T>["$parameter"]): U {
+  $parameter(exp: O["$parameter"]): U {
     return this.translateParameter(exp);
   }
 
-  $join<K>([exps, sep]: DataExpTypes<T>["$join"]): U {
+  $join<K>([exps, sep]: O["$join"]): U {
     const $concat: DataExp<T>[] = [];
     for (const [index, exp] of exps.entries()) {
       if (index) $concat.push({ $parameter: sep });
@@ -352,15 +357,13 @@ export abstract class DataExpTranslator<T, U>
     return this.translate({ $concat });
   }
 
-  $not<K>(exp: DataExpTypes<T>["$not"]): U {
+  $not<K>(exp: O["$not"]): U {
     if (exp && typeof exp === "object" && "$not" in exp)
       return this.translate(exp.$not);
     return this.translateNot(this.translate(exp));
   }
 
-  abstract translateIf(condition: U, then: U, _else: U): U;
-
-  $if<K>(exp: DataExpTypes<T>["$if"]): U {
+  $if<K>(exp: O["$if"]): U {
     if (Array.isArray(exp)) {
       return this.translateIf(
         this.translate(exp[0]),
@@ -376,7 +379,7 @@ export abstract class DataExpTranslator<T, U>
     }
   }
 
-  $case(cases: DataExpTypes<T>["$case"]): U {
+  $case(cases: O["$case"]): U {
     const translate = (index: number) => {
       const exp = cases[index];
       if (!exp) return this.Null;

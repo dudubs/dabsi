@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { MuiIcon } from "../../../browser/mui/components/MuiIcon";
 import { Awaitable } from "../../../common/typings";
-import { LangNode } from "../../../localization/Lang";
+import { LangNode } from "../../../lang/Lang";
 import { State } from "../../../react/utils/State";
 import { DataExp } from "../../DataExp";
 import {

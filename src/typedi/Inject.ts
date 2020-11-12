@@ -1,10 +1,16 @@
-import { Type } from "../common/typings";
-import { CustomResolver, Resolver } from "./Resolver";
+import { getInjectableMetadata, Injectable } from "./Injectable";
+import { Resolver } from "./Resolver";
 
-export function Inject<T>(type: Type<T>): CustomResolver<T> {
-  return ((context): T => {
-    return Resolver.resolveType(type, context);
-  }).toCheck(context => {
-    Resolver.checkType(type, context);
-  });
+export function Inject<T>(resolver?: Resolver<T>): ParameterDecorator {
+  return (target: Function, propertyName, index: number) => {
+    const metadata = getInjectableMetadata(target);
+
+    metadata.resolvers[index] = resolver!;
+
+    setImmediate(() => {
+      if (!metadata.isInjectable) {
+        Injectable()(target);
+      }
+    });
+  };
 }

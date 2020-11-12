@@ -1,4 +1,4 @@
-import { HasKeys, Union } from "../common/typings";
+import { HasKeys, Type, Union } from "../common/typings";
 import { BaseTypeKey, WithBaseType } from "./BaseType";
 import { DataKey, WithDataKey } from "./DataKey";
 import { DataSourceRow } from "./DataSourceRow";
@@ -7,7 +7,12 @@ import {
   DataUnionChildren,
   DataUnionChildrenKey,
 } from "./DataUnion";
-import { MapRelation, RelationKeys, RelationTypeAt } from "./Relation";
+import {
+  IfRelationToOne,
+  MapRelation,
+  RelationKeys,
+  RelationTypeAt,
+} from "./Relation";
 
 type _Children<Children> = {
   [K in keyof Children]: Record<DataKey, string> &
@@ -20,7 +25,9 @@ export type _NoChildren<T> = DataSourceRow &
   WithBaseType<T> &
   WithDataKey &
   {
-    [K in RelationKeys<T>]: MapRelation<T[K], DataRow<RelationTypeAt<T, K>>>;
+    [K in RelationKeys<T>]:
+      | MapRelation<T[K], DataRow<RelationTypeAt<T, K>>>
+      | IfRelationToOne<T[K], undefined>;
   };
 
 export type DataRow<T> = T extends DataUnionChildren<infer Children>
@@ -28,3 +35,7 @@ export type DataRow<T> = T extends DataUnionChildren<infer Children>
     ? Union<_Children<Children>>
     : _NoChildren<T>
   : _NoChildren<T>;
+
+export function DataRow<T>(type: Type<T>): new () => DataRow<T> {
+  return type as any;
+}

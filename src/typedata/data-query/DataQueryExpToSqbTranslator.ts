@@ -2,7 +2,7 @@ import { SelectQueryBuilder } from "typeorm";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { DataExp, DataParameterExp } from "../data-exp/DataExp";
-import { EntityDataExpTranslator } from "../entity-data/EntityDataExpTranslator";
+import { AbstractEntityDataQueryExpTranslator } from "../entity-data/AbstractEntityDataQueryExpTranslator";
 import { DataQuery } from "./DataQueryExp";
 import { DataQueryExpTranslator } from "./DataQueryExpTranslator";
 
@@ -10,16 +10,12 @@ let counter = 0;
 
 @DataQueryExpTranslator<string>()
 export class DataQueryExpToSqbTranslator
-  extends EntityDataExpTranslator<any>
+  extends AbstractEntityDataQueryExpTranslator
   implements DataQueryExpTranslator<string> {
   readonly driver;
 
-  constructor(public qb: SelectQueryBuilder<any>, public schema: string) {
-    super();
-  }
-
-  get connection() {
-    return this.qb.connection;
+  constructor(public qb: SelectQueryBuilder<any>, schema: string) {
+    super(qb.connection, schema);
   }
 
   translateAt(propertyKey: string, exp: DataExp<any>): string {

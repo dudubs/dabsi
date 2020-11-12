@@ -1,0 +1,7 @@
+{
+  "extends": "../../browser/tsconfig.json",
+  "include": [
+    "./index.ts"
+  ],
+  "exclude": []
+}

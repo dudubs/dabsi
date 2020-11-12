@@ -1,7 +1,8 @@
-import { ExtractKeys } from "../../../common/typings";
+import { ExtractKeys, Type } from "../../../common/typings";
+import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { BasedType, GetBaseType } from "../../../typedata/BaseType";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { DataCursor } from "../../../typedata/DataCursor";
+import { DataCursor, EmptyDataCursor } from "../../../typedata/DataCursor";
 import { BasedDataRow } from "../../../typedata/DataSourceRow";
 import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
 import {
@@ -12,6 +13,11 @@ import {
 } from "../../../typedata/Relation";
 import { Group } from "./Group";
 import { User } from "./User";
+
+export type AclRow<T> = BasedDataRow<T> | [Type<T>, string];
+export type AclRowType<T extends AclRow<any>> = T extends AclRow<infer U>
+  ? U
+  : never;
 
 export class AclCriterionExps {
   protected _isUsed = false;
@@ -33,19 +39,25 @@ export class AclCriterionExps {
 }
 
 export class AclCriterion<T> {
-  static create<T extends BasedDataRow<any>>(
-    dataRow: T
-  ): AclCriterion<GetBaseType<T>> {
-    const source = dataRow.getSource();
+  static create<T extends AclRow<any>>(row: T): AclCriterion<AclRowType<T>> {
+    if (Array.isArray(row)) {
+      const [type, key] = row;
+      return new AclCriterion(
+        type,
+        { ...EmptyDataCursor, filter: { $is: key } },
+        undefined
+      );
+    }
+    const source = (row as BasedDataRow<any>).getSource();
     if (!(source instanceof EntityDataSource))
       throw new Error(`Expect to ${EntityDataSource.name}.`);
-    return new AclCriterion(source.mainEntityType, source.cursor);
+    return new AclCriterion(source.mainEntityType, source.cursor, undefined);
   }
 
   constructor(
     public entityType: Function,
     public cursor: DataCursor,
-    public root?: AclCriterion<any>
+    public root: AclCriterion<any> | undefined
   ) {}
 
   getFilterRef?: (exp: AclCriterionExps) => DataExp<any>;
@@ -56,7 +68,7 @@ export class AclCriterion<T> {
   }
 
   createChild() {
-    return new AclCriterion(this.entityType, this.cursor, this.root);
+    return new AclCriterion(this.entityType, this.cursor, this.root ?? this);
   }
 
   at<K extends RelationToOneKeys<T>>(
@@ -77,12 +89,12 @@ export class AclCriterion<T> {
   hasAt<K extends RelationToManyKeys<T>>(
     propertyName: K
   ): AclCriterion<RelationType<T[K]>> {
-    const child = new AclCriterion(this.entityType, this.cursor);
+    const child = this.createChild();
 
     this._filter(
       exps =>
         child.getFilterRef && {
-          $hasAt: { [propertyName]: child.getFilterRef(exps) },
+          $has: { [propertyName]: child.getFilterRef(exps) },
         }
     );
 
@@ -90,9 +102,9 @@ export class AclCriterion<T> {
   }
 
   protected _filter(callback: (exps: AclCriterionExps) => DataExp<any>): this {
-    const { getFilter } = this;
+    const { getFilterRef } = this;
     this.getFilterRef = exps => {
-      return DataExp(getFilter(exps), callback(exps));
+      return DataExp(getFilterRef?.(exps), callback(exps));
     };
     return this;
   }

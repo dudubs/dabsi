@@ -1,4 +1,4 @@
-import { Lang } from "../../../../localization/Lang";
+import { Lang } from "../../../../lang/Lang";
 import { DataTableAction } from "../DataTable";
 
 export const deleteAction: DataTableAction<any> = {

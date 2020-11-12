@@ -3,7 +3,7 @@ import Tabs, { TabsProps } from "@material-ui/core/Tabs";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
 import { entries } from "../../../common/object/entries";
-import { LangKey } from "../../../localization/LangKey";
+import { LangKey } from "../../../lang/LangKey";
 import { Renderer } from "../../../react/renderer";
 import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { mergeProps } from "../../../react/utils/mergeProps";

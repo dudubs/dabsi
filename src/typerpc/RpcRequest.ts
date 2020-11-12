@@ -15,7 +15,7 @@ export class RpcRequest {
     return touchMap(this.cacheMap, id, () => callback());
   }
 
-  push(nextHandler: (next: () => Promise<void>) => Promise<void>) {
+  push(nextHandler: (next: () => Promise<void>) => any) {
     const prevHandler = this.handler;
     this.handler = async firstHandler => {
       let nextIsCalled = false;

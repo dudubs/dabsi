@@ -1,5 +1,4 @@
 import { Connection, getConnection } from "typeorm";
-import { Timeout } from "../../common/async/Timeout";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { Lazy } from "../../common/patterns/lazy";
@@ -9,13 +8,13 @@ import { DataQueryBuilder } from "../data-query/DataQueryBuilder";
 import { DataCursor, EmptyDataCursor } from "../DataCursor";
 import { DataKey } from "../DataKey";
 import { DataRow } from "../DataRow";
-import { DataSourceRow } from "../DataSourceRow";
-import { DataValues } from "../DataValues";
 import { DataSource, GetDataSource } from "../DataSource";
+import { DataSourceRow } from "../DataSourceRow";
+import { DataInsert, DataUpdate } from "../DataValue";
 import { EntityDataCursor } from "./EntityDataCursor";
 import { EntityDataKey } from "./EntityDataKey";
-import { EntityDataQueryRunner } from "./EntityDataQueryRunner";
 import { EntityDataLoader } from "./EntityDataLoader";
+import { EntityDataQueryRunner } from "./EntityDataQueryRunner";
 
 export type EntityDataSourceOptions<T> = {
   connection?: (() => Connection) | string | Connection;
@@ -65,10 +64,9 @@ export class EntityDataSource<T> extends DataSource<T> {
   }
 
   createEntityLoader() {
-    const loader = EntityDataLoader.createFromCursor(
-      this.entityCursor,
-      new DataSourceRow(this)
-    );
+    const loader = EntityDataLoader.createFromCursor(this.entityCursor, {
+      baseRow: new DataSourceRow(this),
+    });
 
     EntityDataLoader.buildCursor(loader, this.cursor);
 
@@ -153,23 +151,27 @@ export class EntityDataSource<T> extends DataSource<T> {
     }
   }
 
-  async insertKey(values: DataValues<T>): Promise<string> {
+  async insertKeys(values: DataInsert<T>[]): Promise<string[]> {
     const entityMetadata = this.entityCursor.repository.metadata;
-    const { row, relationKeys } = this._createEntityValues(values, true);
-    const entity = await this.entityCursor.repository.save(
-      this.entityCursor.repository.create(<any>row)
-    );
-    const entityKey = EntityDataKey.pick(entityMetadata, entity);
-    for (let { relation, key } of relationKeys) {
-      await relation.update("addOrSet", entityKey, key);
+    const keys: string[] = [];
+    for (const value of values) {
+      const { row, relationKeys } = this._createEntityValues(value, true);
+      const entity = await this.entityCursor.repository.save(
+        this.entityCursor.repository.create(<any>row)
+      );
+      const entityKey = EntityDataKey.pick(entityMetadata, entity);
+      for (let { relation, key } of relationKeys) {
+        await relation.update("addOrSet", entityKey, key);
+      }
+      keys.push(EntityDataKey.stringify(entityMetadata, entityKey));
     }
-    return EntityDataKey.stringify(entityMetadata, entityKey);
+    return keys;
   }
 
-  async updateKeys(keys: string[], values: DataValues<T>): Promise<number> {
-    if (!hasKeys(values)) return 0;
+  async updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
+    if (!hasKeys(value)) return 0;
     let affectedRows = 0;
-    const { row, relationKeys } = this._createEntityValues(values, false);
+    const { row, relationKeys } = this._createEntityValues(value, false);
     const entityMetadata = this.entityCursor.repository.metadata;
     for (const key of keys) {
       const entityKey = EntityDataKey.parse(entityMetadata, DataKey(key));

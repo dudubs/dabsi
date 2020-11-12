@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { TReactRouter } from "../../typerouter/ReactRouter";
-import { ReactRouterRouteProps } from "../../typerouter/ReactRouterLocation";
+import { ReactRouterContext } from "../../typerouter/ReactRouterLocation";
 import { Router } from "../../typerouter/Router";
 import { RpcConnection, RpcType } from "../Rpc";
 import { TInlineWidget } from "./inline-widget/InlineWidget";
@@ -24,9 +24,9 @@ export namespace WidgetViewRouter {
     Target extends AnyWidget = NonNullable<T["Target"]>
   >(
     this: Router<R>,
-    getConnection: (params: R["params"], props: ReactRouterRouteProps<R>) => C,
+    getConnection: (params: R["params"], props: ReactRouterContext<R>) => C,
     render: (
-      props: ReactRouterRouteProps<R> & {
+      props: ReactRouterContext<R> & {
         page: PageElement;
         widget: {
           connection: RpcConnection<Target>;
@@ -58,9 +58,9 @@ export namespace WidgetViewRouter {
     C extends AnyWidgetConnection
   >(
     this: Router<T>,
-    getConnection: (params: T["params"], props: ReactRouterRouteProps<T>) => C,
+    getConnection: (params: T["params"], props: ReactRouterContext<T>) => C,
     render: (
-      props: ReactRouterRouteProps<T> & {
+      props: ReactRouterContext<T> & {
         widget: {
           connection: C;
           element: WidgetElement<C>;

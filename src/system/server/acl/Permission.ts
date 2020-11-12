@@ -10,8 +10,10 @@ import { Group } from "./Group";
 import { User } from "./User";
 
 @Entity()
-@Index(["token", "ownerToken", "user"], { unique: true })
-@Index(["token", "ownerToken", "group"], { unique: true })
+@Index(["user", "token"])
+@Index(["group", "token"])
+@Index(["user", "ownerToken", "token"], { unique: true })
+@Index(["group", "ownerToken", "token"], { unique: true })
 export class Permission {
   @PrimaryGeneratedColumn()
   id: number;

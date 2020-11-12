@@ -1,16 +1,15 @@
 import { Connection, EntityMetadata, ObjectType, Repository } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { entries } from "../../common/object/entries";
-import { inspect } from "../../logging";
-import { DataQueryBuilder } from "../data-query/DataQueryBuilder";
-import { EntityDataExpToQebTranslator } from "./EntityDataExpToQebTranslator";
 import { EntityRelation } from "../../typeorm/relations";
-import { DataCursor } from "../DataCursor";
 import { DataExp } from "../data-exp/DataExp";
+import { DataQueryBuilder } from "../data-query/DataQueryBuilder";
+import { DataCursor } from "../DataCursor";
 import { DataFieldsTranslator } from "../DataFieldsTranslator";
 import { DataTypeInfo } from "../DataTypeInfo";
-import { EntityDataKey } from "./EntityDataKey";
+import { EntityDataExpTranslatorToDataQueryExp } from "./EntityDataExpTranslatorToDataQueryExp";
 import { EntityDataInfo, getEntityDataInfo } from "./EntityDataInfo";
+import { EntityDataKey } from "./EntityDataKey";
 
 export type EntityDataCursorBase = {
   typeInfo: DataTypeInfo;
@@ -185,7 +184,7 @@ export namespace EntityDataCursor {
       if (path.filter !== undefined) {
         qb.filter({
           $at: {
-            [schema]: new EntityDataExpToQebTranslator(
+            [schema]: new EntityDataExpTranslatorToDataQueryExp(
               cursor.connection,
               path.typeInfo,
               qb,

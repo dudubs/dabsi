@@ -8,8 +8,8 @@ import { makeStyles } from "@material-ui/styles";
 import clsx from "clsx";
 import * as React from "react";
 import { ReactNode, useEffect, useState } from "react";
-import { Lang } from "../../../localization/Lang";
-import { useLangTranslator } from "../../../localization/LangTranslator";
+import { Lang } from "../../../lang/Lang";
+import { useLangTranslator } from "../../../lang/LangTranslator";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { MuiIcon } from "./MuiIcon";
 

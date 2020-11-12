@@ -1,9 +1,8 @@
 // TODO: DataSource.clone(), DataSource.freeze()
-import { reversed } from "../common/array/reversed";
 import { defined } from "../common/object/defined";
 import { entries } from "../common/object/entries";
 import { hasKeys } from "../common/object/hasKeys";
-import { ArrayTypeOrObject, ExtractKeys, Type } from "../common/typings";
+import { Type } from "../common/typings";
 import { BaseType } from "./BaseType";
 import { chunks } from "./chunks";
 import { DataExp } from "./data-exp/DataExp";
@@ -20,14 +19,8 @@ import { DataNullsSort, DataOrder, DataSort } from "./DataOrder";
 import { DataRow } from "./DataRow";
 import { DataSourceRow } from "./DataSourceRow";
 import { DataUnionChildren } from "./DataUnion";
-import { DataValues } from "./DataValues";
-import {
-  Relation,
-  RelationKeys,
-  RelationToManyKeys,
-  RelationToOneKeys,
-  RelationType,
-} from "./Relation";
+import { DataInsert, DataUpdate } from "./DataValue";
+import { RelationKeys, RelationType } from "./Relation";
 
 export type DataKeyOrKeysInput<T> = DataKeyInput<T>[] | DataKeyInput<T>;
 export type DataSourceAt<T, K extends RelationKeys<T>> = DataSource<
@@ -38,12 +31,6 @@ export function DataKeyOrKeys<T>(keyOrKeys: DataKeyOrKeysInput<T>): string[] {
   if (Array.isArray(keyOrKeys)) return keyOrKeys.map(DataKey);
   return [DataKey(keyOrKeys)];
 }
-
-export type DataSourceOf<T extends DataSource<any>> = T extends DataSource<
-  infer U
->
-  ? U
-  : never;
 
 export type BasedDataSource<T> = DataSource<BaseType<T> & { _ }>;
 
@@ -154,10 +141,14 @@ export abstract class DataSource<T> {
 
   protected abstract updateKeys(
     keys: string[],
-    values: DataValues<T>
+    value: DataUpdate<T>
   ): Promise<number>;
 
-  abstract insertKey(values: DataValues<T>): Promise<string>;
+  insertKey(value: DataInsert<T>): Promise<string> {
+    return this.insertKeys([value]).then(keys => keys[0]);
+  }
+
+  abstract insertKeys(value: DataInsert<T>[]): Promise<string[]>;
 
   protected async _each(
     keyOrKeys: DataKeyOrKeysInput<T> | undefined,
@@ -175,10 +166,10 @@ export abstract class DataSource<T> {
     }
   }
 
-  async update(values: DataValues<T>): Promise<number>;
+  async update(value: DataUpdate<T>): Promise<number>;
   async update(
     keyOrKeys: DataKeyOrKeysInput<T>,
-    values: DataValues<T>
+    value: DataUpdate<T>
   ): Promise<number>;
   async update(...args): Promise<number> {
     let values;
@@ -207,8 +198,18 @@ export abstract class DataSource<T> {
     return this._each(keyOrKeys, keys => this.deleteKeys(keys));
   }
 
-  async insert(values: DataValues<T>): Promise<DataRow<T>> {
-    return this.getOrFail(await this.insertKey(values));
+  insert(value: DataInsert<T>): Promise<DataRow<T>>;
+  insert(values: DataInsert<T>[]): Promise<DataRow<T>[]>;
+  async insert(values): Promise<any> {
+    if (!Array.isArray(values)) {
+      return this.insert([values]).then(rows => rows[0]);
+    }
+    const keys = await this.insertKeys(values);
+
+    const baseRow = new DataSourceRow(this);
+    return this.filter({ $is: keys })
+      .getRows()
+      .then(rows => rows.map(row => Object.setPrototypeOf(row, baseRow)));
   }
 
   // cursoring

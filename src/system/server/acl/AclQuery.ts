@@ -1,28 +1,30 @@
 import { Connection } from "typeorm";
 import { reversed } from "../../../common/array/reversed";
+import { touchMap } from "../../../common/map/touchMap";
 import { entries } from "../../../common/object/entries";
+import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObject } from "../../../common/object/mapObject";
+import { touchObject } from "../../../common/object/touchObject";
+import { values } from "../../../common/object/values";
 import { Type } from "../../../common/typings";
 import { WeakId } from "../../../common/WeakId";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { getExpNode } from "../../../typedata/data-exp/getExpNode";
-import { EntityDataQueryExpToSqlTranslator } from "../../../typedata/data-query/EntityDataQueryExpToSqlTranslator";
 import { DataCursor, EmptyDataCursor } from "../../../typedata/DataCursor";
+import { DataTypeInfo } from "../../../typedata/DataTypeInfo";
 import { EntityDataCursor } from "../../../typedata/entity-data/EntityDataCursor";
-import { EntityDataLoader } from "../../../typedata/entity-data/EntityDataLoader";
+import { EntityDataExpTranslatorToDataQueryExp } from "../../../typedata/entity-data/EntityDataExpTranslatorToDataQueryExp";
+import { EntityDataQueryExpTranslatorToSql } from "../../../typedata/entity-data/EntityDataQueryExpTranslatorToSql";
 import { AclCriterion, AclCriterionExps } from "./AclCriterion";
 import { AclCriterionExp, AclExp, AclExpMap } from "./AclExp";
 import { AclTokenTree } from "./AclTokenTree";
 import { Permission } from "./Permission";
+import { User } from "./User";
 
 export class AclQuery {
   constructor(protected connection: Connection) {}
 
-  protected getCriterionName(criterion: AclCriterionExp) {
-    return `CRITERION:${WeakId(criterion)}`;
-  }
-
-  protected getPermissionName(token: string) {
+  protected getPermissionAliasName(token: string) {
     return `PERMISSION:${token}`;
   }
 
@@ -30,33 +32,12 @@ export class AclQuery {
     return "`" + name + "`";
   }
 
-  protected getEntityQuery<T>(
-    entityType: Type<T>,
-    cursor: DataCursor,
-    filter: DataExp<T>
-  ): string {
-    const entityCursor = EntityDataCursor.create(
-      this.connection,
-      {
-        ...cursor,
-        take: 1,
-        selection: { pick: [], ...cursor.selection },
-        filter: DataExp(cursor.filter, filter),
-      },
-      entityType
-    );
-    const loader = EntityDataLoader.createFromCursor(entityCursor);
-
-    loader.qb.query.take = 1;
-
-    const query = EntityDataQueryExpToSqlTranslator.createFromEntityLoader(
-      loader,
-      this.parameters
-    ).translateQueryWithoutFields(loader.qb.query);
-    return `(SELECT COUNT(*) ${query})`;
-  }
-
-  criterions: Set<AclCriterionExp>;
+  criterionMap: {
+    [aliasName: string]: {
+      escapedAliasName: string;
+      exp: AclCriterionExp;
+    };
+  };
   tokenTree: AclTokenTree;
 
   askFor(userKey: string): this {
@@ -68,11 +49,19 @@ export class AclQuery {
     switch (typeof exp) {
       case "string":
         this.tokenTree.add(exp);
-        return this.escapeName(this.getPermissionName(exp));
+        return this.escapeName(this.getPermissionAliasName(exp));
 
       case "function":
-        this.criterions.add(exp);
-        return this.escapeName(this.getCriterionName(exp));
+        return touchObject(
+          this.criterionMap,
+          `CRITERION:${WeakId(exp)}`,
+          aliasName => {
+            return {
+              exp,
+              escapedAliasName: this.escapeName(aliasName),
+            };
+          }
+        ).escapedAliasName;
     }
     const node = getExpNode<AclExpMap>(exp);
 
@@ -101,6 +90,14 @@ export class AclQuery {
           node.value.allow?.map(exp => this.getExpQuery(exp)).join(" AND ") ||
           "1"
         })`;
+      case "$user":
+        if (!node.value || typeof node.value !== "object")
+          throw new TypeError("$user must to be object.");
+        return touchMap(this.userEscapedFieldMap, node.value, exp => {
+          const aliasName = `USER:${counter++}`;
+          this.userFieldExpMap[aliasName] = node.value;
+          return this.escapeName(aliasName);
+        });
     }
   }
 
@@ -111,6 +108,7 @@ export class AclQuery {
   askMap<K extends string>(
     expMap: Record<K, AclExp>
   ): Promise<Record<K, boolean>> {
+    if (!hasKeys(expMap)) return Promise.resolve({} as any);
     return this.askAll(() => {
       let fields = "";
       for (const [key, exp] of entries(expMap)) {
@@ -123,10 +121,6 @@ export class AclQuery {
       return fields;
     }).then(row => mapObject(row, Boolean));
   }
-
-  parameters: any[];
-
-  userKey: string;
 
   protected getPermissionsQuery() {
     let query = "";
@@ -145,16 +139,17 @@ export class AclQuery {
 
   protected getTokenQuery(token: string, subTokens: string[]) {
     let query = ``;
-    const user = { $is: this.userKey };
 
     for (let subToken of subTokens) {
       query +=
         (query ? " OR " : "") +
-        this.escapeName(this.getPermissionName(subToken));
+        this.escapeName(this.getPermissionAliasName(subToken));
     }
-    return (
-      (query ? query + " OR " : "") +
-      this.getEntityQuery(Permission, EmptyDataCursor, {
+    const user = { $is: this.userKey };
+    const permissionQuery = this.createEntityQuery(
+      Permission,
+      EmptyDataCursor,
+      {
         $and: [
           {
             $or: [
@@ -164,38 +159,110 @@ export class AclQuery {
           },
           { token },
         ],
-      }) +
+      }
+    ).getCountQuery();
+
+    return (
+      (query ? query + " OR " : "") +
+      permissionQuery +
       " AS" +
-      this.escapeName(this.getPermissionName(token))
+      this.escapeName(this.getPermissionAliasName(token))
     );
   }
 
   getCriterionsQuery() {
     let fields = "";
-    for (const criterionExp of this.criterions) {
-      const aliasName = this.getCriterionName(criterionExp);
-      const criterion = criterionExp(dataRow => AclCriterion.create(dataRow));
+    for (const { exp, escapedAliasName } of values(this.criterionMap)) {
+      const criterion = exp(dataRow => AclCriterion.create(dataRow));
       const exps = new AclCriterionExps(this.userKey);
       fields +=
         (fields ? "," : "") +
-        this.getEntityQuery(
+        this.createEntityQuery(
           criterion.entityType,
           criterion.cursor,
           criterion.getFilter(exps)
-        ) +
+        ).getCountQuery() +
         " AS " +
-        this.escapeName(aliasName);
+        escapedAliasName;
     }
-    return fields ? `SELECT (${fields}) _criterions` : "";
+    return fields ? `(SELECT ${fields}) _criterions` : "";
   }
+
+  userFieldExpMap: Record<string, DataExp<User>>;
+  userEscapedFieldMap: Map<DataExp<User>, string>;
+
+  protected createEntityQuery<T>(
+    entityType: Type<T>,
+    cursor: DataCursor,
+    filter: DataExp<T>
+  ) {
+    const entityCursor = EntityDataCursor.create(
+      this.connection,
+      {
+        ...cursor,
+        take: 1,
+        selection: { pick: [], ...cursor.selection },
+        filter: DataExp(cursor.filter, filter),
+      },
+      entityType
+    );
+
+    const qb = EntityDataCursor.createQueryBuilder(entityCursor);
+    qb.query.take = 1;
+
+    const translatorToQueryExp = new EntityDataExpTranslatorToDataQueryExp(
+      this.connection,
+      DataTypeInfo.get(User),
+      qb,
+      qb.query.alias
+    );
+
+    const translatorToSql = new EntityDataQueryExpTranslatorToSql(
+      this.connection,
+      qb.query.alias,
+      this.parameters
+    );
+
+    return {
+      getQueryWithoutFields() {
+        return translatorToSql.translateQueryWithoutFields(qb.query);
+      },
+      getCountQuery() {
+        return `(SELECT COUNT(*) ${this.getQueryWithoutFields()})`;
+      },
+      getQueryWithFields(fieldMap: Record<string, DataExp<any>>) {
+        qb.query.fields = mapObject(fieldMap, exp =>
+          translatorToQueryExp.translate(exp)
+        );
+        return translatorToSql.translateQuery(qb.query);
+      },
+    };
+  }
+
+  protected getUserQuery(): string {
+    if (!hasKeys(this.userFieldExpMap)) return "";
+
+    return `(${this.createEntityQuery(User, EmptyDataCursor, {
+      $is: this.userKey,
+    }).getQueryWithFields(this.userFieldExpMap)}) _user`;
+  }
+
+  parameters: any[];
+  userKey: string;
 
   askAll(getQuery: () => string) {
     this.parameters = [];
-    this.criterions = new Set();
+    this.criterionMap = {};
+    this.userFieldExpMap = {};
+    this.userEscapedFieldMap = new Map();
     this.tokenTree = new AclTokenTree();
-    let query = "SELECT" + getQuery();
+    let query = "SELECT " + getQuery();
 
-    const fromQuery = [this.getCriterionsQuery(), this.getPermissionsQuery()]
+    const fromQuery = [
+      this.getCriterionsQuery(),
+      this.getPermissionsQuery(),
+      this.getUserQuery(),
+    ]
       .filter(query => !!query)
       .join(",");
 
@@ -203,3 +270,5 @@ export class AclQuery {
     return this.connection.query(query, this.parameters).then(rows => rows[0]);
   }
 }
+
+let counter = 0;

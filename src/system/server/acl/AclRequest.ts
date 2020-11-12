@@ -1,4 +1,5 @@
 import { Connection } from "typeorm";
+import { hasKeys } from "../../../common/object/hasKeys";
 import { AclExp } from "./AclExp";
 import { AclQuery } from "./AclQuery";
 import { AclTokenTree } from "./AclTokenTree";
@@ -9,7 +10,10 @@ export class AclRequest {
 
   protected tokenTree = new AclTokenTree();
 
-  constructor(protected connection: Connection, protected userKey: string) {}
+  constructor(
+    protected connection: Connection,
+    protected userKey: string | undefined
+  ) {}
 
   allow(...exps: AclExp[]): this {
     exps = exps.filter(exp => {
@@ -29,29 +33,40 @@ export class AclRequest {
     return this;
   }
 
-  ask(): Promise<boolean> {
-    return new AclQuery(this.connection).askFor(this.userKey).ask({
-      $all: [
-        ...this.tokenTree.getBases(),
-        {
-          $privilege: {
-            allow: this.allowed,
-            deny: this.denied,
+  protected createQuery() {
+    if (!this.userKey) {
+      throw new Error("No user for AclRequest.");
+    }
+    return new AclQuery(this.connection).askFor(this.userKey);
+  }
+
+  review<K extends string>(
+    expMap: Record<K, AclExp>
+  ): Promise<Record<K, boolean>> {
+    return this.createQuery().askMap(expMap);
+  }
+
+  async ask(): Promise<boolean> {
+    if (
+      this.allowed.length ||
+      this.denied.length ||
+      hasKeys(this.tokenTree.children)
+    )
+      return this.createQuery().ask({
+        $all: [
+          ...this.tokenTree.getBases(),
+          {
+            $privilege: {
+              allow: this.allowed,
+              deny: this.denied,
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
+    return true;
   }
 }
 
-/*
-
-  ADMIN/
-
-  ADMIN/FORUMS
-
-  ADMIN/BLOGS
-
-  `PERMISSION:ADMIN/BLOGS` OR `PERMISSION/ADMIN`
-
- */
+export const AclResolvers = {
+  aclReq: AclRequest,
+};

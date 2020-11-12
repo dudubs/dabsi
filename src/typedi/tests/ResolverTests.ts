@@ -1,6 +1,3 @@
-import exp from "constants";
-import { Consumer } from "../Consumer";
-import { Inject } from "../Inject";
 import { Provider } from "../Provider";
 import { Resolver } from "../Resolver";
 
@@ -54,10 +51,6 @@ testm(__filename, () => {
     foo() {}
   }
 
-  it("expect to throw error for empty context", () => {
-    expect(() => Resolver.checkAndResolve(Inject(MyType))).toThrowError();
-  });
-
   it("expect to resolve type", () => {
     expect(
       Resolver.checkAndResolve(
@@ -67,19 +60,10 @@ testm(__filename, () => {
     ).toBeInstanceOf(MyType);
   });
 
-  it("expect to resolve abstract type", () => {
-    expect(
-      Resolver.checkAndResolve(
-        MyAbstractType.asResolver(),
-        MyType.provide(() => new MyType())
-      )
-    ).toBeInstanceOf(MyAbstractType);
-  });
-
   it("expect to consume resolver", () => {
     expect(
       Resolver.checkAndResolve(
-        Consumer([r1], name => `Hello ${name}!`),
+        Resolver.consume([r1], name => `Hello ${name}!`),
         r1.provide("World")
       )
     ).toEqual("Hello World!");

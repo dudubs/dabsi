@@ -11,9 +11,9 @@ import { Router } from "../Router";
 
 testm(__filename, () => {
   let history: History;
-  let tester: ReactTestRenderer;
+  let t: ReactTestRenderer;
 
-  const router = Router()
+  const r = Router()
     .use(ReactRouter)
     .route({
       a: Router({
@@ -23,36 +23,47 @@ testm(__filename, () => {
       b: Router({
         ba: Router(),
       }),
+      wrapByPlugin: Router({
+        a: Router(),
+      }),
     });
 
-  router.at("a").wrap((props) => {
-    return <>wrap {props.children}</>;
-  });
+  const rp = [
+    r.plugin(r => {
+      r.at("a").wrap(props => {
+        return <>wrap {props.children}</>;
+      });
 
-  router.at("b").renderDefault((props) => {
-    return (
-      <>
-        default {props.location.path} of {props.rootPath}
-      </>
-    );
-  });
+      r.at("a").render(p => {
+        return <>a</>;
+      });
 
-  router.render((props) => {
-    return <>index</>;
-  });
+      r.at("b").renderDefault(props => {
+        return (
+          <>
+            default {props.location.path} of {props.rootPath}
+          </>
+        );
+      });
 
-  router
-    .at("a")
-    .at("aa")
-    .render((props) => {
-      return <>hello</>;
-    });
+      r.render(props => {
+        return <>index</>;
+      });
+
+      r.at("a")
+        .at("aa")
+        .render(props => {
+          return <>hello</>;
+        });
+    }),
+  ];
+
   beforeAll(async () => {
     history = createMemoryHistory();
 
     try {
-      tester = TestRenderer.create(
-        <ReactRouterView history={history} router={router}>
+      t = TestRenderer.create(
+        <ReactRouterView history={history} router={r} plugins={rp}>
           <ReactRouterContentView />
         </ReactRouterView>
       );
@@ -63,25 +74,31 @@ testm(__filename, () => {
   });
 
   it("expect to default b of b", async () => {
-    expect(await pushAndGetJSON("/b/hello")).toEqual("default /b of /b/hello");
+    expect(await getPathJSON("/b/hello")).toEqual("default /b of /b/hello");
   });
 
   it("expect to default b of ba", async () => {
-    expect(await pushAndGetJSON("/b/ba/hello")).toEqual(
+    expect(await getPathJSON("/b/ba/hello")).toEqual(
       "default /b/ba of /b/ba/hello"
     );
   });
 
   it("expect to wrapper", async () => {
-    expect(await pushAndGetJSON("/a/aa")).toEqual("wrap hello");
+    expect(await getPathJSON("/a/aa")).toEqual("wrap hello");
   });
 
-  async function pushAndGetJSON(path: string) {
+  it("expect to wrapper", async () => {
+    expect(await getPathJSON("/a")).toEqual("wrap a");
+  });
+
+  async function getPathJSON(path: string) {
     await Timeout(0);
     history.push(path);
     await Timeout(0);
 
-    return (tester.toJSON() as any).join("") as any;
+    const j = t.toJSON() as any;
+    if (typeof j === "string") return j;
+    return j.join("");
   }
 });
 
@@ -105,7 +122,7 @@ function typingTests() {
     .at("a")
     .at("aa")
     .at("aaa")
-    .render((props) => {
+    .render(props => {
       // @ts-expect-error
       props.location.parent.at("x");
 

@@ -6,8 +6,6 @@ import {
   RpcUnresolvedConfig,
 } from "./Rpc";
 
-import "../react/register";
-
 export type RpcTester<T extends AnyRpc> = {
   rpc: T;
   testConfig(config: RpcUnresolvedConfig<T>);

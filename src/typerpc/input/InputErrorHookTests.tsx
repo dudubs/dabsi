@@ -5,7 +5,7 @@ import { testWidgetView } from "../WidgetViewTester";
 import { InputErrorHook, InputErrorHookView } from "./InputErrorHook";
 import { TestInput, TestInputView } from "./InputTests";
 
-describe(__filename, () => {
+testm(__filename, () => {
   testRpc(InputErrorHook<"ERR2">()(TestInput), t => {
     testWidgetView(t, InputErrorHookView, t => {
       t.testRender((View, props) => (

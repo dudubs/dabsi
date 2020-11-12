@@ -1,15 +1,21 @@
 import { Connection } from "typeorm";
 import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
+import { Inject } from "../../../typedi/Inject";
 import { Permission } from "./Permission";
 
-export namespace PermissionManager {
-  export async function add(
-    connection: Connection,
-    to: "user" | "group",
-    key: string,
-    token: string
-  ) {
-    const source = EntityDataSource.create(Permission, connection)
+export class PermissionManager {
+  static *getTokenParts(token: string) {
+    let subToken = "";
+    for (const key of token.split("/")) {
+      subToken += (subToken ? "/" : "") + key;
+      yield subToken;
+    }
+  }
+
+  constructor(@Inject() public connection: Connection) {}
+
+  async addToken(to: "user" | "group", key: string, token: string) {
+    const source = EntityDataSource.create(Permission, this.connection)
       .of(to, key)
       .of("ownerToken", token);
 
@@ -17,22 +23,15 @@ export namespace PermissionManager {
       return "ALREADY_EXISTS" as const;
     }
 
-    let subToken = "";
-    for (const key of token.split("/")) {
-      subToken += (subToken ? "/" : "") + key;
-      await source.insert({ token: subToken });
-    }
+    await source.insert(
+      [...PermissionManager.getTokenParts(token)].map(token => ({ token }))
+    );
 
     return "ADDED" as const;
   }
 
-  export function remove(
-    connection: Connection,
-    to: "user" | "group",
-    key: string,
-    token: string
-  ) {
-    return EntityDataSource.create(Permission, connection)
+  removeToken(to: "user" | "group", key: string, token: string) {
+    return EntityDataSource.create(Permission, this.connection)
       .of(to, key)
       .filter({ ownerToken: token })
       .delete();

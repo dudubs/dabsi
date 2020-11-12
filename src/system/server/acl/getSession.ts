@@ -1,9 +1,7 @@
-import crypto from "crypto";
-import express from "express";
 import { BasedType } from "../../../typedata/BaseType";
 import { DataRow } from "../../../typedata/DataRow";
-import { DataSource } from "../../../typedata/DataSource";
-import { BasedDataSource } from "../../../typedata/DataSource";
+import { BasedDataSource, DataSource } from "../../../typedata/DataSource";
+import { generateSessionToken } from "./generateSessionToken";
 import { Session } from "./Session";
 
 export async function getSession<T extends BasedType<Session>>({
@@ -23,7 +21,7 @@ export async function getSession<T extends BasedType<Session>>({
     : await source.filter({ $base: ["token", { $equals: token }] }).get();
 
   if (!session) {
-    token = crypto.randomBytes(32).toString("base64");
+    token = generateSessionToken();
     session = await source.insert({
       token,
       timeout: new Date().getTime(),

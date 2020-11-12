@@ -1,7 +1,7 @@
 import { Connection } from "typeorm";
 import { AbstractDataQueryRunner } from "../data-query/AbstractDataQueryRunner";
 import { DataQuery } from "../data-query/DataQueryExp";
-import { EntityDataQueryExpToSqlTranslator } from "../data-query/EntityDataQueryExpToSqlTranslator";
+import { EntityDataQueryExpTranslatorToSql } from "./EntityDataQueryExpTranslatorToSql";
 
 export class EntityDataQueryRunner extends AbstractDataQueryRunner {
   constructor(public connection: Connection, public query: DataQuery) {
@@ -9,7 +9,7 @@ export class EntityDataQueryRunner extends AbstractDataQueryRunner {
   }
 
   getQueryAndParameters(): [string, any[]] {
-    return EntityDataQueryExpToSqlTranslator.getQueryAndParameters(
+    return EntityDataQueryExpTranslatorToSql.getQueryAndParameters(
       this.connection,
       this.query
     );
@@ -18,10 +18,7 @@ export class EntityDataQueryRunner extends AbstractDataQueryRunner {
   getRows(): Promise<any> {
     const [query, parameters] = this.getQueryAndParameters();
     // console.log({ query, parameters });
-    return this.connection.query(query, parameters).then(x => {
-      // console.log({ x });
-      return x;
-    });
+    return this.connection.query(query, parameters);
   }
 
   hasRow(): Promise<boolean> {

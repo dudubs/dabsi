@@ -1,6 +1,6 @@
 import { ExpMap } from "../../common/typings";
 import { DataOrder } from "../DataOrder";
-import { DataExp } from "../data-exp/DataExp";
+import { DataExp, DataExpTypes } from "../data-exp/DataExp";
 
 export type DataQueryJoinType = "LEFT" | "INNER";
 
@@ -10,7 +10,7 @@ export type DataQueryJoin = {
   condition?: DataExp<any>;
 };
 
-export type QueryExpTypes = {
+export type DataQueryExpTypes = DataExpTypes<any> & {
   $queryCount: DataQuery;
 
   $queryHas: DataQuery;
@@ -20,7 +20,7 @@ export type QueryExpTypes = {
   $query: DataQuery;
 };
 
-export type DataQueryExp = ExpMap<QueryExpTypes> | DataExp<any>;
+export type DataQueryExp = ExpMap<DataQueryExpTypes> | DataExp<any>;
 
 export type DataQuery = {
   from: string;

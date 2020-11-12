@@ -6,18 +6,14 @@ import { flatToSeq } from "../common/flatToSeq";
 import { Renderer } from "../react/renderer";
 import { EmptyFragment } from "../react/utils/EmptyFragment";
 import { ReactHook } from "../react/utils/ReactHook";
-import {
-  ReactRouterLocation,
-  ReactRouterRouteProps,
-  ReactRouterRoutePropsContext,
-} from "./ReactRouterLocation";
+import { ReactRouterLocation, ReactRouterContext } from "./ReactRouterLocation";
 import { AnyRouter, Router, TRouter, RouterPlugin } from "./Router";
 
 export type TReactRouter = TRouter & { routerType: typeof ReactRouter };
 
 type WrapperProps<T extends TReactRouter> = {
   location: ReactRouterLocation<T>;
-  route: ReactRouterRouteProps;
+  route: ReactRouterContext;
   children: ReactElement;
 };
 
@@ -28,9 +24,9 @@ export const getReactRouterProps = WeakMapFactory<AnyRouter, ReactRouterProps>(
 );
 
 export type ReactRouterProps = {
-  renderer?: Renderer<ReactRouterRouteProps>;
-  defaultRenderer?: Renderer<ReactRouterRouteProps>;
-  loadRenderer?: Renderer<ReactRouterRouteProps>;
+  renderer?: Renderer<ReactRouterContext>;
+  defaultRenderer?: Renderer<ReactRouterContext>;
+  loadRenderer?: Renderer<ReactRouterContext>;
   wrappers: Renderer<WrapperProps<any>>[];
 };
 
@@ -47,13 +43,13 @@ export namespace ReactRouter {
     this: Router<T>,
     wrapper: Renderer<WrapperProps<T>>
   ): Router<T> {
-    getReactRouterProps(this).wrappers.push(wrapper);
+    this.reactProps.wrappers.push(wrapper);
     return this;
   }
 
   export function renderDefault<T extends TReactRouter>(
     this: Router<T>,
-    renderer: Renderer<ReactRouterRouteProps<T> & { type: "default" }>
+    renderer: Renderer<ReactRouterContext<T> & { type: "default" }>
   ): Router<T> {
     this.reactProps.defaultRenderer = renderer;
     return this;
@@ -61,7 +57,7 @@ export namespace ReactRouter {
 
   export function render<T extends TReactRouter>(
     this: Router<T>,
-    component: Renderer<ReactRouterRouteProps<T>>
+    component: Renderer<ReactRouterContext<T>>
   ): Router<T> {
     this.reactProps.renderer = Renderer(component);
     return this;
@@ -69,7 +65,7 @@ export namespace ReactRouter {
 
   export function renderOnLoad<T extends TReactRouter>(
     this: Router<T>,
-    renderer: Renderer<ReactRouterRouteProps>
+    renderer: Renderer<ReactRouterContext>
   ): Router<T> {
     this.reactProps.loadRenderer = renderer;
     return this;
@@ -78,20 +74,20 @@ export namespace ReactRouter {
   export function loadAndRender<T extends TReactRouter>(
     this: Router<T>,
     loadRenderer: (
-      props: ReactRouterRouteProps<T>
+      props: ReactRouterContext<T>
     ) => Awaitable<() => ReactElement>
   ): Router<T> {
-    return this.render((props) => {
+    return this.render(props => {
       const component = useLoader(() => loadRenderer(props), [props.location]);
 
       if (component) return createElement(component);
 
       const renderOnLoad = flatToSeq<Router<TReactRouter>>(
         this,
-        (router) => router.parent
+        router => router.parent
       )
-        .map((router) => router?.reactProps.loadRenderer)
-        .find((renderer) => !!renderer);
+        .map(router => router?.reactProps.loadRenderer)
+        .find(renderer => !!renderer);
 
       if (renderOnLoad) return renderOnLoad(props);
 

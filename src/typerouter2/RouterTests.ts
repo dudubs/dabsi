@@ -1,6 +1,7 @@
 import { Router } from "./Router";
 import { RouterLocation } from "./RouterLocation";
 
+
 describe(__filename, () => {
   const baseRouter = Router({
     a: Router({

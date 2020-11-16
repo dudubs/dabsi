@@ -53,13 +53,18 @@ export class AclRequest {
       hasKeys(this.tokenTree.children)
     )
       return this.createQuery().ask({
-        $all: [
-          ...this.tokenTree.getBases(),
+        $any: [
+          "ROOT",
           {
-            $privilege: {
-              allow: this.allowed,
-              deny: this.denied,
-            },
+            $all: [
+              ...this.tokenTree.getBases(),
+              {
+                $privilege: {
+                  allow: this.allowed,
+                  deny: this.denied,
+                },
+              },
+            ],
           },
         ],
       });

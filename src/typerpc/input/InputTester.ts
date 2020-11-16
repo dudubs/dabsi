@@ -1,4 +1,4 @@
-import { inspect } from "../../logging";
+import { inspect } from "../../logging/inspect";
 import { RpcTester } from "../RpcTester";
 import {
   AnyInput,
@@ -12,17 +12,22 @@ import Expected = jasmine.Expected;
 
 export type InputTester<T extends AnyInput> = {
   readonly valueElement: InputValueElement<T>;
-  testError(data, error: Expected<InputError<T>>);
-  testError(title: string, data, error: Expected<InputError<T>>);
+  testError(data, error: ValueOrAwaitableFn<Expected<InputError<T>>>);
+  testError(
+    title: string,
+    data,
+    error: ValueOrAwaitableFn<Expected<InputError<T>>>
+  );
 
   testValue(
     data: ValueOrAwaitableFn<InputValueData<T>>,
-    expectedValue: jasmine.Expected<InputValueData<T>>
+    expectedValue: ValueOrAwaitableFn<jasmine.Expected<InputValueData<T>>>
   );
+
   testValue(
     title: string,
     data: ValueOrAwaitableFn<InputValueData<T>>,
-    expectedValue: jasmine.Expected<InputValueData<T>>
+    expectedValue: ValueOrAwaitableFn<jasmine.Expected<InputValueData<T>>>
   );
 };
 
@@ -52,8 +57,10 @@ export function testInput<T extends AnyInput>(
         args = [`expect to error:${inspect(error)}`, ...args];
       }
       const [title, data, error] = args;
-      it(title, () => {
-        return testData(data, { error });
+      it(title, async () => {
+        return testData(await ValueOrAwaitableFn(data), {
+          error: await ValueOrAwaitableFn(error),
+        });
       });
     },
     testValue(...args) {
@@ -62,8 +69,8 @@ export function testInput<T extends AnyInput>(
         args = [`expect to value:${inspect(value)}`, ...args];
       }
       const [title, data, value] = args;
-      it(title, () => {
-        return testData(data, { value });
+      it(title, async () => {
+        return testData(data, { value: await ValueOrAwaitableFn(value) });
       });
     },
   });

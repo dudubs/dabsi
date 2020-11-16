@@ -8,14 +8,14 @@ import {
   NonNullableAt,
   PluckRequired,
 } from "../common/typings";
-import { inspect } from "../logging";
+import { inspect } from "../logging/inspect";
 
-export type TRouter = {
+export type TRouterOld = {
   params: Record<string, any>;
 
-  children: Record<string, TRouter>;
+  children: Record<string, TRouterOld>;
 
-  stack: Record<string, TRouter>;
+  stack: Record<string, TRouterOld>;
 
   routerType: typeof RouterType;
 
@@ -23,7 +23,7 @@ export type TRouter = {
 };
 
 export type TEmptyRouter = Expect<
-  TRouter,
+  TRouterOld,
   {
     params: {};
     children: {};
@@ -34,27 +34,27 @@ export type TEmptyRouter = Expect<
 >;
 
 export namespace TEmptyRouter {
-  export type WithChildren<C extends TRouter["children"]> = TRouter & {
+  export type WithChildren<C extends TRouterOld["children"]> = TRouterOld & {
     children: C;
   };
 
   export type WithParams<
     K extends string,
-    C extends TRouter["children"] = {}
-  > = TRouter & {
+    C extends TRouterOld["children"] = {}
+  > = TRouterOld & {
     children: C;
     params: Record<K, any>;
   };
 }
 
-export type Router<T extends TRouter = TEmptyRouter> = WithMetaType<{
+export type Router<T extends TRouterOld = TEmptyRouter> = WithMetaType<{
   TRouter: T;
 }> & {
   params: string[];
 
   routerType: object;
 
-  children: Record<string, Router<TRouter & Pick<T, "routerType">>>;
+  children: Record<string, Router<TRouterOld & Pick<T, "routerType">>>;
 
   plugins: RouterPlugin<T>[];
 
@@ -112,11 +112,14 @@ export function Router(...args): AnyRouter {
   );
 }
 
-export type AnyRouter = Router<TRouter>;
+export type AnyRouter = Router<TRouterOld>;
 
 export type RouterType<T extends AnyRouter> = MetaType<T>["TRouter"];
 
-export type RouterAt<T extends TRouter, K extends keyof T["children"]> = Router<
+export type RouterAt<
+  T extends TRouterOld,
+  K extends keyof T["children"]
+> = Router<
   T["children"][K] & {
     parent: T;
     routerType: T["routerType"];
@@ -127,11 +130,14 @@ export type RouterAt<T extends TRouter, K extends keyof T["children"]> = Router<
 >;
 
 export namespace RouterType {
-  export type Route<U extends Record<string, TRouter>> = {
+  export type Route<U extends Record<string, TRouterOld>> = {
     children: { [K in keyof U]: U[K] };
   };
 
-  export function route<T extends TRouter, U extends Record<string, AnyRouter>>(
+  export function route<
+    T extends TRouterOld,
+    U extends Record<string, AnyRouter>
+  >(
     this: Router<T>,
     children: U
   ): Router<T & Route<{ [K in keyof U]: RouterType<U[K]> }>> {
@@ -140,7 +146,7 @@ export namespace RouterType {
     return <any>this;
   }
 
-  export function use<T extends TRouter, U extends object>(
+  export function use<T extends TRouterOld, U extends object>(
     this: Router<T>,
     type: U
   ): Router<T & { routerType: U }> {
@@ -152,7 +158,7 @@ export namespace RouterType {
     return <any>this;
   }
 
-  export function at<T extends TRouter, K extends keyof T["children"]>(
+  export function at<T extends TRouterOld, K extends keyof T["children"]>(
     this: Router<T>,
     name: string & K,
     callback?: (router: RouterAt<T, K>) => void
@@ -179,7 +185,7 @@ export namespace RouterType {
     params: Record<K, string>;
   };
 
-  export function param<T extends TRouter, K extends string, U = string>(
+  export function param<T extends TRouterOld, K extends string, U = string>(
     this: Router<T>,
     name: K
   ): Router<T & Param<K, U>> {
@@ -187,7 +193,7 @@ export namespace RouterType {
     return <any>this;
   }
 
-  export function bind<T extends TRouter>(
+  export function bind<T extends TRouterOld>(
     this: Router<T>,
     context: T["context"],
     plugins: RouterPlugin<T>[]
@@ -204,7 +210,7 @@ export namespace RouterType {
     return <any>router;
   }
 
-  export function apply<T extends TRouter>(
+  export function apply<T extends TRouterOld>(
     this: Router<T>,
     plugins: RouterPlugin<T>[]
   ): Router<T> {
@@ -212,7 +218,7 @@ export namespace RouterType {
     return this;
   }
 
-  export function plugin<T extends TRouter>(
+  export function plugin<T extends TRouterOld>(
     this: Router<T>,
     callback: (router: Router<T>, context: T["context"]) => void
   ): RouterPlugin<RouterRoot<T>> {
@@ -224,7 +230,7 @@ export namespace RouterType {
     return <any>callback;
   }
 
-  export function context<T extends TRouter>(
+  export function context<T extends TRouterOld>(
     this: Router<T>
   ): <C extends object>() => Router<T & { context: C }> {
     return () => <any>this;
@@ -235,13 +241,13 @@ export namespace RouterType {
   }
 }
 
-export type RouterRoot<T extends TRouter> = Extract<
+export type RouterRoot<T extends TRouterOld> = Extract<
   DefaultIfNever<PluckRequired<T, "root">, T>,
-  TRouter
+  TRouterOld
 >;
 
 // TODO: Move context to render?
-export type RouterPlugin<T extends TRouter> = (
+export type RouterPlugin<T extends TRouterOld> = (
   router: Router<T>,
   context: T["context"]
 ) => void;

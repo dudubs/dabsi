@@ -1,7 +1,8 @@
 import { History } from "history";
 import { createElement, Fragment, ReactNode, useEffect, useState } from "react";
-import { useEmitted } from "../react/useEmitted";
-import { getRouteByPath } from "./getRoute";
+import { useEmitted } from "../react/reactor/useEmitted";
+import { useEmitter } from "../react/reactor/useEmitter";
+import { getRoutePropsByPath, RouteProps } from "./RouteProps";
 import { getReactRouterMetadata } from "./ReactRouter";
 import { AnyRouter } from "./Router";
 import { RouterLocation } from "./RouterLocation";
@@ -16,15 +17,17 @@ export function ReactRouterView({
   history,
 }: ReactRouterViewProps) {
   const [route, setRoute] = useState(() =>
-    getRouteByPath(rootRouter, history.location.pathname)
+    getRoutePropsByPath(rootRouter, history.location.pathname)
   );
+
+  const emit = useEmitter();
 
   useEmitted(RouterLocation, location => {
     if (location.root.router === rootRouter) {
       setRoute({
-        location,
         type: "INDEX",
-        rootPath: location.path,
+        location,
+        path: location.path,
       });
     }
   });
@@ -32,7 +35,7 @@ export function ReactRouterView({
   useEffect(
     () =>
       history.listen(() => {
-        setRoute(getRouteByPath(rootRouter, history.location.pathname));
+        setRoute(getRoutePropsByPath(rootRouter, history.location.pathname));
       }),
     [history]
   );
@@ -42,7 +45,8 @@ export function ReactRouterView({
   const routerMetadata = getReactRouterMetadata(route.location.router);
   if (routerMetadata.renderer) {
     children = routerMetadata.renderer({
-      route: route,
+      emit,
+      route,
       location: route.location,
     });
   }
@@ -51,6 +55,7 @@ export function ReactRouterView({
     const routerMetadata = getReactRouterMetadata(location.router);
     for (const wrapper of routerMetadata.wrappers) {
       children = wrapper({
+        emit,
         children,
         location,
         route,

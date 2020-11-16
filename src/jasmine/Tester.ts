@@ -1,28 +1,43 @@
-import { Awaitable } from "../common/typings";
+import { mapObject, mapObjectAsync } from "../common/object/mapObject";
+import { Awaitable, Awaited } from "../common/typings";
 
+type BeforeFn = {
+  <T extends object, U extends object>(
+    this: T,
+    builder: (context: T) => Awaitable<U>
+  ): T & U;
+
+  <T extends object, U extends Record<string, (context: T) => any>>(
+    this: T,
+    builderMap: U
+  ): T &
+    {
+      [K in keyof U]: Awaited<ReturnType<U[K]>>;
+    };
+};
 export type Tester = {
-  beforeAll<U extends object, T extends object>(
-    this: T,
-    builder: (context: T) => Awaitable<U>
-  ): T & U;
+  beforeAll: BeforeFn;
 
-  beforeEach<U extends object, T extends object>(
-    this: T,
-    builder: (context: T) => Awaitable<U>
-  ): T & U;
+  beforeEach: BeforeFn;
 };
 
 function createMethod(before) {
-  return function (this, callback) {
+  return function (this, builder) {
     const t = Object.create(this);
 
     before(async () => {
-      Object.assign(t, await callback(this));
+      Object.assign(
+        t,
+        typeof builder === "function"
+          ? await builder(this)
+          : await mapObjectAsync(builder, builder => (builder as any)(t))
+      );
     });
 
     return t;
   };
 }
+
 export const Tester: Tester = {
   beforeAll: createMethod(beforeAll),
   beforeEach: createMethod(beforeEach),

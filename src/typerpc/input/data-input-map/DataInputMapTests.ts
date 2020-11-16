@@ -21,9 +21,9 @@ testm(__dirname, () => {
 
     testInput(t, t => {
       t.testValue({}, {});
-      const id1 = DataInputTester.rows[0].id;
-      const id2 = DataInputTester.rows[0].id;
-      const validData = { [id1]: 1, [id2]: 2 };
+      const id1 = () => DataInputTester.rows[0].id;
+      const id2 = () => DataInputTester.rows[1].id;
+      const validData = () => ({ [id1()]: 1, [id2()]: 2 });
       t.testValue(validData, validData);
       t.testError(
         "expect to invalid keys error",
@@ -34,14 +34,15 @@ testm(__dirname, () => {
       );
       t.testError(
         "expect to target error",
-        { ...validData, [id2]: 101 },
-        objectContaining({
-          errorMap: objectContaining({
-            [id2]: objectContaining({
-              type: "MAX_VALUE",
+        () => ({ ...validData(), [id2()]: 101 }),
+        () =>
+          objectContaining({
+            errorMap: objectContaining({
+              [id2()]: objectContaining({
+                type: "MAX_VALUE",
+              }),
             }),
-          }),
-        })
+          })
       );
     });
   });

@@ -3,6 +3,7 @@ import Tabs, { TabsProps } from "@material-ui/core/Tabs";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
 import { entries } from "../../../common/object/entries";
+import { keys } from "../../../common/object/keys";
 import { LangKey } from "../../../lang/LangKey";
 import { Renderer } from "../../../react/renderer";
 import { EmptyFragment } from "../../../react/utils/EmptyFragment";
@@ -10,7 +11,11 @@ import { mergeProps } from "../../../react/utils/mergeProps";
 import { RpcConnection } from "../../../typerpc/Rpc";
 import { AnyTabsWidget } from "../../../typerpc/widget/tabs-widget/TabsWidget";
 import { TabsWidgetView } from "../../../typerpc/widget/tabs-widget/TabsWidgetView";
-import { WidgetType } from "../../../typerpc/widget/Widget";
+import {
+  AnyWidget,
+  AnyWidgetConnection,
+  WidgetType,
+} from "../../../typerpc/widget/Widget";
 import { AnyWidgetRecord } from "../../../typerpc/widget/widget-map/WidgetMap";
 import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
 import { MuiIcon } from "../components/MuiIcon";
@@ -19,15 +24,11 @@ export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 
 export type RendererOrProps<T, P> = [Partial<T>, Renderer<P>] | Renderer<P>;
 
-export function RendererOrProps<T, P>(
-  rendererOrProps: RendererOrProps<T, P>
-): [Partial<T>, Renderer<P>] {
-  if (typeof rendererOrProps === "function") {
-    return [{}, rendererOrProps];
-  } else {
-    return rendererOrProps;
-  }
-}
+export type MuiTabViewProps<C extends AnyWidgetConnection> = {
+  title?: ReactNode;
+  icon?: MuiIcon;
+  render?(props: WidgetViewProps<C>): ReactElement;
+};
 
 export declare namespace MuiTabsWidgetViewProps {
   export type Tab = {
@@ -46,50 +47,53 @@ export type MuiTabsWidgetViewProps<
 
   renderTabPanel?: Renderer<{ children: ReactElement | undefined }>;
 
-  tabs: {
-    [K in keyof T]: RendererOrProps<
-      MuiTabsWidgetViewProps.Tab,
-      WidgetViewProps<RpcConnection<T[K]>>
-    >;
+  tabs?: {
+    [K in keyof T]?:
+      | MuiTabViewProps<RpcConnection<T[K]>>
+      | MuiTabViewProps<RpcConnection<T[K]>>["render"];
   };
 };
 
-export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
-  tabs: keyToTab,
-  TabsProps,
-  TabProps,
-  SelectedTabProps,
-  renderTabPanel,
-  ...props
-}: MuiTabsWidgetViewProps<C>) {
+export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
+  props: MuiTabsWidgetViewProps<C>
+) {
+  const {
+    tabs: tabOptionsMap,
+    TabsProps,
+    TabProps,
+    SelectedTabProps,
+    renderTabPanel,
+    ...otherProps
+  } = props as MuiTabsWidgetViewProps<AnyTabsWidgetConnection>;
+
   return (
-    <TabsWidgetView {...props}>
+    <TabsWidgetView {...otherProps}>
       {view => {
         const tabs: ReactElement[] = [];
-        const { tabProps } = view;
+        const { currentTabProps } = view;
+        const currentTabOptions =
+          currentTabProps && getTabOptions(currentTabProps.key);
 
-        for (const [key, tab] of entries(keyToTab)) {
-          const isSelected = tabProps?.key === key;
-          const [tabRenderProps] = RendererOrProps(tab);
+        for (const tabKey of keys(props.connection.rpc.tabMap)) {
+          const tabOptions = getTabOptions(tabKey);
+
+          const isSelected = currentTabProps?.key === tabKey;
+
           tabs.push(
             <Tab
-              key={key}
+              key={tabKey}
               {...TabProps}
               {...(isSelected ? SelectedTabProps : null)}
-              label={<LangKey for={key}>{tabRenderProps.title}</LangKey>}
-              value={key}
+              label={<LangKey for={tabKey}>{tabOptions?.title}</LangKey>}
+              value={tabKey}
             />
           );
         }
 
         let tabContent: ReactElement | undefined = undefined;
 
-        if (tabProps) {
-          const tab = keyToTab[tabProps.key!];
-          if (tab) {
-            const [_, tabRenderer] = RendererOrProps(tab);
-            tabContent = tabRenderer(tabProps);
-          }
+        if (currentTabOptions?.render) {
+          tabContent = currentTabOptions.render?.(currentTabProps!);
         }
 
         if (tabs.length === 1) return tabContent ?? EmptyFragment;
@@ -100,7 +104,7 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
               {...mergeProps(TabsProps, {
                 onChange: (_, key) => view.switchTo(key),
               })}
-              value={tabProps?.key}
+              value={currentTabProps?.key}
             >
               {tabs}
             </Tabs>
@@ -109,6 +113,15 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>({
               : tabContent}
           </>
         );
+
+        function getTabOptions(key: string) {
+          if (tabOptionsMap)
+            return (typeof tabOptionsMap[key] === "function"
+              ? { render: tabOptionsMap[key] }
+              : tabOptionsMap[key]) as
+              | MuiTabViewProps<AnyWidgetConnection>
+              | undefined;
+        }
       }}
     </TabsWidgetView>
   );

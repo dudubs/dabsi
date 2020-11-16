@@ -1,8 +1,11 @@
 import { Type } from "../../common/typings";
 import { getTypeToken } from "../getTypeToken";
-import { Context, Resolver } from "../Resolver";
+import { ResolverMap, Resolver } from "../Resolver";
 
-export function _provide<T>(type: Type<T>, resolver: Resolver<T>): Context<T> {
+export function _provide<T>(
+  type: Type<T>,
+  resolver: Resolver<T>
+): ResolverMap<T> {
   const context = {};
   for (
     let baseType = type;

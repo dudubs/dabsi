@@ -1,9 +1,10 @@
-import { DataManager } from "../../../typerpc/data-manager/DataManager";
-import { InputMap } from "../../../typerpc/input/input-map/InputMap";
-import { InputErrorHook } from "../../../typerpc/input/InputErrorHook";
-import { TextInput } from "../../../typerpc/input/text-input/TextInput";
-import { RpcPartialConfig } from "../../../typerpc/RpcPartialConfig";
-import { Form } from "../../../typerpc/widget/form/Form";
+import { DataManager } from "../../typerpc/data-manager/DataManager";
+
+import { DataManagerRouter } from "../../typerpc/data-manager/DataManagerRouter";
+import { InputMap } from "../../typerpc/input/input-map/InputMap";
+import { InputErrorHook } from "../../typerpc/input/InputErrorHook";
+import { TextInput } from "../../typerpc/input/text-input/TextInput";
+import { RpcPartialConfig } from "../../typerpc/RpcPartialConfig";
 
 const NameInput = RpcPartialConfig(TextInput(), {
   minLength: 2,
@@ -11,7 +12,7 @@ const NameInput = RpcPartialConfig(TextInput(), {
   required: true,
 });
 
-const UserBasicInfoInput = InputMap({
+export const UserBasicInfoInput = InputMap({
   firstName: NameInput,
   lastName: NameInput,
   loginName: InputErrorHook<"ALREADY_EXISTS">()(TextInput()),
@@ -25,7 +26,7 @@ export const UserContactInfoInput = InputMap({
 export const AclUsersManager = DataManager({
   addInput: UserBasicInfoInput,
   editInput: InputMap({
-    baseInfo: UserBasicInfoInput,
+    basicInfo: UserBasicInfoInput,
     contactInfo: UserContactInfoInput,
   }),
   tableRowType: {
@@ -37,3 +38,5 @@ export const AclUsersManager = DataManager({
     // TODO: groups
   },
 });
+
+export const AclUsersManagerRouter = DataManagerRouter(AclUsersManager);

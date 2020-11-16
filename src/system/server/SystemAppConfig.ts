@@ -6,7 +6,7 @@ import { AclRequest } from "./acl/AclRequest";
 
 import { User, UserFullName } from "./acl/User";
 import { ADMIN_TOKEN, AdminAppConfig } from "./AdminAppConfig";
-import { DataContext } from "../../typedata/DataContext";
+import { DataResolvers } from "../../typedata/DataResolvers";
 import { SystemSession } from "./SystemSession";
 import { UserAppConfig } from "./UserAppConfig";
 
@@ -21,7 +21,7 @@ export const SystemAppConfig = Resolver.consume(
     userConfig: UserAppConfig,
     adminConfig: AdminAppConfig,
     aclReq: AclRequest,
-    ...DataContext({
+    ...DataResolvers({
       users: User,
       session: [SystemSession],
     }),

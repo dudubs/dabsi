@@ -39,7 +39,7 @@ export class DataSourceRow {
     this: T,
     value: DataUpdate<GetBaseType<T>>
   ) {
-    return this.getSource().remove(this.$key);
+    return this.getSource().update(this.$key, value);
   }
 
   reload<T extends AnyBasedDataRow>(this: T): Promise<DataRow<GetBaseType<T>>> {

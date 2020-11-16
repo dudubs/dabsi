@@ -1,6 +1,6 @@
 import { History } from "history";
 import { WithMetaType } from "../common/MetaType";
-import { joinUrl } from "./joinUrl";
+import { joinUrl } from "../common/string/joinUrl";
 import { Lazy } from "../common/patterns/lazy";
 import {
   Assign,
@@ -17,7 +17,7 @@ import { useDefinedContext } from "../react/utils/hooks/useDefinedContext";
 import { getNextPath } from "../common/getNextPath";
 import { TReactRouter } from "./ReactRouter";
 import { ReactRouterError } from "./ReactRouterError";
-import { Router, RouterAt, RouterType, TRouter } from "./Router";
+import { Router, RouterAt, RouterType, TRouterOld } from "./Router";
 
 export type RouterAtArgs<P> =
   | [Record<keyof P, string | number>]
@@ -138,9 +138,9 @@ export class ReactRouterLocation<T extends TReactRouter = TReactRouter> {
 
 export const ReactRouterContext = createUndefinedContext<ReactRouterContext>();
 
-export function useReactRouterContext<T extends TRouter>(): ReactRouterContext<
-  T & TReactRouter
-> {
+export function useReactRouterContext<
+  T extends TRouterOld
+>(): ReactRouterContext<T & TReactRouter> {
   return <any>useDefinedContext(ReactRouterContext);
 }
 

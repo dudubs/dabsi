@@ -29,7 +29,10 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
     {
       getLabel:
         | ((row: InputType<C>["Types"]["TableTypes"]["RowWithKey"]) => string)
-        | If<Is<InputType<C>["Types"]["Row"], { label: string }>, undefined>;
+        | If<
+            Is<InputType<C>["Types"]["TableTypes"]["Row"], { label: string }>,
+            undefined
+          >;
     },
     InputViewProps<C> & {
       title?: LangNode;

@@ -3,9 +3,7 @@ import { AnyDataManager } from "./DataManager";
 
 export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
   config,
-  props: {
-    dataManager: { editInput },
-  },
+  props: { editInput },
 }) => $ => {
   return $({
     async delete(key) {

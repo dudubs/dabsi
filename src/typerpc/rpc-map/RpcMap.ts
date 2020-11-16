@@ -7,6 +7,7 @@ import {
   AnyRpc,
   Rpc,
   RpcConnection,
+  RpcError,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
 } from "../Rpc";
@@ -45,9 +46,16 @@ export function RpcMap<T extends AnyRpcRecord>(targetMap: T): RpcMap<T> {
     },
     handler: RpcMapHandler,
     connect(handler) {
-      return mapObject(this.targetMap, (target, key) =>
-        target.createRpcConnection(payload => handler([key, payload]))
-      );
+      return mapObject(this.targetMap, (target, key) => {
+        try {
+          return target.createRpcConnection(payload => handler([key, payload]));
+        } catch (error) {
+          if (error instanceof RpcError) {
+            throw new RpcError(`at key:${key}, ${error.message}`);
+          }
+          throw error;
+        }
+      });
     },
   });
 }

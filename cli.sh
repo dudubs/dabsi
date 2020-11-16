@@ -76,6 +76,7 @@ function dabsi-x() {
   ./node_modules/.bin/$1 ${@:2}
 }
 
+
 function dabsi() {
 
   if [ -f "$DABSI_PATH/scripts/$1.ts" ]; then
@@ -90,4 +91,11 @@ function dabsi() {
 
 }
 
-dabsi $*
+
+if [ "${@: -1}" == "--mon" ]; then
+  dabsi mon ${@:1:$#-1}
+else
+  dabsi $*
+fi;
+
+

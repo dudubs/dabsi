@@ -16,8 +16,8 @@ testm(__dirname, () => {
 
     testInput(t, t => {
       t.testError("x", "INVALID_DATA_KEY");
-      const realId = DataInputTester.rows[0].id;
 
+      const realId = () => DataInputTester.rows[0].id;
       t.testValue(realId, realId);
     });
   });

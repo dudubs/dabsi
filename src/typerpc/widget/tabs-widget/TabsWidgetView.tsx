@@ -1,4 +1,5 @@
 import React from "react";
+import { Override } from "../../../common/typings";
 import { Renderer } from "../../../react/renderer";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
@@ -18,14 +19,18 @@ export class TabsWidgetView<
   }
 > {
   @ViewState()
-  protected _tabProps: WidgetViewProps<AnyWidgetConnection> | undefined;
+  protected _currentTabProps:
+    | Override<WidgetViewProps<AnyWidgetConnection>, { key: string }>
+    | undefined;
 
-  get tabProps(): WidgetViewProps<AnyWidgetConnection> | undefined {
-    return this._tabProps;
+  get currentTabProps():
+    | Override<WidgetViewProps<AnyWidgetConnection>, { key: string }>
+    | undefined {
+    return this._currentTabProps;
   }
 
   protected updateTabProps({ key, element }: { key: string; element: object }) {
-    this._tabProps = {
+    this._currentTabProps = {
       key,
       connection: this.controller[key],
       element,

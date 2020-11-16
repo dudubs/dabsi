@@ -13,7 +13,7 @@ import { GenericConfig } from "../GenericConfig";
 
 import { AnyInput, InputValue } from "../input/Input";
 import { NoRpc } from "../NoRpc";
-import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "../Rpc";
+import { AnyRpc, RpcConfig, RpcType, RpcUnresolvedConfig } from "../Rpc";
 import { RpcFn } from "../rpc-fn/RpcFn";
 import { RpcMap } from "../rpc-map/RpcMap";
 import { RpcParameter } from "../rpc-parameter/RpcParameter";
@@ -74,17 +74,20 @@ type _Types<T extends TDataManager> = {
     Input: T["AddInput"];
   }>;
 
-  EdiTabMap: TabsWidget<
-    T["EditTabs"] & {
-      form: DataManagerTypes<T>["EditForm"];
+  EditTabsWithForm: Override<
+    T["EditTabs"],
+    {
+      form: _Types<T>["EditForm"];
     }
   >;
+
+  EditTabsWidget: TabsWidget<_Types<T>["EditTabsWithForm"]>;
 };
 export type DataManagerConfig<T extends TDataManager> = PartialUndefinedKeys<
   {
     getTabsConfig:
       | ConfigFactory<
-          RpcUnresolvedConfig<_Types<T>["EdiTabMap"]>,
+          RpcUnresolvedConfig<_Types<T>["EditTabsWidget"]>,
           [DataRow<T["Data"]>]
         >
       | If<IsEmptyObject<T["EditTabs"]>, undefined>;
@@ -117,12 +120,14 @@ export type AnyDataManager = DataManager<TDataManager>;
 
 export type DataManagerTypes<T extends TDataManager> = _Types<T>;
 
+export type DataManagerType<T extends AnyDataManager> = RpcType<
+  T
+>["TConfigHook"]["TDataManager"];
 export type DataManager<T extends TDataManager> = RpcConfigHook<{
+  TDataManager: T;
   Props: {
-    dataManager: {
-      editInput: AnyInput;
-      editTabs: AnyWidgetRecord;
-    };
+    editInput: AnyInput;
+    editTabs: AnyWidgetRecord;
   };
   Target: RpcMap<{
     delete: RpcFn<(key: string) => void>;
@@ -134,7 +139,7 @@ export type DataManager<T extends TDataManager> = RpcConfigHook<{
     edit: RpcParameter<{
       Data: string;
       Target: InlineWidget<{
-        Target: _Types<T>["EdiTabMap"];
+        Target: _Types<T>["EditTabsWidget"];
         Controller: NoRpc;
         Element: { title: string };
       }>;
@@ -180,10 +185,8 @@ export function DataManager<
   } as AnyWidgetRecord;
   return <any>RpcConfigHook<AnyDataManager>({
     props: {
-      dataManager: {
-        editInput,
-        editTabs,
-      },
+      editInput,
+      editTabs,
     },
     isGenericConfig: true,
     handler: DataManagerHandler,

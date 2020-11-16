@@ -1,8 +1,11 @@
 import { createElement } from "react";
 import ReactDOM from "react-dom";
+import { useArrayToSeq } from "../../common/array/useArrayToSeq";
 import { handleRpcService } from "../../typerpc/Rpc";
 import { SystemApp } from "../common/SystemApp";
-import { MuiSystemView } from "./MuiSystemView";
+import { MuiSystemRootView } from "./MuiSystemRootView";
+
+useArrayToSeq();
 
 handleRpcService(SystemApp, payload => {
   return fetch("/service", {
@@ -12,13 +15,11 @@ handleRpcService(SystemApp, payload => {
   }).then(res => res.json());
 });
 
-SystemApp.service.getLoginInfo().then(loginInfo => {
-  console.log({ loginInfo });
-});
+export const SystemLoginInfo = SystemApp.service.getLoginInfo();
 
 window.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    createElement(MuiSystemView), //
+    createElement(MuiSystemRootView), //
     document.getElementById("system")
   );
 });

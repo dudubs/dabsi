@@ -1,16 +1,15 @@
 import { Awaited } from "../../common/typings";
-import { SystemApp } from "../common/SystemApp";
+import { LoginInfo } from "../common/SystemApp";
 
-type LoginInfoPayload = Awaited<
-  ReturnType<typeof SystemApp.service.getLoginInfo>
->;
+type LoginInfoPayload = Awaited<LoginInfo>;
 
-export class LoginInfo {
+export class LoginInfoEvent {
   constructor(public payload: LoginInfoPayload) {}
 
-  get isSuccess() {
+  isSuccess(): this is any {
     return this.payload.type === "SUCCESS";
   }
+
   get success(): Extract<LoginInfoPayload, { type: "SUCCESS" }> | undefined {
     if (this.payload.type === "SUCCESS") {
       return this.payload;
@@ -21,3 +20,10 @@ export class LoginInfo {
     return this.success?.isAdmin || false;
   }
 }
+
+/*
+
+
+  <ReactorProvider>
+
+ */

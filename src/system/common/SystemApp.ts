@@ -8,6 +8,18 @@ import { UserApp } from "./UserApp";
 
 export declare const DevLoginUser: unique symbol;
 
+export type LoginInfo = Payload<{
+  FAILED: {};
+  SUCCESS: {
+    fullName: string;
+    isAdmin: boolean;
+  };
+}>;
+
+// RemotePromise<X>
+// type: rejected
+// type: resolved
+
 export const DevLogin = Form({
   input: DataInput({
     loadType: TypeRef(() => DevLoginUser),
@@ -18,15 +30,7 @@ export const DevLogin = Form({
 export const SystemApp = RpcMap({
   logout: RpcFn(),
 
-  getLoginInfo: RpcFn<
-    () => Payload<{
-      FAILED: {};
-      SUCCESS: {
-        fullName: string;
-        isAdmin: boolean;
-      };
-    }>
-  >(),
+  getLoginInfo: RpcFn<() => LoginInfo>(),
 
   devLogin: DevLogin,
 

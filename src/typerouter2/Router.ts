@@ -1,20 +1,60 @@
 import { WeakMapFactory } from "../common/map/mapFactory";
 import { MetaType, WithMetaType } from "../common/MetaType";
 import { mapObject } from "../common/object/mapObject";
+import { Expect, IfNever, Override } from "../common/typings";
 
-export type AnyRouterMap = Record<string, AnyRouter>;
+export type AnyRouterMap = Record<string, Router<TRouter>>;
+
 export type TRouter = {
   Parent?: TRouter;
-  ParamKey: string;
+  Params: Record<string, string>;
   Stack: Record<string, TRouter>;
   Children: Record<string, TRouter>;
 };
 
-type RouterNamespace = typeof RouterType & ReturnType<typeof createRouter>;
+export type RouterProps = typeof RouterType & ReturnType<typeof createRouter>;
 
-export interface Router<T extends TRouter>
+export type TEmptyRouter = Expect<
+  TRouter,
+  Override<
+    TRouter,
+    {
+      Stack: {};
+      Children: {};
+      Params: {};
+    }
+  >
+>;
+export type RouterMapType<T extends AnyRouterMap> = {
+  [K in keyof T]: RouterType<T[K]>;
+};
+export type RouterWithChildren<
+  C extends AnyRouterMap,
+  P extends object = {}
+> = Router<
+  Override<
+    P & TEmptyRouter,
+    {
+      Children: RouterMapType<C>;
+    }
+  >
+>;
+export type RouterWithParams<
+  P extends string,
+  C extends AnyRouterMap = {}
+> = Router<
+  Override<
+    TEmptyRouter,
+    {
+      Params: Record<P, string>;
+      Children: RouterMapType<C>;
+    }
+  >
+>;
+
+export interface Router<T extends TRouter = TEmptyRouter>
   extends WithMetaType<{ TRouter: T }>,
-    RouterNamespace {}
+    RouterProps {}
 
 function createRouter(params: string[], children: Record<string, AnyRouter>) {
   return {
@@ -28,7 +68,7 @@ export type RouterType<T extends AnyRouter> = MetaType<T>["TRouter"];
 export type AnyRouter = Router<TRouter>;
 
 export function Router(): Router<{
-  ParamKey: never;
+  Params: {};
   Stack: {};
   Children: {};
 }>;
@@ -36,18 +76,25 @@ export function Router(): Router<{
 export function Router<C extends AnyRouterMap>(
   children: C
 ): Router<{
-  ParamKey: never;
+  Params: {};
   Stack: {};
-  Children: { [K in keyof C]: RouterType<C[K]> };
+  Children: RouterMapType<C>;
 }>;
 
-export function Router<K extends string = never, C extends AnyRouterMap = {}>(
-  params?: K[],
-  children?: C
+export function Router<K extends string>(
+  params: K[]
 ): Router<{
-  ParamKey: K;
+  Params: Record<string & K, string>;
   Stack: {};
-  Children: { [K in keyof C]: RouterType<C[K]> };
+  Children: {};
+}>;
+export function Router<K extends string, C extends AnyRouterMap>(
+  params: K[],
+  children: C
+): Router<{
+  Params: Record<string & K, string>;
+  Stack: {};
+  Children: RouterMapType<C>;
 }>;
 
 export function Router(paramsOrChildren?, maybeChildren?) {
@@ -82,8 +129,8 @@ export namespace RouterType {
   export function at<T extends TRouter, K extends keyof T["Children"]>(
     this: Router<T>,
     key: string & K,
-    callback: (router: Router<T["Children"][K]>) => void
-  ): RouterAt<T, K>;
+    callback: (router: RouterAt<T, K>) => void
+  ): Router<T>;
   export function at(this: AnyRouter, key, callback?) {
     if (callback) {
       callback(this.children[key]);
@@ -109,9 +156,3 @@ export namespace RouterType {
     return this === base || this.bases.has(base);
   }
 }
-
-WeakMapFactory((router: AnyRouter) => ({
-  bases: new Set([router]),
-}));
-
-export function RouterPlugin() {}

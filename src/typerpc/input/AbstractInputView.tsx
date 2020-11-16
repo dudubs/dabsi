@@ -104,8 +104,8 @@ export abstract class AbstractInputView<
 
     const errorMap: Record<string, ReactElement | ((error) => ReactElement)> = {
       ...this.getErrorElementMap?.()!,
-      ...this.props.errorMap,
-    };
+      ...this.props.errorMap!,
+    } as any;
 
     const errorType =
       typeof error === "string"

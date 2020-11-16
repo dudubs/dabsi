@@ -1,31 +1,30 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
+import { logBeforeEach } from "../../../jasmine/logBeforeEach";
+import { Tester } from "../../../jasmine/Tester";
 import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
-import { TestConnection } from "../../../typedata/tests/TestConnection";
+import { createTestConnection } from "../../../typedata/tests/TestConnection";
 
-export namespace DataInputTester {
-  @Entity()
-  export class A {
-    @PrimaryColumn()
-    id: string;
+@Entity()
+class TestA {
+  @PrimaryColumn()
+  id: string;
 
-    @Column()
-    text: string;
-  }
-
-  const getConnection = TestConnection([A]);
-
-  export const source = EntityDataSource.create(A, getConnection);
-
-  export const rows = [
-    { id: "1", text: "hello" },
-    { id: "2", text: "world" },
-    { id: "3", text: "foo" },
-    { id: "4", text: "bar" },
-  ] as const;
-
-  beforeAll(async () => {
-    for (const row of rows) {
-      await source.insert(row);
-    }
-  });
+  @Column()
+  text: string;
 }
+
+export const DataInputTester = Tester.beforeAll({
+  connection: () => createTestConnection([TestA]),
+})
+  .beforeAll({
+    source: t => EntityDataSource.create(TestA, t.connection),
+  })
+  .beforeAll({
+    rows: t =>
+      t.source.insert([
+        { id: "1", text: "hello" },
+        { id: "2", text: "world" },
+        { id: "3", text: "foo" },
+        { id: "4", text: "bar" },
+      ]),
+  });

@@ -51,6 +51,7 @@ type _ColumnTypes<
       >
     | UndefinedIfColumnKeyIsDataKey;
 };
+
 export type _Types<T extends TDataTable, D = T["Data"], Row = T["Row"]> = T & {
   RowWithKey: Row & { $key: string };
 
@@ -129,6 +130,7 @@ export type DataTable<
   Config: GenericConfig<
     <D>(config: DataTableConfig<Override<T, { Data: D }>>) => DataTableConfig<T>
   >;
+
   Commands: {};
 
   Connection: {

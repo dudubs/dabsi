@@ -1,4 +1,5 @@
 import { EntityMetadata } from "typeorm";
+import { mapArrayToObject } from "../../common/array/mapArrayToObject";
 import { definedAt } from "../../common/object/definedAt";
 import { KeyObject } from "../KeyObject";
 
@@ -20,7 +21,7 @@ export namespace EntityDataKey {
   }
 
   export function pick(metadata: EntityMetadata, entity: any): KeyObject {
-    return metadata.primaryColumns.toObject(column => [
+    return mapArrayToObject(metadata.primaryColumns, column => [
       column.propertyName,
       definedAt(entity, column.propertyName),
     ]);

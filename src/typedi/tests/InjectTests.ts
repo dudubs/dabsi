@@ -1,12 +1,11 @@
 import "reflect-metadata";
-import { _checkAndResolve } from "../internal/_checkAndResolve";
-import { Inject } from "../Inject";
-import { Resolver } from "../Resolver";
 import { Forward } from "../Forward";
+import { Inject } from "../Inject";
 import { Injectable } from "../Injectable";
+import { Resolver } from "../Resolver";
 
 testm(__filename, () => {
-  it("", () => {
+  it("sanity", done => {
     class B {
       foo = 1;
     }
@@ -16,13 +15,16 @@ testm(__filename, () => {
       constructor(
         @Inject(B) public b1: B,
         @Forward(() => B) @Inject() public b2,
-        @Inject(() => 1) asdsad
+        @Inject(() => 1) one: number
       ) {
-        console.log(this.b1, this.b2);
+        expect(one).toEqual(1);
+        expect(b1).toBeInstanceOf(B);
+        expect(b2).toBeInstanceOf(B);
+        done();
       }
     }
 
-    _checkAndResolve(A, {
+    Resolver.checkAndResolve(A, {
       ...B.provide(() => new B()),
     });
   });

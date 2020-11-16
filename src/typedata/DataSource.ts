@@ -95,6 +95,10 @@ export abstract class DataSource<T> {
 
   abstract hasRow(): Promise<boolean>;
 
+  async touch(insert?: DataInsert<T>): Promise<DataRow<T>> {
+    return (await this.get()) || (await this.insert(insert || {}));
+  }
+
   async getOrFail(key?: string | number): Promise<DataRow<T>> {
     return defined(await this.get(key?.toString()), () =>
       key ? `No row "${key}"` : "No row"

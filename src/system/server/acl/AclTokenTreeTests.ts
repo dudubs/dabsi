@@ -1,5 +1,5 @@
 import { Tester } from "../../../jasmine/Tester";
-import { inspect } from "../../../logging";
+import { inspect } from "../../../logging/inspect";
 import { AclTokenTree } from "./AclTokenTree";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;

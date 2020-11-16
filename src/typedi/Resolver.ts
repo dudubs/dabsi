@@ -3,7 +3,7 @@ import { _checkAndResolve } from "./internal/_checkAndResolve";
 import { _checkContext } from "./internal/_checkContext";
 import { _checkType } from "./internal/_checkType";
 import { _consume } from "./internal/_consume";
-import { _objectResolver } from "./internal/_objectResolver";
+import { _resolverMap } from "./internal/_resolverMap";
 import { _provide } from "./internal/_provide";
 import { _resolve, resolveSymbol } from "./internal/_resolve";
 import { _arrayResolver } from "./internal/_arrayResolver";
@@ -12,11 +12,15 @@ import { _touch } from "./internal/_touch";
 import { FnResolver, TypeResolver } from "./FnResolver";
 import { creatTokenResolver, TokenResolver } from "./TokenResolver";
 
-export type Context<T> = Record<string, Resolver<T>>;
+export type ResolverMap<T> = Record<string, Resolver<T>>;
+
+export type ResolveMapType<T extends ResolverMap<any>> = {
+  [K in keyof T]: ResolverType<T[K]>;
+};
 
 export type CustomResolver<T> = {
-  [resolveSymbol](context: Context<any>): T;
-  [checkSymbol]?(context: Context<any>): void;
+  [resolveSymbol](context: ResolverMap<any>): T;
+  [checkSymbol]?(context: ResolverMap<any>): void;
 };
 
 export type Resolver<T = any> =
@@ -41,7 +45,7 @@ Resolver.checkType = _checkType;
 Resolver.resolveType = _resolveType;
 Resolver.consume = _consume;
 Resolver.array = _arrayResolver;
-Resolver.object = _objectResolver;
+Resolver.object = _resolverMap;
 
 declare global {
   interface String extends CustomResolver<string> {}

@@ -2,16 +2,9 @@ import { Connection } from "typeorm";
 import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
 import { Inject } from "../../../typedi/Inject";
 import { Permission } from "./Permission";
+import { splitToken } from "./splitToken";
 
 export class PermissionManager {
-  static *getTokenParts(token: string) {
-    let subToken = "";
-    for (const key of token.split("/")) {
-      subToken += (subToken ? "/" : "") + key;
-      yield subToken;
-    }
-  }
-
   constructor(@Inject() public connection: Connection) {}
 
   async addToken(to: "user" | "group", key: string, token: string) {
@@ -23,9 +16,7 @@ export class PermissionManager {
       return "ALREADY_EXISTS" as const;
     }
 
-    await source.insert(
-      [...PermissionManager.getTokenParts(token)].map(token => ({ token }))
-    );
+    await source.insert([...splitToken(token)].map(token => ({ token })));
 
     return "ADDED" as const;
   }

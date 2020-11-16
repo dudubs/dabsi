@@ -1,10 +1,16 @@
 import { reversed } from "../common/array/reversed";
 import { entries } from "../common/object/entries";
 import { Lazy } from "../common/patterns/lazy";
-import { IsNever, OmitKeys, Override } from "../common/typings";
-import { inspect } from "../logging";
-import { joinUrl } from "../typerouter/joinUrl";
-import { AnyRouter, Router, TRouter } from "./Router";
+import {
+  HasKeys,
+  IsNever,
+  IsUndefined,
+  OmitKeys,
+  Override,
+} from "../common/typings";
+import { joinUrl } from "../common/string/joinUrl";
+import { inspect } from "../logging/inspect";
+import { AnyRouter, Router, RouterAt, RouterType, TRouter } from "./Router";
 
 export type AnyRouterLocation = RouterLocation<TRouter>;
 
@@ -44,17 +50,17 @@ export class RouterLocation<T extends TRouter> {
     return this._router as Router<T>;
   }
 
-  get params(): Record<T["ParamKey"], string> {
+  get params(): T["Params"] {
     return this._params;
   }
 
   at<T extends TRouter, K extends keyof T["Children"]>(
     this: RouterLocation<T>,
     key: string & K,
-    ...[params]: IsNever<T["Children"][K]["ParamKey"]> extends true
+    ...[params]: HasKeys<T["Children"][K]["Params"]> extends false
       ? []
-      : [Record<T["Children"][K]["ParamKey"], string | number>]
-  ): RouterLocation<T["Children"][K]> {
+      : [T["Children"][K]["Params"]]
+  ): RouterLocation<RouterType<RouterAt<T, K>>> {
     return <any>(
       new RouterLocation(
         this._router.children[key],

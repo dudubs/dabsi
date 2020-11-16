@@ -16,7 +16,7 @@ export type RpcPartialConfig<
 > = RpcConfigHook<{
   Target: T;
   Config:
-    | RpcUnresolvedConfig<T>
+    | NonNullable<RpcConfig<T>>
     | UndefinedIfEmptyObject<PartialKeys<NonNullable<RpcConfig<T>>, K>>;
 }>;
 

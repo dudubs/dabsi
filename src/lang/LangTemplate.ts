@@ -44,7 +44,7 @@ export function LangTemplate<K extends string>(
 ): LangTemplate<K> {
   const token = joinTemplate(strings, params, param => `{${param}}`);
 
-  template.tokenNode = token;
+  template.token = token;
   return <any>template;
 
   function template(arg0, ...args) {

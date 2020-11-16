@@ -3,7 +3,7 @@ import path from "path";
 import { checkSymbol } from "./internal/_check";
 import { StackLastLine } from "./getStackLastLine";
 import { resolveSymbol } from "./internal/_resolve";
-import { Context, CustomResolver, Resolver } from "./Resolver";
+import { ResolverMap, CustomResolver, Resolver } from "./Resolver";
 import { ResolveError } from "./ResolveError";
 let count = 0;
 export function creatTokenResolver(name: string, stack: Error) {
@@ -15,7 +15,7 @@ export function creatTokenResolver(name: string, stack: Error) {
 export type TokenResolver<T> = CustomResolver<T> & {
   token: string;
   stack?: StackLastLine;
-  provide(value: Resolver<T>): Context<T>;
+  provide(value: Resolver<T>): ResolverMap<T>;
 };
 export const AnyTokenResolver: TokenResolver<any> = {
   provide(resolver) {

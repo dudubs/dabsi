@@ -7,7 +7,7 @@ import { ResolveError } from "../ResolveError";
 
 export type AnyResolveMap = Record<string, Resolver>;
 
-export function _objectResolver<T extends AnyResolveMap>(
+export function _resolverMap<T extends AnyResolveMap>(
   resolveMap: T
 ): CustomResolver<
   {

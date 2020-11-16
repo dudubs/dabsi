@@ -1,5 +1,5 @@
 import { touchMap } from "../common/map/touchMap";
-import { MetaType, TMetaType, WithMetaType } from "../common/MetaType";
+import { MetaType, WithMetaType } from "../common/MetaType";
 import { mergeDescriptors } from "../common/object/mergeDescriptors";
 import {
   Awaitable,
@@ -13,7 +13,7 @@ import {
   Override,
   PartialUndefinedKeys,
 } from "../common/typings";
-import { inspect } from "../logging";
+import { inspect } from "../logging/inspect";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
 

@@ -7,9 +7,9 @@ import { Renderer } from "../react/renderer";
 import { EmptyFragment } from "../react/utils/EmptyFragment";
 import { ReactHook } from "../react/utils/ReactHook";
 import { ReactRouterLocation, ReactRouterContext } from "./ReactRouterLocation";
-import { AnyRouter, Router, TRouter, RouterPlugin } from "./Router";
+import { AnyRouter, Router, TRouterOld, RouterPlugin } from "./Router";
 
-export type TReactRouter = TRouter & { routerType: typeof ReactRouter };
+export type TReactRouter = TRouterOld & { routerType: typeof ReactRouter };
 
 type WrapperProps<T extends TReactRouter> = {
   location: ReactRouterLocation<T>;

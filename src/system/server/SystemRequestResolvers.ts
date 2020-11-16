@@ -8,7 +8,7 @@ import { RpcRequest } from "../../typerpc/RpcRequest";
 import { AclRequest } from "./acl/AclRequest";
 import { SystemSession } from "./SystemSession";
 
-export const SystemRequestContext = {
+export const SystemRequestResolvers = {
   ...Resolver.provide(
     RpcRequest,
     Resolver.touch(() => new RpcRequest())

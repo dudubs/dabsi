@@ -1,73 +1,43 @@
-import { createBrowserHistory } from "history";
-import React, { useEffect } from "react";
-import { createMuiSystem } from "../../browser/mui/createMuiSystem";
-import { MuiAdmin } from "../../browser/mui/MuiAdmin";
-import { useEmitter } from "../../react/useEmitter";
-import { ReactRouterContentView } from "../../typerouter/ReactRouterContentView";
-import { ReactRouterView } from "../../typerouter/ReactRouterView";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import { makeStyles } from "@material-ui/core/styles";
+import React from "react";
+import { MuiDataInputView } from "../../browser/mui/rpc/inputs/MuiDataInputView";
+import { MuiFormView } from "../../browser/mui/rpc/MuiFormView";
+import { Lang } from "../../lang/Lang";
+import { EmptyFragment } from "../../react/utils/EmptyFragment";
+import { WidgetRouterView } from "../../typerpc/widget/WidgetRouterView";
+import { MuiAdminView } from "../common/admin/MuiAdminView";
 import { SystemApp } from "../common/SystemApp";
-import { AdminRouterPlugin } from "./admin/SystemAdminRouter";
-import { LoginInfo } from "./LoginInfo";
 import { SystemRouter } from "./SystemRouter";
 
-const { Provider: MuiSystemProvider } = createMuiSystem();
-const history = createBrowserHistory();
-const currentLoginInfo = SystemApp.service.getLoginInfo();
+const useStyles = makeStyles(theme => ({
+  paper: {
+    padding: theme.spacing(2),
+  },
+}));
 
-const plugins = [
-  SystemRouter.at("admin").plugin((r, c) => {
-    AdminRouterPlugin(r, c);
-  }),
-];
-
-export function MuiSystemView() {
-  const emit = useEmitter();
-
-  // emit(LoginInfo, {})
-
-  useEffect(() => {
-    currentLoginInfo.then(loginInfo => {
-      emit(new LoginInfo(loginInfo));
-    });
-  }, []);
-
-  void (
-    <MuiSystemProvider>
-      <ReactRouterView
-        history={history}
-        router={SystemRouter}
-        plugins={plugins}
-      >
-        <ReactRouterContentView />
-      </ReactRouterView>
-    </MuiSystemProvider>
-  );
-
-  return (
-    <MuiAdmin
-      menu={{
-        test: {
-          title: "TestTitle",
-          icon: require("@material-ui/icons/Add"),
-          children: {
-            foo: {
-              children: {
-                hello: {},
-                world: {},
-              },
-            },
-            bar: {},
-          },
-        },
-      }}
-    />
-  );
+export function MuiSystemView(router: typeof SystemRouter) {
+  MuiAdminView(router.at("admin"));
+  WidgetRouterView(router.at("login"), SystemApp.service.devLogin, props => {
+    const classes = useStyles();
+    return (
+      <>
+        <Grid container justify={"center"}>
+          <Grid item>
+            <Paper className={classes.paper}>
+              <MuiFormView
+                {...props}
+                input={props => (
+                  <>
+                    <MuiDataInputView {...props} title={Lang`LOGIN_TO_USER`} />
+                  </>
+                )}
+              />
+            </Paper>
+          </Grid>
+        </Grid>
+      </>
+    );
+  });
 }
-
-/*
-
-SystemPlugin({
-
-
-})
- */

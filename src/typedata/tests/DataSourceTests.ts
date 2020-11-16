@@ -1,7 +1,7 @@
 import { getJasmineSpecReporterResult } from "../../jasmine/getJasmineSpecReporterResult";
 import { logBeforeEach } from "../../jasmine/logBeforeEach";
 import { subTest } from "../../jasmine/subTest";
-import { inspect } from "../../logging";
+import { inspect } from "../../logging/inspect";
 import {
   AEntity,
   BEntity,

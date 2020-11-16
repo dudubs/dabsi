@@ -83,9 +83,11 @@ export function Type<T = any>(this: any): Type<T> {
   return Type;
 }
 
-export type Payload<T extends Record<string, object>> = Union<
-  { [K in keyof T]: { type: K } & T[K] }
->;
+export type Payload<
+  T extends Record<string, object>,
+  U extends object = {}
+> = Union<{ [K in keyof T]: { type: K } & T[K] & U }>;
+
 export type Assign<T, U> = Omit<T, keyof Required<U>> & U;
 export type Override<T extends object, U extends object> = Omit<T, keyof U> & U;
 export type Replace<T extends object, U extends Partial<T>> = Extract<

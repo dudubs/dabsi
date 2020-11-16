@@ -1,13 +1,36 @@
 import Collapse from "@material-ui/core/Collapse";
-import List from "@material-ui/core/List";
+import _List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import ListItemText from "@material-ui/core/ListItemText";
-import React from "react";
-import { ReactNode, useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
+import React, { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import { hasKeys } from "../../common/object/hasKeys";
 import { mapObjectToArray } from "../../common/object/mapObjectToArray";
+import { ImmutableRecord, ImmutableSet } from "../../immutable2";
+import { LangKey } from "../../lang/LangKey";
+import { StateProps } from "../../react/stateHelpers";
+import { partialProps } from "../../react/utils/partialProps";
 import { MuiIcon } from "./components/MuiIcon";
+
+const useStyles = makeStyles(theme => ({
+  nested: {
+    paddingLeft: theme.spacing(4),
+  },
+
+  itemWithChildText: {},
+  parent: {
+    // fontWeight: "bold",
+  },
+  listItemText: {
+    fontSize: theme.typography.fontSize,
+  },
+}));
+const List = partialProps(_List, {
+  // dense: true,
+});
 
 export type MuiNestedMenuProps = {
   title?: ReactNode;
@@ -16,67 +39,110 @@ export type MuiNestedMenuProps = {
   children?: Record<string, MuiNestedMenuProps>;
 };
 
-export function MuiNestedMenu(
-  props: MuiNestedMenuProps & {
-    root?: boolean;
-  }
-) {
-  const { root: isRoot } = props;
-  console.log({ props });
-  const [isOpen, setOpen] = useState(isRoot);
+class MuiNestedMenuState extends ImmutableRecord({
+  selectedPath: "",
+}) {}
 
-  const childMenus = mapObjectToArray(
-    props.children || {},
-    (childProps, key) => {
-      return (
-        <MuiNestedMenu
+export function MuiNestedMenu({
+  children,
+}: {
+  children: Record<string, MuiNestedMenuProps>;
+}) {
+  const classes = useStyles();
+  const [state, setState] = useState(() => new MuiNestedMenuState());
+
+  return (
+    <List>
+      {mapObjectToArray(children, (child, key) => (
+        <MuiNestedMenuChild
+          {...child}
           key={key}
-          {...childProps}
-          root={false}
-          title={childProps.title || key}
+          menuPath={key}
+          menuKey={key}
+          depth={0}
+          classes={classes}
+          state={state}
+          setState={setState}
         />
-      );
-    }
+      ))}
+    </List>
   );
+}
 
-  const hasChildren = hasKeys(props.children);
-  const hasIndex = hasChildren && !!props.onClick;
+export function MuiNestedMenuChild({
+  children,
+  title,
+  icon,
+  onClick,
+  depth,
+  menuPath,
+  menuKey,
+  ...props
+}: MuiNestedMenuProps &
+  StateProps<MuiNestedMenuState> & {
+    menuPath: string;
+    depth: number;
+    menuKey: string;
+    classes: ReturnType<typeof useStyles>;
+  }) {
+  const [isOpen, setOpen] = useState(false);
+  const { classes, setState, state } = props;
 
-  const itemIcon = props.icon && (
-    <ListItemIcon>{MuiIcon(props.icon)}</ListItemIcon>
-  );
+  const itemIcon = <ListItemIcon>{MuiIcon(icon)}</ListItemIcon>;
 
-  let element = (
+  const hasChildren = hasKeys(children);
+
+  return (
     <>
-      {isRoot ? (
-        childMenus
-      ) : (
-        <>
-          <ListItem
-            button
-            onClick={() => {
-              if (hasKeys(props.children)) {
-                setOpen(!isOpen);
-              }
-            }}
-          >
-            {hasIndex ? false : itemIcon}
-            <ListItemText>{props.title}</ListItemText>
-          </ListItem>
-          {isOpen && (
-            <Collapse in>
-              {hasIndex && <ListItem>{itemIcon}</ListItem>}
-              {childMenus}
-            </Collapse>
-          )}
-        </>
+      <ListItem
+        button
+        selected={state.selectedPath === menuPath}
+        onClick={() => {
+          setState(state.set("selectedPath", menuPath));
+          onClick?.();
+          if (hasChildren) {
+            setOpen(!isOpen);
+          }
+        }}
+      >
+        {itemIcon}
+        <ListItemText
+          primaryTypographyProps={{
+            className: clsx(
+              classes.listItemText,
+              hasKeys(children) && classes.parent
+            ),
+          }}
+        >
+          <LangKey for={menuKey}>{title}</LangKey>
+        </ListItemText>
+
+        <ListItemSecondaryAction>
+          {hasChildren &&
+            MuiIcon(
+              isOpen
+                ? require(`@material-ui/icons/ExpandLess`)
+                : require(`@material-ui/icons/ExpandMore`)
+            )}
+        </ListItemSecondaryAction>
+      </ListItem>
+      {isOpen && (
+        <Collapse in>
+          <List disablePadding className={clsx(depth > 0 && classes.nested)}>
+            {mapObjectToArray(children || {}, (childProps, key) => (
+              <MuiNestedMenuChild
+                {...props}
+                depth={depth + 1}
+                key={key}
+                menuPath={menuPath + "/" + key}
+                menuKey={key}
+                onClick={() => {}}
+                {...childProps}
+              />
+            ))}
+          </List>
+        </Collapse>
       )}
     </>
   );
-
-  if (isRoot) {
-    element = <List>{element}</List>;
-  }
-
-  return element;
 }

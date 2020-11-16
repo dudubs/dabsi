@@ -8,7 +8,9 @@ import { EntityDataSource } from "./entity-data/EntityDataSource";
 import { _consume } from "../typedi/internal/_consume";
 import { Resolver } from "../typedi/Resolver";
 
-export function DataContext<T extends Record<string, Type<any> | [Type<any>]>>(
+export function DataResolvers<
+  T extends Record<string, Type<any> | [Type<any>]>
+>(
   typeMap: T
 ): {
   [K in keyof T]: T[K] extends [Type<infer U>]

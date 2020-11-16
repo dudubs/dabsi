@@ -14,7 +14,7 @@ import { PermissionManager } from "./acl/PermissionManager";
 import { User } from "./acl/User";
 import { ADMIN_TOKEN } from "./AdminAppConfig";
 import { SystemAppConfig } from "./SystemAppConfig";
-import { SystemRequestContext } from "./SystemRequestContext";
+import { SystemRequestResolvers } from "./SystemRequestResolvers";
 import { SystemSession } from "./SystemSession";
 
 import { SystemEntities } from "./SystemEntities";
@@ -27,7 +27,7 @@ export const SystemTester = Tester.beforeAll(async t => ({
 
     return {
       context: {
-        ...SystemRequestContext,
+        ...SystemRequestResolvers,
         ...Resolver.provide(Connection, () => t.connection),
       },
       users: {

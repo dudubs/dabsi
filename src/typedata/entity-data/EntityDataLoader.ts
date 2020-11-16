@@ -4,7 +4,7 @@ import { definedAt } from "../../common/object/definedAt";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { Awaitable } from "../../common/typings";
-import { inspect } from "../../logging";
+import { inspect } from "../../logging/inspect";
 import { EntityDataCursor } from "./EntityDataCursor";
 import { EntityDataQueryRunner } from "./EntityDataQueryRunner";
 import { EntityDataExpTranslatorToDataQueryExp } from "./EntityDataExpTranslatorToDataQueryExp";

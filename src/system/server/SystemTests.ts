@@ -3,7 +3,7 @@ import { DataRow } from "../../typedata/DataRow";
 import { Resolver } from "../../typedi/Resolver";
 import { SystemApp } from "../common/SystemApp";
 import { User } from "./acl/User";
-import { SystemRequestContext } from "./SystemRequestContext";
+import { SystemRequestResolvers } from "./SystemRequestResolvers";
 import { SystemSession } from "./SystemSession";
 import { testSystemAs } from "./SystemTester";
 import objectContaining = jasmine.objectContaining;
@@ -12,7 +12,7 @@ testm(__filename, () => {
   it("check system request context", () => {
     expect(() =>
       Resolver.checkContext({
-        ...SystemRequestContext,
+        ...SystemRequestResolvers,
         ...Connection.provide(() => {
           throw new Error("No connection");
         }),

@@ -1,4 +1,12 @@
-import { Context, createElement, ReactElement } from "react";
+import {
+  Context,
+  createElement,
+  Fragment,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+} from "react";
+import { reactNodeToElement } from "./reactNodeToElement";
 
 export type ReactWrapper = (children: ReactElement) => ReactElement;
 let wrappers: ReactWrapper[] | undefined = undefined;
@@ -8,13 +16,9 @@ export function useWrapper(wrapper: ReactWrapper) {
 }
 
 export function useProvider<T>(context: Context<T>, value: T) {
-  useWrapper((children) =>
-    createElement(context.Provider, { value, children })
-  );
+  useWrapper(children => createElement(context.Provider, { value, children }));
 }
-export function ReactHook(props: {
-  children: () => ReactElement;
-}): ReactElement;
+export function ReactHook(props: { children: () => ReactNode }): ReactElement;
 export function ReactHook(children: () => ReactElement): ReactElement;
 export function ReactHook(propsOrChildren): any {
   if (typeof propsOrChildren === "function")
@@ -26,14 +30,14 @@ export function ReactHook(propsOrChildren): any {
 ReactHook.Component = function <C extends (props?: object) => ReactElement>(
   component: C
 ): C {
-  return <any>((props) => {
+  return <any>(props => {
     wrappers = undefined;
     let children = component(props);
     // @ts-ignore
-    wrappers?.forEach((wrapper) => {
+    wrappers?.forEach(wrapper => {
       children = wrapper(children);
     });
 
-    return children;
+    return reactNodeToElement(children);
   });
 };

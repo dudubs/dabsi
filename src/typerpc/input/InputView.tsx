@@ -2,6 +2,7 @@ import { ReactElement, ReactNode, RefCallback } from "react";
 import { Payload } from "../../common/typings";
 import { Renderer } from "../../react/renderer";
 import { EmptyFragment } from "../../react/utils/EmptyFragment";
+import { RpcConnection } from "../Rpc";
 import { WidgetView, WidgetViewProps } from "../widget/WidgetView";
 import {
   AnyInput,
@@ -14,8 +15,11 @@ import {
 } from "./Input";
 import { InputViewChildren } from "./InputViewChildren";
 
+type InputErrorKey<T> =
+  | Extract<T, string>
+  | Extract<T, { type: string }>["type"];
 export type InputErrorElementMap<R extends BasedInput, T = InputError<R>> = {
-  [K in Extract<T, string> | Extract<T, { type: string }>["type"]]?:
+  [K in InputErrorKey<T>]?:
     | ReactElement
     | ((error: Extract<T, { type: K }>) => ReactElement);
 };
@@ -23,7 +27,7 @@ export type InputErrorElementMap<R extends BasedInput, T = InputError<R>> = {
 export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   C
 > & {
-  errorMap?: InputErrorElementMap<InputError<C>>;
+  errorMap?: InputErrorElementMap<C>;
 
   onChange?: (view: InputView<C>) => void;
 
@@ -36,8 +40,8 @@ export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
   value: InputValueElement<C> | undefined;
 };
 
-export type InputViewFn<C extends AnyInputConnection> = Renderer<
-  InputViewProps<C>
+export type InputViewFn<C extends AnyInput> = Renderer<
+  InputViewProps<RpcConnection<C>>
 >;
 
 export type InputView<C extends AnyInputConnection> = WidgetView<C> & {

@@ -1,9 +1,9 @@
 import { Type } from "../../common/typings";
 import { getTypeToken } from "../getTypeToken";
-import { Context } from "../Resolver";
+import { ResolverMap } from "../Resolver";
 import { ResolveError } from "../ResolveError";
 
-export function _checkType(type: Type<any>, context: Context<any>) {
+export function _checkType(type: Type<any>, context: ResolverMap<any>) {
   for (
     let baseType = type;
     typeof baseType === "function";

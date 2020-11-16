@@ -1,5 +1,5 @@
 import { Union } from "../../common/typings";
-import { inspect } from "../../logging";
+import { inspect } from "../../logging/inspect";
 
 import { ExpNode } from "./getExpNode";
 export type Exp<T> = Union<

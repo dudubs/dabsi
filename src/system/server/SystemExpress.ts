@@ -2,18 +2,22 @@ import express from "express";
 import { realpathSync } from "fs";
 import cookieParser from "cookie-parser";
 import { Connection, getConnection } from "typeorm";
+import { DataResolvers } from "../../typedata/DataResolvers";
 import { DataRow } from "../../typedata/DataRow";
 import { EntityDataSource } from "../../typedata/entity-data/EntityDataSource";
 import { Resolver } from "../../typedi";
+import { ResolverMap } from "../../typedi/Resolver";
 import { RpcRequest } from "../../typerpc/RpcRequest";
 import { SystemApp } from "../common/SystemApp";
 import { getSession } from "./acl/getSession";
 import { SYSTEM_BROWSER_BUNDLE } from "./cli/createBrowserWebpack";
 import { SystemAppConfig } from "./SystemAppConfig";
-import { SystemRequestContext } from "./SystemRequestContext";
+import { getSystemDatabaseConnection } from "./getSystemDatabaseConnection";
+import { SystemRequestResolvers } from "./SystemRequestResolvers";
+import { SystemResolvers } from "./SystemResolvers";
 import { SystemSession } from "./SystemSession";
 
-export function SystemExpressApp(
+export function createSystemExpress(
   { scripts = "" } = {},
   callback?: (app: Express.Application) => void
 ) {
@@ -48,7 +52,25 @@ export function SystemExpressApp(
     //
     const cookieKey = "sys-sess-token";
 
-    const connection = getConnection();
+    const connection = await getSystemDatabaseConnection();
+
+    // consumeAndResolve
+    Resolver.resolve(
+      Resolver.consume(
+        {
+          ...DataResolvers({ sessions: SystemSession }),
+        },
+        c =>
+          getSession({
+            cookie: req.cookies[cookieKey],
+            setCookie(value) {
+              res.cookie(cookieKey, value);
+            },
+            source: c.sessions,
+          })
+      ),
+      SystemResolvers
+    );
 
     const session = await getSession({
       cookie: req.cookies[cookieKey],
@@ -59,7 +81,7 @@ export function SystemExpressApp(
     });
 
     const context = {
-      ...SystemRequestContext,
+      ...SystemRequestResolvers,
       ...Connection.provide(() => connection),
       ...DataRow(SystemSession).provide(() => session),
     };

@@ -1,4 +1,9 @@
 import TextField, { TextFieldProps } from "@material-ui/core/TextField";
+import {
+  FilledTextFieldProps,
+  OutlinedTextFieldProps,
+  StandardTextFieldProps,
+} from "@material-ui/core/TextField/TextField";
 import * as React from "react";
 import { ReactNode } from "react";
 import { mergeProps } from "../../../../react/utils/mergeProps";

@@ -1,8 +1,9 @@
-import { createElement, useState } from "react";
-
+import React from "react";
+import { logBeforeEach } from "../../jasmine/logBeforeEach";
 import { testRpc } from "../RpcTester";
 import { testWidgetView } from "../WidgetViewTester";
-import { InputErrorHook, InputErrorHookView } from "./InputErrorHook";
+import { InputErrorHook } from "./InputErrorHook";
+import { InputErrorHookView } from "./InputErrorHookView";
 import { TestInput, TestInputView } from "./InputTests";
 
 testm(__filename, () => {
@@ -12,12 +13,12 @@ testm(__filename, () => {
         <View
           {...props}
           value={undefined}
-          errorMap={{ ERR2: "CUSTOM_ERR2" }}
+          errorMap={{ ERR2: <>CUSTOM_ERR2</> }}
           children={(props, error) => (
             <TestInputView
               {...props}
               errorMap={{
-                ERR1: "CUSTOM_ERR1",
+                ERR1: <>CUSTOM_ERR1</>,
               }}
             />
           )}

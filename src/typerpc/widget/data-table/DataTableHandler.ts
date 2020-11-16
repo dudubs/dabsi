@@ -1,3 +1,4 @@
+import { inspect } from "../../../logging/inspect";
 import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { entries } from "../../../common/object/entries";
 import { mapObject } from "../../../common/object/mapObject";
@@ -6,7 +7,6 @@ import { RequireOptionalKeys } from "../../../common/typings";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataOrder } from "../../../typedata/DataOrder";
 import { DataRow } from "../../../typedata/DataRow";
-import { inspect } from "../../../logging";
 import { ConfigFactory } from "../../ConfigFactory";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { IWidgetHandler, WidgetController, WidgetElement } from "../Widget";

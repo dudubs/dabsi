@@ -2,7 +2,7 @@
 
 echo load dabs
 
-
+alias ds='dabsi system'
 alias dabsi="$(dirname $BASH_SOURCE)/cli.sh"
 
 function at() {

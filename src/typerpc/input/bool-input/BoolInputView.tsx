@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Awaitable } from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { WidgetElement, WidgetType } from "../../widget/Widget";

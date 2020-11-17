@@ -1,7 +1,8 @@
 import React, { createElement, ReactElement, useMemo } from "react";
-import { Fn, OmitKeys } from "../../common/typings";
-import { ReactRouter, ReactRouterOptions } from "../../typerouter2/ReactRouter";
-import { Router, TRouter } from "../../typerouter2/Router";
+import { Fn } from "../../common/typings2/Fn";
+import { OmitKeys } from "../../common/typings2/OmitKeys";
+import { ReactRouter, ReactRouterOptions } from "../../typerouter/ReactRouter";
+import { Router, TRouter } from "../../typerouter/Router";
 import { AnyWidgetConnection } from "./Widget";
 import { WidgetViewProps } from "./WidgetView";
 import { WidgetViewLoader } from "./WidgetViewLoader";

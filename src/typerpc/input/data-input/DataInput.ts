@@ -1,11 +1,9 @@
-import {
-  If,
-  Is,
-  IsNever,
-  OmitKeys,
-  Override,
-  PartialUndefinedKeys,
-} from "../../../common/typings";
+import { If } from "../../../common/typings2/boolean";
+import { Is } from "../../../common/typings2/boolean/Is";
+import { IsNever } from "../../../common/typings2/boolean/IsNever";
+import { OmitKeys } from "../../../common/typings2/OmitKeys";
+import { Override } from "../../../common/typings2/Override";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { DataRow } from "../../../typedata/DataRow";
 import { DataSource } from "../../../typedata/DataSource";
 import { GenericConfig } from "../../GenericConfig";
@@ -68,9 +66,11 @@ export type AnyDataInput = DataInput<any, TDataInput>;
 
 export type TDataInput = {
   TableRow: any;
+
   TableData: any;
 
   LoadData: any;
+
   LoadRow: any;
 
   Value: any;
@@ -91,6 +91,8 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
 
     Props: {
       table: _Types<T>["Table"];
+
+      hasLoadType: boolean;
     };
 
     Config: GenericConfig<
@@ -145,6 +147,7 @@ export function DataInput<
     props: {
       nullable: options.nullable ?? false,
       table,
+      hasLoadType: !!options.loadType,
     },
     isGenericConfig: true,
     controller: table,

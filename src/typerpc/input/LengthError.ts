@@ -1,4 +1,4 @@
-import { Payload } from "../../common/typings";
+import { Payload } from "../../common/typings2/Payload";
 
 export type LengthError = Payload<{
   MAX_LENGTH: { maxLength: number };

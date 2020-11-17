@@ -1,71 +1,67 @@
-import { History } from "History";
-import {
-  createElement,
-  ReactElement,
-  ReactNode,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import { If, IsEmptyObject, PartialUndefinedKeys } from "../common/typings";
-import { TReactRouter } from "./ReactRouter";
-import { ReactRouterLocation, ReactRouterContext } from "./ReactRouterLocation";
-import { Router, RouterPlugin } from "./Router";
+import { History } from "history";
+import { createElement, Fragment, ReactNode, useEffect, useState } from "react";
+import { useEmitted } from "../react/reactor/useEmitted";
+import { useEmitter } from "../react/reactor/useEmitter";
+import { getRoutePropsByPath, RouteProps } from "./RouteProps";
+import { getReactRouterMetadata } from "./ReactRouter";
+import { AnyRouter } from "./Router";
+import { RouterLocation } from "./RouterLocation";
 
-export type ReactRouterViewProps<T extends TReactRouter> = PartialUndefinedKeys<
-  {
-    context: T["context"] | If<IsEmptyObject<T["context"]>, undefined>;
-  },
-  {
-    history: History;
-    children: ReactNode;
-    router: Router<T>;
-    listen?: (callback: (path: string) => void) => () => void;
-    path?: string;
-    plugins?: RouterPlugin<T>[];
-  }
->;
+export type ReactRouterViewProps = {
+  router: AnyRouter;
+  history: History;
+};
 
-export function ReactRouterView<T extends TReactRouter>(
-  props: ReactRouterViewProps<T>
-) {
-  const { plugins, router: unboundRouter, context, history } = <
-    ReactRouterViewProps<TReactRouter>
-  >props;
-
-  const router = useMemo(() => {
-    if (!plugins) return unboundRouter;
-    return unboundRouter.bind(context || {}, plugins);
-  }, [unboundRouter, plugins]);
-
-  const [route, setRoute] = useState<ReactRouterContext>(() =>
-    getRouteFromPath(history.location.pathname)
+export function ReactRouterView({
+  router: rootRouter,
+  history,
+}: ReactRouterViewProps) {
+  const [route, setRoute] = useState(() =>
+    getRoutePropsByPath(rootRouter, history.location.pathname)
   );
 
-  useEffect(() => {
-    if (route.location.router !== router) {
-      setRoute(getRouteFromPath(history.location.pathname));
+  const emit = useEmitter();
+
+  useEmitted(RouterLocation, location => {
+    if (location.root.router === rootRouter) {
+      setRoute({
+        type: "INDEX",
+        location,
+        path: location.path,
+      });
     }
-  }, [router]);
+  });
 
   useEffect(
     () =>
-      history.listen(location => {
-        setRoute(getRouteFromPath(location.pathname));
+      history.listen(() => {
+        setRoute(getRoutePropsByPath(rootRouter, history.location.pathname));
       }),
-    [history, router]
+    [history]
   );
 
-  let children: ReactElement = createElement(ReactRouterContext.Provider, {
-    value: route,
-    children: props.children,
-  });
+  let children: ReactNode = undefined;
 
-  return children;
-
-  function getRouteFromPath(path: string) {
-    return new ReactRouterLocation<any>(null, null, history, router, {}).route(
-      path
-    );
+  const routerMetadata = getReactRouterMetadata(route.location.router);
+  if (routerMetadata.renderer) {
+    children = routerMetadata.renderer({
+      emit,
+      route,
+      location: route.location,
+    });
   }
+
+  for (const location of route.location.getParents()) {
+    const routerMetadata = getReactRouterMetadata(location.router);
+    for (const wrapper of routerMetadata.wrappers) {
+      children = wrapper({
+        emit,
+        children,
+        location,
+        route,
+      });
+    }
+  }
+
+  return createElement(Fragment, null, children);
 }

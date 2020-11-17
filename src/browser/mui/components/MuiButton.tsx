@@ -10,7 +10,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Fn, Override, PluckRequired } from "../../../common/typings";
+import { Fn } from "../../../common/typings2/Fn";
+import { Override } from "../../../common/typings2/Override";
+import { Pluck } from "../../../common/typings2/Pluck";
 import { Lang } from "../../../lang/Lang";
 import { updateRef } from "../../../react/HookRef";
 import { partialProps } from "../../../react/utils/partialProps";

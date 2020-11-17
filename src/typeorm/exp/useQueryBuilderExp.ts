@@ -5,7 +5,7 @@ import { DataTypeInfo } from "../../typedata/DataTypeInfo";
 import { DataExp } from "../../typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "../../typedata/data-query/DataQueryBuilder";
 import { DataQueryExpToSqbTranslator } from "../../typedata/data-query/DataQueryExpToSqbTranslator";
-import { EntityDataExpTranslatorToDataQueryExp } from "../../typedata/entity-data/EntityDataExpTranslatorToDataQueryExp";
+import { DataEntityExpTranslatorToDataQueryExp } from "../../typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
 
 declare module "typeorm" {
   interface SelectQueryBuilder<Entity> {
@@ -48,7 +48,7 @@ export const useQueryBuilderExp = Lazy(() => {
       from: metadata.tableName,
       alias: this.alias,
     };
-    const qebTranslator = new EntityDataExpTranslatorToDataQueryExp(
+    const qebTranslator = new DataEntityExpTranslatorToDataQueryExp(
       metadata.connection,
       DataTypeInfo.get(<Function>metadata.target),
       new DataQueryBuilder(query),

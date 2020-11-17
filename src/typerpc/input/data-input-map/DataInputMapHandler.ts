@@ -1,5 +1,5 @@
 import { hasKeys } from "../../../common/object/hasKeys";
-import { RequireOptionalKeys } from "../../../common/typings";
+import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";

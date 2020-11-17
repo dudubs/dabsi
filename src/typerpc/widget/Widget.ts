@@ -1,15 +1,13 @@
 import { entries } from "../../common/object/entries";
 import { mergeDescriptors } from "../../common/object/mergeDescriptors";
 import { capitalize } from "../../common/string/capitalize";
-import {
-  Fn,
-  If,
-  Is,
-  IsEmptyObject,
-  Override,
-  PartialUndefinedKeys,
-  Union,
-} from "../../common/typings";
+import { If } from "../../common/typings2/boolean";
+import { Is } from "../../common/typings2/boolean/Is";
+import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
+import { Fn } from "../../common/typings2/Fn";
+import { Override } from "../../common/typings2/Override";
+import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
+import { Union } from "../../common/typings2/Union";
 import { NoRpc } from "../NoRpc";
 import {
   AnyRpc,

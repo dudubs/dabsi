@@ -1,5 +1,5 @@
 import Link, { LinkProps } from "@material-ui/core/Link";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
 import { mergeProps } from "../../../react/utils/mergeProps";
 

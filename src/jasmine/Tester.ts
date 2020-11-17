@@ -1,5 +1,5 @@
 import { mapObject, mapObjectAsync } from "../common/object/mapObject";
-import { Awaitable, Awaited } from "../common/typings";
+import { Awaitable, Awaited } from "../common/typings2/Async";
 
 type BeforeFn = {
   <T extends object, U extends object>(

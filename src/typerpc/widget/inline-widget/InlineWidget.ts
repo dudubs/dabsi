@@ -1,9 +1,6 @@
-import {
-  Awaitable,
-  If,
-  IsUndefined,
-  PartialUndefinedKeys,
-} from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
+import { If, IsUndefined } from "../../../common/typings2/boolean";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { NoRpc } from "../../NoRpc";
 import {
   AnyRpc,

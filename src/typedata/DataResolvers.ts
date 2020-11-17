@@ -1,10 +1,10 @@
 import { Connection } from "typeorm";
 import { mapObject } from "../common/object/mapObject";
-import { Type } from "../common/typings";
+import { Type } from "../common/typings2/Type";
 import { TypeResolver } from "../typedi/FnResolver";
 import { DataRow } from "./DataRow";
 import { DataSource } from "./DataSource";
-import { EntityDataSource } from "./entity-data/EntityDataSource";
+import { DataEntitySource } from "./data-entity/DataEntitySource";
 import { _consume } from "../typedi/internal/_consume";
 import { Resolver } from "../typedi/Resolver";
 
@@ -23,7 +23,7 @@ export function DataResolvers<
     Array.isArray(type)
       ? type[0]
       : Resolver.consume([Connection], connection =>
-          EntityDataSource.create(type, connection)
+          DataEntitySource.create(type, connection)
         )
   ) as any;
 }

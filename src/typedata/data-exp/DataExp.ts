@@ -1,13 +1,15 @@
-import { ExpMap, ExtractKeys, Union } from "../../common/typings";
+import { ExpMap } from "../../common/typings2/ExpMap";
+import { ExtractKeys } from "../../common/typings2/ExtractKeys";
+import { Union } from "../../common/typings2/Union";
 import { GetBaseType } from "../BaseType";
 import { DataUnionChildren } from "../DataUnion";
 import {
   NonRelationKeys,
-  RelationKeys,
-  RelationToManyKeys,
-  RelationToOneKeys,
-  RelationTypeAt,
-} from "../Relation";
+  DataRelationKeys,
+  DataRelationToManyKeys,
+  DataRelationToOneKeys,
+  DataRelationTypeAt,
+} from "../DataRelation";
 import { Exp } from "./ExpTranslator";
 
 export type DataSymbolicCompareOperator = keyof {
@@ -113,10 +115,10 @@ export type DataExpTypes<T> = {
 
   // to-many relations
   $count:
-    | RelationToManyKeys<T>
+    | DataRelationToManyKeys<T>
     | Union<
         {
-          [K in RelationToManyKeys<T>]: Record<K, RelationAtExp<T, K>>;
+          [K in DataRelationToManyKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
         }
       >;
 
@@ -128,20 +130,20 @@ export type DataExpTypes<T> = {
   $as: AsExp<T>;
 };
 export type HasExp<T> =
-  | RelationToManyKeys<T>
+  | DataRelationToManyKeys<T>
   | Union<
       {
-        [K in RelationKeys<T>]: Record<K, RelationAtExp<T, K>>;
+        [K in DataRelationKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
       }
     >;
 
-type RelationAtExp<T, K extends RelationKeys<T>> = DataExp<
-  Required<RelationTypeAt<T, K>>
+type DataRelationAtExp<T, K extends DataRelationKeys<T>> = DataExp<
+  Required<DataRelationTypeAt<T, K>>
 >;
 
 export type AtExp<T> = Union<
   {
-    [K in RelationToOneKeys<T>]: Record<K, RelationAtExp<T, K>>;
+    [K in DataRelationToOneKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
   }
 >;
 

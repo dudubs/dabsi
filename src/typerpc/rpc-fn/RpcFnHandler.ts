@@ -1,4 +1,4 @@
-import { Awaitable } from "../../common/typings";
+import { Awaitable } from "../../common/typings2/Async";
 import { AnyRpcFn } from "./RpcFn";
 import { AbstractRpcHandler, IRpcHandler } from "../Rpc";
 

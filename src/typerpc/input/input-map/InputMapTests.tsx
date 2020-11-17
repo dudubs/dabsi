@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Constructor } from "../../../common/typings";
+import { Constructor } from "../../../common/typings2/Constructor";
 import { testRpc } from "../../RpcTester";
 import { testWidgetView } from "../../WidgetViewTester";
 import { testInput } from "../InputTester";

@@ -1,5 +1,6 @@
 import { mapObjectAsync } from "../../../../common/object/mapObject";
-import { Awaited } from "../../../../common/typings";
+import { Awaited } from "../../../../common/typings2/Async";
+import { logBeforeEach } from "../../../../jasmine/logBeforeEach";
 import { DataRow } from "../../../../typedata/DataRow";
 import { AclQuery } from "../AclQuery";
 import { User } from "../User";
@@ -39,8 +40,8 @@ const t = AclTester.beforeAll(async t => {
       IS_GOD: TEST_GOD_TOKEN,
       IS_FORUMS_ADMIN: TEST_FORUMS_ADMIN_TOKEN,
 
-      IS_ADMIN_LAST_NAME: {
-        $user: { lastName: "admin" },
+      IS_ADMIN_FIRST_NAME: {
+        $user: { firstName: "admin" },
       },
     });
   }
@@ -57,11 +58,11 @@ testm(__filename, () => {
     expect(t.reviews.blockedByForum.IS_FORUM_MEMBER).toBeFalse();
   });
   describe("test $user exp:", () => {
-    it("expect 'admin' last name will be 'admin'", () => {
-      expect(t.reviews.admin.IS_ADMIN_LAST_NAME).toBeTrue();
+    it("expect 'admin' first-name will be 'admin'", () => {
+      expect(t.reviews.admin.IS_ADMIN_FIRST_NAME).toBeTrue();
     });
     it("expect 'member' last name not will be 'admin'", () => {
-      expect(t.reviews.member.IS_ADMIN_LAST_NAME).toBeFalse();
+      expect(t.reviews.member.IS_ADMIN_FIRST_NAME).toBeFalse();
     });
   });
   it("expect 'blockedByMember' can't write comment", () => {

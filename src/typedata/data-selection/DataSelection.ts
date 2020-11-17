@@ -1,6 +1,6 @@
 import { mergeObject } from "../../common/object/mergeObject";
 import { omit } from "../../common/object/omit";
-import { HasKeys, If } from "../../common/typings";
+import { HasKeys, If } from "../../common/typings2/boolean";
 import { DataExp } from "../data-exp/DataExp";
 import { DataFieldsTranslator } from "../DataFieldsTranslator";
 import { DataOrder } from "../DataOrder";
@@ -9,9 +9,9 @@ import {
   IfRelationToMany,
   IfRelationToOne,
   NonRelationKeys,
-  RelationKeys,
-  RelationTypeAt,
-} from "../Relation";
+  DataRelationKeys,
+  DataRelationTypeAt,
+} from "../DataRelation";
 
 export type DataPickableKeys<T> = Exclude<
   NonRelationKeys<T>,
@@ -36,11 +36,11 @@ export type DataSelection<T> = {
   fields?: Record<string, DataExp<T>>;
 
   relations?: {
-    [K in RelationKeys<T>]?:
+    [K in DataRelationKeys<T>]?:
       | true
       | false
-      | IfRelationToOne<T[K], _RelationToOne<RelationTypeAt<T, K>>>
-      | IfRelationToMany<T[K], _RelationToMany<RelationTypeAt<T, K>>>;
+      | IfRelationToOne<T[K], _RelationToOne<DataRelationTypeAt<T, K>>>
+      | IfRelationToMany<T[K], _RelationToMany<DataRelationTypeAt<T, K>>>;
   };
 
   children?: T extends DataUnionChildren<infer Children>

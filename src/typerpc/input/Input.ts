@@ -1,15 +1,11 @@
 // TODO: Rename to *Input
 import { mergeDescriptors } from "../../common/object/mergeDescriptors";
-import {
-  Awaitable,
-  If,
-  Is,
-  IsEmptyObject,
-  IsUndefined,
-  Not,
-  Override,
-  PartialUndefinedKeys,
-} from "../../common/typings";
+import { Awaitable } from "../../common/typings2/Async";
+import { If, IsUndefined, Not } from "../../common/typings2/boolean";
+import { Is } from "../../common/typings2/boolean/Is";
+import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
+import { Override } from "../../common/typings2/Override";
+import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
 import { NoRpc } from "../NoRpc";
 import {
   BasedRpc,

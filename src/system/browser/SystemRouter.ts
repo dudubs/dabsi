@@ -1,4 +1,4 @@
-import { Router } from "../../typerouter2/Router";
+import { Router } from "../../typerouter/Router";
 import { AdminRouter } from "../common/admin/AdminRouter";
 
 export const SystemRouter = Router({

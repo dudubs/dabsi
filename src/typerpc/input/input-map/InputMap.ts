@@ -1,5 +1,5 @@
 import { mapObject } from "../../../common/object/mapObject";
-import { Payload } from "../../../common/typings";
+import { Payload } from "../../../common/typings2/Payload";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
 

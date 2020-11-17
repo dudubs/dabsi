@@ -1,10 +1,9 @@
-import {
-  Constructor,
-  Expect,
-  HasKeys,
-  IsNever,
-  PluckRequired,
-} from "../../common/typings";
+import { testMetaType } from "../../common/MetaType";
+import { HasKeys } from "../../common/typings2/boolean";
+import { Constructor } from "../../common/typings2/Constructor";
+import { Expect } from "../../common/typings2/Expect";
+import { IsNever } from "../../common/typings2/boolean/IsNever";
+import { Pluck } from "../../common/typings2/Pluck";
 
 import { DataExp } from "../data-exp/DataExp";
 import { AEntity, BEntity } from "../../typeorm/relations/tests/Entities";
@@ -19,7 +18,12 @@ import {
   DataUnionChildrenKey,
 } from "../DataUnion";
 import { MergeDataSelection } from "../data-selection/DataSelectionMerger";
-import { MapRelation, RelationKeys, RelationTypeAt } from "../Relation";
+import {
+  MapRelation,
+  DataRelationKeys,
+  DataRelationTypeAt,
+} from "../DataRelation";
+import { DataInsert } from "../DataValue";
 import { DBase, DChild1, DUnion, EUnion } from "./BaseEntities";
 
 pass(() => {
@@ -68,10 +72,10 @@ pass(() => {
       [
         //
         //
-        Expect<RelationKeys<SR1>, "oneAToOneB">,
-        Expect<RelationKeys<SR1>, "oneAToOneC">,
-        Expect<RelationKeys<SR2>, "oneAToOneB">,
-        Expect<RelationKeys<SR2>, "oneAToOneC">,
+        Expect<DataRelationKeys<SR1>, "oneAToOneB">,
+        Expect<DataRelationKeys<SR1>, "oneAToOneC">,
+        Expect<DataRelationKeys<SR2>, "oneAToOneB">,
+        Expect<DataRelationKeys<SR2>, "oneAToOneC">,
         //
         //
         Expect<
@@ -172,7 +176,7 @@ pass(() => {
     // MergePicks
     {
       function testPicks<L, R>(
-        x: PluckRequired<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
+        x: Pluck<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
       ) {}
 
       testPicks<undefined, undefined>(undefined);
@@ -231,15 +235,12 @@ pass(() => {
       ? T
       : HasKeys<S> extends false
       ? T
-      : Omit<T, DataUnionChildrenKey | RelationKeys<T>> & {
-          x: PluckRequired<S, "x">;
+      : Omit<T, DataUnionChildrenKey | DataRelationKeys<T>> & {
+          x: Pluck<S, "x">;
         } & {
-            [K in RelationKeys<T>]: MapRelation<
+            [K in DataRelationKeys<T>]: MapRelation<
               T[K],
-              X<
-                RelationTypeAt<T, K>,
-                PluckRequired<PluckRequired<S, "relations">, K>
-              >
+              X<DataRelationTypeAt<T, K>, Pluck<Pluck<S, "relations">, K>>
             >;
           };
 
@@ -257,10 +258,10 @@ pass(() => {
       >
     >(d => {});
 
-    assertType<IsNever<PluckRequired<never, "x">>>(true);
+    assertType<IsNever<Pluck<never, "x">>>(true);
 
     // @ts-expect-error
-    assertType<IsNever<PluckRequired<never, "x">>>(false);
+    assertType<IsNever<Pluck<never, "x">>>(false);
 
     testSelection(AEntity, { pick: ["aText"] } as const, (row, sr, s) => {
       void row.aText;
@@ -502,24 +503,17 @@ pass(() => {
         }
       >
     >(s => {
-      assertType<PluckRequired<typeof s.relations.oneDToOneE.pick, number>>(
+      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>(
         // @ts-expect-error
         "x"
       );
 
-      assertType<PluckRequired<typeof s.relations.oneDToOneE.pick, number>>(
-        "eId"
-      );
+      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("eId");
 
-      assertType<PluckRequired<typeof s.relations.oneDToOneE.pick, number>>(
-        "eText"
-      );
+      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("eText");
 
       assertType<
-        PluckRequired<
-          typeof s.relations.oneDToOneE.children.eChild1.pick,
-          number
-        >
+        Pluck<typeof s.relations.oneDToOneE.children.eChild1.pick, number>
       >(
         // @ts-expect-error
 
@@ -527,10 +521,7 @@ pass(() => {
       );
 
       assertType<
-        PluckRequired<
-          typeof s.relations.oneDToOneE.children.eChild1.pick,
-          number
-        >
+        Pluck<typeof s.relations.oneDToOneE.children.eChild1.pick, number>
       >("eChild1Text");
 
       // @ts-expect-error
@@ -1072,7 +1063,18 @@ pass(() => {
       // @ts-expect-error
       ds.insertKey({ dChild1Text: "" });
 
+      ds.insertKey({
+        dId: "",
+      });
+
+      const x = new DUnion().$unionChildren.dChild1.$baseType;
+      const a: DataInsert<typeof x> = {
+        dId: "",
+        dChild1Text: "",
+      };
+
       ds.as("dChild1").insertKey({
+        dId: "",
         dText: "",
         dChild1Text: "",
         dBoolean: false,

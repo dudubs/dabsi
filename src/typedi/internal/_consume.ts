@@ -40,6 +40,18 @@ export type ConsumeFactory<T, U extends ConsumeDeps> = U extends ResolverArray
   ? (...args: ArrayDeps<U>) => T
   : (context: ResolveMapType<Extract<U, ResolverMap<any>>>) => T;
 
+export function _consumeMap<T, U extends ResolverMap<any>>(
+  deps: U,
+  create: (context: ResolveMapType<U>) => T
+): Resolver<T> {
+  const depsResolver = _resolverMap(deps);
+  return (context => {
+    return create(_resolve(depsResolver, context));
+  }).toCheck(context => {
+    _check(depsResolver, context);
+  });
+}
+
 export function _consume<T, U extends ConsumeDeps>(
   deps: U,
   create: ConsumeFactory<T, U>

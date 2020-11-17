@@ -1,4 +1,4 @@
-import { RequireOptionalKeys } from "../../../common/typings";
+import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { AnyInput, InputValueData } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
 import { RpcUnresolvedConfig } from "../../Rpc";

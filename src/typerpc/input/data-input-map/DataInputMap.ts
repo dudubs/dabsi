@@ -1,11 +1,9 @@
 import { mapArrayToObject } from "../../../common/array/mapArrayToObject";
 import { mapObject } from "../../../common/object/mapObject";
-import {
-  Awaitable,
-  Override,
-  PartialUndefinedKeys,
-  Payload,
-} from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
+import { Override } from "../../../common/typings2/Override";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
+import { Payload } from "../../../common/typings2/Payload";
 import { DataRow } from "../../../typedata/DataRow";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";

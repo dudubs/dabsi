@@ -12,9 +12,9 @@ import { JoinColumnOptions, JoinTableOptions } from "typeorm";
 import { MetadataArgsStorage } from "typeorm/metadata-args/MetadataArgsStorage";
 import { MapFactory } from "../../../common/map/mapFactory";
 import { definedAt } from "../../../common/object/definedAt";
-import { Type } from "../../../common/typings";
+import { Type } from "../../../common/typings2/Type";
 import { logBeforeEach } from "../../../jasmine/logBeforeEach";
-import { Relation } from "../../../typedata/Relation";
+import { DataRelation } from "../../../typedata/DataRelation";
 
 const targetToRelationKeys = MapFactory(
   (target: Function) => new Set<string>()
@@ -28,7 +28,7 @@ export function TestRelation<T>(
   } = {}
 ) {
   return <K extends string>(
-    target: Partial<Record<K, Relation<T> | Relation<T>[]>>,
+    target: Partial<Record<K, DataRelation<T> | DataRelation<T>[]>>,
     relationName: K
   ) => {
     const relationInfo = parseRelationName(relationName);

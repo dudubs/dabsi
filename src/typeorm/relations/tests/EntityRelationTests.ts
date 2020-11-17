@@ -1,6 +1,6 @@
 // TODO: rename to EntityRelationTests.
 import { Connection, Repository } from "typeorm";
-import { EntityDataKey } from "../../../typedata/entity-data/EntityDataKey";
+import { DataEntityKey } from "../../../typedata/data-entity/DataEntityKey";
 import {
   DBase,
   DChild1,
@@ -200,13 +200,13 @@ testm(__filename, () => {
         relation.right.repository.create(),
       ]);
 
-      const rightKey = EntityDataKey.pick(relation.right.entityMetadata, right);
+      const rightKey = DataEntityKey.pick(relation.right.entityMetadata, right);
       const qb = relation.left.repository.createQueryBuilder();
       relation.joinSqb(
         "INNER",
         qb,
         qb.alias,
-        EntityDataKey.pick(relation.right.entityMetadata, right)
+        DataEntityKey.pick(relation.right.entityMetadata, right)
       );
 
       expect(await qb.getRawOne()).toBeFalsy();

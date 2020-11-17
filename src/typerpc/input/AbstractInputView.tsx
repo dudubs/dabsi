@@ -1,6 +1,6 @@
 // TODO: AbstractInputView
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
-import { Awaitable } from "../../common/typings";
+import { Awaitable } from "../../common/typings2/Async";
 import { ViewState } from "../../react/view/ViewState";
 import { RpcConnection } from "../Rpc";
 import { AbstractWidgetView } from "../widget/AbstractWidgetView";

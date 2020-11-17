@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Override, RequireOptionalKeys } from "../../common/typings";
+import { Override } from "../../common/typings2/Override";
+import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
 import { NoRpc } from "../NoRpc";
 import { RpcConnection, RpcUnresolvedConfig } from "../Rpc";
 import { testRpc } from "../RpcTester";
@@ -73,7 +74,7 @@ testm(__dirname, () => {
           <View
             {...props}
             value={undefined}
-            errorMap={{ ERR1: "CUSTOM_ERR1" }}
+            errorMap={{ ERR1: <>CUSTOM_ERR1</> }}
           />
         ),
         () => {

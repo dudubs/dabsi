@@ -1,4 +1,6 @@
-import { Awaited, ExtractKeys, Fn } from "../typings";
+import { Awaited } from "../typings2/Async";
+import { ExtractKeys } from "../typings2/ExtractKeys";
+import { Fn } from "../typings2/Fn";
 
 declare global {
   interface Object {

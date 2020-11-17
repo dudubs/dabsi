@@ -1,9 +1,9 @@
 import { ChildEntity, ManyToOne } from "typeorm/index";
-import { Relation } from "../../../../src/typedata/Relation";
+import { DataRelation } from "../../../../src/typedata/DataRelation";
 import { Dog, DogBreed } from "./DogBreed";
 
 @ChildEntity()
 export class PurebredDog extends Dog {
   @ManyToOne(() => DogBreed, breed => breed.purebredDogs)
-  breed: Relation<DogBreed>;
+  breed: DataRelation<DogBreed>;
 }

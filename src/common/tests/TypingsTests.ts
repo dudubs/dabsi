@@ -1,19 +1,15 @@
-import {
-  HasKeys,
-  Is,
-  IsAny,
-  IsEmptyObject,
-  IsNever,
-  IsSome,
-  IsUndefined,
-  OptionalKeys,
-  OptionalObjectArg,
-  PartialUndefinedKeys,
-  PluckRequired,
-  RequireOptionalKeys,
-} from "../typings";
+import { HasKeys, IsAny, IsUndefined } from "../typings2/boolean";
+import { Is } from "../typings2/boolean/Is";
+import { IsEmptyObject } from "../typings2/boolean/IsEmptyObject";
+import { IsNever } from "../typings2/boolean/IsNever";
+import { IsSome } from "../typings2/boolean/IsSome";
+import { OptionalKeys } from "../typings2/OptionalKeys";
+import { OptionalObjectArg } from "../typings2/OptionalObjectArg";
+import { PartialUndefinedKeys } from "../typings2/PartialUndefinedKeys";
+import { Pluck } from "../typings2/Pluck";
+import { RequireOptionalKeys } from "../typings2/RequireOptionalKeys";
 
-((_) => {})(() => {
+(_ => {})(() => {
   // Bool
   {
     // @ts-expect-error
@@ -175,7 +171,7 @@ import {
   }
   // Pluck
   {
-    test<IsNever<PluckRequired<never, "">>>(true);
+    test<IsNever<Pluck<never, "">>>(true);
   }
 
   // IsAny

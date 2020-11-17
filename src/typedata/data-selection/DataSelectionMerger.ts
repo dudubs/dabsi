@@ -1,9 +1,7 @@
-import {
-  AssignKeys,
-  HasKeys,
-  Merge,
-  PluckRequired,
-} from "../../common/typings";
+import { AssignKeys } from "../../common/typings2/AssignKeys";
+import { HasKeys } from "../../common/typings2/boolean";
+import { Merge } from "../../common/typings2/Merge";
+import { Pluck } from "../../common/typings2/Pluck";
 
 type _MergeRelation<L, R> = L extends boolean
   ? R
@@ -17,7 +15,7 @@ type _MergeRelations<L, R> = Merge<
   {
     [K in keyof R]: _MergeRelation<
       //
-      PluckRequired<L, K, undefined>,
+      Pluck<L, K, undefined>,
       R[K]
     >;
   }
@@ -29,7 +27,7 @@ type _MergeChildren<L, R> = Merge<
   {
     [RK in keyof R]: _Merge<
       //
-      PluckRequired<L, RK, undefined>, // L ChildOf K
+      Pluck<L, RK, undefined>, // L ChildOf K
       R[RK]
       ///
     >;
@@ -50,23 +48,23 @@ type _MergeObject<L, R> = Merge<
   {
     pick: _MergePicks<
       //
-      PluckRequired<L, "pick", undefined>,
-      PluckRequired<R, "pick", undefined>
+      Pluck<L, "pick", undefined>,
+      Pluck<R, "pick", undefined>
     >;
     fields: AssignKeys<
       //
-      PluckRequired<L, "fields">,
-      PluckRequired<R, "fields">
+      Pluck<L, "fields">,
+      Pluck<R, "fields">
     >;
     relations: _MergeRelations<
       //
-      PluckRequired<L, "relations">,
-      PluckRequired<R, "relations">
+      Pluck<L, "relations">,
+      Pluck<R, "relations">
     >;
     children: _MergeChildren<
       //
-      PluckRequired<L, "children">,
-      PluckRequired<R, "children">
+      Pluck<L, "children">,
+      Pluck<R, "children">
     >;
   }
 >;

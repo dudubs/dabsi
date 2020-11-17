@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from "typeorm";
-import { Relation } from "../../../typedata/Relation";
+import { DataRelation } from "../../../typedata/DataRelation";
 
 @Entity("menu")
 @TableInheritance({ column: "type" })
@@ -35,5 +35,5 @@ export class MenuCategory extends Menu {
 
   @JoinTable()
   @ManyToMany(() => Menu)
-  children: Relation<Menu>[];
+  children: DataRelation<Menu>[];
 }

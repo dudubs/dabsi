@@ -1,15 +1,13 @@
-import {
-  If,
-  Is,
-  Override,
-  PartialUndefinedKeys,
-  UndefinedIfEmptyObject,
-  UndefinedIfIsUndefined,
-} from "../../../common/typings";
+import { If } from "../../../common/typings2/boolean";
+import { Is } from "../../../common/typings2/boolean/Is";
+import { Override } from "../../../common/typings2/Override";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
+import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
+import { UndefinedIfIsUndefined } from "../../../common/typings2/UndefinedIfIsUndefined";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataRow } from "../../../typedata/DataRow";
 import { DataSource } from "../../../typedata/DataSource";
-import { NonRelationKeys } from "../../../typedata/Relation";
+import { NonRelationKeys } from "../../../typedata/DataRelation";
 import { ConfigFactory } from "../../ConfigFactory";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
@@ -27,6 +25,7 @@ import { Widget, WidgetController } from "../Widget";
 import { DataTableHandler } from "./DataTableHandler";
 
 export type DataTableTypes<T extends TDataTable> = _Types<T>;
+
 type _ColumnTypes<
   T extends TDataTable & {
     ColumnKey: string;
@@ -150,7 +149,11 @@ export type DataTable<
     rows: _Types<T>["RowWithKey"][];
     pageSize?: number;
   };
-  Props: {};
+
+  Props: {
+    rowType: { [K in keyof Row]: (value: any) => Row[K] };
+  };
+
   Handler: {
     getRows: GetRowsFn;
 
@@ -198,6 +201,7 @@ export function DataTable<
       getRows: conn => query => conn.controller.getRows(query),
       getRowController: conn => key => conn.controller.getRowController(key),
     },
+    props: { rowType },
     controller: RpcMap({
       getRowController: RpcParameter(String, options.rowController || NoRpc),
       getRows: RpcFn<any>(),

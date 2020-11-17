@@ -1,4 +1,6 @@
-import { Payload, TypeRef, Typing } from "../../common/typings";
+import { Payload } from "../../common/typings2/Payload";
+import { TypeRef } from "../../common/typings2/TypeRef";
+import { Typing } from "../../common/typings2/Typing";
 import { DataInput } from "../../typerpc/input/data-input/DataInput";
 import { RpcFn } from "../../typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "../../typerpc/rpc-map/RpcMap";
@@ -24,7 +26,7 @@ export const DevLogin = Form({
   input: DataInput({
     loadType: TypeRef(() => DevLoginUser),
   }),
-  value: Typing<{ helloTo: string }>(),
+  value: Typing<LoginInfo>(),
 });
 
 export const SystemApp = RpcMap({

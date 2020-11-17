@@ -1,11 +1,9 @@
-import {
-  Awaitable,
-  If,
-  IsEmptyObject,
-  OmitKeys,
-  Override,
-  PartialUndefinedKeys,
-} from "../../common/typings";
+import { Awaitable } from "../../common/typings2/Async";
+import { If } from "../../common/typings2/boolean";
+import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
+import { OmitKeys } from "../../common/typings2/OmitKeys";
+import { Override } from "../../common/typings2/Override";
+import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
 import { DataRow } from "../../typedata/DataRow";
 import { DataSource } from "../../typedata/DataSource";
 import { ConfigFactory } from "../ConfigFactory";

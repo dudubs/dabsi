@@ -1,12 +1,12 @@
 import { ChildEntity, Column, Entity, ManyToOne, OneToMany } from "typeorm";
-import { Relation } from "../../../typedata/Relation";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { Menu } from "../menu/Menu";
 import { SystemEntity } from "../SystemEntity";
 
 @Entity()
 export class Page extends SystemEntity({ withOwners: true }) {
   @ManyToOne(() => PageCategory, c => c.pages)
-  category: Relation<PageCategory>;
+  category: DataRelation<PageCategory>;
 
   @Column()
   createdDate: Date;
@@ -21,13 +21,13 @@ export class Page extends SystemEntity({ withOwners: true }) {
 @Entity()
 export class PageCategory extends SystemEntity() {
   @OneToMany(() => Page, p => p.category)
-  pages: Relation<Page>[];
+  pages: DataRelation<Page>[];
 }
 
 @ChildEntity()
 export class PageMenu extends Menu {
   @ManyToOne(() => Page)
-  page: Relation<Page>;
+  page: DataRelation<Page>;
 }
 
 // RichTextInput

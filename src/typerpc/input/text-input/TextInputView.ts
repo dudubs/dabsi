@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Timeout } from "../../../common/async/Timeout";
-import { Awaitable } from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
 import { Lang } from "../../../lang/Lang";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";

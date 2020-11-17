@@ -1,23 +1,11 @@
-import {
-  Column,
-  Entity,
-  ManyToMany,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
-import { DataUnion } from "../../../typedata/DataUnion";
-import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
-import { Relation } from "../../../typedata/Relation";
-import { Owner, OwnerColumn, OwnerData } from "../acl/Owner";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { User } from "../acl/User";
 
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @OwnerColumn()
-  owner: Relation<Owner>;
 
   @Column()
   content: string;
@@ -28,11 +16,12 @@ export class Forum {
   id: number;
 
   @ManyToMany(() => User)
-  members: Relation<User>[];
+  members: DataRelation<User>[];
 
   @ManyToMany(() => User)
-  blockedUsers: Relation<User>[];
+  blockedUsers: DataRelation<User>[];
 }
+
 /*
 
 allow for owner post #postid
@@ -46,25 +35,3 @@ user to system
 
 owner
  */
-
-export class PostData extends DataUnion(Post, {
-  relations: {
-    owner: OwnerData,
-  },
-} as const) {}
-
-EntityDataSource.create(PostData).filter({
-  $at: {
-    owner: {
-      $as: {
-        USER: {
-          $at: {
-            user: {
-              firstName: "x" as const,
-            },
-          },
-        },
-      },
-    },
-  },
-});

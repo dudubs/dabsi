@@ -1,16 +1,17 @@
-import { ExtractKeys, Type } from "../../../common/typings";
+import { ExtractKeys } from "../../../common/typings2/ExtractKeys";
+import { Type } from "../../../common/typings2/Type";
 import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { BasedType, GetBaseType } from "../../../typedata/BaseType";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataCursor, EmptyDataCursor } from "../../../typedata/DataCursor";
 import { BasedDataRow } from "../../../typedata/DataSourceRow";
-import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
+import { DataEntitySource } from "../../../typedata/data-entity/DataEntitySource";
 import {
-  Relation,
-  RelationToManyKeys,
-  RelationToOneKeys,
-  RelationType,
-} from "../../../typedata/Relation";
+  DataRelation,
+  DataRelationToManyKeys,
+  DataRelationToOneKeys,
+  DataRelationType,
+} from "../../../typedata/DataRelation";
 import { Group } from "./Group";
 import { User } from "./User";
 
@@ -49,9 +50,9 @@ export class AclCriterion<T> {
       );
     }
     const source = (row as BasedDataRow<any>).getSource();
-    if (!(source instanceof EntityDataSource))
-      throw new Error(`Expect to ${EntityDataSource.name}.`);
-    return new AclCriterion(source.mainEntityType, source.cursor, undefined);
+    if (!(source instanceof DataEntitySource))
+      throw new Error(`Expect to ${DataEntitySource.name}.`);
+    return new AclCriterion(source.entityType, source.cursor, undefined);
   }
 
   constructor(
@@ -71,9 +72,9 @@ export class AclCriterion<T> {
     return new AclCriterion(this.entityType, this.cursor, this.root ?? this);
   }
 
-  at<K extends RelationToOneKeys<T>>(
+  at<K extends DataRelationToOneKeys<T>>(
     propertyName: K
-  ): AclCriterion<RelationType<T[K]>> {
+  ): AclCriterion<DataRelationType<T[K]>> {
     const child = this.createChild();
 
     this._filter(
@@ -86,9 +87,9 @@ export class AclCriterion<T> {
     return child as any;
   }
 
-  hasAt<K extends RelationToManyKeys<T>>(
+  hasAt<K extends DataRelationToManyKeys<T>>(
     propertyName: K
-  ): AclCriterion<RelationType<T[K]>> {
+  ): AclCriterion<DataRelationType<T[K]>> {
     const child = this.createChild();
 
     this._filter(
@@ -126,25 +127,27 @@ export class AclCriterion<T> {
     });
   }
 
-  userIs<K extends ExtractKeys<T, Relation<User>>>(propertyName: K): this {
+  userIs<K extends ExtractKeys<T, DataRelation<User>>>(propertyName: K): this {
     return this._filter(({ user }) => ({
       $at: { [propertyName]: user },
     }));
   }
 
-  hasUser<K extends ExtractKeys<T, Relation<User>[]>>(propertyName: K) {
+  hasUser<K extends ExtractKeys<T, DataRelation<User>[]>>(propertyName: K) {
     return this._filter(({ user }) => ({
       $has: { [propertyName]: user },
     }));
   }
 
-  userGroupIs<K extends ExtractKeys<T, Relation<Group>>>(propertyName: K) {
+  userGroupIs<K extends ExtractKeys<T, DataRelation<Group>>>(propertyName: K) {
     return this._filter(({ group }) => ({
       $at: { [propertyName]: group },
     }));
   }
 
-  hasUserGroup<K extends ExtractKeys<T, Relation<Group>[]>>(propertyName: K) {
+  hasUserGroup<K extends ExtractKeys<T, DataRelation<Group>[]>>(
+    propertyName: K
+  ) {
     return this._filter(({ group }) => ({
       $has: { [propertyName]: group },
     }));

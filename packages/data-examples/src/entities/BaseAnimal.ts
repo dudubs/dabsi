@@ -1,16 +1,19 @@
-import {Column, Entity, PrimaryGeneratedColumn, TableInheritance} from "typeorm/index";
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  TableInheritance,
+} from "typeorm/index";
 
 @Entity()
-@TableInheritance({column: "type"})
+@TableInheritance({ column: "type" })
 export class BaseAnimal {
+  @Column()
+  type: string;
 
-    @Column()
-    type: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    name: string;
-
+  @Column()
+  name: string;
 }

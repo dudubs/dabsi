@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   ChildEntity,
   Column,
   Entity,

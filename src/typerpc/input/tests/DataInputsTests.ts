@@ -1,5 +1,5 @@
 // import { Column, Entity, PrimaryColumn } from "typeorm";
-// import { EntityDataSource } from "../../../data/eds/EntityDataSource";
+// import { DataEntitySource } from "../../../data/eds/DataEntitySource";
 // import { TestConnection } from "../../../data/tests/TestConnection";
 // import { BoolInput } from "../bool-input/BoolInput";
 // import { DataInput } from "../data-input/DataInput";
@@ -19,7 +19,7 @@
 //   }
 //
 //   const getConnection = TestConnection([A]);
-//   const source = EntityDataSource.create(A, getConnection);
+//   const source = DataEntitySource.create(A, getConnection);
 //
 //   const rows = [
 //     { id: "1", text: "hello" },

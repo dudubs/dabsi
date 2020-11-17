@@ -1,12 +1,10 @@
 import Typography from "@material-ui/core/Typography";
 import React from "react";
-import {
-  If,
-  Is,
-  IsEmptyObject,
-  OmitKeys,
-  PartialUndefinedKeys,
-} from "../../../common/typings";
+import { If } from "../../../common/typings2/boolean";
+import { Is } from "../../../common/typings2/boolean/Is";
+import { IsEmptyObject } from "../../../common/typings2/boolean/IsEmptyObject";
+import { OmitKeys } from "../../../common/typings2/OmitKeys";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import {
   AnyDataManager,

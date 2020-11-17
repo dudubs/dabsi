@@ -1,4 +1,7 @@
-import { Awaited, Fn, If, Not, PartialUndefinedKeys } from "../common/typings";
+import { Awaited } from "../common/typings2/Async";
+import { If, Not } from "../common/typings2/boolean";
+import { Fn } from "../common/typings2/Fn";
+import { PartialUndefinedKeys } from "../common/typings2/PartialUndefinedKeys";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
 import { AnyRpc, RpcHook, RpcType, RpcUnresolvedConfig, TRpc } from "./Rpc";

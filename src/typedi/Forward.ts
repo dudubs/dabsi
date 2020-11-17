@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { WeakMapFactory } from "../common/map/mapFactory";
-import { Type } from "../common/typings";
+import { Type } from "../common/typings2/Type";
 
 const getTargetParameterTypes = WeakMapFactory(() => [] as (() => Function)[]);
 const getTargetPropertyTypes = WeakMapFactory(

@@ -1,4 +1,4 @@
-import { Awaitable } from "../typings";
+import { Awaitable } from "../typings2/Async";
 import { entries } from "./entries";
 
 export function mapObject<T, R>(

@@ -1,4 +1,5 @@
-import { Awaitable, Awaited, Fn } from "../../common/typings";
+import { Awaitable, Awaited } from "../../common/typings2/Async";
+import { Fn } from "../../common/typings2/Fn";
 import { RpcFnHandler } from "./RpcFnHandler";
 import { Rpc } from "../Rpc";
 

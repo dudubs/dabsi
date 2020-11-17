@@ -1,6 +1,6 @@
 import { Connection, createConnection } from "typeorm/index";
 import { defined } from "../../../src/common/object/defined";
-import { EntityDataSource } from "../../../src/typedata/entity-data/EntityDataSource";
+import { DataEntitySource } from "../../../src/typedata/data-entity/DataEntitySource";
 import { Animal } from "./Animal";
 import { BaseAnimal } from "./entities/BaseAnimal";
 import { Cat } from "./entities/Cat";
@@ -14,8 +14,8 @@ function getConnection() {
   return defined(connection, () => `No connection`);
 }
 
-const Animals = EntityDataSource.create(Animal, getConnection);
-const DogBreeds = EntityDataSource.create(DogBreed, getConnection);
+const Animals = DataEntitySource.create(Animal, getConnection);
+const DogBreeds = DataEntitySource.create(DogBreed, getConnection);
 
 const MixedDogs = Animals.as("mixedDog");
 const PurebredDogs = Animals.as("purebredDog");

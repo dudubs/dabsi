@@ -1,20 +1,11 @@
 import "reflect-metadata";
-import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-  PrimaryColumn,
-} from "typeorm";
-import { Relation } from "../../../typedata/Relation";
+import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { TestRelation } from "./TestRelation";
 
 let randomId = 0;
+
+// DataEntity()
 
 @Entity("A")
 export class AEntity {
@@ -27,59 +18,59 @@ export class AEntity {
   aId: string;
 
   @Column({ nullable: true })
-  aText: string;
+  aText?: string;
 
   @Column({ nullable: true })
-  aNumber: number;
+  aNumber?: number;
 
   // to B
   @TestRelation(() => BEntity)
-  oneAToOneB: Relation<BEntity>;
+  oneAToOneB?: DataRelation<BEntity>;
 
   @TestRelation(() => BEntity)
-  oneAToOneBOwner: Relation<BEntity>;
+  oneAToOneBOwner?: DataRelation<BEntity>;
 
   @TestRelation(() => BEntity)
-  oneAToManyB: Relation<BEntity>[];
+  oneAToManyB: DataRelation<BEntity>[];
 
   @TestRelation(() => BEntity)
-  manyAToOneB: Relation<BEntity>;
+  manyAToOneB?: DataRelation<BEntity>;
 
   @TestRelation(() => BEntity)
-  manyAToManyB: Relation<BEntity>[];
+  manyAToManyB: DataRelation<BEntity>[];
 
   @TestRelation(() => BEntity)
-  manyAToManyBOwner: Relation<BEntity>[];
+  manyAToManyBOwner: DataRelation<BEntity>[];
 
   @TestRelation(() => CEntity)
-  oneAToOneC: Relation<CEntity>;
+  oneAToOneC?: DataRelation<CEntity>;
 
   @TestRelation(() => CEntity)
-  oneAToOneCOwner: Relation<CEntity>;
+  oneAToOneCOwner?: DataRelation<CEntity>;
 
   @TestRelation(() => CEntity)
-  manyAToManyC: Relation<CEntity>[];
+  manyAToManyC: DataRelation<CEntity>[];
 
   @TestRelation(() => CEntity)
-  manyAToManyCOwner: Relation<CEntity>[];
+  manyAToManyCOwner: DataRelation<CEntity>[];
 
   @TestRelation(() => AEntity)
-  manyAToManyAOwner: Relation<AEntity>[];
+  manyAToManyAOwner: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyAToManyA: Relation<AEntity>[];
+  manyAToManyA: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  oneAToOneA: Relation<AEntity>;
+  oneAToOneA?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneAToOneAOwner: Relation<AEntity>;
+  oneAToOneAOwner?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneAToManyA: Relation<AEntity>[];
+  oneAToManyA: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyAToOneA: Relation<AEntity>[];
+  manyAToOneA?: DataRelation<AEntity>[];
 }
 
 @Entity("B")
@@ -89,44 +80,44 @@ export class BEntity {
     this.bId = `b${++randomId}`;
   }
 
-  @PrimaryColumn()
+  @PrimaryColumn(String)
   bId: string;
 
   @Column({ nullable: true })
-  bText: string;
+  bText?: string;
 
   @Column({ nullable: true })
-  bNumber: number;
+  bNumber?: number;
 
   @TestRelation(() => AEntity)
-  oneBToOneA: Relation<AEntity>;
+  oneBToOneA?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneBToOneAOwner: Relation<AEntity>;
+  oneBToOneAOwner?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneBToManyA: Relation<AEntity>[];
+  oneBToManyA: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyBToOneA: Relation<AEntity>;
+  manyBToOneA?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  manyBToManyAOwner: Relation<AEntity>[];
+  manyBToManyAOwner: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyBToManyA: Relation<AEntity>[];
+  manyBToManyA: DataRelation<AEntity>[];
 
   @TestRelation(() => CEntity)
-  oneBToOneC: Relation<CEntity>;
+  oneBToOneC?: DataRelation<CEntity>;
 
   @TestRelation(() => CEntity)
-  oneBToOneCOwner: Relation<CEntity>;
+  oneBToOneCOwner?: DataRelation<CEntity>;
 
   @TestRelation(() => CEntity)
-  manyBToManyCOwner: Relation<CEntity>[];
+  manyBToManyCOwner: DataRelation<CEntity>[];
 
   @TestRelation(() => CEntity)
-  manyBToManyC: Relation<CEntity>[];
+  manyBToManyC: DataRelation<CEntity>[];
 }
 
 @Entity("C")
@@ -140,32 +131,32 @@ export class CEntity {
   cId: string;
 
   @Column({ nullable: true })
-  cText: string;
+  cText?: string;
 
   @Column({ nullable: true })
-  cNumber: number;
+  cNumber?: number;
 
   @TestRelation(() => BEntity)
-  oneCToOneB: Relation<BEntity>;
+  oneCToOneB?: DataRelation<BEntity>;
 
   @TestRelation(() => BEntity)
-  oneCToOneBOwner: Relation<BEntity>;
+  oneCToOneBOwner?: DataRelation<BEntity>;
 
   @TestRelation(() => AEntity)
-  oneCToOneA: Relation<AEntity>;
+  oneCToOneA?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneCToOneAOwner: Relation<AEntity>;
+  oneCToOneAOwner?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  manyCToManyAOwner: Relation<AEntity>[];
+  manyCToManyAOwner: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyCToManyA: Relation<AEntity>[];
+  manyCToManyA: DataRelation<AEntity>[];
 
   @TestRelation(() => BEntity)
-  manyCToManyBOwner: Relation<BEntity>[];
+  manyCToManyBOwner: DataRelation<BEntity>[];
 
   @TestRelation(() => BEntity)
-  manyCToManyB: Relation<BEntity>[];
+  manyCToManyB: DataRelation<BEntity>[];
 }

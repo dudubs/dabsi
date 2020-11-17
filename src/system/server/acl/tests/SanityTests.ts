@@ -1,4 +1,4 @@
-import { EntityDataSource } from "../../../../typedata/entity-data/EntityDataSource";
+import { DataEntitySource } from "../../../../typedata/data-entity/DataEntitySource";
 import { TestConnection } from "../../../../typedata/tests/TestConnection";
 import { Group } from "../Group";
 import { User } from "../User";
@@ -6,8 +6,8 @@ import { User } from "../User";
 testm(__filename, () => {
   const getConnection = TestConnection([User, Group]);
 
-  const Users = EntityDataSource.create(User, getConnection);
-  const Groups = EntityDataSource.create(Group, getConnection);
+  const Users = DataEntitySource.create(User, getConnection);
+  const Groups = DataEntitySource.create(Group, getConnection);
 
   let g1: string;
   let g2: string;
@@ -23,9 +23,18 @@ testm(__filename, () => {
       await Groups.insertKey({ name: `g${gi++}` }),
     ];
     [u1, u2, u3] = [
-      await Users.insertKey({}),
-      await Users.insertKey({}),
-      await Users.insertKey({}),
+      await Users.insertKey({
+        firstName: "u1",
+        lastName: "test",
+      }),
+      await Users.insertKey({
+        firstName: "u2",
+        lastName: "test",
+      }),
+      await Users.insertKey({
+        firstName: "u2",
+        lastName: "test",
+      }),
     ];
 
     await Groups.at("users", g1).add([u1, u2]);

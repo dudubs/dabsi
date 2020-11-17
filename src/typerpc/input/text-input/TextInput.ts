@@ -1,4 +1,4 @@
-import { Override } from "../../../common/typings";
+import { Override } from "../../../common/typings2/Override";
 import { NoRpc } from "../../NoRpc";
 import { Input } from "../Input";
 import { TextInputError, TextInputOptions } from "./TextInputLoader";

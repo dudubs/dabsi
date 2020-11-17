@@ -1,8 +1,6 @@
 import { mapObject } from "../../common/object/mapObject";
-import {
-  PartialUndefinedKeys,
-  UndefinedIfEmptyObject,
-} from "../../common/typings";
+import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
+import { UndefinedIfEmptyObject } from "../../common/typings2/UndefinedIfEmptyObject";
 import {
   AnyRpc,
   Rpc,

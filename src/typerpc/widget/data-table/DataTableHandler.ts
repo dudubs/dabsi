@@ -1,9 +1,9 @@
+import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { inspect } from "../../../logging/inspect";
 import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { entries } from "../../../common/object/entries";
-import { mapObject } from "../../../common/object/mapObject";
+import { mapObject, mapObjectAsync } from "../../../common/object/mapObject";
 import { Lazy } from "../../../common/patterns/lazy";
-import { RequireOptionalKeys } from "../../../common/typings";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataOrder } from "../../../typedata/DataOrder";
 import { DataRow } from "../../../typedata/DataRow";
@@ -19,7 +19,8 @@ export class DataTableHandler
   extends AbstractWidgetHandler<R>
   implements IWidgetHandler<R> {
   @Lazy() get columns() {
-    return mapObject(this.config.columns || {}, (columnConfig, key) => {
+    return mapObject(this.rpc.rowType, (columnType, key) => {
+      const columnConfig = this.config.columns?.[key];
       let load, field;
 
       switch (typeof columnConfig) {
@@ -49,12 +50,11 @@ export class DataTableHandler
   }
 
   async loadRow(dataRow, noKey?: boolean) {
-    const row: any = {};
+    const row: any = await mapObjectAsync(this.columns, column =>
+      column.load(dataRow)
+    );
     if (!noKey) {
       row.$key = dataRow.$key;
-    }
-    for (const [key, column] of entries(this.columns)) {
-      row[key] = await column.load(dataRow);
     }
     return row;
   }
@@ -100,7 +100,7 @@ export class DataTableHandler
       }
     }
     let source = this.config.source
-      .order(orders)
+      .sort(orders)
       .take(Math.min(query.take ?? maxRows, maxRows))
       .skip(query.skip ?? 0)
       .filter({ $and: filters });
@@ -113,7 +113,6 @@ export class DataTableHandler
     } else {
       [totalRows, dataRows] = [0, await source.getRows()];
     }
-
     const rows: any[] = [];
     for (const dataRow of dataRows) {
       rows.push(await this.loadRow(dataRow));
@@ -148,7 +147,9 @@ export class DataTableHandler
       totalRows,
       pageSize: this.config.pageSize,
       searchable: !!this.config.searchIn?.length,
-      columns: {},
+      columns: mapObject(this.columns, column => ({
+        sortable: column.field !== undefined,
+      })),
     };
   }
 }

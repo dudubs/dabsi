@@ -1,4 +1,5 @@
-import { If, Nullable } from "../../../common/typings";
+import { If } from "../../../common/typings2/boolean";
+import { Nullable } from "../../../common/typings2/Nullable";
 import { Input, TInput } from "../Input";
 
 export type NullableInput<

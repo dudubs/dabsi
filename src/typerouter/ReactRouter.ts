@@ -1,97 +1,87 @@
-import { createElement, Fragment, ReactElement, useEffect } from "react";
-import { useLoader } from "../react/useLoader";
+import { createContext, ReactNode } from "react";
 import { WeakMapFactory } from "../common/map/mapFactory";
-import { Awaitable } from "../common/typings";
-import { flatToSeq } from "../common/flatToSeq";
-import { Renderer } from "../react/renderer";
+import { ReactorEmitter } from "../react/reactor/useEmitter";
 import { EmptyFragment } from "../react/utils/EmptyFragment";
-import { ReactHook } from "../react/utils/ReactHook";
-import { ReactRouterLocation, ReactRouterContext } from "./ReactRouterLocation";
-import { AnyRouter, Router, TRouterOld, RouterPlugin } from "./Router";
+import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
+import { RouteProps } from "./RouteProps";
+import { AnyRouter, Router, RouterType, TRouter } from "./Router";
+import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
 
-export type TReactRouter = TRouterOld & { routerType: typeof ReactRouter };
+type _RendererProps<T extends TRouter, R extends RouteProps = RouteProps> = {
+  location: RouterLocation<T>;
+  route: R;
+  emit: ReactorEmitter;
+};
+type _WrapperProps<T extends TRouter> = _RendererProps<T> & {
+  children: ReactNode;
+};
+type _Renderer<T extends TRouter, R extends RouteProps = RouteProps> = (
+  props: _RendererProps<T, R>
+) => ReactNode;
+type _Wrapper<T extends TRouter> = (props: _WrapperProps<T>) => ReactNode;
 
-type WrapperProps<T extends TReactRouter> = {
-  location: ReactRouterLocation<T>;
-  route: ReactRouterContext;
-  children: ReactElement;
+export type ReactRouterOptions<T extends TRouter> = {
+  wrap?: _Wrapper<T>;
+
+  render?: _Renderer<T>;
+  renderDefault?: _Renderer<T, Extract<RouteProps, { type: "DEFAULT" }>>;
+  renderIndex?: _Renderer<T, Extract<RouteProps, { type: "INDEX" }>>;
+  renderNoParam?: _Renderer<T, Extract<RouteProps, { type: "NO_PARAM" }>>;
 };
 
-export const getReactRouterProps = WeakMapFactory<AnyRouter, ReactRouterProps>(
-  () => ({
-    wrappers: [],
-  })
-);
+export type ReactRouter = {
+  push(location: AnyRouterLocation);
 
-export type ReactRouterProps = {
-  renderer?: Renderer<ReactRouterContext>;
-  defaultRenderer?: Renderer<ReactRouterContext>;
-  loadRenderer?: Renderer<ReactRouterContext>;
-  wrappers: Renderer<WrapperProps<any>>[];
+  find(router);
 };
 
-export namespace ReactRouter {
-  export let reactProps: ReactRouterProps;
+export const ReactRouterContext = createUndefinedContext<ReactRouter>();
 
-  Object.defineProperty(ReactRouter, "reactProps", {
-    get(this: Router<TReactRouter>): ReactRouterProps {
-      return getReactRouterProps(this);
-    },
-  });
+export function ReactRouter<T extends TRouter>(
+  router: Router<T>,
+  optionsOrRenderer: ReactRouterOptions<T> | _Renderer<T>
+) {
+  let options: ReactRouterOptions<TRouter>;
 
-  export function wrap<T extends TReactRouter>(
-    this: Router<T>,
-    wrapper: Renderer<WrapperProps<T>>
-  ): Router<T> {
-    this.reactProps.wrappers.push(wrapper);
-    return this;
+  if (typeof optionsOrRenderer === "function") {
+    options = { render: optionsOrRenderer as any };
+  } else {
+    options = optionsOrRenderer as any;
   }
 
-  export function renderDefault<T extends TReactRouter>(
-    this: Router<T>,
-    renderer: Renderer<ReactRouterContext<T> & { type: "default" }>
-  ): Router<T> {
-    this.reactProps.defaultRenderer = renderer;
-    return this;
-  }
+  const {
+    wrap: wrapper,
+    render,
+    renderDefault,
+    renderIndex,
+    renderNoParam,
+  } = options;
 
-  export function render<T extends TReactRouter>(
-    this: Router<T>,
-    component: Renderer<ReactRouterContext<T>>
-  ): Router<T> {
-    this.reactProps.renderer = Renderer(component);
-    return this;
-  }
+  const info = getReactRouterMetadata(router);
 
-  export function renderOnLoad<T extends TReactRouter>(
-    this: Router<T>,
-    renderer: Renderer<ReactRouterContext>
-  ): Router<T> {
-    this.reactProps.loadRenderer = renderer;
-    return this;
-  }
+  wrapper && info.wrappers.push(wrapper);
 
-  export function loadAndRender<T extends TReactRouter>(
-    this: Router<T>,
-    loadRenderer: (
-      props: ReactRouterContext<T>
-    ) => Awaitable<() => ReactElement>
-  ): Router<T> {
-    return this.render(props => {
-      const component = useLoader(() => loadRenderer(props), [props.location]);
+  const { renderer: prevRender } = info;
 
-      if (component) return createElement(component);
-
-      const renderOnLoad = flatToSeq<Router<TReactRouter>>(
-        this,
-        router => router.parent
-      )
-        .map(router => router?.reactProps.loadRenderer)
-        .find(renderer => !!renderer);
-
-      if (renderOnLoad) return renderOnLoad(props);
-
-      return EmptyFragment;
-    });
-  }
+  info.renderer = props => {
+    switch (props.route.type) {
+      case "DEFAULT":
+        if (renderDefault) return renderDefault(props as any);
+        break;
+      case "INDEX":
+        if (renderIndex) return renderIndex(props as any);
+        break;
+      case "NO_PARAM":
+        if (renderNoParam) return renderNoParam(props as any);
+        break;
+    }
+    return (render || prevRender)?.(props);
+  };
 }
+
+export const getReactRouterMetadata = WeakMapFactory((router: AnyRouter) => {
+  return {
+    wrappers: [] as _Wrapper<TRouter>[],
+    renderer: undefined as undefined | _Renderer<TRouter>,
+  };
+});

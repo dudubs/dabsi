@@ -2,8 +2,8 @@
 import { defined } from "../common/object/defined";
 import { entries } from "../common/object/entries";
 import { hasKeys } from "../common/object/hasKeys";
-import { Type } from "../common/typings";
-import { BaseType } from "./BaseType";
+import { Type } from "../common/typings2/Type";
+import { BaseType, GetBaseType } from "./BaseType";
 import { chunks } from "./chunks";
 import { DataExp } from "./data-exp/DataExp";
 import {
@@ -16,15 +16,15 @@ import { DataCursor } from "./DataCursor";
 import { DataFields, DataFieldsRow } from "./DataFields";
 import { DataKey, DataKeyInput } from "./DataKey";
 import { DataNullsSort, DataOrder, DataSort } from "./DataOrder";
+import { DataRelationKeys, DataRelationType } from "./DataRelation";
 import { DataRow } from "./DataRow";
 import { DataSourceRow } from "./DataSourceRow";
 import { DataUnionChildren } from "./DataUnion";
 import { DataInsert, DataUpdate } from "./DataValue";
-import { RelationKeys, RelationType } from "./Relation";
 
 export type DataKeyOrKeysInput<T> = DataKeyInput<T>[] | DataKeyInput<T>;
-export type DataSourceAt<T, K extends RelationKeys<T>> = DataSource<
-  RelationType<Required<T>[K]>
+export type DataSourceAt<T, K extends DataRelationKeys<T>> = DataSource<
+  DataRelationType<Required<T>[K]>
 >;
 
 export function DataKeyOrKeys<T>(keyOrKeys: DataKeyOrKeysInput<T>): string[] {
@@ -95,8 +95,13 @@ export abstract class DataSource<T> {
 
   abstract hasRow(): Promise<boolean>;
 
-  async touch(insert?: DataInsert<T>): Promise<DataRow<T>> {
-    return (await this.get()) || (await this.insert(insert || {}));
+  //
+  async touch<T>(
+    this: DataSource<T>,
+    // TODO: Exclude keys .of(key, value)
+    insert?: DataInsert<T>
+  ): Promise<DataRow<T>> {
+    return (await this.get()) || (await this.insert(insert || ({} as any)));
   }
 
   async getOrFail(key?: string | number): Promise<DataRow<T>> {
@@ -152,7 +157,7 @@ export abstract class DataSource<T> {
     return this.insertKeys([value]).then(keys => keys[0]);
   }
 
-  abstract insertKeys(value: DataInsert<T>[]): Promise<string[]>;
+  abstract insertKeys<T>(value: DataInsert<T>[]): Promise<string[]>;
 
   protected async _each(
     keyOrKeys: DataKeyOrKeysInput<T> | undefined,
@@ -202,8 +207,11 @@ export abstract class DataSource<T> {
     return this._each(keyOrKeys, keys => this.deleteKeys(keys));
   }
 
-  insert(value: DataInsert<T>): Promise<DataRow<T>>;
-  insert(values: DataInsert<T>[]): Promise<DataRow<T>[]>;
+  insert<T>(this: DataSource<T>, value: DataInsert<T>): Promise<DataRow<T>>;
+  insert<T>(
+    this: DataSource<T>,
+    values: DataInsert<T>[]
+  ): Promise<DataRow<T>[]>;
   async insert(values): Promise<any> {
     if (!Array.isArray(values)) {
       return this.insert([values]).then(rows => rows[0]);
@@ -211,6 +219,7 @@ export abstract class DataSource<T> {
     const keys = await this.insertKeys(values);
 
     const baseRow = new DataSourceRow(this);
+
     return this.filter({ $is: keys })
       .getRows()
       .then(rows => rows.map(row => Object.setPrototypeOf(row, baseRow)));
@@ -235,16 +244,18 @@ export abstract class DataSource<T> {
     );
   }
 
-  as<K extends string & keyof Children, Children>(
+  as<K extends keyof Children, Children>(
     this: DataSource<DataUnionChildren<Children>>,
-    type: K
+    type: string & K
   ): DataSource<Children[K]> {
     return this.updateCursor({
       type,
     });
   }
 
-  of<T, K extends keyof Required<T>>(
+  T?: T;
+
+  of<T, K extends string & keyof Required<T>>(
     this: DataSource<T>,
     propertyName: string & K,
     value: DataKeyInput<T[K]>
@@ -254,10 +265,10 @@ export abstract class DataSource<T> {
     );
   }
 
-  at<T, K extends RelationKeys<T>>(
+  at<T, K extends DataRelationKeys<T>>(
     this: DataSource<T>,
     propertyName: string & K,
-    key: DataKeyInput<RelationType<T[K]>>
+    key: DataKeyInput<DataRelationType<T[K]>>
   ): DataSourceAt<T, K> {
     return this.withCursor(
       DataCursor.at(this.cursor, propertyName, DataKey(key))
@@ -272,9 +283,9 @@ export abstract class DataSource<T> {
     return this.updateCursor({ take: count });
   }
 
-  order(orders: DataOrder<T>[]): DataSource<T>;
-  order(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>;
-  order(expOrOrders, sort?, nulls?) {
+  sort(orders: DataOrder<T>[]): DataSource<T>;
+  sort(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>;
+  sort(expOrOrders, sort?, nulls?) {
     if (typeof sort === "string")
       return this.updateCursor({
         order: [
@@ -319,11 +330,14 @@ export abstract class DataSource<T> {
     let fields;
     let keys;
 
-    if (Array.isArray(keysOrFields)) {
-      [keys, fields] = [keysOrFields, fields || {}];
+    if (maybeFields) {
+      [keys, fields] = [keysOrFields, maybeFields];
+    } else if (Array.isArray(keysOrFields)) {
+      [keys, fields] = [keysOrFields, {}];
     } else {
-      [keys, fields] = [[], maybeFields];
+      [keys, fields] = [[], keysOrFields];
     }
+
     return this.select({
       pick: keys,
       fields,

@@ -1,4 +1,4 @@
-import { Fn } from "../typings";
+import { Fn } from "../typings2/Fn";
 
 export type FnRef<T extends Fn> = T & { current: T };
 

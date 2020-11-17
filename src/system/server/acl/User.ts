@@ -5,11 +5,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { BasedType, BaseType } from "../../../typedata/BaseType";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { DataRow } from "../../../typedata/DataRow";
-import { BasedDataRow } from "../../../typedata/DataSourceRow";
-import { Relation } from "../../../typedata/Relation";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { Group } from "./Group";
 import { Permission } from "./Permission";
 
@@ -18,10 +15,10 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   firstName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: false })
   lastName: string;
 
   @Column({ nullable: true })
@@ -37,10 +34,10 @@ export class User {
   phoneNumber?: string;
 
   @ManyToMany(() => Group, group => group.users)
-  groups: Relation<Group>[];
+  groups: DataRelation<Group>[];
 
   @ManyToOne(() => Permission, p => p.user)
-  permissions: Relation<Permission>[];
+  permissions: DataRelation<Permission>[];
 }
 
 export const UserFullName: { $base: DataExp<User> } = {

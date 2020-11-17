@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { createMuiSystem } from "../../browser/mui/createMuiSystem";
 import { MuiAdmin } from "../../browser/mui/MuiAdmin";
 import { useEmitter } from "../../react/reactor/useEmitter";
-import { ReactRouterView } from "../../typerouter2/ReactRouterView";
+import { ReactRouterView } from "../../typerouter/ReactRouterView";
 import { SystemLoginInfo } from "./index";
 import { LoginInfoEvent } from "./LoginInfoEvent";
 import { MuiSystemView } from "./MuiSystemView";

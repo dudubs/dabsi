@@ -1,255 +1,160 @@
+import { WeakMapFactory } from "../common/map/mapFactory";
 import { MetaType, WithMetaType } from "../common/MetaType";
-import { defined } from "../common/object/defined";
-import {
-  Assign,
-  DefaultIfNever,
-  Expect,
-  IsNever,
-  NonNullableAt,
-  PluckRequired,
-} from "../common/typings";
-import { inspect } from "../logging/inspect";
+import { mapObject } from "../common/object/mapObject";
+import { Expect } from "../common/typings2/Expect";
+import { IfNever } from "../common/typings2/IfNever";
+import { Override } from "../common/typings2/Override";
 
-export type TRouterOld = {
-  params: Record<string, any>;
+export type AnyRouterMap = Record<string, Router<TRouter>>;
 
-  children: Record<string, TRouterOld>;
-
-  stack: Record<string, TRouterOld>;
-
-  routerType: typeof RouterType;
-
-  context: object;
+export type TRouter = {
+  Parent?: TRouter;
+  Params: Record<string, string>;
+  Stack: Record<string, TRouter>;
+  Children: Record<string, TRouter>;
 };
 
+export type RouterProps = typeof RouterType & ReturnType<typeof createRouter>;
+
 export type TEmptyRouter = Expect<
-  TRouterOld,
-  {
-    params: {};
-    children: {};
-    stack: {};
-    routerType: typeof RouterType;
-    context: {};
-  }
->;
-
-export namespace TEmptyRouter {
-  export type WithChildren<C extends TRouterOld["children"]> = TRouterOld & {
-    children: C;
-  };
-
-  export type WithParams<
-    K extends string,
-    C extends TRouterOld["children"] = {}
-  > = TRouterOld & {
-    children: C;
-    params: Record<K, any>;
-  };
-}
-
-export type Router<T extends TRouterOld = TEmptyRouter> = WithMetaType<{
-  TRouter: T;
-}> & {
-  params: string[];
-
-  routerType: object;
-
-  children: Record<string, Router<TRouterOld & Pick<T, "routerType">>>;
-
-  plugins: RouterPlugin<T>[];
-
-  parent?: Router<Assign<T, { params: any }>>;
-
-  name?: string;
-} & T["routerType"];
-
-export function Router(): Router;
-export function Router<T extends Record<string, AnyRouter>>(
-  children: T
-): Router<
-  TEmptyRouter & {
-    children: { [K in keyof T]: RouterType<T[K]> };
-  }
->;
-export function Router<
-  K extends string,
-  T extends Record<string, AnyRouter> = {}
->(
-  params: K[],
-  children?: T
-): Router<
-  TEmptyRouter & {
-    children: { [K in keyof T]: RouterType<T[K]> };
-    params: Record<K, string>;
-  }
->;
-export function Router(...args): AnyRouter {
-  let params: string[];
-  let children: Record<string, AnyRouter>;
-
-  if (args.length === 2) {
-    [params, children] = args;
-  } else if (args.length === 1) {
-    if (Array.isArray(args[0])) {
-      [params, children] = [args[0], {}];
-    } else {
-      [params, children] = [[], args[0]];
-    }
-  } else {
-    [params, children] = [[], {}];
-  }
-
-  const routerType = Object.create(RouterType);
-
-  return Object.setPrototypeOf(
+  TRouter,
+  Override<
+    TRouter,
     {
-      children,
-      params,
-      routerType,
-      plugins: [],
-    },
-    routerType
-  );
+      Stack: {};
+      Children: {};
+      Params: {};
+    }
+  >
+>;
+export type RouterMapType<T extends AnyRouterMap> = {
+  [K in keyof T]: RouterType<T[K]>;
+};
+export type RouterWithChildren<
+  C extends AnyRouterMap,
+  P extends object = {}
+> = Router<
+  Override<
+    P & TEmptyRouter,
+    {
+      Children: RouterMapType<C>;
+    }
+  >
+>;
+export type RouterWithParams<
+  P extends string,
+  C extends AnyRouterMap = {}
+> = Router<
+  Override<
+    TEmptyRouter,
+    {
+      Params: Record<P, string>;
+      Children: RouterMapType<C>;
+    }
+  >
+>;
+
+export interface Router<T extends TRouter = TEmptyRouter>
+  extends WithMetaType<{ TRouter: T }>,
+    RouterProps {}
+
+function createRouter(params: string[], children: Record<string, AnyRouter>) {
+  return {
+    children,
+    params,
+    bases: new Set<AnyRouter>(),
+  };
 }
-
-export type AnyRouter = Router<TRouterOld>;
-
 export type RouterType<T extends AnyRouter> = MetaType<T>["TRouter"];
 
+export type AnyRouter = Router<TRouter>;
+
+export function Router(): Router<{
+  Params: {};
+  Stack: {};
+  Children: {};
+}>;
+
+export function Router<C extends AnyRouterMap>(
+  children: C
+): Router<{
+  Params: {};
+  Stack: {};
+  Children: RouterMapType<C>;
+}>;
+
+export function Router<K extends string>(
+  params: K[]
+): Router<{
+  Params: Record<string & K, string>;
+  Stack: {};
+  Children: {};
+}>;
+export function Router<K extends string, C extends AnyRouterMap>(
+  params: K[],
+  children: C
+): Router<{
+  Params: Record<string & K, string>;
+  Stack: {};
+  Children: RouterMapType<C>;
+}>;
+
+export function Router(paramsOrChildren?, maybeChildren?) {
+  let params, children;
+  if (maybeChildren) {
+    [params, children] = [paramsOrChildren, maybeChildren];
+  } else {
+    if (Array.isArray(paramsOrChildren)) {
+      [params, children] = [paramsOrChildren, {}];
+    } else {
+      [params, children] = [[], paramsOrChildren || {}];
+    }
+  }
+  return Object.setPrototypeOf(createRouter(params, children), RouterType);
+}
+
 export type RouterAt<
-  T extends TRouterOld,
-  K extends keyof T["children"]
+  T extends TRouter, //
+  K extends keyof T["Children"]
 > = Router<
-  T["children"][K] & {
-    parent: T;
-    routerType: T["routerType"];
-    stack: T["stack"] & Record<K, T["children"][K]>;
-    root: DefaultIfNever<PluckRequired<T, "root">, T>;
-    context: T["context"];
+  T["Children"][K] & {
+    Parent: T;
+    Stack: T["Stack"] & Record<K, T["Children"][K]>;
   }
 >;
 
 export namespace RouterType {
-  export type Route<U extends Record<string, TRouterOld>> = {
-    children: { [K in keyof U]: U[K] };
-  };
-
-  export function route<
-    T extends TRouterOld,
-    U extends Record<string, AnyRouter>
-  >(
+  export function at<T extends TRouter, K extends keyof T["Children"]>(
     this: Router<T>,
-    children: U
-  ): Router<T & Route<{ [K in keyof U]: RouterType<U[K]> }>> {
-    Object.assign(this.children, children);
-
-    return <any>this;
-  }
-
-  export function use<T extends TRouterOld, U extends object>(
+    key: string & K
+  ): RouterAt<T, K>;
+  export function at<T extends TRouter, K extends keyof T["Children"]>(
     this: Router<T>,
-    type: U
-  ): Router<T & { routerType: U }> {
-    Object.defineProperties(
-      this.routerType,
-      Object.getOwnPropertyDescriptors(type)
-    );
-
-    return <any>this;
-  }
-
-  export function at<T extends TRouterOld, K extends keyof T["children"]>(
-    this: Router<T>,
-    name: string & K,
-    callback?: (router: RouterAt<T, K>) => void
-  ): RouterAt<T, K> {
-    let child: AnyRouter = defined(
-      this.children[name],
-      () => `No router child at "${name}".`
-    );
-
-    if (child.parent !== this) {
-      child = this.children[name] = Router(child.params, child.children)
-        .use(child.routerType)
-        .use(this.routerType);
-      child.parent = this;
-      child.name = name;
+    key: string & K,
+    callback: (router: RouterAt<T, K>) => void
+  ): Router<T>;
+  export function at(this: AnyRouter, key, callback?) {
+    if (callback) {
+      callback(this.children[key]);
+      return this;
     }
-
-    callback?.(<any>child);
-
-    return <any>child;
+    return this.children[key];
   }
 
-  export type Param<K extends string, U = string> = {
-    params: Record<K, string>;
-  };
+  export function create<T extends TRouter>(this: Router<T>): Router<T> {
+    const router = Router(
+      this.params,
+      mapObject(this.children, c => c.create())
+    ) as Router<T>;
 
-  export function param<T extends TRouterOld, K extends string, U = string>(
-    this: Router<T>,
-    name: K
-  ): Router<T & Param<K, U>> {
-    this.params.push(name);
-    return <any>this;
-  }
-
-  export function bind<T extends TRouterOld>(
-    this: Router<T>,
-    context: T["context"],
-    plugins: RouterPlugin<T>[]
-  ): Router<T> {
-    const router = <Router<T>>(
-      (<any>Router(this.params, this.children)).use(this.routerType)
-    );
-    this.plugins.forEach(plugin => {
-      plugin(router, context);
-    });
-    plugins.forEach(plugin => {
-      plugin(router, context);
-    });
-    return <any>router;
-  }
-
-  export function apply<T extends TRouterOld>(
-    this: Router<T>,
-    plugins: RouterPlugin<T>[]
-  ): Router<T> {
-    this.plugins.push(...plugins);
-    return this;
-  }
-
-  export function plugin<T extends TRouterOld>(
-    this: Router<T>,
-    callback: (router: Router<T>, context: T["context"]) => void
-  ): RouterPlugin<RouterRoot<T>> {
-    if (this.parent) {
-      return this.parent.plugin((router, context) => {
-        callback(<any>router.at(<any>this.name), context);
-      });
+    router.bases.add(this);
+    for (const base of this.bases) {
+      router.bases.add(base);
     }
-    return <any>callback;
+    return router;
   }
 
-  export function context<T extends TRouterOld>(
-    this: Router<T>
-  ): <C extends object>() => Router<T & { context: C }> {
-    return () => <any>this;
-  }
-
-  export function toString(this: AnyRouter, children: AnyRouter) {
-    return `Router(${inspect(this.params)},${inspect(this.children)})`;
+  export function isRouterOf(this: AnyRouter, base: AnyRouter) {
+    return this === base || this.bases.has(base);
   }
 }
-
-export type RouterRoot<T extends TRouterOld> = Extract<
-  DefaultIfNever<PluckRequired<T, "root">, T>,
-  TRouterOld
->;
-
-// TODO: Move context to render?
-export type RouterPlugin<T extends TRouterOld> = (
-  router: Router<T>,
-  context: T["context"]
-) => void;
-
-Router.prototype = RouterType;

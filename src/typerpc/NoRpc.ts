@@ -1,4 +1,5 @@
-import { If, Is } from "../common/typings";
+import { If } from "../common/typings2/boolean";
+import { Is } from "../common/typings2/boolean/Is";
 import {
   AbstractRpcHandler,
   AnyRpc,

@@ -4,7 +4,7 @@ import {
   RouterType,
   RouterWithChildren,
   RouterWithParams,
-} from "../../typerouter2/Router";
+} from "../../typerouter/Router";
 import {
   AnyDataManager,
   DataManagerType,

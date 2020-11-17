@@ -1,15 +1,5 @@
-import {
-  ChildEntity,
-  Column,
-  Entity,
-  Index,
-  ManyToMany,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  TableInheritance,
-} from "typeorm";
-import { DataUnion } from "../../../typedata/DataUnion";
-import { Relation } from "../../../typedata/Relation";
+import { Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { Group } from "./Group";
 import { User } from "./User";
 
@@ -19,15 +9,15 @@ export class Owner {
   id: number;
 
   @ManyToOne(() => User)
-  user: Relation<User>;
+  user: DataRelation<User>;
 
   @ManyToOne(() => Group)
-  group: Relation<User>;
+  group: DataRelation<User>;
 }
 
 export function OwnersColumn() {
   return (
-    target: Record<"owners", Relation<Owner>[]>,
+    target: Record<"owners", DataRelation<Owner>[]>,
     propertyName: "owners"
   ) => {
     Reflect.decorate(

@@ -1,5 +1,5 @@
 import { JoinTable, ManyToMany } from "typeorm";
-import { Relation } from "../../typedata/Relation";
+import { DataRelation } from "../../typedata/DataRelation";
 import { Owner } from "./acl/Owner";
 
 export function SystemEntity<WithOwners extends boolean = false>({
@@ -10,7 +10,7 @@ export function SystemEntity<WithOwners extends boolean = false>({
   id: number;
 } & WithOwners extends false
   ? {}
-  : { owners: Relation<Owner>[] } {
+  : { owners: DataRelation<Owner>[] } {
   class Base {}
 
   withOwners &&

@@ -1,9 +1,6 @@
-import {
-  HasKeys,
-  IsNever,
-  IsUndefined,
-  PluckRequired,
-} from "../../common/typings";
+import { HasKeys, IsUndefined } from "../../common/typings2/boolean";
+import { IsNever } from "../../common/typings2/boolean/IsNever";
+import { Pluck } from "../../common/typings2/Pluck";
 import { BaseType, WithBaseType } from "../BaseType";
 
 import { DataFieldsRow } from "../DataFields";
@@ -18,9 +15,9 @@ import { MergeDataSelection } from "./DataSelectionMerger";
 import {
   MapRelation,
   NonRelationKeys,
-  RelationKeys,
-  RelationTypeAt,
-} from "../Relation";
+  DataRelationKeys,
+  DataRelationTypeAt,
+} from "../DataRelation";
 
 type _PickRow<T, S> = S extends { pick: ReadonlyArray<infer K> }
   ? Pick<T, Extract<K | DataTypeKey, NonRelationKeys<T>>>
@@ -37,7 +34,7 @@ type _ChildrenRow<T, S, SChildren, SWithoutChildren, UChildren> = HasKeys<
           MergeDataSelection<
             //
             SWithoutChildren,
-            PluckRequired<SChildren, K>
+            Pluck<SChildren, K>
             //
           >
         >;
@@ -49,14 +46,12 @@ type _Fields<T, SFields> = HasKeys<SFields> extends false
   : DataFieldsRow<T, SFields>;
 
 type _RelationsRow<T, S, SRelations> = {
-  [K in RelationKeys<T>]: MapRelation<
+  [K in DataRelationKeys<T>]: MapRelation<
     T[K],
     _Row<
       //
-      RelationTypeAt<T, K>,
-      PluckRequired<SRelations, K> extends true | false
-        ? {}
-        : PluckRequired<SRelations, K>
+      DataRelationTypeAt<T, K>,
+      Pluck<SRelations, K> extends true | false ? {} : Pluck<SRelations, K>
       //
     >
     //
@@ -70,13 +65,13 @@ type _NoChildrenRow<T> = T extends DataUnionChildren<any>
 type __Row<T, S> = Omit<
   _PickRow<T, S>,
   // omit all relations or metaTypes
-  RelationKeys<T> | DataUnionChildrenKey
+  DataRelationKeys<T> | DataUnionChildrenKey
 > &
   WithBaseType<T> &
   (S extends { fields: infer SFields } ? _Fields<T, SFields> : {}) &
   (S extends { relations: infer SRelations }
     ? _RelationsRow<T, S, SRelations>
-    : Pick<T, RelationKeys<T>>) &
+    : Pick<T, DataRelationKeys<T>>) &
   (S extends { children: infer SChildren }
     ? _ChildrenRow<T, S, SChildren, Omit<S, "children">, DataUnionChildrenOf<T>>
     : _NoChildrenRow<T>);

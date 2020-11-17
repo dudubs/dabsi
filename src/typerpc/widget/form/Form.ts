@@ -1,4 +1,14 @@
-import { Awaitable, If, Is } from "../../../common/typings";
+/*
+
+TODO:
+  onSubmit(value, {resolve, reject}) {
+    return resolve();
+  }
+
+ */
+import { Awaitable } from "../../../common/typings2/Async";
+import { If } from "../../../common/typings2/boolean";
+import { Is } from "../../../common/typings2/boolean/Is";
 import {
   AnyInput,
   InputError,

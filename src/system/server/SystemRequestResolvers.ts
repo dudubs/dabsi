@@ -6,9 +6,11 @@ import { _touch } from "../../typedi/internal/_touch";
 import { RpcError } from "../../typerpc/Rpc";
 import { RpcRequest } from "../../typerpc/RpcRequest";
 import { AclRequest } from "./acl/AclRequest";
+import { SystemResolvers } from "./SystemResolvers";
 import { SystemSession } from "./SystemSession";
 
 export const SystemRequestResolvers = {
+  ...SystemResolvers,
   ...Resolver.provide(
     RpcRequest,
     Resolver.touch(() => new RpcRequest())

@@ -1,4 +1,5 @@
-import { Awaitable, Typing } from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
+import { Typing } from "../../../common/typings2/Typing";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { RpcConfigHook } from "../../RpcConfigHook";
 import { InlineWidget } from "../inline-widget/InlineWidget";

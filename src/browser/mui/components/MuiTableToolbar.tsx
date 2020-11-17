@@ -4,7 +4,7 @@ import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import Toolbar, { ToolbarProps } from "@material-ui/core/Toolbar";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/styles";
+import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 import * as React from "react";
 import { ReactNode, useEffect, useState } from "react";
@@ -13,7 +13,7 @@ import { useLangTranslator } from "../../../lang/LangTranslator";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { MuiIcon } from "./MuiIcon";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   toolbar: {
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(1),
@@ -69,7 +69,8 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
     <Toolbar
       {...mergeProps(props.ToolbarProps, {
         className: classes.toolbar,
-      })}>
+      })}
+    >
       <Grid container>
         <Grid item xs>
           {title && (
@@ -77,7 +78,8 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
               variant={"h6"}
               {...mergeProps(props.TitleTypographyProps, {
                 className: classes.title,
-              })}>
+              })}
+            >
               {title}
             </Typography>
           )}
@@ -86,7 +88,7 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
           {props.countSelectedItems ? (
             props.selectActions
           ) : (
-            <Grid container alignItems='center'>
+            <Grid container alignItems="center">
               {props.staticActions && <Grid item>{props.staticActions}</Grid>}
               {searchProps && (
                 <Grid item>
@@ -94,7 +96,7 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
                     value={searchText}
                     placeholder={lang.translateNode(Lang`SEARCH`)}
                     {...mergeProps(searchProps.TextFieldProps, {
-                      onChange: (event) => {
+                      onChange: event => {
                         const text = event.target.value;
                         setSearchText(text || "");
                         searchProps?.onSearch?.(text);
@@ -103,14 +105,14 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
                       onBlur: () => {
                         searchProps?.onSearch?.(searchText);
                       },
-                      onKeyDown: (event) => {
+                      onKeyDown: event => {
                         if (event.key === "Escape") {
                           event.preventDefault();
                           setSearchText("");
                           searchProps?.onSearch?.("");
                         }
                       },
-                      onKeyPress: (event) => {
+                      onKeyPress: event => {
                         // console.log({eventKey:event.key});
 
                         switch (event.key) {
@@ -139,7 +141,8 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
                             position={"start"}
                             onClick={() => {
                               setSearchText("");
-                            }}>
+                            }}
+                          >
                             {MuiIcon("close")}
                           </InputAdornment>
                         ),

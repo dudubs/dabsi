@@ -1,18 +1,13 @@
 import { touchMap } from "../common/map/touchMap";
 import { MetaType, WithMetaType } from "../common/MetaType";
 import { mergeDescriptors } from "../common/object/mergeDescriptors";
-import {
-  Awaitable,
-  Awaited,
-  Fn,
-  If,
-  Is,
-  IsEmptyObject,
-  IsUndefined,
-  Not,
-  Override,
-  PartialUndefinedKeys,
-} from "../common/typings";
+import { Awaitable, Awaited } from "../common/typings2/Async";
+import { If, IsUndefined, Not } from "../common/typings2/boolean";
+import { Is } from "../common/typings2/boolean/Is";
+import { IsEmptyObject } from "../common/typings2/boolean/IsEmptyObject";
+import { Fn } from "../common/typings2/Fn";
+import { Override } from "../common/typings2/Override";
+import { PartialUndefinedKeys } from "../common/typings2/PartialUndefinedKeys";
 import { inspect } from "../logging/inspect";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";

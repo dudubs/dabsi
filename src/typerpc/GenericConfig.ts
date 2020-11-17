@@ -1,5 +1,7 @@
 import { touchMap } from "../common/map/touchMap";
-import { Awaitable, Fn, IsNever } from "../common/typings";
+import { Awaitable } from "../common/typings2/Async";
+import { IsNever } from "../common/typings2/boolean/IsNever";
+import { Fn } from "../common/typings2/Fn";
 
 const genericConfigCache = new WeakMap();
 

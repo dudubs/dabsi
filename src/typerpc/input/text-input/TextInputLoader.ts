@@ -1,4 +1,4 @@
-import { Payload } from "../../../common/typings";
+import { Payload } from "../../../common/typings2/Payload";
 import { getLengthError, LengthError } from "../LengthError";
 
 export type TextInputOptions = {

@@ -1,6 +1,6 @@
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
 import { RandomId } from "../../../common/patterns/RandomId";
-import { RequiredOnly } from "../../../common/typings";
+import { RequiredOnly } from "../../../common/typings2/RequiredOnly";
 import { RpcConnection } from "../../Rpc";
 import { AbstractInputView } from "../AbstractInputView";
 import { InputType } from "../Input";

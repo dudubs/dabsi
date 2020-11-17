@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Relation } from "../../../typedata/Relation";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { Group } from "./Group";
 import { User } from "./User";
 
@@ -27,8 +27,8 @@ export class Permission {
   ownerToken: string;
 
   @ManyToOne(() => User, user => user.permissions)
-  user: Relation<User>;
+  user?: DataRelation<User>;
 
   @ManyToOne(() => Group, group => group.permissions)
-  group: Relation<Group>;
+  group?: DataRelation<Group>;
 }

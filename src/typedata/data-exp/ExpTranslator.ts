@@ -1,4 +1,4 @@
-import { Union } from "../../common/typings";
+import { Union } from "../../common/typings2/Union";
 import { inspect } from "../../logging/inspect";
 
 import { ExpNode } from "./getExpNode";

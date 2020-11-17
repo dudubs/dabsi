@@ -1,5 +1,5 @@
-import { buildTestEntities } from "../../../typedata/entity-data/tests/buildTestEntities";
-import { buildTestRelations } from "../../../typedata/entity-data/tests/buildTestRelations";
+import { buildTestEntities } from "../../../typedata/data-entity/tests/buildTestEntities";
+import { buildTestRelations } from "../../../typedata/data-entity/tests/buildTestRelations";
 import {
   DBase,
   DChild1,

@@ -1,4 +1,5 @@
-import { Fn, Override } from "../common/typings";
+import { Fn } from "../common/typings2/Fn";
+import { Override } from "../common/typings2/Override";
 import { GenericConfig } from "./GenericConfig";
 import {
   AbstractRpcHandler,

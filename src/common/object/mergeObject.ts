@@ -1,4 +1,4 @@
-import { Nullable } from "../typings";
+import { Nullable } from "../typings2/Nullable";
 import { entries } from "./entries";
 
 export function mergeObject<T>(

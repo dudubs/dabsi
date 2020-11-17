@@ -1,6 +1,6 @@
+import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { keys } from "../../../common/object/keys";
-import { RequireOptionalKeys } from "../../../common/typings";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { IWidgetHandler, WidgetController, WidgetElement } from "../Widget";
 import { AnyTabsWidget } from "./TabsWidget";

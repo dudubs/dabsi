@@ -1,4 +1,4 @@
-import { Union } from "../../../common/typings";
+import { Union } from "../../../common/typings2/Union";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
 import { AnyWidget, Widget, WidgetElement } from "../Widget";

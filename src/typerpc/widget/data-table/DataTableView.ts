@@ -117,11 +117,7 @@ export class DataTableView<
     return this.reload();
   }
 
-  // TODO: @ViewMethod() - emit only if isDidMount && !sDidUnmount
   async reload() {
-    if (!this.isDidMount) {
-      return;
-    }
     this.isLoading = true;
     const getCount = this.totalRows === 0 || this.pageIndex === 0;
     const { totalRows, rows } = await this.props.connection.controller.getRows({

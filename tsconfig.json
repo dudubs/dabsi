@@ -13,6 +13,8 @@
     "node_modules",
     "./dist",
     "./src/browser",
+    "./src/**/browser",
+    "./src/system/browser",
     "./src/typedata/old",
     "./src/typedata/DataTable",
     "./src/system/server/acl/old/**"

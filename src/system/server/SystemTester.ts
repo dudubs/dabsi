@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import { Connection } from "typeorm";
 import { mapObjectAsync } from "../../common/object/mapObject";
-import { ExtractKeys } from "../../common/typings";
+import { ExtractKeys } from "../../common/typings2/ExtractKeys";
 import { Tester } from "../../jasmine/Tester";
 import { DataRow } from "../../typedata/DataRow";
-import { EntityDataSource } from "../../typedata/entity-data/EntityDataSource";
+import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
 import { createTestConnection } from "../../typedata/tests/TestConnection";
 import { _provide } from "../../typedi/internal/_provide";
 import { Resolver } from "../../typedi/Resolver";
@@ -23,7 +23,7 @@ export const SystemTester = Tester.beforeAll(async t => ({
   connection: await createTestConnection(SystemEntities),
 }))
   .beforeAll(async t => {
-    const users = EntityDataSource.create(User, t.connection);
+    const users = DataEntitySource.create(User, t.connection);
 
     return {
       context: {
@@ -31,8 +31,14 @@ export const SystemTester = Tester.beforeAll(async t => ({
         ...Resolver.provide(Connection, () => t.connection),
       },
       users: {
-        regular: await users.insert({}),
-        admin: await users.insert({}),
+        regular: await users.insert({
+          firstName: "regular",
+          lastName: "test",
+        }),
+        admin: await users.insert({
+          firstName: "admin",
+          lastName: "test",
+        }),
       },
     };
   })
@@ -41,7 +47,7 @@ export const SystemTester = Tester.beforeAll(async t => ({
     const pm = Resolver.checkAndResolve(PermissionManager, t.context);
     await pm.addToken("user", t.users.admin.$key, ADMIN_TOKEN);
 
-    const systemSessions = EntityDataSource.create(SystemSession, t.connection);
+    const systemSessions = DataEntitySource.create(SystemSession, t.connection);
 
     return {
       sessions: {

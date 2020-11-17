@@ -1,3 +1,4 @@
+import exp from "constants";
 import { getJasmineSpecReporterResult } from "../../jasmine/getJasmineSpecReporterResult";
 import { logBeforeEach } from "../../jasmine/logBeforeEach";
 import { subTest } from "../../jasmine/subTest";
@@ -10,8 +11,8 @@ import {
 import { forEachTestRelation } from "../../typeorm/relations/tests/TestRelation";
 import { DataRow } from "../DataRow";
 import { DataSource } from "../DataSource";
-import { EntityDataSource } from "../entity-data/EntityDataSource";
-import { RelationKeys } from "../Relation";
+import { DataEntitySource } from "../data-entity/DataEntitySource";
+import { DataRelationKeys } from "../DataRelation";
 import { DUnion, EUnion } from "./BaseEntities";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
@@ -111,7 +112,7 @@ export function DataSourceTests(
     await assert("oneAToManyB");
     await assert("manyAToOneB");
 
-    function assert(p: RelationKeys<AEntity>) {
+    function assert(p: DataRelationKeys<AEntity>) {
       return subTest(`(${p})`, async () => {
         debug && console.log({ p, aKey, bKey });
         const aOfBOwner = ADS.of(p, bKey);
@@ -326,6 +327,15 @@ export function DataSourceTests(
         .getOrFail()
     ).toEqual(
       objectContaining({ oneAToOneB: objectContaining({ bX: "hello" }) })
+    );
+  });
+
+  it("selected relation sanity", async () => {
+    const a = await ADS.select({ relations: { oneAToOneB: true } }).insert({
+      oneAToOneB: await BDS.insertKey({ bText: "b" }),
+    });
+    expect(await a.oneAToOneB!.reload()).toEqual(
+      objectContaining({ bText: "b" })
     );
   });
 }

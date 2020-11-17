@@ -1,4 +1,4 @@
-import { Type } from "../../common/typings";
+import { Type } from "../../common/typings2/Type";
 import { getTypeToken } from "../getTypeToken";
 import { _resolve } from "./_resolve";
 import { ResolverMap, Resolver } from "../Resolver";

@@ -8,10 +8,13 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { mapArrayToObject } from "../../../../common/array/mapArrayToObject";
+import { mapObjectAsync } from "../../../../common/object/mapObject";
 import { Tester } from "../../../../jasmine/Tester";
 import { decorateDesignType } from "../../../../reflect/decorateDesignType";
-import { EntityDataSource } from "../../../../typedata/entity-data/EntityDataSource";
-import { Relation } from "../../../../typedata/Relation";
+import { DataEntitySource } from "../../../../typedata/data-entity/DataEntitySource";
+import { DataRelation } from "../../../../typedata/DataRelation";
+import { DataRow } from "../../../../typedata/DataRow";
 import { createTestConnection } from "../../../../typedata/tests/TestConnection";
 import { PermissionManager } from "../PermissionManager";
 import { User } from "../User";
@@ -24,11 +27,11 @@ export class TestForum {
 
   @JoinTable()
   @ManyToMany(() => TestForumMember, m => m.forum)
-  members: Relation<TestForumMember>[];
+  members: DataRelation<TestForumMember>[];
 
   @JoinTable()
   @ManyToMany(() => TestPost, post => post.forum)
-  posts: Relation<TestPost>[];
+  posts: DataRelation<TestPost>[];
 }
 
 export enum TestForumMemberMode {
@@ -44,10 +47,10 @@ export class TestForumMember {
   id: number;
 
   @ManyToOne(() => TestForum, forum => forum.members)
-  forum: Relation<TestForum>;
+  forum: DataRelation<TestForum>;
 
   @ManyToOne(() => User)
-  user: Relation<User>;
+  user: DataRelation<User>;
 
   @Column()
   mode: TestForumMemberMode;
@@ -59,10 +62,10 @@ export class TestComment {
   id: number;
 
   @ManyToOne(() => TestPost, post => post.comments)
-  post: Relation<TestPost>;
+  post: DataRelation<TestPost>;
 
   @ManyToOne(() => User)
-  user: Relation<User>;
+  user: DataRelation<User>;
 }
 
 @Entity()
@@ -71,13 +74,13 @@ export class TestPost {
   id: number;
 
   @ManyToMany(() => TestForum, forum => forum.posts)
-  forum: Relation<TestForum>;
+  forum: DataRelation<TestForum>;
 
   @OneToMany(() => TestComment, comment => comment.post)
-  comments: Relation<TestComment>[];
+  comments: DataRelation<TestComment>[];
 
   @ManyToOne(() => User)
-  user: Relation<User>;
+  user: DataRelation<User>;
 }
 
 decorateDesignType(User, "blockedUsers", Object as Function, [
@@ -87,28 +90,41 @@ decorateDesignType(User, "blockedUsers", Object as Function, [
 
 declare module "../User" {
   interface User {
-    blockedUsers: Relation<User>[];
+    blockedUsers: DataRelation<User>[];
   }
 }
+
+const userNames = [
+  "member",
+  "god",
+  "forumsAdmin",
+  "otherMember",
+  "admin",
+  "blockedByMember",
+  "blockedByForum",
+  "adminBlockedByMember",
+  "notMember",
+] as const;
+
 export const AclTester = Tester.beforeAll(async t => ({
   connection: await createTestConnection([TestPost]),
 }))
   .beforeAll(async t => ({
-    forums: EntityDataSource.create(TestForum, t.connection),
-    users: EntityDataSource.create(User, t.connection),
+    forums: DataEntitySource.create(TestForum, t.connection),
+    users: DataEntitySource.create(User, t.connection),
   }))
   .beforeAll(async t => ({
-    users: {
-      member: await t.users.insert({}),
-      god: await t.users.insert({}),
-      forumsAdmin: await t.users.insert({}),
-      otherMember: await t.users.insert({}),
-      admin: await t.users.insert({ lastName: "admin" }),
-      blockedByMember: await t.users.insert({}),
-      blockedByForum: await t.users.insert({}),
-      adminBlockedByMember: await t.users.insert({}),
-      notMember: await t.users.insert({}),
-    },
+    users: (await mapObjectAsync(
+      mapArrayToObject([...userNames], firstName => [
+        firstName,
+        () =>
+          t.users.insert({
+            firstName,
+            lastName: "test",
+          }),
+      ]),
+      insert => insert()
+    )) as Record<typeof userNames[number], DataRow<User>>,
 
     forum: await t.forums.insert({}),
     otherForum: await t.forums.insert({}),
@@ -130,7 +146,7 @@ export const AclTester = Tester.beforeAll(async t => ({
       mode: TestForumMemberMode.regular,
     });
 
-    // EntityDataRow()
+    // DataEntityRow()
     await t.forum.at("members").insert({
       user: t.users.admin.$key,
       mode: TestForumMemberMode.admin,

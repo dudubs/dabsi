@@ -1,6 +1,6 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObjectAsync } from "../../../common/object/mapObject";
-import { RequireOptionalKeys } from "../../../common/typings";
+import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";

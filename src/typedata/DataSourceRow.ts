@@ -3,7 +3,7 @@ import { WithDataKey } from "./DataKey";
 import { DataRow } from "./DataRow";
 import { DataSource, DataSourceAt } from "./DataSource";
 import { DataUpdate } from "./DataValue";
-import { RelationKeys } from "./Relation";
+import { DataRelationKeys } from "./DataRelation";
 
 export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
 
@@ -20,7 +20,7 @@ export class DataSourceRow {
     return this[source];
   }
 
-  at<T extends AnyBasedDataRow, K extends RelationKeys<GetBaseType<T>>>(
+  at<T extends AnyBasedDataRow, K extends DataRelationKeys<GetBaseType<T>>>(
     this: T,
     propertyName: K
   ): DataSourceAt<GetBaseType<T>, K> {

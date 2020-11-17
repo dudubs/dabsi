@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Relation } from "../../../typedata/Relation";
+import { DataRelation } from "../../../typedata/DataRelation";
 import { User } from "./User";
 
 // TODO: Resource
@@ -15,5 +15,5 @@ export class Session {
   timeout: number;
 
   @ManyToOne(() => User)
-  user: Relation<User>;
+  user?: DataRelation<User>;
 }

@@ -1,4 +1,4 @@
-import { Union } from "../../common/typings";
+import { Union } from "../../common/typings2/Union";
 
 export type ExpNode<T> = Union<{ [K in keyof T]: { type: K; value: T[K] } }>;
 

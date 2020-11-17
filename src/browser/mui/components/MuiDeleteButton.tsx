@@ -1,6 +1,6 @@
 import React, { ReactNode } from "react";
+import { Override } from "../../../common/typings2/Override";
 import { MuiDangerButton, MuiDangerButtonProps } from "./MuiDangerButton";
-import { Override } from "../../../common/typings";
 import { Lang, LangNode } from "../../../lang/Lang";
 import { mergeProps } from "../../../react/utils/mergeProps";
 

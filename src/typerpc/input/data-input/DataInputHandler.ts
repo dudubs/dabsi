@@ -1,4 +1,4 @@
-import { RequireOptionalKeys } from "../../../common/typings";
+import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { DataRow } from "../../../typedata/DataRow";
 import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
@@ -52,8 +52,10 @@ export class DataInputHandler extends AbstractNullableInputHandler<T> {
   async loadAndCheckNotNull(
     key: NonNullable<InputValueData<T>>
   ): Promise<ErrorOrValue<InputError<T>, NonNullable<InputValue<T>>>> {
-    if (this.config.loadSource) {
-      const row = await this.config.loadSource.get(String(key));
+    if (this.rpc.hasLoadType) {
+      const row = await (this.config.loadSource || this.config.source).get(
+        String(key)
+      );
       if (!row) {
         return { error: "INVALID_DATA_KEY", value: undefined };
       }

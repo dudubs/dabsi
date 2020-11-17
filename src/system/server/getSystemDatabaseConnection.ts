@@ -8,7 +8,9 @@ SystemBootstrap(
   createSystemDatabaseConnection().then(result => {
     connection = result;
   })
-);
+).catch(error => {
+  console.error(error);
+});
 
 export const getSystemDatabaseConnection = (): Connection => {
   if (!connection) {

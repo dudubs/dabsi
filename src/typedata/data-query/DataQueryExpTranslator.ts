@@ -1,4 +1,4 @@
-import { Constructor } from "../../common/typings";
+import { Constructor } from "../../common/typings2/Constructor";
 import { DataExpTranslator } from "../data-exp/DataExpTranslator";
 import { DataQuery, DataQueryExp, DataQueryExpTypes } from "./DataQueryExp";
 

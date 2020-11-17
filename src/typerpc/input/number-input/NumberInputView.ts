@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Awaitable } from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
 import { RpcConnection } from "../../Rpc";
 import { AbstractInputView } from "../AbstractInputView";
 import { InputError, InputValueElement } from "../Input";

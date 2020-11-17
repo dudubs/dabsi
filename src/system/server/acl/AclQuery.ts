@@ -6,15 +6,15 @@ import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObject } from "../../../common/object/mapObject";
 import { touchObject } from "../../../common/object/touchObject";
 import { values } from "../../../common/object/values";
-import { Type } from "../../../common/typings";
+import { Type } from "../../../common/typings2/Type";
 import { WeakId } from "../../../common/WeakId";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { getExpNode } from "../../../typedata/data-exp/getExpNode";
 import { DataCursor, EmptyDataCursor } from "../../../typedata/DataCursor";
 import { DataTypeInfo } from "../../../typedata/DataTypeInfo";
-import { EntityDataCursor } from "../../../typedata/entity-data/EntityDataCursor";
-import { EntityDataExpTranslatorToDataQueryExp } from "../../../typedata/entity-data/EntityDataExpTranslatorToDataQueryExp";
-import { EntityDataQueryExpTranslatorToSql } from "../../../typedata/entity-data/EntityDataQueryExpTranslatorToSql";
+import { DataEntityCursor } from "../../../typedata/data-entity/DataEntityCursor";
+import { DataEntityExpTranslatorToDataQueryExp } from "../../../typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
+import { DataEntityQueryExpTranslatorToSql } from "../../../typedata/data-entity/DataEntityQueryExpTranslatorToSql";
 import { AclCriterion, AclCriterionExps } from "./AclCriterion";
 import { AclCriterionExp, AclExp, AclExpMap } from "./AclExp";
 import { AclTokenTree } from "./AclTokenTree";
@@ -196,7 +196,7 @@ export class AclQuery {
     cursor: DataCursor,
     filter: DataExp<T>
   ) {
-    const entityCursor = EntityDataCursor.create(
+    const entityCursor = DataEntityCursor.create(
       this.connection,
       {
         ...cursor,
@@ -207,17 +207,17 @@ export class AclQuery {
       entityType
     );
 
-    const qb = EntityDataCursor.createQueryBuilder(entityCursor);
+    const qb = DataEntityCursor.createQueryBuilder(entityCursor);
     qb.query.take = 1;
 
-    const translatorToQueryExp = new EntityDataExpTranslatorToDataQueryExp(
+    const translatorToQueryExp = new DataEntityExpTranslatorToDataQueryExp(
       this.connection,
       DataTypeInfo.get(User),
       qb,
       qb.query.alias
     );
 
-    const translatorToSql = new EntityDataQueryExpTranslatorToSql(
+    const translatorToSql = new DataEntityQueryExpTranslatorToSql(
       this.connection,
       qb.query.alias,
       this.parameters

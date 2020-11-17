@@ -1,5 +1,5 @@
 import React from "react";
-import { Override } from "../../../common/typings";
+import { Override } from "../../../common/typings2/Override";
 import { Renderer } from "../../../react/renderer";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";

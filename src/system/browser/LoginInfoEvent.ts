@@ -1,4 +1,4 @@
-import { Awaited } from "../../common/typings";
+import { Awaited } from "../../common/typings2/Async";
 import { LoginInfo } from "../common/SystemApp";
 
 type LoginInfoPayload = Awaited<LoginInfo>;

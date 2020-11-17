@@ -6,7 +6,7 @@ import {
 import {
   jssPreset,
   StylesProvider as MuiJssProvider,
-} from "@material-ui/styles";
+} from "@material-ui/core/styles";
 import { create } from "jss";
 import { createElement, useMemo } from "react";
 
@@ -16,7 +16,7 @@ import {
   LangTranslatorContext,
 } from "../../lang/LangTranslator";
 
-declare module "@material-ui/styles" {
+declare module "@material-ui/core/styles" {
   interface DefaultTheme extends MuiCoreTheme {}
 }
 declare module "styled-components" {

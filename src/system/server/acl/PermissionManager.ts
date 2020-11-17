@@ -1,5 +1,5 @@
 import { Connection } from "typeorm";
-import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
+import { DataEntitySource } from "../../../typedata/data-entity/DataEntitySource";
 import { Inject } from "../../../typedi/Inject";
 import { Permission } from "./Permission";
 import { splitToken } from "./splitToken";
@@ -8,7 +8,7 @@ export class PermissionManager {
   constructor(@Inject() public connection: Connection) {}
 
   async addToken(to: "user" | "group", key: string, token: string) {
-    const source = EntityDataSource.create(Permission, this.connection)
+    const source = DataEntitySource.create(Permission, this.connection)
       .of(to, key)
       .of("ownerToken", token);
 
@@ -22,7 +22,7 @@ export class PermissionManager {
   }
 
   removeToken(to: "user" | "group", key: string, token: string) {
-    return EntityDataSource.create(Permission, this.connection)
+    return DataEntitySource.create(Permission, this.connection)
       .of(to, key)
       .filter({ ownerToken: token })
       .delete();

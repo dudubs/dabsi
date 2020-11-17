@@ -1,4 +1,5 @@
-import { ArrayTypeOrObject, ExtractKeys } from "../common/typings";
+import { ArrayTypeOrObject } from "../common/typings2/ArrayTypeOrObject";
+import { ExtractKeys } from "../common/typings2/ExtractKeys";
 import { DataExp } from "./data-exp/DataExp";
 import { DataOrder } from "./DataOrder";
 import {
@@ -6,9 +7,9 @@ import {
   DataSelection,
 } from "./data-selection/DataSelection";
 
-export type DataLoadMapValue<T> = boolean | RelationMap<T>;
+export type DataLoadMapValue<T> = boolean | DataRelationMap<T>;
 
-export type RelationMap<T> = {
+export type DataRelationMap<T> = {
   [K in ExtractKeys<Required<T>, object>]?: DataLoadMapValue<T[K]>;
 };
 

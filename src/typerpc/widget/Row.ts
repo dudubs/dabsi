@@ -1,4 +1,5 @@
-import { Expect, Nullable } from "../../common/typings";
+import { Expect } from "../../common/typings2/Expect";
+import { Nullable } from "../../common/typings2/Nullable";
 
 export function number(value: any): number {
   return Number(value);

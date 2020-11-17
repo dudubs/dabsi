@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 import { logBeforeEach } from "../../../jasmine/logBeforeEach";
 import { Tester } from "../../../jasmine/Tester";
-import { EntityDataSource } from "../../../typedata/entity-data/EntityDataSource";
+import { DataEntitySource } from "../../../typedata/data-entity/DataEntitySource";
 import { createTestConnection } from "../../../typedata/tests/TestConnection";
 
 @Entity()
@@ -17,7 +17,7 @@ export const DataInputTester = Tester.beforeAll({
   connection: () => createTestConnection([TestA]),
 })
   .beforeAll({
-    source: t => EntityDataSource.create(TestA, t.connection),
+    source: t => DataEntitySource.create(TestA, t.connection),
   })
   .beforeAll({
     rows: t =>

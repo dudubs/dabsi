@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm/index";
-import { Relation } from "../../../../src/typedata/Relation";
+import { DataRelation } from "../../../../src/typedata/DataRelation";
 import { BaseAnimal } from "./BaseAnimal";
 import { MixedDog } from "./MixedDog";
 import { PurebredDog } from "./PurebredDog";
@@ -20,10 +20,10 @@ export class DogBreed {
   name: string;
 
   @OneToMany(() => PurebredDog, dog => dog.breed)
-  purebredDogs: Relation<PurebredDog>[];
+  purebredDogs: DataRelation<PurebredDog>[];
 
   @ManyToMany(() => MixedDog, dog => dog.breeds)
-  mixedDogs: Relation<MixedDog>[];
+  mixedDogs: DataRelation<MixedDog>[];
 }
 
 @ChildEntity()

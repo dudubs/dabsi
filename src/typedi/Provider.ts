@@ -1,5 +1,5 @@
 import { flatObject } from "../common/object/flatObject";
-import { Type } from "../common/typings";
+import { Type } from "../common/typings2/Type";
 import { checkSymbol } from "./internal/_check";
 import { resolveSymbol } from "./internal/_resolve";
 import { ResolverMap, CustomResolver, Resolver } from "./Resolver";

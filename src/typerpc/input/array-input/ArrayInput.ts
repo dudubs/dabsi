@@ -1,10 +1,7 @@
-import {
-  Awaitable,
-  If,
-  Is,
-  Not,
-  PartialUndefinedKeys,
-} from "../../../common/typings";
+import { Awaitable } from "../../../common/typings2/Async";
+import { If, Not } from "../../../common/typings2/boolean";
+import { Is } from "../../../common/typings2/boolean/Is";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { RpcUndefinedConfig, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
 import { WidgetElement } from "../../widget/Widget";

@@ -1,7 +1,7 @@
 import { RefCallback } from "react";
 import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
-import { If } from "../../common/typings";
+import { If } from "../../common/typings2/boolean";
 import { AnyInputConnection } from "./Input";
 import { InputErrorMap } from "./input-map/InputMap";
 import { AnyInputView, InputView } from "./InputView";

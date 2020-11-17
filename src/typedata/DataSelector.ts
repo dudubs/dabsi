@@ -1,4 +1,5 @@
-import { Constructor, Type } from "../common/typings";
+import { Constructor } from "../common/typings2/Constructor";
+import { Type } from "../common/typings2/Type";
 import {
   AnyDataSelection,
   DataSelection,

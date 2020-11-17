@@ -1,4 +1,4 @@
-import { RequireOptionalKeys } from "../../common/typings";
+import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
 import {
   AnyInput,
   IInput,

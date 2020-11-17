@@ -3,7 +3,7 @@ import { Handler, Request } from "express";
 import * as http from "http";
 import fetch, { RequestInit } from "node-fetch";
 import { toPromise } from "../common/async/toPromise";
-import { Awaitable } from "../common/typings";
+import { Awaitable } from "../common/typings2/Async";
 
 const _fetch = fetch;
 

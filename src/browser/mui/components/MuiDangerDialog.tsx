@@ -1,8 +1,8 @@
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import * as React from "react";
 import { ReactNode } from "react";
+import { Override } from "../../../common/typings2/Override";
 import { MuiDialog, MuiDialogProps } from "./MuiDialog";
-import { Override } from "../../../common/typings";
 import { Lang, LangNode } from "../../../lang/Lang";
 import { ReactCallback } from "../../../react/ReactCallback";
 import { MuiButton, MuiCancelButton, MuiConfirmButton } from "./MuiButton";
@@ -42,19 +42,20 @@ export function MuiDangerDialog({
       actions={
         <>
           <MuiCancelButton
-            onClick={(event) => {
+            onClick={event => {
               onCancel?.(event);
             }}
           />
           <MuiConfirmButton
             danger
             title={Lang`CONFIRM`}
-            onClick={(event) => {
+            onClick={event => {
               onConfirm?.(event);
             }}
           />
         </>
-      }>
+      }
+    >
       <Typography {...TypographyProps}>
         {text ??
           DEFAULT_TEXT({

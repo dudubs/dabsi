@@ -1,4 +1,4 @@
-import { Union } from "../../../common/typings";
+import { Union } from "../../../common/typings2/Union";
 import { GetBaseType } from "../../../typedata/BaseType";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { BasedDataRow } from "../../../typedata/DataSourceRow";

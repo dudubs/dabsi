@@ -1,4 +1,4 @@
-import { ExpMap } from "../../common/typings";
+import { ExpMap } from "../../common/typings2/ExpMap";
 import { DataOrder } from "../DataOrder";
 import { DataExp, DataExpTypes } from "../data-exp/DataExp";
 

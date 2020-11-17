@@ -1,4 +1,6 @@
-import { HasKeys, Type, Union } from "../common/typings";
+import { HasKeys } from "../common/typings2/boolean";
+import { Type } from "../common/typings2/Type";
+import { Union } from "../common/typings2/Union";
 import { BaseTypeKey, WithBaseType } from "./BaseType";
 import { DataKey, WithDataKey } from "./DataKey";
 import { DataSourceRow } from "./DataSourceRow";
@@ -10,9 +12,9 @@ import {
 import {
   IfRelationToOne,
   MapRelation,
-  RelationKeys,
-  RelationTypeAt,
-} from "./Relation";
+  DataRelationKeys,
+  DataRelationTypeAt,
+} from "./DataRelation";
 
 type _Children<Children> = {
   [K in keyof Children]: Record<DataKey, string> &
@@ -21,12 +23,12 @@ type _Children<Children> = {
 };
 
 export type _NoChildren<T> = DataSourceRow &
-  Omit<T, DataUnionChildrenKey | RelationKeys<T> | BaseTypeKey> &
+  Omit<T, DataUnionChildrenKey | DataRelationKeys<T> | BaseTypeKey> &
   WithBaseType<T> &
   WithDataKey &
   {
-    [K in RelationKeys<T>]:
-      | MapRelation<T[K], DataRow<RelationTypeAt<T, K>>>
+    [K in DataRelationKeys<T>]:
+      | MapRelation<T[K], DataRow<DataRelationTypeAt<T, K>>>
       | IfRelationToOne<T[K], undefined>;
   };
 

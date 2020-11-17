@@ -1,20 +1,14 @@
+import { DataResolvers } from "../../typedata/DataResolvers";
 import { Resolver } from "../../typedi";
-import { _consume } from "../../typedi/internal/_consume";
 import { RpcConfig } from "../../typerpc/Rpc";
 import { DevLoginUser, SystemApp } from "../common/SystemApp";
 import { AclRequest } from "./acl/AclRequest";
 
 import { User, UserFullName } from "./acl/User";
 import { ADMIN_TOKEN, AdminAppConfig } from "./AdminAppConfig";
-import { DataResolvers } from "../../typedata/DataResolvers";
+import { DevLoginConfig } from "./DevLoginConfig";
 import { SystemSession } from "./SystemSession";
 import { UserAppConfig } from "./UserAppConfig";
-
-declare global {
-  interface TypeRefs {
-    [DevLoginUser]: { fullName: string };
-  }
-}
 
 export const SystemAppConfig = Resolver.consume(
   {
@@ -25,6 +19,7 @@ export const SystemAppConfig = Resolver.consume(
       users: User,
       session: [SystemSession],
     }),
+    devLoginConfig: DevLoginConfig,
   },
   c =>
     RpcConfig(SystemApp, $ => {
@@ -48,20 +43,7 @@ export const SystemAppConfig = Resolver.consume(
         },
         user: c.userConfig,
         admin: c.adminConfig,
-        devLogin: $ =>
-          $({
-            inputConfig: $ =>
-              $({
-                source: c.users.pick({
-                  fullName: UserFullName,
-                }),
-                columns: { label: "fullName" },
-              }),
-            async submit(user) {
-              await c.session.update({ user: user.$key });
-              return { value: { helloTo: user.fullName } };
-            },
-          }),
+        devLogin: c.devLoginConfig,
       });
     })
 );

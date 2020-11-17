@@ -1,4 +1,4 @@
-import { Awaitable } from "../common/typings";
+import { Awaitable } from "../common/typings2/Async";
 
 const resultSymbol = Symbol();
 

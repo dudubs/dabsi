@@ -1,3 +1,4 @@
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { DataRow } from "../../../typedata/DataRow";
 import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
@@ -8,6 +9,7 @@ import {
   InputError,
   InputType,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
@@ -31,31 +33,53 @@ export class DataInputHandler extends AbstractNullableInputHandler<T> {
     return Promise.resolve({});
   }
 
-  async getValueElement(
-    dataKey: InputValue<T> | undefined
-  ): Promise<InputValueElement<T>> {
-    let dataRow: DataRow<any> | undefined = undefined;
-    if (!dataKey) {
-      const dataKeyOrRow = await ValueOrAwaitableFn(this.config.default);
-      if (dataKeyOrRow && typeof dataKeyOrRow === "object") {
-        dataRow = dataKeyOrRow;
-      } else if (dataKeyOrRow) {
-        dataKey = String(dataKeyOrRow);
+  async getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Promise<InputValue<T>> {
+    valueConfig = await ValueOrAwaitableFn(valueConfig);
+    if (!valueConfig) {
+      return;
+    }
+    if (this.rpc.isValueDataRow) {
+      if (typeof valueConfig === "string") {
+        return await this.valueSource.get(valueConfig);
       }
+      return valueConfig;
     }
-    if (dataKey && !dataRow) {
-      dataRow = await this.config.source.get(dataKey);
+    return typeof valueConfig === "object" //
+      ? valueConfig.$key
+      : valueConfig;
+  }
+
+  get valueSource() {
+    return this.config.valueSource || this.config.source;
+  }
+
+  async getValueElement(
+    value: InputValue<T> | undefined
+  ): Promise<InputValueElement<T>> {
+    if (!value) return undefined;
+
+    let dataRow: DataRow<any> | undefined = undefined;
+
+    if (typeof value === "object") {
+      if (!this.config.valueSource) {
+        dataRow = value;
+      } else if (typeof value.$key === "string") {
+        dataRow = await this.config.source.get(value.$key);
+      }
+    } else if (typeof value === "string") {
+      dataRow = await this.config.source.get(value);
     }
-    return dataRow && (await this.controller.then(c => c.loadRow(dataRow)));
+
+    return dataRow && (await (await this.controller).loadRow(dataRow));
   }
 
   async loadAndCheckNotNull(
     key: NonNullable<InputValueData<T>>
   ): Promise<ErrorOrValue<InputError<T>, NonNullable<InputValue<T>>>> {
-    if (this.rpc.hasLoadType) {
-      const row = await (this.config.loadSource || this.config.source).get(
-        String(key)
-      );
+    if (this.rpc.isValueDataRow) {
+      const row = await this.valueSource.get(String(key));
       if (!row) {
         return { error: "INVALID_DATA_KEY", value: undefined };
       }

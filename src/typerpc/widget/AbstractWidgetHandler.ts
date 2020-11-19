@@ -12,29 +12,29 @@ import {
   TWidget,
   WidgetController,
   WidgetElement,
+  WidgetElementState,
   WidgetType,
 } from "./Widget";
 
-export abstract class AbstractWidgetHandler<
-    R extends AnyWidget,
-    T extends TWidget = WidgetType<R>
-  >
-  extends AbstractRpcHandler<R>
+export abstract class AbstractWidgetHandler<T extends AnyWidget>
+  extends AbstractRpcHandler<T>
   implements IRpcHandler<IWidget> {
-  abstract getControllerConfig(): RpcUnresolvedConfig<WidgetController<R>>;
+  abstract getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>>;
 
-  abstract getElement(): Promise<RequireOptionalKeys<WidgetElement<R>>>;
+  abstract getElement(
+    state: WidgetElementState<T> | undefined
+  ): Promise<RequireOptionalKeys<WidgetElement<T>>>;
 
-  @Lazy() get controller(): Promise<RpcResolvedHandler<WidgetController<R>>> {
+  @Lazy() get controller(): Promise<RpcResolvedHandler<WidgetController<T>>> {
     return this.rpc.widget.controller.resolveRpcHandler(
       this.getControllerConfig()
-    ) as Promise<RpcResolvedHandler<WidgetController<R>>>;
+    ) as Promise<RpcResolvedHandler<WidgetController<T>>>;
   }
 
   async handle([key, payload]: [string, any]): Promise<any> {
     switch (key) {
       case "getElement":
-        return this.getElement();
+        return this.getElement(payload);
       case "controller":
         return this.controller.then(handler => handler.handle(payload));
       default:

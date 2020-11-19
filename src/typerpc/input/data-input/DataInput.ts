@@ -8,6 +8,7 @@ import { DataRow } from "../../../typedata/DataRow";
 import { DataSource } from "../../../typedata/DataSource";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
+import { AnyRpc } from "../../Rpc";
 import { DataTable } from "../../widget/data-table/DataTable";
 import { AnyRowType, Row, string } from "../../widget/Row";
 import { WidgetType } from "../../widget/Widget";
@@ -38,8 +39,6 @@ type _Types<T extends TDataInput> = T & {
   };
 
   RequiredConfig: {
-    default?: ValueOrAwaitableFn<string | DataRow<T["TableData"]> | undefined>;
-
     tableConfig?: OmitKeys<
       _Types<T>["TableTypes"]["RequiredConfig"] &
         _Types<T>["TableTypes"]["OptionalConfig"],
@@ -52,7 +51,7 @@ type _Types<T extends TDataInput> = T & {
 
 export type DataInputConfig<T extends TDataInput> = PartialUndefinedKeys<
   _Types<T>["OptionalConfig"] & {
-    loadSource:
+    valueSource:
       | DataSource<T["LoadData"]>
       | If<
           Is<T["Value"], string> | Is<T["TableData"], T["LoadRow"]>,
@@ -66,6 +65,8 @@ export type AnyDataInput = DataInput<any, TDataInput>;
 
 export type TDataInput = {
   TableRow: any;
+
+  TableRowController: AnyRpc;
 
   TableData: any;
 
@@ -89,10 +90,14 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
 
     ValueElement: _Types<T>["TableTypes"]["RowWithKey"];
 
+    ValueConfig: ValueOrAwaitableFn<
+      string | DataRow<T["TableData"]> | undefined
+    >;
+
     Props: {
       table: _Types<T>["Table"];
 
-      hasLoadType: boolean;
+      isValueDataRow: boolean;
     };
 
     Config: GenericConfig<
@@ -121,6 +126,7 @@ export function DataInput<
   TableRowType extends AnyRowType = {
     label: typeof string;
   },
+  TableRowController extends AnyRpc = NoRpc,
   N extends boolean = false,
   LoadType = never,
   S extends PropertyKey = any
@@ -128,12 +134,14 @@ export function DataInput<
   options: {
     nullable?: N;
     tableRowType?: TableRowType;
+    tableRowController?: TableRowController;
     loadType?: LoadType;
   } = {}
 ): DataInput<
   N,
   {
     TableRow: Row<TableRowType>;
+    TableRowController: TableRowController;
     Data: any;
     LoadRow: LoadType;
     TableData: any;
@@ -147,7 +155,7 @@ export function DataInput<
     props: {
       nullable: options.nullable ?? false,
       table,
-      hasLoadType: !!options.loadType,
+      isValueDataRow: !!options.loadType,
     },
     isGenericConfig: true,
     controller: table,

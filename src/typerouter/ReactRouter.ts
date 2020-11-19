@@ -1,32 +1,35 @@
-import { createContext, ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 import { WeakMapFactory } from "../common/map/mapFactory";
+import { createRendererComponent } from "../react/createRendererComponent";
 import { ReactorEmitter } from "../react/reactor/useEmitter";
-import { EmptyFragment } from "../react/utils/EmptyFragment";
 import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
-import { RouteProps } from "./RouteProps";
-import { AnyRouter, Router, RouterType, TRouter } from "./Router";
+import { Route } from "./Route";
+import { AnyRouter, Router, TRouter } from "./Router";
 import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
 
-type _RendererProps<T extends TRouter, R extends RouteProps = RouteProps> = {
+type _RendererProps<T extends TRouter, R extends Route = Route> = {
   location: RouterLocation<T>;
   route: R;
   emit: ReactorEmitter;
+
+  state: any;
+  setState: (state: any) => void;
 };
 type _WrapperProps<T extends TRouter> = _RendererProps<T> & {
   children: ReactNode;
 };
-type _Renderer<T extends TRouter, R extends RouteProps = RouteProps> = (
+type _Renderer<T extends TRouter, R extends Route = Route> = (
   props: _RendererProps<T, R>
-) => ReactNode;
-type _Wrapper<T extends TRouter> = (props: _WrapperProps<T>) => ReactNode;
+) => ReactElement;
+type _Wrapper<T extends TRouter> = (props: _WrapperProps<T>) => ReactElement;
 
 export type ReactRouterOptions<T extends TRouter> = {
   wrap?: _Wrapper<T>;
 
   render?: _Renderer<T>;
-  renderDefault?: _Renderer<T, Extract<RouteProps, { type: "DEFAULT" }>>;
-  renderIndex?: _Renderer<T, Extract<RouteProps, { type: "INDEX" }>>;
-  renderNoParam?: _Renderer<T, Extract<RouteProps, { type: "NO_PARAM" }>>;
+  renderDefault?: _Renderer<T, Extract<Route, { type: "DEFAULT" }>>;
+  renderIndex?: _Renderer<T, Extract<Route, { type: "INDEX" }>>;
+  renderNoParam?: _Renderer<T, Extract<Route, { type: "NO_PARAM" }>>;
 };
 
 export type ReactRouter = {
@@ -34,8 +37,6 @@ export type ReactRouter = {
 
   find(router);
 };
-
-export const ReactRouterContext = createUndefinedContext<ReactRouter>();
 
 export function ReactRouter<T extends TRouter>(
   router: Router<T>,
@@ -66,7 +67,7 @@ export function ReactRouter<T extends TRouter>(
   info.renderer = props => {
     switch (props.route.type) {
       case "DEFAULT":
-        if (renderDefault) return renderDefault(props as any);
+        if (renderDefault) return props as any;
         break;
       case "INDEX":
         if (renderIndex) return renderIndex(props as any);

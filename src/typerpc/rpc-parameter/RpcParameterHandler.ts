@@ -9,9 +9,9 @@ export class RpcParameterHandler
   implements IRpcHandler<T> {
   async handle([data, payload]): Promise<any> {
     const value = await this.rpc.parameterDataType(data);
-    const targetConfig = await ConfigFactory(this.config, value);
+    const configForValue = await ConfigFactory(this.config, value);
     return this.rpc.parameterTarget
-      .resolveRpcHandler(targetConfig)
+      .resolveRpcHandler(configForValue)
       .then(c => c.handle(payload));
   }
 }

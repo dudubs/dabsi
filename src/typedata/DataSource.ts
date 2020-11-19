@@ -125,21 +125,25 @@ export abstract class DataSource<T> {
 
   // relation
 
-  async addOrRemove(keys?: Record<string, boolean | undefined>): Promise<void>;
-  async addOrRemove(addKeys: string[], removeKeys: string[]): Promise<void>;
-  async addOrRemove(addKeysOrKeys, removeKeys?): Promise<void> {
-    if (removeKeys) {
-      addKeysOrKeys.length && (await this.addKeys(addKeysOrKeys));
-      removeKeys.length && (await this.removeKeys(removeKeys));
-    } else {
-      const addKeys = [];
-      removeKeys = [];
-      for (let [key, value] of entries(addKeysOrKeys)) {
-        if (typeof value !== "boolean") continue;
-        (value ? addKeys : removeKeys).push(key);
+  async updateRelations(keyMap: Record<string, boolean>) {
+    const existsKeys = new Set(
+      await this.filter({
+        $is: Object.keys(keyMap),
+      }).getKeys()
+    );
+
+    const keysToAdd: string[] = [];
+    const keysToRemove: string[] = [];
+
+    for (const [key, toAdd] of entries(keyMap)) {
+      if (toAdd) {
+        !existsKeys.has(key) && keysToAdd.push(key);
+      } else {
+        existsKeys.has(key) && keysToRemove.push(key);
       }
-      return await this.addOrRemove(addKeys, removeKeys);
     }
+    keysToAdd.length && (await this.addKeys(keysToAdd));
+    keysToRemove.length && (await this.removeKeys(keysToRemove));
   }
 
   protected abstract addKeys(keys: string[]): Promise<void>;

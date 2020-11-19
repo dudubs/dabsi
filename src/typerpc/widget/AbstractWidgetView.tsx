@@ -7,6 +7,7 @@ import {
   Widget,
   WidgetController,
   WidgetElement,
+  WidgetElementState,
   WidgetType,
 } from "./Widget";
 import { WidgetView, WidgetViewProps } from "./WidgetView";
@@ -20,6 +21,16 @@ export abstract class AbstractWidgetView<
   @ViewState("forceUpdateElement") _element: WidgetElement<C>;
 
   protected updateElement?(element: WidgetElement<C>): void;
+
+  protected _elementState: WidgetElementState<C> | undefined = this.props
+    .elementState;
+  setElementState(state: WidgetElementState<C>) {
+    this.props.onElementStateChange?.((this._elementState = state));
+  }
+
+  get elementState(): WidgetElementState<C> | undefined {
+    return this._elementState;
+  }
 
   get element(): WidgetElement<C> {
     return this._element;

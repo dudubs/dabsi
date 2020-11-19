@@ -46,6 +46,8 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
 
   Value: Record<string, InputValue<T["Target"]>>;
 
+  ValueConfig: undefined;
+
   ValueElement: Record<
     string,
     {
@@ -99,23 +101,27 @@ export type DataInputMapConfig<
 
 export function DataInputMap<
   Target extends AnyInput,
-  RowType extends AnyRowType = {
+  TableRowType extends AnyRowType = {
     label: typeof string;
   },
-  RowController extends AnyRpc = NoRpc
+  TableRowController extends AnyRpc = NoRpc
 >(
   target: Target,
-  options?: { rowType?: RowType; rowController?: RowController }
+  options?: {
+    tableRowType?: TableRowType;
+    tableRowController?: TableRowController;
+  }
 ): DataInputMap<{
   Target: Target;
-  TableRow: Row<RowType>;
+  TableRow: Row<TableRowType>;
+  TableRowController: TableRowController;
   TableData: any;
   LoadData: any;
   LoadRow: any;
   Value: string;
 }> {
   const table = DataTable(
-    (options?.rowType as AnyRowType) || { label: string }
+    (options?.tableRowType as AnyRowType) || { label: string }
   );
 
   return <any>Input<AnyDataInputMap>({

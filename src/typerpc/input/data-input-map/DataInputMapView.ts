@@ -1,3 +1,4 @@
+import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
 import { RpcConnection } from "../../Rpc";
@@ -16,6 +17,7 @@ export type DataInputMapViewProps<
     index: number;
     key: string;
   }>;
+  renderNoKeys?();
 };
 
 export class DataInputMapView<
@@ -24,6 +26,10 @@ export class DataInputMapView<
   children = new InputViewChildren();
 
   renderView(): React.ReactNode {
+    if (!hasKeys(this.value)) {
+      return this.props.renderNoKeys?.();
+    }
+
     return mapObjectToArray(
       this.value! || {},
       ({ $value, ...row }, key, index) => {
@@ -34,6 +40,8 @@ export class DataInputMapView<
           props: {
             key,
             value: $value,
+            elementState: undefined,
+            onElementStateChange: undefined,
             onChange: view =>
               this.setValue({
                 ...this.value,

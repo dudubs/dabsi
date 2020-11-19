@@ -1,9 +1,10 @@
+import { ConfigFactory } from "../ConfigFactory";
+import { ValueOrAwaitableFn } from "../input/ValueOrAwaitableFn";
 import { RpcConfigHookHandler } from "../RpcConfigHook";
 import { AnyDataManager } from "./DataManager";
 
 export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
   config,
-  props: { editInput },
 }) => $ => {
   return $({
     async delete(key) {
@@ -12,25 +13,38 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
     table: $ =>
       $({
         ...config.tableConfig,
+        columns: config.tableColumnsConfig,
         source: config.source,
       }),
     add: {
       inputConfig: config.addInputConfig,
-      submit: value => {
-        return config.addSubmit(value);
-      },
+      submit: config.addSubmit,
     },
     edit: async ($, key) => {
       const row = await config.source.getOrFail(key);
       return $({
         getElement() {
-          return { title: config.getTitle(row) };
+          return { title: config.getTitleForRow(row) };
         },
-        targetConfig: {
-          form: { inputConfig: config.editInputConfig },
-          submit(value) {
-            return config.editSubmit(row, value);
-          },
+        targetConfig: async $ => {
+          return $({
+            ...(await ConfigFactory(config.getTabsConfigForRow, row)),
+            form: async $ =>
+              $({
+                inputConfig: await ConfigFactory(
+                  config.editInputConfigForRow,
+                  row
+                ), //
+                valueConfig:
+                  config.editValueConfigForRow &&
+                  (() => ConfigFactory(config.editValueConfigForRow, row)),
+                async submit(value) {
+                  await config.editSubmit(row, value);
+                },
+
+                /// tabsConfig
+              }),
+          });
         },
       });
     },

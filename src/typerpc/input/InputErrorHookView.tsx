@@ -2,7 +2,7 @@ import { ReactElement } from "react";
 import { Awaitable } from "../../common/typings2/Async";
 import { RpcConnection } from "../Rpc";
 import { AbstractInputView } from "./AbstractInputView";
-import { AnyInput, InputType } from "./Input";
+import { AnyInput, Input, InputType } from "./Input";
 import { AnyInputErrorHook, TInputErrorHook } from "./InputErrorHook";
 import { InputView, InputViewProps } from "./InputView";
 
@@ -32,12 +32,19 @@ export class InputErrorHookView<
   }
 
   renderView(): React.ReactNode {
-    const { connection, element } = this.props;
+    const {
+      connection,
+      element,
+      elementState,
+      onElementStateChange,
+    } = this.props;
 
     return this.props.children(
       {
         connection,
         element,
+        elementState,
+        onElementStateChange,
         inputRef: target => {
           this.target = target;
         },

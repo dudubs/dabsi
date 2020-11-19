@@ -8,11 +8,8 @@ export type BoolInput = Input<{
   ValueData: boolean;
   Value: boolean;
   ValueElement: boolean;
-  Config:
-    | {
-        default?: ValueOrAwaitableFn<boolean>;
-      }
-    | undefined;
+  ValueConfig: boolean | undefined;
+  Config: undefined;
   Props: {};
   Element: {};
   Error: undefined;

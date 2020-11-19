@@ -81,7 +81,7 @@ export function RpcConfigHook<
         if (isGenericConfig) {
           config = await GenericConfig(
             (handler as _GenericConfigHandler<T>)({
-              config,
+              config: await GenericConfig(config),
               target: this,
               props: options["props"],
             }) as GenericConfig

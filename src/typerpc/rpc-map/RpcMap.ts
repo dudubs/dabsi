@@ -23,6 +23,7 @@ export type RpcMap<T extends AnyRpcRecord> = Rpc<{
   };
 
   Props: { targetMap: T };
+
   Config: UndefinedIfEmptyObject<
     PartialUndefinedKeys<
       {

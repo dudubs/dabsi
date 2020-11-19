@@ -9,7 +9,7 @@ import { AbstractInputView } from "../AbstractInputView";
 import { InputError, InputValueElement } from "../Input";
 import { InputErrorElementMap, InputViewProps } from "../InputView";
 import { TextInput } from "./TextInput";
-import { TextInputLoader, TextInputOptions } from "./TextInputLoader";
+import { TextInputLoader, TextLoaderOptions } from "./TextInputLoader";
 
 export type TextInputViewProps<
   C extends RpcConnection<TextInput>
@@ -35,7 +35,8 @@ export class TextInputView<
 
   protected debounceId = 0;
 
-  protected _options: TextInputOptions;
+  protected _options: TextLoaderOptions;
+
   protected updateElement(element: WidgetType<C>["Element"]) {
     super.updateElement(element);
     this._options = {
@@ -49,7 +50,9 @@ export class TextInputView<
   }
 
   async setValue(value: InputValueElement<C>): Promise<void> {
-    return super.setValue(TextInputLoader.load(this._options, value));
+    return super.setValue(
+      (this._text = TextInputLoader.load(this._options, value))
+    );
   }
 
   inputWillValidate(): Awaitable {

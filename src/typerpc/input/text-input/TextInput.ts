@@ -1,42 +1,52 @@
+import { If } from "../../../common/typings2/boolean";
 import { Override } from "../../../common/typings2/Override";
 import { NoRpc } from "../../NoRpc";
 import { Input } from "../Input";
-import { TextInputError, TextInputOptions } from "./TextInputLoader";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { TextInputHandler } from "./TextInputHandler";
+import { TextLoaderError, TextLoaderOptions } from "./TextInputLoader";
 
-export type TextInput = Input<{
-  Error: TextInputError;
+export type TextInput<N extends boolean = any> = Input<{
+  Error: TextLoaderError;
 
   ValueData: string;
 
   Commands: {};
 
-  Value: string;
+  Value: string | If<N, null>;
 
   ValueElement: string;
 
+  ValueConfig: string | undefined;
+
   Controller: NoRpc;
 
-  Props: {};
+  Props: {
+    nullable: boolean;
+    loaderOptions: TextLoaderOptions;
+  };
 
-  Config:
-    | undefined
-    | (TextInputOptions & {
-        default?: ValueOrAwaitableFn<string | undefined>;
-      });
+  Config: undefined | TextLoaderOptions;
 
   Element: Override<
-    TextInputOptions,
+    TextLoaderOptions,
     {
       pattern?: string;
     }
   >;
 }>;
 
-export function TextInput(): TextInput {
-  return Input<TextInput>({
+export function TextInput<N extends boolean = false>({
+  nullable,
+  ...loaderOptions
+}: {
+  nullable?: N;
+} & TextLoaderOptions = {}): TextInput<N> {
+  return <any>Input<TextInput<any>>({
     handler: TextInputHandler,
+    props: {
+      nullable: nullable || false,
+      loaderOptions,
+    },
     getValueDataFromElement(value) {
       return value;
     },

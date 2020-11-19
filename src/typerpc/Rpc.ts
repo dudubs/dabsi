@@ -50,7 +50,7 @@ export type Rpc<T extends TRpc> = WithMetaType<{
     ): Promise<_RpcResolvedHandler<T>>;
   };
 
-const rpcToServiceHandler = new WeakMap<any, Fn>();
+const rpcToServiceCommand = new WeakMap<any, Fn>();
 
 export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
   options: RpcOptions<T>
@@ -59,7 +59,6 @@ export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
   const rpc: Rpc<T> = Object.setPrototypeOf(
     mergeDescriptors(options["props"] || {}, {
       options,
-
       get service() {
         return service;
       },
@@ -67,11 +66,11 @@ export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
     AnyRpc
   );
   service = rpc.createRpcConnection(payload => {
-    const handler = rpcToServiceHandler.get(rpc);
-    if (!handler) {
+    const command = rpcToServiceCommand.get(service);
+    if (!command) {
       throw new RpcError(`No handle for service.`);
     }
-    return handler(payload);
+    return command(payload);
   });
   return rpc;
 }
@@ -160,7 +159,7 @@ export const AnyRpc: AnyRpc = {
   },
   createRpcConnection(handler) {
     if (isServiceHandler) {
-      rpcToServiceHandler.set(this, handler);
+      rpcToServiceCommand.set(this.service, handler);
     }
     return this.options.connect.call(this, handler);
   },
@@ -192,7 +191,7 @@ export const AnyRpc: AnyRpc = {
           `expected to generic config, got: ${inspect(config)}`
         );
       config = await GenericConfig(config as GenericConfig);
-    } else if (!this.options.isConfigFn && typeof config === "function") {
+    } else if (typeof config === "function" && !this.options.isConfigFn) {
       config = await ConfigFactory(config as ConfigFactory<any>);
     }
 

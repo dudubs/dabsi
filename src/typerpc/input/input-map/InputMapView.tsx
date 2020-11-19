@@ -35,6 +35,8 @@ export class InputMapView<
       key,
       connection: this.controller[key],
       element: this.element.elementMap[key],
+      elementState: undefined,
+      onElementStateChange: undefined,
       value: this.value?.[key],
       onError: view => this.props.onError?.(this),
       onChange: view =>

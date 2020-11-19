@@ -1,4 +1,5 @@
 import { hasKeys } from "../../../common/object/hasKeys";
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { IWidgetHandler, WidgetController } from "../../widget/Widget";
@@ -7,6 +8,7 @@ import {
   InputElement,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
@@ -19,6 +21,12 @@ type T = AnyArrayInput;
 export class ArrayInputHandler
   extends AbstractInputHandler<T>
   implements IWidgetHandler<AnyArrayInput> {
+  getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Awaitable<InputValue<T>> {
+    return valueConfig || [];
+  }
+
   async handleAddNewItem(data): Promise<any> {
     const result = await this.controller
       .then(c => c.getTargetHandler("item"))
@@ -47,10 +55,10 @@ export class ArrayInputHandler
       minLength: this.config.minLength,
       item: await this.controller
         .then(c => c.getTargetHandler("item"))
-        .then(c => c.getElement()),
+        .then(c => c.getElement(undefined)),
       newItem: await this.controller
         .then(c => c.getTargetHandler("newItem"))
-        .then(c => c.getElement()),
+        .then(c => c.getElement(undefined)),
     };
   }
 
@@ -61,9 +69,7 @@ export class ArrayInputHandler
       c.getTargetHandler("item")
     );
     const valueElement: any[] = [];
-    for (const itemValue of value ||
-      (await ValueOrAwaitableFn(this.config.default)) ||
-      []) {
+    for (const itemValue of value || []) {
       valueElement.push(await itemHandler.getValueElement(itemValue));
     }
     return valueElement;

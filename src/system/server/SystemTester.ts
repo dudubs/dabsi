@@ -38,6 +38,7 @@ export const SystemTester = Tester.beforeAll(async t => ({
         admin: await users.insert({
           firstName: "admin",
           lastName: "test",
+          loginName: "admin",
         }),
       },
     };

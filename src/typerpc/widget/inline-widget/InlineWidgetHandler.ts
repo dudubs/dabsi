@@ -16,7 +16,7 @@ export class InlineWidgetHandler<T extends AnyInlineWidget>
     return this.config.controllerConfig;
   }
 
-  @Lazy() get targetContext():
+  @Lazy() get targetHandler():
     | Promise<RpcResolvedHandler<AnyWidget>>
     | undefined {
     if (this.rpc.inlineTarget)
@@ -24,15 +24,14 @@ export class InlineWidgetHandler<T extends AnyInlineWidget>
   }
 
   async handleTarget(payload) {
-    if (!this.targetContext) throw new RpcError(`No target`);
-    return this.targetContext.then(c => c.handle(payload));
+    if (!this.targetHandler) throw new RpcError(`No target`);
+    return this.targetHandler.then(c => c.handle(payload));
   }
 
-  async getElement(): Promise<WidgetElement<T>> {
-    this.config.getElement();
+  async getElement(state?): Promise<WidgetElement<T>> {
     return [
       await this.config.getElement(),
-      await this.targetContext?.then(c => c.getElement()),
+      await (await this.targetHandler)?.getElement(state),
     ];
   }
 }

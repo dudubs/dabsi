@@ -1,8 +1,10 @@
 import { DataResolvers } from "../../typedata/DataResolvers";
+import { DataRow } from "../../typedata/DataRow";
 import { Resolver } from "../../typedi";
 import { RpcConfig } from "../../typerpc/Rpc";
 import { DevLoginUser, SystemApp } from "../common/SystemApp";
 import { AclRequest } from "./acl/AclRequest";
+import { Session } from "./acl/Session";
 
 import { User, UserFullName } from "./acl/User";
 import { ADMIN_TOKEN, AdminAppConfig } from "./AdminAppConfig";
@@ -15,9 +17,9 @@ export const SystemAppConfig = Resolver.consume(
     userConfig: UserAppConfig,
     adminConfig: AdminAppConfig,
     aclReq: AclRequest,
+    session: DataRow(SystemSession),
     ...DataResolvers({
       users: User,
-      session: [SystemSession],
     }),
     devLoginConfig: DevLoginConfig,
   },
@@ -38,7 +40,9 @@ export const SystemAppConfig = Resolver.consume(
           return {
             type: "SUCCESS",
             fullName,
-            ...(await c.aclReq.review({ isAdmin: ADMIN_TOKEN })),
+            ...(await c.aclReq.review({
+              isAdmin: { $any: [ADMIN_TOKEN, "ROOT"] },
+            })),
           };
         },
         user: c.userConfig,

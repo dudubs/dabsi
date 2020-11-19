@@ -1,3 +1,4 @@
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
@@ -6,24 +7,25 @@ import {
   InputElement,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueElement,
 } from "../Input";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { NumberInput } from "./NumberInput";
 import { NumberInputLoader } from "./NumberInputLoader";
 
 export type T = NumberInput;
 
 export class NumberInputHandler extends AbstractInputHandler<T> {
+  getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Awaitable<InputValue<T>> {
+    return valueConfig ?? this.config.minValue ?? this.config.maxValue ?? 0;
+  }
+
   async getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    return (
-      value ??
-      (await ValueOrAwaitableFn(this.config.default)) ??
-      this.config.minValue ??
-      0
-    );
+    return value ?? this.config.minValue ?? 0;
   }
 
   getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {

@@ -15,13 +15,11 @@ export type NumberInput = Input<{
 
   ValueElement: number;
 
+  ValueConfig: number | undefined;
+
   Props: {};
 
-  Config:
-    | undefined
-    | (NumberInputOptions & {
-        default?: ValueOrAwaitableFn<number>;
-      });
+  Config: undefined | NumberInputOptions;
 
   Element: NumberInputOptions;
 

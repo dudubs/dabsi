@@ -4,9 +4,9 @@ export function setViewStateKey(view: View, key: string, value) {
   if (view.currentState[key] === value) return false;
   view.currentState[key] = value;
 
-  if (view.isDidMount && !view.isDidSetState) {
+  if (view.isDidMount && !view.isDidSetState && !view.isWillUnmount) {
     view.isDidSetState = true;
-    view.setState((state) => {
+    view.setState(state => {
       view.isDidSetState = false;
       return { ...state, ...view.currentState };
     });

@@ -1,7 +1,7 @@
 import { Payload } from "../../../common/typings2/Payload";
 import { getLengthError, LengthError } from "../LengthError";
 
-export type TextInputOptions = {
+export type TextLoaderOptions = {
   pattern?: RegExp;
   minLength?: number;
   maxLength?: number;
@@ -9,7 +9,7 @@ export type TextInputOptions = {
   required?: boolean;
 };
 
-export type TextInputError =
+export type TextLoaderError =
   | Payload<{
       INVALID_PATTERN: { pattern: string };
     }>
@@ -17,7 +17,7 @@ export type TextInputError =
   | "REQUIRED";
 
 export namespace TextInputLoader {
-  export function load(options: TextInputOptions, value: string): string {
+  export function load(options: TextLoaderOptions, value: string): string {
     if (options.trim) {
       value = value.trim();
     }
@@ -25,9 +25,9 @@ export namespace TextInputLoader {
   }
 
   export function check(
-    { required, pattern, minLength, maxLength }: TextInputOptions,
+    { required, pattern, minLength, maxLength }: TextLoaderOptions,
     value: string
-  ): TextInputError | undefined {
+  ): TextLoaderError | undefined {
     if (!value) {
       if (required) return "REQUIRED";
       return;

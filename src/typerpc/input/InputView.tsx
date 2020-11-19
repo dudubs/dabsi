@@ -1,7 +1,5 @@
-import { ReactElement, ReactNode, RefCallback } from "react";
-import { Payload } from "../../common/typings2/Payload";
+import { ReactElement, RefCallback } from "react";
 import { Renderer } from "../../react/renderer";
-import { EmptyFragment } from "../../react/utils/EmptyFragment";
 import { RpcConnection } from "../Rpc";
 import { WidgetView, WidgetViewProps } from "../widget/WidgetView";
 import {

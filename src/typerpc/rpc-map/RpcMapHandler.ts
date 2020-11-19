@@ -3,6 +3,7 @@ import {
   AbstractRpcHandler,
   AnyRpc,
   IRpcHandler,
+  RpcError,
   RpcResolvedHandler,
   RpcType,
 } from "../Rpc";
@@ -15,7 +16,14 @@ export class RpcMapHandler<R extends AnyRpcMap, T extends RpcType<R>["TRpcMap"]>
     return this.getTargetHandler(key).then(c => c.handle(payload));
   }
 
-  getTargetHandler(key: string): Promise<RpcResolvedHandler<AnyRpc>> {
-    return this.rpc.targetMap[key].resolveRpcHandler(this.config[key]);
+  async getTargetHandler(key: string): Promise<RpcResolvedHandler<AnyRpc>> {
+    try {
+      return await this.rpc.targetMap[key].resolveRpcHandler(this.config[key]);
+    } catch (error) {
+      if (error instanceof RpcError) {
+        throw new RpcError(`At key:${key}, ${error.message}`);
+      }
+      throw error;
+    }
   }
 }

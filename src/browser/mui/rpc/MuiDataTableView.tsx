@@ -130,7 +130,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
   onEditClick &&
     (actions.add = {
       title: Lang`EDIT`,
-      icon: "edit",
+      icon: require("@material-ui/icons/Edit"),
       onClick: onEditClick,
     });
 

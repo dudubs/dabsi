@@ -21,23 +21,28 @@ function dabsi-node() {
 
   _node="echo NO_NODE"
 
+
+  O=""
+  O="$O -r source-map-support/register"
+  O="$O -r ts-node/register"
+  O="$O -r $DABSI_PATH/src/common/register.ts"
+  REGISTER_O=$O
+
   if [ "$mon" ]; then
     O=""
     O="$O -w src"
+    O="$O $REGISTER_O"
     O="$O -e ts,tsx"
     O="$O -i node_modules"
     O="$O -i packages"
     O="$O $(platformDirs browser)"
     _node="nodemon $DABSI_MON $O"
   else
-    _node="node"
+    _node="node $REGISTER_O"
   fi
 
   O=""
   O="$O --preserve-symlinks"
-  O="$O -r source-map-support/register"
-  O="$O -r ts-node/register"
-  O="$O -r $DABSI_PATH/src/common/register.ts"
   export NODE_OPTIONS=$O
 
   if [ "$DABSI_NODE_DEBUG" ]; then

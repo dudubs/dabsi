@@ -22,6 +22,10 @@ export class InlineWidgetView<
     return {
       connection: this.connection.target!,
       element: this.element[1]!,
+      elementState: this.elementState,
+      onElementStateChange: state => {
+        this.setElementState(state);
+      },
     };
   }
 

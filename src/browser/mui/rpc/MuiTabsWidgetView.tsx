@@ -5,6 +5,7 @@ import { ReactElement, ReactNode } from "react";
 import { entries } from "../../../common/object/entries";
 import { keys } from "../../../common/object/keys";
 import { LangKey } from "../../../lang/LangKey";
+import { useEmitter } from "../../../react/reactor/useEmitter";
 import { Renderer } from "../../../react/renderer";
 import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { mergeProps } from "../../../react/utils/mergeProps";
@@ -30,12 +31,6 @@ export type MuiTabViewProps<C extends AnyWidgetConnection> = {
   render?(props: WidgetViewProps<C>): ReactElement;
 };
 
-export declare namespace MuiTabsWidgetViewProps {
-  export type Tab = {
-    title: ReactNode;
-    icon?: MuiIcon;
-  };
-}
 export type MuiTabsWidgetViewProps<
   C extends AnyTabsWidgetConnection,
   T extends AnyWidgetRecord = WidgetType<C>["TabMap"]
@@ -47,7 +42,11 @@ export type MuiTabsWidgetViewProps<
 
   renderTabPanel?: Renderer<{ children: ReactElement | undefined }>;
 
-  tabs?: {
+  locationStateKey?: string;
+
+  onTabChange?(key: string);
+
+  tabs: {
     [K in keyof T]?:
       | MuiTabViewProps<RpcConnection<T[K]>>
       | MuiTabViewProps<RpcConnection<T[K]>>["render"];
@@ -65,6 +64,7 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
     renderTabPanel,
     ...otherProps
   } = props as MuiTabsWidgetViewProps<AnyTabsWidgetConnection>;
+  const emit = useEmitter();
 
   return (
     <TabsWidgetView {...otherProps}>
@@ -102,7 +102,10 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
           <>
             <Tabs
               {...mergeProps(TabsProps, {
-                onChange: (_, key) => view.switchTo(key),
+                onChange: (_, key) => {
+                  props.onTabChange?.(key);
+                  return view.switchTo(key);
+                },
               })}
               value={currentTabProps?.key}
             >
@@ -125,4 +128,8 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
       }}
     </TabsWidgetView>
   );
+}
+
+export class LocationState {
+  constructor(public key: string, public value: any) {}
 }

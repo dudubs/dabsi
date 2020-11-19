@@ -33,22 +33,13 @@ export const DevLoginConfig = RpcConfigResolver(
         }),
       async submit(user) {
         await c.session.update({ user: user.$key });
-        console.log({ user });
-
-        /*
-      resolve()
-      reject(error)
-       */
 
         return {
-          value: {
-            type: "SUCCESS",
-            fullName: user.fullName,
-
-            ...(await new AclQuery(c.connection)
-              .askFor(user.$key)
-              .askMap({ isAdmin: ADMIN_TOKEN })),
-          },
+          type: "SUCCESS",
+          fullName: user.fullName,
+          ...(await new AclQuery(c.connection).askFor(user.$key).askMap({
+            isAdmin: { $any: [ADMIN_TOKEN, "ROOT"] },
+          })),
         };
       },
     })

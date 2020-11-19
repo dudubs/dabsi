@@ -1,3 +1,4 @@
+import { If } from "../../../common/typings2/boolean";
 import { NoRpc } from "../../NoRpc";
 import { Input } from "../Input";
 import { NullableInput } from "../nullable-input/NullableInput";
@@ -17,11 +18,13 @@ export type EnumInput<K extends string, N extends boolean> = NullableInput<
 
     ValueElement: K;
 
+    ValueConfig: K | undefined;
+
     Props: { keys: Set<K> };
 
-    Config: undefined | { default?: ValueOrAwaitableFn<K> };
+    Config: undefined;
 
-    Element: { default?: K };
+    Element: {};
 
     Error: "INVALID_ENUM_KEY";
   }

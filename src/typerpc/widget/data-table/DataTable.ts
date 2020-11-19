@@ -61,8 +61,8 @@ export type _Types<T extends TDataTable, D = T["Data"], Row = T["Row"]> = T & {
       { sort?: "ASC" | "DESC"; nulls?: "FIRST" | "LAST" } | "ASC" | "DESC"
     >;
     text?: string;
-    skip?: number;
-    take?: number;
+    pageSize?: number;
+    pageIndex?: number;
   };
 
   QueryResult: { totalRows: number; rows: ({ $key: string } & Row)[] };
@@ -137,6 +137,9 @@ export type DataTable<
     getRowController(key: string): RpcConnection<RowController>;
   };
 
+  ElementState: {
+    query: _Types<T>["Query"];
+  };
   Element: {
     // TODO: move to Props
     searchable: boolean;

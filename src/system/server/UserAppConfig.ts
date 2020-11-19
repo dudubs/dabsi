@@ -1,3 +1,4 @@
+import { DataRow } from "../../typedata/DataRow";
 import { RpcConfigResolver } from "../../typerpc/RpcConfigResolver";
 import { RpcError } from "../../typerpc/Rpc";
 import { UserApp } from "../common/UserApp";
@@ -7,9 +8,7 @@ import { SystemSession } from "./SystemSession";
 export const UserAppConfig = RpcConfigResolver(
   UserApp,
   {
-    ...DataResolvers({
-      session: [SystemSession],
-    }),
+    session: DataRow(SystemSession),
   },
   c => $ => {
     if (!c.session.user) throw new RpcError(`USER_SECURE`);

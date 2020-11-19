@@ -5,6 +5,7 @@ import {
   AnyWidgetConnection,
   TWidget,
   WidgetElement,
+  WidgetElementState,
   WidgetType,
 } from "./Widget";
 
@@ -18,6 +19,10 @@ export type WidgetViewProps<C extends AnyWidgetConnection> = {
   connection: C;
 
   element: WidgetElement<C>;
+
+  elementState: WidgetElementState<C> | undefined;
+
+  onElementStateChange: ((state: WidgetElementState<C>) => void) | undefined;
 };
 
 export type WidgetView<

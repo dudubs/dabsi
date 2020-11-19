@@ -1,5 +1,7 @@
 import { mapObject } from "../../../common/object/mapObject";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { Payload } from "../../../common/typings2/Payload";
+import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
 
@@ -9,6 +11,7 @@ import {
   InputElement,
   InputError,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
@@ -35,6 +38,10 @@ export type InputMap<T extends AnyInputRecord> = Input<{
     };
   };
   Config: RpcUnresolvedConfig<RpcMap<T>>;
+
+  ValueConfig: UndefinedIfEmptyObject<
+    PartialUndefinedKeys<{ [K in keyof T]: InputValueConfig<T[K]> }>
+  >;
   Error: InputErrorMap<T>;
   ValueData: { [K in keyof T]: InputValueData<T[K]> };
   Value: { [K in keyof T]: InputValue<T[K]> };
@@ -51,8 +58,8 @@ export function InputMap<T extends AnyInputRecord>(targetMap: T): InputMap<T> {
     controller: RpcMap(targetMap),
     handler: InputMapHandler,
     getValueDataFromElement(valueElementMap) {
-      return mapObject(valueElementMap, (itemValue, itemKey) => {
-        return this.targetMap[itemKey].getValueDataFromElement(itemValue);
+      return mapObject(this.targetMap, (target, key) => {
+        return target.getValueDataFromElement(valueElementMap[key]);
       });
     },
   });

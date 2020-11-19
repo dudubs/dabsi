@@ -6,13 +6,11 @@ import React from "react";
 import { MuiDataInputView } from "../../browser/mui/rpc/inputs/MuiDataInputView";
 import { MuiFormView } from "../../browser/mui/rpc/MuiFormView";
 import { Lang } from "../../lang/Lang";
-import { useEmitted } from "../../react/reactor/useEmitted";
-import { useEmitter } from "../../react/reactor/useEmitter";
-import { EmptyFragment } from "../../react/utils/EmptyFragment";
+import { useEmittedState } from "../../react/reactor/useEmittedState";
 import { WidgetRouterView } from "../../typerpc/widget/WidgetRouterView";
-import { MuiAdminView } from "./MuiAdminView";
 import { SystemApp } from "../common/SystemApp";
 import { LoginInfoEvent } from "./LoginInfoEvent";
+import { MuiAdminView } from "./MuiAdminView";
 import { SystemRouter } from "./SystemRouter";
 
 const useStyles = makeStyles(theme => ({
@@ -28,7 +26,7 @@ export function MuiSystemView(router: typeof SystemRouter) {
     SystemApp.service.devLogin,
     (props, { emit }) => {
       const classes = useStyles();
-      const loginInfo = useEmitted(LoginInfoEvent);
+      const loginInfo = useEmittedState(LoginInfoEvent);
 
       return (
         <>

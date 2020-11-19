@@ -1,17 +1,22 @@
 import React from "react";
+import { MuiAdmin } from "../../browser/mui/MuiAdmin";
 import { Lang } from "../../lang/Lang";
-import { useEmitted } from "../../react/reactor/useEmitted";
+import { useEmittedState } from "../../react/reactor/useEmittedState";
 import { ReactRouter } from "../../typerouter/ReactRouter";
 import { LoginInfoEvent } from "./LoginInfoEvent";
 import { AdminRouter } from "../common/admin/AdminRouter";
+import { MuiAclGroupsManagerView } from "./MuiAclGroupsManagerView";
 import { MuiAclUsersManagerView } from "./MuiAclUsersManagerView";
 
 export function MuiAdminView(router: typeof AdminRouter) {
-  console.log("x");
-
   ReactRouter(router, {
-    wrap(props) {
-      const loginInfo = useEmitted(LoginInfoEvent);
+    renderDefault(props) {
+      return Lang`NO_ROUTE_${"path"}`({
+        path: props.route.defaultPath,
+      });
+    },
+    wrap({ children, location }) {
+      const loginInfo = useEmittedState(LoginInfoEvent);
 
       if (!loginInfo) {
         return Lang`ACCESS_DENIED_BECAUSE_NO_LOGIN`;
@@ -24,9 +29,38 @@ export function MuiAdminView(router: typeof AdminRouter) {
         return Lang`ACCESS_DENIED_BECAUSE_LOGIN_IS_NOT_ADMIN`;
       }
 
-      return <>{props.children}</>;
+      return (
+        <MuiAdmin
+          menu={{
+            acl: {
+              // icon: require("@material-ui/icons/Home"),
+              children: {
+                users: {
+                  icon: require("@material-ui/icons/People"),
+                  onClick() {
+                    location.at("acl").at("users").push();
+                  },
+                },
+                groups: {
+                  icon: require("@material-ui/icons/People"),
+                  onClick() {
+                    location.at("acl").at("groups").push();
+                  },
+                },
+                addUser: { icon: require("@material-ui/icons/PersonAdd") },
+                addGroup: { icon: require("@material-ui/icons/GroupAdd") },
+              },
+            },
+          }}
+        >
+          {children}
+        </MuiAdmin>
+      );
     },
   });
 
-  MuiAclUsersManagerView(router.at("acl").at("users"));
+  router.at("acl", router => {
+    MuiAclUsersManagerView(router.at("users"));
+    MuiAclGroupsManagerView(router.at("groups"));
+  });
 }

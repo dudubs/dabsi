@@ -17,7 +17,7 @@ testm(__dirname, () => {
     }),
     t => {
       t.testConfig({
-        text1: { minLength: 2, default: "hello" },
+        text1: { minLength: 2 },
       });
 
       testWidgetView(
@@ -44,14 +44,6 @@ testm(__dirname, () => {
       );
 
       testInput(t, t => {
-        it("expect to default value of text1", () => {
-          expect(t.valueElement).toEqual(
-            objectContaining({
-              text1: "hello",
-            })
-          );
-        });
-
         const data = { text1: "hello", text2: "world" };
         t.testValue(data, data);
 

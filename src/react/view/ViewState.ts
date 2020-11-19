@@ -13,7 +13,7 @@ export function ViewState(updateMethod?) {
       get(this: View) {
         return this.currentState[key];
       },
-      set(this, value) {
+      set(this: View<any>, value) {
         if (setViewStateKey(this, key, value)) {
           updateMethod && this[updateMethod]();
         }

@@ -1,4 +1,5 @@
 import Typography from "@material-ui/core/Typography";
+import { emit } from "cluster";
 import React from "react";
 import { If } from "../../../common/typings2/boolean";
 import { Is } from "../../../common/typings2/boolean/Is";
@@ -40,7 +41,7 @@ export type MuiDataManagerViewProps<
       | FormViewProps<RpcConnection<_Types<T>["EditForm"]>>["input"]
       | If<Is<T["AddInput"], T["EditInput"]>, undefined>;
 
-    tabs:
+    editTabs:
       | MuiTabsWidgetViewProps<RpcConnection<TabsWidget<T["EditTabs"]>>>["tabs"]
       | If<IsEmptyObject<T["EditTabs"]>, undefined>;
   },
@@ -77,10 +78,14 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
   const _router = props.router as AnyDataManagerRouter;
   const dm = props as MuiDataManagerViewProps<RpcConnection<AnyDataManager>>;
 
-  WidgetRouterView(
-    _router,
-    dm.connection.table,
-    (props, { location, emit }) => (
+  // TODO: save table query as state
+
+  // TODO Save table state on location state
+  WidgetRouterView(_router, dm.connection.table, (props, { location }) => {
+    // useLocationState(location.useState(""))
+
+    // location.createState()
+    return (
       <MuiDataTableView
         {...props}
         {...mergeProps(dm.MuiDataTableViewProps, {
@@ -89,31 +94,31 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
               buttonType: MuiAddButton,
               ...dm.MuiAddButtonProps,
               onClick() {
-                emit(location.at("add"));
+                location.at("add").push();
               },
             },
           },
           onEditClick(event) {
-            emit(location.at("edit", { id: event.key }));
+            location.at("edit", { id: event.key }).push();
           },
           onDeleteClick(event) {
             return dm.connection.delete(event.key);
           },
         })}
       />
-    )
-  );
+    );
+  });
 
   WidgetRouterView(
     _router.at("add"),
     dm.connection.add,
-    (props, { location, emit }) => {
+    (props, { location }) => {
       return (
         <MuiFormView
           {...props}
           {...mergeProps(dm.MuiAddFormViewProps, {
             onSubmit(id) {
-              emit(location.parent.at("edit", { id }));
+              location.parent.at("edit", { id }).push();
             },
           })}
           input={dm.renderAddInput}
@@ -125,39 +130,42 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
   WidgetRouterView(
     _router.at("edit"),
     params => dm.connection.edit(params.id),
-    props => {
-      return (
-        <InlineWidgetView
-          {...props}
-          children={({ targetProps: props, inlineElement: page }) => (
-            <>
-              <Typography>{page.title}</Typography>
-              <MuiTabsWidgetView
-                {...props}
-                tabs={{
-                  ...dm.tabs,
-                  form: {
-                    ...dm.MuiEditFormTabViewProps,
-                    render: props => {
-                      return (
-                        <MuiFormView
-                          {...props}
-                          {...mergeProps(dm.MuiEditFormViewProps, {
-                            onSubmit() {
-                              // TODO: alert or next location ...
-                            },
-                          })}
-                          input={dm.renderEditInput || dm.renderAddInput}
-                        />
-                      );
+    {
+      renderWidget(props, { location }) {
+        return (
+          <InlineWidgetView
+            {...props}
+            children={({ targetProps: props, inlineElement: page }) => (
+              <>
+                <Typography>{page.title}</Typography>
+                <MuiTabsWidgetView
+                  // onTabChange={}
+                  {...props}
+                  tabs={{
+                    ...dm.editTabs,
+                    form: {
+                      ...dm.MuiEditFormTabViewProps,
+                      render: props => {
+                        return (
+                          <MuiFormView
+                            {...props}
+                            {...mergeProps(dm.MuiEditFormViewProps, {
+                              onSubmit() {
+                                location.parent.push();
+                              },
+                            })}
+                            input={dm.renderEditInput || dm.renderAddInput}
+                          />
+                        );
+                      },
                     },
-                  },
-                }}
-              />
-            </>
-          )}
-        />
-      );
+                  }}
+                />
+              </>
+            )}
+          />
+        );
+      },
     }
   );
 }

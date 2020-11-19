@@ -1,10 +1,12 @@
 import { ReactElement } from "react";
 import { mapAndFilterObject } from "../../../common/object/mapAndFilterObject";
+import { pick } from "../../../common/object/pick";
+import { Manipulator } from "../../../react/manipulate";
 import { Debounce } from "../../../react/utils/hooks/useDebounce";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyDataTable } from "./DataTable";
+import { AnyDataTable, DataTableTypes } from "./DataTable";
 import { WidgetElement, WidgetType } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
 
@@ -12,28 +14,38 @@ export type DataTableViewProps<
   C extends RpcConnection<AnyDataTable>
 > = WidgetViewProps<C>;
 
+export type DataTableViewState = {
+  searchText?: string;
+  pageSize?: number;
+  pageIndex?: number;
+};
 export class DataTableView<
   C extends RpcConnection<AnyDataTable>
 > extends AbstractWidgetView<
   C,
   DataTableViewProps<C> & {
-    children(view: Readonly<DataTableView<C>>): ReactElement;
+    children(view: DataTableView<C>): ReactElement;
   }
 > {
   protected reloadDebounce = Debounce();
 
-  @ViewState("reloadWithDebounce") searchText: string = "";
+  @ViewState("reloadWithDebounce") searchText: string =
+    this.elementState?.query.text || "";
   @ViewState("reload") pageSize;
-  @ViewState("reload") pageIndex = 0;
+  @ViewState("reload") pageIndex = this.elementState?.query.pageIndex || 0;
 
   @ViewState() totalRows: number;
   @ViewState() rows: WidgetType<C>["Types"]["RowWithKey"][];
   @ViewState() isLoading = false;
 
+  // locationStateKey=""
+  // @ViewHook(()=> useLocationState()) locationState: LocationState;
+
   protected updateElement(element: WidgetElement<C>) {
     this.rows = element.rows || [];
     this.totalRows = element.totalRows ?? 0;
-    this.pageSize = element.pageSize || 10;
+    this.pageSize =
+      this.elementState?.query?.pageSize || element.pageSize || 10;
   }
 
   @ViewState() columns: Record<
@@ -57,7 +69,7 @@ export class DataTableView<
   }
 
   setPageSize(pageSize: number) {
-    this.pageSize = 1 > pageSize ? 1 : pageSize;
+    pageSize = this.pageSize = 1 > pageSize ? 1 : pageSize;
   }
 
   async search(text: string) {
@@ -118,6 +130,7 @@ export class DataTableView<
   }
 
   async reload() {
+    if (this.isLoading) return;
     this.isLoading = true;
     const getCount = this.totalRows === 0 || this.pageIndex === 0;
     const { totalRows, rows } = await this.props.connection.controller.getRows({
@@ -129,8 +142,8 @@ export class DataTableView<
         }
       }),
       text: this.searchText,
-      take: this.pageSize,
-      skip: this.pageIndex * this.pageSize,
+      pageSize: this.pageSize,
+      pageIndex: this.pageIndex,
     });
 
     if (getCount) {

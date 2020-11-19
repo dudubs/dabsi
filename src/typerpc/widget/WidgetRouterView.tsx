@@ -1,19 +1,25 @@
 import React, { createElement, ReactElement, useMemo } from "react";
 import { Fn } from "../../common/typings2/Fn";
 import { OmitKeys } from "../../common/typings2/OmitKeys";
+import { WeakId } from "../../common/WeakId";
 import { ReactRouter, ReactRouterOptions } from "../../typerouter/ReactRouter";
 import { Router, TRouter } from "../../typerouter/Router";
-import { AnyWidgetConnection } from "./Widget";
+import { AnyWidgetConnection, WidgetElementState } from "./Widget";
 import { WidgetViewProps } from "./WidgetView";
 import { WidgetViewLoader } from "./WidgetViewLoader";
+
+type IndexProps<T extends TRouter> = Parameters<
+  NonNullable<ReactRouterOptions<T>["renderIndex"]>
+>[0];
 
 export type WidgetViewRouterOptions<
   T extends TRouter,
   C extends AnyWidgetConnection
 > = OmitKeys<ReactRouterOptions<T>, "renderIndex"> & {
+  getElementState?: (props: IndexProps<T>) => WidgetElementState<C>;
   renderWidget(
     props: WidgetViewProps<C>,
-    indexProps: Parameters<NonNullable<ReactRouterOptions<T>["renderIndex"]>>[0]
+    indexProps: IndexProps<T>
   ): ReactElement;
 };
 
@@ -37,7 +43,7 @@ export function WidgetRouterView<
       ? { renderWidget: optionsOrRenderWidget }
       : optionsOrRenderWidget;
 
-  const { renderWidget } = options;
+  const { renderWidget, getElementState } = options;
 
   ReactRouter(router, {
     ...options,
@@ -48,6 +54,11 @@ export function WidgetRouterView<
       );
       return (
         <WidgetViewLoader
+          key={WeakId(indexProps.location)}
+          elementState={indexProps.state}
+          onElementStateChange={state => {
+            indexProps.setState(state);
+          }}
           connection={connection}
           children={props => createElement(Component, { props, indexProps })}
         />

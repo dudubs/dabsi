@@ -1,4 +1,5 @@
 import { hasKeys } from "../../../common/object/hasKeys";
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
@@ -7,6 +8,7 @@ import {
   InputElement,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
@@ -15,6 +17,12 @@ import { AnyDataInputMap } from "./DataInputMap";
 type T = AnyDataInputMap;
 
 export class DataInputMapHandler extends AbstractInputHandler<T> {
+  getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Awaitable<InputValue<T>> {
+    return {};
+  }
+
   getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
     return {
       table: $ =>
@@ -43,7 +51,7 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
     return {
       target: await this.controller
         .then(c => c.getTargetHandler("target"))
-        .then(c => c.getElement()),
+        .then(c => c.getElement(undefined)),
     };
   }
 
@@ -70,6 +78,7 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
   async loadAndCheck(
     dataMap: InputValueData<T>
   ): Promise<InputErrorOrValue<T>> {
+    // if (!dataMap) dataMap = {};
     const keys = Object.keys(dataMap);
     if (!keys.length) return { value: {} };
 

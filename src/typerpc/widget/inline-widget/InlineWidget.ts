@@ -13,6 +13,7 @@ import {
   TWidget,
   Widget,
   WidgetElement,
+  WidgetElementState,
   WidgetHandlerClass,
 } from "../Widget";
 import { InlineWidgetHandler } from "./InlineWidgetHandler";
@@ -57,6 +58,7 @@ export type InlineWidget<
   Commands: {
     target: RpcCommand & { handler: "handleTarget" };
   };
+  ElementState: WidgetElementState<Target>;
 }>;
 
 export function InlineWidget<

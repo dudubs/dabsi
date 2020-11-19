@@ -50,6 +50,8 @@ export type TInput = {
 
   ValueElement: any;
 
+  ValueConfig: any;
+
   Error: any;
 
   Commands: TWidget["Commands"];
@@ -57,6 +59,14 @@ export type TInput = {
 
 export type InputElement<T extends AnyInput> = InputType<T>["Element"];
 
+/*
+
+  $input: {
+    config: ...,
+    check
+  }
+
+ */
 export type Input<T extends TInput> = Widget<{
   Commands: T["Commands"] & {
     check: {
@@ -67,12 +77,15 @@ export type Input<T extends TInput> = Widget<{
 
   TInput: T;
 
-  Connection: {};
+  Connection: {
+    check(data: T["ValueData"]): T["Error"] | undefined;
+  };
 
   Config: T["Config"];
 
   Handler: {
     getInputElement(): Promise<T["Element"]>;
+    getValueFromConfig(valueConfig: T["ValueConfig"]): Awaitable<T["Value"]>;
     getValueElement(value: T["Value"] | undefined): Promise<T["ValueElement"]>;
     loadAndCheck(
       valueData: T["ValueData"]
@@ -92,6 +105,7 @@ export type Input<T extends TInput> = Widget<{
     value: T["ValueElement"] | undefined;
   };
 
+  ElementState: undefined;
   Controller: T["Controller"];
 }>;
 
@@ -148,6 +162,9 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     controller,
     isGenericConfig,
     commands: { check: "handleCheck" },
+    connection: {
+      check: conn => data => conn.command("check", data),
+    },
     handler,
   });
 }
@@ -161,3 +178,7 @@ export type InputValueElement<T extends BasedInput> = InputType<
 export type InputError<T extends BasedInput> = InputType<T>["Error"];
 
 export type InputValueData<T extends BasedInput> = InputType<T>["ValueData"];
+
+export type InputValueConfig<T extends BasedInput> = InputType<
+  T
+>["ValueConfig"];

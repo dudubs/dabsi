@@ -4,9 +4,25 @@ import { testRpc } from "../RpcTester";
 import { testWidgetView } from "../WidgetViewTester";
 import { InputErrorHook } from "./InputErrorHook";
 import { InputErrorHookView } from "./InputErrorHookView";
+import { testInput } from "./InputTester";
 import { TestInput, TestInputView } from "./InputTests";
+import { TextInput } from "./text-input/TextInput";
 
+// InputValueHook()
 testm(__filename, () => {
+  testRpc(InputErrorHook<"INVALID">()(TextInput()), t => {
+    t.testConfig({
+      $check(value) {
+        if (value === "invalid") {
+          return "INVALID";
+        }
+      },
+    });
+
+    testInput(t, t => {
+      t.testError("invalid", "INVALID");
+    });
+  });
   testRpc(InputErrorHook<"ERR2">()(TestInput), t => {
     testWidgetView(t, InputErrorHookView, t => {
       t.testRender((View, props) => (

@@ -19,9 +19,9 @@ export class Reactor {
     if (this.handle?.(event) === false) return;
     this.eventMap.set(event.constructor, event);
     const listeners = this.eventListenerMap.get(event.constructor);
-    listeners?.forEach(callback => {
+    for (const callback of listeners || []) {
       callback(event);
-    });
+    }
   }
 
   listen<T>(eventType: ReactorEvent<T>, callback: (action: T) => void) {
@@ -42,3 +42,5 @@ export class Reactor {
 
 export const ReactorContext = React.createContext(new Reactor());
 export const useReactor = () => React.useContext(ReactorContext);
+
+// EventMap

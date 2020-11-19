@@ -5,7 +5,11 @@ import { ReactElement } from "react";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { RpcConnection } from "../../../typerpc/Rpc";
 import { AnyForm } from "../../../typerpc/widget/form/Form";
-import { FormView, FormViewProps } from "../../../typerpc/widget/form/FormView";
+import {
+  FormView,
+  FormViewEvent,
+  FormViewProps,
+} from "../../../typerpc/widget/form/FormView";
 
 import {
   MuiButton,
@@ -27,21 +31,23 @@ export function MuiFormView<C extends RpcConnection<AnyForm>>(
 ): ReactElement {
   return (
     <FormView {...props}>
-      {({ input, form }) => (
+      {({ input }) => (
         <Grid container direction={"column"} spacing={2}>
           <Grid item>{input}</Grid>
           <Grid item>
             <MuiGrid spacing={2} justify={"flex-end"}>
               <MuiSubmitButton
-                ButtonProps={{ variant: "contained" }}
                 {...mergeProps(props.MuiSubmitButtonProps, {
-                  onClick: () => form.submit(),
+                  emitOnClick: emit => {
+                    emit(new FormViewEvent("SUBMIT"));
+                  },
                 })}
               />
               <MuiResetButton
-                ButtonProps={{ variant: "contained" }}
                 {...mergeProps(props.MuiResetButtonProps, {
-                  onClick: () => form.reset(),
+                  emitOnClick: emit => {
+                    emit(new FormViewEvent("RESET"));
+                  },
                 })}
               />
             </MuiGrid>
@@ -51,3 +57,15 @@ export function MuiFormView<C extends RpcConnection<AnyForm>>(
     </FormView>
   );
 }
+
+/*
+
+
+  <ReactorProvider>
+
+    <ReactorListener toEvent= onEvent= />
+
+
+  </ReactorProvider>
+
+ */

@@ -1,14 +1,30 @@
-import { Connection, getMetadataArgsStorage } from "typeorm";
+import { Connection } from "typeorm";
 import { DataRow } from "../../typedata/DataRow";
-import { Resolver } from "../../typedi/Resolver";
+import { Resolver } from "../../typedi";
+import { AclUsersManager } from "../common/AclUsersManager";
 import { SystemApp } from "../common/SystemApp";
-import { User } from "./acl/User";
 import { SystemRequestResolvers } from "./SystemRequestResolvers";
 import { SystemSession } from "./SystemSession";
-import { testSystemAs } from "./SystemTester";
+import { SystemTester, testSystemAs } from "./SystemTester";
 import objectContaining = jasmine.objectContaining;
 
+const t = SystemTester;
+
 testm(__filename, () => {
+  xit("", async () => {
+    testSystemAs("admin");
+    expect(t.users.admin.loginName).toBeDefined();
+
+    console.log(
+      await AclUsersManager.service
+        .edit(t.users.regular.$key)
+        .target.tabs.form.input //
+        .controller.basicInfo //
+        .controller.loginName //
+        .check("admin")
+    );
+  });
+
   it("check system request context", () => {
     expect(() =>
       Resolver.checkContext({

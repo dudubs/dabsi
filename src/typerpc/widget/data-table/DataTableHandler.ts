@@ -9,11 +9,15 @@ import { DataOrder } from "../../../typedata/DataOrder";
 import { DataRow } from "../../../typedata/DataRow";
 import { ConfigFactory } from "../../ConfigFactory";
 import { RpcUnresolvedConfig } from "../../Rpc";
-import { IWidgetHandler, WidgetController, WidgetElement } from "../Widget";
+import {
+  IWidgetHandler,
+  WidgetController,
+  WidgetElement,
+  WidgetElementState,
+} from "../Widget";
 import { AnyDataTable, DataTableTypes, TDataTable } from "./DataTable";
 
 type R = AnyDataTable;
-type T = TDataTable;
 
 export class DataTableHandler
   extends AbstractWidgetHandler<R>
@@ -38,6 +42,8 @@ export class DataTableHandler
             field = key;
           }
           break;
+        case "undefined":
+          return { field: key, load: dataRow => dataRow[key] };
         default:
           throw new TypeError(`Unexpected ${inspect({ columnConfig })}`);
       }
@@ -60,8 +66,8 @@ export class DataTableHandler
   }
 
   async getRows(
-    query: DataTableTypes<T>["Query"]
-  ): Promise<DataTableTypes<T>["QueryResult"]> {
+    query: DataTableTypes<TDataTable>["Query"]
+  ): Promise<DataTableTypes<TDataTable>["QueryResult"]> {
     const orders: DataOrder<any>[] = [];
     for (const [key, order] of entries(query.order)) {
       const column = this.columns[key];
@@ -99,10 +105,11 @@ export class DataTableHandler
         filters.push({ $or: searchFilters });
       }
     }
+    const pageSize = Math.max(1, Math.min(query.pageSize ?? maxRows, maxRows));
     let source = this.config.source
       .sort(orders)
-      .take(Math.min(query.take ?? maxRows, maxRows))
-      .skip(query.skip ?? 0)
+      .take(pageSize)
+      .skip(pageSize * (query.pageIndex || 0))
       .filter({ $and: filters });
 
     let totalRows: number;
@@ -134,13 +141,16 @@ export class DataTableHandler
     };
   }
 
-  async getElement(): Promise<RequireOptionalKeys<WidgetElement<R>>> {
+  async getElement(
+    state: WidgetElementState<R> | undefined
+  ): Promise<RequireOptionalKeys<WidgetElement<R>>> {
     const { rows, totalRows } = await this.getRows({
       getCount: true,
       text: "",
-      take: this.config.pageSize || 10,
-      skip: 0,
+      pageSize: this.config.pageSize || 10,
+      pageIndex: 0,
       order: {},
+      ...state?.query,
     });
     return {
       rows,

@@ -14,6 +14,8 @@ export type NullableInput<
 
     Value: T["Value"] | If<N, Nullable>;
 
+    ValueConfig: T["Value"] | If<N, Nullable>;
+
     ValueElement: T["ValueElement"] | If<N, Nullable>;
 
     Props: T["Props"] & {

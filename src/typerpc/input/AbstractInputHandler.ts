@@ -1,26 +1,31 @@
+import { Awaitable } from "../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
+import { AbstractWidgetHandler } from "../widget/AbstractWidgetHandler";
+import {
+  IWidgetHandler,
+  WidgetElement,
+  WidgetElementState,
+} from "../widget/Widget";
 import {
   AnyInput,
   IInput,
-  InputValueData,
+  InputElement,
   InputError,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
+  InputValueData,
   InputValueElement,
-  InputElement,
 } from "./Input";
-import {
-  RpcResolvedConfig,
-  RpcResolvedHandler,
-  RpcUnresolvedConfig,
-} from "../Rpc";
-import { AbstractWidgetHandler } from "../widget/AbstractWidgetHandler";
-import { IWidgetHandler, WidgetElement } from "../widget/Widget";
 
 export abstract class AbstractInputHandler<T extends AnyInput>
   extends AbstractWidgetHandler<T>
   implements IWidgetHandler<IInput> {
   abstract loadAndCheck(data: InputValueData<T>): Promise<InputErrorOrValue<T>>;
+
+  abstract getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Awaitable<InputValue<T>>;
 
   abstract getValueElement(
     value: InputValue<T> | undefined
@@ -28,7 +33,9 @@ export abstract class AbstractInputHandler<T extends AnyInput>
 
   abstract getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>>;
 
-  async getElement(): Promise<RequireOptionalKeys<WidgetElement<T>>> {
+  async getElement(
+    state: WidgetElementState<T> | undefined
+  ): Promise<RequireOptionalKeys<WidgetElement<T>>> {
     return {
       ...(await this.getInputElement()),
       value: await this.getValueElement(undefined),

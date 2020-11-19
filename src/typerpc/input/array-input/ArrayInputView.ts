@@ -71,6 +71,8 @@ export class ArrayInputView<
     return this.props.renderNewItem(
       {
         value: undefined,
+        elementState: undefined,
+        onElementStateChange: undefined,
         onChange: async newItemInput => {
           const {
             connection: {
@@ -115,6 +117,8 @@ export class ArrayInputView<
           props: {
             connection: this.controller.item,
             element: this.element.item,
+            elementState: undefined,
+            onElementStateChange: undefined,
             value,
             onChange: view => {
               if (uniqueItem) {

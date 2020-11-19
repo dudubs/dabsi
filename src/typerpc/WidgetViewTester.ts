@@ -126,6 +126,8 @@ export function testWidgetView<
               },
               element: wt.element,
               connection: t.connection,
+              elementState: undefined,
+              onElementStateChange: undefined,
             })
           );
           await Timeout(0);

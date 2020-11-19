@@ -1,4 +1,6 @@
+import React from "react";
 import { ReactElement } from "react";
+import { ReactorListener } from "../../../react/reactor/ReactorListener";
 import { Renderer } from "../../../react/renderer";
 import { InputError } from "../../input/Input";
 import { InputView, InputViewProps } from "../../input/InputView";
@@ -59,17 +61,39 @@ export class FormView<
   }
 
   renderView(): React.ReactNode {
-    return this.props.children({
-      form: this,
-      input: this.props.input({
-        connection: this.controller,
-        value: undefined,
-        onChange: undefined,
-        element: this.element,
-        inputRef: field => {
-          this.input = field as any;
-        },
-      }),
-    });
+    return (
+      <ReactorListener
+        eventType={FormViewEvent}
+        onEvent={event => {
+          switch (event.type) {
+            case "SUBMIT":
+              return this.submit();
+            case "RESET":
+              return this.reset();
+          }
+        }}
+      >
+        {this.props.children({
+          form: this,
+          input: this.props.input({
+            connection: this.controller,
+            value: undefined,
+            onChange: undefined,
+            element: this.element,
+            inputRef: field => {
+              this.input = field as any;
+            },
+            elementState: this.elementState,
+            onElementStateChange: state => {
+              this.setElementState(state);
+            },
+          }),
+        })}
+      </ReactorListener>
+    );
   }
+}
+
+export class FormViewEvent {
+  constructor(public type: "SUBMIT" | "RESET") {}
 }

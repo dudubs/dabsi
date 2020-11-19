@@ -1,5 +1,6 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObjectAsync } from "../../../common/object/mapObject";
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController } from "../../widget/Widget";
@@ -8,6 +9,7 @@ import {
   InputElement,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
@@ -38,6 +40,16 @@ export class InputMapHandler extends AbstractInputHandler<T> {
           .then(h => h.getInputElement())
       ),
     };
+  }
+
+  async getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Promise<InputValue<T>> {
+    return mapObjectAsync(this.rpc.targetMap, (target, key) => {
+      return this.controller
+        .then(c => c.getTargetHandler(key))
+        .then(h => h.getValueFromConfig(valueConfig?.[key]));
+    });
   }
 
   async loadAndCheck(

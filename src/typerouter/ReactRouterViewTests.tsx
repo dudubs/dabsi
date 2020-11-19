@@ -23,23 +23,27 @@ TestRouter.at("a", r => {
   ReactRouter(r, { wrap: ({ children }) => <>A{children}</> });
   r.at("aa", r => {
     ReactRouter(r, {
-      wrap: ({ children }) => <>AA{children}</>,
-      renderIndex: () => "index",
-      renderDefault: p => `default ${p.route.defaultPath}`,
+      wrap: ({ children }) => <>/AA{children}</>,
+      renderIndex: () => <>index</>,
+      renderDefault: p => <>default {p.route.defaultPath}</>,
     });
-    ReactRouter(r.at("aaa"), () => "AAA");
-    ReactRouter(r.at("aab"), () => "AAB");
+    ReactRouter(r.at("aaa"), () => <>/AAA</>);
+    ReactRouter(r.at("aab"), () => <>/AAB</>);
   });
 }).at("hello", r => {
   ReactRouter(r, {
     wrap: p => {
       // @ts-expect-error
       p.location.params.x;
-      return `Hello ${p.location.params.name}! ${p.children}`;
+      return (
+        <>
+          Hello {p.location.params.name}! {p.children}
+        </>
+      );
     },
-    renderIndex: () => `Index`,
+    renderIndex: () => <>Index</>,
   });
-  ReactRouter(r.at("logout"), () => `Logout`);
+  ReactRouter(r.at("logout"), () => <>Logout</>);
 });
 
 const history = createMemoryHistory();
@@ -57,11 +61,7 @@ testm(__filename, () => {
   });
 
   it("expect to wrap by 2 wrappers.", async () =>
-    test(l => l.find(TestRouter.at("a").at("aa").at("aaa"))!, [
-      "A",
-      "AA",
-      "AAA",
-    ]));
+    test(l => l.find(TestRouter.at("a").at("aa").at("aaa"))!, "A/AA/AAA"));
 
   it("expect to wrap by 2 wrappers to Index", async () =>
     test(l => l.at("hello", { name: "World" }), "Hello World! Index"));
@@ -80,7 +80,12 @@ testm(__filename, () => {
   ) {
     emit(getLocation(RouterLocation.create(TestRouter)));
     await Timeout(0);
-    expect(t.toJSON()).toEqual(expected);
+    expect(toString(t.toJSON())).toEqual(expected);
+
+    function toString(obj) {
+      if (Array.isArray(obj)) return obj.map(toString).join("");
+      return obj.toString();
+    }
   }
   function TestContext({ children }) {
     emit = useEmitter();

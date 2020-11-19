@@ -1,3 +1,4 @@
+// TODO: remove controller.
 import { entries } from "../../common/object/entries";
 import { mergeDescriptors } from "../../common/object/mergeDescriptors";
 import { capitalize } from "../../common/string/capitalize";
@@ -29,7 +30,7 @@ type _WidgetConnection<T extends TWidget> = T["Connection"] & {
   rpcCommand: RpcCommand;
   controller: RpcConnection<T["Controller"]>;
 
-  getElement(): Promise<T["Element"]>;
+  getElement(state?: T["ElementState"]): Promise<T["Element"]>;
 
   command<K extends keyof T["Commands"]>(
     key: string & K,
@@ -45,6 +46,7 @@ export type TWidget = {
   Element: object;
   Controller: AnyRpc;
   Commands: Record<string, Fn & { handler: string }>;
+  ElementState: any;
 };
 
 export type Widget<
@@ -56,7 +58,7 @@ export type Widget<
   Config: T["Config"];
 
   Handler: T["Handler"] & {
-    getElement(): Promise<T["Element"]>;
+    getElement(state: T["ElementState"] | undefined): Promise<T["Element"]>;
     getControllerConfig(): RpcUnresolvedConfig<T["Controller"]>;
   };
 
@@ -142,8 +144,8 @@ export const AnyWidgetConnection: _WidgetConnection<TWidget> = {
   command(key, ...args) {
     return this.rpcCommand([key, args]);
   },
-  getElement() {
-    return this.rpcCommand(["getElement", []]);
+  getElement(state?) {
+    return this.rpcCommand(["getElement", state]);
   },
 };
 
@@ -210,6 +212,9 @@ export type BasedWidget<T extends TWidget = TWidget> = BasedRpc<
 >;
 
 export type WidgetType<T extends BasedWidget> = RpcType<T>["TWidget"];
+export type WidgetElementState<T extends BasedWidget> = WidgetType<
+  T
+>["ElementState"];
 
 export type WidgetElement<T extends BasedWidget> = WidgetType<T>["Element"];
 

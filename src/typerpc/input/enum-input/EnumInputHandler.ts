@@ -1,3 +1,4 @@
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { WidgetController, WidgetElement } from "../../widget/Widget";
@@ -9,6 +10,7 @@ import {
   InputError,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
@@ -22,6 +24,12 @@ export class EnumInputHandler extends AbstractNullableInputHandler<T> {
     return undefined;
   }
 
+  getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Awaitable<InputValue<T>> {
+    return valueConfig;
+  }
+
   async loadAndCheckNotNull(
     valueData: NonNullable<InputValueData<T>>
   ): Promise<ErrorOrValue<InputError<T>, NonNullable<InputValue<T>>>> {
@@ -32,9 +40,7 @@ export class EnumInputHandler extends AbstractNullableInputHandler<T> {
   }
 
   async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
-    return {
-      default: await ValueOrAwaitableFn(this.config.default),
-    };
+    return {};
   }
 
   getValueElement(

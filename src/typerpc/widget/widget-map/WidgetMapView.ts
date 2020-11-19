@@ -37,6 +37,13 @@ export class WidgetMapView<
         key,
         connection: this.controller[key],
         element: this.element.elementMap[key],
+        elementState: this.elementState?.[key],
+        onElementStateChange: newState => {
+          this.setElementState({
+            ...this.elementState,
+            [key]: newState,
+          });
+        },
       })
     );
   }

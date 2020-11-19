@@ -33,18 +33,34 @@ export class TabsWidgetView<
     this._currentTabProps = {
       key,
       connection: this.controller[key],
+      elementState:
+        this.elementState?.currentTab?.key === key
+          ? this.elementState.currentTab.state
+          : undefined,
+      onElementStateChange: state => {
+        this.setElementState({
+          ...this.elementState,
+          currentTab: { key, state },
+        });
+      },
       element,
     };
   }
 
   protected updateElement(element: WidgetType<C>["Element"]) {
-    if (element.current) this.updateTabProps(element.current);
+    if (element.current) {
+      this.updateTabProps(element.current);
+    }
   }
 
   async switchTo<K extends string & keyof WidgetType<C>["TabMap"]>(key: K) {
+    this.setElementState({
+      ...this.elementState,
+      currentTab: { key, state: undefined },
+    });
     this.updateTabProps({
       key,
-      element: await this.props.connection.getTab(key),
+      element: await this.props.connection.getTabElement(key),
     });
   }
 

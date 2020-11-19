@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Awaitable } from "../../common/typings2/Async";
 import { Override } from "../../common/typings2/Override";
 import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
 import { NoRpc } from "../NoRpc";
@@ -14,6 +15,7 @@ import {
   InputElement,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
   TInput,
@@ -32,6 +34,12 @@ export type TestInput = Input<
 export const TestInput = Input<TestInput>({
   controller: NoRpc,
   handler: class extends AbstractInputHandler<TestInput> {
+    getValueFromConfig(
+      valueConfig: InputValueConfig<TestInput>
+    ): Awaitable<InputValue<TestInput>> {
+      return undefined;
+    }
+
     getControllerConfig(): RpcUnresolvedConfig<WidgetController<AnyInput>> {
       return undefined;
     }

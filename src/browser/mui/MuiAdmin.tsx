@@ -6,11 +6,7 @@ import Typography from "@material-ui/core/Typography";
 import React, { useState } from "react";
 import { Lang } from "../../lang/Lang";
 import { MuiButton } from "./components/MuiButton";
-import {
-  MuiNestedMenuChild,
-  MuiNestedMenuProps,
-  MuiNestedMenu,
-} from "./MuiNestedMenu";
+import { MuiNestedMenu, MuiNestedMenuProps } from "./MuiNestedMenu";
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -37,7 +33,7 @@ export type MuiAdminProps = {
 
 export function MuiAdmin({ children, menu }: MuiAdminProps) {
   const classes = useStyles();
-  const [isMenuOpen, setMenu] = useState(true);
+  const [isMenuOpen, setMenu] = useState(false);
 
   return (
     <div className={classes.root}>
@@ -56,7 +52,7 @@ export function MuiAdmin({ children, menu }: MuiAdminProps) {
         </Toolbar>{" "}
         <Drawer open={isMenuOpen} keepMounted onClose={() => setMenu(false)}>
           <div className={classes.drawer}>
-            <MuiNestedMenu children={menu||{}}  />
+            <MuiNestedMenu children={menu || {}} />
           </div>
         </Drawer>
       </AppBar>

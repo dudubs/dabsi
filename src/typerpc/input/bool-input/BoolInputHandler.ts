@@ -1,24 +1,31 @@
+import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController, WidgetElement } from "../../widget/Widget";
+import { WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
   InputValue,
+  InputValueConfig,
   InputValueData,
   InputValueElement,
 } from "../Input";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { BoolInput } from "./BoolInput";
 
 type T = BoolInput;
 
 export class BoolInputHandler extends AbstractInputHandler<T> {
+  getValueFromConfig(
+    valueConfig: InputValueConfig<T>
+  ): Awaitable<InputValue<T>> {
+    return valueConfig || false;
+  }
+
   async getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    return value ?? (await ValueOrAwaitableFn(this.config.default)) ?? false;
+    return Boolean(value);
   }
 
   getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {

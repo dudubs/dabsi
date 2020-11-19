@@ -4,7 +4,7 @@ import { Payload } from "../common/typings2/Payload";
 import { AnyRouter, Router } from "./Router";
 import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
 
-export type RouteProps = Payload<
+export type Route = Payload<
   {
     INDEX: {};
     DEFAULT: {
@@ -22,11 +22,10 @@ export type RouteProps = Payload<
   }
 >;
 
-export function getRoutePropsByPath(
-  router: AnyRouter,
+export function getRouteByPath(
+  location: AnyRouterLocation,
   path: string
-): RouteProps {
-  let location = RouterLocation.create(router);
+): Route {
   const baseProps = { path };
 
   while (true) {
@@ -61,7 +60,13 @@ export function getRoutePropsByPath(
       }
       params[paramKey] = value;
     }
-    location = new RouterLocation(router, params, location, name);
+    location = new RouterLocation(
+      router,
+      params,
+      location,
+      name,
+      location.emit
+    );
   }
 }
 testMetaType(Router(["p"]), t => {

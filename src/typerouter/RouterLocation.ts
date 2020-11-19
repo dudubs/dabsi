@@ -1,28 +1,34 @@
-import { reversed } from "../common/array/reversed";
 import { entries } from "../common/object/entries";
 import { Lazy } from "../common/patterns/lazy";
 import { joinUrl } from "../common/string/joinUrl";
-import { HasKeys, IsUndefined } from "../common/typings2/boolean";
-import { IsNever } from "../common/typings2/boolean/IsNever";
-import { OmitKeys } from "../common/typings2/OmitKeys";
+import { HasKeys } from "../common/typings2/boolean";
 import { Override } from "../common/typings2/Override";
 import { inspect } from "../logging/inspect";
+import { Manipulator } from "../react/manipulate";
+import { ReactorEmitter } from "../react/reactor/useEmitter";
+import { ValueRef } from "../react/ValueRef";
+import { LocationStateEvent } from "./LocationStateEvent";
 import { AnyRouter, Router, RouterAt, RouterType, TRouter } from "./Router";
 
 export type AnyRouterLocation = RouterLocation<TRouter>;
 
 export interface RouterLocation<T extends TRouter> {}
+
 export class RouterLocation<T extends TRouter> {
-  static create<T extends TRouter>(router: Router<T>): RouterLocation<T> {
+  static create<T extends TRouter>(
+    router: Router<T>,
+    emit: ReactorEmitter = (event: any) => void 0
+  ): RouterLocation<T> {
     if (router.params.length)
       throw new Error(`Can't create RouterLocation for ${inspect(this)}.`);
-    return new RouterLocation(router, {}, undefined, undefined);
+    return new RouterLocation(router, {}, undefined, undefined, emit);
   }
   constructor(
     protected _router: AnyRouter,
     protected _params: any,
     protected _parent: AnyRouterLocation | undefined,
-    public name: string | undefined
+    public name: string | undefined,
+    public emit
   ) {}
 
   @Lazy() get path(): string {
@@ -51,6 +57,10 @@ export class RouterLocation<T extends TRouter> {
     return this._params;
   }
 
+  push() {
+    this.emit(this);
+  }
+
   at<T extends TRouter, K extends keyof T["Children"]>(
     this: RouterLocation<T>,
     key: string & K,
@@ -63,7 +73,8 @@ export class RouterLocation<T extends TRouter> {
         this._router.children[key],
         params || {},
         this as any,
-        key
+        key,
+        this.emit
       )
     );
   }
@@ -84,14 +95,14 @@ export class RouterLocation<T extends TRouter> {
   *getParentsChildren(this: AnyRouterLocation) {
     for (let [name, router] of entries(this._router.children)) {
       if (router.params.length) continue;
-      yield new RouterLocation(router, {}, this, name);
+      yield new RouterLocation(router, {}, this, name, this.emit);
     }
   }
 
   *getChildren(this: AnyRouterLocation): IterableIterator<AnyRouterLocation> {
     for (const [name, router] of entries(this._router.children)) {
       if (!router.params.length) {
-        yield new RouterLocation(router, {}, this, name);
+        yield new RouterLocation(router, {}, this, name, this.emit);
       }
     }
   }

@@ -9,15 +9,24 @@ TODO:
 import { Awaitable } from "../../../common/typings2/Async";
 import { If } from "../../../common/typings2/boolean";
 import { Is } from "../../../common/typings2/boolean/Is";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
+import { UndefinedIfIsUndefined } from "../../../common/typings2/UndefinedIfIsUndefined";
 import {
   AnyInput,
   InputError,
   InputValue,
+  InputValueConfig,
   InputValueData,
 } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { BasedWidget, Widget, WidgetElement, WidgetType } from "../Widget";
+import { RpcConnection, RpcUnresolvedConfig } from "../../Rpc";
+import {
+  BasedWidget,
+  Widget,
+  WidgetElement,
+  WidgetElementState,
+  WidgetType,
+} from "../Widget";
 import { FormHandler } from "./FormHandler";
 
 export type TForm = {
@@ -43,7 +52,9 @@ export type Form<
 > = Widget<{
   TForm: T;
 
-  Connection: {};
+  Connection: {
+    input: RpcConnection<Input>;
+  };
 
   Commands: {
     submit: {
@@ -53,17 +64,13 @@ export type Form<
   };
 
   Config: {
-    default?: ValueOrAwaitableFn<InputValue<Input>>;
-
     inputConfig: RpcUnresolvedConfig<Input>;
+    valueConfig?: ValueOrAwaitableFn<InputValueConfig<Input>>;
 
     submit(
-      value: InputValue<Input>
-    ): Awaitable<
-      | Result
-      | If<Is<Value, null>, void>
-      | If<Is<Value, string | number | boolean | any[]>, Value>
-    >;
+      value: InputValue<Input>,
+      errorClass: new (error: Error) => FormSubmitError
+    ): Awaitable<Value>;
   };
 
   Element: WidgetElement<Input>;
@@ -73,6 +80,8 @@ export type Form<
   Props: { input: Input };
 
   Handler: {};
+
+  ElementState: WidgetElementState<Input>;
 }>;
 
 export function Form<
@@ -90,5 +99,14 @@ export function Form<
     controller: input,
     handler: FormHandler,
     commands: { submit: "handleSubmit" },
+    connection: {
+      input: conn => conn.controller,
+    },
   });
+}
+
+//
+
+export class FormSubmitError {
+  constructor(public error) {}
 }

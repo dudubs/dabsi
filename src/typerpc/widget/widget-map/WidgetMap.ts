@@ -1,6 +1,11 @@
 import { RpcConnection, RpcHandlerClass, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
-import { AnyWidget, Widget, WidgetElement } from "../Widget";
+import {
+  AnyWidget,
+  Widget,
+  WidgetElement,
+  WidgetElementState,
+} from "../Widget";
 import { WidgetMapHandler } from "./WidgetMapHandler";
 
 export type AnyWidgetRecord = Record<string, AnyWidget>;
@@ -14,6 +19,9 @@ export type WidgetMap<T extends AnyWidgetRecord> = Widget<{
   Props: { targetMap: T };
   Element: {
     elementMap: { [K in keyof T]: WidgetElement<T[K]> };
+  };
+  ElementState: {
+    [K in keyof T]?: WidgetElementState<T[K]>;
   };
   Controller: RpcMap<T>;
   Commands: {};

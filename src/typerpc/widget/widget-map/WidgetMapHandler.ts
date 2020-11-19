@@ -11,12 +11,12 @@ export class WidgetMapHandler extends AbstractWidgetHandler<T> {
     return this.config;
   }
 
-  async getElement(): Promise<WidgetElement<T>> {
+  async getElement(state?): Promise<WidgetElement<T>> {
     return {
       elementMap: await mapObjectAsync(this.rpc.targetMap, (target, key) =>
         this.controller
           .then(c => c.getTargetHandler(key))
-          .then(h => h.getElement())
+          .then(h => h.getElement(state?.[key]))
       ),
     };
   }

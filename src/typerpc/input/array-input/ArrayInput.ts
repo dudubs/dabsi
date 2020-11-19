@@ -10,6 +10,7 @@ import {
   ErrorOrValue,
   Input,
   InputError,
+  InputType,
   InputValue,
   InputValueData,
   InputValueElement,
@@ -48,6 +49,8 @@ export type ArrayInput<
 
   Value: InputValue<Item>[];
 
+  ValueConfig: InputValue<Item>[] | undefined;
+
   ValueElement: InputValueElement<Item>[];
 
   Props: {
@@ -73,9 +76,6 @@ export type ArrayInput<
             | UndefinedGetItemValue;
         },
         {
-          // TODO: DO NOT USE ConfigFactory -> ValueOrAwaitableFn
-          default?: ValueOrAwaitableFn<InputValue<Item>[]>;
-
           maxLength?: number;
           minLength?: number;
         }

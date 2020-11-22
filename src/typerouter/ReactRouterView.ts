@@ -16,7 +16,7 @@ import { RouterLocation } from "./RouterLocation";
 
 export type ReactRouterViewProps = {
   router: AnyRouter;
-  history: History;
+  history: History<any>;
 };
 
 const HistoryContext = createContext<History>(undefined!);

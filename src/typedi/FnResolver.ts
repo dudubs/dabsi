@@ -1,12 +1,12 @@
 import { Constructor } from "../common/typings2/Constructor";
 import { Type } from "../common/typings2/Type";
 import { logBeforeEach } from "../jasmine/logBeforeEach";
-import { checkSymbol } from "./internal/_check";
-import { _checkType } from "./internal/_checkType";
-import { _provide } from "./internal/_provide";
-import { resolveSymbol } from "./internal/_resolve";
+import { checkResolverSymbol } from "./checkResolver";
+import { checkTypeResolver } from "./checkTypeResolver";
+import { provideType } from "./provideType";
+import { resolveSymbol } from "./resolve";
 import { ResolverMap, CustomResolver, Resolver } from "./Resolver";
-import { _resolveType } from "./internal/_resolveType";
+import { resolveType } from "./resolveType";
 
 export type FnResolver<T> = (context: ResolverMap<any>) => T;
 
@@ -25,25 +25,25 @@ declare global {
 
 Function.prototype[resolveSymbol] = function (context) {
   if (this.prototype) {
-    return _resolveType(this, context);
+    return resolveType(this, context);
   } else {
     return this(context);
   }
 };
 
-Function.prototype[checkSymbol] = function (context) {
+Function.prototype[checkResolverSymbol] = function (context) {
   if (this.prototype) {
-    _checkType(this, context);
+    checkTypeResolver(this, context);
   }
 };
 
 Function.prototype.toCheck = function (checkFn) {
   return {
     [resolveSymbol]: this,
-    [checkSymbol]: checkFn,
+    [checkResolverSymbol]: checkFn,
   };
 };
 
 Function.prototype.provide = function (resolver) {
-  return _provide(this, resolver);
+  return provideType(this, resolver);
 };

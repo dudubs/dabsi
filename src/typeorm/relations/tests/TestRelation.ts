@@ -1,19 +1,17 @@
 import {
-  getMetadataArgsStorage,
   JoinColumn,
+  JoinColumnOptions,
   JoinTable,
+  JoinTableOptions,
   ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
 } from "typeorm";
 import { JoinTableMultipleColumnsOptions } from "typeorm/decorator/options/JoinTableMultipleColumnsOptions";
-import { JoinColumnOptions, JoinTableOptions } from "typeorm";
-import { MetadataArgsStorage } from "typeorm/metadata-args/MetadataArgsStorage";
 import { MapFactory } from "../../../common/map/mapFactory";
 import { definedAt } from "../../../common/object/definedAt";
 import { Type } from "../../../common/typings2/Type";
-import { logBeforeEach } from "../../../jasmine/logBeforeEach";
 import { DataRelation } from "../../../typedata/DataRelation";
 
 const targetToRelationKeys = MapFactory(
@@ -46,8 +44,8 @@ export function TestRelation<T>(
     );
 
     const ownerDecorator = {
-      oneToOne: (...args) => JoinColumn(options.joinColumn!)(...args),
-      manyToMany: (...args) => JoinTable(options.joinTable!)(...args),
+      oneToOne: (...args) => (JoinColumn as any)(options.joinColumn!)(...args),
+      manyToMany: (...args) => (JoinTable as any)(options.joinTable!)(...args),
     }[relationInfo.type];
 
     targetToRelationKeys(target.constructor).add(relationName);

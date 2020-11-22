@@ -1,12 +1,4 @@
-import { If } from "../common/typings2/boolean";
-import { Is } from "../common/typings2/boolean/Is";
-import {
-  AbstractRpcHandler,
-  AnyRpc,
-  IRpcHandler,
-  Rpc,
-  RpcCommand,
-} from "./Rpc";
+import { AbstractRpcHandler, IRpcHandler, Rpc } from "./Rpc";
 
 export type NoRpc = Rpc<{
   Handler: {};

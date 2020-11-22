@@ -25,18 +25,20 @@ function dabsi-node() {
   O=""
   O="$O -r source-map-support/register"
   O="$O -r ts-node/register"
-  O="$O -r $DABSI_PATH/src/common/register.ts"
+  O="$O -r tsconfig-paths/register"
+  O="$O -r @dabsi/common/register.ts"
   REGISTER_O=$O
 
   if [ "$mon" ]; then
     O=""
     O="$O -w src"
+    O="$O -w $DABSI_PATH"
     O="$O $REGISTER_O"
     O="$O -e ts,tsx"
     O="$O -i node_modules"
     O="$O -i packages"
     O="$O $(platformDirs browser)"
-    _node="nodemon $DABSI_MON $O"
+    _node="nodemon $DABSI_MON $O -x node"
   else
     _node="node $REGISTER_O"
   fi
@@ -50,6 +52,7 @@ function dabsi-node() {
   fi
 
   export TS_NODE_TRANSPILE_ONLY=true
+  export TS_NODE_PROJECT="./tsconfig.json"
 
 #echo \
   $_node $*
@@ -81,19 +84,14 @@ function dabsi-x() {
   ./node_modules/.bin/$1 ${@:2}
 }
 
+function dabsi-typestack() {
+
+  dabsi node -r @dabsi/typestack/register.ts src/index.ts $*
+}
+
 
 function dabsi() {
-
-  if [ -f "$DABSI_PATH/scripts/$1.ts" ]; then
-    dabsi node "$DABSI_PATH/scripts/$1.ts" ${@:2}
-  else
-    if [ -f "$DABSI_PATH/scripts/$1.sh" ]; then
-      $DABSI_PATH/scripts/$1.sh ${@:2}
-    else
-      dabsi-$1 ${@:2}
-    fi
-  fi
-
+   dabsi-$1 ${@:2}
 }
 
 
@@ -102,5 +100,6 @@ if [ "${@: -1}" == "--mon" ]; then
 else
   dabsi $*
 fi;
+
 
 

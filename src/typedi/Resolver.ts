@@ -1,16 +1,12 @@
-import { _check, checkSymbol } from "./internal/_check";
-import { _checkAndResolve } from "./internal/_checkAndResolve";
-import { _checkContext } from "./internal/_checkContext";
-import { _checkType } from "./internal/_checkType";
-import { _consume } from "./internal/_consume";
-import { _resolverMap } from "./internal/_resolverMap";
-import { _provide } from "./internal/_provide";
-import { _resolve, resolveSymbol } from "./internal/_resolve";
-import { _arrayResolver } from "./internal/_arrayResolver";
-import { _resolveType } from "./internal/_resolveType";
-import { _touch } from "./internal/_touch";
+import { CodeStackInfo } from "./CodeStackInfo";
 import { FnResolver, TypeResolver } from "./FnResolver";
-import { creatTokenResolver, TokenResolver } from "./TokenResolver";
+import { checkAndResolve } from "./checkAndResolve";
+import { checkResolver, checkResolverSymbol } from "./checkResolver";
+import { checkResolverContext } from "./checkResolverContext";
+import { resolve, resolveSymbol } from "./resolve";
+import { ObjectResolver } from "./ObjectResolver";
+import { TokenResolver } from "./TokenResolver";
+import { Touch } from "./Touch";
 
 export type ResolverMap<T> = Record<string, Resolver<T>>;
 
@@ -20,7 +16,7 @@ export type ResolveMapType<T extends ResolverMap<any>> = {
 
 export type CustomResolver<T> = {
   [resolveSymbol](context: ResolverMap<any>): T;
-  [checkSymbol]?(context: ResolverMap<any>): void;
+  [checkResolverSymbol]?(context: ResolverMap<any>): void;
 };
 
 export type Resolver<T = any> =
@@ -32,25 +28,29 @@ export type ResolverType<T extends Resolver> = T extends Resolver<infer U>
   ? U
   : never;
 
+let count = 0;
+
 export function Resolver<T>(name?: string): TokenResolver<T> {
-  return creatTokenResolver(name || "unknown", new Error());
+  return new TokenResolver(
+    new CodeStackInfo(new Error()),
+    `token:${count++}_${name || "unknown"}`
+  );
 }
-Resolver.touch = _touch;
-Resolver.resolve = _resolve;
-Resolver.provide = _provide;
-Resolver.check = _check;
-Resolver.checkContext = _checkContext;
-Resolver.checkAndResolve = _checkAndResolve;
-Resolver.checkType = _checkType;
-Resolver.resolveType = _resolveType;
-Resolver.consume = _consume;
-Resolver.array = _arrayResolver;
-Resolver.object = _resolverMap;
+
+Resolver.touch = Touch;
+Resolver.resolve = resolve;
+Resolver.check = checkResolver;
+Resolver.checkContext = checkResolverContext;
+Resolver.checkAndResolve = checkAndResolve;
+Resolver.object = ObjectResolver;
 
 declare global {
   interface String extends CustomResolver<string> {}
+
   interface Number extends CustomResolver<number> {}
+
   interface Boolean extends CustomResolver<boolean> {}
+
   interface Date extends CustomResolver<Date> {}
 }
 [String, Number, Boolean, Date].forEach(type => {

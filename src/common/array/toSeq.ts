@@ -9,8 +9,6 @@ declare global {
   }
 }
 
-export const useArrayToSeq = Lazy(() => {
-  Array.prototype.toSeq = function () {
-    return Seq.Indexed(this);
-  };
-});
+Array.prototype.toSeq = function () {
+  return Seq.Indexed(this);
+};

@@ -6,7 +6,7 @@ import { Tester } from "../../jasmine/Tester";
 import { DataRow } from "../../typedata/DataRow";
 import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
 import { createTestConnection } from "../../typedata/tests/TestConnection";
-import { _provide } from "../../typedi/internal/_provide";
+import { provideType } from "../../typedi/provideType";
 import { Resolver } from "../../typedi/Resolver";
 import { configureRpcService } from "../../typerpc/Rpc";
 import { SystemApp } from "../common/SystemApp";
@@ -28,7 +28,7 @@ export const SystemTester = Tester.beforeAll(async t => ({
     return {
       context: {
         ...SystemRequestResolvers,
-        ...Resolver.provide(Connection, () => t.connection),
+        ...Connection.provide(() => t.connection),
       },
       users: {
         regular: await users.insert({
@@ -77,10 +77,7 @@ export function testSystemAs(
     SystemApp,
     Resolver.checkAndResolve(SystemAppConfig, {
       ...SystemTester.context,
-      ...Resolver.provide(
-        DataRow(SystemSession),
-        () => SystemTester.sessions[k]
-      ),
+      ...DataRow(SystemSession).provide(() => SystemTester.sessions[k]),
     })
   );
 }

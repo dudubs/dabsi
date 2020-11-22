@@ -1,7 +1,7 @@
 import { flatObject } from "../common/object/flatObject";
 import { Type } from "../common/typings2/Type";
-import { checkSymbol } from "./internal/_check";
-import { resolveSymbol } from "./internal/_resolve";
+import { checkResolverSymbol } from "./checkResolver";
+import { resolveSymbol } from "./resolve";
 import { ResolverMap, CustomResolver, Resolver } from "./Resolver";
 
 export function Provider(
@@ -16,7 +16,7 @@ export function Provider(context) {
         Object.setPrototypeOf({ ...context }, parentContext)
       );
     }).toCheck(parentContext => {
-      resolver[checkSymbol]?.(
+      resolver[checkResolverSymbol]?.(
         Object.setPrototypeOf({ ...context }, parentContext)
       );
     });

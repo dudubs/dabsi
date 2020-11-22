@@ -1,48 +1,26 @@
-import { realpathSync } from "fs";
-import path from "path";
-import { checkSymbol } from "./internal/_check";
-import { StackLastLine } from "./getStackLastLine";
-import { resolveSymbol } from "./internal/_resolve";
-import { ResolverMap, CustomResolver, Resolver } from "./Resolver";
+import { checkResolverSymbol } from "./checkResolver";
+import { CodeStackInfo } from "./CodeStackInfo";
+import { AnyResolverMap } from "./ObjectResolver";
+import { resolve, resolveSymbol } from "./resolve";
 import { ResolveError } from "./ResolveError";
-let count = 0;
-export function creatTokenResolver(name: string, stack: Error) {
-  return Object.setPrototypeOf(
-    { token: `token:${count++}_${name}`, stack },
-    AnyTokenResolver
-  );
-}
-export type TokenResolver<T> = CustomResolver<T> & {
-  token: string;
-  stack?: StackLastLine;
-  provide(value: Resolver<T>): ResolverMap<T>;
-};
-export const AnyTokenResolver: TokenResolver<any> = {
-  provide(resolver) {
-    return { [this.token]: resolver };
-  },
-  get token(): string {
-    throw new Error("No token");
-  },
-  get stack(): any {
-    throw new Error("No stack");
-  },
-  [resolveSymbol](context) {
-    return context[this.token][resolveSymbol]();
-  },
-  [checkSymbol](context) {
-    if (!(this.token in context)) {
-      const { sourceFileName, lineNumber, column, line } = this.stack!();
+import { Resolver } from "./Resolver";
 
+export class TokenResolver<T> {
+  constructor(public codeStackInfo: CodeStackInfo, public token: string) {}
+
+  provide(resolver: Resolver<T>): AnyResolverMap<T> {
+    return { [this.token]: resolver };
+  }
+
+  [resolveSymbol](context): T {
+    return resolve(context[this.token], context);
+  }
+
+  [checkResolverSymbol](context) {
+    if (context[this.token] === undefined) {
       throw new ResolveError(
-        `Can't resolve ${this.token}${
-          line &&
-          `: at ${path.relative(
-            realpathSync("."),
-            sourceFileName
-          )}:${lineNumber}:\n\t ${line.trim()}`
-        }`
+        `Can't resolve "${this.token}": ${this.codeStackInfo.description}`
       );
     }
-  },
-};
+  }
+}

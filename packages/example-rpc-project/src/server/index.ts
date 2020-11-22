@@ -1,4 +1,5 @@
 import { Resolver } from "../../../../src/typedi";
+import { Consumer } from "../../../../src/typedi/Consumer";
 import { RpcConfigResolver } from "../../../../src/typerpc/RpcConfigResolver";
 import { RpcProject } from "../../../../src/typerpc/RpcProject";
 import { RpcRequest } from "../../../../src/typerpc/RpcRequest";
@@ -7,7 +8,7 @@ import { TodoListEntity } from "./TodoListEntity";
 
 export default new RpcProject(
   TodoListRpc,
-  Resolver.consume(
+  Consumer(
     {
       rpcReq: RpcRequest,
     },

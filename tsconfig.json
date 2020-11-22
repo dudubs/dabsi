@@ -1,11 +1,5 @@
 {
-  "extends": "./configs/dev.tsconfig.json",
-  "compilerOptions": {
-    "sourceMap": true,
-    "preserveSymlinks": false,
-    "esModuleInterop": true,
-    "jsx": "react"
-  },
+  "extends": "./configs/base.tsconfig.json",
   "include": [
     "src"
   ],

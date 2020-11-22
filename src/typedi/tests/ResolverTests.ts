@@ -1,3 +1,4 @@
+import { Consumer } from "../Consumer";
 import { Provider } from "../Provider";
 import { Resolver } from "../Resolver";
 
@@ -63,7 +64,7 @@ testm(__filename, () => {
   it("expect to consume resolver", () => {
     expect(
       Resolver.checkAndResolve(
-        Resolver.consume([r1], name => `Hello ${name}!`),
+        Consumer([r1], name => `Hello ${name}!`),
         r1.provide("World")
       )
     ).toEqual("Hello World!");

@@ -1,8 +1,8 @@
-import { Type } from "../../common/typings2/Type";
-import { getTypeToken } from "../getTypeToken";
-import { ResolverMap, Resolver } from "../Resolver";
+import { Type } from "../common/typings2/Type";
+import { getTypeToken } from "./getTypeToken";
+import { ResolverMap, Resolver } from "./Resolver";
 
-export function _provide<T>(
+export function provideType<T>(
   type: Type<T>,
   resolver: Resolver<T>
 ): ResolverMap<T> {

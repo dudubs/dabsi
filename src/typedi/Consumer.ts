@@ -1,14 +1,14 @@
-import { _check } from "./_check";
-import { _resolve } from "./_resolve";
-import { _arrayResolver } from "./_arrayResolver";
-import { _resolverMap } from "./_resolverMap";
+import { checkResolver } from "./checkResolver";
+import { resolve } from "./resolve";
+import { ArrayResolver } from "./ArrayResolver";
+import { ObjectResolver } from "./ObjectResolver";
 import {
   CustomResolver,
   ResolveMapType,
   Resolver,
   ResolverMap,
   ResolverType,
-} from "../Resolver";
+} from "./Resolver";
 
 type A<U extends (Resolver | undefined)[], N extends number> = ResolverType<
   NonNullable<U[N]>
@@ -44,31 +44,36 @@ export function _consumeMap<T, U extends ResolverMap<any>>(
   deps: U,
   create: (context: ResolveMapType<U>) => T
 ): Resolver<T> {
-  const depsResolver = _resolverMap(deps);
+  const depsResolver = ObjectResolver(deps);
   return (context => {
-    return create(_resolve(depsResolver, context));
+    return create(resolve(depsResolver, context));
   }).toCheck(context => {
-    _check(depsResolver, context);
+    checkResolver(depsResolver, context);
   });
 }
 
-export function _consume<T, U extends ConsumeDeps>(
+export type Consumer<T> = <U extends ConsumeDeps>(
+  deps: U,
+  callback: ConsumeFactory<T, U>
+) => Resolver<T>;
+
+export function Consumer<T, U extends ConsumeDeps>(
   deps: U,
   create: ConsumeFactory<T, U>
 ): CustomResolver<T>;
-export function _consume(deps, create): any {
+export function Consumer(deps, create): any {
   if (Array.isArray(deps)) {
-    const depsResolver = _arrayResolver(deps);
-    return (context => create(..._resolve(depsResolver, context))).toCheck(
+    const depsResolver = ArrayResolver(deps);
+    return (context => create(...resolve(depsResolver, context))).toCheck(
       context => {
-        _check(depsResolver, context);
+        checkResolver(depsResolver, context);
       }
     );
   }
-  const depsResolver = _resolverMap(deps);
+  const depsResolver = ObjectResolver(deps);
   return (context => {
-    return create(_resolve(depsResolver, context));
+    return create(resolve(depsResolver, context));
   }).toCheck(context => {
-    _check(depsResolver, context);
+    checkResolver(depsResolver, context);
   });
 }

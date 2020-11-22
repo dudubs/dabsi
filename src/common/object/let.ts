@@ -27,13 +27,11 @@ function _let(this: any, callback) {
   return callback(this);
 }
 
-export function useLet() {
-  [Object, Number, String, Array].forEach(({ prototype }) => {
-    Object.defineProperty(prototype, "let", {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: _let,
-    });
+[Object, Number, String, Array].forEach(({ prototype }) => {
+  Object.defineProperty(prototype, "let", {
+    enumerable: false,
+    configurable: true,
+    writable: true,
+    value: _let,
   });
-}
+});

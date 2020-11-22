@@ -1,15 +1,11 @@
 #!/usr/bin/bash
 
-echo load dabs
+echo Loads DABSI bash-rc
+
+THIS_PATH=$(dirname $BASH_SOURCE)
 
 alias ds='dabsi system'
-alias dabsi="$(dirname $BASH_SOURCE)/cli.sh"
+alias dabsi="$THIS_PATH/cli.sh"
+alias ts="dabsi typestack"
 
-function at() {
-    pushd $1
-    ${@:2} &
-    P=$!
-    popd
-
-    wait $P
-}
+export PATH=$THIS_PATH/../node_modules/.bin:$PATH

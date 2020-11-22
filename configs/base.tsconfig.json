@@ -2,6 +2,9 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "isolatedModules": false,
+    "sourceMap": true,
+    "preserveSymlinks": false,
+    "esModuleInterop": true,
     "lib": [
       "es2020"
     ],

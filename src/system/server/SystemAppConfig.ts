@@ -1,6 +1,7 @@
 import { DataResolvers } from "../../typedata/DataResolvers";
 import { DataRow } from "../../typedata/DataRow";
 import { Resolver } from "../../typedi";
+import { Consumer } from "../../typedi/Consumer";
 import { RpcConfig } from "../../typerpc/Rpc";
 import { DevLoginUser, SystemApp } from "../common/SystemApp";
 import { AclRequest } from "./acl/AclRequest";
@@ -12,7 +13,7 @@ import { DevLoginConfig } from "./DevLoginConfig";
 import { SystemSession } from "./SystemSession";
 import { UserAppConfig } from "./UserAppConfig";
 
-export const SystemAppConfig = Resolver.consume(
+export const SystemAppConfig = Consumer(
   {
     userConfig: UserAppConfig,
     adminConfig: AdminAppConfig,

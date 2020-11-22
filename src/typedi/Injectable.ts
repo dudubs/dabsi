@@ -1,11 +1,11 @@
 import { WeakMapFactory } from "../common/map/mapFactory";
-import { _check, checkSymbol } from "./internal/_check";
-import { _checkType } from "./internal/_checkType";
-import { _resolve, resolveSymbol } from "./internal/_resolve";
-import { _arrayResolver } from "./internal/_arrayResolver";
+import { checkResolver, checkResolverSymbol } from "./checkResolver";
+import { checkTypeResolver } from "./checkTypeResolver";
+import { resolve, resolveSymbol } from "./resolve";
+import { ArrayResolver } from "./ArrayResolver";
 import { Forward } from "./Forward";
 import { Resolver } from "./Resolver";
-import { _resolveType } from "./internal/_resolveType";
+import { resolveType } from "./resolveType";
 
 import "./FnResolver";
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
@@ -16,25 +16,21 @@ export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   };
 });
 
-export function Injectable() {
-  return target => {
-    const designParamTypes: Function[] = Reflect.getMetadata(
-      "design:paramtypes",
-      target
-    );
+export const getInjectableResolver = WeakMapFactory(
+  (target: Function): Resolver<any[]> => {
+    const designParamTypes: Function[] =
+      Reflect.getMetadata("design:paramtypes", target) || [];
 
     const metadata = getInjectableMetadata(target);
-    metadata.isInjectable = true;
-    const paramsResolver = _arrayResolver(
+    return ArrayResolver(
       designParamTypes.map((designType, index) => {
         let resolverCache;
-
         return (
           metadata.resolvers[index] ??
           (context => {
-            return _resolve(getResolver(), context);
+            return resolve(getResolver(), context);
           }).toCheck(context => {
-            _check(getResolver(), context);
+            checkResolver(getResolver(), context);
           })
         );
 
@@ -47,18 +43,26 @@ export function Injectable() {
         }
       })
     );
+  }
+);
+
+export function Injectable() {
+  return target => {
+    const metadata = getInjectableMetadata(target);
+    metadata.isInjectable = true;
+    const paramsResolver = getInjectableResolver(target);
     target[resolveSymbol] = function (context) {
       if (metadata.target !== this) {
-        return _resolveType(this, context);
+        return resolveType(this, context);
       }
-      return new this(..._resolve(paramsResolver, context));
+      return new this(...resolve(paramsResolver, context));
     };
 
-    target[checkSymbol] = function (context) {
+    target[checkResolverSymbol] = function (context) {
       if (metadata.target !== this) {
-        return _checkType(this, context);
+        return checkTypeResolver(this, context);
       }
-      _check(paramsResolver, context);
+      checkResolver(paramsResolver, context);
     };
   };
 }

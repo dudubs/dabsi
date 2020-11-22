@@ -1,8 +1,7 @@
 import { Connection } from "typeorm";
 import { DataRow } from "../../typedata/DataRow";
 import { Resolver } from "../../typedi";
-import { _consume } from "../../typedi/internal/_consume";
-import { _touch } from "../../typedi/internal/_touch";
+import { Consumer } from "../../typedi/Consumer";
 import { RpcError } from "../../typerpc/Rpc";
 import { RpcRequest } from "../../typerpc/RpcRequest";
 import { AclRequest } from "./acl/AclRequest";
@@ -11,14 +10,10 @@ import { SystemSession } from "./SystemSession";
 
 export const SystemRequestResolvers = {
   ...SystemResolvers,
-  ...Resolver.provide(
-    RpcRequest,
-    Resolver.touch(() => new RpcRequest())
-  ),
-  ...Resolver.provide(
-    AclRequest,
+  ...RpcRequest.provide(Resolver.touch(() => new RpcRequest())),
+  ...AclRequest.provide(
     Resolver.touch(
-      Resolver.consume(
+      Consumer(
         {
           connection: Connection,
           session: DataRow(SystemSession),

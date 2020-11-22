@@ -1,13 +1,11 @@
 import { createElement } from "react";
 import ReactDOM from "react-dom";
-import { useArrayToSeq } from "../../common/array/useArrayToSeq";
-import { handleRpcService } from "../../typerpc/Rpc";
+
+import { commandRpcService } from "../../typerpc/Rpc";
 import { SystemApp } from "../common/SystemApp";
 import { MuiSystemRootView } from "./MuiSystemRootView";
 
-useArrayToSeq();
-
-handleRpcService(SystemApp, payload => {
+commandRpcService(SystemApp, payload => {
   return fetch("/service", {
     method: "post",
     headers: { "Content-Type": "application/json" },

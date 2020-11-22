@@ -252,7 +252,7 @@ export type RpcConnection<T extends BasedRpc> = _RpcConnection<RpcType<T>>;
 
 type _RpcConnection<T extends TRpc> = T["Connection"] & BasedRpc<T>;
 
-export function handleRpcService<T extends AnyRpc>(
+export function commandRpcService<T extends AnyRpc>(
   rpc: T,
   command: RpcCommand
 ): RpcConnection<T> {
@@ -266,7 +266,7 @@ export function configureRpcService<T extends AnyRpc>(
   rpc: T,
   config: RpcUnresolvedConfig<T>
 ): RpcConnection<T> {
-  return handleRpcService(rpc, rpc.createRpcCommand(config));
+  return commandRpcService(rpc, rpc.createRpcCommand(config));
 }
 
 export function RpcConfig<T extends AnyRpc>(

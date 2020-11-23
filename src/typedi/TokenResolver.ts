@@ -12,15 +12,18 @@ export class TokenResolver<T> {
     return { [this.token]: resolver };
   }
 
+  get resolveMessage() {
+    return `Can't resolve "${this.token}": ${this.codeStackInfo.description}`;
+  }
   [resolveSymbol](context): T {
-    return resolve(context[this.token], context);
+    const resolver = context[this.token];
+    if (!resolver) throw new ResolveError(this.resolveMessage);
+    return resolve(resolver, context);
   }
 
   [checkResolverSymbol](context) {
     if (context[this.token] === undefined) {
-      throw new ResolveError(
-        `Can't resolve "${this.token}": ${this.codeStackInfo.description}`
-      );
+      throw new ResolveError(this.resolveMessage);
     }
   }
 }

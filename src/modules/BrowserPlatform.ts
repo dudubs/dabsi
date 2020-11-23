@@ -1,26 +1,20 @@
 import express from "express";
-import * as fs from "fs";
-import { realpathSync, watch, writeFileSync } from "fs";
-import path, { dirname, relative, resolve } from "path";
-
-import reload from "reload";
-import { fileExistsSync } from "tsconfig-paths/lib/filesystem";
+import { realpathSync } from "fs";
 import webpack from "webpack";
 import { makeHtml } from "../common/makeHtml";
 import { Lazy } from "../common/patterns/lazy";
-import { DABSI_SRC_PATH } from "../index";
+import { DABSI_PATH } from "../index";
 
 import { Inject } from "../typedi/Inject";
 import { Module } from "../typedi/Module";
 import { DevModule } from "../typestack/DevModule";
 import { DevWatchdog } from "../typestack/DevWatchdog";
+import { ProjectModule } from "../typestack/ProjectModule";
 import { Cli } from "./Cli";
 import { ExpressModule } from "./ExpressModule";
+import { MakeModule } from "./MakeModule";
+import { relativePosixPath } from "./pathHelpers";
 import { PlatformBuilder } from "./PlatformBuilder";
-
-export const CURRENT_PATH = realpathSync(".");
-export const GENERATED_PATH = path.resolve(CURRENT_PATH, "generated/browser");
-export const BUNDLE_PATH = path.resolve(CURRENT_PATH, "bundle/browser");
 
 @Module({
   dependencies: [DevModule, ExpressModule],
@@ -44,7 +38,9 @@ export class BrowserPlatform {
     @Inject() cli: Cli, //
     @Inject() protected platformBuilder: PlatformBuilder,
     @Inject() protected watchdog: DevWatchdog,
-    @Inject() expressModule: ExpressModule
+    @Inject() expressModule: ExpressModule,
+    @Inject() protected makeModule: MakeModule,
+    @Inject() protected projectModule: ProjectModule
   ) {
     cli.connect("browser", this.cli);
 
@@ -71,54 +67,41 @@ export class BrowserPlatform {
         });
       },
     });
+
+    makeModule.cli.push({
+      run: () => this.make(),
+    });
   }
 
-  @Lazy() protected get platform() {
+  @Lazy()
+  protected get platform() {
     return this.platformBuilder.create("browser");
   }
 
   protected async make() {
-    await this.platform.makeIndexFile();
+    if (this.projectModule.path === DABSI_PATH) return;
 
-    const rootBrowserTsConfigPath = resolve(
-      DABSI_SRC_PATH,
-      "browser/tsconfig.json"
+    await this.makeModule.makeTsConfigWithPaths(this.platform.srcPath);
+
+    await this.makeIndexFile();
+  }
+
+  createIndexFileSource() {
+    let code = "// @generated\n\n";
+    for (let indexFileName of this.platform.indexPaths) {
+      code += `import "${relativePosixPath(
+        this.platform.generatedPath,
+        indexFileName
+      )}";\n`;
+    }
+    return code;
+  }
+
+  protected makeIndexFile() {
+    return this.makeModule.makeFile(
+      this.platform.generatedIndexPath,
+      this.createIndexFileSource()
     );
-    const thisBrowserTsConfigPath = resolve(
-      CURRENT_PATH,
-      "browser/tsconfig.json"
-    );
-
-    if (rootBrowserTsConfigPath !== thisBrowserTsConfigPath) {
-      makeTsConfigFile(rootBrowserTsConfigPath, thisBrowserTsConfigPath, {
-        // TODO: copy paths
-      });
-    }
-
-    for (const path of this.platform.platformPaths) {
-      if (path === thisBrowserTsConfigPath) continue;
-      if (path == rootBrowserTsConfigPath) continue;
-
-      const tsConfigPath = resolve(path, "tsconfig.json");
-      // if (fileExistsSync(tsConfigPath)) continue;
-      console.log(`make "${tsConfigPath}".`);
-      makeTsConfigFile(thisBrowserTsConfigPath, tsConfigPath);
-    }
-
-    function makeTsConfigFile(baseTsConfigPath, tsConfigPath, config = {}) {
-      console.log(tsConfigPath, {
-        extends: relative(dirname(tsConfigPath), baseTsConfigPath).replace(
-          /\\/g,
-          "/"
-        ),
-        ...config,
-      });
-    }
-    function writeJsonFile(path, data) {
-      // if(fileExistsSync(path))return;
-      console.log(`make "${path}".`);
-      writeFileSync(path, JSON.stringify(data, null, 2));
-    }
   }
 
   protected async pack() {
@@ -133,7 +116,7 @@ export class BrowserPlatform {
         },
       },
       output: {
-        path: BUNDLE_PATH,
+        path: this.platform.bundlePath,
       },
       entry: {
         index: this.platform.generatedIndexPath,

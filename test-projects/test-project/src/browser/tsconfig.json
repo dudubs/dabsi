@@ -1,0 +1,6 @@
+{
+  "extends": "../../../../../src/browser/tsconfig.json",
+  "include": [
+    "./"
+  ]
+}

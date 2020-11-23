@@ -1,0 +1,14 @@
+{
+  "extends": "../dabsi/baseConfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@dabsi/*": [
+        "../dabsi/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ]
+}

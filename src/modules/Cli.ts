@@ -2,7 +2,6 @@ import yargs from "yargs";
 import { pushAsyncHook } from "../common/async/pushAsyncHook";
 import { Awaitable } from "../common/typings2/Async";
 import { Module } from "../typedi/Module";
-import { AnyWidgetConnection } from "../typerpc/widget/Widget";
 
 @Module()
 export class Cli {
@@ -64,3 +63,5 @@ export class Cli {
     return this;
   }
 }
+
+export class CliError extends Error {}

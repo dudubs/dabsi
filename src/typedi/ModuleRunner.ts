@@ -3,6 +3,7 @@ import { Constructor } from "../common/typings2/Constructor";
 import { Resolver } from "./index";
 import { getInjectableResolver } from "./Injectable";
 import { moduleOptionsMap } from "./Module";
+
 export type ChildModuleInternface<Child> = {
   registerAsParentModule(child: Child);
 };

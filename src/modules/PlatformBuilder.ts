@@ -1,8 +1,11 @@
-import fs, { existsSync, realpathSync, statSync } from "fs";
-import path, { dirname, resolve } from "path";
+import fs, { existsSync, realpathSync } from "fs";
+import path, { dirname, join, resolve } from "path";
 import { fileExistsSync } from "tsconfig-paths/lib/filesystem";
+import { Lazy } from "../common/patterns/lazy";
+import { Inject } from "../typedi/Inject";
 import { Module, ModuleProvider } from "../typedi/Module";
 import { DevModule } from "../typestack/DevModule";
+import { ProjectModule } from "../typestack/ProjectModule";
 import { Builder } from "./Builder";
 
 export function PlatformProvider(path: string) {
@@ -16,38 +19,34 @@ export function PlatformProvider(path: string) {
   );
 }
 
-export const CURRENT_PATH = realpathSync(".");
-
 export class Platform {
   indexPaths = Array<string>();
+
   paths = new Set<string>();
 
-  generatedPath = resolve(CURRENT_PATH, "generated", this.name);
+  generatedPath = resolve(this.rootPath, "generated", this.name);
+
   generatedIndexPath = resolve(this.generatedPath, "index.ts");
+
   platformPaths: string[] = [];
-  bundlePath = resolve(CURRENT_PATH, "bundle", this.name);
-  constructor(public name: string) {}
 
-  createIndexSource() {
-    let code = "// @generated\n\n";
-    for (let indexFileName of this.indexPaths) {
-      code += `import "${path
-        .relative(this.generatedPath, indexFileName)
-        .replace(/\\/g, "/")}";\n`;
-    }
-  }
+  bundlePath = resolve(this.rootPath, "bundle", this.name);
 
-  async makeIndexFile() {
-    console.log(`make "${this.generatedIndexPath}".`);
-    await fs.promises.mkdir(this.generatedPath, { recursive: true });
-    await fs.writeFileSync(this.generatedIndexPath, this.createIndexSource());
-  }
+  srcPath = resolve(this.rootPath, "src", this.name);
+
+  modulesPath: string[] = [];
+
+  constructor(public rootPath: string, public name: string) {}
 }
 
 @Module()
 export class PlatformBuilder extends Builder<Platform> {
+  constructor(@Inject() protected projectModule: ProjectModule) {
+    super();
+  }
+
   create(name: string): Platform {
-    const info = new Platform(name);
+    const info = new Platform(this.projectModule.path, name);
     this.build(info);
     return info;
   }
@@ -59,9 +58,13 @@ export class PlatformBuilder extends Builder<Platform> {
       p.paths.add(path);
       const platformPath = resolve(path, p.name);
       if (!existsSync(platformPath)) return;
+
       p.platformPaths.push(platformPath);
       const indexPath = resolve(platformPath, "index.ts");
       if (fileExistsSync(indexPath)) p.indexPaths.push(indexPath);
+
+      if (platformPath !== p.srcPath)
+        p.modulesPath.push(join(platformPath, "tsconfig.path"));
     });
   }
 

@@ -9,6 +9,9 @@ declare global {
   }
 }
 
-Array.prototype.toSeq = function () {
-  return Seq.Indexed(this);
-};
+Object.defineProperty(Array.prototype, "toSeq", {
+  enumerable: false,
+  value() {
+    return Seq.Indexed(this);
+  },
+});

@@ -3,6 +3,7 @@ import { join } from "path";
 import { Inject } from "../typedi/Inject";
 import { Module } from "../typedi/Module";
 import { DevModule } from "./DevModule";
+import { ProjectModule } from "./ProjectModule";
 
 export type WatchdogExclude = (path: string) => boolean;
 export type WatchdogEvent = { filename; event };
@@ -20,10 +21,13 @@ export class DevWatchdog {
 
   protected listeners = new Set<WatchdogCallback>();
 
-  constructor(@Inject() devModule: DevModule) {
+  constructor(
+    @Inject() devModule: DevModule,
+    @Inject() projectModule: ProjectModule
+  ) {
     devModule.push({
       asParent: () => {
-        this.paths.push(...this.getWatchingPaths());
+        this.paths.push(...projectModule.paths.map(path => join(path, "src")));
         this.listen(() => {
           devModule.reload();
         });
@@ -37,15 +41,6 @@ export class DevWatchdog {
     return () => {
       this.listeners.delete(callback);
     };
-  }
-
-  protected getWatchingPaths() {
-    return Object.keys(require.cache)
-      .toSeq()
-      .filter(path => !/[\\\/]node_modules[\\\/]/.test(path))
-      .map(path => path.replace(/[\\\/]src[\\\/].*$/, ""))
-      .toSet()
-      .map(path => join(path, "src"));
   }
 
   run() {

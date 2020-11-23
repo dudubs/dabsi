@@ -2,10 +2,11 @@
 
 echo Loads DABSI bash-rc
 
-THIS_PATH=$(dirname $BASH_SOURCE)
+export DABSI_PATH=$(dirname $BASH_SOURCE)
 
-alias ds='dabsi system'
-alias dabsi="$THIS_PATH/cli.sh"
+export PATH=DABSI_PATH/../node_modules/.bin:$PATH
+
+alias dabsi="$DABSI_PATH/cli.sh"
+
 alias ts="dabsi typestack"
 
-export PATH=$THIS_PATH/../node_modules/.bin:$PATH

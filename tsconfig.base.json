@@ -1,5 +1,4 @@
 {
-  "$schema": "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/tsconfig.json",
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "isolatedModules": false,
@@ -8,10 +7,6 @@
     "esModuleInterop": true,
     "lib": [
       "es2020"
-    ],
-    "types": [
-      "node",
-      "jasmine"
     ],
     "experimentalDecorators": true,
     "noImplicitThis": true,

@@ -27,7 +27,8 @@ export class DevWatchdog {
   ) {
     devModule.push({
       asParent: () => {
-        this.paths.push(...projectModule.paths.map(path => join(path, "src")));
+        console.log({ TODO: "..." });
+        // this.paths.push(...projectModule.paths.map(path => join(path, "src")));
         this.listen(() => {
           devModule.reload();
         });

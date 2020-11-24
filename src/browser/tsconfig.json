@@ -1,9 +1,3 @@
 {
-  "extends": "./baseBrowserConfig.json",
-
-  "include": [
-    "."
-  ],
-  "exclude": [
-  ]
+  "extends": "../../tsconfig.browser.json"
 }

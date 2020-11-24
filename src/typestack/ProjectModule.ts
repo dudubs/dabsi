@@ -1,76 +1,58 @@
-import { readFileSync, realpathSync } from "fs";
-import { basename, join } from "path";
-import { mapArrayToObject } from "../common/array/mapArrayToObject";
-import { Lazy } from "../common/patterns/lazy";
-import { relativePosixPath } from "../modules/pathHelpers";
-import { TsConfig } from "../modules/TsConfig";
-import { Resolver } from "../typedi";
-import { DefaultResolver } from "../typedi/DefaultResolver";
+import { existsSync } from "fs";
+import path from "path";
+import { touchObject } from "../common/object/touchObject";
+import { DABSI_ROOT_DIR } from "../index";
+import { CALL_STACK_PATTERN, CallStackInfo } from "../typedi/CallStackInfo";
 import { Inject } from "../typedi/Inject";
 import { Module } from "../typedi/Module";
-
-const CURRENT_PATH = realpathSync(".");
-
-export const ProjectPathResolver = Resolver<string>();
+import { MakeModule } from "./MakeModule";
+import { ProjectInfo } from "./ProjectInfo";
 
 @Module()
 export class ProjectModule {
-  constructor(
-    @Inject(DefaultResolver(ProjectPathResolver, CURRENT_PATH))
-    public path: string
-  ) {}
+  dirNames = new Set<string>();
 
-  @Lazy() get paths() {
-    return this.pathsInfo.map(p => p.path);
+  projectInfoMap: Record<string, ProjectInfo>;
+
+  currentProjectInfo: ProjectInfo;
+
+  providers: { error: Error; fileName: string }[] = [];
+
+  constructor(@Inject() makeModule: MakeModule) {
+    makeModule.cli.push({ run: () => this.init() });
   }
 
-  @Lazy() get pathsInfo() {
-    return Object.keys(require.cache)
-      .toSeq()
-      .filter(path => !/[\\\/]node_modules[\\\/]/.test(path))
-      .map(path => path.replace(/[\\\/]src[\\\/].*$/, ""))
-      .toSet()
-      .map(path => ({
-        path,
-        isBasePath: path !== CURRENT_PATH,
-        baseName: basename(path),
-        srcPath: join(path, "src"),
-      }))
-      .toArray();
-  }
+  async init() {
+    if (this.projectInfoMap) return;
 
-  @Lazy() get basePaths() {
-    return this.paths.filter(p => p !== CURRENT_PATH);
-  }
-
-  getTsConfigPaths(outDir: string) {
-    return mapArrayToObject(this.pathsInfo, pi => {
-      if (pi.isBasePath)
-        return [
-          `@${pi.baseName}/*`,
-          relativePosixPath(outDir, join(pi.srcPath, "*")),
-        ];
-    });
-  }
-
-  @Lazy() get tsConfigInfo() {
-    const path = join(this.path, "tsconfig.json");
-    return {
-      path,
-      config: JSON.parse(readFileSync(path, "utf-8")) as TsConfig,
-    };
-  }
-
-  resolvePath(from: string, path: string) {
-    const pathInfo = this.pathsInfo.find(pi => path.startsWith(pi.srcPath));
-    if (pathInfo) {
-      return `@${pathInfo.baseName}/${relativePosixPath(
-        pathInfo.srcPath,
-        path
-      )}`;
+    for (const {
+      error: { stack },
+      fileName,
+    } of this.providers) {
+      const dirName = path.dirname(
+        CallStackInfo.getLineInfo(stack!, fileName)!.fileName
+      );
+      if (!dirName.startsWith(DABSI_ROOT_DIR))
+        throw new Error(`Invalid provider: ${stack}`);
+      this.dirNames.add(dirName);
     }
-    return relativePosixPath(from, path);
-  }
 
-  readonly name = basename(CURRENT_PATH);
+    this.projectInfoMap = {};
+    for (let dirName of this.dirNames) {
+      if (!dirName.startsWith(DABSI_ROOT_DIR))
+        throw new Error(`Project must to be in "${DABSI_ROOT_DIR}".`);
+
+      const [projectDir] = dirName.split(/[\\\/]src([\\\/]|$)/);
+      if (!existsSync(path.join(projectDir, "src")))
+        throw new Error(`Invalid project directory ${dirName}`);
+
+      const projectInfo = touchObject(
+        this.projectInfoMap,
+        projectDir,
+        () => new ProjectInfo(projectDir)
+      );
+      projectInfo.dirNames.add(dirName);
+      if (!this.currentProjectInfo) this.currentProjectInfo = projectInfo;
+    }
+  }
 }

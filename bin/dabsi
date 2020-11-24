@@ -1,3 +1,5 @@
+#!/usr/bin/bash
+
 
 O=""
 O="$O --preserve-symlinks"
@@ -13,5 +15,6 @@ export TS_NODE_TRANSPILE_ONLY=true
 
 
 node $O $DABSI_PATH/src/cli/index.ts $*
+
 
 

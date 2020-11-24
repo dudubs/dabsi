@@ -25,6 +25,7 @@ export class ModuleRunner {
 
   get<T>(module: Constructor<T>): T {
     return touchMap(this.cache, module, () => {
+      // console.log("init", module.name);
       const argsResolver = getInjectableResolver(module);
       const options = moduleOptionsMap.get(module)!;
 

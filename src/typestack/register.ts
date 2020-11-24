@@ -9,13 +9,4 @@ setImmediate(async () => {
   const cli = moduleRunner.get(Cli);
 
   await cli.main(yargs.scriptName("ts"));
-
-  // console.log(
-  //   Object.keys(require.cache)
-  //     .toSeq()
-  //     .toSet()
-  //     .filter(path => !/[\\\/]node_modules[\\\/]/.test(path))
-  //     .map(path => path.replace(/[\\\/]src[\\\/].*$/, ""))
-  //     .toArray()
-  // );
 });

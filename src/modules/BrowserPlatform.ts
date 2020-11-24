@@ -1,20 +1,25 @@
 import express from "express";
 import { realpathSync } from "fs";
+import * as path from "path";
 import webpack from "webpack";
 import { makeHtml } from "../common/makeHtml";
-import { Lazy } from "../common/patterns/lazy";
+import { mapObject } from "../common/object/mapObject";
+import { values } from "../common/object/values";
+import { existsDirSync } from "../filesystem/existsDirSync";
 import { DABSI_PATH } from "../index";
+import { inspect } from "../logging/inspect";
 
 import { Inject } from "../typedi/Inject";
 import { Module } from "../typedi/Module";
 import { DevModule } from "../typestack/DevModule";
 import { DevWatchdog } from "../typestack/DevWatchdog";
+import { MakeModule } from "../typestack/MakeModule";
+import { ProjectInfo } from "../typestack/ProjectInfo";
 import { ProjectModule } from "../typestack/ProjectModule";
 import { Cli } from "./Cli";
 import { ExpressModule } from "./ExpressModule";
-import { MakeModule } from "./MakeModule";
 import { relativePosixPath } from "./pathHelpers";
-import { PlatformBuilder } from "./PlatformBuilder";
+import { PlatformInfo } from "./PlatformInfo";
 
 @Module({
   dependencies: [DevModule, ExpressModule],
@@ -24,25 +29,23 @@ export class BrowserPlatform {
     lastRun: () => this.pack(),
   });
 
-  makeCli = new Cli().push({
-    lastRun: () => this.make(),
-  });
-
   cli = new Cli() //
-    .connect("pack", this.packCli)
-    .connect("make", this.makeCli);
+    .connect("pack", this.packCli);
 
   scripts: string[] = [];
 
   constructor(
     @Inject() cli: Cli, //
-    @Inject() protected platformBuilder: PlatformBuilder,
     @Inject() protected watchdog: DevWatchdog,
     @Inject() expressModule: ExpressModule,
-    @Inject() protected makeModule: MakeModule,
-    @Inject() protected projectModule: ProjectModule
+    @Inject() protected projectModule: ProjectModule,
+    @Inject() protected makeModule: MakeModule
   ) {
     cli.connect("browser", this.cli);
+
+    makeModule.cli.push({
+      run: () => this.make(),
+    });
 
     watchdog.exclude.push(path => {
       return /([\\\/]|^)browser[\\\/$]/.test(path);
@@ -67,44 +70,71 @@ export class BrowserPlatform {
         });
       },
     });
+  }
+  platformInfoMap: Record<string, PlatformInfo>;
+  currentPlatformInfo: PlatformInfo;
 
-    makeModule.cli.push({
-      run: () => this.make(),
+  protected async init() {
+    await this.projectModule.init();
+    this.platformInfoMap = mapObject(
+      this.projectModule.projectInfoMap,
+      p => new PlatformInfo(p, "browser")
+    );
+    this.currentPlatformInfo = this.platformInfoMap[
+      this.projectModule.currentProjectInfo.rootDir
+    ];
+  }
+
+  protected async makePlatformConfig(platformInfo: PlatformInfo) {
+    await this.makeModule.makeJsonFile(platformInfo.tsConfigFileName, {
+      extends: relativePosixPath(
+        platformInfo.projectInfo.rootDir,
+        path.join(DABSI_PATH, platformInfo.tsConfigBaseName)
+      ),
     });
   }
 
-  @Lazy()
-  protected get platform() {
-    return this.platformBuilder.create("browser");
+  protected async makePlatformModuleConfigs(platformInfo: PlatformInfo) {
+    for (const dirName of platformInfo.projectInfo.dirNames) {
+      const platformModuleDir = path.join(dirName, platformInfo.name);
+      if (!existsDirSync(dirName)) continue;
+      await this.makeModule.makeJsonFile(
+        path.join(platformModuleDir, "tsconfig.json"),
+        {
+          extends: relativePosixPath(
+            platformModuleDir,
+            platformInfo.tsConfigFileName
+          ),
+        }
+      );
+    }
   }
 
   protected async make() {
-    if (this.projectModule.path === DABSI_PATH) return;
+    await this.init();
 
-    await this.makeModule.makeTsConfigWithPaths(this.platform.srcPath);
-
-    await this.makeIndexFile();
-  }
-
-  createIndexFileSource() {
-    let code = "// @generated\n\n";
-    for (let indexFileName of this.platform.indexPaths) {
-      code += `import "${relativePosixPath(
-        this.platform.generatedPath,
-        indexFileName
-      )}";\n`;
+    let indexFileCode = "";
+    for (const platformInfo of values(this.platformInfoMap)) {
+      if (platformInfo.projectInfo.rootDir !== DABSI_PATH) {
+        await this.makePlatformConfig(platformInfo);
+      }
+      await this.makePlatformModuleConfigs(platformInfo);
+      for (let indexFileName of platformInfo.findIndexDirNames()) {
+        indexFileCode = `import "${this.projectModule.currentProjectInfo.tsConfigInfo.resolvePath(
+          this.currentPlatformInfo.generatedDir,
+          indexFileName
+        )}";\n ${indexFileCode}`;
+      }
+      // code += platformInfo.createIndexSource();
     }
-    return code;
-  }
-
-  protected makeIndexFile() {
-    return this.makeModule.makeFile(
-      this.platform.generatedIndexPath,
-      this.createIndexFileSource()
+    await this.makeModule.makeFile(
+      this.currentPlatformInfo.generatedIndexFileName,
+      indexFileCode
     );
   }
 
   protected async pack() {
+    await this.init();
     webpack({
       mode: "development",
       devtool: "inline-source-map",
@@ -116,10 +146,10 @@ export class BrowserPlatform {
         },
       },
       output: {
-        path: this.platform.bundlePath,
+        path: this.currentPlatformInfo.bundleDir,
       },
       entry: {
-        index: this.platform.generatedIndexPath,
+        index: this.currentPlatformInfo.generatedIndexFileName,
       },
       stats: {
         warnings: false,

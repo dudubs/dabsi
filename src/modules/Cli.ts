@@ -18,7 +18,6 @@ export class Cli {
           "",
           y => cli.hooks.build(y),
           async args => {
-            console.log({ name });
             await this.hooks.runAsParent(args);
             await cli.run(args);
           }

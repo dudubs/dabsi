@@ -1,5 +1,5 @@
 {
-  "extends": "./baseConfig.json",
+  "extends": "./tsconfig.server.json",
   "include": [
     "src"
   ],

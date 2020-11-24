@@ -1,10 +1,10 @@
-import { CodeStackInfo } from "../typedi/CodeStackInfo";
+import { CallStackInfo } from "../typedi/CallStackInfo";
 import { getJasmineSpecReporterResult } from "./getJasmineSpecReporterResult";
 
 export function logBeforeEach(
   propertyName: "description" | "fullName" = "fullName"
 ) {
-  const codeStackInfo = new CodeStackInfo(new Error());
+  const codeStackInfo = new CallStackInfo(new Error());
   let isFirst = true;
   beforeEach(() => {
     if (!isEnabled) {

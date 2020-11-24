@@ -1,10 +1,11 @@
-import { spawn } from "child_process";
+import { spawn, spawnSync } from "child_process";
 import { watch } from "fs";
 import * as fs from "fs";
-import { join, relative, resolve } from "path";
+import path, { join, relative, resolve } from "path";
 import yargs from "yargs";
+import { readdirRecursiveSync } from "../filesystem/readdirRecursiveSync";
 import { DABSI_PATH, DABSI_SRC_PATH, NODE_MODULES_PATH } from "../index";
-import { readdirRecursiveSync } from "./readdirRecursiveSync";
+import { TYPESTACK_CLI_ARGS } from "../typestack/cli";
 import { spawnNodeSync } from "./spawnNodeSync";
 
 const cwd = process.cwd();
@@ -31,11 +32,18 @@ if (require.main === module)
         const debounce = Debounce(100);
         let p: { kill() } | null = null;
         reload();
-        const w = watch(DABSI_SRC_PATH, { recursive: true }, async (e, f) => {
-          if (await debounce()) {
-            reload();
+        const w = watch(
+          DABSI_SRC_PATH,
+          { recursive: true },
+          async (e, filename) => {
+            if (!/\.tsx?$/.test(filename)) {
+              return;
+            }
+            if (await debounce()) {
+              reload();
+            }
           }
-        });
+        );
         process.on("SIGINT", () => {
           w.close();
           p?.kill();
@@ -53,6 +61,24 @@ if (require.main === module)
             }
           );
         }
+        return;
+      }
+
+      if (process.argv[2] === "typestack") {
+        spawnSync(
+          process.argv[0],
+          [
+            ...TYPESTACK_CLI_ARGS,
+            ...process.argv.slice(process.argv.indexOf("typestack") + 1),
+          ],
+          {
+            stdio: [0, 1, 2],
+            env: {
+              ...process.env,
+              TS_NODE_PROJECT: path.resolve(process.cwd(), "tsconfig.json"),
+            },
+          }
+        );
         return;
       }
       yargs.command(

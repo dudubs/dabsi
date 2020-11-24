@@ -1,12 +1,12 @@
 import { checkResolverSymbol } from "./checkResolver";
-import { CodeStackInfo } from "./CodeStackInfo";
+import { CallStackInfo } from "./CallStackInfo";
 import { AnyResolverMap } from "./ObjectResolver";
 import { resolve, resolveSymbol } from "./resolve";
 import { ResolveError } from "./ResolveError";
 import { Resolver } from "./Resolver";
 
 export class TokenResolver<T> {
-  constructor(public codeStackInfo: CodeStackInfo, public token: string) {}
+  constructor(public codeStackInfo: CallStackInfo, public token: string) {}
 
   provide(resolver: Resolver<T>): AnyResolverMap<T> {
     return { [this.token]: resolver };

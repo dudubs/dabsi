@@ -1,4 +1,4 @@
-import { CodeStackInfo } from "./CodeStackInfo";
+import { CallStackInfo } from "./CallStackInfo";
 import { FnResolver, TypeResolver } from "./FnResolver";
 import { checkAndResolve } from "./checkAndResolve";
 import { checkResolver, checkResolverSymbol } from "./checkResolver";
@@ -32,7 +32,7 @@ let count = 0;
 
 export function Resolver<T>(name?: string): TokenResolver<T> {
   return new TokenResolver(
-    new CodeStackInfo(new Error()),
+    new CallStackInfo(new Error()),
     `token:${count++}_${name || "unknown"}`
   );
 }

@@ -1,17 +1,19 @@
-import { Seq } from "immutable";
-import { Lazy } from "../patterns/lazy";
+import {Seq} from "immutable";
+
 declare global {
-  interface Array<T> {
-    toSeq(): Seq.Indexed<T>;
-  }
-  interface ReadonlyArray<T> {
-    toSeq(): Seq.Indexed<T>;
-  }
+    interface Array<T> {
+        toSeq(): Seq.Indexed<T>;
+    }
+
+    interface ReadonlyArray<T> {
+        toSeq(): Seq.Indexed<T>;
+    }
 }
 
 Object.defineProperty(Array.prototype, "toSeq", {
-  enumerable: false,
-  value() {
-    return Seq.Indexed(this);
-  },
+    enumerable: false,
+    value() {
+        return Seq.Indexed(this);
+    },
 });
+

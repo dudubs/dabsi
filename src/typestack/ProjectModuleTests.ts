@@ -5,7 +5,7 @@ import { DABSI_NODE_OPTIONS, DABSI_ROOT_DIR } from "../index";
 import { TYPESTACK_CLI_ARGS } from "./cli";
 
 testm(__filename, () => {
-  it("", () => {
+  xit("", () => {
     console.log(make("test-project"));
     console.log(make("test-sub-project"));
   });

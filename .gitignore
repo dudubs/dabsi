@@ -2,5 +2,8 @@
 node_modules
 dist
 
+bundle
+**/bundle
+
 packages/*/lib
 packages/*/index.*

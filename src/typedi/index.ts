@@ -1,2 +1,7 @@
 export { Resolver } from "./Resolver";
-import "./FnResolver";
+
+export { ModuleProvider } from "./decorators/Module";
+export { Module } from "./decorators/Module";
+export { Inject } from "./decorators/Inject";
+
+export { Injectable } from "./decorators/Injectable";

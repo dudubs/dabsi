@@ -1,26 +1,63 @@
 import { spawnSync } from "child_process";
+import { existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
-import { DABSI_CURRENT_PATH } from "../index";
+import yargs from "yargs";
+import { DABSI_CURRENT_PATH, DABSI_ROOT_DIR } from "../index";
+import { relativePosixPath } from "../modules/pathHelpers";
 import { TYPESTACK_CLI_ARGS } from "../typestack/cli";
 
-export function typestackCli(): boolean {
-  if (process.argv[2] === "typestack") {
-    spawnSync(
-      process.argv[0],
-      [
-        ...TYPESTACK_CLI_ARGS,
-        ...process.argv.slice(process.argv.indexOf("typestack") + 1),
-      ],
-      {
-        stdio: [0, 1, 2],
-        env: {
-          ...process.env,
-          TS_NODE_PROJECT: path.resolve(DABSI_CURRENT_PATH, "tsconfig.json"),
-        },
-      }
-    );
+let config!: {
+  current: string[];
+};
 
-    return true;
+export function projectCli(): boolean {
+  let cwd = DABSI_CURRENT_PATH;
+  useConfig();
+
+  if (config.current.length) {
+    cwd = path.resolve(
+      DABSI_ROOT_DIR,
+      config.current[config.current.length - 1]
+    );
+    if (!existsSync(cwd)) {
+      console.log(`No have project ${config.current}`);
+      return true;
+    }
   }
-  return false;
+
+  spawnSync(
+    process.argv[0],
+    [
+      ...TYPESTACK_CLI_ARGS,
+      ...process.argv.slice(process.argv.indexOf("typestack") + 1),
+    ],
+    {
+      stdio: "inherit",
+      cwd,
+      env: {
+        ...process.env,
+        TS_NODE_PROJECT: path.resolve(cwd, "tsconfig.json"),
+      },
+    }
+  );
+
+  return true;
+}
+
+export function typestackCli(): boolean {
+  return (
+    process.argv[2] === "typestack" && //
+    projectCli()
+  );
+}
+
+function useConfig() {
+  if (config) return config;
+  const fileName = path.join(DABSI_ROOT_DIR, "typestack.json");
+  const currentConfig = (config = JSON.parse(readFileSync(fileName, "utf8")));
+  process.on("exit", () => {
+    if (currentConfig !== config) {
+      writeFileSync(fileName, JSON.stringify(config, null, 2));
+    }
+  });
 }

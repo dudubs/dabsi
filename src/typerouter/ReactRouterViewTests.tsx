@@ -19,20 +19,20 @@ export const TestRouter = Router({
   }),
 });
 
-TestRouter.at("a", r => {
-  ReactRouter(r, { wrap: ({ children }) => <>A{children}</> });
-  r.at("aa", r => {
-    ReactRouter(r, {
+TestRouter.at("a", (r) => {
+  ReactRouterView(r, { wrap: ({ children }) => <>A{children}</> });
+  r.at("aa", (r) => {
+    ReactRouterView(r, {
       wrap: ({ children }) => <>/AA{children}</>,
       renderIndex: () => <>index</>,
-      renderDefault: p => <>default {p.route.defaultPath}</>,
+      renderDefault: (p) => <>default {p.route.defaultPath}</>,
     });
-    ReactRouter(r.at("aaa"), () => <>/AAA</>);
-    ReactRouter(r.at("aab"), () => <>/AAB</>);
+    ReactRouterView(r.at("aaa"), () => <>/AAA</>);
+    ReactRouterView(r.at("aab"), () => <>/AAB</>);
   });
-}).at("hello", r => {
-  ReactRouter(r, {
-    wrap: p => {
+}).at("hello", (r) => {
+  ReactRouterView(r, {
+    wrap: (p) => {
       // @ts-expect-error
       p.location.params.x;
       return (
@@ -43,7 +43,7 @@ TestRouter.at("a", r => {
     },
     renderIndex: () => <>Index</>,
   });
-  ReactRouter(r.at("logout"), () => <>Logout</>);
+  ReactRouterView(r.at("logout"), () => <>Logout</>);
 });
 
 const history = createMemoryHistory();
@@ -54,21 +54,21 @@ testm(__filename, () => {
   beforeEach(async () => {
     t = ReactTesterRenderer.create(
       <TestContext>
-        <ReactRouterView history={history} router={TestRouter} />
+        <ReactRouter history={history} router={TestRouter} />
       </TestContext>
     );
     await Timeout(0);
   });
 
   it("expect to wrap by 2 wrappers.", async () =>
-    test(l => l.find(TestRouter.at("a").at("aa").at("aaa"))!, "A/AA/AAA"));
+    test((l) => l.find(TestRouter.at("a").at("aa").at("aaa"))!, "A/AA/AAA"));
 
   it("expect to wrap by 2 wrappers to Index", async () =>
-    test(l => l.at("hello", { name: "World" }), "Hello World! Index"));
+    test((l) => l.at("hello", { name: "World" }), "Hello World! Index"));
 
   it("expect to wrap by 2 wrappers to Logout", async () =>
     test(
-      l => l.at("hello", { name: "World" }).at("logout"),
+      (l) => l.at("hello", { name: "World" }).at("logout"),
       "Hello World! Logout"
     ));
 
@@ -87,6 +87,7 @@ testm(__filename, () => {
       return obj.toString();
     }
   }
+
   function TestContext({ children }) {
     emit = useEmitter();
     return <>{children}</>;

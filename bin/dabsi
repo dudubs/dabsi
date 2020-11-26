@@ -2,7 +2,7 @@
 
 
 O=""
-O="$O --preserve-symlinks"
+#O="$O --preserve-symlinks"
 O="$O -r source-map-support/register"
 O="$O -r ts-node/register"
 

@@ -1,88 +1,126 @@
-import { ReactElement, ReactNode } from "react";
-import { WeakMapFactory } from "../common/map/mapFactory";
-import { createRendererComponent } from "../react/createRendererComponent";
-import { ReactorEmitter } from "../react/reactor/useEmitter";
-import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
-import { Route } from "./Route";
-import { AnyRouter, Router, TRouter } from "./Router";
-import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
+import { History } from "history";
+import {
+  createContext,
+  createElement,
+  Fragment,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
+import { useEmitted } from "../react/reactor/useEmitted";
+import { useEmitter } from "../react/reactor/useEmitter";
+import { getReactRouterMetadata } from "./ReactRouterView";
+import { getRouteByPath, Route } from "./Route";
+import { AnyRouter } from "./Router";
+import { RouterLocation } from "./RouterLocation";
 
-type _RendererProps<T extends TRouter, R extends Route = Route> = {
-  location: RouterLocation<T>;
-  route: R;
-  emit: ReactorEmitter;
-
-  state: any;
-  setState: (state: any) => void;
-};
-type _WrapperProps<T extends TRouter> = _RendererProps<T> & {
-  children: ReactNode;
-};
-type _Renderer<T extends TRouter, R extends Route = Route> = (
-  props: _RendererProps<T, R>
-) => ReactElement;
-type _Wrapper<T extends TRouter> = (props: _WrapperProps<T>) => ReactElement;
-
-export type ReactRouterOptions<T extends TRouter> = {
-  wrap?: _Wrapper<T>;
-
-  render?: _Renderer<T>;
-  renderDefault?: _Renderer<T, Extract<Route, { type: "DEFAULT" }>>;
-  renderIndex?: _Renderer<T, Extract<Route, { type: "INDEX" }>>;
-  renderNoParam?: _Renderer<T, Extract<Route, { type: "NO_PARAM" }>>;
+export type ReactRouterViewProps = {
+  router: AnyRouter;
+  history: History<any>;
 };
 
-export type ReactRouter = {
-  push(location: AnyRouterLocation);
+export function ReactRouter({
+  router: rootRouter,
+  history,
+}: ReactRouterViewProps) {
+  const emit = useEmitter();
 
-  find(router);
-};
+  const [routerState, setRouterState] = useState(() => {
+    const route = getRouteByHistory();
+    return {
+      route,
+      element: createRouteElement(route, history.location.state),
+    };
+  });
 
-export function ReactRouter<T extends TRouter>(
-  router: Router<T>,
-  optionsOrRenderer: ReactRouterOptions<T> | _Renderer<T>
-) {
-  let options: ReactRouterOptions<TRouter>;
+  useEmitted(
+    RouterLocation,
+    (location) => {
+      if (
+        location.root.router === rootRouter &&
+        location.path !== routerState.route.location.path
+      ) {
+        history.push(location.path);
+        pushRoute({
+          type: "INDEX",
+          location,
+          path: location.path,
+        });
+      }
+    },
+    [routerState]
+  );
 
-  if (typeof optionsOrRenderer === "function") {
-    options = { render: optionsOrRenderer as any };
-  } else {
-    options = optionsOrRenderer as any;
+  useEffect(
+    () =>
+      history.listen(() => {
+        if (history.location.pathname !== routerState.route.location.path) {
+          pushRoute(getRouteByHistory());
+        }
+      }),
+    [history, routerState]
+  );
+
+  return routerState.element;
+
+  function setLocationState(state) {
+    history.replace(history.location.pathname, {
+      ...history.location.state,
+      ...state,
+    });
   }
 
-  const {
-    wrap: wrapper,
-    render,
-    renderDefault,
-    renderIndex,
-    renderNoParam,
-  } = options;
+  function pushRoute(route: Route) {
+    setRouterState({
+      route,
+      element: createRouteElement(route, undefined),
+    });
+  }
 
-  const info = getReactRouterMetadata(router);
+  function createRouteElement(route: Route, state) {
+    let children: ReactNode = undefined;
 
-  wrapper && info.wrappers.push(wrapper);
+    const routerMetadata = getReactRouterMetadata(route.location.router);
 
-  const { renderer: prevRender } = info;
-
-  info.renderer = props => {
-    switch (props.route.type) {
-      case "DEFAULT":
-        if (renderDefault) return props as any;
-        break;
-      case "INDEX":
-        if (renderIndex) return renderIndex(props as any);
-        break;
-      case "NO_PARAM":
-        if (renderNoParam) return renderNoParam(props as any);
-        break;
+    if (routerMetadata.renderer) {
+      const path = route.location.path;
+      children = createElement(routerMetadata.renderer, {
+        key: path + ":index",
+        emit,
+        route,
+        location: route.location,
+        state: state?.[path],
+        setState(state) {
+          setLocationState({ [path]: state });
+        },
+      });
     }
-    return (render || prevRender)?.(props);
-  };
-}
 
-export const getReactRouterMetadata = WeakMapFactory((router: AnyRouter) => {
-  return {
-    wrappers: [] as _Wrapper<TRouter>[],
-    renderer: undefined as undefined | _Renderer<TRouter>,
-  };
-});
+    for (const location of route.location.getParents()) {
+      const path = route.location.path;
+      const routerMetadata = getReactRouterMetadata(location.router);
+      for (const [index, wrapper] of routerMetadata.wrappers.entries()) {
+        children = createElement(wrapper, {
+          key: location.path + ":wrapper:" + index,
+          emit,
+          children,
+          location,
+          route,
+          state: state?.[path],
+          setState(state) {
+            setLocationState({ [path]: state });
+          },
+        });
+      }
+    }
+
+    return createElement(Fragment, null, children);
+  }
+
+  function getRouteByHistory() {
+    return getRouteByPath(
+      RouterLocation.create(rootRouter, emit),
+      history.location.pathname
+    );
+  }
+}

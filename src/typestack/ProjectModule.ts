@@ -3,8 +3,8 @@ import path from "path";
 import { touchObject } from "../common/object/touchObject";
 import { DABSI_ROOT_DIR } from "../index";
 import { CALL_STACK_PATTERN, CallStackInfo } from "../typedi/CallStackInfo";
-import { Inject } from "../typedi/Inject";
-import { Module } from "../typedi/Module";
+import { Inject } from "../typedi";
+import { Module } from "../typedi";
 import { MakeModule } from "./MakeModule";
 import { ProjectInfo } from "./ProjectInfo";
 
@@ -18,8 +18,8 @@ export class ProjectModule {
 
   providers: { error: Error; fileName: string }[] = [];
 
-  constructor(@Inject() makeModule: MakeModule) {
-    makeModule.cli.push({ run: () => this.init() });
+  constructor(@Inject() mMake: MakeModule) {
+    mMake.cli.push({ run: () => this.init() });
   }
 
   async init() {

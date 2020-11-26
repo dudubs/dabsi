@@ -8,9 +8,9 @@
     "./dist",
     "./src/browser",
     "./src/**/browser",
-    "./src/system/browser",
+    "./src/system-old/browser",
     "./src/typedata/old",
     "./src/typedata/DataTable",
-    "./src/system/server/acl/old/**"
+    "./src/system-old/server/acl/old/**"
   ]
 }

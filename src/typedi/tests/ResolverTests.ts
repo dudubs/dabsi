@@ -64,7 +64,7 @@ testm(__filename, () => {
   it("expect to consume resolver", () => {
     expect(
       Resolver.checkAndResolve(
-        Consumer([r1], name => `Hello ${name}!`),
+        Consumer([r1], (name) => `Hello ${name}!`),
         r1.provide("World")
       )
     ).toEqual("Hello World!");

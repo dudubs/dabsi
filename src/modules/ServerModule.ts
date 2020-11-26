@@ -1,17 +1,19 @@
-import { Module } from "../typedi/Module";
-import { Inject } from "../typedi/Inject";
+import { Module } from "../typedi";
+import { Inject } from "../typedi";
 import { Cli } from "./Cli";
 
 @Module()
 export class ServerModule {
   public readonly cli = new Cli();
 
+  log = log.get("SERVER");
+
   constructor(@Inject() cli: Cli) {
     cli.connect(
       "start",
       this.cli.push({
         run: () => {
-          console.log("starting server...");
+          this.log.info("starting...");
         },
       })
     );

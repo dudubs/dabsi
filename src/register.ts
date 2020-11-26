@@ -1,2 +1,3 @@
 import "./common/register";
-import "./typedi";
+import "./typedi/register";
+import "./logging/register";

@@ -45,6 +45,6 @@ export class CallStackInfo {
   }
 
   @Lazy() get description() {
-    return `At ${this.relativeFileName}, line: ${this.lineInfo.lineNumber}`;
+    return `\n At ${this.relativeFileName}, line: ${this.lineInfo.lineNumber}`;
   }
 }

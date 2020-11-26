@@ -2,7 +2,10 @@ import React, { createElement, ReactElement, useMemo } from "react";
 import { Fn } from "../../common/typings2/Fn";
 import { OmitKeys } from "../../common/typings2/OmitKeys";
 import { WeakId } from "../../common/WeakId";
-import { ReactRouter, ReactRouterOptions } from "../../typerouter/ReactRouter";
+import {
+  ReactRouterProps,
+  ReactRouterOptions,
+} from "../../typerouter/ReactRouterView";
 import { Router, TRouter } from "../../typerouter/Router";
 import { AnyWidgetConnection, WidgetElementState } from "./Widget";
 import { WidgetViewProps } from "./WidgetView";
@@ -56,11 +59,11 @@ export function WidgetRouterView<
         <WidgetViewLoader
           key={WeakId(indexProps.location)}
           elementState={indexProps.state}
-          onElementStateChange={state => {
+          onElementStateChange={(state) => {
             indexProps.setState(state);
           }}
           connection={connection}
-          children={props => createElement(Component, { props, indexProps })}
+          children={(props) => createElement(Component, { props, indexProps })}
         />
       );
     },

@@ -15,12 +15,12 @@ export function mainCli(): boolean {
   yargs.command(
     "test",
     "",
-    y => y,
+    (y) => y,
     ({ _: [_, ...args] }) => {
       let tests: string[] = [];
       if (args.length) {
         for (let arg of args) {
-          const path = resolve(DABSI_PATH, arg);
+          const path = resolve(DABSI_CURRENT_PATH, arg);
           if (!fs.existsSync(path)) {
             console.log(`invalid path ${path}`);
             continue;
@@ -31,27 +31,30 @@ export function mainCli(): boolean {
           }
           tests.push(
             ...[...readdirRecursiveSync(path)]
-              .filter(p => /Tests\.tsx?$/.test(p))
-              .map(p => relative(DABSI_CURRENT_PATH, p))
+              .filter((p) => /Tests\.tsx?$/.test(p))
+              .map((p) => relative(DABSI_CURRENT_PATH, p))
           );
         }
       } else {
         tests.push(
           ...[...readdirRecursiveSync(DABSI_SRC_PATH)]
-            .filter(p => /Tests\.tsx?$/.test(p))
-            .map(p => relative(DABSI_CURRENT_PATH, p))
+            .filter((p) => /Tests\.tsx?$/.test(p))
+            .map((p) => relative(DABSI_CURRENT_PATH, p))
         );
       }
       spawnSync(
         process.argv[0],
         [
           ...DABSI_NODE_OPTIONS, //
-          ...["-r", path.join(DABSI_PATH, "src", "register.ts")],
           "--",
           relative(
             DABSI_CURRENT_PATH,
             path.join(NODE_MODULES_PATH, "jasmine/bin/jasmine.js")
           ),
+          `--helper=${relative(
+            DABSI_CURRENT_PATH,
+            path.join(DABSI_SRC_PATH, "register.ts")
+          )}`,
           `--helper=${relative(
             DABSI_CURRENT_PATH,
             path.join(DABSI_SRC_PATH, "jasmine/register.ts")
@@ -60,7 +63,7 @@ export function mainCli(): boolean {
           ...tests,
         ],
         {
-          stdio: [0, 1, 2],
+          stdio: "inherit",
         }
       );
     }

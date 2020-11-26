@@ -1,11 +1,11 @@
 import "reflect-metadata";
 import { Forward } from "../Forward";
-import { Inject } from "../Inject";
-import { Injectable } from "../Injectable";
+import { Inject } from "..";
+import { Injectable } from "../decorators/Injectable";
 import { Resolver } from "../Resolver";
 
 testm(__filename, () => {
-  it("sanity", done => {
+  it("sanity", (done) => {
     class B {
       foo = 1;
     }

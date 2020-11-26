@@ -4,8 +4,8 @@ import { touchSet } from "../common/map/touchSet";
 import { DABSI_CURRENT_PATH, DABSI_PATH } from "../index";
 import { Cli, CliError } from "../modules/Cli";
 import { relativePosixPath } from "../modules/pathHelpers";
-import { Inject } from "../typedi/Inject";
-import { Module } from "../typedi/Module";
+import { Inject } from "../typedi";
+import { Module } from "../typedi";
 
 @Module()
 export class MakeModule {
@@ -15,6 +15,8 @@ export class MakeModule {
         throw new CliError(`You can't run make on "${DABSI_PATH}".`);
     },
   });
+
+  log = log.get("MAKE");
 
   constructor(@Inject() cli: Cli) {
     cli.connect("make", this.cli);
@@ -27,9 +29,7 @@ export class MakeModule {
     }
   }
   async makeFile(outFileName, data: string) {
-    console.log(
-      `make "${relativePosixPath(DABSI_CURRENT_PATH, outFileName)}".`
-    );
+    this.log(`make "${relativePosixPath(DABSI_CURRENT_PATH, outFileName)}".`);
     if (process.env.MAKE_TO_STDOUT) {
       console.log(("\n" + data).replace(/\n/g, "\n  ").replace(/\n/, ""));
     } else {

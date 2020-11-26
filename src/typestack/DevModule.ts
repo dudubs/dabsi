@@ -2,25 +2,26 @@ import { spawn } from "child_process";
 import { pushAsyncHook } from "../common/async/pushAsyncHook";
 import { Awaitable } from "../common/typings2/Async";
 import { Cli } from "../modules/Cli";
-import { Inject } from "../typedi/Inject";
-import { Module } from "../typedi/Module";
+import { Inject } from "../typedi";
+import { Module } from "../typedi";
 
 @Module()
 export class DevModule {
+  log = log.get("DEV");
+
   constructor(@Inject() cli: Cli) {
-    cli.connect("test", new Cli()).push({
-      build: y => y.boolean("dev"),
-      runAsParent: args => {
-        return new Promise(async next => {
-          if (!args.dev || args.skipDev) {
-            if (args.skipDev) {
-              await this.hooks.runAsChild();
-            }
-            return next();
+    cli.push({
+      build: (y) => y.boolean("dev"),
+      runAsParent: (args) =>
+        new Promise(async (next) => {
+          if (args.dev && !args.skipDev) {
+            await this.hooks.runAsParent();
+            this.reload();
+            return;
           }
-          return this.hooks.runAsParent();
-        });
-      },
+          await this.hooks.runAsChild();
+          return next();
+        }),
     });
   }
 
@@ -34,13 +35,13 @@ export class DevModule {
   reload() {
     if (this.process) {
       this.process.kill();
-      console.log("reloading");
+      this.log.info("reloading");
     }
     this.process = spawn(
       process.argv[0],
       [...process.execArgv, ...process.argv.slice(1), "--skip-dev"],
       {
-        stdio: [0, 1, 2],
+        stdio: "inherit",
         env: process.env,
       }
     );

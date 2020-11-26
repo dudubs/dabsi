@@ -1,7 +1,7 @@
-import { ProjectProvider } from "../../modules/ProjectProvider";
-import { Module } from "../../typedi/Module";
+import { ProjectModuleProvider } from "../../modules/ProjectModuleProvider";
+import { Module } from "../../typedi";
 
 @Module({
-  providers: [ProjectProvider()],
+  providers: [ProjectModuleProvider()],
 })
 export class TestFrameworkModule {}

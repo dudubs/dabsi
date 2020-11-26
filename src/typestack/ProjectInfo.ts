@@ -9,6 +9,8 @@ export class ProjectInfo {
 
   bundleDir = path.join(this.rootDir, "bundle");
 
+  srcDir = path.join(this.rootDir, "src");
+
   generatedDir = path.join(this.rootDir, "generated");
 
   tsConfigInfo = new TsConfigInfo(path.join(this.rootDir, "tsconfig.json"));

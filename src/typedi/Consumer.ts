@@ -1,7 +1,7 @@
-import { checkResolver } from "./checkResolver";
+import { checkResolver } from "./operators/checkResolver";
 import { resolve } from "./resolve";
-import { ArrayResolver } from "./ArrayResolver";
-import { ObjectResolver } from "./ObjectResolver";
+import { ArrayResolver } from "./resolvers/ArrayResolver";
+import { ObjectResolver } from "./resolvers/ObjectResolver";
 import {
   CustomResolver,
   ResolveMapType,
@@ -45,9 +45,9 @@ export function _consumeMap<T, U extends ResolverMap<any>>(
   create: (context: ResolveMapType<U>) => T
 ): Resolver<T> {
   const depsResolver = ObjectResolver(deps);
-  return (context => {
+  return ((context) => {
     return create(resolve(depsResolver, context));
-  }).toCheck(context => {
+  }).toCheck((context) => {
     checkResolver(depsResolver, context);
   });
 }
@@ -64,16 +64,16 @@ export function Consumer<T, U extends ConsumeDeps>(
 export function Consumer(deps, create): any {
   if (Array.isArray(deps)) {
     const depsResolver = ArrayResolver(deps);
-    return (context => create(...resolve(depsResolver, context))).toCheck(
-      context => {
+    return ((context) => create(...resolve(depsResolver, context))).toCheck(
+      (context) => {
         checkResolver(depsResolver, context);
       }
     );
   }
   const depsResolver = ObjectResolver(deps);
-  return (context => {
+  return ((context) => {
     return create(resolve(depsResolver, context));
-  }).toCheck(context => {
+  }).toCheck((context) => {
     checkResolver(depsResolver, context);
   });
 }

@@ -1,19 +1,19 @@
 import { touchMap } from "../common/map/touchMap";
 import { Constructor } from "../common/typings2/Constructor";
 import { Resolver } from "./index";
-import { getInjectableResolver } from "./Injectable";
-import { moduleOptionsMap } from "./Module";
+import { getInjectableResolver } from "./decorators/Injectable";
+import { moduleOptionsMap } from "./decorators/Module";
 
-export type ChildModuleInternface<Child> = {
-  registerAsParentModule(child: Child);
+export type ChildModuleInterface<Child> = {
+  registerChildModule(child: Child);
 };
 
 export type ParentModuleInterface<Parent> = {
-  registerAsChildModule(parent: Parent);
+  registerParentModule(parent: Parent);
 };
 
 export type ModuleInterface<Parent = any, Child = any> = Partial<
-  ChildModuleInternface<Child> & ParentModuleInterface<Parent>
+  ChildModuleInterface<Child> & ParentModuleInterface<Parent>
 >;
 
 export class ModuleRunner {
@@ -38,8 +38,8 @@ export class ModuleRunner {
       const instance: ModuleInterface = new module(...args);
       for (const dependencyModule of options.dependencies || []) {
         const parent: ModuleInterface = this.get(dependencyModule);
-        parent.registerAsParentModule?.(instance);
-        instance.registerAsChildModule?.(parent);
+        parent.registerChildModule?.(instance);
+        instance.registerParentModule?.(parent);
       }
 
       return instance;
@@ -47,5 +47,5 @@ export class ModuleRunner {
   }
 }
 
-// registerAsParentModule
-// registerAsChildModule
+// registerChildModule
+// registerParentModule

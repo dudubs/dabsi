@@ -1,11 +1,11 @@
 import { CallStackInfo } from "./CallStackInfo";
-import { FnResolver, TypeResolver } from "./FnResolver";
-import { checkAndResolve } from "./checkAndResolve";
-import { checkResolver, checkResolverSymbol } from "./checkResolver";
-import { checkResolverContext } from "./checkResolverContext";
+import { FnResolver, TypeResolver } from "./resolvers/FnResolver";
+import { checkAndResolve } from "./operators/checkAndResolve";
+import { checkResolver, checkResolverSymbol } from "./operators/checkResolver";
+import { checkResolverContext } from "./operators/checkResolverContext";
 import { resolve, resolveSymbol } from "./resolve";
-import { ObjectResolver } from "./ObjectResolver";
-import { TokenResolver } from "./TokenResolver";
+import { ObjectResolver } from "./resolvers/ObjectResolver";
+import { TokenResolver } from "./resolvers/TokenResolver";
 import { Touch } from "./Touch";
 
 export type ResolverMap<T> = Record<string, Resolver<T>>;
@@ -43,18 +43,3 @@ Resolver.check = checkResolver;
 Resolver.checkContext = checkResolverContext;
 Resolver.checkAndResolve = checkAndResolve;
 Resolver.object = ObjectResolver;
-
-declare global {
-  interface String extends CustomResolver<string> {}
-
-  interface Number extends CustomResolver<number> {}
-
-  interface Boolean extends CustomResolver<boolean> {}
-
-  interface Date extends CustomResolver<Date> {}
-}
-[String, Number, Boolean, Date].forEach(type => {
-  type.prototype[resolveSymbol] = function () {
-    return this as any;
-  };
-});

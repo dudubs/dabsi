@@ -1,23 +1,23 @@
 import yargs from "yargs";
 import { pushAsyncHook } from "../common/async/pushAsyncHook";
 import { Awaitable } from "../common/typings2/Async";
-import { Module } from "../typedi/Module";
+import { Module } from "../typedi";
 
 @Module()
 export class Cli {
   connect(name: string, cli: Cli): this {
     cli.push({
-      runAsParent: args => {
+      runAsParent: (args) => {
         return this.hooks.runAsParent(args);
       },
     });
     return this.push({
-      build: y =>
+      build: (y) =>
         y.command(
           name,
           "",
-          y => cli.hooks.build(y),
-          async args => {
+          (y) => cli.hooks.build(y),
+          async (args) => {
             await this.hooks.runAsParent(args);
             await cli.run(args);
           }
@@ -58,7 +58,7 @@ export class Cli {
       hooks: { build: prevBuild },
     } = this;
     const { build: nextBuild } = options;
-    nextBuild && (this.hooks.build = y => nextBuild(prevBuild(y)));
+    nextBuild && (this.hooks.build = (y) => nextBuild(prevBuild(y)));
     return this;
   }
 }

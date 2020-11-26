@@ -1,8 +1,7 @@
 import path from "path";
 import webpack from "webpack";
-import { NODE_MODULES_PATH } from "../system/server/cli/createBrowserWebpack";
-import { Inject } from "../typedi/Inject";
-import { Module } from "../typedi/Module";
+import { NODE_MODULES_PATH } from "../system-old/server/cli/createBrowserWebpack";
+import { Inject, Module } from "../typedi";
 import { Builder } from "./Builder";
 import { Cli } from "./Cli";
 
@@ -22,7 +21,7 @@ export class BrowserCli extends Cli {
     this.connect(
       "pack",
       this.packCli.push({
-        build: y => y.boolean(["w", "watch"]),
+        build: (y) => y.boolean(["w", "watch"]),
         run: ({ w, watch = w }) => {
           this.init();
           return () => {
@@ -58,7 +57,7 @@ export class BrowserCli extends Cli {
         warnings: false,
       },
       resolve: {
-        symlinks: false,
+        // symlinks: false,
         alias: {
           // ...getAliases(),
           // dabsi: resolve(__dirname, "..", "dabsi-src"),

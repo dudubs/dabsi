@@ -2,18 +2,21 @@ import { mapObject } from "../../../common/object/mapObject";
 import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { Payload } from "../../../common/typings2/Payload";
 import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { RpcMap } from "../../rpc-map/RpcMap";
+import { RpcType } from "../../Rpc";
+import { RpcConfigMap, RpcMap } from "../../rpc-map/RpcMap";
 
 import {
+  _InputElement,
   AnyInput,
   Input,
   InputElement,
   InputError,
+  InputType,
   InputValue,
   InputValueConfig,
   InputValueData,
   InputValueElement,
+  TInput,
 } from "../Input";
 import { InputMapHandler } from "./InputMapHandler";
 
@@ -25,8 +28,11 @@ export type InputErrorMap<T extends AnyInputRecord> = Payload<{
   };
 }>;
 
+export type TInputMap = Record<string, TInput>;
+
 export type InputMap<T extends AnyInputRecord> = Input<{
   TInputMap: T;
+  Children: T;
   Commands: {};
   Controller: RpcMap<T>;
   Props: {
@@ -37,7 +43,8 @@ export type InputMap<T extends AnyInputRecord> = Input<{
       [K in keyof T]: InputElement<T[K]>;
     };
   };
-  Config: RpcUnresolvedConfig<RpcMap<T>>;
+
+  Config: RpcConfigMap<T>;
 
   ValueConfig: UndefinedIfEmptyObject<
     PartialUndefinedKeys<{ [K in keyof T]: InputValueConfig<T[K]> }>

@@ -10,6 +10,8 @@ export type NullableInput<
 
     Commands: {};
 
+    Children: T["Children"];
+
     ValueData: T["ValueData"] | If<N, Nullable>;
 
     Value: T["Value"] | If<N, Nullable>;

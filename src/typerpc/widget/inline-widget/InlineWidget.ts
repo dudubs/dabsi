@@ -3,10 +3,14 @@ import { If, IsUndefined } from "../../../common/typings2/boolean";
 import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { NoRpc } from "../../NoRpc";
 import {
+  _RpcConnection,
+  _RpcUnresolvedConfig,
   AnyRpc,
   RpcCommand,
   RpcConnection,
+  RpcType,
   RpcUnresolvedConfig,
+  TRpc,
 } from "../../Rpc";
 import {
   AnyWidget,
@@ -15,6 +19,7 @@ import {
   WidgetElement,
   WidgetElementState,
   WidgetHandlerClass,
+  WidgetType,
 } from "../Widget";
 import { InlineWidgetHandler } from "./InlineWidgetHandler";
 
@@ -55,6 +60,8 @@ export type InlineWidget<
   };
   Element: [T["Element"], WidgetElement<Target> | UndefinedTarget];
   Controller: T["Controller"];
+  Children: {};
+
   Commands: {
     target: RpcCommand & { handler: "handleTarget" };
   };

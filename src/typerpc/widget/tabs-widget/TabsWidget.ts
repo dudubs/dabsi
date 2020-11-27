@@ -10,7 +10,7 @@ export type AnyTabsWidget = TabsWidget<AnyWidgetRecord>;
 
 export type TabsWidget<T extends AnyWidgetRecord> = Widget<{
   TabMap: T;
-
+  Children: {};
   Controller: RpcMap<T>;
 
   Commands: {

@@ -1,3 +1,4 @@
+import { Awaitable } from "../../common/typings2/Async";
 import {
   AbstractRpcHandler,
   AnyRpc,
@@ -5,6 +6,7 @@ import {
   RpcError,
   RpcResolvedHandler,
   RpcType,
+  RpcUnresolvedConfig,
 } from "../Rpc";
 import { AnyRpcMap } from "./RpcMap";
 
@@ -13,6 +15,26 @@ export class RpcMapHandler<R extends AnyRpcMap, T extends RpcType<R>["TRpcMap"]>
   implements IRpcHandler<AnyRpcMap> {
   handle([key, payload]): Promise<any> {
     return this.getTargetHandler(key).then(c => c.handle(payload));
+  }
+
+  getChildConfig(key): Awaitable<RpcUnresolvedConfig<AnyRpc>> {
+    throw new Error();
+  }
+
+  async getChildRpc(data) {
+    return this.rpc.children[data];
+  }
+
+  async getChildHandler(key) {
+    if (!this.getChildConfig) throw new Error();
+    return this.rpc.children[key].resolveRpcHandler(
+      await this.getChildConfig(key),
+      this
+    );
+  }
+
+  async route(path) {
+    return this.getChildHandler(path);
   }
 
   async getTargetHandler(key: string): Promise<RpcResolvedHandler<AnyRpc>> {

@@ -25,6 +25,7 @@ export type EnumInput<K extends string, N extends boolean> = NullableInput<
     Config: undefined;
 
     Element: {};
+    Children: {};
 
     Error: "INVALID_ENUM_KEY";
   }

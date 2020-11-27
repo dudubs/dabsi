@@ -4,7 +4,8 @@ import yargs from "yargs";
 import { DataResolvers } from "../../../typedata/DataResolvers";
 import { PermissionManager } from "../acl/PermissionManager";
 import { User } from "../acl/User";
-import { createSysteexpressModule } from "../createSysteexpressModule";
+import { createSysteexpressModule } from "../createSystemExpress";
+
 import { SystemBootstrap } from "../SystemBootstrap";
 import {
   createBrowserWebpack,

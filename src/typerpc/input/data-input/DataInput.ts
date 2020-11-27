@@ -17,7 +17,6 @@ import { NullableInput } from "../nullable-input/NullableInput";
 
 import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { DataInputHandler } from "./DataInputHandler";
-import { DataInputTester } from "./DataInputTester";
 
 export type WithDataKey = {
   $key: string;
@@ -115,6 +114,7 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
     >;
 
     Element: {};
+    Children: {};
 
     Controller: _Types<T>["Table"];
 

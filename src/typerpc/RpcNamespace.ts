@@ -13,6 +13,7 @@ import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 export type RpcNamespace = Rpc<{
   Handler: {};
   Connection: {};
+  Children: {};
   Config: {
     getNamespaceConfig(
       rpc: AnyRpc,

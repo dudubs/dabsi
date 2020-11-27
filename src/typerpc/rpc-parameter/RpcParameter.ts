@@ -4,6 +4,7 @@ import {
   Rpc,
   RpcConfig,
   RpcConnection,
+  RpcType,
   RpcUnresolvedConfig,
 } from "../Rpc";
 import { RpcParameterHandler } from "./RpcParameterHandler";
@@ -16,6 +17,10 @@ export type RpcParameter<T extends TRpcParameter> = Rpc<{
   Handler: {};
 
   Connection: (data: T["Data"]) => RpcConnection<T["Target"]>;
+
+  Children: {
+    target: T["Target"];
+  };
 
   Props: {
     parameterTarget: T["Target"];

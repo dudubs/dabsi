@@ -1,8 +1,9 @@
-import { AbstractRpcHandler, IRpcHandler, Rpc } from "./Rpc";
+import { AbstractRpcHandler, IRpcHandler, Rpc, RpcType } from "./Rpc";
 
 export type NoRpc = Rpc<{
   Handler: {};
   Connection: {};
+  Children: {};
   Config: undefined;
   Props: {};
 }>;
@@ -17,3 +18,5 @@ export const NoRpc: NoRpc = Rpc<NoRpc>({
     }
   },
 });
+
+export type NoRpcType = RpcType<NoRpc>;

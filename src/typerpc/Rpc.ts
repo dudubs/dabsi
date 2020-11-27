@@ -12,11 +12,12 @@ import { inspect } from "../logging/inspect";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
 
-export type RpcCommand = (payload: any) => Promise<any>;
+export type RpcCommand = (path: any[], payload: any) => Promise<any>;
 
 export type TRpc = {
   Handler: object;
   Connection: any;
+  Children: Record<string, AnyRpc>;
   Config: object | undefined;
   Props: object;
 };
@@ -30,6 +31,8 @@ export type Rpc<T extends TRpc> = WithMetaType<{
     readonly options: RpcOptions<TRpc>;
 
     readonly service: _RpcConnection<T>;
+
+    children: T["Children"];
 
     createRpcConnection(command: RpcCommand): T["Connection"];
 
@@ -90,11 +93,13 @@ export type RpcResolvedHandler<T extends BasedRpc> = _RpcResolvedHandler<
   RpcType<T>
 >;
 
-type _RpcResolvedHandler<T extends TRpc> = T["Handler"] & {
+export type _RpcResolvedHandler<T extends TRpc> = T["Handler"] & {
   config: _RpcResolvedConfig<T>;
   rpc: Rpc<T>;
   handle(payload: any): Awaitable<any>;
   parent: _RpcResolvedHandler<TRpc> | null;
+
+  route?(data: any): Awaitable<RpcResolvedHandler<AnyRpc>>;
 };
 
 export type IRpcHandler<T extends BasedRpc> = _RpcResolvedHandler<RpcType<T>>;
@@ -110,6 +115,8 @@ export abstract class AbstractRpcHandler<
   ) {}
 
   abstract handle(payload: any): Promise<any>;
+
+  getChildConfig?(key: string): Awaitable<RpcUnresolvedConfig<AnyRpc>>;
 }
 
 export type RpcHandlerClass<T extends AnyRpc, P = {}> = new (
@@ -140,7 +147,7 @@ export type RpcOptions<
     props: RpcPropsOption<T>;
   },
   {
-    connect(this: Rpc<T>, command: RpcCommand): T["Connection"];
+    connect(this: Rpc<T>, path: any[], command: RpcCommand): T["Connection"];
 
     handler: RpcHandlerClass<Rpc<T>>;
   }
@@ -159,6 +166,9 @@ export const AnyRpc: AnyRpc = {
     throw new Error();
   },
   get service(): any {
+    throw new Error();
+  },
+  get children(): any {
     throw new Error();
   },
   createRpcConnection(handler) {
@@ -232,12 +242,15 @@ export const AnyRpc: AnyRpc = {
 export type BasedRpc<T extends TRpc = TRpc> = WithMetaType<{ TRpc: T }>;
 
 export type RpcType<T extends BasedRpc> = MetaType<T>["TRpc"];
+export type RpcMapType<T extends Record<string, BasedRpc>> = {
+  [K in keyof T]: RpcType<T[K]>;
+};
 
 export type RpcHook<R extends BasedRpc, T extends Partial<TRpc>> = Rpc<
   Extract<Override<RpcType<R>, T>, TRpc>
 >;
 
-type _RpcUnresolvedConfig<T extends TRpc> =
+export type _RpcUnresolvedConfig<T extends TRpc> =
   | T["Config"]
   | If<Not<Is<T["Config"], Fn>>, ConfigFactory<T["Config"]>>
   // TODO: $configContext, $genericConfigContext
@@ -260,7 +273,7 @@ export class RpcError extends Error {}
 
 export type RpcConnection<T extends BasedRpc> = _RpcConnection<RpcType<T>>;
 
-type _RpcConnection<T extends TRpc> = T["Connection"] & BasedRpc<T>;
+export type _RpcConnection<T extends TRpc> = T["Connection"] & BasedRpc<T>;
 
 export function commandRpcService<T extends AnyRpc>(
   rpc: T,

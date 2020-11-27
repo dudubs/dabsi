@@ -6,6 +6,8 @@ import { TextInputHandler } from "./TextInputHandler";
 import { TextLoaderError, TextLoaderOptions } from "./TextInputLoader";
 
 export type TextInput<N extends boolean = any> = Input<{
+  Children: {};
+
   Error: TextLoaderError;
 
   ValueData: string;

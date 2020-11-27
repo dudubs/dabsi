@@ -34,6 +34,8 @@ export type ArrayInput<
 > = Input<{
   TArrayInput: T;
 
+  Children: {};
+
   ItemDataValue: InputValueData<Item>;
   Commands: {
     addNewItem: {

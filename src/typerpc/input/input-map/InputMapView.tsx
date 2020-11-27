@@ -9,12 +9,12 @@ import { AbstractInputView } from "../AbstractInputView";
 import { AnyInputConnection } from "../Input";
 import { InputViewProps } from "../InputView";
 import { InputViewChildren } from "../InputViewChildren";
-import { AnyInputMap, AnyInputRecord, InputMap } from "./InputMap";
+import { AnyInputMap } from "./InputMap";
 
-export type AnyInputMapConnection = RpcConnection<InputMap<AnyInputRecord>>;
+export type AnyInputMapConnection = RpcConnection<AnyInputMap>;
 
 export class InputMapView<
-  C extends RpcConnection<InputMap<AnyInputRecord>>
+  C extends RpcConnection<AnyInputMap>
 > extends AbstractInputView<
   C,
   InputViewProps<C> & {

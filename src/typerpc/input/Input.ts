@@ -16,6 +16,7 @@ import {
   RpcType,
   RpcUnresolvedConfig,
   RpcPropsOption,
+  TRpc,
 } from "../Rpc";
 import { IsGenericConfig } from "../GenericConfig";
 import {
@@ -42,6 +43,8 @@ export type TInput = {
 
   Controller: TWidget["Controller"];
 
+  Children: TRpc["Children"];
+
   Props: TWidget["Props"];
 
   Config: TWidget["Config"];
@@ -58,6 +61,7 @@ export type TInput = {
 };
 
 export type InputElement<T extends AnyInput> = InputType<T>["Element"];
+export type _InputElement<T extends TInput> = T["Element"];
 
 /*
 
@@ -68,6 +72,7 @@ export type InputElement<T extends AnyInput> = InputType<T>["Element"];
 
  */
 export type Input<T extends TInput> = Widget<{
+  Children: T["Children"];
   Commands: T["Commands"] & {
     check: {
       (data: T["ValueData"]): T["Error"] | undefined;
@@ -171,14 +176,14 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
 
 export type InputValue<T extends BasedInput> = InputType<T>["Value"];
 
-export type InputValueElement<T extends BasedInput> = InputType<
-  T
->["ValueElement"];
+export type InputValueElement<
+  T extends BasedInput
+> = InputType<T>["ValueElement"];
 
 export type InputError<T extends BasedInput> = InputType<T>["Error"];
 
 export type InputValueData<T extends BasedInput> = InputType<T>["ValueData"];
 
-export type InputValueConfig<T extends BasedInput> = InputType<
-  T
->["ValueConfig"];
+export type InputValueConfig<
+  T extends BasedInput
+> = InputType<T>["ValueConfig"];

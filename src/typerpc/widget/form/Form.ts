@@ -56,6 +56,7 @@ export type Form<
     input: RpcConnection<Input>;
   };
 
+  Children: {};
   Commands: {
     submit: {
       (data: InputValueData<Input>): Result;

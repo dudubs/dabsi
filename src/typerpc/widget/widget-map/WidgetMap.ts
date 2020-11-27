@@ -1,5 +1,4 @@
-import { RpcConnection, RpcHandlerClass, RpcUnresolvedConfig } from "../../Rpc";
-import { RpcMap } from "../../rpc-map/RpcMap";
+import { RpcConfigMap, RpcMap } from "../../rpc-map/RpcMap";
 import {
   AnyWidget,
   Widget,
@@ -14,9 +13,12 @@ export type AnyWidgetMap = WidgetMap<AnyWidgetRecord>;
 
 export type WidgetMap<T extends AnyWidgetRecord> = Widget<{
   Connection: {};
-  Config: RpcUnresolvedConfig<RpcMap<T>>;
+  Children: T;
+  Config: RpcConfigMap<T>;
   Handler: {};
-  Props: { targetMap: T };
+  Props: {
+    targetMap: T;
+  };
   Element: {
     elementMap: { [K in keyof T]: WidgetElement<T[K]> };
   };

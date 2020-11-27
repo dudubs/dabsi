@@ -40,6 +40,7 @@ type _Types<T extends TDataInputMap> = T & DataInputTypes<T>;
 export type DataInputMap<T extends TDataInputMap> = Input<{
   Types: _Types<T>;
 
+  Children: {};
   Commands: {};
 
   ValueData: Record<string, InputValueData<T["Target"]>>;

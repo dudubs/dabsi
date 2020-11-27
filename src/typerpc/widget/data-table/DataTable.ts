@@ -16,6 +16,7 @@ import {
   AnyRpc,
   RpcConfig,
   RpcConnection,
+  RpcType,
   RpcUnresolvedConfig,
 } from "../../Rpc";
 import { RpcFn } from "../../rpc-fn/RpcFn";
@@ -131,6 +132,8 @@ export type DataTable<
   >;
 
   Commands: {};
+
+  Children: {};
 
   Connection: {
     getRows: GetRowsFn;

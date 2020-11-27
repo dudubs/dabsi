@@ -13,6 +13,8 @@ export type NumberInput = Input<{
 
   Value: number;
 
+  Children: {};
+
   ValueElement: number;
 
   ValueConfig: number | undefined;

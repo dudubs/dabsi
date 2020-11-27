@@ -11,6 +11,8 @@ import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys
 import { Union } from "../../common/typings2/Union";
 import { NoRpc } from "../NoRpc";
 import {
+  _RpcConnection,
+  _RpcUnresolvedConfig,
   AnyRpc,
   BasedRpc,
   IRpcHandler,
@@ -37,10 +39,12 @@ type _WidgetConnection<T extends TWidget> = T["Connection"] & {
     ...args: Parameters<T["Commands"][K]>
   ): Promise<ReturnType<T["Commands"][K]>>;
 };
+export type TWidgetMap = Record<string, TWidget>;
 
 export type TWidget = {
   Connection: object;
   Config: TRpc["Config"];
+  Children: TRpc["Children"];
   Handler: TRpc["Handler"];
   Props: TRpc["Props"];
   Element: object;
@@ -54,6 +58,10 @@ export type Widget<
   C extends TWidget["Commands"] = T["Commands"]
 > = Rpc<{
   TWidget: T;
+
+  Widget: T;
+
+  Children: {};
 
   Config: T["Config"];
 
@@ -212,15 +220,15 @@ export type BasedWidget<T extends TWidget = TWidget> = BasedRpc<
 >;
 
 export type WidgetType<T extends BasedWidget> = RpcType<T>["TWidget"];
-export type WidgetElementState<T extends BasedWidget> = WidgetType<
-  T
->["ElementState"];
+export type WidgetElementState<
+  T extends BasedWidget
+> = WidgetType<T>["ElementState"];
 
 export type WidgetElement<T extends BasedWidget> = WidgetType<T>["Element"];
 
-export type WidgetController<T extends BasedWidget> = WidgetType<
-  T
->["Controller"];
+export type WidgetController<
+  T extends BasedWidget
+> = WidgetType<T>["Controller"];
 
 export type WidgetHook<
   R extends AnyWidget,

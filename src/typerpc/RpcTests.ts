@@ -88,9 +88,12 @@ testm(__dirname, () => {
           return $ => $({ ...config, secondConfig: 2 });
         },
       })
-        .resolveRpcHandler({
-          firstConfig: 1,
-        })
+        .resolveRpcHandler(
+          {
+            firstConfig: 1,
+          },
+          null
+        )
         .then(h => h.config)
     ).toEqual({ firstConfig: 1, secondConfig: 2 });
   });

@@ -4,7 +4,7 @@ import { Resolver } from "../../typedi";
 import { AclUsersManager } from "../common/AclUsersManager";
 import { SystemApp } from "../common/SystemApp";
 import { SystemRequestResolvers } from "./SystemRequestResolvers";
-import { SystemSession } from "../../system/core/server/SystemSession";
+import { SystemSession } from "../../system/core/SystemSession";
 import { SystemTester, testSystemAs } from "./SystemTester";
 import objectContaining = jasmine.objectContaining;
 

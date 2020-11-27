@@ -57,7 +57,10 @@ export function testRpc<T extends AnyRpc>(
     describe(`config:${title}`, () => {
       let configHandler;
       beforeAll(async () => {
-        handler = configHandler = await rpc.resolveRpcHandler(unresolvedConfig);
+        handler = configHandler = await rpc.resolveRpcHandler(
+          unresolvedConfig,
+          null
+        );
       });
       beforeEach(() => {
         handler = configHandler;

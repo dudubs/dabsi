@@ -1,3 +1,4 @@
+import { Constructor } from "../common/typings2/Constructor";
 import { Type } from "../common/typings2/Type";
 import { checkResolverSymbol } from "./operators/checkResolver";
 import { checkTypeResolver } from "./operators/checkTypeResolver";
@@ -21,11 +22,14 @@ declare global {
       check: (context: ResolverMap<any>) => void
     ): CustomResolver<T>;
 
-    provide<T>(this: Type<T>, resolver: Resolver<T>): ResolverMap<T>;
+    provide<T extends Constructor<any>>(
+      this: T,
+      resolver: Resolver<InstanceType<T>>
+    ): ResolverMap<T>;
   }
 }
 
-[String, Number, Boolean, Date].forEach((type) => {
+[String, Number, Boolean, Date].forEach(type => {
   type.prototype[resolveSymbol] = function () {
     return this as any;
   };

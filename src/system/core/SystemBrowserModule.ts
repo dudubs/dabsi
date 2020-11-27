@@ -9,5 +9,5 @@ import { SystemModule } from "./SystemModule";
   providers: [ProjectModuleProvider()],
 })
 export class SystemBrowserModule {
-  constructor(@Inject() mExpress: ExpressModule) {}
+  constructor(@Inject() expressModule: ExpressModule) {}
 }

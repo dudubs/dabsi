@@ -1,5 +1,5 @@
 import express from "express";
-import { pushAsyncHook } from "../common/async/pushAsyncHook";
+import { pushHook } from "../common/async/pushHook";
 import { Awaitable } from "../common/typings2/Async";
 import { Inject } from "../typedi";
 import { Module } from "../typedi";
@@ -11,39 +11,39 @@ export class ExpressModule {
 
   constructor(@Inject() protected server: ServerModule) {
     server.cli.push({
-      run: async (args) => {
+      run: async args => {
         this.log.info("starting ...");
         const app = express();
-        await this.hooks.preBuild(app);
-        await this.hooks.build(app);
-        await this.hooks.postBuild(app);
+        await this.hooks.preRoutes(app);
+        await this.hooks.routes(app);
+        await this.hooks.postRoutes(app);
         await this.hooks.run(app);
       },
     });
   }
 
   protected hooks = {
-    preBuild: (app: express.Application): Awaitable => {},
-    build: (app: express.Application): Awaitable => {},
-    postBuild: (app: express.Application): Awaitable => {},
+    routes: (app: express.Application): Awaitable => {},
+    preRoutes: (app: express.Application): Awaitable => {},
+    postRoutes: (app: express.Application): Awaitable => {},
     run: (app: express.Application): Awaitable => {},
   };
 
   push({
-    postBuild = undefined as undefined | ((app: express.Application) => void),
-    preBuild = undefined as undefined | ((app: express.Application) => void),
-    build = undefined as undefined | ((app: express.Application) => void),
+    preRoutes = undefined as undefined | ((app: express.Application) => void),
+    routes = undefined as undefined | ((app: express.Application) => void),
+    postRoutes = undefined as undefined | ((app: express.Application) => void),
     run = undefined as undefined | ((app: express.Application) => void),
   }) {
-    pushAsyncHook(this.hooks, "preBuild", preBuild);
-    pushAsyncHook(this.hooks, "build", build);
-    pushAsyncHook(this.hooks, "postBuild", postBuild);
-    pushAsyncHook(this.hooks, "run", run);
+    pushHook(this.hooks, "preRoutes", preRoutes);
+    pushHook(this.hooks, "routes", routes);
+    pushHook(this.hooks, "postRoutes", postRoutes);
+    pushHook(this.hooks, "run", run);
   }
 
   listen(port: number, addr = "0.0.0.0") {
     this.push({
-      run: (app) => {
+      run: app => {
         this.log.info(`listening: ${addr}:${port}`);
         const server = app.listen(port, addr);
         process.on("SIGINT", () => {

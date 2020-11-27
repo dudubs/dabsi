@@ -2,14 +2,14 @@ import React from "react";
 import { MuiAdmin } from "../../browser/mui/MuiAdmin";
 import { Lang } from "../../lang/Lang";
 import { useEmittedState } from "../../react/reactor/useEmittedState";
-import { ReactRouterProps } from "../../typerouter/ReactRouterView";
-import { LoginInfoEvent } from "./LoginInfoEvent";
+import { ReactRouterView } from "../../typerouter/ReactRouterView";
 import { AdminRouter } from "../common/admin/AdminRouter";
+import { LoginInfoEvent } from "./LoginInfoEvent";
 import { MuiAclGroupsManagerView } from "./MuiAclGroupsManagerView";
 import { MuiAclUsersManagerView } from "./MuiAclUsersManagerView";
 
 export function MuiAdminView(router: typeof AdminRouter) {
-  ReactRouter(router, {
+  ReactRouterView(router, {
     renderDefault(props) {
       return Lang`NO_ROUTE_${"path"}`({
         path: props.route.defaultPath,
@@ -59,7 +59,7 @@ export function MuiAdminView(router: typeof AdminRouter) {
     },
   });
 
-  router.at("acl", (router) => {
+  router.at("acl", router => {
     MuiAclUsersManagerView(router.at("users"));
     MuiAclGroupsManagerView(router.at("groups"));
   });

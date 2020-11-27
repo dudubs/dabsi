@@ -1,5 +1,4 @@
-import { Module } from "../typedi";
-import { Inject } from "../typedi";
+import { Inject, Module } from "../typedi";
 import { Cli } from "./Cli";
 
 @Module()
@@ -9,7 +8,7 @@ export class ServerModule {
   log = log.get("SERVER");
 
   constructor(@Inject() cli: Cli) {
-    cli.connect(
+    cli.command(
       "start",
       this.cli.push({
         run: () => {

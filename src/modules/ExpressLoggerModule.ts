@@ -5,11 +5,13 @@ import { ExpressModule } from "./ExpressModule";
 
 @Module()
 export class ExpressLoggerModule {
-  constructor(@Inject() mExpress: ExpressModule) {
-    mExpress.push({
-      build: (app) => {
+  constructor(@Inject() expressModule: ExpressModule) {
+    expressModule.push({
+      preRoutes: app => {
         app.use((req, res, next) => {
-          mExpress.log.info(`${req.method} ${req.path}`);
+          expressModule.log.info(
+            `${req.httpVersion} ${req.method} ${req.path}`
+          );
           next();
         });
       },

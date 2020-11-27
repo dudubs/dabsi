@@ -29,7 +29,7 @@ export class BrowserPlatformModule {
   });
 
   cli = new Cli() //
-    .connect("pack", this.packCli);
+    .command("pack", this.packCli);
 
   scripts: string[] = [];
 
@@ -38,17 +38,17 @@ export class BrowserPlatformModule {
   constructor(
     @Inject() protected mProject: ProjectModule,
     @Inject() protected mMake: MakeModule,
-    @Inject() mExpress: ExpressModule,
+    @Inject() expressModule: ExpressModule,
     @Inject() cli: Cli
   ) {
-    cli.connect("browser", this.cli);
+    cli.command("browser", this.cli);
 
     mMake.cli.push({
       run: () => this.make(),
     });
 
-    mExpress.push({
-      postBuild: (app) => {
+    expressModule.push({
+      postRoutes: app => {
         app.get("/*", (req, res) => {
           res.setHeader("Content-Type", "text/html");
           res.send(
@@ -56,14 +56,14 @@ export class BrowserPlatformModule {
               scripts: [
                 ...this.scripts,
                 ...["vendor", "index", "runtime"].map(
-                  (name) => `/bundle/browser/${name}.js`
+                  name => `/bundle/browser/${name}.js`
                 ),
               ],
             })
           );
         });
       },
-      build: (app) => {
+      routes: app => {
         const bundlePath = realpathSync("./bundle/browser");
         const bundleStatic = express.static(bundlePath);
         app.use("/bundle/browser", (req, res, next) => {
@@ -89,7 +89,7 @@ export class BrowserPlatformModule {
     await this.mProject.init();
     this.platformInfoMap = mapObject(
       this.mProject.projectInfoMap,
-      (p) => new PlatformInfo(p, "browser")
+      p => new PlatformInfo(p, "browser")
     );
     this.currentPlatformInfo = this.platformInfoMap[
       this.mProject.currentProjectInfo.rootDir

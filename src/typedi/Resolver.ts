@@ -1,10 +1,11 @@
 import { CallStackInfo } from "./CallStackInfo";
-import { FnResolver, TypeResolver } from "./resolvers/FnResolver";
+import { catchResolveError } from "./operators/catchResolveError";
 import { checkAndResolve } from "./operators/checkAndResolve";
 import { checkResolver, checkResolverSymbol } from "./operators/checkResolver";
 import { checkResolverContext } from "./operators/checkResolverContext";
 import { resolve, resolveSymbol } from "./resolve";
-import { ObjectResolver } from "./resolvers/ObjectResolver";
+import { FnResolver, TypeResolver } from "./resolvers/FnResolver";
+import { AnyResolverMap, ObjectResolver } from "./resolvers/ObjectResolver";
 import { TokenResolver } from "./resolvers/TokenResolver";
 import { Touch } from "./Touch";
 
@@ -43,3 +44,10 @@ Resolver.check = checkResolver;
 Resolver.checkContext = checkResolverContext;
 Resolver.checkAndResolve = checkAndResolve;
 Resolver.object = ObjectResolver;
+Resolver.catch = catchResolveError;
+Resolver.provide = function (
+  context: AnyResolverMap,
+  ...args: AnyResolverMap[]
+) {
+  Object.assign(context, ...args);
+};

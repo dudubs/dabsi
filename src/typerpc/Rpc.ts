@@ -42,11 +42,13 @@ export type Rpc<T extends TRpc> = WithMetaType<{
     ): Promise<_RpcResolvedConfig<T>>;
 
     resolveRpcHandler(
-      config: _RpcUnresolvedConfig<T>
+      config: _RpcUnresolvedConfig<T>,
+      parent: RpcResolvedHandler<AnyRpc> | null
     ): Promise<_RpcResolvedHandler<T>>;
 
     createRpcHandler(
-      config: _RpcResolvedConfig<T>
+      config: _RpcResolvedConfig<T>,
+      parent: RpcResolvedHandler<AnyRpc> | null
     ): Promise<_RpcResolvedHandler<T>>;
   };
 
@@ -75,10 +77,6 @@ export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
   return rpc;
 }
 
-export type RpcResolvedConfig<T extends BasedRpc> = _RpcResolvedConfig<
-  RpcType<T>
->;
-
 export type _RpcResolvedConfig<
   T extends TRpc,
   Config = NonNullable<T["Config"]>
@@ -96,6 +94,7 @@ type _RpcResolvedHandler<T extends TRpc> = T["Handler"] & {
   config: _RpcResolvedConfig<T>;
   rpc: Rpc<T>;
   handle(payload: any): Awaitable<any>;
+  parent: _RpcResolvedHandler<TRpc> | null;
 };
 
 export type IRpcHandler<T extends BasedRpc> = _RpcResolvedHandler<RpcType<T>>;
@@ -104,14 +103,19 @@ export abstract class AbstractRpcHandler<
   R extends AnyRpc,
   T extends TRpc = RpcType<R>
 > {
-  constructor(public rpc: R, public config: _RpcResolvedConfig<T>) {}
+  constructor(
+    public rpc: R,
+    public config: _RpcResolvedConfig<T>,
+    public parent: RpcResolvedHandler<AnyRpc>
+  ) {}
 
   abstract handle(payload: any): Promise<any>;
 }
 
 export type RpcHandlerClass<T extends AnyRpc, P = {}> = new (
   rpc: T,
-  config: _RpcResolvedConfig<RpcType<T>>
+  config: _RpcResolvedConfig<RpcType<T>>,
+  parent: RpcResolvedHandler<AnyRpc> | null
 ) => _RpcResolvedHandler<RpcType<T>> & P;
 
 export type RpcIsGenericConfigOption<T extends Pick<TRpc, "Config">> =
@@ -163,12 +167,19 @@ export const AnyRpc: AnyRpc = {
     }
     return this.options.connect.call(this, handler);
   },
-  async createRpcHandler(config) {
-    return new this.options.handler(this, config);
+
+  async createRpcHandler(config, parent: RpcResolvedHandler<AnyRpc> | null) {
+    return new this.options.handler(this, config, parent);
   },
 
-  async resolveRpcHandler(unresolvedConfig) {
-    return this.createRpcHandler(await this.resolveRpcConfig(unresolvedConfig));
+  async resolveRpcHandler(
+    unresolvedConfig,
+    parent: RpcResolvedHandler<AnyRpc> | null
+  ) {
+    return this.createRpcHandler(
+      await this.resolveRpcConfig(unresolvedConfig),
+      parent
+    );
   },
 
   async resolveRpcConfig(config): Promise<object> {
@@ -211,7 +222,7 @@ export const AnyRpc: AnyRpc = {
       const context = await touchMap(
         touchMap(rpcToConfigToContext, this, () => new WeakMap()),
         config,
-        () => this.createRpcHandler(config)
+        () => this.createRpcHandler(config, null)
       );
       return context.handle(payload);
     };
@@ -247,7 +258,6 @@ export type RpcUndefinedConfig<T extends BasedRpc> = If<
 
 export class RpcError extends Error {}
 
-export type RpcHandler<T extends AnyRpc> = RpcType<T>["Handler"];
 export type RpcConnection<T extends BasedRpc> = _RpcConnection<RpcType<T>>;
 
 type _RpcConnection<T extends TRpc> = T["Connection"] & BasedRpc<T>;

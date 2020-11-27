@@ -27,7 +27,8 @@ export abstract class AbstractWidgetHandler<T extends AnyWidget>
 
   @Lazy() get controller(): Promise<RpcResolvedHandler<WidgetController<T>>> {
     return this.rpc.widget.controller.resolveRpcHandler(
-      this.getControllerConfig()
+      this.getControllerConfig(),
+      this
     ) as Promise<RpcResolvedHandler<WidgetController<T>>>;
   }
 

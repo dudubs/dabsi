@@ -15,7 +15,7 @@ import { User } from "./acl/User";
 import { ADMIN_TOKEN } from "./AdminAppConfig";
 import { SystemAppConfig } from "./SystemAppConfig";
 import { SystemRequestResolvers } from "./SystemRequestResolvers";
-import { SystemSession } from "../../system/core/server/SystemSession";
+import { SystemSession } from "../../system/core/SystemSession";
 
 import { SystemEntities } from "./SystemEntities";
 

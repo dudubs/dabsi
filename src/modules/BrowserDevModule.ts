@@ -2,28 +2,31 @@ import * as fs from "fs";
 import reload from "reload";
 import webpack from "webpack";
 import { Debounce } from "../common/async/Debounce";
-import { Inject } from "../typedi";
-import { Module } from "../typedi";
+import { Inject, Module } from "../typedi";
 import { DevModule } from "../typestack/DevModule";
-import { DevWatchdogModule } from "../typestack/DevWatchdogModule";
 import { BrowserPlatformModule } from "./BrowserPlatformModule";
 import { ExpressModule } from "./ExpressModule";
 
 @Module()
 export class BrowserDevModule {
-  log = this.mDev.log.get("BROWSER");
+  log = this.devModule.log.get("BROWSER");
 
   constructor(
-    @Inject() protected mDev: DevModule,
-    @Inject() mDevWatchdog: DevWatchdogModule,
-    @Inject() mExpress: ExpressModule,
+    @Inject() protected devModule: DevModule,
+    @Inject() expressModule: ExpressModule,
     @Inject() mBrowserPlatform: BrowserPlatformModule
   ) {
     mBrowserPlatform.scripts.push("/reload/reload.js");
-    mDevWatchdog.exclude.push((path) => {
-      return /([\\\/]|^)browser[\\\/$]/.test(path);
+
+    devModule.push({
+      buildWatchdog: watchdog => {
+        watchdog.exclude.push(path => {
+          return /([\\\/]|^)browser[\\\/$]/.test(path);
+        });
+      },
     });
-    mDev.push({
+
+    devModule.push({
       asParent: async () => {
         await mBrowserPlatform.init();
         webpack(mBrowserPlatform.webpackConfig).watch(
@@ -32,11 +35,12 @@ export class BrowserDevModule {
         );
       },
     });
-    mExpress.push({
-      build: (app) => {
+    expressModule.push({
+      routes: app => {
+        if (devModule.watchOnly) return;
         const debounce = Debounce(200);
         this.log.info("starting reload server...");
-        reload(app).then((server) => {
+        reload(app).then(server => {
           const path = "./bundle/browser";
           this.log.info(() => `watching ${path}`);
           const watcher = fs.watch(path, async () => {

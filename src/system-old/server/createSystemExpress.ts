@@ -11,11 +11,11 @@ import { SYSTEM_BROWSER_BUNDLE } from "./cli/createBrowserWebpack";
 import { SystemCommand } from "./cli/SystemCommand";
 import { SystemAppConfig } from "./SystemAppConfig";
 import { SystemRequestResolvers } from "./SystemRequestResolvers";
-import { SystemSession } from "../../system/core/server/SystemSession";
+import { SystemSession } from "../../system/core/SystemSession";
 
 const resolvers = DataResolvers({ sessions: SystemSession });
 
-export function createSystemExpress(
+export function createSysteexpressModule(
   { scripts = "" } = {},
   callback?: (app: Express.Application) => void
 ) {
@@ -51,7 +51,7 @@ export function createSystemExpress(
     //
     const cookieKey = "sys-sess-token";
 
-    const session = await SystemCommand(resolvers, (c) =>
+    const session = await SystemCommand(resolvers, c =>
       getSession({
         cookie: req.cookies[cookieKey],
         setCookie(value) {

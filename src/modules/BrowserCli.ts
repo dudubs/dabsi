@@ -16,9 +16,9 @@ export class BrowserCli extends Cli {
 
   constructor(@Inject() cli: Cli) {
     super();
-    cli.connect("browser", this);
+    cli.command("browser", this);
 
-    this.connect(
+    this.command(
       "pack",
       this.packCli.push({
         build: (y) => y.boolean(["w", "watch"]),

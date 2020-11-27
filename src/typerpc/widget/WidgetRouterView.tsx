@@ -5,6 +5,7 @@ import { WeakId } from "../../common/WeakId";
 import {
   ReactRouterProps,
   ReactRouterOptions,
+  ReactRouterView,
 } from "../../typerouter/ReactRouterView";
 import { Router, TRouter } from "../../typerouter/Router";
 import { AnyWidgetConnection, WidgetElementState } from "./Widget";
@@ -48,7 +49,7 @@ export function WidgetRouterView<
 
   const { renderWidget, getElementState } = options;
 
-  ReactRouter(router, {
+  ReactRouterView(router, {
     ...options,
     renderIndex(indexProps) {
       const connection = useMemo(
@@ -59,11 +60,11 @@ export function WidgetRouterView<
         <WidgetViewLoader
           key={WeakId(indexProps.location)}
           elementState={indexProps.state}
-          onElementStateChange={(state) => {
+          onElementStateChange={state => {
             indexProps.setState(state);
           }}
           connection={connection}
-          children={(props) => createElement(Component, { props, indexProps })}
+          children={props => createElement(Component, { props, indexProps })}
         />
       );
     },

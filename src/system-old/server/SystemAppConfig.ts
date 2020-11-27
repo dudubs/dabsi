@@ -10,7 +10,7 @@ import { Session } from "./acl/Session";
 import { User, UserFullName } from "./acl/User";
 import { ADMIN_TOKEN, AdminAppConfig } from "./AdminAppConfig";
 import { DevLoginConfig } from "./DevLoginConfig";
-import { SystemSession } from "../../system/core/server/SystemSession";
+import { SystemSession } from "../../system/core/SystemSession";
 import { UserAppConfig } from "./UserAppConfig";
 
 export const SystemAppConfig = Consumer(

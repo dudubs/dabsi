@@ -1,5 +1,6 @@
 import { createObjectProxy } from "../../common/object/createObjectProxy";
 import { entries } from "../../common/object/entries";
+import { inspect } from "../../logging/inspect";
 import { ResolveError } from "../ResolveError";
 import { CustomResolver, Resolver, ResolverType } from "../Resolver";
 import { checkResolver } from "../operators/checkResolver";
@@ -18,13 +19,13 @@ export function ObjectResolver<T extends AnyResolverMap>(
   );
   return ((context): any => {
     return resolve(context);
-  }).toCheck((context) => {
+  }).toCheck(context => {
     for (const [key, resolver] of entries(resolverMap)) {
       try {
         checkResolver(resolver, context);
       } catch (error) {
         if (error instanceof ResolveError) {
-          throw new ResolveError(`at key:${key}, ${error.message}`);
+          throw new ResolveError(`at key:${inspect(key)}`, error);
         }
         throw error;
       }

@@ -1,23 +1,30 @@
 import yargs from "yargs";
-import { pushAsyncHook } from "../common/async/pushAsyncHook";
+import { pushHook } from "../common/async/pushHook";
 import { Awaitable } from "../common/typings2/Async";
 import { Module } from "../typedi";
 
 @Module()
 export class Cli {
-  connect(name: string, cli: Cli): this {
+  command(name: string, cliOrCallback: Cli | ((cli: Cli) => void)): this {
+    let cli: Cli;
+    if (typeof cliOrCallback == "function") {
+      cli = new Cli();
+      cliOrCallback(cli);
+    } else {
+      cli = cliOrCallback;
+    }
     cli.push({
-      runAsParent: (args) => {
+      runAsParent: args => {
         return this.hooks.runAsParent(args);
       },
     });
     return this.push({
-      build: (y) =>
+      build: y =>
         y.command(
           name,
           "",
-          (y) => cli.hooks.build(y),
-          async (args) => {
+          y => cli.hooks.build(y),
+          async args => {
             await this.hooks.runAsParent(args);
             await cli.run(args);
           }
@@ -50,15 +57,15 @@ export class Cli {
     runAsParent?(args): Awaitable;
     lastRun?: (args) => Awaitable;
   }) {
-    pushAsyncHook(this.hooks, "run", options.run);
-    pushAsyncHook(this.hooks, "lastRun", options.lastRun, true);
-    pushAsyncHook(this.hooks, "runAsParent", options.runAsParent);
+    pushHook(this.hooks, "run", options.run);
+    pushHook(this.hooks, "lastRun", options.lastRun, true);
+    pushHook(this.hooks, "runAsParent", options.runAsParent);
 
     const {
       hooks: { build: prevBuild },
     } = this;
     const { build: nextBuild } = options;
-    nextBuild && (this.hooks.build = (y) => nextBuild(prevBuild(y)));
+    nextBuild && (this.hooks.build = y => nextBuild(prevBuild(y)));
     return this;
   }
 }

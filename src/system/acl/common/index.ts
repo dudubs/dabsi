@@ -14,4 +14,9 @@ export const AclRpc = RpcMap({
   getLogin: RpcFn<() => LoginInfo>(),
 });
 
-SystemRpc.register("acl", AclRpc);
+//
+export const AclConnection = SystemRpc.register("acl", AclRpc);
+
+// AdminRpcConfigResolver(AclRpc, { token: "" }, )
+
+// Admin

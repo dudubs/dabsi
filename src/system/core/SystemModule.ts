@@ -1,68 +1,101 @@
 import express from "express";
-import { entries } from "../../common/object/entries";
+import { Connection } from "typeorm";
+import { Lazy } from "../../common/patterns/lazy";
 import { ExpressModule } from "../../modules/ExpressModule";
-import { Inject, Module, Resolver } from "../../typedi";
+import { AclRequest } from "../../system-old/server/acl/AclRequest";
+import { Inject, Module, ModuleProvider, Resolver } from "../../typedi";
+import { Consumer } from "../../typedi/Consumer";
 import { ModuleRunner } from "../../typedi/ModuleRunner";
-import { ResolveError } from "../../typedi/ResolveError";
 import { AnyRpc, RpcError } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "../../typerpc/RpcConfigResolver";
-import { SystemRpc } from "./common/SystemRpc";
-import CookieParser from "cookie-parser";
-@Module()
+import { SystemRpc, SystemRpcPath } from "./common/SystemRpc";
+import { SystemRpcConfig } from "./server/SystemRpcConfig";
+import { SessionModule } from "./SessionModule";
+import { SystemRequest } from "./SystemRequest";
+
+export function SystemModuleProvider({
+  configs,
+}: {
+  configs?: RpcConfigResolver<AnyRpc>[];
+}): ModuleProvider {
+  return Consumer([SystemModule], mSystem => {
+    configs?.forEach(config => {
+      mSystem.configure(config);
+    });
+    return {};
+  });
+}
+
+@Module({
+  dependencies: [SessionModule],
+})
 export class SystemModule {
   log = log.get("SYSTEM");
 
-  protected configMap = new Map<AnyRpc, RpcConfigResolver<AnyRpc>>();
+  @Lazy()
+  protected get configMap(): Map<AnyRpc, RpcConfigResolver<AnyRpc>> {
+    return new Map().set(SystemRpc, SystemRpcConfig);
+  }
 
-  context = {};
+  @Lazy()
+  protected get requestContext() {
+    return Object.setPrototypeOf(
+      {
+        ...AclRequest.provide(() => {
+          throw new Error();
+        }),
+        ...SystemRequest.provide(() => {
+          throw new Error();
+        }),
+      },
+      this.mRunner.context
+    );
+  }
+
+  getConfig(rpc: AnyRpc): RpcConfigResolver<AnyRpc> {
+    return this.configMap.get(rpc)!;
+  }
 
   constructor(
-    @Inject() mExpress: ExpressModule,
+    @Inject() expressModule: ExpressModule,
     @Inject() protected mRunner: ModuleRunner
   ) {
-    Object.setPrototypeOf(this.context, mRunner.context);
-    mExpress.push({
+    expressModule.push({
       run: () => {
-        for (const [key, rpc] of entries(SystemRpc.targetMap)) {
-          const configResolver = this.configMap.get(rpc);
-          if (!configResolver) {
-            this.log.warn(() => `No config resovler for key "${key}"`);
-          }
-          try {
-            Resolver.check(configResolver!, this.context);
-          } catch (error) {
-            if (error instanceof ResolveError) {
-              this.log.error(
-                `Cant resolve system rpc at:${key}, ${error.message}`
-              );
-              return;
-            }
-            throw error;
-          }
+        for (const resolver of this.configMap.values()) {
+          Resolver.check(
+            Resolver.catch(resolver, error => {
+              this.log.error(error);
+            }),
+            this.requestContext
+          );
         }
       },
-      build: (app) => {
+      routes: app => {
         const json = express.json();
-        const cookieParser = CookieParser();
-        app.post(SystemRpc.path, async (req, res) => {
-          await new Promise((next) => cookieParser(req, res, next));
+        app.post(SystemRpcPath, async (req, res) => {
+          await new Promise(next => json(req, res, next));
+          const context = Object.create(this.requestContext);
+          const session = await req.getSession();
+          const connection = Resolver.resolve(Connection, context);
+          const aclReq = new AclRequest(connection, session.$key);
 
-          const context = Object.create(this.context);
+          const sysReq = new SystemRequest(this, context);
 
-          await new Promise((next) => json(req, res, next));
-          const [key, payload] = req.body;
+          Resolver.provide(
+            context,
+            AclRequest.provide(() => aclReq),
+            SystemRequest.provide(() => sysReq)
+          );
 
-          const rpc = SystemRpc.targetMap[key];
-          if (!rpc) throw new RpcError(`No system rpc for key "${key}".`);
+          const payload = req.body;
 
-          const configResolver = this.configMap.get(rpc);
-          if (!configResolver)
-            throw new RpcError(`No config resolver for system rpc "${key}".`);
-
-          const config = Resolver.resolve(configResolver, context);
-          const handler = await rpc.resolveRpcHandler(config);
-
-          res.json(await handler.handle(payload));
+          const config = sysReq.getUnresolvedConfig(SystemRpc);
+          const command = await SystemRpc.createRpcCommand(config);
+          if (!(await aclReq.ask())) {
+            throw new RpcError(`Access denied.`);
+          }
+          res.json(await command(payload));
         });
       },
     });

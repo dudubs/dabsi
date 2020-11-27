@@ -6,7 +6,7 @@ import { RpcError } from "../../typerpc/Rpc";
 import { RpcRequest } from "../../typerpc/RpcRequest";
 import { AclRequest } from "./acl/AclRequest";
 import { SystemResolvers } from "./SystemResolvers";
-import { SystemSession } from "../../system/core/server/SystemSession";
+import { SystemSession } from "../../system/core/SystemSession";
 
 export const SystemRequestResolvers = {
   ...SystemResolvers,

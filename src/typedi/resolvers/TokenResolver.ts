@@ -1,3 +1,4 @@
+import { inspect } from "../../logging/inspect";
 import { checkResolverSymbol } from "../operators/checkResolver";
 import { CallStackInfo } from "../CallStackInfo";
 import { AnyResolverMap } from "./ObjectResolver";
@@ -12,9 +13,14 @@ export class TokenResolver<T> {
     return { [this.token]: resolver };
   }
 
-  get resolveMessage() {
-    return `Can't resolve "${this.token}": ${this.codeStackInfo.description}`;
+  [inspect.custom]() {
+    return `<Resolver ${this.token} ${this.codeStackInfo.description}>`;
   }
+
+  get resolveMessage() {
+    return `Can't resolve "${inspect(this)}`;
+  }
+
   [resolveSymbol](context): T {
     const resolver = context[this.token];
     if (!resolver) throw new ResolveError(this.resolveMessage);

@@ -6,7 +6,7 @@ import { DevLogin, DevLoginUser } from "../common/SystemApp";
 import { AclQuery } from "./acl/AclQuery";
 import { User, UserFullName } from "./acl/User";
 import { ADMIN_TOKEN } from "./AdminAppConfig";
-import { SystemSession } from "../../system/core/server/SystemSession";
+import { SystemSession } from "../../system/core/SystemSession";
 
 declare global {
   interface TypeRefs {

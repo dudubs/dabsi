@@ -20,7 +20,10 @@ export class InlineWidgetHandler<T extends AnyInlineWidget>
     | Promise<RpcResolvedHandler<AnyWidget>>
     | undefined {
     if (this.rpc.inlineTarget)
-      return this.rpc.inlineTarget.resolveRpcHandler(this.config.targetConfig);
+      return this.rpc.inlineTarget.resolveRpcHandler(
+        this.config.targetConfig,
+        this
+      );
   }
 
   async handleTarget(payload) {

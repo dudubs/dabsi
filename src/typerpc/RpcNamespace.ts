@@ -1,35 +1,62 @@
-import { mapObject } from "../common/object/mapObject";
-import { AnyRpc, Rpc, RpcUnresolvedConfig, TRpc } from "./Rpc";
+import { Awaitable } from "../common/typings2/Async";
+import {
+  AnyRpc,
+  Rpc,
+  RpcCommand,
+  RpcConnection,
+  RpcResolvedHandler,
+  RpcUnresolvedConfig,
+  TRpc,
+} from "./Rpc";
 import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 
 export type RpcNamespace = Rpc<{
   Handler: {};
-  Connection: Record<string, TRpc["Connection"]>;
+  Connection: {};
   Config: {
-    getTargetConfig(rpc: AnyRpc, key: string): RpcUnresolvedConfig<AnyRpc>;
+    getNamespaceConfig(
+      rpc: AnyRpc,
+      key: string,
+      handler: RpcNamespaceHandler
+    ): RpcUnresolvedConfig<AnyRpc>;
+
+    checkNamespace?(
+      nsHandler: RpcNamespaceHandler,
+      handler: RpcResolvedHandler<AnyRpc>
+    ): Awaitable;
   };
   Props: {
-    register(name: string, rpc: AnyRpc);
-    targetMap: Readonly<Record<string, AnyRpc>>;
+    register<T extends AnyRpc>(name: string, rpc: T): RpcNamespaceConnection<T>;
+    namespaceMap: Readonly<Record<string, AnyRpc>>;
   };
 }>;
 
-export function RpcNamespace(): RpcNamespace {
-  const targetMap: Record<string, AnyRpc> = {};
+export type RpcNamespaceConnection<T extends AnyRpc> = RpcConnection<T> & {
+  $nsInfo: { parent: RpcNamespace; key: string };
+};
 
-  return Rpc({
+export function RpcNamespace(): RpcNamespace {
+  const namespaceMap: Record<string, AnyRpc> = {};
+
+  let command: RpcCommand;
+  let namespace;
+  return (namespace = Rpc({
     handler: RpcNamespaceHandler,
-    connect(command) {
-      return mapObject(targetMap, (target, key) =>
-        target.createRpcConnection((payload) => command([payload, command]))
-      );
+    connect(_command) {
+      command = _command;
+      return {};
     },
     props: {
-      targetMap,
-      register(name: string, rpc: AnyRpc) {
-        if (targetMap[name]) throw new Error(`Can't register ${name}.`);
-        targetMap[name] = rpc;
+      namespaceMap,
+      register(key: string, rpc: AnyRpc) {
+        if (namespaceMap[key]) throw new Error(`Can't register ${key}.`);
+        namespaceMap[key] = rpc;
+        const connection: RpcNamespaceConnection<AnyRpc> = rpc.createRpcConnection(
+          payload => command([key, payload])
+        );
+        connection.$nsInfo = { parent: namespace, key };
+        return connection;
       },
     },
-  });
+  }));
 }

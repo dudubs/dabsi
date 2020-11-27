@@ -1,25 +1,45 @@
-import { Connection, createConnection } from "typeorm";
+import { Connection, ConnectionOptions, createConnection } from "typeorm";
 import { Lazy } from "../../common/patterns/lazy";
 import { Cli } from "../../modules/Cli";
-import { Inject, Module, ModuleProvider } from "../../typedi";
+import { ServerModule } from "../../modules/ServerModule";
+import { Inject, Module, ModuleProvider, Resolver } from "../../typedi";
 import { Consumer } from "../../typedi/Consumer";
+import { ModuleRunner } from "../../typedi/ModuleRunner";
 
 @Module({})
 export class DbModule {
-  cli = new Cli().connect(
+  log = log.get("DB");
+
+  cli = new Cli().command(
     "sync",
     new Cli().push({
-      build: (y) => y.boolean("force"),
-      run: (args) => this.sync(args),
+      build: y => y.boolean("force"),
+      run: args => this.sync(args),
     })
   );
 
-  connection: Connection;
+  protected connection: Connection;
 
   entities: Function[] = [];
 
-  constructor(@Inject() cli: Cli) {
-    cli.connect("db", this.cli);
+  getConnection = (): Connection => {
+    if (!this.connection) throw new Error(`No db connection`);
+    return this.connection;
+  };
+
+  constructor(
+    @Inject() cli: Cli,
+    @Inject() mServer: ServerModule,
+    @Inject() mRunner: ModuleRunner
+  ) {
+    cli.command("db", this.cli);
+    mServer.cli.push({
+      run: () => this.init(),
+    });
+    Resolver.provide(
+      mRunner.context,
+      Connection.provide(() => this.connection)
+    );
   }
 
   protected async sync({ force }) {
@@ -29,14 +49,25 @@ export class DbModule {
     }
     await this.connection.synchronize();
   }
+
+  connectionOptions: ConnectionOptions | null = null;
+
   @Lazy()
   async init() {
+    this.log.info("initializing");
     this.connection = await createConnection({
-      name: "default",
-      type: "sqlite",
       logging: ["schema"],
-      database: "./bundle/db.sqlite3",
-      entities: [...new Set(this.entities)],
+      ...(this.connectionOptions || {
+        name: "default",
+        type: "sqlite",
+        database: "./bundle/db.sqlite3",
+      }),
+      entities: [
+        ...new Set([
+          ...(this.connectionOptions?.entities || []),
+          ...this.entities,
+        ]),
+      ],
     });
   }
 }
@@ -49,10 +80,10 @@ export class DbModule {
 export function DbModuleProvider({
   entities,
 }: {
-  entities: Function[];
+  entities?: Function[];
 }): ModuleProvider {
-  return Consumer([DbModule], (mDb) => {
-    mDb.entities.push(...entities);
+  return Consumer([DbModule], dbModule => {
+    entities && dbModule.entities.push(...entities);
     return {};
   });
 }

@@ -11,7 +11,7 @@ export class RpcParameterHandler
     const value = await this.rpc.parameterDataType(data);
     const configForValue = await ConfigFactory(this.config, value);
     return this.rpc.parameterTarget
-      .resolveRpcHandler(configForValue)
+      .resolveRpcHandler(configForValue, this)
       .then(c => c.handle(payload));
   }
 }

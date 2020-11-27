@@ -19,7 +19,7 @@ export class MakeModule {
   log = log.get("MAKE");
 
   constructor(@Inject() cli: Cli) {
-    cli.connect("make", this.cli);
+    cli.command("make", this.cli);
   }
 
   protected makeDirCache = new Set();

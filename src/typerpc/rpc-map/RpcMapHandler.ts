@@ -1,4 +1,3 @@
-import { Awaitable } from "../../common/typings2/Async";
 import {
   AbstractRpcHandler,
   AnyRpc,
@@ -18,7 +17,10 @@ export class RpcMapHandler<R extends AnyRpcMap, T extends RpcType<R>["TRpcMap"]>
 
   async getTargetHandler(key: string): Promise<RpcResolvedHandler<AnyRpc>> {
     try {
-      return await this.rpc.targetMap[key].resolveRpcHandler(this.config[key]);
+      return await this.rpc.targetMap[key].resolveRpcHandler(
+        this.config[key],
+        this
+      );
     } catch (error) {
       if (error instanceof RpcError) {
         throw new RpcError(`At key:${key}, ${error.message}`);

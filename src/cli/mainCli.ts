@@ -15,33 +15,40 @@ export function mainCli(): boolean {
   yargs.command(
     "test",
     "",
-    (y) => y,
+    y => y,
     ({ _: [_, ...args] }) => {
-      let tests: string[] = [];
-      if (args.length) {
-        for (let arg of args) {
-          const path = resolve(DABSI_CURRENT_PATH, arg);
-          if (!fs.existsSync(path)) {
-            console.log(`invalid path ${path}`);
-            continue;
-          }
-          if (!fs.statSync(path).isDirectory()) {
-            tests.push(path);
-            continue;
-          }
-          tests.push(
-            ...[...readdirRecursiveSync(path)]
-              .filter((p) => /Tests\.tsx?$/.test(p))
-              .map((p) => relative(DABSI_CURRENT_PATH, p))
-          );
+      const tests: string[] = [];
+      const helpers: string[] = [
+        relative(DABSI_CURRENT_PATH, path.join(DABSI_SRC_PATH, "register.ts")),
+        relative(
+          DABSI_CURRENT_PATH,
+          path.join(DABSI_SRC_PATH, "jasmine/register.ts")
+        ),
+      ];
+
+      const paths = args.length
+        ? args.map(arg => resolve(DABSI_CURRENT_PATH, arg))
+        : [DABSI_SRC_PATH];
+
+      for (const path of paths) {
+        if (!fs.existsSync(path)) {
+          console.log(`invalid path ${path}`);
+          continue;
         }
-      } else {
-        tests.push(
-          ...[...readdirRecursiveSync(DABSI_SRC_PATH)]
-            .filter((p) => /Tests\.tsx?$/.test(p))
-            .map((p) => relative(DABSI_CURRENT_PATH, p))
-        );
+        if (!fs.statSync(path).isDirectory()) {
+          tests.push(path);
+          continue;
+        }
+
+        for (const fileName of readdirRecursiveSync(path)) {
+          if (/Tests\.tsx?$/.test(fileName)) {
+            tests.push(fileName);
+          } else if (/[\\\/]tests[\\\/]register\.tsx?$/.test(fileName)) {
+            helpers.push(relative(DABSI_CURRENT_PATH, fileName));
+          }
+        }
       }
+
       spawnSync(
         process.argv[0],
         [
@@ -51,15 +58,8 @@ export function mainCli(): boolean {
             DABSI_CURRENT_PATH,
             path.join(NODE_MODULES_PATH, "jasmine/bin/jasmine.js")
           ),
-          `--helper=${relative(
-            DABSI_CURRENT_PATH,
-            path.join(DABSI_SRC_PATH, "register.ts")
-          )}`,
-          `--helper=${relative(
-            DABSI_CURRENT_PATH,
-            path.join(DABSI_SRC_PATH, "jasmine/register.ts")
-          )}`,
           "--stop-on-failure=true",
+          ...helpers.map(fileName => "--helper=" + fileName),
           ...tests,
         ],
         {

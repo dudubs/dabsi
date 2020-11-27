@@ -16,19 +16,19 @@ export class CallStackInfo {
     }
   }
 
-  static getLineInfo(stack: string, afterFileName?: string) {
+  static getLineInfo(stack: string, fromFileName?: string) {
     for (const lineInfo of this.parseCallStack(stack)) {
-      if (!afterFileName) return lineInfo;
-      if (lineInfo.fileName === afterFileName) {
-        afterFileName = undefined;
+      if (!fromFileName) return lineInfo;
+      if (lineInfo.fileName === fromFileName) {
+        fromFileName = undefined;
       }
     }
   }
 
-  constructor(protected error: Error) {}
+  constructor(protected error: Error, protected fromFileName?: string) {}
 
   @Lazy() get lineInfo() {
-    return CallStackInfo.getLineInfo(this.error.stack!)!;
+    return CallStackInfo.getLineInfo(this.error.stack!, this.fromFileName)!;
   }
 
   @Lazy() get lineCode() {
@@ -45,6 +45,6 @@ export class CallStackInfo {
   }
 
   @Lazy() get description() {
-    return `\n At ${this.relativeFileName}, line: ${this.lineInfo.lineNumber}`;
+    return `file: ${this.relativeFileName}, line:${this.lineInfo.lineNumber}`;
   }
 }

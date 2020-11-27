@@ -1,19 +1,14 @@
 import * as fs from "fs";
 import { FSWatcher } from "fs";
 import { Debounce } from "../common/async/Debounce";
-import { mapObjectToArray } from "../common/object/mapObjectToArray";
-import { Inject, Module } from "../typedi";
-import { DevModule } from "./DevModule";
-import { ProjectModule } from "./ProjectModule";
 
 export type WatchdogExclude = (path: string) => boolean;
 export type WatchdogEvent = { filename; event };
 
 export type WatchdogCallback = (events: WatchdogEvent[]) => void;
 
-@Module()
-export class DevWatchdogModule {
-  exclude: WatchdogExclude[] = [(fn) => /View.tsx?$/.test(fn)];
+export class DevWatchdog {
+  exclude: WatchdogExclude[] = [fn => /View.tsx?$/.test(fn)];
   paths: string[] = [];
 
   protected watchers: FSWatcher[] = [];
@@ -21,26 +16,7 @@ export class DevWatchdogModule {
 
   protected listeners = new Set<WatchdogCallback>();
 
-  log = this.mDev.log.get("WATCHDOG");
-
-  constructor(
-    @Inject() protected mDev: DevModule,
-    @Inject() mProjectModule: ProjectModule
-  ) {
-    mDev.push({
-      asChild: () => {},
-      asParent: async () => {
-        await mProjectModule.init();
-        this.paths.push(
-          ...mapObjectToArray(mProjectModule.projectInfoMap, (pi) => pi.srcDir)
-        );
-        this.listen(() => {
-          mDev.reload();
-        });
-        this.run();
-      },
-    });
-  }
+  log = log.get("DEV").get("WATCHDOG");
 
   listen(callback): () => void {
     this.listeners.add(callback);
@@ -50,7 +26,7 @@ export class DevWatchdogModule {
   }
 
   protected run() {
-    this.start();
+    this.watch();
     process.on("SIGINT", () => {
       this.stop();
     });
@@ -63,7 +39,7 @@ export class DevWatchdogModule {
     this.watchers = [];
   }
 
-  protected start() {
+  watch() {
     const debounce = Debounce(100);
     for (let path of this.paths) {
       this.log.info(() => `watching ${path}`);

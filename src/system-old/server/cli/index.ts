@@ -4,7 +4,7 @@ import yargs from "yargs";
 import { DataResolvers } from "../../../typedata/DataResolvers";
 import { PermissionManager } from "../acl/PermissionManager";
 import { User } from "../acl/User";
-import { createSystemExpress } from "../createSystemExpress";
+import { createSysteexpressModule } from "../createSysteexpressModule";
 import { SystemBootstrap } from "../SystemBootstrap";
 import {
   createBrowserWebpack,
@@ -19,14 +19,14 @@ import { SystemCommand } from "./SystemCommand";
     .command(
       "init",
       "",
-      (y) => y,
+      y => y,
       () =>
         SystemCommand(
           {
             ...DataResolvers({ users: User }),
             pm: PermissionManager,
           },
-          async (c) => {
+          async c => {
             const root = await c.users.of("loginName", "root").pick([]).touch({
               firstName: "root",
               lastName: "root",
@@ -38,7 +38,7 @@ import { SystemCommand } from "./SystemCommand";
     .command(
       "browser",
       "",
-      (y) => y.boolean(["prod", "p"]),
+      y => y.boolean(["prod", "p"]),
       ({ w, watch = w }) => {
         if (watch) {
           createBrowserWebpack().watch({}, webpackCallback);
@@ -54,17 +54,17 @@ import { SystemCommand } from "./SystemCommand";
     .command(
       "start",
       "",
-      (y) => y.boolean("prod").number("port").string("host"),
+      y => y.boolean("prod").number("port").string("host"),
       async ({ prod, port = 7070, host = "0.0.0.0" }) => {
         const isDev = !prod;
 
-        const app = createSystemExpress(
+        const app = createSysteexpressModule(
           {
             scripts: isDev ? `<script src="/reload/reload.js"></script>` : "",
           },
-          (app) => {
+          app => {
             if (isDev) {
-              reload(app).then((r) => {
+              reload(app).then(r => {
                 console.log(`watching ${SYSTEM_BROWSER_BUNDLE}`);
                 fs.watch(SYSTEM_BROWSER_BUNDLE, () => {
                   r.reload();

@@ -1,8 +1,8 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
+import { RpcChildConfig, RpcError, RpcUnresolvedConfig } from "../../Rpc";
+import { IWidgetHandler, WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -16,52 +16,39 @@ import { AnyDataInputMap } from "./DataInputMap";
 
 type T = AnyDataInputMap;
 
-export class DataInputMapHandler extends AbstractInputHandler<T> {
+export class DataInputMapHandler
+  extends AbstractInputHandler<T>
+  implements IWidgetHandler<T> {
+  $tableConfig: RpcChildConfig<T, "table"> = $ =>
+    $({
+      ...this.config.tableConfig,
+      source: this.config.source,
+      columns: this.config.columns,
+    });
+
+  $targetConfig: RpcChildConfig<T, "target"> = this.config.targetConfig;
+
   getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return {};
   }
 
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
+  async getInputElement(): Promise<InputElement<T>> {
     return {
-      table: $ =>
-        $({
-          ...this.config.tableConfig,
-          source: this.config.source,
-          columns: this.config.columns,
-        }),
-      target: this.config.targetConfig,
-      getRowController: $ =>
-        $({
-          load: async key => {
-            if (
-              !(await this.config.source.filter({ $is: String(key) }).hasRow())
-            ) {
-              throw new RpcError(`No have a key "${key}".`);
-            }
-            return key;
-          },
-          getTargetConfig: $ => $(this.config.targetConfig),
-        }),
-    };
-  }
-
-  async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
-    return {
-      target: await this.controller
-        .then(c => c.getTargetHandler("target"))
-        .then(c => c.getElement(undefined)),
+      target: await this.getChildHandler("target").then(c =>
+        c.getElement(undefined)
+      ),
     };
   }
 
   async getValueElement(
     valueMap: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    const { table, target } = await this.controller.then(async c => ({
-      table: await c.getTargetHandler("table"),
-      target: await c.getTargetHandler("target"),
-    }));
+    const { table, target } = {
+      table: await this.getChildHandler("table"),
+      target: await this.getChildHandler("target"),
+    };
 
     let elementMap: Record<string, { $value }> = {};
     for (const dataRow of await this.config.source.getRows()) {
@@ -85,9 +72,7 @@ export class DataInputMapHandler extends AbstractInputHandler<T> {
     let errorMap: any = {};
     let valueMap: any = {};
     const invalidKeys = new Set(keys);
-    const target = await this.controller.then(c =>
-      c.getTargetHandler("target")
-    );
+    const target = await this.getChildHandler("target");
     for (const row of await this.config.source
       .filter({ $is: keys })
       .getRows()) {

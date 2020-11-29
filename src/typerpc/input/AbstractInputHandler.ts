@@ -1,5 +1,6 @@
 import { Awaitable } from "../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
+import { IRpcHandler } from "../Rpc";
 import { AbstractWidgetHandler } from "../widget/AbstractWidgetHandler";
 import {
   IWidgetHandler,
@@ -10,7 +11,6 @@ import {
   AnyInput,
   IInput,
   InputElement,
-  InputError,
   InputErrorOrValue,
   InputValue,
   InputValueConfig,
@@ -23,6 +23,13 @@ export abstract class AbstractInputHandler<T extends AnyInput>
   implements IWidgetHandler<IInput> {
   abstract loadAndCheck(data: InputValueData<T>): Promise<InputErrorOrValue<T>>;
 
+  $checkCommand = async data => {
+    const result = await this.loadAndCheck(data);
+    if ("error" in result) {
+      return result.error;
+    }
+  };
+
   abstract getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>>;
@@ -31,23 +38,14 @@ export abstract class AbstractInputHandler<T extends AnyInput>
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>>;
 
-  abstract getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>>;
+  abstract getInputElement(): Promise<InputElement<T>>;
 
   async getElement(
     state: WidgetElementState<T> | undefined
-  ): Promise<RequireOptionalKeys<WidgetElement<T>>> {
+  ): Promise<WidgetElement<T>> {
     return {
       ...(await this.getInputElement()),
       value: await this.getValueElement(undefined),
     } as RequireOptionalKeys<WidgetElement<T>>;
-  }
-
-  async handleCheck(
-    data: InputValueData<T>
-  ): Promise<InputError<T> | undefined> {
-    const result = await this.loadAndCheck(data);
-    if ("error" in result) {
-      return result.error;
-    }
   }
 }

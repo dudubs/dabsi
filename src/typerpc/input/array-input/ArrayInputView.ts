@@ -54,10 +54,7 @@ export class ArrayInputView<
       return false;
     }
 
-    const result = await this.connection.command(
-      "addNewItem",
-      this.newItemInput.data
-    );
+    const result = await this.connection.addNewItem(this.newItemInput.data);
     if ("error" in result) {
       this.newItemInput.setError(result.error);
       return false;
@@ -76,7 +73,7 @@ export class ArrayInputView<
         onChange: async newItemInput => {
           const {
             connection: {
-              rpc: { uniqueItem },
+              $widget: { uniqueItem },
             },
           } = this;
 
@@ -88,7 +85,7 @@ export class ArrayInputView<
           }
         },
         key: "add",
-        connection: this.controller.newItem,
+        connection: this.connection.newItem,
         element: this.element.newItem,
         inputRef: input => {
           this.newItemInput = input!;
@@ -115,7 +112,7 @@ export class ArrayInputView<
         { key },
         this.props.renderItem({
           props: {
-            connection: this.controller.item,
+            connection: this.connection.item,
             element: this.element.item,
             elementState: undefined,
             onElementStateChange: undefined,

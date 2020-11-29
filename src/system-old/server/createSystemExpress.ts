@@ -69,8 +69,9 @@ export function createSysteexpressModule(
     const rpcReq = Resolver.resolve(RpcRequest, context);
     const config = Resolver.resolve(SystemAppConfig, context);
     const command = SystemApp.createRpcCommand(config);
-    const result = await rpcReq.handle(() => command(req.body));
-    res.json(result);
+    // const result = await rpcReq.handle(() => command(req.body));
+    // res.json(result);
+    throw new Error();
   });
   return app;
 }

@@ -1,6 +1,7 @@
 import { buildTests } from "../jasmine/buildTests";
 import {
   AnyRpc,
+  AnyRpcHandler,
   RpcConnection,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
@@ -23,7 +24,7 @@ export function testRpc<T extends AnyRpc>(
   rpc: T,
   callback: (tester: RpcTester<T>) => void
 ) {
-  let handler: RpcResolvedHandler<AnyRpc>;
+  let handler: AnyRpcHandler;
 
   const configs: { title; config; defineTests?() }[] = [];
 

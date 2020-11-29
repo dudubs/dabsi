@@ -1,8 +1,8 @@
 import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { DataRow } from "../../../typedata/DataRow";
-import { RpcError, RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
+import { RpcChildConfig, RpcError, RpcUnresolvedConfig } from "../../Rpc";
+import { IWidgetHandler, WidgetController } from "../../widget/Widget";
 import {
   ErrorOrValue,
   InputElement,
@@ -19,17 +19,17 @@ import { AnyDataInput } from "./DataInput";
 
 type T = AnyDataInput;
 
-export class DataInputHandler extends AbstractNullableInputHandler<T> {
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return $ =>
-      $({
-        ...this.config.tableConfig,
-        source: this.config.source,
-        columns: this.config.columns,
-      });
-  }
+export class DataInputHandler
+  extends AbstractNullableInputHandler<T>
+  implements IWidgetHandler<T> {
+  $tableConfig: RpcChildConfig<T, "table"> = $ =>
+    $({
+      ...this.config.tableConfig,
+      source: this.config.source,
+      columns: this.config.columns,
+    });
 
-  getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  getInputElement(): Promise<InputElement<T>> {
     return Promise.resolve({});
   }
 
@@ -72,7 +72,9 @@ export class DataInputHandler extends AbstractNullableInputHandler<T> {
       dataRow = await this.config.source.get(value);
     }
 
-    return dataRow && (await (await this.controller).loadRow(dataRow));
+    return (
+      dataRow && (await (await this.getChildHandler("table")).loadRow(dataRow))
+    );
   }
 
   async loadAndCheckNotNull(

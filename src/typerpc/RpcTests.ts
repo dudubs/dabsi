@@ -1,13 +1,9 @@
 import { Fn } from "../common/typings2/Fn";
 import { Override } from "../common/typings2/Override";
+import { AbstractRpcHandler } from "./AbstractRpcHandler";
 import { GenericConfig } from "./GenericConfig";
-import {
-  AbstractRpcHandler,
-  AnyRpc,
-  configureRpcService,
-  Rpc,
-  TRpc,
-} from "./Rpc";
+import { AnyRpc, configureRpcService, Rpc, TRpc } from "./Rpc";
+import { RpcMap } from "./rpc-map/RpcMap";
 import { RpcConfigHook } from "./RpcConfigHook";
 import { RpcFn } from "./rpc-fn/RpcFn";
 import { testRpc } from "./RpcTester";
@@ -44,28 +40,32 @@ testm(__dirname, () => {
     }
   );
 
-  testm(__filename, () => {
-    describe("rpc service >", () => {
-      it("expect to use service config", done => {
-        const c = RpcFn();
-        /*
-          {$context($){
-            return $(()=>{
+  it("RpcFn", async () => {
+    const r = RpcFn<any>();
+    configureRpcService(r, () => "hello");
+    expect(await r.service()).toEqual("hello");
+  });
 
-            })
-          }}
+  it("RpcMap", async () => {
+    const r = RpcMap({
+      f: RpcFn<any>(),
+    });
+    configureRpcService(r, { f: () => "hello" });
+    expect(await r.service.f()).toEqual("hello");
+  });
 
-         */
-        configureRpcService(c, () => {
-          done();
-        });
-        c.service();
+  describe("rpc service >", () => {
+    it("expect to use service config", done => {
+      const c = RpcFn();
+      configureRpcService(c, () => {
+        done();
       });
+      c.service();
+    });
 
-      it("expect to fail before configure or handler service", async () => {
-        const c = RpcFn();
-        await expectAsync(c.service()).toBeRejected();
-      });
+    it("expect to fail before configure or handler service", async () => {
+      const c = RpcFn();
+      await expectAsync(c.service()).toBeRejected();
     });
   });
 

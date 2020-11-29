@@ -1,5 +1,6 @@
 import { touchMap } from "../common/map/touchMap";
 import { Awaitable } from "../common/typings2/Async";
+import { Is } from "../common/typings2/boolean/Is";
 import { IsNever } from "../common/typings2/boolean/IsNever";
 import { Fn } from "../common/typings2/Fn";
 
@@ -7,13 +8,16 @@ const genericConfigCache = new WeakMap();
 
 declare const isGenericConfig: unique symbol;
 
-export type GenericConfigConfigure<
-  T extends GenericConfig<Fn>
-> = T extends GenericConfig<infer U> ? U : never;
 export type GenericConfig<T extends Fn = any> = {
   (configure: T): Awaitable<ReturnType<T>>;
   [isGenericConfig]?: true;
 };
+
+export type FnIsGenericConfig<T extends Fn> = Is<
+  Required<T>,
+  { [isGenericConfig]: true }
+>;
+
 export type IsGenericConfig<T> = IsNever<T> extends true
   ? false | true
   : T extends Fn

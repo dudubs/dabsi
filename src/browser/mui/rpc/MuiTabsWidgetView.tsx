@@ -74,7 +74,9 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
         const currentTabOptions =
           currentTabProps && getTabOptions(currentTabProps.key);
 
-        for (const tabKey of keys(props.connection.rpc.tabMap)) {
+        for (const tabKey of keys(
+          props.connection.$widget.children.map.children
+        )) {
           const tabOptions = getTabOptions(tabKey);
 
           const isSelected = currentTabProps?.key === tabKey;

@@ -1,5 +1,6 @@
 import { isConstructor } from "../common/object/isConstructor";
-import { AbstractRpcHandler, IRpcHandler } from "./Rpc";
+import { AbstractRpcHandler } from "./AbstractRpcHandler";
+import { IRpcHandler } from "./Rpc";
 import { RpcNamespace } from "./RpcNamespace";
 
 type T = RpcNamespace;

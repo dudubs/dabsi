@@ -4,9 +4,9 @@ import { Renderer } from "../../../react/renderer";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyWidget, AnyWidgetConnection, WidgetType } from "../Widget";
+import { AnyWidgetConnection, WidgetType } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
-import { AnyTabsWidget, TabsWidget } from "./TabsWidget";
+import { AnyTabsWidget } from "./TabsWidget";
 
 export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 
@@ -32,7 +32,7 @@ export class TabsWidgetView<
   protected updateTabProps({ key, element }: { key: string; element: object }) {
     this._currentTabProps = {
       key,
-      connection: this.controller[key],
+      connection: this.connection.map[key],
       elementState:
         this.elementState?.currentTab?.key === key
           ? this.elementState.currentTab.state
@@ -60,7 +60,7 @@ export class TabsWidgetView<
     });
     this.updateTabProps({
       key,
-      element: await this.props.connection.getTabElement(key),
+      element: await this.connection.getTabElement(key),
     });
   }
 

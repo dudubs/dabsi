@@ -18,9 +18,9 @@ testm(__filename, () => {
     console.log(
       await AclUsersManager.service
         .edit(t.users.regular.$key)
-        .target.tabs.form.input //
-        .controller.basicInfo //
-        .controller.loginName //
+        .map.form.input //
+        .map.basicInfo //
+        .map.loginName //
         .check("admin")
     );
   });

@@ -1,5 +1,4 @@
 import Typography from "@material-ui/core/Typography";
-import { emit } from "cluster";
 import React from "react";
 import { If } from "../../../common/typings2/boolean";
 import { Is } from "../../../common/typings2/boolean/Is";
@@ -18,7 +17,6 @@ import {
 } from "../../../typerpc/data-manager/DataManagerRouter";
 import { RpcConnection, RpcType } from "../../../typerpc/Rpc";
 import { FormViewProps } from "../../../typerpc/widget/form/FormView";
-import { InlineWidgetView } from "../../../typerpc/widget/inline-widget/InlineWidgetView";
 import { TabsWidget } from "../../../typerpc/widget/tabs-widget/TabsWidget";
 import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
 import { MuiAddButton, MuiButtonProps } from "../components/MuiButton";
@@ -133,9 +131,9 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
     {
       renderWidget(props, { location }) {
         return (
-          <InlineWidgetView
+          <WidgetHookView
             {...props}
-            children={({ targetProps: props, inlineElement: page }) => (
+            children={(props, page) => (
               <>
                 <Typography>{page.title}</Typography>
                 <MuiTabsWidgetView

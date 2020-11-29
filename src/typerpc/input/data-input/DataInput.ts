@@ -10,7 +10,11 @@ import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
 import { AnyRpc } from "../../Rpc";
 import { DataTable } from "../../widget/data-table/DataTable";
-import { AnyRowType, Row, string } from "../../widget/Row";
+import {
+  InlineObject,
+  InlineObjectType,
+  string,
+} from "../../widget/InlineObjectType";
 import { WidgetType } from "../../widget/Widget";
 import { Input } from "../Input";
 import { NullableInput } from "../nullable-input/NullableInput";
@@ -94,8 +98,6 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
     >;
 
     Props: {
-      table: _Types<T>["Table"];
-
       isValueDataRow: boolean;
     };
 
@@ -114,33 +116,35 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
     >;
 
     Element: {};
-    Children: {};
 
-    Controller: _Types<T>["Table"];
+    Children: {
+      table: _Types<T>["Table"];
+    };
+
+    Controller: NoRpc;
 
     Error: "INVALID_DATA_KEY";
   }
 >;
 
 export function DataInput<
-  TableRowType extends AnyRowType = {
+  TableRowType extends InlineObject = {
     label: typeof string;
   },
   TableRowController extends AnyRpc = NoRpc,
-  N extends boolean = false,
-  LoadType = never,
-  S extends PropertyKey = any
+  Nullable extends boolean = false,
+  LoadType = never
 >(
   options: {
-    nullable?: N;
+    nullable?: Nullable;
     tableRowType?: TableRowType;
     tableRowController?: TableRowController;
     loadType?: LoadType;
   } = {}
 ): DataInput<
-  N,
+  Nullable,
   {
-    TableRow: Row<TableRowType>;
+    TableRow: InlineObjectType<TableRowType>;
     TableRowController: TableRowController;
     Data: any;
     LoadRow: LoadType;
@@ -150,23 +154,18 @@ export function DataInput<
     Row: any;
   }
 > {
-  const table = DataTable(options.tableRowType || { label: string });
   return <any>Input<AnyDataInput>({
     props: {
       nullable: options.nullable ?? false,
-      table,
       isValueDataRow: !!options.loadType,
     },
     isGenericConfig: true,
-    controller: table,
+    children: {
+      table: DataTable(options.tableRowType || { label: string }),
+    },
     handler: DataInputHandler,
     getValueDataFromElement(value) {
       return value?.$key;
     },
   });
 }
-
-// DataInput({
-//    tableRow: {}
-//    row: Typing<User>()
-// })

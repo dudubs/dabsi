@@ -1,5 +1,4 @@
 import { ConfigFactory } from "../ConfigFactory";
-import { ValueOrAwaitableFn } from "../input/ValueOrAwaitableFn";
 import { RpcConfigHookHandler } from "../RpcConfigHook";
 import { AnyDataManager } from "./DataManager";
 

@@ -3,7 +3,7 @@ import { Lazy } from "../../../common/patterns/lazy";
 import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
+import { IWidgetHandler, WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -18,22 +18,20 @@ import { TextInputLoader, TextLoaderOptions } from "./TextInputLoader";
 
 type T = TextInput<any>;
 
-export class TextInputHandler extends AbstractInputHandler<T> {
+export class TextInputHandler
+  extends AbstractInputHandler<T>
+  implements IWidgetHandler<T> {
   async getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     return value ?? "";
   }
 
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return undefined;
-  }
-
   @Lazy() get loaderOptions(): TextLoaderOptions {
     return { ...this.rpc.loaderOptions, ...this.config };
   }
 
-  async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  async getInputElement(): Promise<InputElement<T>> {
     return {
       minLength: this.loaderOptions.minLength,
       maxLength: this.loaderOptions.maxLength,

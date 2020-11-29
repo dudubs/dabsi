@@ -1,20 +1,20 @@
 import { touchMap } from "../common/map/touchMap";
 import { MetaType, WithMetaType } from "../common/MetaType";
-import { mergeDescriptors } from "../common/object/mergeDescriptors";
+import { assignDescriptors } from "../common/object/assignDescriptors";
 import { Awaitable, Awaited } from "../common/typings2/Async";
 import { If, IsUndefined, Not } from "../common/typings2/boolean";
 import { Is } from "../common/typings2/boolean/Is";
 import { IsEmptyObject } from "../common/typings2/boolean/IsEmptyObject";
 import { Fn } from "../common/typings2/Fn";
-import { Override } from "../common/typings2/Override";
 import { PartialUndefinedKeys } from "../common/typings2/PartialUndefinedKeys";
 import { inspect } from "../logging/inspect";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
 
-export type RpcCommand = (path: any[], payload: any) => Promise<any>;
+export type RpcCommand = (path: any[], payload) => Promise<any>;
 
 export type TRpc = {
+  Payload?: any;
   Handler: object;
   Connection: any;
   Children: Record<string, AnyRpc>;
@@ -46,15 +46,15 @@ export type Rpc<T extends TRpc> = WithMetaType<{
 
     resolveRpcHandler(
       config: _RpcUnresolvedConfig<T>,
-      parent: RpcResolvedHandler<AnyRpc> | null
+      parent: AnyRpcHandler | null
     ): Promise<_RpcResolvedHandler<T>>;
 
     createRpcHandler(
       config: _RpcResolvedConfig<T>,
-      parent: RpcResolvedHandler<AnyRpc> | null
+      parent: AnyRpcHandler | null
     ): Promise<_RpcResolvedHandler<T>>;
   };
-
+export type AnyRpcHandler = RpcResolvedHandler<AnyRpc>;
 const rpcToServiceCommand = new WeakMap<any, Fn>();
 
 export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
@@ -62,24 +62,27 @@ export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
 ): Rpc<T> {
   let service;
   const rpc: Rpc<T> = Object.setPrototypeOf(
-    mergeDescriptors(options["props"] || {}, {
+    assignDescriptors(options["props"] || {}, {
       options,
+      children: options["children"] || {},
       get service() {
         return service;
       },
     }),
     AnyRpc
   );
-  service = rpc.createRpcConnection(payload => {
+  service = rpc.createRpcConnection((path, payload) => {
     const command = rpcToServiceCommand.get(service);
     if (!command) {
       throw new RpcError(`No handle for service.`);
     }
-    return command(payload);
+    return command(path, payload);
   });
   return rpc;
 }
-
+export type RpcResolvedConfig<T extends BasedRpc> = _RpcResolvedConfig<
+  RpcType<T>
+>;
 export type _RpcResolvedConfig<
   T extends TRpc,
   Config = NonNullable<T["Config"]>
@@ -96,34 +99,36 @@ export type RpcResolvedHandler<T extends BasedRpc> = _RpcResolvedHandler<
 export type _RpcResolvedHandler<T extends TRpc> = T["Handler"] & {
   config: _RpcResolvedConfig<T>;
   rpc: Rpc<T>;
-  handle(payload: any): Awaitable<any>;
+  handle(payload: T["Payload"]): Awaitable<any>;
   parent: _RpcResolvedHandler<TRpc> | null;
 
-  route?(data: any): Awaitable<RpcResolvedHandler<AnyRpc>>;
+  route(path: any): Awaitable<_RpcResolvedHandler<TRpc>>;
+  routeAndHandle(path: any[], body: any): Promise<any>;
+
+  getChildHandler<K extends keyof T["Children"]>(
+    key: K
+  ): Promise<RpcResolvedHandler<T["Children"][K]>>;
 };
 
-export type IRpcHandler<T extends BasedRpc> = _RpcResolvedHandler<RpcType<T>>;
+export type _IRpcHandler<T extends TRpc> = {
+  [K in string & keyof T["Children"] as `$${K}Config`]: _RpcUnresolvedConfig<
+    //
+    RpcType<T["Children"][K]>
+  > | null;
+};
 
-export abstract class AbstractRpcHandler<
-  R extends AnyRpc,
-  T extends TRpc = RpcType<R>
-> {
-  constructor(
-    public rpc: R,
-    public config: _RpcResolvedConfig<T>,
-    public parent: RpcResolvedHandler<AnyRpc>
-  ) {}
+export type IRpcHandler<T extends BasedRpc> = _IRpcHandler<RpcType<T>>;
 
-  abstract handle(payload: any): Promise<any>;
+export type _RpcHandlerClass<T extends TRpc, P = {}> = new (
+  rpc: Rpc<T>,
+  config: _RpcResolvedConfig<T>,
+  parent: AnyRpcHandler | null
+) => _RpcResolvedHandler<T> & P;
 
-  getChildConfig?(key: string): Awaitable<RpcUnresolvedConfig<AnyRpc>>;
-}
-
-export type RpcHandlerClass<T extends AnyRpc, P = {}> = new (
-  rpc: T,
-  config: _RpcResolvedConfig<RpcType<T>>,
-  parent: RpcResolvedHandler<AnyRpc> | null
-) => _RpcResolvedHandler<RpcType<T>> & P;
+export type RpcHandlerClass<T extends AnyRpc, P = {}> = _RpcHandlerClass<
+  RpcType<T>,
+  IRpcHandler<T>
+>;
 
 export type RpcIsGenericConfigOption<T extends Pick<TRpc, "Config">> =
   | IsGenericConfig<T["Config"]>
@@ -132,6 +137,16 @@ export type RpcIsGenericConfigOption<T extends Pick<TRpc, "Config">> =
 export type RpcPropsOption<T extends Pick<TRpc, "Props">> =
   | T["Props"]
   | If<IsEmptyObject<T["Props"]>, undefined>;
+
+export type RpcChildrenOption<T extends Pick<TRpc, "Children">> =
+  | T["Children"]
+  | If<IsEmptyObject<T["Children"]>, undefined>;
+
+export type _RpcConnectionFactory<T extends TRpc> = (
+  this: Rpc<T>,
+  path: any[],
+  command: RpcCommand
+) => T["Connection"];
 
 export type RpcOptions<
   T extends TRpc,
@@ -145,9 +160,11 @@ export type RpcOptions<
     isConfigFn: boolean | If<Not<Is<T["Config"], Fn>>, undefined>;
 
     props: RpcPropsOption<T>;
+
+    children: RpcChildrenOption<T>;
   },
   {
-    connect(this: Rpc<T>, path: any[], command: RpcCommand): T["Connection"];
+    connect: _RpcConnectionFactory<T>;
 
     handler: RpcHandlerClass<Rpc<T>>;
   }
@@ -160,7 +177,7 @@ const rpcToConfigToContext = new WeakMap<
 >();
 
 let isServiceHandler = false;
-
+// TODO: class BaseRpc
 export const AnyRpc: AnyRpc = {
   get options(): any {
     throw new Error();
@@ -171,21 +188,18 @@ export const AnyRpc: AnyRpc = {
   get children(): any {
     throw new Error();
   },
-  createRpcConnection(handler) {
+  createRpcConnection(command) {
     if (isServiceHandler) {
-      rpcToServiceCommand.set(this.service, handler);
+      rpcToServiceCommand.set(this.service, command);
     }
-    return this.options.connect.call(this, handler);
+    return this.options.connect.call(this, [], command);
   },
 
-  async createRpcHandler(config, parent: RpcResolvedHandler<AnyRpc> | null) {
+  async createRpcHandler(config, parent: AnyRpcHandler | null) {
     return new this.options.handler(this, config, parent);
   },
 
-  async resolveRpcHandler(
-    unresolvedConfig,
-    parent: RpcResolvedHandler<AnyRpc> | null
-  ) {
+  async resolveRpcHandler(unresolvedConfig, parent: AnyRpcHandler | null) {
     return this.createRpcHandler(
       await this.resolveRpcConfig(unresolvedConfig),
       parent
@@ -224,17 +238,17 @@ export const AnyRpc: AnyRpc = {
     }
     let config;
     let hasConfig = false;
-    return async payload => {
+    return async (path, payload) => {
       if (!hasConfig) {
         config = await this.resolveRpcConfig(unresolvedConfig);
         hasConfig = true;
       }
-      const context = await touchMap(
+      const handler = await touchMap(
         touchMap(rpcToConfigToContext, this, () => new WeakMap()),
         config,
         () => this.createRpcHandler(config, null)
       );
-      return context.handle(payload);
+      return handler.routeAndHandle(path, payload);
     };
   },
 };
@@ -246,14 +260,9 @@ export type RpcMapType<T extends Record<string, BasedRpc>> = {
   [K in keyof T]: RpcType<T[K]>;
 };
 
-export type RpcHook<R extends BasedRpc, T extends Partial<TRpc>> = Rpc<
-  Extract<Override<RpcType<R>, T>, TRpc>
->;
-
 export type _RpcUnresolvedConfig<T extends TRpc> =
   | T["Config"]
   | If<Not<Is<T["Config"], Fn>>, ConfigFactory<T["Config"]>>
-  // TODO: $configContext, $genericConfigContext
   | {
       $context: ConfigFactory<T["Config"], [Rpc<T>]>;
     };
@@ -263,6 +272,22 @@ export type RpcUnresolvedConfig<T extends BasedRpc> = _RpcUnresolvedConfig<
 >;
 
 export type RpcConfig<T extends BasedRpc> = RpcType<T>["Config"];
+export type RpcChildren<T extends BasedRpc> = RpcType<T>["Children"];
+
+export type RpcChild<
+  T extends BasedRpc,
+  K extends keyof RpcChildren<T>
+> = RpcChildren<T>[K];
+
+export type RpcChildConnection<
+  T extends BasedRpc,
+  K extends keyof RpcChildren<T>
+> = RpcConnection<RpcChild<T, K>>;
+
+export type RpcChildConfig<
+  T extends BasedRpc,
+  K extends keyof RpcChildren<T>
+> = RpcUnresolvedConfig<RpcChild<T, K>>;
 
 export type RpcUndefinedConfig<T extends BasedRpc> = If<
   IsUndefined<RpcUnresolvedConfig<T>>,
@@ -272,6 +297,7 @@ export type RpcUndefinedConfig<T extends BasedRpc> = If<
 export class RpcError extends Error {}
 
 export type RpcConnection<T extends BasedRpc> = _RpcConnection<RpcType<T>>;
+export type RpcPayload<T extends BasedRpc> = RpcType<T>["Payload"];
 
 export type _RpcConnection<T extends TRpc> = T["Connection"] & BasedRpc<T>;
 

@@ -7,6 +7,7 @@ import {
   RpcResolvedHandler,
   RpcUnresolvedConfig,
   TRpc,
+  AnyRpcHandler,
 } from "./Rpc";
 import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 
@@ -23,7 +24,7 @@ export type RpcNamespace = Rpc<{
 
     checkNamespace?(
       nsHandler: RpcNamespaceHandler,
-      handler: RpcResolvedHandler<AnyRpc>
+      handler: AnyRpcHandler
     ): Awaitable;
   };
   Props: {
@@ -37,25 +38,27 @@ export type RpcNamespaceConnection<T extends AnyRpc> = RpcConnection<T> & {
 };
 
 export function RpcNamespace(): RpcNamespace {
-  const namespaceMap: Record<string, AnyRpc> = {};
+  const nsMap: Record<string, AnyRpc> = {};
 
-  let command: RpcCommand;
-  let namespace;
-  return (namespace = Rpc({
+  let nsCommand: RpcCommand;
+  let nsPath: any[];
+  let ns;
+  return (ns = Rpc({
     handler: RpcNamespaceHandler,
-    connect(_command) {
-      command = _command;
+    connect(_path, _command) {
+      nsCommand = _command;
+      nsPath = _path;
       return {};
     },
     props: {
-      namespaceMap,
+      namespaceMap: nsMap,
       register(key: string, rpc: AnyRpc) {
-        if (namespaceMap[key]) throw new Error(`Can't register ${key}.`);
-        namespaceMap[key] = rpc;
+        if (nsMap[key]) throw new Error(`Can't register ${key}.`);
+        nsMap[key] = rpc;
         const connection: RpcNamespaceConnection<AnyRpc> = rpc.createRpcConnection(
-          payload => command([key, payload])
+          (path, payload) => nsCommand([...nsPath, ...path, key], payload)
         );
-        connection.$nsInfo = { parent: namespace, key };
+        connection.$nsInfo = { parent: ns, key };
         return connection;
       },
     },

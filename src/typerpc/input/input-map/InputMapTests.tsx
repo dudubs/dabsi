@@ -1,11 +1,13 @@
 import * as React from "react";
 import { Constructor } from "../../../common/typings2/Constructor";
+import { RpcConnection } from "../../Rpc";
 import { testRpc } from "../../RpcTester";
+import { AnyWidgetMap } from "../../widget/widget-map/WidgetMap";
 import { testWidgetView } from "../../WidgetViewTester";
 import { testInput } from "../InputTester";
 import { TestInputView } from "../InputTests";
 import { TextInput } from "../text-input/TextInput";
-import { InputMap } from "./InputMap";
+import { AnyInputMap, InputMap } from "./InputMap";
 import { InputMapView } from "./InputMapView";
 import objectContaining = jasmine.objectContaining;
 
@@ -19,6 +21,8 @@ testm(__dirname, () => {
       t.testConfig({
         text1: { minLength: 2 },
       });
+
+      let x: RpcConnection<AnyInputMap> = t.connection;
 
       testWidgetView(
         t,

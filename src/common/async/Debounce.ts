@@ -4,7 +4,7 @@ export function Debounce(ms: number) {
   return async () => {
     let id = ++counter;
     if (timeout) clearTimeout(timeout);
-    await new Promise(resolve =>
+    await new Promise<void>(resolve =>
       setTimeout(() => {
         resolve();
       }, ms)

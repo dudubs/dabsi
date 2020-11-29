@@ -1,5 +1,10 @@
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { inspect } from "../../../logging/inspect";
+import { TextInput } from "../../input/text-input/TextInput";
+import {
+  AnyRpcParameter,
+  RpcParameter,
+} from "../../rpc-parameter/RpcParameter";
 import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { entries } from "../../../common/object/entries";
 import { mapObject, mapObjectAsync } from "../../../common/object/mapObject";
@@ -8,7 +13,7 @@ import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataOrder } from "../../../typedata/DataOrder";
 import { DataRow } from "../../../typedata/DataRow";
 import { ConfigFactory } from "../../ConfigFactory";
-import { RpcUnresolvedConfig } from "../../Rpc";
+import { RpcChildConfig, RpcUnresolvedConfig } from "../../Rpc";
 import {
   IWidgetHandler,
   WidgetController,
@@ -17,11 +22,21 @@ import {
 } from "../Widget";
 import { AnyDataTable, DataTableTypes, TDataTable } from "./DataTable";
 
-type R = AnyDataTable;
+type T = AnyDataTable;
 
 export class DataTableHandler
-  extends AbstractWidgetHandler<R>
-  implements IWidgetHandler<R> {
+  extends AbstractWidgetHandler<T>
+  implements IWidgetHandler<T> {
+  $queryCommand = query => this.query(query);
+
+  $rowConfig: RpcChildConfig<T, "row"> = async ($, key) =>
+    $(
+      await ConfigFactory(this.config.getRowControllerConfig, {
+        key,
+        source: this.config.source,
+      })
+    );
+
   @Lazy() get columns() {
     return mapObject(this.rpc.rowType, (columnType, key) => {
       const columnConfig = this.config.columns?.[key];
@@ -65,7 +80,7 @@ export class DataTableHandler
     return row;
   }
 
-  async getRows(
+  async query(
     query: DataTableTypes<TDataTable>["Query"]
   ): Promise<DataTableTypes<TDataTable>["QueryResult"]> {
     const orders: DataOrder<any>[] = [];
@@ -128,23 +143,10 @@ export class DataTableHandler
     return { rows, totalRows };
   }
 
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<R>> {
-    return {
-      getRowController: async ($, key) =>
-        $(
-          await ConfigFactory(this.config.getRowControllerConfig, {
-            key,
-            source: this.config.source,
-          })
-        ),
-      getRows: query => this.getRows(query),
-    };
-  }
-
   async getElement(
-    state: WidgetElementState<R> | undefined
-  ): Promise<RequireOptionalKeys<WidgetElement<R>>> {
-    const { rows, totalRows } = await this.getRows({
+    state: WidgetElementState<T> | undefined
+  ): Promise<WidgetElement<T>> {
+    const { rows, totalRows } = await this.query({
       getCount: true,
       text: "",
       pageSize: this.config.pageSize || 10,

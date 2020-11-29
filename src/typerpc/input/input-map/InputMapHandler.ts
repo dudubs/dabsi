@@ -1,9 +1,8 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObjectAsync } from "../../../common/object/mapObject";
 import { Awaitable } from "../../../common/typings2/Async";
-import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
+import { AnyRpc, RpcUnresolvedConfig } from "../../Rpc";
+import { IWidgetHandler } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -17,26 +16,30 @@ import { AnyInputMap } from "./InputMap";
 
 type T = AnyInputMap;
 
-export class InputMapHandler extends AbstractInputHandler<T> {
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return this.config;
+export class InputMapHandler
+  extends AbstractInputHandler<T>
+  implements IWidgetHandler<T> {
+  $mapConfig = this.config;
+
+  getChildConfig(key: string): Awaitable<RpcUnresolvedConfig<AnyRpc>> {
+    return this.config[key];
   }
 
   getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    return mapObjectAsync(this.rpc.targetMap, (target, key) =>
-      this.controller
-        .then(c => c.getTargetHandler(key))
+    return mapObjectAsync(this.rpc.children, (target, key) =>
+      this.getChildHandler("map")
+        .then(c => c.getChildHandler(key))
         .then(h => h.getValueElement(value?.[key]))
     );
   }
 
-  async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  async getInputElement(): Promise<InputElement<T>> {
     return {
-      elementMap: await mapObjectAsync(this.rpc.targetMap, (target, key) =>
-        this.controller
-          .then(c => c.getTargetHandler(key))
+      elementMap: await mapObjectAsync(this.rpc.children, (target, key) =>
+        this.getChildHandler("map")
+          .then(c => c.getChildHandler(key))
           .then(h => h.getInputElement())
       ),
     };
@@ -45,9 +48,9 @@ export class InputMapHandler extends AbstractInputHandler<T> {
   async getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Promise<InputValue<T>> {
-    return mapObjectAsync(this.rpc.targetMap, (target, key) => {
-      return this.controller
-        .then(c => c.getTargetHandler(key))
+    return mapObjectAsync(this.rpc.children, (target, key) => {
+      this.getChildHandler("map")
+        .then(c => c.getChildHandler(key))
         .then(h => h.getValueFromConfig(valueConfig?.[key]));
     });
   }
@@ -56,9 +59,9 @@ export class InputMapHandler extends AbstractInputHandler<T> {
     dataMap: InputValueData<T>
   ): Promise<InputErrorOrValue<T>> {
     const errorMap: any = {};
-    const valueMap = await mapObjectAsync(this.rpc.targetMap, (target, key) =>
-      this.controller
-        .then(c => c.getTargetHandler(key))
+    const valueMap = await mapObjectAsync(this.rpc.children, (target, key) =>
+      this.getChildHandler("map")
+        .then(c => c.getChildHandler(key))
         .then(h => h.loadAndCheck(dataMap[key]))
         .then(result => {
           if ("error" in result) {

@@ -5,24 +5,21 @@ import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedK
 import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
 import { UndefinedIfIsUndefined } from "../../../common/typings2/UndefinedIfIsUndefined";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
+import { NonRelationKeys } from "../../../typedata/DataRelation";
 import { DataRow } from "../../../typedata/DataRow";
 import { DataSource } from "../../../typedata/DataSource";
-import { NonRelationKeys } from "../../../typedata/DataRelation";
 import { ConfigFactory } from "../../ConfigFactory";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
-import { RpcParameter } from "../../rpc-parameter/RpcParameter";
 import {
   AnyRpc,
   RpcConfig,
   RpcConnection,
-  RpcType,
   RpcUnresolvedConfig,
 } from "../../Rpc";
-import { RpcFn } from "../../rpc-fn/RpcFn";
-import { RpcMap } from "../../rpc-map/RpcMap";
-import { AnyRowType, Column, Row } from "../Row";
-import { Widget, WidgetController } from "../Widget";
+import { RpcParameter } from "../../rpc-parameter/RpcParameter";
+import { InlineObject, InlineObjectType } from "../InlineObjectType";
+import { ToAsync, Widget } from "../Widget";
 import { DataTableHandler } from "./DataTableHandler";
 
 export type DataTableTypes<T extends TDataTable> = _Types<T>;
@@ -67,6 +64,8 @@ export type _Types<T extends TDataTable, D = T["Data"], Row = T["Row"]> = T & {
   };
 
   QueryResult: { totalRows: number; rows: ({ $key: string } & Row)[] };
+
+  QueryFn(query: _Types<T>["Query"]): _Types<T>["QueryResult"];
 
   ColumnConfigMap: UndefinedIfEmptyObject<
     PartialUndefinedKeys<
@@ -113,41 +112,28 @@ export type DataTableConfig<T extends TDataTable> = PartialUndefinedKeys<
 export type AnyDataTable = DataTable<TDataTable>;
 
 export type TDataTable = {
-  Row: any;
+  Row: object;
   RowController: AnyRpc;
   Data: any;
 };
 
-export type DataTable<
-  T extends TDataTable,
-  Row = T["Row"],
-  RowController extends AnyRpc = T["RowController"],
-  D = T["Data"],
-  GetRowsFn = (query: _Types<T>["Query"]) => Promise<_Types<T>["QueryResult"]>
-> = Widget<{
+export type DataTable<T extends TDataTable> = Widget<{
   Types: _Types<T>;
 
   Config: GenericConfig<
-    <D>(config: DataTableConfig<Override<T, { Data: D }>>) => DataTableConfig<T>
+    <Data>(
+      config: DataTableConfig<Override<T, { Data: Data }>>
+    ) => DataTableConfig<T>
   >;
-
-  Commands: {};
-
-  Children: {};
-
-  Connection: {
-    getRows: GetRowsFn;
-    getRowController(key: string): RpcConnection<RowController>;
-  };
 
   ElementState: {
     query: _Types<T>["Query"];
   };
+
   Element: {
-    // TODO: move to Props
     searchable: boolean;
     columns: {
-      [K in keyof Required<Row>]: {
+      [K in keyof Required<T["Row"]>]: {
         sortable: boolean;
       };
     };
@@ -157,31 +143,39 @@ export type DataTable<
   };
 
   Props: {
-    rowType: { [K in keyof Row]: (value: any) => Row[K] };
+    rowType: { [K in keyof T["Row"]]: (value: any) => T["Row"][K] };
+  };
+
+  Connection: {
+    row: RpcConnection<T["RowController"]>;
+    query: ToAsync<_Types<T>["QueryFn"]>;
   };
 
   Handler: {
-    getRows: GetRowsFn;
+    query: ToAsync<_Types<T>["QueryFn"]>;
 
-    loadRow(dataRow: any): Promise<{ $key: string } & Row>;
-    loadRow(dataRow: any, noKey: true): Promise<Row>;
+    loadRow(dataRow: any): Promise<_Types<T>["RowWithKey"]>;
+    loadRow(dataRow: any, noKey: true): Promise<T["Row"]>;
 
     columns: Record<
       string,
       {
-        load: (row: DataRow<D>) => any;
-        field?: DataExp<D>;
+        load: (row: DataRow<any>) => any;
+        field?: DataExp<any>;
       }
     >;
   };
-  Controller: RpcMap<{
-    getRowController: RpcParameter<{
-      Target: RowController;
+
+  Commands: { query: _Types<T>["QueryFn"] };
+
+  Children: {
+    row: RpcParameter<{
+      Target: T["RowController"];
       Data: string;
-      Value: string;
     }>;
-    getRows: RpcFn<(query: _Types<T>["Query"]) => _Types<T>["QueryResult"]>;
-  }>;
+  };
+
+  Controller: NoRpc;
 }>;
 
 export type DataTableOptions<RowController extends AnyRpc> = {
@@ -191,27 +185,29 @@ export type DataTableOptions<RowController extends AnyRpc> = {
 };
 
 export function DataTable<
-  RowType extends AnyRowType,
+  RowType extends InlineObject,
   RowController extends AnyRpc = NoRpc
 >(
   rowType: RowType,
   options: DataTableOptions<RowController> = {}
 ): DataTable<{
+  Row: InlineObjectType<RowType>;
   RowController: RowController;
-  Row: Row<RowType>;
   Data: any;
 }> {
   return <any>Widget<AnyDataTable>({
+    handler: DataTableHandler,
     isGenericConfig: true,
+    children: {
+      row: RpcParameter(String, (options.rowController || NoRpc) as AnyRpc),
+    },
     connection: {
-      getRows: conn => query => conn.controller.getRows(query),
-      getRowController: conn => key => conn.controller.getRowController(key),
+      query: conn => conn.$getWidgetCommand("query"),
+      row: conn => conn.$getChildConnection("row"),
     },
     props: { rowType },
-    controller: RpcMap({
-      getRowController: RpcParameter(String, options.rowController || NoRpc),
-      getRows: RpcFn<any>(),
-    }) as WidgetController<AnyDataTable>,
-    handler: DataTableHandler,
   });
 }
+
+// /table/row/33 ...
+// /table/query

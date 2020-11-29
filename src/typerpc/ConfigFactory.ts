@@ -1,16 +1,27 @@
 import { Awaitable } from "../common/typings2/Async";
+import { Is } from "../common/typings2/boolean/Is";
+import { Fn } from "../common/typings2/Fn";
 import { RpcError } from "./Rpc";
 
-const resultSymbol = Symbol();
+declare const isConfigFactory: unique symbol;
 
-export type ConfigFactoryResult<C> = Awaitable<{ [resultSymbol]: C }>;
+const configSymbol = Symbol();
 
-export type ConfigFactoryFn<C> = (config: C) => ConfigFactoryResult<C>;
+export type Config<T> = { [configSymbol]: T };
 
-export type ConfigFactory<C, U extends any[] = []> = (
-  $: ConfigFactoryFn<C>,
-  ...args: U
-) => ConfigFactoryResult<C>;
+export type AwaitableConfig<C> = Awaitable<Config<C>>;
+
+export type ConfigFn<C> = (config: C) => AwaitableConfig<C>;
+
+export type ConfigFactory<C, U extends any[] = []> = {
+  ($: ConfigFn<C>, ...args: U): AwaitableConfig<C>;
+  [isConfigFactory]?: true;
+};
+
+export type FnIsConfigFactory<T extends Fn> = Is<
+  Required<T>,
+  { [isConfigFactory]: true }
+>;
 
 export function ConfigFactory<C, U extends any[]>(
   config: ConfigFactory<C, U> | undefined,
@@ -24,16 +35,16 @@ export async function ConfigFactory(config, context, ...args) {
   if (!config) return;
   let result = await config(
     $ => {
-      return { [resultSymbol]: $ };
+      return { [configSymbol]: $ };
     },
     context,
     ...args
   );
-  if (!result || !(resultSymbol in result)) {
+  if (!result || !(configSymbol in result)) {
     throw new RpcError(`You have to use $`);
   }
-  while (resultSymbol in result) {
-    result = result[resultSymbol];
+  while (configSymbol in result) {
+    result = result[configSymbol];
   }
   return result;
 }

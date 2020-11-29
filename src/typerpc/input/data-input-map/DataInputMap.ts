@@ -1,4 +1,3 @@
-import { mapArrayToObject } from "../../../common/array/mapArrayToObject";
 import { mapObject } from "../../../common/object/mapObject";
 import { Awaitable } from "../../../common/typings2/Async";
 import { Override } from "../../../common/typings2/Override";
@@ -12,13 +11,13 @@ import { RpcParameter } from "../../rpc-parameter/RpcParameter";
 import { AnyRpc, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
 import { DataTable } from "../../widget/data-table/DataTable";
-import { AnyRowType, Row, string } from "../../widget/Row";
-import { WidgetElement } from "../../widget/Widget";
 import {
-  WithDataKey,
-  DataInputTypes,
-  TDataInput,
-} from "../data-input/DataInput";
+  InlineObject,
+  InlineObjectType,
+  string,
+} from "../../widget/InlineObjectType";
+import { WidgetElement } from "../../widget/Widget";
+import { DataInputTypes, TDataInput } from "../data-input/DataInput";
 import {
   AnyInput,
   Input,
@@ -35,13 +34,10 @@ export type AnyDataInputMap = DataInputMap<TDataInputMap>;
 export type TDataInputMap = TDataInput & {
   Target: AnyInput;
 };
-type _Types<T extends TDataInputMap> = T & DataInputTypes<T>;
+type _Types<T extends TDataInputMap> = DataInputTypes<T>;
 
 export type DataInputMap<T extends TDataInputMap> = Input<{
   Types: _Types<T>;
-
-  Children: {};
-  Commands: {};
 
   ValueData: Record<string, InputValueData<T["Target"]>>;
 
@@ -79,11 +75,14 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
         };
       }>;
 
-  Controller: RpcMap<{
+  Controller: NoRpc;
+
+  Children: {
     table: DataInputTypes<T>["Table"];
     target: T["Target"];
-    getRowController: RpcParameter<{ Target: T["Target"]; Data: string }>;
-  }>;
+  };
+
+  Commands: {};
 }>;
 
 export type DataInputMapConfig<
@@ -102,7 +101,7 @@ export type DataInputMapConfig<
 
 export function DataInputMap<
   Target extends AnyInput,
-  TableRowType extends AnyRowType = {
+  TableRowType extends InlineObject = {
     label: typeof string;
   },
   TableRowController extends AnyRpc = NoRpc
@@ -114,7 +113,7 @@ export function DataInputMap<
   }
 ): DataInputMap<{
   Target: Target;
-  TableRow: Row<TableRowType>;
+  TableRow: InlineObjectType<TableRowType>;
   TableRowController: TableRowController;
   TableData: any;
   LoadData: any;
@@ -122,7 +121,7 @@ export function DataInputMap<
   Value: string;
 }> {
   const table = DataTable(
-    (options?.tableRowType as AnyRowType) || { label: string }
+    (options?.tableRowType as InlineObject) || { label: string }
   );
 
   return <any>Input<AnyDataInputMap>({
@@ -132,11 +131,10 @@ export function DataInputMap<
     },
     handler: DataInputMapHandler,
     isGenericConfig: true,
-    controller: RpcMap({
+    children: {
       table: table,
       target: target as AnyInput,
-      getRowController: RpcParameter(String, target),
-    }),
+    },
     getValueDataFromElement(valueMap) {
       return mapObject(valueMap, item =>
         this.target.getValueDataFromElement(item.$value)

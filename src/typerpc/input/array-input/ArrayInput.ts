@@ -3,6 +3,7 @@ import { If, Not } from "../../../common/typings2/boolean";
 import { Is } from "../../../common/typings2/boolean/Is";
 import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { RpcUndefinedConfig, RpcUnresolvedConfig } from "../../Rpc";
+import { RpcFnMap } from "../../rpc-fn/RpcFn";
 import { RpcMap } from "../../rpc-map/RpcMap";
 import { WidgetElement } from "../../widget/Widget";
 import {
@@ -34,18 +35,17 @@ export type ArrayInput<
 > = Input<{
   TArrayInput: T;
 
-  Children: {};
+  Children: RpcFnMap<{
+    addNewItem(
+      data: InputValueData<Item>
+    ): ErrorOrValue<InputError<NewItem>, InputValueElement<Item>>;
+  }> & {
+    newItem: NewItem;
+    item: Item;
+  };
 
   ItemDataValue: InputValueData<Item>;
-  Commands: {
-    addNewItem: {
-      (data: InputValueData<Item>): ErrorOrValue<
-        InputError<NewItem>,
-        InputValueElement<Item>
-      >;
-      handler: "handleAddNewItem";
-    };
-  };
+  Commands: {};
 
   ValueData: InputValueData<Item>[];
 
@@ -108,45 +108,52 @@ type _InputUniqueItemErrorHook<
   ? Item
   : InputErrorHook<{ Target: Item; Error: "NOT_UNIQUE" }>;
 
+export type ArrayInputOptions<
+  Item extends AnyInput,
+  NewItem extends AnyInput,
+  IsUniqueItem extends boolean
+> = PartialUndefinedKeys<
+  {
+    getItemDataKey:
+      | ((data: InputValueData<Item>) => string)
+      | If<Not<IsUniqueItem>, undefined>;
+
+    getNewItemDataKey:
+      | ((data: InputValueData<NewItem>) => string)
+      | If<
+          Not<IsUniqueItem> | Is<InputValueData<NewItem>, InputValueData<Item>>,
+          undefined
+        >;
+  },
+  {
+    isUniqueItem?: IsUniqueItem;
+    newItem?: NewItem;
+  }
+>;
+
 export function ArrayInput<
   Item extends AnyInput,
   NewItem extends AnyInput = Item,
   IsUniqueItem extends boolean = false
 >(
   item: Item,
-  options?: PartialUndefinedKeys<
-    {
-      getItemDataKey:
-        | ((data: InputValueData<Item>) => string)
-        | If<Not<IsUniqueItem>, undefined>;
-
-      getNewItemDataKey:
-        | ((data: InputValueData<NewItem>) => string)
-        | If<
-            | Not<IsUniqueItem>
-            | Is<InputValueData<NewItem>, InputValueData<Item>>,
-            undefined
-          >;
-    },
-    {
-      isUniqueItem?: IsUniqueItem;
-      newItem?: NewItem;
-    }
-  >
+  options?: ArrayInputOptions<Item, NewItem, IsUniqueItem>
 ): ArrayInput<{
   Item: _InputUniqueItemErrorHook<IsUniqueItem, Item>;
   NewItem: _InputUniqueItemErrorHook<IsUniqueItem, NewItem>;
 }> {
-  const getItemDataKey =
-    options && "getItemDataKey" in options ? options.getItemDataKey : undefined;
+  const {
+    getItemDataKey,
+    getNewItemDataKey = getItemDataKey,
+    newItem = item,
+  } = (options || {}) as ArrayInputOptions<AnyInput, AnyInput, boolean>;
 
-  const getNewItemDataKey =
-    (options && "getNewItemDataKey" in options
-      ? options.getNewItemDataKey
-      : undefined) ?? getItemDataKey;
-
-  const newItem = options?.newItem ?? item;
   return <any>Input<AnyArrayInput>({
+    children: {
+      ...RpcFnMap("addNewItem"),
+      item,
+      newItem,
+    },
     props: {
       item,
       newItem,

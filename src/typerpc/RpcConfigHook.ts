@@ -1,10 +1,12 @@
 import { Awaited } from "../common/typings2/Async";
 import { If, Not } from "../common/typings2/boolean";
+import { Call } from "../common/typings2/Call";
 import { Fn } from "../common/typings2/Fn";
 import { PartialUndefinedKeys } from "../common/typings2/PartialUndefinedKeys";
 import { ConfigFactory } from "./ConfigFactory";
 import { GenericConfig, IsGenericConfig } from "./GenericConfig";
-import { AnyRpc, RpcHook, RpcType, RpcUnresolvedConfig, TRpc } from "./Rpc";
+import { AnyRpc, RpcType, RpcUnresolvedConfig, TRpc } from "./Rpc";
+import { RpcHook } from "./RpcHook";
 
 export type RpcConfigHook<
   T extends TConfigHook & {
@@ -52,27 +54,32 @@ export type RpcConfigHookHandler<
   ? _GenericConfigHandler<T>
   : _ConfigHandler<T>;
 
+export type RpcConfigHookOptions<
+  R extends AnyRpcConfigHook,
+  T extends TConfigHook = RpcType<R>["TConfigHook"]
+> = PartialUndefinedKeys<
+  {
+    isGenericConfig:
+      | IsGenericConfig<T["Config"]>
+      | If<Not<IsGenericConfig<T["Config"]>>, undefined>;
+
+    props: T["Props"];
+  },
+  {
+    target: T["Target"];
+    handler: RpcConfigHookHandler<R>;
+  }
+>;
+
 export function RpcConfigHook<
   R extends AnyRpcConfigHook,
   T extends TConfigHook = RpcType<R>["TConfigHook"]
->(
-  options: PartialUndefinedKeys<
-    {
-      isGenericConfig:
-        | IsGenericConfig<T["Config"]>
-        | If<Not<IsGenericConfig<T["Config"]>>, undefined>;
-
-      props: T["Props"];
-    },
-    {
-      target: T["Target"];
-      handler: RpcConfigHookHandler<R>;
-    }
-  >
-): R {
-  const { target, handler } = options;
-  const isGenericConfig =
-    "isGenericConfig" in options ? options.isGenericConfig ?? false : false;
+>(options: RpcConfigHookOptions<R>): R {
+  const {
+    isGenericConfig = false,
+    target,
+    handler,
+  } = options as RpcConfigHookOptions<AnyRpcConfigHook>;
 
   return Object.setPrototypeOf(
     {
@@ -95,7 +102,9 @@ export function RpcConfigHook<
             })
           );
         }
-        return target.resolveRpcConfig.call(this, config);
+        return (target.resolveRpcConfig.call as Call<
+          typeof target.resolveRpcConfig
+        >)(this, config);
       },
     },
     target

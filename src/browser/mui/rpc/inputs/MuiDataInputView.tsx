@@ -54,7 +54,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
 
   async function updateOptions(text: string) {
     setQueryResult(
-      await props.connection.controller.getRows({
+      await props.connection.controller.query({
         getCount: true,
         text,
         take: 15,

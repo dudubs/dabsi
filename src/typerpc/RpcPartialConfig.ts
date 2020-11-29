@@ -1,7 +1,7 @@
 import { Override } from "../common/typings2/Override";
 import { PartialKeys } from "../common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "../common/typings2/UndefinedIfEmptyObject";
-import { AnyRpc, Rpc, RpcConfig, RpcUnresolvedConfig, TRpc } from "./Rpc";
+import { AnyRpc, Rpc, RpcConfig, TRpc } from "./Rpc";
 import { AnyRpcConfigHook, RpcConfigHook } from "./RpcConfigHook";
 
 export type AnyRpcWithObjectConfig = Rpc<

@@ -1,8 +1,6 @@
-import express from "express";
-import { Handler, Request } from "express";
+import express, { Handler, Request } from "express";
 import * as http from "http";
 import fetch, { RequestInit } from "node-fetch";
-import { toPromise } from "../common/async/toPromise";
 import { Awaitable } from "../common/typings2/Async";
 
 const _fetch = fetch;
@@ -21,8 +19,7 @@ beforeAll(async () => {
     return _handler(req, res, next);
   });
 
-  await toPromise(callback => {
-    server = app.listen(callback);
+  await new Promise<void>(callback => {
     const addr = app.listen(callback).address();
     _url = `http://[::]:${addr?.["port"]}`;
   });

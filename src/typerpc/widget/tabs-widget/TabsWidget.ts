@@ -1,5 +1,6 @@
 import { mapObject } from "../../../common/object/mapObject";
 import { Union } from "../../../common/typings2/Union";
+import { NoRpc } from "../../NoRpc";
 import { RpcConnection, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
 import { AnyWidget, Widget, WidgetElement } from "../Widget";
@@ -8,21 +9,21 @@ import { TabsWidgetHandler } from "./TabsWidgetHandler";
 
 export type AnyTabsWidget = TabsWidget<AnyWidgetRecord>;
 
+type TabsCommands<T extends AnyWidgetRecord> = {
+  getTabElement<K extends keyof T>(key: K): WidgetElement<T[K]>;
+};
 export type TabsWidget<T extends AnyWidgetRecord> = Widget<{
   TabMap: T;
-  Children: {};
-  Controller: RpcMap<T>;
-
-  Commands: {
-    getTabElement: {
-      (key: string): WidgetElement<AnyWidget>;
-      handler: "handleGetTabElement";
-    };
+  Children: {
+    map: RpcMap<T>;
   };
 
-  Connection: {
-    getTabElement<K extends keyof T>(key: K): WidgetElement<T[K]>;
-    tabs: { [K in keyof T]: RpcConnection<T[K]> };
+  Controller: NoRpc;
+
+  Commands: TabsCommands<T>;
+
+  Connection: TabsCommands<T> & {
+    map: RpcConnection<RpcMap<T>>;
   };
 
   Config: RpcUnresolvedConfig<RpcMap<T>>;
@@ -45,24 +46,20 @@ export type TabsWidget<T extends AnyWidgetRecord> = Widget<{
     };
   };
 
-  Props: {
-    tabMap: T;
-  };
+  Props: {};
 
   Handler: {};
 }>;
 
 export function TabsWidget<T extends AnyWidgetRecord>(
-  tabMap: T
+  children: T
 ): TabsWidget<T> {
   return <any>Widget<AnyTabsWidget>({
-    controller: RpcMap(tabMap),
     handler: TabsWidgetHandler,
-    commands: { getTabElement: "handleGetTabElement" },
-    props: { tabMap },
+    children: { map: RpcMap(children) },
     connection: {
-      getTabElement: conn => key => conn.command("getTabElement", key),
-      tabs: conn => conn.controller,
+      getTabElement: conn => conn.$getWidgetCommand("getTabElement"),
+      map: conn => conn.$getChildConnection("map"),
     },
   });
 }

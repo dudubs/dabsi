@@ -50,7 +50,7 @@ export class DataInputMapView<
                   $value: view.value,
                 },
               }),
-            connection: this.controller.getRowController(key),
+            connection: this.connection.target,
             element: this.element.target,
             inputRef: this.children.ref(key),
           },

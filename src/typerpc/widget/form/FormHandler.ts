@@ -11,12 +11,11 @@ type T = AnyForm;
 export class FormHandler
   extends AbstractWidgetHandler<T>
   implements IWidgetHandler<AnyForm> {
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return this.config.inputConfig;
-  }
+  $inputConfig = this.config.inputConfig;
 
-  async handleSubmit(valueData: InputValueData<AnyInput>) {
-    const inputResult = await (await this.controller).loadAndCheck(valueData);
+  $submitCommand = async (valueData: InputValueData<AnyInput>) => {
+    const inputHandler = await this.getChildHandler("input");
+    const inputResult = await inputHandler.loadAndCheck(valueData);
     if ("error" in inputResult) return { inputError: inputResult.error };
 
     class _Error {
@@ -31,14 +30,15 @@ export class FormHandler
       }
       throw error;
     }
-  }
+  };
 
-  async getElement(state): Promise<RequireOptionalKeys<WidgetElement<T>>> {
+  async getElement(state): Promise<WidgetElement<T>> {
     const value = await ValueOrAwaitableFn(this.config.valueConfig);
+    const inputHandler = await this.getChildHandler("input");
     if (value !== undefined) {
-      const element = await this.controller.then(c => c.getInputElement());
+      const element = await inputHandler.getInputElement();
       return { ...element, value };
     }
-    return this.controller.then(c => c.getElement(state));
+    return inputHandler.getElement(state);
   }
 }

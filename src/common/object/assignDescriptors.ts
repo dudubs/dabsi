@@ -1,6 +1,6 @@
 import { entries } from "./entries";
 
-export function mergeDescriptors<T extends object, U extends object>(
+export function assignDescriptors<T extends object, U extends object>(
   base: T,
   child: U
 ): Omit<T, keyof U> & U {

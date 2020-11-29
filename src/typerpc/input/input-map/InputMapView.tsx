@@ -3,15 +3,24 @@ import { createElement, Fragment, ReactElement, ReactNode } from "react";
 import { mapObject } from "../../../common/object/mapObject";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
-import { RpcConnection } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
+import { RpcChildren, RpcConnection } from "../../Rpc";
 import { AbstractInputView } from "../AbstractInputView";
-import { AnyInputConnection } from "../Input";
+import { BasedInput, InputChildren, InputType } from "../Input";
 import { InputViewProps } from "../InputView";
 import { InputViewChildren } from "../InputViewChildren";
 import { AnyInputMap } from "./InputMap";
 
 export type AnyInputMapConnection = RpcConnection<AnyInputMap>;
+
+export type BasedInputMap = BasedInput<InputType<AnyInputMap>>;
+
+export type InputMapChildren<T extends BasedInputMap> = RpcChildren<
+  RpcChildren<T>["map"]
+>;
+export type InputMapChildConnection<
+  T extends BasedInputMap,
+  K extends keyof InputMapChildren<T>
+> = RpcConnection<InputMapChildren<T>[K]>;
 
 export class InputMapView<
   C extends RpcConnection<AnyInputMap>
@@ -19,21 +28,21 @@ export class InputMapView<
   C,
   InputViewProps<C> & {
     children(
-      getProps: <K extends keyof RpcConnection<WidgetController<C>>>(
+      getProps: <K extends keyof C["map"]>(
         key: string & K
-      ) => InputViewProps<RpcConnection<WidgetController<C>>[K]>,
+      ) => InputViewProps<C["map"][K]>,
       view: InputMapView<C>
     ): ReactNode;
   }
 > {
   children = new InputViewChildren();
 
-  getProps<K extends keyof RpcConnection<WidgetController<C>>>(
+  getProps<K extends keyof C["map"]>(
     key: string & K
-  ): InputViewProps<RpcConnection<WidgetController<C>>[K]> {
+  ): InputViewProps<C["map"][K]> {
     return {
       key,
-      connection: this.controller[key],
+      connection: this.connection.map[key],
       element: this.element.elementMap[key],
       elementState: undefined,
       onElementStateChange: undefined,
@@ -45,7 +54,7 @@ export class InputMapView<
           [key]: view.value,
         }),
       inputRef: this.children.ref(key),
-    } as InputViewProps<RpcConnection<WidgetController<C>>[K]>;
+    } as InputViewProps<C["map"][K]>;
   }
 
   renderView(): React.ReactNode {
@@ -55,14 +64,13 @@ export class InputMapView<
 
 export namespace InputMapView {
   export type FieldsProps<
-    C extends AnyInputMapConnection,
-    T extends Record<string, AnyInputConnection> = RpcConnection<
-      WidgetController<C>
-    >
+    C extends AnyInputMapConnection
   > = InputViewProps<C> & {
-    fields: { [K in string & keyof T]: Renderer<InputViewProps<T[K]>> };
+    fields: {
+      [K in string & keyof C["map"]]: Renderer<InputViewProps<C["map"][K]>>;
+    };
     children?: Renderer<{
-      fields: Record<string & keyof T, ReactElement>;
+      fields: Record<string & keyof InputChildren<C>, ReactElement>;
       view: InputMapView<C>;
     }>;
   };

@@ -28,10 +28,6 @@ export class NumberInputHandler extends AbstractInputHandler<T> {
     return value ?? this.config.minValue ?? 0;
   }
 
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return undefined;
-  }
-
   async loadAndCheck(data: any): Promise<InputErrorOrValue<T>> {
     const value = NumberInputLoader.load(this.config, data);
     const error = NumberInputLoader.check(this.config, value);
@@ -39,7 +35,7 @@ export class NumberInputHandler extends AbstractInputHandler<T> {
     return { value };
   }
 
-  async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  async getInputElement(): Promise<InputElement<T>> {
     return {
       maxValue: this.config.maxValue,
       minValue: this.config.minValue,

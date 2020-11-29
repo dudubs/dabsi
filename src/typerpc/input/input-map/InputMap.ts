@@ -2,21 +2,19 @@ import { mapObject } from "../../../common/object/mapObject";
 import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { Payload } from "../../../common/typings2/Payload";
 import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
-import { RpcType } from "../../Rpc";
-import { RpcConfigMap, RpcMap } from "../../rpc-map/RpcMap";
+import { NoRpc } from "../../NoRpc";
+import { RpcConfig } from "../../Rpc";
+import { RpcConfigMap, RpcMap, RpcMap2 } from "../../rpc-map/RpcMap";
 
 import {
-  _InputElement,
   AnyInput,
   Input,
   InputElement,
   InputError,
-  InputType,
   InputValue,
   InputValueConfig,
   InputValueData,
   InputValueElement,
-  TInput,
 } from "../Input";
 import { InputMapHandler } from "./InputMapHandler";
 
@@ -28,45 +26,40 @@ export type InputErrorMap<T extends AnyInputRecord> = Payload<{
   };
 }>;
 
-export type TInputMap = Record<string, TInput>;
-
 export type InputMap<T extends AnyInputRecord> = Input<{
-  TInputMap: T;
-  Children: T;
+  Children: { map: RpcMap<T> };
   Commands: {};
-  Controller: RpcMap<T>;
-  Props: {
-    targetMap: T;
-  };
+  Controller: NoRpc;
+  Props: {};
   Element: {
     elementMap: {
-      [K in keyof T]: InputElement<T[K]>;
+      [K in string & keyof T]: InputElement<T[K]>;
     };
   };
 
-  Config: RpcConfigMap<T>;
+  Config: RpcConfig<RpcMap<T>>;
+  Error: InputErrorMap<T>;
+
+  Value: { [K in string & keyof T]: InputValue<T[K]> };
+  ValueData: { [K in string & keyof T]: InputValueData<T[K]> };
+  ValueElement: { [K in string & keyof T]: InputValueElement<T[K]> };
 
   ValueConfig: UndefinedIfEmptyObject<
-    PartialUndefinedKeys<{ [K in keyof T]: InputValueConfig<T[K]> }>
+    PartialUndefinedKeys<{ [K in string & keyof T]: InputValueConfig<T[K]> }>
   >;
-  Error: InputErrorMap<T>;
-  ValueData: { [K in keyof T]: InputValueData<T[K]> };
-  Value: { [K in keyof T]: InputValue<T[K]> };
-  ValueElement: { [K in keyof T]: InputValueElement<T[K]> };
 }>;
 
 //
 
-export function InputMap<T extends AnyInputRecord>(targetMap: T): InputMap<T> {
+export function InputMap<T extends AnyInputRecord>(children: T): InputMap<T> {
   return <any>Input<AnyInputMap>({
-    props: {
-      targetMap,
-    },
-    controller: RpcMap(targetMap),
     handler: InputMapHandler,
+    children: {
+      map: RpcMap(children),
+    },
     getValueDataFromElement(valueElementMap) {
-      return mapObject(this.targetMap, (target, key) => {
-        return target.getValueDataFromElement(valueElementMap[key]);
+      return mapObject(this.children.map.children, (child: AnyInput, key) => {
+        return child.getValueDataFromElement(valueElementMap[key]);
       });
     },
   });

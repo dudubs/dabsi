@@ -7,10 +7,6 @@ TODO:
 
  */
 import { Awaitable } from "../../../common/typings2/Async";
-import { If } from "../../../common/typings2/boolean";
-import { Is } from "../../../common/typings2/boolean/Is";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { UndefinedIfIsUndefined } from "../../../common/typings2/UndefinedIfIsUndefined";
 import {
   AnyInput,
   InputError,
@@ -19,9 +15,11 @@ import {
   InputValueData,
 } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
+import { NoRpc } from "../../NoRpc";
 import { RpcConnection, RpcUnresolvedConfig } from "../../Rpc";
 import {
   BasedWidget,
+  ToAsync,
   Widget,
   WidgetElement,
   WidgetElementState,
@@ -38,51 +36,49 @@ export type AnyForm = Form<TForm>;
 
 export type BasedForm = BasedWidget<WidgetType<AnyForm>>;
 
-export type FormType<T extends BasedForm> = WidgetType<T>["TForm"];
-
-export type Form<
-  T extends TForm,
-  Value = T["Value"],
-  Error = T["Error"],
-  Input extends AnyInput = T["Input"],
-  Result =
-    | { value: Value }
+type _Types<T extends TForm> = {
+  SubmitResult:
+    | { value: T["Value"] }
     | { error: Error }
-    | { inputError: InputError<Input> }
-> = Widget<{
+    | { inputError: InputError<T["Input"]> };
+
+  SubmitFn: (data: InputValueData<T["Input"]>) => _Types<T>["SubmitResult"];
+};
+export type Form<T extends TForm> = Widget<{
   TForm: T;
 
   Connection: {
-    input: RpcConnection<Input>;
+    input: RpcConnection<T["Input"]>;
+    submit: ToAsync<_Types<T>["SubmitFn"]>;
   };
 
-  Children: {};
   Commands: {
-    submit: {
-      (data: InputValueData<Input>): Result;
-      handler: "handleSubmit";
-    };
+    submit: _Types<T>["SubmitFn"];
   };
 
   Config: {
-    inputConfig: RpcUnresolvedConfig<Input>;
-    valueConfig?: ValueOrAwaitableFn<InputValueConfig<Input>>;
+    inputConfig: RpcUnresolvedConfig<T["Input"]>;
+    valueConfig?: ValueOrAwaitableFn<InputValueConfig<T["Input"]>>;
 
     submit(
-      value: InputValue<Input>,
-      errorClass: new (error: Error) => FormSubmitError
-    ): Awaitable<Value>;
+      value: InputValue<T["Input"]>,
+      errorClass: new (error: T["Error"]) => FormSubmitError
+    ): Awaitable<T["Value"]>;
   };
 
-  Element: WidgetElement<Input>;
+  Element: WidgetElement<T["Input"]>;
 
-  Controller: Input;
+  Controller: NoRpc;
 
-  Props: { input: Input };
+  Children: {
+    input: T["Input"];
+  };
+
+  Props: {};
 
   Handler: {};
 
-  ElementState: WidgetElementState<Input>;
+  ElementState: WidgetElementState<T["Input"]>;
 }>;
 
 export function Form<
@@ -96,12 +92,12 @@ export function Form<
   }
 >({ input }: { value?: Value; error?: Error; input: Input }): Form<T> {
   return <any>Widget<AnyForm>({
-    props: { input },
-    controller: input,
+    children: { input },
     handler: FormHandler,
     commands: { submit: "handleSubmit" },
     connection: {
-      input: conn => conn.controller,
+      input: conn => conn.$getChildConnection("input"),
+      submit: conn => conn.$getWidgetCommand("submit"),
     },
   });
 }

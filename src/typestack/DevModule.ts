@@ -20,7 +20,7 @@ export class DevModule {
           .boolean(["dev", "d"])
           .boolean(["watch", "w"]),
       runAsParent: ({ w, watch = w, d, dev = d }) =>
-        new Promise(async next => {
+        new Promise<void>(async next => {
           this.watchOnly = watch && !dev;
           if (process.env.DEV_CHILD === "true") {
             if (!this.watchOnly) await this.hooks.runAsChild();

@@ -44,7 +44,7 @@ export const TestInput = Input<TestInput>({
       return undefined;
     }
 
-    getInputElement(): Promise<RequireOptionalKeys<InputElement<AnyInput>>> {
+    getInputElement(): Promise<InputElement<AnyInput>> {
       return Promise.resolve({});
     }
 

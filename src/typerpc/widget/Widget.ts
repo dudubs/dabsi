@@ -1,44 +1,34 @@
 // TODO: remove controller.
+import { assignDescriptors } from "../../common/object/assignDescriptors";
 import { entries } from "../../common/object/entries";
-import { mergeDescriptors } from "../../common/object/mergeDescriptors";
-import { capitalize } from "../../common/string/capitalize";
+import { override } from "../../common/object/override";
+import { Lazy } from "../../common/patterns/lazy";
 import { If } from "../../common/typings2/boolean";
 import { Is } from "../../common/typings2/boolean/Is";
 import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
 import { Fn } from "../../common/typings2/Fn";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
-import { Union } from "../../common/typings2/Union";
 import { NoRpc } from "../NoRpc";
 import {
-  _RpcConnection,
-  _RpcUnresolvedConfig,
+  _IRpcHandler,
+  _RpcHandlerClass,
   AnyRpc,
   BasedRpc,
   IRpcHandler,
   Rpc,
+  RpcChildrenOption,
   RpcCommand,
   RpcConnection,
   RpcHandlerClass,
   RpcIsGenericConfigOption,
   RpcPropsOption,
   RpcType,
-  RpcUnresolvedConfig,
   TRpc,
 } from "../Rpc";
+import { RpcFnMap } from "../rpc-fn/RpcFn";
+import { BaseWidgetConnection } from "./BaseWidgetConnection";
 
-type _WidgetConnection<T extends TWidget> = T["Connection"] & {
-  rpc: Widget<T>;
-  rpcCommand: RpcCommand;
-  controller: RpcConnection<T["Controller"]>;
-
-  getElement(state?: T["ElementState"]): Promise<T["Element"]>;
-
-  command<K extends keyof T["Commands"]>(
-    key: string & K,
-    ...args: Parameters<T["Commands"][K]>
-  ): Promise<ReturnType<T["Commands"][K]>>;
-};
 export type TWidgetMap = Record<string, TWidget>;
 
 export type TWidget = {
@@ -49,8 +39,28 @@ export type TWidget = {
   Props: TRpc["Props"];
   Element: object;
   Controller: AnyRpc;
-  Commands: Record<string, Fn & { handler: string }>;
+  Commands: Record<string, Fn>;
   ElementState: any;
+};
+
+export type WidgetChildren<T extends BasedWidget> = WidgetType<T>["Children"];
+
+export type WidgetChild<
+  T extends BasedWidget,
+  K extends keyof WidgetChildren<T>
+> = WidgetChildren<T>[K];
+
+export type WidgetChildConnection<
+  T extends BasedWidget,
+  K extends keyof WidgetChildren<T>
+> = RpcConnection<WidgetChild<T, K>>;
+
+export type ToAsync<T extends Fn> = (
+  ...args: Parameters<T>
+) => Promise<ReturnType<T>>;
+
+export type ToAsyncMap<T extends Record<string, Fn>> = {
+  [K in keyof T]: ToAsync<T[K]>;
 };
 
 export type Widget<
@@ -61,22 +71,19 @@ export type Widget<
 
   Widget: T;
 
-  Children: {};
+  Payload: [string, any[]];
+
+  Children: T["Children"];
 
   Config: T["Config"];
 
   Handler: T["Handler"] & {
     getElement(state: T["ElementState"] | undefined): Promise<T["Element"]>;
-    getControllerConfig(): RpcUnresolvedConfig<T["Controller"]>;
   };
 
   Props: T["Props"] & {
-    widget: {
-      options: WidgetOptions<TWidget>;
-      commands: Record<keyof T["Commands"], string>;
-      connection: _WidgetConnection<T>;
-      controller: T["Controller"];
-    };
+    widgetConnectionClass: WidgetConnectionClass<T>;
+    widgetController: T["Controller"];
   };
 
   Connection: _WidgetConnection<T>;
@@ -86,22 +93,15 @@ export type WidgetControllerOption<T extends Pick<TWidget, "Controller">> =
   | T["Controller"]
   | If<Is<T["Controller"], NoRpc>, undefined>;
 
-export type WidgetCommandsOption<
-  T extends Pick<TWidget, "Commands">,
-  C extends TWidget["Commands"] = T["Commands"]
-> =
-  | { [K in keyof T["Commands"]]: C[K]["handler"] }
-  | If<IsEmptyObject<T["Commands"]>, undefined>;
-
 export type WidgetOptions<T extends TWidget> = PartialUndefinedKeys<
   {
     isGenericConfig: RpcIsGenericConfigOption<T>;
 
     props: RpcPropsOption<T>;
 
-    controller: WidgetControllerOption<T>;
+    children: RpcChildrenOption<T>;
 
-    commands: WidgetCommandsOption<T>;
+    controller: WidgetControllerOption<T>;
 
     connection:
       | {
@@ -112,49 +112,65 @@ export type WidgetOptions<T extends TWidget> = PartialUndefinedKeys<
       | If<IsEmptyObject<T["Connection"]>, undefined>;
   },
   {
+    commands?: any;
     handler: WidgetHandlerClass<Widget<T>>;
   }
 >;
 
-export type WidgetHandlerClass<
-  R extends AnyWidget,
-  C extends TWidget["Commands"] = WidgetType<R>["Commands"]
-> = RpcHandlerClass<R, _WidgetCommandHandlerMap<R>>;
+export type WidgetHandlerClass<T extends AnyWidget> = _RpcHandlerClass<
+  RpcType<T>,
+  IWidgetHandler<T>
+>;
 
-type _WidgetCommandHandlerMap<
-  R extends BasedWidget,
-  C extends TWidget["Commands"] = WidgetType<R>["Commands"]
-> = {
-  [HK in Union<{ [K in keyof C]: C[K]["handler"] }>]: Union<
+export type IWidgetHandler<T extends AnyWidget> = IRpcHandler<T> &
+  {
+    [K in string &
+      keyof _WidgetCommands<WidgetType<T>> as `$${K}Command`]: ToAsync<
+      _WidgetCommands<WidgetType<T>>[K]
+    >;
+  };
+
+export type IWidget<T extends AnyWidget = AnyWidget> = Widget<
+  Override<
+    WidgetType<T>,
     {
-      [K in keyof C]: C[K]["handler"] extends HK
-        ? (...args: Parameters<C[K]>) => Promise<ReturnType<C[K]>>
-        : never;
+      Commands: {};
+      Children: {};
     }
-  >;
-};
+  >
+>;
 
-export type IWidgetHandler<
-  R extends AnyWidget,
-  C extends TWidget["Commands"] = WidgetType<R>["Commands"]
-> = IRpcHandler<R> & _WidgetCommandHandlerMap<R>;
+export type WidgetConnectionClass<T extends TWidget> = new (
+  widget: AnyWidget,
+  path: any[],
+  command: RpcCommand
+) => _WidgetConnection<T>;
 
-export const AnyWidgetConnection: _WidgetConnection<TWidget> = {
-  get rpc(): any {
-    throw new Error();
-  },
-  get rpcCommand(): any {
-    throw new Error();
-  },
-  get controller(): any {
-    throw new Error();
-  },
-  command(key, ...args) {
-    return this.rpcCommand([key, args]);
-  },
-  getElement(state?) {
-    return this.rpcCommand(["getElement", state]);
-  },
+export type _WidgetCommands<T extends TWidget> = {
+  getElement(state?: T["ElementState"]): T["Element"];
+} & T["Commands"];
+
+export type _WidgetConnection<T extends TWidget> = T["Connection"] & {
+  $widget: Widget<T>;
+  $path: any[];
+  $command: RpcCommand;
+
+  $childCommand(key: string, payload, path?: any[]): Promise<any>;
+
+  $widgetCommand<K extends keyof _WidgetCommands<T>>(
+    key: string & K,
+    ...args: Parameters<_WidgetCommands<T>[K]>
+  ): Promise<ReturnType<_WidgetCommands<T>[K]>>;
+
+  $getWidgetCommand<K extends keyof _WidgetCommands<T>>(
+    key: string & K
+  ): ToAsync<_WidgetCommands<T>[K]>;
+
+  $getChildConnection<K extends keyof T["Children"]>(
+    key: K
+  ): RpcConnection<T["Children"][K]>;
+
+  getElement: ToAsync<_WidgetCommands<T>["getElement"]>;
 };
 
 export type AnyWidget = Widget<TWidget>;
@@ -167,46 +183,32 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     props = {},
     handler,
     commands,
-    controller,
-    connection: connectionDescriptors,
-  } = options as WidgetOptions<TWidget>;
+    controller = NoRpc,
+    children,
+    connection: connectionProps,
+  } = (options as any) as WidgetOptions<TWidget>;
 
-  let connection = Object.create(AnyWidgetConnection);
+  class Connection extends BaseWidgetConnection {}
 
-  for (const [key, value] of entries(connectionDescriptors)) {
-    const currentKey = "current" + capitalize(key);
-    Object.defineProperty(connection, key, {
+  for (const [key, getProp] of entries(connectionProps)) {
+    const desc: PropertyDescriptor = {
       get() {
-        if (!(currentKey in this)) {
-          this[currentKey] = value(this);
-        }
-        return this[currentKey];
+        return getProp(this);
       },
-    });
+    };
+    Lazy()(Connection.prototype, key, desc);
   }
 
   return <any>Rpc<AnyWidget>({
     handler,
     isGenericConfig,
-    props: mergeDescriptors(props as {}, {
-      widget: {
-        controller: controller || NoRpc,
-        options: <WidgetOptions<TWidget>>options,
-        commands: commands || {},
-        connection: connection,
-      },
+    children: override(RpcFnMap("getElement"), children || {}),
+    props: assignDescriptors(props as {}, {
+      widgetConnectionClass: Connection,
+      widgetController: controller || NoRpc,
     }),
-    connect(command) {
-      return Object.setPrototypeOf(
-        {
-          rpc: this,
-          rpcCommand: command,
-          controller: this.widget.controller.createRpcConnection(payload => {
-            return command(["controller", payload]);
-          }),
-        },
-        this.widget.connection
-      );
+    connect($path, $command) {
+      return new this.widgetConnectionClass(this, $path, $command);
     },
   });
 }
@@ -229,17 +231,3 @@ export type WidgetElement<T extends BasedWidget> = WidgetType<T>["Element"];
 export type WidgetController<
   T extends BasedWidget
 > = WidgetType<T>["Controller"];
-
-export type WidgetHook<
-  R extends AnyWidget,
-  T extends Partial<TWidget>
-> = Widget<Extract<Override<WidgetType<R>, T>, TWidget>>;
-
-export type IWidget = Widget<
-  Override<
-    TWidget,
-    {
-      Commands: {};
-    }
-  >
->;

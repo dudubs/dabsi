@@ -36,7 +36,7 @@ export class FormView<
     }) => ReactElement;
   }
 > {
-  input: InputView<RpcConnection<WidgetController<C>>>;
+  input: InputView<C["input"]>;
 
   reset() {
     this._element = { ...this.element };
@@ -45,10 +45,7 @@ export class FormView<
   async submit() {
     if (!(await this.input.validate())) return;
 
-    const result = await this.props.connection.command(
-      "submit",
-      this.input.data
-    );
+    const result = await this.connection.submit(this.input.data);
 
     if ("inputError" in result) {
       this.input?.setError(result.inputError);
@@ -76,7 +73,7 @@ export class FormView<
         {this.props.children({
           form: this,
           input: this.props.input({
-            connection: this.controller,
+            connection: this.connection.input,
             value: undefined,
             onChange: undefined,
             element: this.element,

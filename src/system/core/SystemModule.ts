@@ -88,14 +88,14 @@ export class SystemModule {
             SystemRequest.provide(() => sysReq)
           );
 
-          const payload = req.body;
+          const { path, payload } = req.body;
 
           const config = sysReq.getUnresolvedConfig(SystemRpc);
           const command = await SystemRpc.createRpcCommand(config);
           if (!(await aclReq.ask())) {
             throw new RpcError(`Access denied.`);
           }
-          res.json(await command(payload));
+          res.json(await command(path, payload));
         });
       },
     });

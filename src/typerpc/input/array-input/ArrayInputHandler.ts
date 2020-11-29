@@ -1,8 +1,8 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { IWidgetHandler, WidgetController } from "../../widget/Widget";
+import { IRpcHandler, RpcUnresolvedConfig } from "../../Rpc";
+import { WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -13,34 +13,36 @@ import {
   InputValueElement,
 } from "../Input";
 import { getLengthError } from "../LengthError";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { AnyArrayInput } from "./ArrayInput";
 
 type T = AnyArrayInput;
 
 export class ArrayInputHandler
   extends AbstractInputHandler<T>
-  implements IWidgetHandler<AnyArrayInput> {
+  implements IRpcHandler<AnyArrayInput> {
   getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig || [];
   }
 
-  async handleAddNewItem(data): Promise<any> {
-    const result = await this.controller
-      .then(c => c.getTargetHandler("item"))
-      .then(c => c.loadAndCheck(data));
+  $addNewItemConfig = async data => {
+    const result = await this.getChildHandler("item").then(c =>
+      c.loadAndCheck(data)
+    );
 
     if ("error" in result) return result;
     const itemValue = this.config.addNewItem
       ? await this.config.addNewItem(result.value)
       : result.value;
 
-    return await this.controller
-      .then(c => c.getTargetHandler("item"))
-      .then(c => c.getValueElement(itemValue));
-  }
+    return await this.getChildHandler("item").then(c =>
+      c.getValueElement(itemValue)
+    );
+  };
+
+  $itemConfig = this.config.itemConfig;
+  $newItemConfig = this.config.newItemConfig;
 
   getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
     return {
@@ -49,25 +51,23 @@ export class ArrayInputHandler
     };
   }
 
-  async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  async getInputElement(): Promise<InputElement<T>> {
     return {
       maxLength: this.config.maxLength,
       minLength: this.config.minLength,
-      item: await this.controller
-        .then(c => c.getTargetHandler("item"))
-        .then(c => c.getElement(undefined)),
-      newItem: await this.controller
-        .then(c => c.getTargetHandler("newItem"))
-        .then(c => c.getElement(undefined)),
+      item: await this.getChildHandler("item").then(h =>
+        h.getElement(undefined)
+      ),
+      newItem: await this.getChildHandler("newItem").then(c =>
+        c.getElement(undefined)
+      ),
     };
   }
 
   async getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    const itemHandler = await this.controller.then(c =>
-      c.getTargetHandler("item")
-    );
+    const itemHandler = await this.getChildHandler("item");
     const valueElement: any[] = [];
     for (const itemValue of value || []) {
       valueElement.push(await itemHandler.getValueElement(itemValue));
@@ -79,9 +79,7 @@ export class ArrayInputHandler
     const items: any[] = [];
     const errorMap = {};
     const keys = new Set();
-    const itemHandler = await this.controller.then(c =>
-      c.getTargetHandler("item")
-    );
+    const itemHandler = await this.getChildHandler("item");
 
     const lengthError = getLengthError(data, this.config);
     if (lengthError) {

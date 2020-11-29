@@ -15,7 +15,6 @@ import { RpcMapHandler } from "./RpcMapHandler";
 export type AnyRpcRecord = Record<string, AnyRpc>;
 
 export type AnyRpcMap = RpcMap<AnyRpcRecord>;
-export type TRpcMap = Record<string, TRpc>;
 
 export type RpcConfigMap<T extends AnyRpcRecord> = UndefinedIfEmptyObject<
   PartialUndefinedKeys<
@@ -24,37 +23,57 @@ export type RpcConfigMap<T extends AnyRpcRecord> = UndefinedIfEmptyObject<
     }
   >
 >;
+export type RpcMap2<T extends AnyRpcRecord> = Rpc<{
+  Children: {};
 
-export type RpcMap<T extends AnyRpcRecord> = Rpc<{
-  TRpcMap: T;
-
-  Children: T;
+  Payload: undefined;
 
   Connection: {
-    [K in keyof T]: RpcConnection<T[K]>;
+    // [K in string & keyof T]: RpcConnection<T[K]>;
   };
 
-  Props: { targetMap: T };
+  Props: {};
 
-  Config: RpcConfigMap<T>;
-  Handler: {
-    getTargetHandler<K extends keyof T>(
-      key: K
-    ): Promise<RpcResolvedHandler<T[K]>>;
+  Config;
+  // : UndefinedIfEmptyObject<
+  // PartialUndefinedKeys<{
+  //   [K in string & keyof T]: RpcUnresolvedConfig<T[K]>;
+  // }>
+  // >;
+  Handler: {};
+}>;
+export type RpcMap<T extends AnyRpcRecord> = Rpc<{
+  Children: T;
+
+  Payload: undefined;
+
+  Connection: {
+    [K in string & keyof T]: RpcConnection<T[K]>;
   };
+
+  Props: {};
+
+  Config: UndefinedIfEmptyObject<
+    PartialUndefinedKeys<
+      {
+        [K in string & keyof T]: RpcUnresolvedConfig<T[K]>;
+      }
+    >
+  >;
+  Handler: {};
 }>;
 
-export function RpcMap<T extends AnyRpcRecord>(targetMap: T): RpcMap<T> {
+export function RpcMap<T extends AnyRpcRecord>(children: T): RpcMap<T> {
   return <any>Rpc<AnyRpcMap>({
-    props: {
-      targetMap: targetMap,
-    },
     handler: RpcMapHandler,
+
+    children: children,
+
     connect(path, command) {
-      return mapObject(this.targetMap, (target, key) => {
+      return mapObject(this.children, (child, key) => {
         try {
-          return target.createRpcConnection(payload =>
-            command([...path, key], payload)
+          return child.createRpcConnection((childPath, payload) =>
+            command([...path, key, ...childPath], payload)
           );
         } catch (error) {
           if (error instanceof RpcError) {

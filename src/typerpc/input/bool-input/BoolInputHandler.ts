@@ -28,11 +28,7 @@ export class BoolInputHandler extends AbstractInputHandler<T> {
     return Boolean(value);
   }
 
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return undefined;
-  }
-
-  getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  getInputElement(): Promise<InputElement<T>> {
     return Promise.resolve({});
   }
 

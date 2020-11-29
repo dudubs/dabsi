@@ -133,7 +133,7 @@ export class DataTableView<
     if (this.isLoading) return;
     this.isLoading = true;
     const getCount = this.totalRows === 0 || this.pageIndex === 0;
-    const { totalRows, rows } = await this.props.connection.controller.getRows({
+    const { totalRows, rows } = await this.connection.query({
       getCount,
       order: mapAndFilterObject(this.columns, column => {
         const { nulls, sort } = column;

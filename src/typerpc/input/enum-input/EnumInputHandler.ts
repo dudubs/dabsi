@@ -20,10 +20,6 @@ import { AnyEnumInput, EnumInput } from "./EnumInput";
 type T = AnyEnumInput;
 
 export class EnumInputHandler extends AbstractNullableInputHandler<T> {
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return undefined;
-  }
-
   getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
@@ -39,7 +35,7 @@ export class EnumInputHandler extends AbstractNullableInputHandler<T> {
     return { value: valueData };
   }
 
-  async getInputElement(): Promise<RequireOptionalKeys<InputElement<T>>> {
+  async getInputElement(): Promise<InputElement<T>> {
     return {};
   }
 

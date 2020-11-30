@@ -4,7 +4,7 @@ import { Renderer } from "../../../react/renderer";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyWidgetConnection, WidgetType } from "../Widget";
+import { AnyWidgetConnection, WidgetElement, WidgetType } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
 import { AnyTabsWidget } from "./TabsWidget";
 
@@ -47,13 +47,13 @@ export class TabsWidgetView<
     };
   }
 
-  protected updateElement(element: WidgetType<C>["Element"]) {
+  protected updateElement(element: WidgetElement<C>) {
     if (element.current) {
       this.updateTabProps(element.current);
     }
   }
 
-  async switchTo<K extends string & keyof WidgetType<C>["TabMap"]>(key: K) {
+  async switchTo<K extends keyof C["map"]>(key: string & K) {
     this.setElementState({
       ...this.elementState,
       currentTab: { key, state: undefined },

@@ -1,4 +1,5 @@
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
+import { testMetaType } from "../../../common/MetaType";
 import { RandomId } from "../../../common/patterns/RandomId";
 import { RequiredOnly } from "../../../common/typings2/RequiredOnly";
 import { RpcConnection } from "../../Rpc";
@@ -46,15 +47,16 @@ export class ArrayInputView<
     if (this.newItemInput.error != null) return false;
 
     const itemKey =
-      this.rpc.uniqueItem?.getNewItemDataKey(this.newItemInput.data) ??
-      RandomId();
+      this.connection.$widget.uniqueItem?.getNewItemDataKey(
+        this.newItemInput.data
+      ) ?? RandomId();
 
     if (this.children.viewMap[itemKey]) {
       this.newItemInput.setError("UNIQUE_ITEM");
       return false;
     }
 
-    const result = await this.connection.addNewItemX(this.newItemInput.data);
+    const result = await this.connection.addNewItem(this.newItemInput.data);
     if ("error" in result) {
       this.newItemInput.setError(result.error);
       return false;
@@ -96,13 +98,13 @@ export class ArrayInputView<
   }
 
   renderItems() {
-    const { uniqueItem } = this.rpc;
+    const { uniqueItem } = this.connection.$widget;
 
     return this.value?.map((value, index) => {
       let key: string;
       if (uniqueItem) {
         key = uniqueItem.getItemDataKey(
-          this.rpc.item.getValueDataFromElement(value)
+          this.connection.item.$widget.getValueDataFromElement(value)
         );
       } else {
         key = String(index);

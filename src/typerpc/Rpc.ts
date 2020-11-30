@@ -324,3 +324,5 @@ export function RpcConfig<T extends AnyRpc>(
 ): RpcUnresolvedConfig<T> {
   return config;
 }
+
+export type RpcChilndren<T extends BasedRpc> = RpcType<T>["Children"];

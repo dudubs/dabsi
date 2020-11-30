@@ -10,35 +10,40 @@ import {
   WidgetElementState,
   WidgetType,
 } from "./Widget";
-import { WidgetHookHandler } from "./WidgetHookHandler";
+import { WidgetExtraHandler } from "./WidgetExtraHandler";
 
-export type WidgetHook<
+// WidgetExtra
+export type WidgetExtra<
   Target extends AnyWidget,
   Element extends object
 > = Widget<
   Override<
     WidgetType<Target>,
     {
-      WidgetHookTarget: Target;
+      WidgetExtraTarget: Target;
 
-      Element: [Element, WidgetElement<Target>];
+      Element: WidgetElement<Target> & {
+        extra: Element;
+      };
 
       Config: {
-        getElement: (state: WidgetElementState<Target>) => Awaitable<Element>;
+        getExtraElement: (
+          state: WidgetElementState<Target>
+        ) => Awaitable<Element>;
         targetConfig: RpcUnresolvedConfig<Target>;
       };
     }
   >
 >;
 
-export type AnyWidgetHook = WidgetHook<AnyWidget, any>;
+export type AnyWidgetExtra = WidgetExtra<AnyWidget, any>;
 
-export function WidgetHook<
+export function WidgetExtra<
   Target extends AnyWidget,
   ElementType extends InlineObject
 >(
   target: Target,
   element: ElementType
-): WidgetHook<Target, InlineObjectType<ElementType>> {
-  return RpcHook(target as AnyWidget, WidgetHookHandler);
+): WidgetExtra<Target, InlineObjectType<ElementType>> {
+  return RpcHook(target as AnyWidget, WidgetExtraHandler);
 }

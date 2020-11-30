@@ -15,8 +15,6 @@ export type AnyWidgetRecord = Record<string, AnyWidget>;
 export type AnyWidgetMap = WidgetMap<AnyWidgetRecord>;
 
 export type WidgetMap<T extends AnyWidgetRecord> = Widget<{
-  Connection: { map: RpcConnection<RpcMap<T>> };
-  Children: { map: RpcMap<T> };
   Controller: { map: RpcMap<T> };
   Config: RpcConfig<RpcMap<T>>;
   Handler: {};
@@ -27,17 +25,15 @@ export type WidgetMap<T extends AnyWidgetRecord> = Widget<{
   ElementState: {
     [K in keyof T]?: WidgetElementState<T[K]>;
   };
-  Commands: {};
 }>;
 
 export function WidgetMap<T extends AnyWidgetRecord>(
   children: T
 ): WidgetMap<T> {
   return <any>Widget<WidgetMap<AnyWidgetRecord>>({
+    handler: WidgetMapHandler,
     children: {
       map: RpcMap(children),
     },
-    handler: WidgetMapHandler,
-    connection: { map: conn => conn.$getChildConnection("map") },
   });
 }

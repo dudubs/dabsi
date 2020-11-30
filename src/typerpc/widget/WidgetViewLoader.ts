@@ -1,12 +1,7 @@
 import { ReactNode } from "react";
 import { View } from "../../react/view/View";
 import { ViewState } from "../../react/view/ViewState";
-import {
-  AnyWidgetConnection,
-  WidgetElement,
-  WidgetElementState,
-  WidgetType,
-} from "./Widget";
+import { AnyWidgetConnection, WidgetElement } from "./Widget";
 import { WidgetViewProps } from "./WidgetView";
 
 // TODO: Make service for WidgetViewLoader
@@ -16,7 +11,7 @@ export class WidgetViewLoader<C extends AnyWidgetConnection> extends View<
     connection: C;
 
     children(props: WidgetViewProps<C>, view: WidgetViewLoader<C>): ReactNode;
-  } & Pick<WidgetViewProps<C>, "elementState" | "onElementStateChange">
+  } & Partial<Pick<WidgetViewProps<C>, "elementState" | "onElementStateChange">>
 > {
   @ViewState() isLoading = false;
 

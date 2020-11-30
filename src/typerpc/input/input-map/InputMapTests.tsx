@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Constructor } from "../../../common/typings2/Constructor";
+import { focusNextTest } from "../../../typeorm/exp/tests/focusNextTest";
 import { RpcConnection } from "../../Rpc";
 import { testRpc } from "../../RpcTester";
 import { AnyWidgetMap } from "../../widget/widget-map/WidgetMap";
@@ -21,8 +22,6 @@ testm(__dirname, () => {
       t.testConfig({
         text1: { minLength: 2 },
       });
-
-      let x: RpcConnection<AnyInputMap> = t.connection;
 
       testWidgetView(
         t,
@@ -46,6 +45,8 @@ testm(__dirname, () => {
           });
         }
       );
+
+      focusNextTest();
 
       testInput(t, t => {
         const data = { text1: "hello", text2: "world" };

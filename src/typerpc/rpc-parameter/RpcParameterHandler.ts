@@ -20,10 +20,3 @@ export class RpcParameterHandler
     );
   }
 }
-
-const r = RpcParameter(String, TextInput());
-r.resolveRpcHandler(($, x) => {
-  return $({});
-}, null);
-
-r.children.target;

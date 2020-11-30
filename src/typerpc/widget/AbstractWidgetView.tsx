@@ -39,12 +39,8 @@ export abstract class AbstractWidgetView<
     this._element = element;
   }
 
-  get rpc(): Widget<WidgetType<C>> {
-    return this.connection.$widget as any;
-  }
-
   get connection(): C {
-    return this.connection;
+    return this.props.connection;
   }
 
   constructor(props: P) {

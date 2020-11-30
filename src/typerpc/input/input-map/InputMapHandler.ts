@@ -3,6 +3,7 @@ import { mapObjectAsync } from "../../../common/object/mapObject";
 import { Awaitable } from "../../../common/typings2/Async";
 import { AnyRpc, RpcUnresolvedConfig } from "../../Rpc";
 import { IWidgetHandler } from "../../widget/Widget";
+import { mapHandlerChildrenAsync } from "../../widget/widget-map/mapHandlerChildrenAsync";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -21,26 +22,19 @@ export class InputMapHandler
   implements IWidgetHandler<T> {
   $mapConfig = this.config;
 
-  getChildConfig(key: string): Awaitable<RpcUnresolvedConfig<AnyRpc>> {
-    return this.config[key];
-  }
-
-  getValueElement(
+  // todo: mapChildren
+  async getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    return mapObjectAsync(this.rpc.children, (target, key) =>
-      this.getChildHandler("map")
-        .then(c => c.getChildHandler(key))
-        .then(h => h.getValueElement(value?.[key]))
+    return mapHandlerChildrenAsync(this, (handler, key) =>
+      handler.getValueElement(value?.[key])
     );
   }
 
   async getInputElement(): Promise<InputElement<T>> {
     return {
-      elementMap: await mapObjectAsync(this.rpc.children, (target, key) =>
-        this.getChildHandler("map")
-          .then(c => c.getChildHandler(key))
-          .then(h => h.getInputElement())
+      elementMap: await mapHandlerChildrenAsync(this, handler =>
+        handler.getInputElement()
       ),
     };
   }
@@ -48,10 +42,8 @@ export class InputMapHandler
   async getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Promise<InputValue<T>> {
-    return mapObjectAsync(this.rpc.children, (target, key) => {
-      this.getChildHandler("map")
-        .then(c => c.getChildHandler(key))
-        .then(h => h.getValueFromConfig(valueConfig?.[key]));
+    return mapHandlerChildrenAsync(this, (handler, key) => {
+      handler.getValueFromConfig(valueConfig?.[key]);
     });
   }
 
@@ -59,16 +51,14 @@ export class InputMapHandler
     dataMap: InputValueData<T>
   ): Promise<InputErrorOrValue<T>> {
     const errorMap: any = {};
-    const valueMap = await mapObjectAsync(this.rpc.children, (target, key) =>
-      this.getChildHandler("map")
-        .then(c => c.getChildHandler(key))
-        .then(h => h.loadAndCheck(dataMap[key]))
-        .then(result => {
-          if ("error" in result) {
-            errorMap[key] = result.error;
-          }
-          return result.value;
-        })
+
+    const valueMap = await mapHandlerChildrenAsync(this, (handler, key) =>
+      handler.loadAndCheck(dataMap[key]).then(result => {
+        if ("error" in result) {
+          errorMap[key] = result.error;
+        }
+        return result.value;
+      })
     );
 
     if (hasKeys(errorMap)) {

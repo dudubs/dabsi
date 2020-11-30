@@ -4,7 +4,6 @@ import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { BoolInputHandler } from "./BoolInputHandler";
 
 export type BoolInput = Input<{
-  Commands: {};
   ValueData: boolean;
   Value: boolean;
   ValueElement: boolean;
@@ -13,7 +12,6 @@ export type BoolInput = Input<{
   Props: {};
   Element: {};
   Controller: {};
-  Children: {};
   Error: undefined;
 }>;
 

@@ -18,13 +18,17 @@ import { RpcFn } from "../rpc-fn/RpcFn";
 import { RpcMap } from "../rpc-map/RpcMap";
 import { AnyRpcParameter, RpcParameter } from "../rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "../RpcConfigHook";
-import { DataTable, DataTableOptions } from "../widget/data-table/DataTable";
+import {
+  AnyDataTable,
+  DataTable,
+  DataTableOptions,
+} from "../widget/data-table/DataTable";
 import { Form } from "../widget/form/Form";
 import { InlineObject, InlineObjectType } from "../widget/InlineObjectType";
 import { TabsWidget } from "../widget/tabs-widget/TabsWidget";
 import { WidgetType } from "../widget/Widget";
 import { AnyWidgetRecord } from "../widget/widget-map/WidgetMap";
-import { WidgetHook } from "../widget/WidgetHook";
+import { WidgetExtra } from "../widget/WidgetExtra";
 import { DataManagerHandler } from "./DataManagerHandler";
 
 // Full<Type>Stack
@@ -111,12 +115,9 @@ type _Types<T extends TDataManager> = {
     Input: T["AddInput"];
   }>;
 
-  EditTabsWithForm: Override<
-    T["EditTabs"],
-    {
-      form: _Types<T>["EditForm"];
-    }
-  >;
+  EditTabsWithForm: T["EditTabs"] & {
+    form: _Types<T>["EditForm"];
+  };
 
   EditTabsWidget: TabsWidget<_Types<T>["EditTabsWithForm"]>;
 
@@ -146,7 +147,7 @@ export type DataManager<T extends TDataManager> = RpcConfigHook<{
 
     edit: RpcParameter<{
       Data: string;
-      Target: WidgetHook<
+      Target: WidgetExtra<
         _Types<T>["EditTabsWidget"],
         {
           title: string;
@@ -204,7 +205,10 @@ export function DataManager<
     target: RpcMap({
       delete: RpcFn<(key: string) => void>(),
 
-      table: DataTable(options.tableRowType, options.tableOptions),
+      table: DataTable(
+        options.tableRowType as any,
+        options.tableOptions as DataTableOptions<AnyRpc>
+      ),
 
       add: Form({
         input: options.addInput,
@@ -212,7 +216,7 @@ export function DataManager<
 
       edit: RpcParameter(
         String,
-        WidgetHook(TabsWidget(editTabs), {
+        WidgetExtra(TabsWidget(editTabs), {
           title: String,
         })
       ),

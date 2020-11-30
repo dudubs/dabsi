@@ -32,8 +32,7 @@ export type MuiTabViewProps<C extends AnyWidgetConnection> = {
 };
 
 export type MuiTabsWidgetViewProps<
-  C extends AnyTabsWidgetConnection,
-  T extends AnyWidgetRecord = WidgetType<C>["TabMap"]
+  C extends AnyTabsWidgetConnection
 > = WidgetViewProps<C> & {
   TabsProps?: TabsProps;
 
@@ -47,9 +46,9 @@ export type MuiTabsWidgetViewProps<
   onTabChange?(key: string);
 
   tabs: {
-    [K in keyof T]?:
-      | MuiTabViewProps<RpcConnection<T[K]>>
-      | MuiTabViewProps<RpcConnection<T[K]>>["render"];
+    [K in keyof C["map"]]?:
+      | MuiTabViewProps<RpcConnection<C["map"][K]>>
+      | MuiTabViewProps<RpcConnection<C["map"][K]>>["render"];
   };
 };
 

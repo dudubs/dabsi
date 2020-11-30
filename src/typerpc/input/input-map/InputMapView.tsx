@@ -5,7 +5,7 @@ import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
 import { RpcChildren, RpcConnection } from "../../Rpc";
 import { AbstractInputView } from "../AbstractInputView";
-import { BasedInput, InputChildren, InputType } from "../Input";
+import { BasedInput, InputType } from "../Input";
 import { InputViewProps } from "../InputView";
 import { InputViewChildren } from "../InputViewChildren";
 import { AnyInputMap } from "./InputMap";
@@ -70,7 +70,7 @@ export namespace InputMapView {
       [K in string & keyof C["map"]]: Renderer<InputViewProps<C["map"][K]>>;
     };
     children?: Renderer<{
-      fields: Record<string & keyof InputChildren<C>, ReactElement>;
+      fields: Record<string & keyof C["map"], ReactElement>;
       view: InputMapView<C>;
     }>;
   };

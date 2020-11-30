@@ -1,5 +1,6 @@
 import Typography from "@material-ui/core/Typography";
 import React from "react";
+import { testMetaType } from "../../../common/MetaType";
 import { If } from "../../../common/typings2/boolean";
 import { Is } from "../../../common/typings2/boolean/Is";
 import { IsEmptyObject } from "../../../common/typings2/boolean/IsEmptyObject";
@@ -16,8 +17,11 @@ import {
   DataManagerRouter,
 } from "../../../typerpc/data-manager/DataManagerRouter";
 import { RpcConnection, RpcType } from "../../../typerpc/Rpc";
+import { AnyForm, Form } from "../../../typerpc/widget/form/Form";
 import { FormViewProps } from "../../../typerpc/widget/form/FormView";
 import { TabsWidget } from "../../../typerpc/widget/tabs-widget/TabsWidget";
+import { WidgetMap } from "../../../typerpc/widget/widget-map/WidgetMap";
+import { WidgetExtraView } from "../../../typerpc/widget/WidgetExtraView";
 import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
 import { MuiAddButton, MuiButtonProps } from "../components/MuiButton";
 import { MuiDataTableView, MuiDataTableViewProps } from "./MuiDataTableView";
@@ -28,7 +32,12 @@ import {
   MuiTabViewProps,
 } from "./MuiTabsWidgetView";
 
-type _Types<T extends TDataManager> = DataManagerTypes<T> & {};
+type _TypesOld<T extends TDataManager> = DataManagerTypes<T> & {};
+
+type _Types<C extends RpcConnection<AnyDataManager>> = {
+  EditTabs: ReturnType<C["edit"]>;
+  EditForm: _Types<C>["EditTabs"]["map"]["form"];
+};
 
 export type MuiDataManagerViewProps<
   C extends RpcConnection<AnyDataManager>,
@@ -36,35 +45,33 @@ export type MuiDataManagerViewProps<
 > = PartialUndefinedKeys<
   {
     renderEditInput:
-      | FormViewProps<RpcConnection<_Types<T>["EditForm"]>>["input"]
+      | FormViewProps<_Types<C>["EditForm"]>["input"]
       | If<Is<T["AddInput"], T["EditInput"]>, undefined>;
 
     editTabs:
-      | MuiTabsWidgetViewProps<RpcConnection<TabsWidget<T["EditTabs"]>>>["tabs"]
+      | MuiTabsWidgetViewProps<_Types<C>["EditTabs"]>["tabs"]
       | If<IsEmptyObject<T["EditTabs"]>, undefined>;
   },
   {
     connection: C;
     router: DataManagerRouter<T>;
 
-    renderAddInput: FormViewProps<RpcConnection<_Types<T>["AddForm"]>>["input"];
+    renderAddInput: FormViewProps<
+      RpcConnection<_Types<C>["EditForm"]>
+    >["input"];
 
     MuiEditFormTabViewProps?: OmitKeys<
-      MuiTabViewProps<RpcConnection<_Types<T>["EditForm"]>>,
+      MuiTabViewProps<RpcConnection<_Types<C>["EditForm"]>>,
       "render"
     >;
 
     MuiDataTableViewProps?: Partial<
-      MuiDataTableViewProps<RpcConnection<_Types<T>["Table"]>>
+      MuiDataTableViewProps<RpcConnection<C["table"]>>
     >;
 
-    MuiAddFormViewProps?: Partial<
-      MuiFormViewProps<RpcConnection<_Types<T>["AddForm"]>>
-    >;
+    MuiAddFormViewProps?: Partial<MuiFormViewProps<RpcConnection<C["add"]>>>;
 
-    MuiEditFormViewProps?: Partial<
-      MuiFormViewProps<RpcConnection<_Types<T>["EditForm"]>>
-    >;
+    MuiEditFormViewProps?: Partial<MuiFormViewProps<_Types<C>["EditForm"]>>;
 
     MuiAddButtonProps?: MuiButtonProps;
   }
@@ -131,7 +138,7 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
     {
       renderWidget(props, { location }) {
         return (
-          <WidgetHookView
+          <WidgetExtraView
             {...props}
             children={(props, page) => (
               <>

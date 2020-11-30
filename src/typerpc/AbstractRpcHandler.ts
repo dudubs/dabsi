@@ -1,20 +1,19 @@
-import { Lazy } from "../common/patterns/lazy";
 import { Awaitable } from "../common/typings2/Async";
 import { Override } from "../common/typings2/Override";
+import { inspect } from "../logging/inspect";
 import {
-  _RpcResolvedConfig,
   AnyRpc,
-  RpcError,
-  RpcPayload,
-  RpcResolvedHandler,
-  RpcType,
-  RpcUnresolvedConfig,
-  RpcResolvedConfig,
-  RpcChildren,
-  RpcChild,
   AnyRpcHandler,
   IRpcHandler,
   Rpc,
+  RpcChildren,
+  RpcChilndren,
+  RpcError,
+  RpcPayload,
+  RpcResolvedConfig,
+  RpcResolvedHandler,
+  RpcType,
+  RpcUnresolvedConfig,
 } from "./Rpc";
 
 export type IRpc = Rpc<
@@ -41,24 +40,33 @@ export abstract class AbstractRpcHandler<T extends AnyRpc>
   protected getChildConfig?(
     key: string
   ): Awaitable<RpcUnresolvedConfig<AnyRpc>> {
+    const childConfigKey = `$${key}Config`;
+    let childConfig = this[childConfigKey];
+
+    if (childConfig !== null) {
+      if (typeof childConfig === "function") {
+        childConfig = childConfig.bind(this);
+      }
+      return childConfig;
+    }
+
     throw new RpcError(`No childConfig for "${key}".`);
   }
 
   protected _childHandlerMapCache: Record<string, any> = {};
-  async getChildHandler<K extends keyof RpcChildren<T>>(
+
+  async getChildHandler<K extends keyof RpcChilndren<T>>(
     key: string & K
   ): Promise<RpcResolvedHandler<RpcChildren<T>[K]>> {
     if (this._childHandlerMapCache[key]) return this._childHandlerMapCache[key];
     const child = this.rpc.children[key];
-    if (!child) throw new RpcError(`No child "${key}".`);
-    const childConfigKey = `$${key}Config`;
-    const childConfig = this[childConfigKey];
-    if (childConfig === null) {
-      throw new RpcError(`Can't resolve child key "${key}".`);
-    }
-    try {
-      const config = childConfig ?? (await this.getChildConfig!(key));
+    if (!child)
+      throw new RpcError(
+        `No child "${key}". ${inspect(Object.keys(this.rpc.children))}`
+      );
 
+    const config = await this.getChildConfig!(key);
+    try {
       return (this._childHandlerMapCache[key] = await child.resolveRpcHandler(
         config,
         this as AnyRpcHandler

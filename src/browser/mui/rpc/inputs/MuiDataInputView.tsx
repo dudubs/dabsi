@@ -45,7 +45,6 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
 ) {
   type Types = InputType<C>["Types"];
   type TableTypes = Types["TableTypes"];
-  type TableRow = TableTypes["RowWithKey"];
 
   const lang = useLangTranslator();
   const inputRef = useRef<DataInputView<C>>(null);
@@ -54,10 +53,10 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
 
   async function updateOptions(text: string) {
     setQueryResult(
-      await props.connection.controller.query({
+      await props.connection.table.query({
         getCount: true,
         text,
-        take: 15,
+        pageSize: 15,
       })
     );
   }
@@ -113,7 +112,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
               })}
             </DialogTitle>
             <WidgetViewLoader
-              connection={props.connection.controller}
+              connection={props.connection.table}
               children={props => (
                 <MuiDataTableView
                   // disableToolbar

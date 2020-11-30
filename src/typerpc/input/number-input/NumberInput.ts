@@ -9,11 +9,7 @@ export type NumberInput = Input<{
 
   ValueData: number;
 
-  Commands: {};
-
   Value: number;
-
-  Children: {};
 
   ValueElement: number;
 

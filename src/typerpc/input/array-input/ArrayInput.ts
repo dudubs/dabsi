@@ -24,12 +24,6 @@ import { ArrayInputHandler } from "./ArrayInputHandler";
 
 export type TArrayInput = { NewItem: AnyInput; Item: AnyInput };
 
-type _Types<T extends TArrayInput> = {
-  AddNewItemFn(
-    data: InputValueData<T["Item"]>
-  ): ErrorOrValue<InputError<T["NewItem"]>, InputValueElement<T["Item"]>>;
-};
-
 export type ArrayInput<
   T extends TArrayInput,
   Item extends AnyInput = T["Item"],
@@ -49,20 +43,7 @@ export type ArrayInput<
     ): ErrorOrValue<InputError<T["NewItem"]>, InputValueElement<T["Item"]>>;
   };
 
-  Children: {
-    newItem: NewItem;
-    item: Item;
-  };
-
   ItemDataValue: InputValueData<Item>;
-
-  Commands: {
-    addNewItem: _Types<T>["AddNewItemFn"];
-  };
-
-  Connection: {
-    addNewItem: ToAsync<_Types<T>["AddNewItemFn"]>;
-  };
 
   ValueData: InputValueData<Item>[];
 
@@ -73,8 +54,6 @@ export type ArrayInput<
   ValueElement: InputValueElement<Item>[];
 
   Props: {
-    item: Item;
-    newItem: NewItem;
     // TODO: uniqueItem?: {...}
     uniqueItem?: {
       getItemDataKey: (data: InputValueData<Item>) => string;
@@ -161,13 +140,11 @@ export function ArrayInput<
 
   return <any>Input<AnyArrayInput>({
     children: {
-      ...RpcFnMap("addNewItem"),
       item,
       newItem,
     },
+    commands: { addNewItem: true },
     props: {
-      item,
-      newItem,
       uniqueItem: getItemDataKey &&
         getNewItemDataKey && {
           getNewItemDataKey,
@@ -177,7 +154,7 @@ export function ArrayInput<
     handler: ArrayInputHandler,
     getValueDataFromElement(items) {
       return items.map(itemValue => {
-        return this.item.getValueDataFromElement(itemValue);
+        return this.children.item.getValueDataFromElement(itemValue);
       });
     },
   });

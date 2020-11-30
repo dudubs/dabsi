@@ -5,7 +5,6 @@ import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
-import { WidgetChildConnection, WidgetChildren } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
 import { AnyWidgetMap } from "./WidgetMap";
 
@@ -16,7 +15,7 @@ export type WidgetMapViewProps<
     [K in string & keyof C["map"]]: Renderer<WidgetViewProps<C["map"][K]>>;
   };
   children?: Renderer<{
-    fields: Record<string & keyof WidgetChildren<C>, ReactElement>;
+    fields: Record<string & keyof C["map"], ReactElement>;
   }>;
 };
 

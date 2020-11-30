@@ -1,6 +1,7 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { Awaitable } from "../../../common/typings2/Async";
 import { IRpcHandler } from "../../Rpc";
+import { IWidgetHandler } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -17,14 +18,14 @@ type T = AnyArrayInput;
 
 export class ArrayInputHandler
   extends AbstractInputHandler<T>
-  implements IRpcHandler<AnyArrayInput> {
+  implements IWidgetHandler<AnyArrayInput> {
   getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig || [];
   }
 
-  $addNewItemConfig = async data => {
+  async $addNewItemCommand(data) {
     const result = await this.getChildHandler("item").then(c =>
       c.loadAndCheck(data)
     );
@@ -37,7 +38,7 @@ export class ArrayInputHandler
     return await this.getChildHandler("item").then(c =>
       c.getValueElement(itemValue)
     );
-  };
+  }
 
   $itemConfig = this.config.itemConfig;
   $newItemConfig = this.config.newItemConfig;

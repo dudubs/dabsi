@@ -6,6 +6,7 @@ import { Awaitable } from "../../common/typings2/Async";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
 import {
+  AnyRpc,
   BasedRpc,
   RpcChildren,
   RpcChildrenOption,
@@ -20,7 +21,7 @@ import {
   ToAsyncMap,
   TWidget,
   Widget,
-  WidgetConnectionOption,
+  WidgetControllerOptions,
   WidgetHandlerClass,
   WidgetType,
 } from "../widget/Widget";
@@ -29,8 +30,7 @@ export type IInput<T extends AnyInput = AnyInput> = Input<
   Override<
     TInput,
     {
-      Commands: {};
-      Children: {};
+      Controller: {};
     }
   >
 >;
@@ -39,8 +39,6 @@ export type TInput = {
   ValueData: any;
 
   Value: any;
-
-  Children: TRpc["Children"];
 
   Controller: TWidget["Controller"];
 
@@ -55,8 +53,6 @@ export type TInput = {
   ValueConfig: any;
 
   Error: any;
-
-  Commands: TWidget["Commands"];
 };
 
 export type InputElement<T extends AnyInput> = InputType<T>["Element"];
@@ -71,29 +67,16 @@ export type _InputElement<T extends TInput> = T["Element"];
 
  */
 
-export type InputChildren<T extends BasedInput> = RpcChildren<
-  InputType<T>["Children"]["children"]
->;
-
 type _InputCommands<T extends TInput> = {
   check(data: T["ValueData"]): T["Error"] | undefined;
 };
 
 export type Input<T extends TInput> = Widget<{
-  Children: T["Children"];
-
-  Commands: _InputCommands<T>;
-
   TInput: T;
 
-  Controller: T["Controller"];
-
-  Connection: Override<
-    ToAsyncMap<_InputCommands<T>>,
-    {
-      [K in keyof T["Children"]]: RpcConnection<T["Children"][K]>;
-    }
-  >;
+  Controller: T["Controller"] & {
+    check(data: T["ValueData"]): T["Error"] | undefined;
+  };
 
   Config: T["Config"];
 
@@ -120,7 +103,9 @@ export type Input<T extends TInput> = Widget<{
   ElementState: undefined;
 }>;
 
-export type BasedInput<T extends TInput = TInput> = BasedRpc<RpcType<Input<T>>>;
+export type BasedInput<T extends TInput = TInput> = BasedRpc<
+  Extract<RpcType<Extract<Input<T>, AnyRpc>>, TRpc>
+>;
 
 export type InputType<T extends BasedInput> = WidgetType<T>["TInput"];
 
@@ -141,9 +126,7 @@ export type InputOptions<T extends TInput> = PartialUndefinedKeys<
     isGenericConfig: RpcIsGenericConfigOption<T>;
 
     props: RpcPropsOption<T>;
-
-    children: RpcChildrenOption<T>;
-  },
+  } & WidgetControllerOptions<T>,
   {
     handler: WidgetHandlerClass<Input<T>>;
 
@@ -161,25 +144,18 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     props = {},
     isGenericConfig,
     handler,
-    children,
+    children = {},
     getValueDataFromElement,
-  } = (options as any) as InputOptions<TInput>;
+  } = (options as any) as InputOptions<InputType<IInput>>;
 
   return <any>Widget<IInput>({
     handler,
-    children: override(RpcFnMap("check"), children || {}),
+    children,
+    commands: { check: true },
     props: assignDescriptors(props, {
       getValueDataFromElement,
     }),
     isGenericConfig,
-    connection: override(
-      {
-        check: conn => conn.$getWidgetCommand("check"),
-      },
-      mapObject(children || {}, (_, key) => conn =>
-        conn.$getChildConnection(key)
-      )
-    ),
   });
 }
 

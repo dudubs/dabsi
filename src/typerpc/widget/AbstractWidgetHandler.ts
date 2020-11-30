@@ -1,3 +1,4 @@
+import { mapObjectAsync } from "../../common/object/mapObject";
 import { AbstractRpcHandler } from "../AbstractRpcHandler";
 import { RpcPayload } from "../Rpc";
 import {
@@ -11,9 +12,12 @@ import {
 export abstract class AbstractWidgetHandler<T extends AnyWidget>
   extends AbstractRpcHandler<T>
   implements IWidgetHandler<IWidget> {
-  $getElementCommand = (state?) => this.getElement(state);
+  $getElementCommand(state?) {
+    return this.getElement(state);
+  }
 
-  async handle([key, args]: RpcPayload<T>): Promise<any> {
+  async handle(payload): Promise<any> {
+    const [key, args] = payload;
     return this["$" + key + "Command"](...args);
   }
 

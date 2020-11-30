@@ -29,7 +29,7 @@ export type RpcMap2<T extends AnyRpcRecord> = Rpc<{
   Payload: undefined;
 
   Connection: {
-    // [K in string & keyof T]: RpcConnection<T[K]>;
+    // [K in keyof T]: RpcConnection<T[K]>;
   };
 
   Props: {};
@@ -37,7 +37,7 @@ export type RpcMap2<T extends AnyRpcRecord> = Rpc<{
   Config;
   // : UndefinedIfEmptyObject<
   // PartialUndefinedKeys<{
-  //   [K in string & keyof T]: RpcUnresolvedConfig<T[K]>;
+  //   [K in keyof T]: RpcUnresolvedConfig<T[K]>;
   // }>
   // >;
   Handler: {};
@@ -48,7 +48,7 @@ export type RpcMap<T extends AnyRpcRecord> = Rpc<{
   Payload: undefined;
 
   Connection: {
-    [K in string & keyof T]: RpcConnection<T[K]>;
+    [K in keyof T]: RpcConnection<T[K]>;
   };
 
   Props: {};
@@ -56,7 +56,7 @@ export type RpcMap<T extends AnyRpcRecord> = Rpc<{
   Config: UndefinedIfEmptyObject<
     PartialUndefinedKeys<
       {
-        [K in string & keyof T]: RpcUnresolvedConfig<T[K]>;
+        [K in keyof T]: RpcUnresolvedConfig<T[K]>;
       }
     >
   >;

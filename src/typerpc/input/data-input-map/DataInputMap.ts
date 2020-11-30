@@ -84,8 +84,6 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
     table: DataInputTypes<T>["Table"];
     target: T["Target"];
   };
-
-  Commands: {};
 }>;
 
 export type DataInputMapConfig<

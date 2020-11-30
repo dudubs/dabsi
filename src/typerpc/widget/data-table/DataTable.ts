@@ -146,14 +146,8 @@ export type DataTable<T extends TDataTable> = Widget<{
     rowType: { [K in keyof T["Row"]]: (value: any) => T["Row"][K] };
   };
 
-  Connection: {
-    row: RpcConnection<T["RowController"]>;
-    query: ToAsync<_Types<T>["QueryFn"]>;
-  };
-
   Handler: {
     query: ToAsync<_Types<T>["QueryFn"]>;
-
     loadRow(dataRow: any): Promise<_Types<T>["RowWithKey"]>;
     loadRow(dataRow: any, noKey: true): Promise<T["Row"]>;
 
@@ -173,7 +167,6 @@ export type DataTable<T extends TDataTable> = Widget<{
       Data: string;
     }>;
   };
-  Commands: { query: _Types<T>["QueryFn"] };
 
   Children: {
     row: RpcParameter<{
@@ -206,10 +199,7 @@ export function DataTable<
     children: {
       row: RpcParameter(String, (options.rowController || NoRpc) as AnyRpc),
     },
-    connection: {
-      query: conn => conn.$getWidgetCommand("query"),
-      row: conn => conn.$getChildConnection("row"),
-    },
+    commands: { query: true },
     props: { rowType },
   });
 }

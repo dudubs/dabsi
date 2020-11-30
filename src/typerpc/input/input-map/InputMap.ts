@@ -27,25 +27,23 @@ export type InputErrorMap<T extends AnyInputRecord> = Payload<{
 }>;
 
 export type InputMap<T extends AnyInputRecord> = Input<{
-  Children: { map: RpcMap<T> };
-  Commands: {};
   Controller: { map: RpcMap<T> };
   Props: {};
   Element: {
     elementMap: {
-      [K in string & keyof T]: InputElement<T[K]>;
+      [K in keyof T]: InputElement<T[K]>;
     };
   };
 
   Config: RpcConfig<RpcMap<T>>;
   Error: InputErrorMap<T>;
 
-  Value: { [K in string & keyof T]: InputValue<T[K]> };
-  ValueData: { [K in string & keyof T]: InputValueData<T[K]> };
-  ValueElement: { [K in string & keyof T]: InputValueElement<T[K]> };
+  Value: { [K in keyof T]: InputValue<T[K]> };
+  ValueData: { [K in keyof T]: InputValueData<T[K]> };
+  ValueElement: { [K in keyof T]: InputValueElement<T[K]> };
 
   ValueConfig: UndefinedIfEmptyObject<
-    PartialUndefinedKeys<{ [K in string & keyof T]: InputValueConfig<T[K]> }>
+    PartialUndefinedKeys<{ [K in keyof T]: InputValueConfig<T[K]> }>
   >;
 }>;
 

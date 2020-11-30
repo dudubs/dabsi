@@ -22,7 +22,7 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
     edit: async ($, key) => {
       const row = await config.source.getOrFail(key);
       return $({
-        getElement() {
+        getExtraElement() {
           return { title: config.getTitleForRow(row) };
         },
         targetConfig: async $ => {

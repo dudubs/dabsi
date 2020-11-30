@@ -6,11 +6,7 @@ export type NullableInput<
   N extends boolean,
   T extends TInput,
   U extends TInput = {
-    Commands: {};
-
     Controller: T["Controller"];
-
-    Children: T["Children"];
 
     ValueData: T["ValueData"] | If<N, Nullable>;
 

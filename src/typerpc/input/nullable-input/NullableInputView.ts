@@ -16,7 +16,7 @@ export class NullableInputView<
   }
 > {
   protected getError(): Awaitable<InputError<C> | undefined> {
-    if (!this.rpc.nullable) {
+    if (!this.connection.$widget.nullable) {
       if (this.value == null) {
         return "NOT_NULLABLE";
       }

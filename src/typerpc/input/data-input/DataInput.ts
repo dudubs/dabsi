@@ -22,13 +22,9 @@ import { NullableInput } from "../nullable-input/NullableInput";
 import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
 import { DataInputHandler } from "./DataInputHandler";
 
-export type WithDataKey = {
-  $key: string;
-};
-
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
 
-type _Types<T extends TDataInput> = T & {
+type _Types<T extends TDataInput> = {
   Table: DataTable<{
     Row: T["TableRow"];
     Data: T["TableData"];
@@ -85,8 +81,6 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
   {
     Types: _Types<T>;
 
-    Commands: {};
-
     ValueData: string;
 
     Value: T["Value"];
@@ -116,10 +110,6 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
     >;
 
     Element: {};
-
-    Children: {
-      table: _Types<T>["Table"];
-    };
 
     Controller: {
       table: _Types<T>["Table"];

@@ -47,15 +47,6 @@ type _Types<T extends TForm> = {
 export type Form<T extends TForm> = Widget<{
   TForm: T;
 
-  Connection: {
-    input: RpcConnection<T["Input"]>;
-    submit: ToAsync<_Types<T>["SubmitFn"]>;
-  };
-
-  Commands: {
-    submit: _Types<T>["SubmitFn"];
-  };
-
   Config: {
     inputConfig: RpcUnresolvedConfig<T["Input"]>;
     valueConfig?: ValueOrAwaitableFn<InputValueConfig<T["Input"]>>;
@@ -68,9 +59,6 @@ export type Form<T extends TForm> = Widget<{
 
   Element: WidgetElement<T["Input"]>;
 
-  Children: {
-    input: T["Input"];
-  };
   Controller: {
     input: T["Input"];
     submit: _Types<T>["SubmitFn"];
@@ -96,10 +84,7 @@ export function Form<
   return <any>Widget<AnyForm>({
     children: { input },
     handler: FormHandler,
-    connection: {
-      input: conn => conn.$getChildConnection("input"),
-      submit: conn => conn.$getWidgetCommand("submit"),
-    },
+    commands: { submit: true },
   });
 }
 

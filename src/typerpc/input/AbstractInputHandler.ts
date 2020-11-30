@@ -1,6 +1,5 @@
 import { Awaitable } from "../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
-import { IRpcHandler } from "../Rpc";
 import { AbstractWidgetHandler } from "../widget/AbstractWidgetHandler";
 import {
   IWidgetHandler,

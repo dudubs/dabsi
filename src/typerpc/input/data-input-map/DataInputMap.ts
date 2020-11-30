@@ -75,7 +75,10 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
         };
       }>;
 
-  Controller: NoRpc;
+  Controller: {
+    table: DataInputTypes<T>["Table"];
+    target: T["Target"];
+  };
 
   Children: {
     table: DataInputTypes<T>["Table"];

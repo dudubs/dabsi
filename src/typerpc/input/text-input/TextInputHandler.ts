@@ -3,7 +3,7 @@ import { Lazy } from "../../../common/patterns/lazy";
 import { Awaitable } from "../../../common/typings2/Async";
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "../../Rpc";
-import { IWidgetHandler, WidgetController } from "../../widget/Widget";
+import { IWidgetHandler } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,

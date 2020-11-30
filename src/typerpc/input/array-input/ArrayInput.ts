@@ -5,7 +5,7 @@ import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedK
 import { RpcUndefinedConfig, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcFnMap } from "../../rpc-fn/RpcFn";
 import { RpcMap } from "../../rpc-map/RpcMap";
-import { WidgetElement } from "../../widget/Widget";
+import { ToAsync, WidgetElement } from "../../widget/Widget";
 import {
   AnyInput,
   ErrorOrValue,
@@ -24,6 +24,12 @@ import { ArrayInputHandler } from "./ArrayInputHandler";
 
 export type TArrayInput = { NewItem: AnyInput; Item: AnyInput };
 
+type _Types<T extends TArrayInput> = {
+  AddNewItemFn(
+    data: InputValueData<T["Item"]>
+  ): ErrorOrValue<InputError<T["NewItem"]>, InputValueElement<T["Item"]>>;
+};
+
 export type ArrayInput<
   T extends TArrayInput,
   Item extends AnyInput = T["Item"],
@@ -35,17 +41,28 @@ export type ArrayInput<
 > = Input<{
   TArrayInput: T;
 
-  Children: RpcFnMap<{
+  Controller: {
+    newItem: NewItem;
+    item: Item;
     addNewItem(
-      data: InputValueData<Item>
-    ): ErrorOrValue<InputError<NewItem>, InputValueElement<Item>>;
-  }> & {
+      data: InputValueData<T["Item"]>
+    ): ErrorOrValue<InputError<T["NewItem"]>, InputValueElement<T["Item"]>>;
+  };
+
+  Children: {
     newItem: NewItem;
     item: Item;
   };
 
   ItemDataValue: InputValueData<Item>;
-  Commands: {};
+
+  Commands: {
+    addNewItem: _Types<T>["AddNewItemFn"];
+  };
+
+  Connection: {
+    addNewItem: ToAsync<_Types<T>["AddNewItemFn"]>;
+  };
 
   ValueData: InputValueData<Item>[];
 
@@ -89,12 +106,6 @@ export type ArrayInput<
     maxLength?: number;
     minLength?: number;
   };
-
-  Controller: RpcMap<{
-    item: Item;
-
-    newItem: NewItem;
-  }>;
 
   Error: LengthError | "UNIQUE_ITEM" | InputErrorMap<Record<string, Item>>;
 }>;
@@ -164,11 +175,6 @@ export function ArrayInput<
         },
     },
     handler: ArrayInputHandler,
-    controller: RpcMap({
-      item,
-      newItem,
-    }),
-
     getValueDataFromElement(items) {
       return items.map(itemValue => {
         return this.item.getValueDataFromElement(itemValue);

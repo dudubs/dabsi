@@ -12,9 +12,9 @@ export type BoolInput = Input<{
   Config: undefined;
   Props: {};
   Element: {};
+  Controller: {};
   Children: {};
   Error: undefined;
-  Controller: NoRpc;
 }>;
 
 export function BoolInput(): BoolInput {

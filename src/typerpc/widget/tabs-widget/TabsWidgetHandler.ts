@@ -1,14 +1,7 @@
-import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { keys } from "../../../common/object/keys";
-import { IRpcHandler, RpcError, RpcUnresolvedConfig } from "../../Rpc";
-import {
-  AnyWidget,
-  IWidgetHandler,
-  WidgetController,
-  WidgetElement,
-  WidgetElementState,
-} from "../Widget";
+import { IRpcHandler, RpcError } from "../../Rpc";
+import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
+import { AnyWidget, WidgetElement, WidgetElementState } from "../Widget";
 import { AnyTabsWidget } from "./TabsWidget";
 
 type T = AnyTabsWidget;

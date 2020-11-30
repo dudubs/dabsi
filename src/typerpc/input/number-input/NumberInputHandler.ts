@@ -1,7 +1,4 @@
 import { Awaitable } from "../../../common/typings2/Async";
-import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,

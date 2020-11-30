@@ -5,7 +5,7 @@ import { NumberInputHandler } from "./NumberInputHandler";
 import { NumberInputError, NumberInputOptions } from "./NumberInputLoader";
 
 export type NumberInput = Input<{
-  Controller: NoRpc;
+  Controller: {};
 
   ValueData: number;
 

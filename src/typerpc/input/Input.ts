@@ -3,31 +3,24 @@ import { assignDescriptors } from "../../common/object/assignDescriptors";
 import { mapObject } from "../../common/object/mapObject";
 import { override } from "../../common/object/override";
 import { Awaitable } from "../../common/typings2/Async";
-import { Fn } from "../../common/typings2/Fn";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
 import {
   BasedRpc,
-  IRpcHandler,
   RpcChildren,
   RpcChildrenOption,
   RpcConnection,
-  RpcHandlerClass,
   RpcIsGenericConfigOption,
   RpcPropsOption,
   RpcType,
   TRpc,
 } from "../Rpc";
-import { RpcFn, RpcFnMap } from "../rpc-fn/RpcFn";
+import { RpcFnMap } from "../rpc-fn/RpcFn";
 import {
-  _WidgetCommands,
-  AnyWidget,
-  IWidgetHandler,
-  ToAsync,
   ToAsyncMap,
   TWidget,
   Widget,
-  WidgetControllerOption,
+  WidgetConnectionOption,
   WidgetHandlerClass,
   WidgetType,
 } from "../widget/Widget";
@@ -47,9 +40,9 @@ export type TInput = {
 
   Value: any;
 
-  Controller: TWidget["Controller"];
-
   Children: TRpc["Children"];
+
+  Controller: TWidget["Controller"];
 
   Props: TWidget["Props"];
 
@@ -93,10 +86,14 @@ export type Input<T extends TInput> = Widget<{
 
   TInput: T;
 
-  Connection: ToAsyncMap<_InputCommands<T>> &
+  Controller: T["Controller"];
+
+  Connection: Override<
+    ToAsyncMap<_InputCommands<T>>,
     {
       [K in keyof T["Children"]]: RpcConnection<T["Children"][K]>;
-    };
+    }
+  >;
 
   Config: T["Config"];
 
@@ -121,7 +118,6 @@ export type Input<T extends TInput> = Widget<{
   };
 
   ElementState: undefined;
-  Controller: T["Controller"];
 }>;
 
 export type BasedInput<T extends TInput = TInput> = BasedRpc<RpcType<Input<T>>>;
@@ -151,8 +147,6 @@ export type InputOptions<T extends TInput> = PartialUndefinedKeys<
   {
     handler: WidgetHandlerClass<Input<T>>;
 
-    controller?: any;
-
     getValueDataFromElement: (
       this: Input<T>,
       value: InputValueElement<Input<T>>
@@ -166,11 +160,10 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
   const {
     props = {},
     isGenericConfig,
-    controller,
     handler,
     children,
     getValueDataFromElement,
-  } = options as InputOptions<TInput>;
+  } = (options as any) as InputOptions<TInput>;
 
   return <any>Widget<IInput>({
     handler,
@@ -178,7 +171,6 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     props: assignDescriptors(props, {
       getValueDataFromElement,
     }),
-    controller,
     isGenericConfig,
     connection: override(
       {

@@ -5,7 +5,6 @@ import {
   AnyWidget,
   AnyWidgetConnection,
   Widget,
-  WidgetController,
   WidgetElement,
   WidgetElementState,
   WidgetType,

@@ -14,12 +14,7 @@ import { DataOrder } from "../../../typedata/DataOrder";
 import { DataRow } from "../../../typedata/DataRow";
 import { ConfigFactory } from "../../ConfigFactory";
 import { RpcChildConfig, RpcUnresolvedConfig } from "../../Rpc";
-import {
-  IWidgetHandler,
-  WidgetController,
-  WidgetElement,
-  WidgetElementState,
-} from "../Widget";
+import { IWidgetHandler, WidgetElement, WidgetElementState } from "../Widget";
 import { AnyDataTable, DataTableTypes, TDataTable } from "./DataTable";
 
 type T = AnyDataTable;

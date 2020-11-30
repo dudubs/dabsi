@@ -17,6 +17,7 @@ export type AnyWidgetMap = WidgetMap<AnyWidgetRecord>;
 export type WidgetMap<T extends AnyWidgetRecord> = Widget<{
   Connection: { map: RpcConnection<RpcMap<T>> };
   Children: { map: RpcMap<T> };
+  Controller: { map: RpcMap<T> };
   Config: RpcConfig<RpcMap<T>>;
   Handler: {};
   Props: {};
@@ -26,7 +27,6 @@ export type WidgetMap<T extends AnyWidgetRecord> = Widget<{
   ElementState: {
     [K in keyof T]?: WidgetElementState<T[K]>;
   };
-  Controller: NoRpc;
   Commands: {};
 }>;
 

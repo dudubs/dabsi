@@ -181,9 +181,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                             onClick?.({
                               row: row.data,
                               key: row.key,
-                              connection: table.props.connection.controller.getRowController(
-                                row.key
-                              ),
+                              connection: table.props.connection.row(row.key),
                               table,
                             });
                           }}

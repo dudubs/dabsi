@@ -1,5 +1,4 @@
-import React from "react";
-import { ReactElement } from "react";
+import React, { ReactElement } from "react";
 import { ReactorListener } from "../../../react/reactor/ReactorListener";
 import { Renderer } from "../../../react/renderer";
 import { InputError } from "../../input/Input";
@@ -7,7 +6,7 @@ import { InputView, InputViewProps } from "../../input/InputView";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
 
-import { WidgetController, WidgetType } from "../Widget";
+import { WidgetType } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
 import { AnyForm, TForm } from "./Form";
 

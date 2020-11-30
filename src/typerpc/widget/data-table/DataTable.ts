@@ -166,6 +166,13 @@ export type DataTable<T extends TDataTable> = Widget<{
     >;
   };
 
+  Controller: {
+    query: _Types<T>["QueryFn"];
+    row: RpcParameter<{
+      Target: T["RowController"];
+      Data: string;
+    }>;
+  };
   Commands: { query: _Types<T>["QueryFn"] };
 
   Children: {
@@ -174,8 +181,6 @@ export type DataTable<T extends TDataTable> = Widget<{
       Data: string;
     }>;
   };
-
-  Controller: NoRpc;
 }>;
 
 export type DataTableOptions<RowController extends AnyRpc> = {

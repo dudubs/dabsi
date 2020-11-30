@@ -1,11 +1,10 @@
 import { spawn } from "child_process";
 import * as fs from "fs";
-import { watch } from "fs";
 import { Debounce } from "../common/async/Debounce";
 import { DABSI_SRC_PATH } from "../index";
 
 export function monCli(): boolean {
-  const argsWithoutMon = process.argv.filter((x) => x !== "--mon");
+  const argsWithoutMon = process.argv.filter(x => x !== "--mon");
   if (process.argv.length === argsWithoutMon.length) {
     return false;
   }

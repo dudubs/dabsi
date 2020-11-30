@@ -1,9 +1,8 @@
-import { mapObject } from "../../../common/object/mapObject";
 import { Union } from "../../../common/typings2/Union";
 import { NoRpc } from "../../NoRpc";
 import { RpcConnection, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcMap } from "../../rpc-map/RpcMap";
-import { AnyWidget, Widget, WidgetElement } from "../Widget";
+import { Widget, WidgetElement } from "../Widget";
 import { AnyWidgetRecord } from "../widget-map/WidgetMap";
 import { TabsWidgetHandler } from "./TabsWidgetHandler";
 
@@ -18,7 +17,10 @@ export type TabsWidget<T extends AnyWidgetRecord> = Widget<{
     map: RpcMap<T>;
   };
 
-  Controller: NoRpc;
+  Controller: {
+    getTabElement<K extends keyof T>(key: K): WidgetElement<T[K]>;
+    map: RpcMap<T>;
+  };
 
   Commands: TabsCommands<T>;
 

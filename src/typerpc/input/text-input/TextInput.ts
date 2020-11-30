@@ -22,14 +22,14 @@ export type TextInput<N extends boolean = any> = Input<{
 
   ValueConfig: string | undefined;
 
-  Controller: NoRpc;
-
   Props: {
     nullable: boolean;
     loaderOptions: TextLoaderOptions;
   };
 
   Config: undefined | TextLoaderOptions;
+
+  Controller: {};
 
   Element: Override<
     TextLoaderOptions,

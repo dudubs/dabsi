@@ -54,7 +54,7 @@ export class ArrayInputView<
       return false;
     }
 
-    const result = await this.connection.addNewItem(this.newItemInput.data);
+    const result = await this.connection.addNewItemX(this.newItemInput.data);
     if ("error" in result) {
       this.newItemInput.setError(result.error);
       return false;

@@ -1,8 +1,6 @@
 import { hasKeys } from "../../../common/object/hasKeys";
 import { Awaitable } from "../../../common/typings2/Async";
-import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { IRpcHandler, RpcUnresolvedConfig } from "../../Rpc";
-import { WidgetController } from "../../widget/Widget";
+import { IRpcHandler } from "../../Rpc";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -43,13 +41,6 @@ export class ArrayInputHandler
 
   $itemConfig = this.config.itemConfig;
   $newItemConfig = this.config.newItemConfig;
-
-  getControllerConfig(): RpcUnresolvedConfig<WidgetController<T>> {
-    return {
-      item: this.config.itemConfig,
-      newItem: this.config.newItemConfig,
-    };
-  }
 
   async getInputElement(): Promise<InputElement<T>> {
     return {

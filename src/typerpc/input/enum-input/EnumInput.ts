@@ -8,7 +8,7 @@ import { EnumInputHandler } from "./EnumInputHandler";
 export type EnumInput<K extends string, N extends boolean> = NullableInput<
   N,
   {
-    Controller: NoRpc;
+    Controller: {};
 
     Commands: {};
 

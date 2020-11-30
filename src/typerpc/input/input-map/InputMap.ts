@@ -29,7 +29,7 @@ export type InputErrorMap<T extends AnyInputRecord> = Payload<{
 export type InputMap<T extends AnyInputRecord> = Input<{
   Children: { map: RpcMap<T> };
   Commands: {};
-  Controller: NoRpc;
+  Controller: { map: RpcMap<T> };
   Props: {};
   Element: {
     elementMap: {

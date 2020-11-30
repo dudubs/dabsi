@@ -6,7 +6,6 @@ import { NoRpc } from "../NoRpc";
 import { RpcConnection, RpcUnresolvedConfig } from "../Rpc";
 import { testRpc } from "../RpcTester";
 import { testWidgetView } from "../WidgetViewTester";
-import { WidgetController } from "../widget/Widget";
 import { AbstractInputHandler } from "./AbstractInputHandler";
 import { AbstractInputView } from "./AbstractInputView";
 import {
@@ -32,15 +31,10 @@ export type TestInput = Input<
 >;
 
 export const TestInput = Input<TestInput>({
-  controller: NoRpc,
   handler: class extends AbstractInputHandler<TestInput> {
     getValueFromConfig(
       valueConfig: InputValueConfig<TestInput>
     ): Awaitable<InputValue<TestInput>> {
-      return undefined;
-    }
-
-    getControllerConfig(): RpcUnresolvedConfig<WidgetController<AnyInput>> {
       return undefined;
     }
 

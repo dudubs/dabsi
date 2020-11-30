@@ -68,10 +68,12 @@ export type Form<T extends TForm> = Widget<{
 
   Element: WidgetElement<T["Input"]>;
 
-  Controller: NoRpc;
-
   Children: {
     input: T["Input"];
+  };
+  Controller: {
+    input: T["Input"];
+    submit: _Types<T>["SubmitFn"];
   };
 
   Props: {};
@@ -94,7 +96,6 @@ export function Form<
   return <any>Widget<AnyForm>({
     children: { input },
     handler: FormHandler,
-    commands: { submit: "handleSubmit" },
     connection: {
       input: conn => conn.$getChildConnection("input"),
       submit: conn => conn.$getWidgetCommand("submit"),

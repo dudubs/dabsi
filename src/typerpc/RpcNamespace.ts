@@ -1,13 +1,11 @@
 import { Awaitable } from "../common/typings2/Async";
 import {
   AnyRpc,
+  AnyRpcHandler,
   Rpc,
   RpcCommand,
   RpcConnection,
-  RpcResolvedHandler,
   RpcUnresolvedConfig,
-  TRpc,
-  AnyRpcHandler,
 } from "./Rpc";
 import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 
@@ -43,7 +41,7 @@ export function RpcNamespace(): RpcNamespace {
   let nsCommand: RpcCommand;
   let nsPath: any[];
   let ns;
-  return (ns = Rpc({
+  return (ns = Rpc<RpcNamespace>({
     handler: RpcNamespaceHandler,
     connect(_path, _command) {
       nsCommand = _command;

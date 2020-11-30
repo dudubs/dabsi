@@ -4,7 +4,7 @@ import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
 import { RpcUnresolvedConfig } from "../../Rpc";
 import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { AnyForm, FormSubmitError } from "./Form";
-import { IWidgetHandler, WidgetController, WidgetElement } from "../Widget";
+import { IWidgetHandler, WidgetElement } from "../Widget";
 
 type T = AnyForm;
 

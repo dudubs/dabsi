@@ -121,7 +121,9 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
       table: _Types<T>["Table"];
     };
 
-    Controller: NoRpc;
+    Controller: {
+      table: _Types<T>["Table"];
+    };
 
     Error: "INVALID_DATA_KEY";
   }

@@ -6,9 +6,9 @@ export type NullableInput<
   N extends boolean,
   T extends TInput,
   U extends TInput = {
-    Controller: T["Controller"];
-
     Commands: {};
+
+    Controller: T["Controller"];
 
     Children: T["Children"];
 

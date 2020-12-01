@@ -1,4 +1,5 @@
 import React, { ReactElement } from "react";
+import { Emittable } from "../../../react/reactor/Reactor";
 import { ReactorListener } from "../../../react/reactor/ReactorListener";
 import { Renderer } from "../../../react/renderer";
 import { InputError } from "../../input/Input";
@@ -19,9 +20,7 @@ export type FormViewProps<
 
   onSubmit?(result: T["Value"]);
 
-  onError?(result: T["Error"]);
-
-  onInputError?(result: InputError<T["Input"]>);
+  onError?(result: InputError<T["Input"]>);
 };
 
 export class FormView<
@@ -46,10 +45,8 @@ export class FormView<
 
     const result = await this.connection.submit(this.input.data);
 
-    if ("inputError" in result) {
-      this.input?.setError(result.inputError);
-      this.props.onInputError?.(result.inputError);
-    } else if ("error" in result) {
+    if ("error" in result) {
+      this.input?.setError(result.error);
       this.props.onError?.(result.error);
     } else {
       this.props.onSubmit?.(result.value);
@@ -90,6 +87,7 @@ export class FormView<
   }
 }
 
+export const FormAction = Emittable<"submit" | "reset">();
 export class FormViewEvent {
   constructor(public type: "SUBMIT" | "RESET") {}
 }

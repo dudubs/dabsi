@@ -15,7 +15,7 @@ import { Override } from "../../../common/typings2/Override";
 import { Pluck } from "../../../common/typings2/Pluck";
 import { Lang } from "../../../lang/Lang";
 import { updateRef } from "../../../react/HookRef";
-import { ReactorEmitter, useEmitter } from "../../../react/reactor/useEmitter";
+import { Emitter, useEmitter } from "../../../react/reactor/useEmitter";
 import { partialProps } from "../../../react/utils/partialProps";
 import { MuiIcon } from "./MuiIcon";
 
@@ -34,7 +34,7 @@ type BaseProps = {
   icon?: MuiIcon;
   title?: ReactNode;
   buttonType?: ComponentType<MuiButtonProps>;
-  emitOnClick?(emit: ReactorEmitter): void;
+  emitOnClick?(emit: Emitter): void;
 };
 
 export function MuiButton(props: MuiButtonProps) {

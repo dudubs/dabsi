@@ -7,6 +7,7 @@ TODO:
 
  */
 import { Awaitable } from "../../../common/typings2/Async";
+import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import {
   AnyInput,
   InputError,
@@ -29,7 +30,6 @@ import { FormHandler } from "./FormHandler";
 
 export type TForm = {
   Input: AnyInput;
-  Error: any;
   Value: any;
 };
 export type AnyForm = Form<TForm>;
@@ -37,25 +37,23 @@ export type AnyForm = Form<TForm>;
 export type BasedForm = BasedWidget<WidgetType<AnyForm>>;
 
 type _Types<T extends TForm> = {
-  SubmitResult:
-    | { value: T["Value"] }
-    | { error: Error }
-    | { inputError: InputError<T["Input"]> };
+  SubmitResult: { value: T["Value"] } | { error: InputError<T["Input"]> };
 
   SubmitFn: (data: InputValueData<T["Input"]>) => _Types<T>["SubmitResult"];
 };
 export type Form<T extends TForm> = Widget<{
   TForm: T;
 
-  Config: {
-    inputConfig: RpcUnresolvedConfig<T["Input"]>;
-    valueConfig?: ValueOrAwaitableFn<InputValueConfig<T["Input"]>>;
+  Config: PartialUndefinedKeys<
+    {
+      inputConfig: RpcUnresolvedConfig<T["Input"]>;
+    },
+    {
+      valueConfig?: ValueOrAwaitableFn<InputValueConfig<T["Input"]>>;
 
-    submit(
-      value: InputValue<T["Input"]>,
-      errorClass: new (error: T["Error"]) => FormSubmitError
-    ): Awaitable<T["Value"]>;
-  };
+      submit(value: InputValue<T["Input"]>): Awaitable<T["Value"]>;
+    }
+  >;
 
   Element: WidgetElement<T["Input"]>;
 
@@ -73,14 +71,12 @@ export type Form<T extends TForm> = Widget<{
 
 export function Form<
   Input extends AnyInput,
-  Value = null,
-  Error = never,
+  Value = any,
   T extends TForm = {
     Input: Input;
     Value: Value;
-    Error: Error;
   }
->({ input }: { value?: Value; error?: Error; input: Input }): Form<T> {
+>({ input }: { value?: Value; input: Input }): Form<T> {
   return <any>Widget<AnyForm>({
     children: { input },
     handler: FormHandler,

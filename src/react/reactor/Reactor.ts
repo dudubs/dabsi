@@ -1,39 +1,65 @@
 import { touchMap } from "../../common/map/touchMap";
+import { MetaType, WithMetaType } from "../../common/MetaType";
 
 export type ReactorEvent<T> = new (...args) => T;
 
-export type ReactorListener = (action: any) => void;
+export type ReactorListener = (action: any, emittable?: Emittable<any>) => void;
+export type EmittableType<T extends Emittable<any>> = MetaType<T>["emittable"];
+export type Emittable<T> = {
+  id: number;
+  init: T | undefined;
+} & WithMetaType<{ emittable: T }>;
+
+let counter = 0;
+
+export function Emittable<T>(): Emittable<T | undefined>;
+export function Emittable<T>(init: T): Emittable<T>;
+export function Emittable(init?): Emittable<any> {
+  return { id: counter++, init };
+}
+
+// UserInfoEvent = Emittable<UserInfo>();
 
 export class Reactor {
   protected eventMap = new Map();
-  protected eventListenerMap = new Map<Function, Set<ReactorListener>>();
 
-  constructor(protected handle?: (event: object) => boolean | void) {}
+  protected eventListenerMap = new Map<any, Set<ReactorListener>>();
 
-  getLast<T>(event: ReactorEvent<T>): T | undefined {
-    return this.eventMap.get(event.constructor);
+  constructor(
+    protected handle?: (
+      emittable: Emittable<any>,
+      event: object
+    ) => boolean | void
+  ) {}
+
+  getLast<T extends Emittable<any>>(
+    emittable: T
+  ): EmittableType<T> | undefined {
+    return this.eventMap.get(emittable.id);
   }
 
-  emit(event: object) {
-    if (this.handle?.(event) === false) return;
-    this.eventMap.set(event.constructor, event);
-    const listeners = this.eventListenerMap.get(event.constructor);
-    for (const callback of listeners || []) {
-      callback(event);
-    }
+  emit<T extends Emittable<any>>(emittable: T, event: EmittableType<T>) {
+    if (this.handle?.(emittable, event) === false) return;
+    this.eventMap.set(emittable.id, event);
+    this.eventListenerMap.get(emittable.id)?.forEach(callback => {
+      callback(event, emittable);
+    });
   }
 
-  listen<T>(eventType: ReactorEvent<T>, callback: (action: T) => void) {
+  listen<T extends Emittable<any>>(
+    emittable: T,
+    callback: (event: EmittableType<T>) => void
+  ) {
     const listeners = touchMap(
       this.eventListenerMap,
-      eventType,
+      emittable.id,
       () => new Set()
     );
     listeners.add(callback);
     return () => {
       listeners.delete(callback);
       if (!listeners.size) {
-        this.eventListenerMap.delete(eventType);
+        this.eventListenerMap.delete(emittable.id);
       }
     };
   }
@@ -41,7 +67,4 @@ export class Reactor {
 
 export const RootReactor = new Reactor();
 
-export function emit(event: object) {
-  RootReactor.emit(event);
-}
 // EventMap

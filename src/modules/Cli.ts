@@ -3,15 +3,27 @@ import { pushHook } from "../common/async/pushHook";
 import { Awaitable } from "../common/typings2/Async";
 import { Module } from "../typedi";
 
+export type CliOptions = {
+  build?(yargs: yargs.Argv): yargs.Argv;
+  run?(args): Awaitable<(() => void) | void>;
+  runAsParent?(args): Awaitable;
+  lastRun?: (args) => Awaitable;
+};
+
 @Module()
 export class Cli {
-  command(name: string, cliOrCallback: Cli | ((cli: Cli) => void)): this {
+  command(
+    name: string,
+    cliOrCallbackOrOptions: Cli | ((cli: Cli) => void) | CliOptions
+  ): Cli {
     let cli: Cli;
-    if (typeof cliOrCallback == "function") {
+    if (typeof cliOrCallbackOrOptions == "function") {
       cli = new Cli();
-      cliOrCallback(cli);
+      cliOrCallbackOrOptions(cli);
+    } else if (cliOrCallbackOrOptions instanceof Cli) {
+      cli = cliOrCallbackOrOptions;
     } else {
-      cli = cliOrCallback;
+      cli = new Cli().push(cliOrCallbackOrOptions);
     }
     cli.push({
       runAsParent: args => {
@@ -51,12 +63,11 @@ export class Cli {
     await this.hooks.lastRun(args);
   }
 
-  push(options: {
-    build?(yargs: yargs.Argv): yargs.Argv;
-    run?(args): Awaitable<(() => void) | void>;
-    runAsParent?(args): Awaitable;
-    lastRun?: (args) => Awaitable;
-  }) {
+  push(run: (args) => Awaitable): Cli;
+  push(options: CliOptions): Cli;
+  push(runOrOptions) {
+    const options: CliOptions =
+      typeof runOrOptions === "function" ? { run: runOrOptions } : runOrOptions;
     pushHook(this.hooks, "run", options.run);
     pushHook(this.hooks, "lastRun", options.lastRun, true);
     pushHook(this.hooks, "runAsParent", options.runAsParent);

@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode } from "react";
 import { WeakMapFactory } from "../common/map/mapFactory";
-import { ReactorEmitter } from "../react/reactor/useEmitter";
+import { Emitter } from "../react/reactor/useEmitter";
 import { Route } from "./Route";
 import { AnyRouter, Router, TRouter } from "./Router";
 import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
@@ -8,7 +8,7 @@ import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
 type _RendererProps<T extends TRouter, R extends Route = Route> = {
   location: RouterLocation<T>;
   route: R;
-  emit: ReactorEmitter;
+  emit: Emitter;
 
   state: any;
   setState: (state: any) => void;
@@ -64,20 +64,21 @@ export function ReactRouterView<T extends TRouter>(
 
   const { renderer: prevRender } = info;
 
-  info.renderer = props => {
-    switch (props.route.type) {
-      case "DEFAULT":
-        if (renderDefault) return props as any;
-        break;
-      case "INDEX":
-        if (renderIndex) return renderIndex(props as any);
-        break;
-      case "NO_PARAM":
-        if (renderNoParam) return renderNoParam(props as any);
-        break;
-    }
-    return (render || prevRender)?.(props);
-  };
+  if (renderIndex || renderNoParam || renderDefault)
+    info.renderer = props => {
+      switch (props.route.type) {
+        case "DEFAULT":
+          if (renderDefault) return props as any;
+          break;
+        case "INDEX":
+          if (renderIndex) return renderIndex(props as any);
+          break;
+        case "NO_PARAM":
+          if (renderNoParam) return renderNoParam(props as any);
+          break;
+      }
+      return (render || prevRender)?.(props);
+    };
 }
 
 export const getReactRouterMetadata = WeakMapFactory((router: AnyRouter) => {

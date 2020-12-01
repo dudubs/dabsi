@@ -8,7 +8,7 @@ import { LoginInfoEvent } from "./LoginInfoEvent";
 import { MuiAclGroupsManagerView } from "./MuiAclGroupsManagerView";
 import { MuiAclUsersManagerView } from "./MuiAclUsersManagerView";
 
-export function MuiAdminView(router: typeof AdminRouter) {
+export function MuiAdminViewOld(router: typeof AdminRouter) {
   ReactRouterView(router, {
     renderDefault(props) {
       return Lang`NO_ROUTE_${"path"}`({

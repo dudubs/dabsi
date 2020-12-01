@@ -5,7 +5,7 @@ import {
   SystemRpc,
   SystemRpcPath,
 } from "../common/SystemRpc";
-import { SystemView } from "./SystemView";
+import { MuiSystemView } from "./MuiSystemView";
 
 commandSystemRpc((path, payload) => {
   return fetch(SystemRpcPath, {
@@ -18,5 +18,5 @@ commandSystemRpc((path, payload) => {
 window.addEventListener("DOMContentLoaded", () => {
   const container = document.createElement("div");
   document.body.append(container);
-  ReactDOM.render(React.createElement(SystemView), container);
+  ReactDOM.render(React.createElement(MuiSystemView), container);
 });

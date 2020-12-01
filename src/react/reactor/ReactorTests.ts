@@ -1,20 +1,15 @@
-import { Reactor } from "./Reactor";
+import { Emittable, Reactor } from "./Reactor";
 
 testm(__dirname, () => {
   it("expect to listen", () => {
     let isEmitted = false;
     let isListening = true;
 
-    class MyEvent {
-      constructor() {}
-    }
-    class MyOtherEvent {
-      constructor() {}
-    }
+    const MyEvent = Emittable();
+    const MyOtherEvent = Emittable();
     const r = new Reactor();
 
     const unlisten = r.listen(MyEvent, event => {
-      expect(event).toBeInstanceOf(MyEvent);
       if (isEmitted && !isListening) {
         fail("unlisten() didn't worked");
       }
@@ -23,8 +18,8 @@ testm(__dirname, () => {
       unlisten();
     });
 
-    r.emit(new MyOtherEvent());
-    r.emit(new MyEvent());
-    r.emit(new MyEvent());
+    r.emit(MyOtherEvent, 1);
+    r.emit(MyEvent, 1);
+    r.emit(MyEvent, 2);
   });
 });

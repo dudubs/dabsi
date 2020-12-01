@@ -5,7 +5,7 @@ import { HasKeys } from "../common/typings2/boolean";
 import { Override } from "../common/typings2/Override";
 import { inspect } from "../logging/inspect";
 import { Manipulator } from "../react/manipulate";
-import { ReactorEmitter } from "../react/reactor/useEmitter";
+import { Emitter } from "../react/reactor/useEmitter";
 import { ValueRef } from "../react/ValueRef";
 import { LocationStateEvent } from "./LocationStateEvent";
 import { AnyRouter, Router, RouterAt, RouterType, TRouter } from "./Router";
@@ -17,7 +17,7 @@ export interface RouterLocation<T extends TRouter> {}
 export class RouterLocation<T extends TRouter> {
   static create<T extends TRouter>(
     router: Router<T>,
-    emit: ReactorEmitter = (event: any) => void 0
+    emit: Emitter = (event: any) => void 0
   ): RouterLocation<T> {
     if (router.params.length)
       throw new Error(`Can't create RouterLocation for ${inspect(this)}.`);

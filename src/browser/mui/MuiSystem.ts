@@ -6,9 +6,10 @@ import {
   ThemeProvider as MuiCoreThemeProvider,
 } from "@material-ui/core/styles";
 import { create } from "jss";
-import { createElement, ReactElement } from "react";
+import { createElement, ReactNode } from "react";
 
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
+import { toReactElement } from "../../react/utils/toReactElement";
 
 export { MuiTheme };
 
@@ -24,7 +25,7 @@ const jss = create({
 
 const theme = createMuiTheme();
 
-export function MuiSystem({ children }: { children: ReactElement }) {
+export function MuiSystem({ children }: { children: ReactNode }) {
   children = createElement(MuiCoreThemeProvider, {
     children,
     theme,
@@ -39,5 +40,5 @@ export function MuiSystem({ children }: { children: ReactElement }) {
     children,
     jss,
   });
-  return children;
+  return toReactElement(children);
 }

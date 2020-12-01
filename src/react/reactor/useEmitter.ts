@@ -1,9 +1,18 @@
+import { WeakMapFactory } from "../../common/map/mapFactory";
+import { WithMetaType } from "../../common/MetaType";
 import { useReactor } from "./hooks";
+import { Emittable, EmittableType } from "./Reactor";
 
-export type ReactorEmitter = (event: object) => void;
-export function useEmitter(): ReactorEmitter {
+export type Emitter = {
+  <T extends Emittable<any>>(emittable: T, event: EmittableType<T>): void;
+  <T extends object>(event: T);
+};
+
+export function useEmitter(): Emitter {
   const reactor = useReactor();
-  return event => {
-    reactor.emit(event);
+  return (emittable, event?) => {
+    reactor.emit(emittable, event);
   };
 }
+
+// const AdminInfo = Emittable<{}>;

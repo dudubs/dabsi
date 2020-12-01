@@ -15,9 +15,8 @@ export function MuiSystemRootView() {
   const emit = useEmitter();
 
   useEffect(() => {
-    SystemLoginInfo.then((loginInfo) => {
+    SystemLoginInfo.then(loginInfo => {
       console.log({ loginInfo });
-      emit(new LoginInfoEvent(loginInfo));
     });
   }, []);
 

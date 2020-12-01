@@ -178,7 +178,9 @@ export class DataEntitySource<T> extends DataSource<T> {
           await relation.update("addOrSet", entityKey, key);
         }
       }
-      if (result.affected) {
+      if (typeof result.affected == "number") {
+        affectedRows += result.affected;
+      } else {
         affectedRows++;
       }
     }

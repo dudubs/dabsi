@@ -1,18 +1,18 @@
 import { Awaited } from "../../common/typings2/Async";
 import { LoginInfo } from "../common/SystemApp";
 
-type LoginInfoPayload = Awaited<LoginInfo>;
+type LoginInfoData = Awaited<LoginInfo>;
 
 export class LoginInfoEvent {
-  constructor(public payload: LoginInfoPayload) {}
+  constructor(public data: LoginInfoData) {}
 
   isSuccess(): this is any {
-    return this.payload.type === "SUCCESS";
+    return this.data.type === "SUCCESS";
   }
 
-  get success(): Extract<LoginInfoPayload, { type: "SUCCESS" }> | undefined {
-    if (this.payload.type === "SUCCESS") {
-      return this.payload;
+  get success(): Extract<LoginInfoData, { type: "SUCCESS" }> | undefined {
+    if (this.data.type === "SUCCESS") {
+      return this.data;
     }
   }
 

@@ -1,7 +1,11 @@
+import { hasKeys } from "../../common/object/hasKeys";
+import { mapObject } from "../../common/object/mapObject";
+import { pick } from "../../common/object/pick";
 import { Lazy } from "../../common/patterns/lazy";
 import { Cli } from "../../modules/Cli";
 import { ProjectModuleProvider } from "../../modules/ProjectModuleProvider";
 import { AclRequest } from "../../system-old/server/acl/AclRequest";
+import { getPasswordHash } from "../../system-old/server/acl/getPasswordHash";
 import { Group } from "../../system-old/server/acl/Group";
 import { Permission } from "../../system-old/server/acl/Permission";
 import { User } from "../../system-old/server/acl/User";
@@ -10,7 +14,7 @@ import { Inject, Module } from "../../typedi";
 import { MakeModule } from "../../typestack/MakeModule";
 import { DbModule, DbModuleProvider } from "../core/DbModule";
 import { SystemModuleProvider } from "../core/SystemModule";
-import { AclRpcConfig } from "./server/AclRpcConfig";
+import { AclConfig } from "./server/AclConfig";
 
 declare global {
   namespace Express {
@@ -27,12 +31,27 @@ declare global {
       entities: [User, Group, Permission],
     }),
     SystemModuleProvider({
-      configs: [AclRpcConfig],
+      configs: [AclConfig],
     }),
   ],
 })
 export class AclModule {
-  cli = new Cli().command("init", cli => cli);
+  cli = new Cli() //
+    .push({ runAsParent: () => this.dbModule.init() })
+    .command("make-admin", {
+      run: async () => {
+        const admin = await this.sources.users.touch({
+          firstName: "admin",
+          lastName: "admin",
+        });
+        await admin.update({
+          loginName: "admin",
+          password: "admin",
+        });
+      },
+    });
+
+  log = log.get("ACL");
 
   @Lazy() get sources() {
     return {

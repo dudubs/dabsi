@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { DataExp } from "../../../typedata/data-exp/DataExp";
 import { DataRelation } from "../../../typedata/DataRelation";
+import { getPasswordHash } from "./getPasswordHash";
 import { Group } from "./Group";
 import { Permission } from "./Permission";
 
@@ -24,7 +25,17 @@ export class User {
   @Column({ nullable: true })
   loginName?: string;
 
-  @Column({ nullable: true })
+  @Column({
+    nullable: true,
+    transformer: {
+      to(value) {
+        return getPasswordHash(value);
+      },
+      from(value) {
+        return value;
+      },
+    },
+  })
   password?: string;
 
   @Column({ nullable: true })
@@ -33,13 +44,13 @@ export class User {
   @Column({ nullable: true })
   phoneNumber?: string;
 
-  @ManyToMany(() => Group, (group) => group.users)
+  @ManyToMany(() => Group, group => group.users)
   groups: DataRelation<Group>[];
 
-  @ManyToOne(() => Permission, (p) => p.user)
+  @ManyToOne(() => Permission, p => p.user)
   permissions: DataRelation<Permission>[];
 }
 
-export const UserFullName: { $base: DataExp<User> } = {
-  $base: { $join: [["firstName", "lastName"], " "] },
+export const UserFullName: DataExp<User> = {
+  $join: [["firstName", "lastName"], " "],
 } as const;

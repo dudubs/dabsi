@@ -1,7 +1,7 @@
 import { mapObjectAsync } from "../../../common/object/mapObject";
 import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
 import { IWidgetHandler, WidgetElement } from "../Widget";
-import { mapHandlerChildrenAsync } from "./mapHandlerChildrenAsync";
+import { mapChildrenHandlerAsync } from "./mapChildrenHandlerAsync";
 import { AnyWidgetMap } from "./WidgetMap";
 
 type T = AnyWidgetMap;
@@ -13,7 +13,7 @@ export class WidgetMapHandler
 
   async getElement(state?): Promise<WidgetElement<T>> {
     return {
-      elementMap: await mapHandlerChildrenAsync(this, (handler, key) =>
+      elementMap: await mapChildrenHandlerAsync(this, (handler, key) =>
         handler.getElement(state?.[key])
       ),
     };

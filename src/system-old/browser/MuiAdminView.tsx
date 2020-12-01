@@ -1,7 +1,7 @@
 import React from "react";
 import { MuiAdmin } from "../../browser/mui/MuiAdmin";
 import { Lang } from "../../lang/Lang";
-import { useEmittedState } from "../../react/reactor/useEmittedState";
+import { useEmitted } from "../../react/reactor/useEmitted";
 import { ReactRouterView } from "../../typerouter/ReactRouterView";
 import { AdminRouter } from "../common/admin/AdminRouter";
 import { LoginInfoEvent } from "./LoginInfoEvent";
@@ -16,7 +16,7 @@ export function MuiAdminView(router: typeof AdminRouter) {
       });
     },
     wrap({ children, location }) {
-      const loginInfo = useEmittedState(LoginInfoEvent);
+      const loginInfo = useEmitted(LoginInfoEvent);
 
       if (!loginInfo) {
         return Lang`ACCESS_DENIED_BECAUSE_NO_LOGIN`;

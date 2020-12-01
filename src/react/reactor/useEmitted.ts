@@ -1,15 +1,21 @@
-import { useEffect } from "react";
-import { ReactorEvent, useReactor } from "./Reactor";
+import { useEffect, useState } from "react";
+import { useReactor } from "./hooks";
+import { ReactorEvent } from "./Reactor";
 
 export function useEmitted<T>(
   actionType: ReactorEvent<T>,
-  callback?: (action: T) => void,
-  deps: any[] = []
-): void {
+  callback?: (action: T) => void
+): T | undefined {
   const reactor = useReactor();
+  const [state, setState] = useState(() => reactor.getLast(actionType));
   useEffect(() => {
     return reactor.listen(actionType, event => {
-      callback?.(event);
+      if (event != state) {
+        setState(event);
+        callback?.(event);
+      }
     });
-  }, [reactor, ...deps]);
+  }, [reactor]);
+
+  return state;
 }

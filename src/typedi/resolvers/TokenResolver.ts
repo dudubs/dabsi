@@ -18,7 +18,7 @@ export class TokenResolver<T> {
   }
 
   get resolveMessage() {
-    return `Can't resolve "${inspect(this)}`;
+    return `Can't resolve ${inspect(this)}`;
   }
 
   [resolveSymbol](context): T {

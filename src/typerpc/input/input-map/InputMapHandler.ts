@@ -3,7 +3,7 @@ import { mapObjectAsync } from "../../../common/object/mapObject";
 import { Awaitable } from "../../../common/typings2/Async";
 import { AnyRpc, RpcUnresolvedConfig } from "../../Rpc";
 import { IWidgetHandler } from "../../widget/Widget";
-import { mapHandlerChildrenAsync } from "../../widget/widget-map/mapHandlerChildrenAsync";
+import { mapChildrenHandlerAsync } from "../../widget/widget-map/mapChildrenHandlerAsync";
 import { AbstractInputHandler } from "../AbstractInputHandler";
 import {
   InputElement,
@@ -26,14 +26,14 @@ export class InputMapHandler
   async getValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    return mapHandlerChildrenAsync(this, (handler, key) =>
+    return mapChildrenHandlerAsync(this, (handler, key) =>
       handler.getValueElement(value?.[key])
     );
   }
 
   async getInputElement(): Promise<InputElement<T>> {
     return {
-      elementMap: await mapHandlerChildrenAsync(this, handler =>
+      elementMap: await mapChildrenHandlerAsync(this, handler =>
         handler.getInputElement()
       ),
     };
@@ -42,7 +42,7 @@ export class InputMapHandler
   async getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Promise<InputValue<T>> {
-    return mapHandlerChildrenAsync(this, (handler, key) => {
+    return mapChildrenHandlerAsync(this, (handler, key) => {
       handler.getValueFromConfig(valueConfig?.[key]);
     });
   }
@@ -52,7 +52,7 @@ export class InputMapHandler
   ): Promise<InputErrorOrValue<T>> {
     const errorMap: any = {};
 
-    const valueMap = await mapHandlerChildrenAsync(this, (handler, key) =>
+    const valueMap = await mapChildrenHandlerAsync(this, (handler, key) =>
       handler.loadAndCheck(dataMap[key]).then(result => {
         if ("error" in result) {
           errorMap[key] = result.error;

@@ -26,7 +26,7 @@ import {
   WidgetType,
 } from "../widget/Widget";
 
-export type IInput<T extends AnyInput = AnyInput> = Input<
+export type InputWithoutController<T extends AnyInput = AnyInput> = Input<
   Override<
     TInput,
     {
@@ -146,9 +146,9 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     handler,
     children = {},
     getValueDataFromElement,
-  } = (options as any) as InputOptions<InputType<IInput>>;
+  } = (options as any) as InputOptions<InputType<InputWithoutController>>;
 
-  return <any>Widget<IInput>({
+  return <any>Widget<InputWithoutController>({
     handler,
     children,
     commands: { check: true },

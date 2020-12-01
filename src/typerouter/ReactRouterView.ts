@@ -21,6 +21,8 @@ type _Renderer<T extends TRouter, R extends Route = Route> = (
 ) => ReactElement;
 type _Wrapper<T extends TRouter> = (props: _WrapperProps<T>) => ReactElement;
 
+export type ReactRouterWrapper = _Wrapper<TRouter>;
+
 export type ReactRouterOptions<T extends TRouter> = {
   wrap?: _Wrapper<T>;
 
@@ -62,7 +64,7 @@ export function ReactRouterView<T extends TRouter>(
 
   const { renderer: prevRender } = info;
 
-  info.renderer = (props) => {
+  info.renderer = props => {
     switch (props.route.type) {
       case "DEFAULT":
         if (renderDefault) return props as any;

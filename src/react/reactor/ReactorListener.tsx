@@ -1,6 +1,7 @@
 import { createElement, ReactNode, useMemo } from "react";
 import { Constructor } from "../../common/typings2/Constructor";
-import { Reactor, ReactorContext, useReactor } from "./Reactor";
+import { ReactorContext, useReactor } from "./hooks";
+import { Reactor } from "./Reactor";
 
 export function ReactorListener<T extends object>({
   eventType,

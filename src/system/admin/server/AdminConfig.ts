@@ -10,18 +10,19 @@ import { RpcError } from "../../../typerpc/Rpc";
 import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
 import { RpcNamespaceHandler } from "../../../typerpc/RpcNamespaceHandler";
 import { SystemRequest } from "../../core/SystemRequest";
+import { SystemSession } from "../../core/SystemSession";
 import { AdminRpc } from "../common";
 import { getRootTokens } from "./getRootTokens";
 import { hasPermissionForUserExp } from "./hasPermissionForUserExp";
+
 const r = Resolver();
 
 export const AdminConfig = RpcConfigResolver(
   AdminRpc,
   {
     sysReq: SystemRequest,
-    r,
     aclReq: AclRequest,
-    session: DataRow(Session),
+    session: DataRow(SystemSession),
     ...DataResolvers({
       permissions: Permission,
     }),

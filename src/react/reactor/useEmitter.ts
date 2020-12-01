@@ -1,4 +1,4 @@
-import { useReactor } from "./Reactor";
+import { useReactor } from "./hooks";
 
 export type ReactorEmitter = (event: object) => void;
 export function useEmitter(): ReactorEmitter {

@@ -34,10 +34,9 @@ export type AnyDataInputMap = DataInputMap<TDataInputMap>;
 export type TDataInputMap = TDataInput & {
   Target: AnyInput;
 };
-type _Types<T extends TDataInputMap> = DataInputTypes<T>;
 
 export type DataInputMap<T extends TDataInputMap> = Input<{
-  Types: _Types<T>;
+  Types: DataInputTypes<T>;
 
   ValueData: Record<string, InputValueData<T["Target"]>>;
 

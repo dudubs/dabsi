@@ -2,7 +2,7 @@ import { Fn } from "../common/typings2/Fn";
 import { Override } from "../common/typings2/Override";
 import { AbstractRpcHandler } from "./AbstractRpcHandler";
 import { GenericConfig } from "./GenericConfig";
-import { AnyRpc, configureRpcService, Rpc, TRpc } from "./Rpc";
+import { AnyRpc, Rpc, TRpc } from "./Rpc";
 import { RpcMap } from "./rpc-map/RpcMap";
 import { RpcConfigHook } from "./RpcConfigHook";
 import { RpcFn } from "./rpc-fn/RpcFn";
@@ -42,7 +42,7 @@ testm(__dirname, () => {
 
   it("RpcFn", async () => {
     const r = RpcFn<any>();
-    configureRpcService(r, () => "hello");
+    r.configureRpcService(() => "hello");
     expect(await r.service()).toEqual("hello");
   });
 
@@ -50,14 +50,14 @@ testm(__dirname, () => {
     const r = RpcMap({
       f: RpcFn<any>(),
     });
-    configureRpcService(r, { f: () => "hello" });
+    r.configureRpcService({ f: () => "hello" });
     expect(await r.service.f()).toEqual("hello");
   });
 
   describe("rpc service >", () => {
     it("expect to use service config", done => {
       const c = RpcFn();
-      configureRpcService(c, () => {
+      c.configureRpcService(() => {
         done();
       });
       c.service();

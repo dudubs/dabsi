@@ -1,14 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { commandRpcService } from "../../../typerpc/Rpc";
-import { SystemRpc, SystemRpcPath } from "../common/SystemRpc";
+import {
+  commandSystemRpc,
+  SystemRpc,
+  SystemRpcPath,
+} from "../common/SystemRpc";
 import { SystemView } from "./SystemView";
 
-commandRpcService(SystemRpc, payload => {
+commandSystemRpc((path, payload) => {
   return fetch(SystemRpcPath, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ path, payload }),
   }).then(res => res.json());
 });
 

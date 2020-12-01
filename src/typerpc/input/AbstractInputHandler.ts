@@ -8,7 +8,7 @@ import {
 } from "../widget/Widget";
 import {
   AnyInput,
-  IInput,
+  InputWithoutController,
   InputElement,
   InputErrorOrValue,
   InputValue,
@@ -19,7 +19,7 @@ import {
 
 export abstract class AbstractInputHandler<T extends AnyInput>
   extends AbstractWidgetHandler<T>
-  implements IWidgetHandler<IInput> {
+  implements IWidgetHandler<InputWithoutController> {
   abstract loadAndCheck(data: InputValueData<T>): Promise<InputErrorOrValue<T>>;
 
   $checkCommand = async data => {

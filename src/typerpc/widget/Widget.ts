@@ -100,7 +100,7 @@ export type IWidgetHandler<T extends AnyWidget> = IRpcHandler<T> &
     >;
   };
 
-export type IWidget<T extends AnyWidget = AnyWidget> = Widget<
+export type WidgetWithoutController<T extends AnyWidget = AnyWidget> = Widget<
   Override<
     WidgetType<T>,
     {
@@ -153,7 +153,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     handler,
     children = {},
     commands,
-  } = (options as any) as WidgetOptions<WidgetType<IWidget>>;
+  } = (options as any) as WidgetOptions<WidgetType<WidgetWithoutController>>;
 
   class Connection extends BaseWidgetConnection {}
 
@@ -175,7 +175,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     Object.defineProperty(Connection.prototype, key, desc);
   }
 
-  return <any>Rpc<IWidget>({
+  return <any>Rpc<WidgetWithoutController>({
     handler,
     isGenericConfig,
     children,

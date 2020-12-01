@@ -1,18 +1,29 @@
 import express from "express";
 import { Connection } from "typeorm";
+import { flat } from "../../common/iterator/flat";
+import { entries } from "../../common/object/entries";
 import { Lazy } from "../../common/patterns/lazy";
 import { ExpressModule } from "../../modules/ExpressModule";
 import { AclRequest } from "../../system-old/server/acl/AclRequest";
+import { getSession } from "../../system-old/server/acl/getSession";
+import { Session } from "../../system-old/server/acl/Session";
+import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
+import { DataRow } from "../../typedata/DataRow";
 import { Inject, Module, ModuleProvider, Resolver } from "../../typedi";
 import { Consumer } from "../../typedi/Consumer";
 import { ModuleRunner } from "../../typedi/ModuleRunner";
 import { AnyRpc, RpcError } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "../../typerpc/RpcConfigResolver";
+import { flatRpc } from "../../typerpc/FlatRpc";
+import { RpcNamespace } from "../../typerpc/RpcNamespace";
+import { RpcNamespaceHandler } from "../../typerpc/RpcNamespaceHandler";
 import { SystemRpc, SystemRpcPath } from "./common/SystemRpc";
+import { DbModule } from "./DbModule";
 import { SystemRpcConfig } from "./server/SystemRpcConfig";
 import { SessionModule } from "./SessionModule";
 import { SystemRequest } from "./SystemRequest";
-
+import { SystemSession } from "./SystemSession";
+import CookieParser from "cookie-parser";
 export function SystemModuleProvider({
   configs,
 }: {
@@ -32,8 +43,17 @@ export function SystemModuleProvider({
 export class SystemModule {
   log = log.get("SYSTEM");
 
+  @Lazy() get sources() {
+    return {
+      sessions: DataEntitySource.create(
+        SystemSession,
+        this.dbModule.getConnection
+      ),
+    };
+  }
+
   @Lazy()
-  protected get configMap(): Map<AnyRpc, RpcConfigResolver<AnyRpc>> {
+  protected get rpcConfigResolverMap(): Map<AnyRpc, RpcConfigResolver<AnyRpc>> {
     return new Map().set(SystemRpc, SystemRpcConfig);
   }
 
@@ -47,36 +67,64 @@ export class SystemModule {
         ...SystemRequest.provide(() => {
           throw new Error();
         }),
+        ...SystemSession.provide(() => {
+          throw new Error();
+        }),
       },
       this.mRunner.context
     );
   }
 
   getConfig(rpc: AnyRpc): RpcConfigResolver<AnyRpc> {
-    return this.configMap.get(rpc)!;
+    return this.rpcConfigResolverMap.get(rpc)!;
   }
 
   constructor(
     @Inject() expressModule: ExpressModule,
-    @Inject() protected mRunner: ModuleRunner
+    @Inject() protected mRunner: ModuleRunner,
+    @Inject() protected dbModule: DbModule
   ) {
     expressModule.push({
       run: () => {
-        for (const resolver of this.configMap.values()) {
-          Resolver.check(
-            Resolver.catch(resolver, error => {
-              this.log.error(error);
-            }),
-            this.requestContext
-          );
+        for (const { rpc, path } of flatRpc(SystemRpc)) {
+          if (rpc.options.handler !== RpcNamespaceHandler) continue;
+          const rpcNs: RpcNamespace = rpc as RpcNamespace;
+
+          for (const [key, rpc] of entries(rpcNs.children)) {
+            const getChildPath = () => ["SystemRpc", ...path, key].join(".");
+            const rpcConfigResolver = this.rpcConfigResolverMap.get(rpc);
+            if (!rpcConfigResolver) {
+              this.log.warn(
+                () => `No have config resolver for "${getChildPath()}".`
+              );
+              continue;
+            }
+            Resolver.check(
+              Resolver.catch(rpcConfigResolver, error => {
+                this.log.error(
+                  () => `At ${getChildPath()}: ${error.toString()}`
+                );
+              }),
+              this.requestContext
+            );
+          }
         }
       },
       routes: app => {
-        const json = express.json();
+        const handlers = [express.json(), CookieParser()];
+
         app.post(SystemRpcPath, async (req, res) => {
-          await new Promise(next => json(req, res, next));
+          for (const handler of handlers) {
+            await new Promise(next => handler(req, res, next));
+          }
           const context = Object.create(this.requestContext);
-          const session = await req.getSession();
+          const session = await getSession({
+            source: this.sources.sessions,
+            cookie: req.cookies["system"],
+            setCookie(value: string) {
+              res.cookie("system", value);
+            },
+          });
           const connection = Resolver.resolve(Connection, context);
           const aclReq = new AclRequest(connection, session.$key);
 
@@ -85,7 +133,8 @@ export class SystemModule {
           Resolver.provide(
             context,
             AclRequest.provide(() => aclReq),
-            SystemRequest.provide(() => sysReq)
+            SystemRequest.provide(() => sysReq),
+            DataRow(SystemSession).provide(() => session)
           );
 
           const { path, payload } = req.body;
@@ -102,6 +151,6 @@ export class SystemModule {
   }
 
   configure(rpcConfigResolver: RpcConfigResolver<AnyRpc>) {
-    this.configMap.set(rpcConfigResolver.rpc, rpcConfigResolver);
+    this.rpcConfigResolverMap.set(rpcConfigResolver.rpc, rpcConfigResolver);
   }
 }

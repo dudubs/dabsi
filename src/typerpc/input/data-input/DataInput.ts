@@ -25,6 +25,8 @@ import { DataInputHandler } from "./DataInputHandler";
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
 
 type _Types<T extends TDataInput> = {
+  T: T;
+
   Table: DataTable<{
     Row: T["TableRow"];
     Data: T["TableData"];

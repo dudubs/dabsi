@@ -1,11 +1,10 @@
 import { createElement } from "react";
 import ReactDOM from "react-dom";
 
-import { commandRpcService } from "../../typerpc/Rpc";
 import { SystemApp } from "../common/SystemApp";
 import { MuiSystemRootView } from "./MuiSystemRootView";
 
-commandRpcService(SystemApp, payload => {
+SystemApp.commandRpcService(payload => {
   return fetch("/service", {
     method: "post",
     headers: { "Content-Type": "application/json" },

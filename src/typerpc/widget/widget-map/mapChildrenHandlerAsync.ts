@@ -16,7 +16,7 @@ export type AnyRpcWithMapChild = Rpc<
   >
 >;
 
-export function mapHandlerChildrenAsync<T extends AnyRpcWithMapChild, U>(
+export function mapChildrenHandlerAsync<T extends AnyRpcWithMapChild, U>(
   handler: AbstractRpcHandler<T>,
   callback: (
     handler: RpcResolvedHandler<T["children"]["map"]["children"][string]>,

@@ -1,35 +1,29 @@
-import { configureRpcService, RpcUnresolvedConfig } from "./Rpc";
+import { flat } from "../common/iterator/flat";
+import { entries } from "../common/object/entries";
+import { RpcUnresolvedConfig } from "./Rpc";
 import { RpcFn } from "./rpc-fn/RpcFn";
 import { RpcMap } from "./rpc-map/RpcMap";
 import { RpcNamespace } from "./RpcNamespace";
+import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 
 testm(__filename, () => {
-  fit("", () => {
-    console.log(
-      [1, 2, 3, 4, 5, 6, 7]
-        .toSeq()
-        .reverse()
-        .takeUntil(x => x == 2)
-        .reverse()
-        .filter(x => 5 >= x)
-        .toArray()
-    );
-  });
-  fit("", async () => {
+  it("sanity", async () => {
     const a = RpcNamespace();
-    const af = RpcFn();
-    const afc = a.register("af", af);
     const b = RpcNamespace();
-    const bf = RpcFn();
-    const bfc = a.register("bf", bf);
     const c = RpcNamespace();
     const e = RpcNamespace();
+
+    const af = RpcFn();
+    const afc = a.register("af", af);
+
+    const bf = RpcFn();
+    const bfc = a.register("bf", bf);
 
     const bc = a.register("b", b);
     const cc = b.register("c", c);
 
     const m = RpcMap({
-      n: e,
+      e,
     });
     const mc = c.register("m", m);
 
@@ -42,7 +36,7 @@ testm(__filename, () => {
       },
     };
 
-    configureRpcService(a, config);
+    a.configureRpcService(config);
 
     const configMap = new Map()
       .set(a, config)
@@ -58,7 +52,7 @@ testm(__filename, () => {
         return "AF";
       })
       .set(m, {
-        n: config,
+        e: config,
       });
 
     expect(<any>await afc()).toEqual("AF");

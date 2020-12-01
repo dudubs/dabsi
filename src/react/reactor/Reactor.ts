@@ -1,4 +1,3 @@
-import React from "react";
 import { touchMap } from "../../common/map/touchMap";
 
 export type ReactorEvent<T> = new (...args) => T;
@@ -40,7 +39,9 @@ export class Reactor {
   }
 }
 
-export const ReactorContext = React.createContext(new Reactor());
-export const useReactor = () => React.useContext(ReactorContext);
+export const RootReactor = new Reactor();
 
+export function emit(event: object) {
+  RootReactor.emit(event);
+}
 // EventMap

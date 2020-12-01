@@ -1,32 +1,20 @@
 import { Awaitable } from "../common/typings2/Async";
-import { Override } from "../common/typings2/Override";
 import { inspect } from "../logging/inspect";
 import {
   AnyRpc,
   AnyRpcHandler,
+  RpcWithoutChildren,
   IRpcHandler,
-  Rpc,
   RpcChildren,
-  RpcChilndren,
   RpcError,
   RpcPayload,
   RpcResolvedConfig,
   RpcResolvedHandler,
-  RpcType,
   RpcUnresolvedConfig,
 } from "./Rpc";
 
-export type IRpc = Rpc<
-  Override<
-    RpcType<AnyRpc>,
-    {
-      Children: {};
-    }
-  >
->;
-
 export abstract class AbstractRpcHandler<T extends AnyRpc>
-  implements IRpcHandler<IRpc> {
+  implements IRpcHandler<RpcWithoutChildren> {
   constructor(
     public rpc: T,
     public config: RpcResolvedConfig<T>,
@@ -38,7 +26,8 @@ export abstract class AbstractRpcHandler<T extends AnyRpc>
   }
 
   protected getChildConfig?(
-    key: string
+    key: string,
+    child: AnyRpc
   ): Awaitable<RpcUnresolvedConfig<AnyRpc>> {
     const childConfigKey = `$${key}Config`;
     let childConfig = this[childConfigKey];
@@ -55,7 +44,7 @@ export abstract class AbstractRpcHandler<T extends AnyRpc>
 
   protected _childHandlerMapCache: Record<string, any> = {};
 
-  async getChildHandler<K extends keyof RpcChilndren<T>>(
+  async getChildHandler<K extends keyof RpcChildren<T>>(
     key: string & K
   ): Promise<RpcResolvedHandler<RpcChildren<T>[K]>> {
     if (this._childHandlerMapCache[key]) return this._childHandlerMapCache[key];
@@ -65,7 +54,7 @@ export abstract class AbstractRpcHandler<T extends AnyRpc>
         `No child "${key}". ${inspect(Object.keys(this.rpc.children))}`
       );
 
-    const config = await this.getChildConfig!(key);
+    const config = await this.getChildConfig!(key, child);
     try {
       return (this._childHandlerMapCache[key] = await child.resolveRpcHandler(
         config,
@@ -81,7 +70,7 @@ export abstract class AbstractRpcHandler<T extends AnyRpc>
 
   async routeAndHandle(path: any[], payload): Promise<any> {
     let handler = this as AnyRpcHandler;
-    for (const [key] of path) {
+    for (const key of path) {
       handler = await handler.route(key);
     }
     return handler.handle(payload);

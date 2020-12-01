@@ -6,7 +6,7 @@ import React from "react";
 import { MuiDataInputView } from "../../browser/mui/rpc/inputs/MuiDataInputView";
 import { MuiFormView } from "../../browser/mui/rpc/MuiFormView";
 import { Lang } from "../../lang/Lang";
-import { useEmittedState } from "../../react/reactor/useEmittedState";
+import { useEmitted } from "../../react/reactor/useEmitted";
 import { WidgetRouterView } from "../../typerpc/widget/WidgetRouterView";
 import { SystemApp } from "../common/SystemApp";
 import { LoginInfoEvent } from "./LoginInfoEvent";
@@ -26,7 +26,7 @@ export function MuiSystemView(router: typeof SystemRouter) {
     SystemApp.service.devLogin,
     (props, { emit }) => {
       const classes = useStyles();
-      const loginInfo = useEmittedState(LoginInfoEvent);
+      const loginInfo = useEmitted(LoginInfoEvent);
 
       return (
         <>

@@ -45,5 +45,5 @@ export function WidgetExtra<
   target: Target,
   element: ElementType
 ): WidgetExtra<Target, InlineObjectType<ElementType>> {
-  return RpcHook(target as AnyWidget, WidgetExtraHandler);
+  return <any>RpcHook(target as AnyWidget, WidgetExtraHandler);
 }

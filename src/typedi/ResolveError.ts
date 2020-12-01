@@ -4,6 +4,6 @@ export class ResolveError extends Error {
   }
 
   toString() {
-    return `${this.message}${this.child ? `\n${this.child}` : ""}`;
+    return `${this.message}${this.child ? `, ${this.child}` : ""}`;
   }
 }

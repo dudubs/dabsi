@@ -12,8 +12,8 @@ export type DataInputMapViewProps<
   C extends RpcConnection<AnyDataInputMap>
 > = InputViewProps<C> & {
   target: Renderer<{
-    props: InputViewProps<RpcConnection<InputType<C>["Types"]["Target"]>>;
-    row: InputType<C>["Types"]["TableRow"];
+    props: InputViewProps<C["target"]>;
+    row: InputType<C>["Types"]["T"]["TableRow"];
     index: number;
     key: string;
   }>;

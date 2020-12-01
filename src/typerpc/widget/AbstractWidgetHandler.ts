@@ -3,7 +3,7 @@ import { AbstractRpcHandler } from "../AbstractRpcHandler";
 import { RpcPayload } from "../Rpc";
 import {
   AnyWidget,
-  IWidget,
+  WidgetWithoutController,
   IWidgetHandler,
   WidgetElement,
   WidgetElementState,
@@ -11,7 +11,7 @@ import {
 
 export abstract class AbstractWidgetHandler<T extends AnyWidget>
   extends AbstractRpcHandler<T>
-  implements IWidgetHandler<IWidget> {
+  implements IWidgetHandler<WidgetWithoutController> {
   $getElementCommand(state?) {
     return this.getElement(state);
   }

@@ -54,7 +54,6 @@ export class DbModule {
 
   @Lazy()
   async init() {
-    this.log.info("initializing");
     this.connection = await createConnection({
       logging: ["schema"],
       ...(this.connectionOptions || {

@@ -1,6 +1,7 @@
 import { isConstructor } from "../common/object/isConstructor";
+import { Awaitable } from "../common/typings2/Async";
 import { AbstractRpcHandler } from "./AbstractRpcHandler";
-import { AnyRpcHandler, IRpcHandler } from "./Rpc";
+import { AnyRpc, AnyRpcHandler, IRpcHandler, RpcUnresolvedConfig } from "./Rpc";
 import { RpcNamespace } from "./RpcNamespace";
 
 type T = RpcNamespace;
@@ -13,20 +14,10 @@ export class RpcNamespaceHandler
     key: string;
   } | null = null;
 
-  async handle([key, payload]: any): Promise<any> {
-    const target = this.rpc.namespaceMap[key];
-    const unresolvedConfig = this.config.getNamespaceConfig(target, key, this);
-    const handler = await target.resolveRpcHandler(
-      unresolvedConfig,
-      this as AnyRpcHandler
-    );
-    if (isConstructor(handler, RpcNamespaceHandler)) {
-      handler.nsInfo = {
-        parent: this,
-        key,
-      };
-    }
-    await this.config?.checkNamespace?.(this, handler);
-    return handler.handle(payload);
+  protected getChildConfig(
+    key: string,
+    child: AnyRpc
+  ): Awaitable<RpcUnresolvedConfig<AnyRpc>> {
+    return this.config.getNamespaceConfig(child, key, this);
   }
 }

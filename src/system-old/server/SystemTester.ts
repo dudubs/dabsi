@@ -8,7 +8,6 @@ import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
 import { createTestConnection } from "../../typedata/tests/TestConnection";
 import { provideType } from "../../typedi/provideType";
 import { Resolver } from "../../typedi/Resolver";
-import { configureRpcService } from "../../typerpc/Rpc";
 import { SystemApp } from "../common/SystemApp";
 import { PermissionManager } from "./acl/PermissionManager";
 import { User } from "./acl/User";
@@ -19,10 +18,10 @@ import { SystemSession } from "../../system/core/SystemSession";
 
 import { SystemEntities } from "./SystemEntities";
 
-export const SystemTester = Tester.beforeAll(async (t) => ({
+export const SystemTester = Tester.beforeAll(async t => ({
   connection: await createTestConnection(SystemEntities),
 }))
-  .beforeAll(async (t) => {
+  .beforeAll(async t => {
     const users = DataEntitySource.create(User, t.connection);
 
     return {
@@ -44,7 +43,7 @@ export const SystemTester = Tester.beforeAll(async (t) => ({
     };
   })
 
-  .beforeAll(async (t) => {
+  .beforeAll(async t => {
     const pm = Resolver.checkAndResolve(PermissionManager, t.context);
     await pm.addToken("user", t.users.admin.$key, ADMIN_TOKEN);
 
@@ -53,7 +52,7 @@ export const SystemTester = Tester.beforeAll(async (t) => ({
     return {
       sessions: {
         ...(<Record<keyof typeof t.users, DataRow<SystemSession>>>(
-          await mapObjectAsync(t.users, (user) =>
+          await mapObjectAsync(t.users, user =>
             systemSessions.insert({
               user: user.$key,
               timeout: new Date().getTime(),
@@ -68,13 +67,12 @@ export const SystemTester = Tester.beforeAll(async (t) => ({
       },
     };
   })
-  .beforeAll(async (t) => ({}));
+  .beforeAll(async t => ({}));
 
 export function testSystemAs(
   k: ExtractKeys<typeof SystemTester.sessions, DataRow<SystemSession>>
 ) {
-  configureRpcService(
-    SystemApp,
+  SystemApp.configureRpcService(
     Resolver.checkAndResolve(SystemAppConfig, {
       ...SystemTester.context,
       ...DataRow(SystemSession).provide(() => SystemTester.sessions[k]),

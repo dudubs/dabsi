@@ -35,7 +35,7 @@ export function InputErrorHook<E>() {
   return <T extends AnyInput>(
     input: T
   ): InputErrorHook<{ Target: T; Error: E }> => {
-    return RpcHook<AnyInput>(input, InputErrorHookHandler);
+    return <any>RpcHook<AnyInput>(input, InputErrorHookHandler);
   };
 }
 

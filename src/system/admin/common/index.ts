@@ -10,7 +10,7 @@ SystemRouter.register("admin", AdminRouter);
 
 export const AdminRpc = RpcNamespace();
 
-export const AdminInfoRpc = RpcFn<() => string[]>();
+export const AdminInfoRpc = RpcFn<() => AdminInfoData>();
 
 export const AdminInfoConnection = SystemRpc.register(
   "admin-info",
@@ -18,3 +18,7 @@ export const AdminInfoConnection = SystemRpc.register(
 );
 
 export const AdminConnection = SystemRpc.register("admin", AdminRpc);
+
+export type AdminInfoData =
+  | { type: "fail" }
+  | { type: "success"; tokens: string[] };

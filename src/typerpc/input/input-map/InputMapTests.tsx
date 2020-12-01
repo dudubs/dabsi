@@ -46,8 +46,6 @@ testm(__dirname, () => {
         }
       );
 
-      focusNextTest();
-
       testInput(t, t => {
         const data = { text1: "hello", text2: "world" };
         t.testValue(data, data);

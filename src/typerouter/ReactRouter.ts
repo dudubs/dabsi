@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useEmitted } from "../react/reactor/useEmitted";
+import { useEmittedWithoutState } from "../react/reactor/useEmittedWithoutState";
 import { useEmitter } from "../react/reactor/useEmitter";
 import { getReactRouterMetadata } from "./ReactRouterView";
 import { getRouteByPath, Route } from "./Route";
@@ -33,9 +33,9 @@ export function ReactRouter({
     };
   });
 
-  useEmitted(
+  useEmittedWithoutState(
     RouterLocation,
-    (location) => {
+    location => {
       if (
         location.root.router === rootRouter &&
         location.path !== routerState.route.location.path

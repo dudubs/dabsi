@@ -14,14 +14,6 @@ export type AnyInputMapConnection = RpcConnection<AnyInputMap>;
 
 export type BasedInputMap = BasedInput<InputType<AnyInputMap>>;
 
-export type InputMapChildren<T extends BasedInputMap> = RpcChildren<
-  RpcChildren<T>["map"]
->;
-export type InputMapChildConnection<
-  T extends BasedInputMap,
-  K extends keyof InputMapChildren<T>
-> = RpcConnection<InputMapChildren<T>[K]>;
-
 export class InputMapView<
   C extends RpcConnection<AnyInputMap>
 > extends AbstractInputView<

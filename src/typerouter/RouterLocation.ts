@@ -4,11 +4,9 @@ import { joinUrl } from "../common/string/joinUrl";
 import { HasKeys } from "../common/typings2/boolean";
 import { Override } from "../common/typings2/Override";
 import { inspect } from "../logging/inspect";
-import { Manipulator } from "../react/manipulate";
 import { Emitter } from "../react/reactor/useEmitter";
-import { ValueRef } from "../react/ValueRef";
-import { LocationStateEvent } from "./LocationStateEvent";
 import { AnyRouter, Router, RouterAt, RouterType, TRouter } from "./Router";
+import { RouterEvent } from "./RouterEvent";
 
 export type AnyRouterLocation = RouterLocation<TRouter>;
 
@@ -17,18 +15,19 @@ export interface RouterLocation<T extends TRouter> {}
 export class RouterLocation<T extends TRouter> {
   static create<T extends TRouter>(
     router: Router<T>,
-    emit: Emitter = (event: any) => void 0
+    emit: Emitter
   ): RouterLocation<T> {
     if (router.params.length)
       throw new Error(`Can't create RouterLocation for ${inspect(this)}.`);
     return new RouterLocation(router, {}, undefined, undefined, emit);
   }
+
   constructor(
     protected _router: AnyRouter,
     protected _params: any,
     protected _parent: AnyRouterLocation | undefined,
     public name: string | undefined,
-    public emit
+    public emit: Emitter
   ) {}
 
   @Lazy() get path(): string {
@@ -58,7 +57,7 @@ export class RouterLocation<T extends TRouter> {
   }
 
   push() {
-    this.emit(this);
+    this.emit(RouterEvent, { type: "push", location: this });
   }
 
   at<T extends TRouter, K extends keyof T["Children"]>(
@@ -89,13 +88,6 @@ export class RouterLocation<T extends TRouter> {
   *getParents(this: AnyRouterLocation) {
     for (let parent = this; parent; parent = parent.parent!) {
       yield parent;
-    }
-  }
-
-  *getParentsChildren(this: AnyRouterLocation) {
-    for (let [name, router] of entries(this._router.children)) {
-      if (router.params.length) continue;
-      yield new RouterLocation(router, {}, this, name, this.emit);
     }
   }
 
@@ -146,9 +138,7 @@ export class RouterLocation<T extends TRouter> {
   find<T extends TRouter>(
     this: AnyRouterLocation,
     router: Router<T>
-  ):
-    | RouterLocation<Override<T, Pick<TRouter, "Parent" | "Stack">>>
-    | undefined {
+  ): RouterLocation<T> | undefined {
     return this._find(this.findParents(), router) as any;
   }
 }

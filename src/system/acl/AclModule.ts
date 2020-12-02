@@ -8,6 +8,7 @@ import { AclRequest } from "../../system-old/server/acl/AclRequest";
 import { getPasswordHash } from "../../system-old/server/acl/getPasswordHash";
 import { Group } from "../../system-old/server/acl/Group";
 import { Permission } from "../../system-old/server/acl/Permission";
+import { PermissionManager } from "../../system-old/server/acl/PermissionManager";
 import { User } from "../../system-old/server/acl/User";
 import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
 import { Inject, Module } from "../../typedi";
@@ -48,6 +49,8 @@ export class AclModule {
           loginName: "admin",
           password: "admin",
         });
+        const pm = new PermissionManager(this.dbModule.getConnection());
+        await pm.addToken("user", admin.$key, "admin/*");
       },
     });
 

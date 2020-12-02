@@ -14,7 +14,7 @@ export const WidgetExtraHandler: RpcHookHandler<AnyWidget> = {
         config.targetConfig,
         async state => {
           return {
-            ...(await getElement(state)),
+            ...(await getElement?.(state)),
             ...(await config.getExtraElement(state)),
           };
         },

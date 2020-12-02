@@ -10,7 +10,7 @@ import { UserApp } from "./UserApp";
 
 export declare const DevLoginUser: unique symbol;
 
-export type LoginInfo = Payload<{
+export type LoginInfoOld = Payload<{
   FAILED: {};
   SUCCESS: {
     fullName: string;
@@ -26,13 +26,13 @@ export const DevLogin = Form({
   input: DataInput({
     loadType: TypeRef(() => DevLoginUser),
   }),
-  value: Typing<LoginInfo>(),
+  value: Typing<LoginInfoOld>(),
 });
 
 export const SystemApp = RpcMap({
   logout: RpcFn(),
 
-  getLoginInfo: RpcFn<() => LoginInfo>(),
+  getLoginInfo: RpcFn<() => LoginInfoOld>(),
 
   devLogin: DevLogin,
 

@@ -1,3 +1,4 @@
+import { RootReactor } from "../react/reactor/Reactor";
 import { Router } from "./Router";
 import { RouterLocation } from "./RouterLocation";
 
@@ -18,7 +19,7 @@ describe(__filename, () => {
     }),
   });
   const router = baseRouter.create();
-  const location = RouterLocation.create(router);
+  const location = RouterLocation.create(router, RootReactor.emit);
 
   const a = baseRouter.at("a");
   const aa = a.at("aa");

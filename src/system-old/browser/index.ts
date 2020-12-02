@@ -2,7 +2,7 @@ import { createElement } from "react";
 import ReactDOM from "react-dom";
 
 import { SystemApp } from "../common/SystemApp";
-import { MuiSystemRootView } from "./MuiSystemRootView";
+import { MuiSystemView } from "./MuiSystemView";
 
 SystemApp.commandRpcService(payload => {
   return fetch("/service", {
@@ -16,7 +16,7 @@ export const SystemLoginInfo = SystemApp.service.getLoginInfo();
 
 window.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(
-    createElement(MuiSystemRootView), //
+    createElement(MuiSystemView), //
     document.getElementById("system")
   );
 });

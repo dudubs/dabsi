@@ -16,7 +16,11 @@ export class DataSourceRow {
     this[source] = _source;
   }
 
-  getSource<T extends AnyBasedDataRow>(this: T): DataSource<GetBaseType<T>> {
+  getSource<T extends AnyBasedDataRow>(
+    this: T,
+    filterThis: boolean = false
+  ): DataSource<GetBaseType<T>> {
+    if (filterThis) return this[source].filter({ $is: this.$key });
     return this[source];
   }
 

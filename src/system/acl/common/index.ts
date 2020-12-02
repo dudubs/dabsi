@@ -1,3 +1,9 @@
+import { Emittable, RootReactor } from "../../../react/reactor/Reactor";
+import { useEmitted } from "../../../react/reactor/useEmitted";
+import { useEmitter } from "../../../react/reactor/useEmitter";
+import { toReactElement } from "../../../react/utils/toReactElement";
+import { LoginInfoOld } from "../../../system-old/common/SystemApp";
+import { ReactRouterView } from "../../../typerouter/ReactRouterView";
 import { Router } from "../../../typerouter/Router";
 import { InputMap } from "../../../typerpc/input/input-map/InputMap";
 import { TextInput } from "../../../typerpc/input/text-input/TextInput";
@@ -7,7 +13,7 @@ import { Form } from "../../../typerpc/widget/form/Form";
 import { SystemRouter } from "../../core/common/SystemRouter";
 import { SystemRpc } from "../../core/common/SystemRpc";
 
-export type LoginInfoData =
+export type LoginInfo =
   | {
       type: "success";
       fullName: string;
@@ -27,11 +33,12 @@ SystemRouter.register("login", AclLoginRouter);
 
 export const AclRpc = RpcMap({
   login: AclLoginForm,
-  getLoginInfo: RpcFn<() => LoginInfoData>(),
+  logout: RpcFn(),
+  getLoginInfo: RpcFn<() => LoginInfo>(),
 });
 //
 export const AclConnection = SystemRpc.register("acl", AclRpc);
 
-// AdminRpcConfigResolver(AclRpc, { token: "" }, )
-
-// Admin
+export const LoginInfoEvent = Emittable<LoginInfo | { type: "logout" }>({
+  type: "logout",
+});

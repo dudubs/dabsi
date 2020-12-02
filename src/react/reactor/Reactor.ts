@@ -15,7 +15,7 @@ let counter = 0;
 export function Emittable<T>(): Emittable<T | undefined>;
 export function Emittable<T>(init: T): Emittable<T>;
 export function Emittable(init?): Emittable<any> {
-  return { id: counter++, init };
+  return { id: ++counter, init };
 }
 
 // UserInfoEvent = Emittable<UserInfo>();
@@ -26,10 +26,7 @@ export class Reactor {
   protected eventListenerMap = new Map<any, Set<ReactorListener>>();
 
   constructor(
-    protected handle?: (
-      emittable: Emittable<any>,
-      event: object
-    ) => boolean | void
+    protected handle?: (event: any, emittable: Emittable<any>) => boolean | void
   ) {}
 
   getLast<T extends Emittable<any>>(
@@ -39,7 +36,7 @@ export class Reactor {
   }
 
   emit<T extends Emittable<any>>(emittable: T, event: EmittableType<T>) {
-    if (this.handle?.(emittable, event) === false) return;
+    if (this.handle?.(event, emittable) === false) return;
     this.eventMap.set(emittable.id, event);
     this.eventListenerMap.get(emittable.id)?.forEach(callback => {
       callback(event, emittable);

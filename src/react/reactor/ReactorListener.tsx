@@ -1,32 +1,31 @@
 import { createElement, ReactNode, useMemo } from "react";
 import { Constructor } from "../../common/typings2/Constructor";
+import { Defined } from "../../common/typings2/Defined";
 import { ReactorContext, useReactor } from "./hooks";
-import { Reactor } from "./Reactor";
+import { Emittable, EmittableType, Reactor } from "./Reactor";
 
-export function ReactorListener<T extends object>({
-  eventType,
+export function ReactorListener<T extends Emittable<any>>({
+  emittable: { id: emittableId },
   children,
   onEvent,
 }: {
-  eventType: Constructor<T>;
+  emittable: T;
   children: ReactNode;
-  onEvent(event: T): void;
+  onEvent(event: Defined<EmittableType<T>>, emittable: T): void;
 }) {
-  const parentReactor = useReactor();
-
-  const reactor = useMemo(() => {
-    return new Reactor(event => {
-      if (event.constructor === eventType) {
-        onEvent(event as T);
-        return false;
-      } else {
-        parentReactor.emit(event);
-      }
-    });
-  }, [parentReactor]);
+  const reactor = useReactor();
 
   return createElement(ReactorContext.Provider, {
-    value: reactor,
+    value: useMemo(() => {
+      return new Reactor((event, emittable) => {
+        if (emittable.id === emittableId) {
+          onEvent(event, emittable as T);
+          return false;
+        } else {
+          reactor.emit(emittable, event);
+        }
+      });
+    }, [reactor]),
     children,
   });
 }

@@ -16,9 +16,8 @@ import { MuiUserContactInfoInputView } from "./MuiUserContactInfoInputView";
 // MuiAclManagerView
 
 export function MuiAclUsersManagerView(router: typeof AclUsersManagerRouter) {
-  MuiDataManagerView({
+  MuiDataManagerView(AclUsersManager.service)({
     router,
-    connection: AclUsersManager.service,
     editTabs: {
       groups: props => (
         <MuiFormView

@@ -39,7 +39,7 @@ export const AclGroupsManagerConfig = RpcConfigResolver(
           name,
         });
       },
-      async editSubmit(row, { groupName: name }) {
+      async editSubmit([row, { groupName: name }]) {
         await row.update({ name });
       },
     });

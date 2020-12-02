@@ -19,9 +19,9 @@ import {
 } from "../components/MuiButton";
 import { MuiGrid } from "../components/MuiGrid";
 
-export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = FormViewProps<
-  C
-> & {
+export type MuiFormViewProps<
+  C extends RpcConnection<AnyForm>
+> = FormViewProps<C> & {
   MuiSubmitButtonProps?: MuiButtonProps;
   MuiResetButtonProps?: MuiButtonProps;
 };
@@ -39,14 +39,14 @@ export function MuiFormView<C extends RpcConnection<AnyForm>>(
               <MuiSubmitButton
                 {...mergeProps(props.MuiSubmitButtonProps, {
                   emitOnClick: emit => {
-                    emit(new FormViewEvent("SUBMIT"));
+                    emit(FormViewEvent, "submit");
                   },
                 })}
               />
               <MuiResetButton
                 {...mergeProps(props.MuiResetButtonProps, {
                   emitOnClick: emit => {
-                    emit(new FormViewEvent("RESET"));
+                    emit(FormViewEvent, "reset");
                   },
                 })}
               />

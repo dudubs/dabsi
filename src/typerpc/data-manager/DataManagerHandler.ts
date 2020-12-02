@@ -1,6 +1,7 @@
 import { ConfigFactory } from "../ConfigFactory";
 import { RpcConfigHookHandler } from "../RpcConfigHook";
 import { AnyDataManager } from "./DataManager";
+import { Rejectable } from "./Rejectable";
 
 export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
   config,
@@ -17,7 +18,7 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
       }),
     add: {
       inputConfig: config.addInputConfig,
-      submit: config.addSubmit,
+      submit: (value, reject) => config.addSubmit(value, reject),
     },
     edit: async ($, key) => {
       const row = await config.source.getOrFail(key);
@@ -37,8 +38,8 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
                 valueConfig:
                   config.editValueConfigForRow &&
                   (() => ConfigFactory(config.editValueConfigForRow, row)),
-                async submit(value) {
-                  await config.editSubmit(row, value);
+                submit(value, reject) {
+                  return config.editSubmit([row, value], reject);
                 },
 
                 /// tabsConfig

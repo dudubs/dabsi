@@ -7,8 +7,8 @@ import { Fn } from "../common/typings2/Fn";
 import { Nullable } from "../common/typings2/Nullable";
 import { OmitKeys } from "../common/typings2/OmitKeys";
 import {
-  PartialKeys,
   PartialUndefinedKeys,
+  PartialKeys,
 } from "../common/typings2/PartialUndefinedKeys";
 import { PickByValue } from "../common/typings2/PickByValue";
 import { Pluck } from "../common/typings2/Pluck";

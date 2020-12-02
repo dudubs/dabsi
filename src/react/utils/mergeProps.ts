@@ -1,4 +1,4 @@
-import { Ref } from "react";
+import { createElement, ReactElement, Ref } from "react";
 import { entries } from "../../common/object/entries";
 import { setRef } from "./setRef";
 
@@ -17,7 +17,7 @@ function mergeCallbacks(prevCallback: Function, nextCallback: Function) {
 }
 
 function mergeRefs(prevRef, nextRef) {
-  return (current) => {
+  return current => {
     setRef(prevRef, current);
     setRef(nextRef, current);
   };
@@ -25,10 +25,16 @@ function mergeRefs(prevRef, nextRef) {
 
 export function mergeProp(prevValue, nextValue) {
   const nextType = typeof nextValue;
-
   const prevType = typeof prevValue;
 
   // TODO: $reverse
+
+  if (nextType === "undefined") {
+    return prevValue ?? nextValue;
+  }
+  if (isRefObject(prevValue) || isRefObject(nextValue)) {
+    return mergeRefs(prevValue, nextValue);
+  }
 
   if (nextValue && nextType === "object") {
     if ($default in nextValue) {
@@ -43,14 +49,6 @@ export function mergeProp(prevValue, nextValue) {
       if (Object.getPrototypeOf(nextValue) === Object.prototype)
         return mergeProps({}, nextValue);
     }
-  }
-
-  if (nextType === "undefined") {
-    return prevValue ?? nextValue;
-  }
-
-  if (isRefObject(prevValue) || isRefObject(nextValue)) {
-    return mergeRefs(prevValue, nextValue);
   }
 
   if (prevType === nextType) {
@@ -99,4 +97,8 @@ export function mergeProps<P, E extends NextProps<P>>(
 
 export function isRefObject(o): o is React.RefObject<any> {
   return o && typeof o === "object" && "current" in o;
+}
+
+export function mergeElement(element: ReactElement, props) {
+  return createElement(element.type, mergeProps(element.props, props));
 }

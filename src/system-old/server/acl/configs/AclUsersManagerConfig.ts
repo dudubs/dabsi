@@ -74,7 +74,7 @@ export const AclUsersManagerConfig = RpcConfigResolver(
       addSubmit({ loginName, ...basicInfo }) {
         return c.users.insertKey(basicInfo);
       },
-      async editSubmit(row, { basicInfo, contactInfo }) {
+      async editSubmit([row, { basicInfo, contactInfo }]) {
         console.log(inspect(basicInfo));
         await row.update({
           ...basicInfo,

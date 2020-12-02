@@ -1,17 +1,21 @@
 import { History } from "history";
 import {
-  createContext,
   createElement,
   Fragment,
   ReactNode,
+  useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { useEmittedWithoutState } from "../react/reactor/useEmittedWithoutState";
 import { useEmitter } from "../react/reactor/useEmitter";
+import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
+import { useDefinedContext } from "../react/utils/hooks/useDefinedContext";
 import { getReactRouterMetadata } from "./ReactRouterView";
 import { getRouteByPath, Route } from "./Route";
-import { AnyRouter } from "./Router";
+import { AnyRouter, Router, TRouter } from "./Router";
+import { RouterEvent } from "./RouterEvent";
 import { RouterLocation } from "./RouterLocation";
 
 export type ReactRouterViewProps = {
@@ -25,7 +29,7 @@ export function ReactRouter({
 }: ReactRouterViewProps) {
   const emit = useEmitter();
 
-  const [routerState, setRouterState] = useState(() => {
+  const [state, setState] = useState(() => {
     const route = getRouteByHistory();
     return {
       route,
@@ -34,34 +38,54 @@ export function ReactRouter({
   });
 
   useEmittedWithoutState(
-    RouterLocation,
-    location => {
-      if (
-        location.root.router === rootRouter &&
-        location.path !== routerState.route.location.path
-      ) {
-        history.push(location.path);
-        pushRoute({
-          type: "INDEX",
-          location,
-          path: location.path,
-        });
+    RouterEvent,
+    event => {
+      switch (event.type) {
+        case "push":
+          {
+            const { location } = event;
+            if (
+              location.root.router === rootRouter &&
+              location.path !== state.route.location.path
+            ) {
+              let { path } = location;
+              if (event.redirection?.type === "location") {
+                path += `?redirection=${encodeURIComponent(
+                  JSON.stringify({
+                    type: "location",
+                    path: event.redirection.location.path,
+                  })
+                )}`;
+              }
+              history.push(path);
+
+              pushRoute({
+                type: "INDEX",
+                location,
+                path: location.path,
+              });
+            }
+          }
+          break;
       }
     },
-    [routerState]
+    [state]
   );
 
   useEffect(
     () =>
       history.listen(() => {
-        if (history.location.pathname !== routerState.route.location.path) {
+        if (history.location.pathname !== state.route.location.path) {
           pushRoute(getRouteByHistory());
         }
       }),
-    [history, routerState]
+    [history, state]
   );
 
-  return routerState.element;
+  return createElement(ReactRouterContext.Provider, {
+    value: { route: state.route, router: rootRouter, history },
+    children: state.element,
+  });
 
   function setLocationState(state) {
     history.replace(history.location.pathname, {
@@ -71,7 +95,7 @@ export function ReactRouter({
   }
 
   function pushRoute(route: Route) {
-    setRouterState({
+    setState({
       route,
       element: createRouteElement(route, undefined),
     });
@@ -123,4 +147,26 @@ export function ReactRouter({
       history.location.pathname
     );
   }
+}
+
+type ReactRouter = {
+  route: Route;
+  router: Router;
+  history: History;
+};
+
+const ReactRouterContext = createUndefinedContext<ReactRouter>();
+
+export function useReactRouter(): ReactRouter {
+  return useDefinedContext(ReactRouterContext);
+}
+export function useRoute(): Route {
+  return useDefinedContext(ReactRouterContext).route;
+}
+
+export function useRouterLocation<T extends TRouter>(
+  router: Router<T>
+): RouterLocation<T> {
+  const { route, router: rootRouter } = useDefinedContext(ReactRouterContext);
+  return useMemo(() => route.location.find(router)!, [router, rootRouter]);
 }

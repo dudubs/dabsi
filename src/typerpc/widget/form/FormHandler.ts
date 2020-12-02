@@ -1,4 +1,5 @@
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
+import { Rejectable } from "../../data-manager/Rejectable";
 import { AnyInput, InputValueData } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
 import { RpcUnresolvedConfig } from "../../Rpc";
@@ -16,8 +17,8 @@ export class FormHandler
   $submitCommand = async (valueData: InputValueData<AnyInput>) => {
     const inputHandler = await this.getChildHandler("input");
     const inputResult = await inputHandler.loadAndCheck(valueData);
-    if ("error" in inputResult) return inputResult;
-    return { value: await this.config.submit(inputResult.value) };
+    if ("error" in inputResult) return { inputError: inputResult.error };
+    return await Rejectable(this.config.submit, inputResult.value);
   };
 
   async getElement(state): Promise<WidgetElement<T>> {

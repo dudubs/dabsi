@@ -1,7 +1,8 @@
-import { testMetaType } from "../../common/MetaType";
 import { Awaitable } from "../../common/typings2/Async";
 import { If } from "../../common/typings2/boolean";
+import { Is } from "../../common/typings2/boolean/Is";
 import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
+import { IfNever } from "../../common/typings2/IfNever";
 import { OmitKeys } from "../../common/typings2/OmitKeys";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
@@ -13,16 +14,12 @@ import { GenericConfig } from "../GenericConfig";
 
 import { AnyInput, InputValue, InputValueConfig } from "../input/Input";
 import { NoRpc } from "../NoRpc";
-import { AnyRpc, RpcConfig, RpcType, RpcUnresolvedConfig } from "../Rpc";
+import { AnyRpc, RpcType, RpcUnresolvedConfig } from "../Rpc";
 import { RpcFn } from "../rpc-fn/RpcFn";
 import { RpcMap } from "../rpc-map/RpcMap";
-import { AnyRpcParameter, RpcParameter } from "../rpc-parameter/RpcParameter";
+import { RpcParameter } from "../rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "../RpcConfigHook";
-import {
-  AnyDataTable,
-  DataTable,
-  DataTableOptions,
-} from "../widget/data-table/DataTable";
+import { DataTable, DataTableOptions } from "../widget/data-table/DataTable";
 import { Form } from "../widget/form/Form";
 import { InlineObject, InlineObjectType } from "../widget/InlineObjectType";
 import { TabsWidget } from "../widget/tabs-widget/TabsWidget";
@@ -30,6 +27,7 @@ import { WidgetType } from "../widget/Widget";
 import { AnyWidgetRecord } from "../widget/widget-map/WidgetMap";
 import { WidgetExtra } from "../widget/WidgetExtra";
 import { DataManagerHandler } from "./DataManagerHandler";
+import { Rejectable } from "./Rejectable";
 
 // Full<Type>Stack
 export type TDataManager = {
@@ -40,6 +38,8 @@ export type TDataManager = {
   TableRow: any;
 
   EditInput: AnyInput;
+
+  EditValue: any;
 
   EditTabs: AnyWidgetRecord;
 
@@ -76,12 +76,13 @@ export type DataManagerConfig<T extends TDataManager> = PartialUndefinedKeys<
 
     tableConfig?: _Types<T>["TableConfig"];
 
-    addSubmit: RpcConfig<_Types<T>["AddForm"]>["submit"];
+    addSubmit: Rejectable<InputValue<T["AddInput"]>, string, T["AddError"]>;
 
-    editSubmit: (
-      row: DataRow<T["Data"]>,
-      value: InputValue<T["EditInput"]>
-    ) => Awaitable;
+    editSubmit: Rejectable<
+      [DataRow<T["Data"]>, InputValue<T["EditInput"]>],
+      T["EditValue"],
+      T["EditError"]
+    >;
   }
 >;
 
@@ -104,14 +105,14 @@ type _Types<T extends TDataManager> = {
     | undefined;
 
   EditForm: Form<{
-    Value: null;
     Error: T["EditError"];
+    Value: void;
     Input: T["EditInput"];
   }>;
 
   AddForm: Form<{
-    Value: string;
     Error: T["AddError"];
+    Value: string;
     Input: T["AddInput"];
   }>;
 
@@ -167,6 +168,7 @@ export function DataManager<
   AddInput extends AnyInput,
   AddError = never,
   EditError = never,
+  EditValue = void,
   EditInput extends AnyInput = AddInput,
   TableRowController extends AnyRpc = NoRpc,
   EditTabs extends AnyWidgetRecord = {}
@@ -178,22 +180,25 @@ export function DataManager<
   tableOptions?: DataTableOptions<TableRowController>;
 
   editError?: EditError;
+  editValue?: EditValue;
   editInput?: EditInput;
   editTabs?: EditTabs;
 }): DataManager<{
   Data: any;
+
   TableRowController: TableRowController;
   TableRow: InlineObjectType<TableRowType>;
   AddError: AddError;
   AddInput: AddInput;
   EditError: EditError;
   EditInput: EditInput;
+  EditValue: EditValue;
   EditTabs: EditTabs;
 }> {
   const editInput: AnyInput = options.editInput || options.addInput;
   const editTabs = {
-    ...(options.editTabs as AnyWidgetRecord),
     form: Form({ input: editInput }),
+    ...(options.editTabs as AnyWidgetRecord),
   };
   return <any>RpcConfigHook<AnyDataManager>({
     props: {

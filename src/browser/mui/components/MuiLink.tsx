@@ -1,21 +1,11 @@
 import Link, { LinkProps } from "@material-ui/core/Link";
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
+import styled from "styled-components";
 import { mergeProps } from "../../../react/utils/mergeProps";
 
-const useStyles = makeStyles({
-  root: {
-    cursor: "pointer",
-  },
-});
+export type MuiLinkProps = LinkProps;
 
-export function MuiLink(props: LinkProps) {
-  const classes = useStyles();
-  return (
-    <Link
-      {...mergeProps(props, {
-        className: classes.root,
-      })}
-    />
-  );
-}
+export const MuiLink = styled(Link)`
+  cursor: pointer;
+`;

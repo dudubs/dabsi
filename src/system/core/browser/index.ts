@@ -12,7 +12,9 @@ commandSystemRpc((path, payload) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ path, payload }),
-  }).then(res => res.json());
+  })
+    .then(res => res.json())
+    .then(res => res.result);
 });
 
 window.addEventListener("DOMContentLoaded", () => {

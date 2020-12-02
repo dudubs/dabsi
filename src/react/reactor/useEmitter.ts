@@ -5,7 +5,6 @@ import { Emittable, EmittableType } from "./Reactor";
 
 export type Emitter = {
   <T extends Emittable<any>>(emittable: T, event: EmittableType<T>): void;
-  <T extends object>(event: T);
 };
 
 export function useEmitter(): Emitter {

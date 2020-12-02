@@ -324,6 +324,7 @@ export abstract class DataSource<T> {
     this: DataSource<T>,
     keys: readonly K[]
   ): DataSource<DataSelectionRow<T, { pick: K[] }>>;
+
   pick<T, K extends DataPickableKeys<T>, Fields extends DataFields<T>>(
     this: DataSource<T>,
     keys: readonly K[],

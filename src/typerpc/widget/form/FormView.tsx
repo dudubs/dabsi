@@ -16,12 +16,18 @@ export type FormViewProps<
   T extends TForm = WidgetType<C>["TForm"]
 > = WidgetViewProps<C> & {
   // renderFormError
-  input: Renderer<InputViewProps<RpcConnection<T["Input"]>>>;
+  input: Renderer<InputViewProps<C["input"]>>;
 
   onSubmit?(result: T["Value"]);
 
+  onError?(result: T["Error"]);
+
+  onInputError?(result: InputError<T["Input"]>);
+
   onError?(result: InputError<T["Input"]>);
 };
+
+export const FormViewEvent = Emittable<"submit" | "reset">();
 
 export class FormView<
   C extends RpcConnection<AnyForm>
@@ -46,8 +52,10 @@ export class FormView<
     const result = await this.connection.submit(this.input.data);
 
     if ("error" in result) {
-      this.input?.setError(result.error);
       this.props.onError?.(result.error);
+    } else if ("inputError" in result) {
+      this.input?.setError(result.inputError);
+      this.props.onInputError?.(result.inputError);
     } else {
       this.props.onSubmit?.(result.value);
     }
@@ -56,12 +64,12 @@ export class FormView<
   renderView(): React.ReactNode {
     return (
       <ReactorListener
-        eventType={FormViewEvent}
+        emittable={FormViewEvent}
         onEvent={event => {
-          switch (event.type) {
-            case "SUBMIT":
+          switch (event) {
+            case "submit":
               return this.submit();
-            case "RESET":
+            case "reset":
               return this.reset();
           }
         }}
@@ -85,9 +93,4 @@ export class FormView<
       </ReactorListener>
     );
   }
-}
-
-export const FormAction = Emittable<"submit" | "reset">();
-export class FormViewEvent {
-  constructor(public type: "SUBMIT" | "RESET") {}
 }

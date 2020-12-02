@@ -15,6 +15,11 @@ export const AclConfig = RpcConfigResolver(
   },
   c => $ => {
     return $({
+      async logout() {
+        if (c.session.user) {
+          await c.session.update({ user: null });
+        }
+      },
       login: {
         async submit({ loginName, password }) {
           const user = await c.sources.users
@@ -29,8 +34,13 @@ export const AclConfig = RpcConfigResolver(
           return { type: "success", fullName: user.fullName };
         },
       },
-      getLoginInfo() {
-        throw new Error();
+      async getLoginInfo() {
+        if (!c.session.user) return { type: "fail" };
+        const { fullName } = await c.session.user
+          .getSource(true)
+          .pick({ fullName: { $base: UserFullName } })
+          .getOrFail();
+        return { type: "success", fullName };
       },
     });
   }

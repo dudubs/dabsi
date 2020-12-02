@@ -7,9 +7,8 @@ import {
 import { MuiAclGroupInputView } from "./MuiAclGroupInputView";
 
 export function MuiAclGroupsManagerView(router: typeof AclGroupsManagerRouter) {
-  MuiDataManagerView({
+  MuiDataManagerView(AclGroupsManager.service)({
     router,
-    connection: AclGroupsManager.service,
     renderAddInput: props => <MuiAclGroupInputView {...props} />,
   });
 }

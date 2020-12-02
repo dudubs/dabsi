@@ -91,18 +91,19 @@ export class SystemModule {
           const rpcNs: RpcNamespace = rpc as RpcNamespace;
 
           for (const [key, rpc] of entries(rpcNs.children)) {
-            const getChildPath = () => ["SystemRpc", ...path, key].join(".");
+            const childPath = [...path, key];
+
             const rpcConfigResolver = this.rpcConfigResolverMap.get(rpc);
             if (!rpcConfigResolver) {
               this.log.warn(
-                () => `No have config resolver for "${getChildPath()}".`
+                () => `No have config resolver for "${childPath.join(".")}".`
               );
               continue;
             }
             Resolver.check(
               Resolver.catch(rpcConfigResolver, error => {
                 this.log.error(
-                  () => `At ${getChildPath()}: ${error.toString()}`
+                  () => `At ${childPath.join(".")}: ${error.toString()}`
                 );
               }),
               this.requestContext
@@ -114,6 +115,7 @@ export class SystemModule {
         const handlers = [express.json(), CookieParser()];
 
         app.post(SystemRpcPath, async (req, res) => {
+          const log = this.log.get("RPC");
           for (const handler of handlers) {
             await new Promise(next => handler(req, res, next));
           }
@@ -139,12 +141,23 @@ export class SystemModule {
 
           const { path, payload } = req.body;
 
+          log.info(
+            i =>
+              `${(path as any[])
+                .toSeq()
+                .map(path =>
+                  typeof path === "object" ? JSON.stringify(path) : path
+                )
+                .join("/")}`
+          );
           const config = sysReq.getUnresolvedConfig(SystemRpc);
           const command = await SystemRpc.createRpcCommand(config);
           if (!(await aclReq.ask())) {
             throw new RpcError(`Access denied.`);
           }
-          res.json(await command(path, payload));
+          res.json({
+            result: await command(path, payload),
+          });
         });
       },
     });

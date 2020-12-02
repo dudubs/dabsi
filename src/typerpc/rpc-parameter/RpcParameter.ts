@@ -38,8 +38,8 @@ export function RpcParameter<Target extends AnyRpc, Data>(
     props: { parameterDataType: dataType },
     connect(path, command) {
       return data =>
-        this.children.target.createRpcConnection(body =>
-          command([...path, data], body)
+        this.children.target.createRpcConnection((childPath, payload) =>
+          command([...path, data, ...childPath], payload)
         );
     },
   });

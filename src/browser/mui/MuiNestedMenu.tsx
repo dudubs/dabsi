@@ -27,6 +27,9 @@ const useStyles = makeStyles(theme => ({
   listItemText: {
     fontSize: theme.typography.fontSize,
   },
+  root: {
+    minWidth: "200px",
+  },
 }));
 const List = partialProps(_List, {
   // dense: true,
@@ -52,7 +55,7 @@ export function MuiNestedMenu({
   const [state, setState] = useState(() => new MuiNestedMenuState());
 
   return (
-    <List>
+    <List className={classes.root}>
       {mapObjectToArray(children, (child, key) => (
         <MuiNestedMenuChild
           {...child}

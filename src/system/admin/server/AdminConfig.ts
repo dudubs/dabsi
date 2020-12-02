@@ -35,28 +35,28 @@ export const AdminConfig = RpcConfigResolver(
       getNamespaceConfig: rpc => {
         return c.sysReq.getUnresolvedConfig(rpc);
       },
-      async checkNamespace(adminHandler, handler) {
-        const tokens = [handler]
-          .toSeq()
-          .flatMap(h => parents(h))
-          .takeUntil(p => p === adminHandler)
-          .reverse()
-          .filter(
-            (h): h is RpcNamespaceHandler =>
-              isConstructor(h, RpcNamespaceHandler) && !!h.nsInfo?.key
-          )
-          .map(p => p.nsInfo!.key);
-        const rootTokens = [...getRootTokens(["admin"].toSeq().concat(tokens))];
-        if (
-          !(await c.permissions
-            .filter(hasPermissionForUserExp(user.$key, rootTokens))
-            .hasRow())
-        ) {
-          throw new RpcError(
-            `Access denied: ${rootTokens[rootTokens.length - 1]}`
-          );
-        }
-      },
+      // async checkNamespace(adminHandler, handler) {
+      //   const tokens = [handler]
+      //     .toSeq()
+      //     .flatMap(h => parents(h))
+      //     .takeUntil(p => p === adminHandler)
+      //     .reverse()
+      //     .filter(
+      //       (h): h is RpcNamespaceHandler =>
+      //         isConstructor(h, RpcNamespaceHandler) && !!h.nsInfo?.key
+      //     )
+      //     .map(p => p.nsInfo!.key);
+      //   const rootTokens = [...getRootTokens(["admin"].toSeq().concat(tokens))];
+      //   if (
+      //     !(await c.permissions
+      //       .filter(hasPermissionForUserExp(user.$key, rootTokens))
+      //       .hasRow())
+      //   ) {
+      //     throw new RpcError(
+      //       `Access denied: ${rootTokens[rootTokens.length - 1]}`
+      //     );
+      //   }
+      // },
     });
   }
 );

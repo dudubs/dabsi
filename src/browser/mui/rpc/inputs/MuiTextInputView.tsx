@@ -42,7 +42,7 @@ export function MuiTextInputView<C extends RpcConnection<TextInput>>({
             onChange: event => view.setText(event.target.value),
             onKeyPress: event => {
               if (event.key === "Enter") {
-                emit(new FormViewEvent("SUBMIT"));
+                emit(FormViewEvent, "submit");
               }
             },
           })}

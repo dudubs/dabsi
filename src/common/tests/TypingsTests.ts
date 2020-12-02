@@ -47,7 +47,9 @@ import { RequireOptionalKeys } from "../typings2/RequireOptionalKeys";
   // PartialUndefinedKeys
   {
     test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(
-      { b: 1 }
+      {
+        b: 1,
+      }
     );
 
     test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(

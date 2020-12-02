@@ -64,7 +64,7 @@ export function ReactRouterView<T extends TRouter>(
 
   const { renderer: prevRender } = info;
 
-  if (renderIndex || renderNoParam || renderDefault)
+  if (renderIndex || renderNoParam || renderDefault || render)
     info.renderer = props => {
       switch (props.route.type) {
         case "DEFAULT":

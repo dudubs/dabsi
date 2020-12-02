@@ -29,7 +29,7 @@ export class User {
     nullable: true,
     transformer: {
       to(value) {
-        return getPasswordHash(value);
+        if (typeof value === "string") return getPasswordHash(value);
       },
       from(value) {
         return value;

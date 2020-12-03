@@ -6,7 +6,7 @@ import { ExpressModule } from "./ExpressModule";
 @Module()
 export class ExpressLoggerModule {
   constructor(@Inject() expressModule: ExpressModule) {
-    expressModule.push({
+    expressModule.install({
       preRoutes: app => {
         app.use((req, res, next) => {
           expressModule.log.info(

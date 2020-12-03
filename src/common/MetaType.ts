@@ -10,15 +10,6 @@ export type MetaType<T extends WithMetaType<any>> = NonNullableAt<
   typeof TMetaType
 >;
 
-export type MetaTypeHook<T extends WithMetaType<any>, U extends object> = Omit<
-  T,
-  typeof TMetaType
-> &
-  WithMetaType<Override<MetaType<T>, U>>;
-
-export function testMetaType<T>(
-  obj: WithMetaType<T>,
-  callback: (type: T) => void
-) {
-  //
+declare global {
+  function testMetaType<T>(obj: WithMetaType<T>, callback: (type: T) => void);
 }

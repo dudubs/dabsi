@@ -52,18 +52,16 @@ import { RequireOptionalKeys } from "../typings2/RequireOptionalKeys";
       }
     );
 
-    test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(
+    test<PartialUndefinedKeys<{ a?: number; b: number }>>(
       // @ts-expect-error
       {}
     );
 
-    test<PartialUndefinedKeys<PartialUndefinedKeys<{ a?: number; b: number }>>>(
-      {
-        b: 1,
-        // @ts-expect-error
-        c: 1,
-      }
-    );
+    test<PartialUndefinedKeys<{ a?: number; b: number }>>({
+      b: 1,
+      // @ts-expect-error
+      c: 1,
+    });
   }
   // Is
   {

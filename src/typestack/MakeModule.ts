@@ -9,7 +9,7 @@ import { Module } from "../typedi";
 
 @Module()
 export class MakeModule {
-  cli = new Cli().push({
+  cli = new Cli().install({
     run: () => {
       if (DABSI_CURRENT_PATH === DABSI_PATH)
         throw new CliError(`You can't run make on "${DABSI_PATH}".`);

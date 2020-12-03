@@ -1,6 +1,6 @@
 import React from "react";
 import { MuiDataManagerView } from "../../../browser/mui/rpc/MuiDataManagerView";
-import { testMetaType } from "../../../common/MetaType";
+
 import { EmptyFragment } from "../../../react/utils/EmptyFragment";
 import { MuiUserBasicInfoInputView } from "../../../system-old/browser/MuiUserBasicInfoInputView";
 import { MuiUserContactInfoInputView } from "../../../system-old/browser/MuiUserContactInfoInputView";
@@ -13,7 +13,6 @@ MuiDataManagerView(AclAdminConnection.users)({
     groups: props => EmptyFragment,
   },
   renderAddInput: props => <MuiUserBasicInfoInputView {...props} />,
-
   renderEditInput: props => {
     return (
       <InputMapView.Fields

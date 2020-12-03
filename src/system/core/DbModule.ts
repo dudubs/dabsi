@@ -12,7 +12,7 @@ export class DbModule {
 
   cli = new Cli().command(
     "sync",
-    new Cli().push({
+    new Cli().install({
       build: y => y.boolean("force"),
       run: args => this.sync(args),
     })
@@ -33,7 +33,7 @@ export class DbModule {
     @Inject() mRunner: ModuleRunner
   ) {
     cli.command("db", this.cli);
-    mServer.cli.push({
+    mServer.cli.install({
       run: () => this.init(),
     });
     Resolver.provide(

@@ -1,4 +1,3 @@
-import { testMetaType } from "../../common/MetaType";
 import { HasKeys } from "../../common/typings2/boolean";
 import { Constructor } from "../../common/typings2/Constructor";
 import { Expect } from "../../common/typings2/Expect";

@@ -19,7 +19,7 @@ export class ProjectModule {
   providers: { error: Error; fileName: string }[] = [];
 
   constructor(@Inject() mMake: MakeModule) {
-    mMake.cli.push({ run: () => this.init() });
+    mMake.cli.install({ run: () => this.init() });
   }
 
   async init() {

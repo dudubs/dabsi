@@ -1,5 +1,4 @@
 import { getNextPath } from "../common/getNextPath";
-import { testMetaType } from "../common/MetaType";
 import { Payload } from "../common/typings2/Payload";
 import { AnyRouter, Router } from "./Router";
 import { AnyRouterLocation, RouterLocation } from "./RouterLocation";

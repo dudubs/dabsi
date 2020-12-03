@@ -3,6 +3,7 @@ import { pushHook } from "../common/async/pushHook";
 import { Awaitable } from "../common/typings2/Async";
 import { Inject } from "../typedi";
 import { Module } from "../typedi";
+import { HooksInstaller } from "./HooksInstaller";
 import { ServerModule } from "./ServerModule";
 
 @Module()
@@ -10,7 +11,7 @@ export class ExpressModule {
   log = this.server.log.get("EXPRESS");
 
   constructor(@Inject() protected server: ServerModule) {
-    server.cli.push({
+    server.cli.install({
       run: async args => {
         this.log.info("starting ...");
         const app = express();
@@ -29,6 +30,8 @@ export class ExpressModule {
     run: (app: express.Application): Awaitable => {},
   };
 
+  install = HooksInstaller(this.hooks, this);
+
   push({
     preRoutes = undefined as undefined | ((app: express.Application) => void),
     routes = undefined as undefined | ((app: express.Application) => void),
@@ -42,7 +45,7 @@ export class ExpressModule {
   }
 
   listen(port: number, addr = "0.0.0.0") {
-    this.push({
+    this.install({
       run: app => {
         this.log.info(`listening: ${addr}:${port}`);
         const server = app.listen(port, addr);

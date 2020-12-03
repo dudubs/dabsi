@@ -1,36 +1,23 @@
 import path from "path";
 import webpack from "webpack";
-import { NODE_MODULES_PATH } from "../system-old/server/cli/createBrowserWebpack";
+import { DABSI_ROOT_DIR } from "../index";
 import { Inject, Module } from "../typedi";
-import { Builder } from "./Builder";
 import { Cli } from "./Cli";
-
-export class WebpackBuilder extends Builder<webpack.Configuration> {}
 
 @Module()
 export class BrowserCli extends Cli {
   webpackConfig: webpack.Configuration;
-  packCli = new Cli();
-
-  webpackBuilder = new WebpackBuilder();
+  packCli = new Cli().install({
+    run: ({ w, watch = w }) => {
+      return this.init();
+    },
+  });
 
   constructor(@Inject() cli: Cli) {
     super();
     cli.command("browser", this);
 
-    this.command(
-      "pack",
-      this.packCli.push({
-        build: (y) => y.boolean(["w", "watch"]),
-        run: ({ w, watch = w }) => {
-          this.init();
-          return () => {
-            console.log(this.includedFileNames);
-            console.log("x");
-          };
-        },
-      })
-    );
+    this.command("pack", this.packCli);
   }
 
   includedFileNames: string[];
@@ -55,6 +42,7 @@ export class BrowserCli extends Cli {
       entry: this.webpackConfigEntries,
       stats: {
         warnings: false,
+        colors: true,
       },
       resolve: {
         // symlinks: false,
@@ -62,7 +50,7 @@ export class BrowserCli extends Cli {
           // ...getAliases(),
           // dabsi: resolve(__dirname, "..", "dabsi-src"),
         },
-        modules: [NODE_MODULES_PATH],
+        modules: [path.join(DABSI_ROOT_DIR, "node_modules")],
         extensions: [".ts", ".tsx", ".js"],
       },
     };

@@ -1,6 +1,6 @@
 import Typography from "@material-ui/core/Typography";
 import React from "react";
-import { testMetaType } from "../../../common/MetaType";
+
 import { If } from "../../../common/typings2/boolean";
 import { Is } from "../../../common/typings2/boolean/Is";
 import { OmitKeys } from "../../../common/typings2/OmitKeys";

@@ -24,8 +24,10 @@ import { PlatformInfo } from "./PlatformInfo";
   dependencies: [DevModule, ExpressModule],
 })
 export class BrowserPlatformModule {
-  packCli = new Cli().push({
-    lastRun: () => this.pack(),
+  packCli = new Cli().install({
+    run: {
+      after: () => this.pack(),
+    },
   });
 
   cli = new Cli() //
@@ -43,11 +45,11 @@ export class BrowserPlatformModule {
   ) {
     cli.command("browser", this.cli);
 
-    mMake.cli.push({
+    mMake.cli.install({
       run: () => this.make(),
     });
 
-    expressModule.push({
+    expressModule.install({
       postRoutes: app => {
         app.get("/*", (req, res) => {
           res.setHeader("Content-Type", "text/html");
@@ -155,7 +157,7 @@ export class BrowserPlatformModule {
 
   webpackCallback = (err, stats) => {
     if (stats) {
-      this.log.info(stats.toString({ colors: true }));
+      this.log.info(stats.toString(this.webpackConfig.stats));
     }
   };
 

@@ -3,6 +3,7 @@ import { pushHook } from "../common/async/pushHook";
 import { Lazy } from "../common/patterns/lazy";
 import { Awaitable } from "../common/typings2/Async";
 import { Cli } from "../modules/Cli";
+import { HooksInstaller } from "../modules/HooksInstaller";
 import { Inject } from "../typedi";
 import { Module } from "../typedi";
 import { DevWatchdog } from "./DevWatchdog";
@@ -14,7 +15,7 @@ export class DevModule {
   watchOnly: boolean;
 
   constructor(@Inject() cli: Cli) {
-    cli.push({
+    cli.install({
       build: y =>
         y //
           .boolean(["dev", "d"])
@@ -68,6 +69,7 @@ export class DevModule {
     );
   }
 
+  install = HooksInstaller(this.hooks, this);
   push({
     asParent = undefined as undefined | (() => Awaitable),
     asChild = undefined as undefined | (() => void),

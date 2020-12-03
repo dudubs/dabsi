@@ -84,7 +84,7 @@ export class SystemModule {
     @Inject() protected mRunner: ModuleRunner,
     @Inject() protected dbModule: DbModule
   ) {
-    expressModule.push({
+    expressModule.install({
       run: () => {
         for (const { rpc, path } of flatRpc(SystemRpc)) {
           if (rpc.options.handler !== RpcNamespaceHandler) continue;

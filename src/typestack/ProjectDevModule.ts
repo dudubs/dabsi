@@ -9,7 +9,7 @@ export class ProjectDevModule {
     @Inject() devModule: DevModule,
     @Inject() projectModule: ProjectModule
   ) {
-    devModule.push({
+    devModule.install({
       buildWatchdog: async w => {
         await projectModule.init();
         w.paths.push(

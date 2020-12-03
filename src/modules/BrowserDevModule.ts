@@ -18,16 +18,13 @@ export class BrowserDevModule {
   ) {
     mBrowserPlatform.scripts.push("/reload/reload.js");
 
-    devModule.push({
+    devModule.install({
       buildWatchdog: watchdog => {
         watchdog.exclude.push(path => {
           return /([\\\/]|^)browser[\\\/$]/.test(path);
         });
       },
-    });
-
-    devModule.push({
-      asParent: async () => {
+      runAsParent: async () => {
         await mBrowserPlatform.init();
         webpack(mBrowserPlatform.webpackConfig).watch(
           {},
@@ -35,7 +32,8 @@ export class BrowserDevModule {
         );
       },
     });
-    expressModule.push({
+
+    expressModule.install({
       routes: app => {
         if (devModule.watchOnly) return;
         const debounce = Debounce(200);

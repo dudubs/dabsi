@@ -10,12 +10,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { Fn } from "../../../common/typings2/Fn";
 import { Override } from "../../../common/typings2/Override";
-import { Pluck } from "../../../common/typings2/Pluck";
 import { Lang } from "../../../lang/Lang";
 import { updateRef } from "../../../react/HookRef";
-import { Emitter, useEmitter } from "../../../react/reactor/useEmitter";
 import { partialProps } from "../../../react/utils/partialProps";
 import { MuiIcon } from "./MuiIcon";
 
@@ -34,7 +31,6 @@ type BaseProps = {
   icon?: MuiIcon;
   title?: ReactNode;
   buttonType?: ComponentType<MuiButtonProps>;
-  emitOnClick?(emit: Emitter): void;
 };
 
 export function MuiButton(props: MuiButtonProps) {
@@ -54,12 +50,10 @@ export function MuiButton(props: MuiButtonProps) {
     iconOnly,
     buttonRef: initButtonRef,
     buttonType,
-    emitOnClick,
     ...buttonProps
   }: MuiButtonProps = props;
 
   const [open, setOpen] = useState(false);
-  const emit = emitOnClick && useEmitter();
   const buttonRef = useRef<unknown>(null);
   let element: ReactElement;
 
@@ -88,7 +82,6 @@ export function MuiButton(props: MuiButtonProps) {
   };
   elementProps.onClick = event => {
     onClick?.(event);
-    emitOnClick?.(emit!);
     setOpen(true);
   };
 

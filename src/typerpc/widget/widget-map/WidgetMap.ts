@@ -32,6 +32,7 @@ export function WidgetMap<T extends AnyWidgetRecord>(
 ): WidgetMap<T> {
   return <any>Widget<WidgetMap<AnyWidgetRecord>>({
     handler: WidgetMapHandler,
+    type: WidgetMap,
     children: {
       map: RpcMap(children),
     },

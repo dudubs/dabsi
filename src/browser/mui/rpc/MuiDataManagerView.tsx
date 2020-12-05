@@ -7,6 +7,7 @@ import { OmitKeys } from "../../../common/typings2/OmitKeys";
 import { Override } from "../../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
+import { Lang } from "../../../lang/Lang";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import {
   AnyDataManager,
@@ -142,43 +143,45 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
       WidgetRouterView(
         _router.at("edit"),
         params => connection.edit(params.id),
-        {
-          renderWidget(props, { location }) {
-            return (
-              <WidgetExtraView
-                {...props}
-                children={(props, page) => (
-                  <>
-                    <Typography>{page.title}</Typography>
-                    <MuiTabsWidgetView
-                      // onTabChange={}
-                      {...props}
-                      tabs={{
-                        ...dm.editTabs,
-                        form: {
-                          ...dm.MuiEditFormTabViewProps,
-                          render: props => {
-                            return (
-                              <MuiFormView
-                                {...props}
-                                {...mergeProps(dm.MuiEditFormViewProps, {
-                                  onSubmit() {
-                                    location.parent.push();
-                                  },
-                                })}
-                                input={dm.renderEditInput || dm.renderAddInput}
-                              />
-                            );
-                          },
-                        },
-                      }}
-                    />
-                  </>
-                )}
-              />
-            );
-          },
-        }
+        (props, { location }) => (
+          <WidgetExtraView
+            {...props}
+            children={(props, page) => (
+              <>
+                <Typography>{page.title}</Typography>
+                <MuiTabsWidgetView
+                  // onTabChange={}
+                  {...props}
+                  tabs={{
+                    ...dm.editTabs,
+                    form: {
+                      ...dm.MuiEditFormTabViewProps,
+                      render: props => (
+                        <MuiFormView
+                          {...props}
+                          {...mergeProps(dm.MuiEditFormViewProps, {
+                            resetMuiButtonProps: {
+                              variant: "contained",
+                            },
+                            submitMuiButtonProps: {
+                              title: Lang`SAVE_CHANGES`,
+                              variant: "contained",
+                              color: "primary",
+                            },
+                            onSubmit() {
+                              location.parent.push();
+                            },
+                          })}
+                          input={dm.renderEditInput || dm.renderAddInput}
+                        />
+                      ),
+                    },
+                  }}
+                />
+              </>
+            )}
+          />
+        )
       );
     }
   };

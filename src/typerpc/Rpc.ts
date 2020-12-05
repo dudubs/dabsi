@@ -22,15 +22,20 @@ export type TRpc = {
 export interface IRpc<T extends TRpc> {
   options: RpcOptions<TRpc>;
 
-  service: _RpcConnection<T>;
-
   children: T["Children"];
 
-  commandRpcService(command: RpcCommand): _RpcConnection<T>;
+  rpcType: Function;
 
-  configureRpcService(config: _RpcUnresolvedConfig<T>): _RpcConnection<T>;
+  at<K extends keyof T["Children"]>(
+    key: K,
+    callback?: (child: T["Children"][K]) => void
+  ): T["Children"][K];
 
-  createRpcConnection(command: RpcCommand): T["Connection"];
+  createRpcConnection(path: any[], command: RpcCommand): T["Connection"];
+
+  configureRpc(config: _RpcUnresolvedConfig<T>): T["Connection"];
+
+  commandRpc(command: RpcCommand): T["Connection"];
 
   createRpcCommand(unresolvedConfig: _RpcUnresolvedConfig<T>): RpcCommand;
 
@@ -182,6 +187,7 @@ export enum RpcConfigType {
   Generic,
   Factory,
 }
+
 export type RpcOptions<
   T extends TRpc,
   ConfigIsFn extends boolean = Is<T["Config"], Fn>,
@@ -194,6 +200,8 @@ export type RpcOptions<
     isConfigFn: boolean | If<Not<Is<T["Config"], Fn>>, undefined>;
 
     props: RpcPropsOption<T>;
+
+    type?: Function;
 
     children: RpcChildrenOption<T>;
   },
@@ -222,7 +230,7 @@ export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
   options: RpcOptions<T>
 ): Rpc<T> {
   const rpc = new BaseRpc(options);
-
+  (rpc as any).rpcType = options?.type;
   Object.defineProperties(
     rpc,
     Object.getOwnPropertyDescriptors(options["props"] || {})

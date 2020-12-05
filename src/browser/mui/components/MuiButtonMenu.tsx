@@ -3,7 +3,7 @@ import * as React from "react";
 import { ReactElement, ReactNode, useRef, useState } from "react";
 import { mergeRefs } from "../../../react/utils/mergeRefs";
 import { MuiButton, MuiButtonProps } from "./MuiButton";
-import { mergeElement, mergeProps } from "../../../react/utils/mergeProps";
+import { mergeElementProps, mergeProps } from "../../../react/utils/mergeProps";
 
 export function MuiButtonMenu({
   children,
@@ -28,7 +28,7 @@ export function MuiButtonMenu({
       >
         {React.Children.map(children, child => {
           if (React.isValidElement(child)) {
-            return mergeElement(child, {
+            return mergeElementProps(child, {
               onClick: event => {
                 setOpen(false);
               },

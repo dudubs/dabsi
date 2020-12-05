@@ -20,6 +20,6 @@ export function commandSystemRpc(command: RpcCommand) {
   }
 }
 
-SystemRpc.commandRpcService((path, payload) => {
+SystemRpc.commandRpc((path, payload) => {
   return _command(path, payload);
 });

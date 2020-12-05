@@ -86,6 +86,7 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
               {...TabProps}
               {...(isSelected ? SelectedTabProps : null)}
               label={<LangKey for={tabKey}>{tabOptions?.title}</LangKey>}
+              icon={MuiIcon(tabOptions?.icon)}
               value={tabKey}
             />
           );

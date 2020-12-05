@@ -81,6 +81,7 @@ export function Form<
 >({ input }: { value?: Value; input: Input; error?: Error }): Form<T> {
   return <any>Widget<AnyForm>({
     children: { input },
+    type: Form,
     handler: FormHandler,
     commands: { submit: true },
   });

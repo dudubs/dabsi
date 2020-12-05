@@ -1,5 +1,14 @@
 import * as React from "react";
-import { createElement, Fragment, ReactElement, ReactNode } from "react";
+import {
+  ComponentType,
+  createContext,
+  createElement,
+  Fragment,
+  ReactElement,
+  ReactNode,
+  useContext,
+  useMemo,
+} from "react";
 import { mapObject } from "../../../common/object/mapObject";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
@@ -34,6 +43,7 @@ export class InputMapView<
   ): InputViewProps<C["map"][K]> {
     return {
       key,
+      mapKey: key,
       connection: this.connection.map[key],
       element: this.element.elementMap[key],
       elementState: undefined,
@@ -54,6 +64,22 @@ export class InputMapView<
   }
 }
 
+export const InputMapTheme = {
+  renderContainer: (element: ReactElement) => <>{element}</>,
+  renderField: (element: ReactElement, key: string) => <>{element}</>,
+};
+export const InputMapThemeContext = createContext(InputMapTheme);
+
+export function InputMapThemeProvider({ children, theme: getTheme }) {
+  const theme = useContext(InputMapThemeContext);
+  const nextTheme = useMemo(() => getTheme(theme), [theme]);
+  return (
+    <InputMapThemeContext.Provider value={nextTheme}>
+      {children}
+    </InputMapThemeContext.Provider>
+  );
+}
+
 export namespace InputMapView {
   export type FieldsProps<
     C extends AnyInputMapConnection
@@ -72,7 +98,8 @@ export namespace InputMapView {
     fields: keyToRenderer,
     ...props
   }: FieldsProps<C>) {
-    return (
+    const theme = useContext(InputMapThemeContext);
+    return theme.renderContainer(
       <InputMapView
         {...props}
         children={(getProps, view) => {
@@ -91,10 +118,10 @@ export namespace InputMapView {
           return mapObjectToArray(
             keyToRenderer,
             (render: Renderer<any>, key) => {
-              return createElement(
-                Fragment,
-                { key },
-                render(getProps(key) as any)
+              return (
+                <Fragment key={key}>
+                  {theme.renderField(render(getProps(key) as any), key)}
+                </Fragment>
               );
             }
           );

@@ -1,5 +1,5 @@
 import { parents } from "../../../common/iterator/parents";
-import { isConstructor } from "../../../common/object/isConstructor";
+import { isConstructorOf } from "../../../common/object/isConstructorOf";
 import { AclRequest } from "../../../system-old/server/acl/AclRequest";
 import { Permission } from "../../../system-old/server/acl/Permission";
 import { Session } from "../../../system-old/server/acl/Session";

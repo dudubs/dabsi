@@ -27,6 +27,7 @@ export type WidgetViewRouterOptions<
   ): ReactElement;
 };
 
+// SystemRouterView
 export function WidgetRouterView<
   T extends TRouter,
   C extends AnyWidgetConnection

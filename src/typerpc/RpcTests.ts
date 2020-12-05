@@ -2,7 +2,7 @@ import { Fn } from "../common/typings2/Fn";
 import { Override } from "../common/typings2/Override";
 import { AbstractRpcHandler } from "./AbstractRpcHandler";
 import { GenericConfig } from "./GenericConfig";
-import { AnyRpc, Rpc, TRpc } from "./Rpc";
+import { AnyRpc, Rpc, RpcConnection, RpcUnresolvedConfig, TRpc } from "./Rpc";
 import { RpcMap } from "./rpc-map/RpcMap";
 import { RpcConfigHook } from "./RpcConfigHook";
 import { RpcFn } from "./rpc-fn/RpcFn";
@@ -42,30 +42,24 @@ testm(__dirname, () => {
 
   it("RpcFn", async () => {
     const r = RpcFn<any>();
-    r.configureRpcService(() => "hello");
-    expect(await r.service()).toEqual("hello");
+    expect(await RpcFn<any>().configureRpc(() => "hello")()).toEqual("hello");
   });
 
   it("RpcMap", async () => {
-    const r = RpcMap({
-      f: RpcFn<any>(),
-    });
-    r.configureRpcService({ f: () => "hello" });
-    expect(await r.service.f()).toEqual("hello");
+    expect(
+      await RpcMap({
+        f: RpcFn<any>(),
+      })
+        .configureRpc({ f: () => "hello" })
+        .f()
+    ).toEqual("hello");
   });
 
   describe("rpc service >", () => {
     it("expect to use service config", done => {
-      const c = RpcFn();
-      c.configureRpcService(() => {
+      RpcFn().configureRpc(() => {
         done();
-      });
-      c.service();
-    });
-
-    it("expect to fail before configure or handler service", async () => {
-      const c = RpcFn();
-      await expectAsync(c.service()).toBeRejected();
+      })();
     });
   });
 

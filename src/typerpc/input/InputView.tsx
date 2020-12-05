@@ -21,10 +21,12 @@ export type InputErrorElementMap<R extends BasedInput, T = InputError<R>> = {
     | ReactElement
     | ((error: Extract<T, { type: K }>) => ReactElement);
 };
-
-export type InputViewProps<C extends AnyInputConnection> = WidgetViewProps<
-  C
-> & {
+export type InputViewRenderer<C extends AnyInputConnection> = (
+  props: InputViewProps<C>
+) => ReactElement;
+export type InputViewProps<
+  C extends AnyInputConnection
+> = WidgetViewProps<C> & {
   errorMap?: InputErrorElementMap<C>;
 
   onChange?: (view: InputView<C>) => void;

@@ -8,13 +8,15 @@ export const AdminRouter = Router({});
 
 SystemRouter.register("admin", AdminRouter);
 
-export const AdminRpc = RpcNamespace();
+export const [AdminInfoRpc, getAdminInfo] = SystemRpc.register(
+  "admin-info",
+  RpcFn<() => AdminInfo>()
+);
 
-export const AdminInfoRpc = RpcFn<() => AdminInfo>();
-
-export const getAdminInfo = SystemRpc.register("admin-info", AdminInfoRpc);
-
-export const AdminConnection = SystemRpc.register("admin", AdminRpc);
+export const [AdminRpc, AdminConnection] = SystemRpc.register(
+  "admin",
+  RpcNamespace()
+);
 
 export type AdminInfo =
   | { type: "fail" }

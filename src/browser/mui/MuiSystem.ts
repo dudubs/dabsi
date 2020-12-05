@@ -1,17 +1,18 @@
 import {
   createMuiTheme,
   jssPreset,
+  makeStyles,
   StylesProvider as MuiJssProvider,
   Theme as MuiTheme,
-  ThemeProvider as MuiCoreThemeProvider,
+  ThemeProvider as MuiThemeProvider,
 } from "@material-ui/core/styles";
 import { create } from "jss";
 import { createElement, ReactNode } from "react";
 
-import { ThemeProvider as StyledThemeProvider } from "styled-components";
+import { ThemeProvider as JssThemeProvider } from "styled-components";
 import { toReactElement } from "../../react/utils/toReactElement";
 
-export { MuiTheme };
+export { MuiTheme, MuiThemeProvider };
 
 declare module "@material-ui/core/styles" {
   interface DefaultTheme extends MuiTheme {}
@@ -23,22 +24,23 @@ const jss = create({
   plugins: [...jssPreset().plugins],
 });
 
-const theme = createMuiTheme();
+export const MuiDefaultTheme = createMuiTheme({});
 
-export function MuiSystem({ children }: { children: ReactNode }) {
-  children = createElement(MuiCoreThemeProvider, {
+export function MuiProvider({ children }: { children: ReactNode }) {
+  children = createElement(MuiThemeProvider, {
     children,
-    theme,
+    theme: MuiDefaultTheme,
   });
 
-  children = createElement(StyledThemeProvider, {
+  children = createElement(JssThemeProvider, {
     children,
-    theme,
+    theme: MuiDefaultTheme,
   });
 
   children = createElement(MuiJssProvider, {
     children,
     jss,
   });
+
   return toReactElement(children);
 }

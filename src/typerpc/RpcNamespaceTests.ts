@@ -36,7 +36,7 @@ testm(__filename, () => {
       },
     };
 
-    a.configureRpcService(config);
+    a.configureRpc(config);
 
     const configMap = new Map()
       .set(a, config)

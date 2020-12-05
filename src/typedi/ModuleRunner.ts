@@ -29,6 +29,11 @@ export class ModuleRunner {
       // console.log("init", module.name);
       const argsResolver = getInjectableResolver(module);
       const options = moduleOptionsMap.get(module)!;
+      for (const dependencyModule of options.dependencies || []) {
+        const parent: IModule = this.get(dependencyModule);
+        // parent.registerChildModule?.(instance);
+        // instance.registerParentModule?.(parent);
+      }
 
       for (const provider of options.providers || []) {
         const context = Resolver.checkAndResolve(provider, this.context) || {};
@@ -44,12 +49,8 @@ export class ModuleRunner {
         }),
         this.context
       );
+
       const instance: IModule = new module(...args);
-      for (const dependencyModule of options.dependencies || []) {
-        const parent: IModule = this.get(dependencyModule);
-        parent.registerChildModule?.(instance);
-        instance.registerParentModule?.(parent);
-      }
 
       return instance;
     });

@@ -51,7 +51,7 @@ export class TextInputView<
 
   async setValue(value: InputValueElement<C>): Promise<void> {
     return super.setValue(
-      (this._text = TextInputLoader.load(this._options, value))
+      (this._text = TextInputLoader.load(this._options, value || ""))
     );
   }
 

@@ -3,8 +3,9 @@ import path from "path";
 import { touchObject } from "../common/object/touchObject";
 import { DABSI_ROOT_DIR } from "../index";
 import { CALL_STACK_PATTERN, CallStackInfo } from "../typedi/CallStackInfo";
-import { Inject } from "../typedi";
+import { Inject, Resolver } from "../typedi";
 import { Module } from "../typedi";
+import { ModuleRunner } from "../typedi/ModuleRunner";
 import { MakeModule } from "./MakeModule";
 import { ProjectInfo } from "./ProjectInfo";
 
@@ -18,7 +19,10 @@ export class ProjectModule {
 
   providers: { error: Error; fileName: string }[] = [];
 
-  constructor(@Inject() mMake: MakeModule) {
+  constructor(
+    @Inject() mMake: MakeModule,
+    @Inject() moduleRunner: ModuleRunner
+  ) {
     mMake.cli.install({ run: () => this.init() });
   }
 
@@ -52,7 +56,7 @@ export class ProjectModule {
         () => new ProjectInfo(projectDir)
       );
       projectInfo.dirNames.add(dirName);
-      if (!this.currentProjectInfo) this.currentProjectInfo = projectInfo;
+      this.currentProjectInfo = projectInfo;
     }
   }
 }

@@ -5,7 +5,8 @@ import {
   StandardTextFieldProps,
 } from "@material-ui/core/TextField/TextField";
 import * as React from "react";
-import { ReactNode } from "react";
+import { ReactNode, useRef } from "react";
+import { LangKey } from "../../../../lang/LangKey";
 import { useEmitter } from "../../../../react/reactor/useEmitter";
 import { mergeProps } from "../../../../react/utils/mergeProps";
 import { TextInput } from "../../../../typerpc/input/text-input/TextInput";
@@ -21,16 +22,18 @@ export type MuiTextInputViewProps<
   C extends RpcConnection<TextInput>
 > = TextInputViewProps<C> & {
   title?: ReactNode;
+  disableLangKey?: boolean;
   TextFieldProps?: Partial<TextFieldProps>;
 };
 
 export function MuiTextInputView<C extends RpcConnection<TextInput>>({
   title,
   TextFieldProps,
+  disableLangKey,
   ...props
 }: MuiTextInputViewProps<C>) {
   const emit = useEmitter();
-
+  const isChanged = useRef(false);
   return (
     <TextInputView
       {...props}
@@ -38,15 +41,28 @@ export function MuiTextInputView<C extends RpcConnection<TextInput>>({
         <TextField
           fullWidth
           {...mergeProps(TextFieldProps, {
-            onBlur: () => view.validate(),
-            onChange: event => view.setText(event.target.value),
+            onBlur: () => {
+              if (isChanged.current) {
+                isChanged.current = false;
+                return view.validate();
+              }
+            },
+            onChange(event) {
+              isChanged.current = true;
+              return view.setText(event.target.value);
+            },
             onKeyPress: event => {
               if (event.key === "Enter") {
                 emit(FormViewEvent, "submit");
               }
             },
           })}
-          label={title}
+          label={
+            title ||
+            (disableLangKey
+              ? undefined
+              : props.mapKey && <LangKey for={props.mapKey}>{title}</LangKey>)
+          }
           error={view.error != null}
           helperText={view.renderError()}
           value={view.text || ""}

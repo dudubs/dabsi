@@ -1,4 +1,4 @@
-import { isConstructor } from "../common/object/isConstructor";
+import { isConstructorOf } from "../common/object/isConstructorOf";
 import { Awaitable } from "../common/typings2/Async";
 import { AbstractRpcHandler } from "./AbstractRpcHandler";
 import { AnyRpc, AnyRpcHandler, IRpcHandler, RpcUnresolvedConfig } from "./Rpc";
@@ -9,11 +9,6 @@ type T = RpcNamespace;
 export class RpcNamespaceHandler
   extends AbstractRpcHandler<T>
   implements IRpcHandler<T> {
-  nsInfo: {
-    parent: RpcNamespaceHandler;
-    key: string;
-  } | null = null;
-
   protected getChildConfig(
     key: string,
     child: AnyRpc

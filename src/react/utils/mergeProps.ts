@@ -58,11 +58,12 @@ export function mergeProp(prevValue, nextValue) {
       case "function":
         return mergeCallbacks(prevValue, nextValue);
       case "object":
-        if (Array.isArray(prevType) && Array.isArray(nextType)) {
-          console.info("mergeBetweenArrays");
-          return [...prevValue, ...nextValue];
-        }
-        return mergeProps(prevValue, nextValue);
+        throw new Error(`Can't merge object`);
+      // if (Array.isArray(prevType) && Array.isArray(nextType)) {
+      //   console.info("mergeBetweenArrays");
+      //   return [...prevValue, ...nextValue];
+      // }
+      // return mergeProps(prevValue, nextValue);
     }
   }
 
@@ -99,6 +100,6 @@ export function isRefObject(o): o is React.RefObject<any> {
   return o && typeof o === "object" && "current" in o;
 }
 
-export function mergeElement(element: ReactElement, props) {
+export function mergeElementProps(element: ReactElement, props) {
   return createElement(element.type, mergeProps(element.props, props));
 }

@@ -9,6 +9,7 @@ export class TsConfigInfo {
   constructor(public fileName: string) {}
 
   @Lazy() get config(): TsConfig {
+    console.log({ thisFileName: this.fileName });
     return JSON.parse(readFileSync(this.fileName, "utf-8")) as TsConfig;
   }
 

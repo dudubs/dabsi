@@ -140,10 +140,10 @@ export class BrowserPlatformModule {
       }
       await this.makePlatformModuleConfigs(platformInfo);
       for (let indexFileName of platformInfo.findIndexDirNames()) {
-        indexFileCode = `import "${this.mProject.currentProjectInfo.tsConfigInfo.resolvePath(
+        indexFileCode += `import "${this.mProject.currentProjectInfo.tsConfigInfo.resolvePath(
           this.currentPlatformInfo.generatedDir,
           indexFileName
-        )}";\n${indexFileCode}`;
+        )}";\n`;
       }
     }
     await this.mMake.makeFile(

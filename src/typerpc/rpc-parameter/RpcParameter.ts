@@ -38,9 +38,7 @@ export function RpcParameter<Target extends AnyRpc, Data>(
     props: { parameterDataType: dataType },
     connect(path, command) {
       return data =>
-        this.children.target.createRpcConnection((childPath, payload) =>
-          command([...path, data, ...childPath], payload)
-        );
+        this.children.target.createRpcConnection([...path, ...data], command);
     },
   });
 }

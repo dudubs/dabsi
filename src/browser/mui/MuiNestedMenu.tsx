@@ -1,151 +1,79 @@
-import Collapse from "@material-ui/core/Collapse";
-import _List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
-import ListItemText from "@material-ui/core/ListItemText";
+import List from "@material-ui/core/List";
 import { makeStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
-import React, { Dispatch, ReactNode, SetStateAction, useState } from "react";
+import React, { ReactNode } from "react";
+import { entries } from "../../common/object/entries";
 import { hasKeys } from "../../common/object/hasKeys";
 import { mapObjectToArray } from "../../common/object/mapObjectToArray";
-import { ImmutableRecord, ImmutableSet } from "../../immutable2";
-import { LangKey } from "../../lang/LangKey";
-import { StateProps } from "../../react/stateHelpers";
-import { partialProps } from "../../react/utils/partialProps";
+import { useStore } from "../../react/useStore";
+import { WithStore } from "../../Store";
 import { MuiIcon } from "./components/MuiIcon";
+import { MuiNestedMenuChild } from "./MuiNestedMenuChild";
 
-const useStyles = makeStyles(theme => ({
-  nested: {
-    paddingLeft: theme.spacing(4),
-  },
-
-  itemWithChildText: {},
-  parent: {
-    // fontWeight: "bold",
-  },
-  listItemText: {
-    fontSize: theme.typography.fontSize,
-  },
+export const useStyles = makeStyles(theme => ({
   root: {
-    minWidth: "200px",
+    minWidth: "250px",
   },
 }));
-const List = partialProps(_List, {
-  // dense: true,
-});
 
-export type MuiNestedMenuProps = {
-  title?: ReactNode;
-  icon?: MuiIcon;
-  onClick?();
-  children?: Record<string, MuiNestedMenuProps>;
+export type MuiNestedMenuProps<T> = WithStore<MuiNestedMenuState<T>> & {
+  children: Record<string, T>;
+  getChildren: (root: T) => Record<string, T>;
+
+  getChildIcon(child: T): MuiIcon;
+  getChildTitle(child: T): ReactNode;
+  onChildClick(path: MuiNestedMenuPath<T>);
 };
 
-class MuiNestedMenuState extends ImmutableRecord({
-  selectedPath: "",
-}) {}
+export class MuiNestedMenuState<T> {
+  currentPath: MuiNestedMenuPath<T>[] = [];
+  selectedChild;
+}
 
-export function MuiNestedMenu({
-  children,
-}: {
-  children: Record<string, MuiNestedMenuProps>;
-}) {
+export type MuiNestedMenuPath<T> = {
+  parent?: MuiNestedMenuPath<T>;
+  child: T;
+  key: string;
+  depth: number;
+  index: number;
+};
+
+export function MuiNestedMenu<T>(props: MuiNestedMenuProps<T>) {
   const classes = useStyles();
-  const [state, setState] = useState(() => new MuiNestedMenuState());
+  const { store } = useStore(props, MuiNestedMenuState);
 
+  const children = {};
+  const rootChildren = {};
+
+  for (const [key, child] of entries(props.children)) {
+    if (hasKeys(props.getChildren(child))) {
+      children[key] = child;
+    } else {
+      rootChildren[key] = child;
+    }
+  }
   return (
     <List className={classes.root}>
-      {mapObjectToArray(children, (child, key) => (
-        <MuiNestedMenuChild
+      {mapObjectToArray(rootChildren, (child, key, index) => (
+        <MuiNestedMenuChild<T>
+          asRoot
           {...child}
+          store={store}
+          path={{ child, key, index, depth: 0 }}
+          child={child}
+          menuProps={props}
           key={key}
-          menuPath={key}
-          menuKey={key}
-          depth={0}
-          classes={classes}
-          state={state}
-          setState={setState}
+        />
+      ))}
+      {mapObjectToArray(children, (child, key, index) => (
+        <MuiNestedMenuChild<T>
+          {...child}
+          store={store}
+          path={{ child, key, index, depth: 0 }}
+          child={child}
+          menuProps={props}
+          key={key}
         />
       ))}
     </List>
-  );
-}
-
-export function MuiNestedMenuChild({
-  children,
-  title,
-  icon,
-  onClick,
-  depth,
-  menuPath,
-  menuKey,
-  ...props
-}: MuiNestedMenuProps &
-  StateProps<MuiNestedMenuState> & {
-    menuPath: string;
-    depth: number;
-    menuKey: string;
-    classes: ReturnType<typeof useStyles>;
-  }) {
-  const [isOpen, setOpen] = useState(false);
-  const { classes, setState, state } = props;
-
-  const itemIcon = <ListItemIcon>{MuiIcon(icon)}</ListItemIcon>;
-
-  const hasChildren = hasKeys(children);
-
-  return (
-    <>
-      <ListItem
-        button
-        selected={state.selectedPath === menuPath}
-        onClick={() => {
-          setState(state.set("selectedPath", menuPath));
-          onClick?.();
-          if (hasChildren) {
-            setOpen(!isOpen);
-          }
-        }}
-      >
-        {itemIcon}
-        <ListItemText
-          primaryTypographyProps={{
-            className: clsx(
-              classes.listItemText,
-              hasKeys(children) && classes.parent
-            ),
-          }}
-        >
-          <LangKey for={menuKey}>{title}</LangKey>
-        </ListItemText>
-
-        <ListItemSecondaryAction>
-          {hasChildren &&
-            MuiIcon(
-              isOpen
-                ? require(`@material-ui/icons/ExpandLess`)
-                : require(`@material-ui/icons/ExpandMore`)
-            )}
-        </ListItemSecondaryAction>
-      </ListItem>
-      {isOpen && (
-        <Collapse in>
-          <List disablePadding className={clsx(depth > 0 && classes.nested)}>
-            {mapObjectToArray(children || {}, (childProps, key) => (
-              <MuiNestedMenuChild
-                {...props}
-                depth={depth + 1}
-                key={key}
-                menuPath={menuPath + "/" + key}
-                menuKey={key}
-                onClick={() => {}}
-                {...childProps}
-              />
-            ))}
-          </List>
-        </Collapse>
-      )}
-    </>
   );
 }

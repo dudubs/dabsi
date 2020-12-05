@@ -83,6 +83,7 @@ export type WidgetOptions<T extends TWidget> = PartialUndefinedKeys<
     props: RpcPropsOption<T>;
   } & WidgetControllerOptions<T>,
   {
+    type?: Function;
     handler: WidgetHandlerClass<Widget<T>>;
   }
 >;
@@ -151,6 +152,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     isGenericConfig = false,
     props = {},
     handler,
+    type,
     children = {},
     commands,
   } = (options as any) as WidgetOptions<WidgetType<WidgetWithoutController>>;
@@ -166,9 +168,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
   for (const [key, child] of entries((children as AnyRpcRecord) || {})) {
     const desc: PropertyDescriptor = {
       get(this: AnyWidgetConnection) {
-        return child.createRpcConnection((path, payload) => {
-          return this.$command([...this.$path, key, ...path], payload);
-        });
+        return child.createRpcConnection([...this.$path, key], this.$command);
       },
     };
     Lazy()(Connection.prototype, key, desc);
@@ -179,6 +179,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     handler,
     isGenericConfig,
     children,
+    type,
     props: assignDescriptors(props as {}, {
       widgetConnectionClass: Connection as any,
     }),

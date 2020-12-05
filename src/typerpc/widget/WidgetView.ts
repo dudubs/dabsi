@@ -16,6 +16,8 @@ export type WidgetViewFn<T extends AnyWidget, P = {}> = (
 export type WidgetViewProps<C extends AnyWidgetConnection> = {
   key?: string | number;
 
+  mapKey?: string;
+
   connection: C;
 
   element: WidgetElement<C>;

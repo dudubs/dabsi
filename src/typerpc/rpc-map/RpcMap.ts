@@ -72,9 +72,7 @@ export function RpcMap<T extends AnyRpcRecord>(children: T): RpcMap<T> {
     connect(path, command) {
       return mapObject(this.children, (child, key) => {
         try {
-          return child.createRpcConnection((childPath, payload) =>
-            command([...path, key, ...childPath], payload)
-          );
+          return child.createRpcConnection([...path, key], command);
         } catch (error) {
           if (error instanceof RpcError) {
             throw new RpcError(`at key:${key}, ${error.message}`);

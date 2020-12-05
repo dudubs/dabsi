@@ -39,7 +39,7 @@ export function testRpc<T extends AnyRpc>(
         const defineTests = callback && buildTests("config:" + title, callback);
         configs.push({ title, config, defineTests });
       },
-      connection: rpc.createRpcConnection((path, payload) =>
+      connection: rpc.createRpcConnection([], (path, payload) =>
         handler.routeAndHandle(path, payload)
       ),
       get handler(): any {

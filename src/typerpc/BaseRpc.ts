@@ -31,36 +31,29 @@ const configHandlerCacheMap = new WeakMap<
 let isServiceCommand = false;
 
 export class BaseRpc implements IRpc<T> {
+  rpcType;
+
   children = this.options.children || {};
 
   constructor(public options: RpcOptions<T>) {}
 
-  commandRpcService(command) {
-    isServiceCommand = true;
-    const connection = this.createRpcConnection(command);
-    isServiceCommand = false;
-    return connection;
+  at(key, callback) {
+    callback?.(this.children[key]);
+    return this.children[key];
   }
 
-  configureRpcService(config) {
-    return this.commandRpcService(this.createRpcCommand(config));
+  commandRpc(command) {
+    return this.createRpcConnection([], command);
+  }
+  configureRpc(config) {
+    return this.createRpcConnection([], this.createRpcCommand(config));
   }
 
-  @Lazy() get service() {
-    return this.createRpcConnection((path, payload) => {
-      const command = serviceCommandMap.get(this);
-      if (!command) {
-        throw new RpcError(`No service command ${inspect(path)}.`);
-      }
-      return command(path, payload);
-    });
-  }
-
-  createRpcConnection(command: RpcCommand): T["Connection"] {
+  createRpcConnection(path: any[], command: RpcCommand): T["Connection"] {
     if (isServiceCommand) {
       serviceCommandMap.set(this, command);
     }
-    return this.options.connect.call(this, [], command);
+    return this.options.connect.call(this, path, command);
   }
 
   async resolveRpcConfig(

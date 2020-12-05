@@ -40,6 +40,7 @@ export function TextInput<N extends boolean = false>({
 } & TextLoaderOptions = {}): TextInput<N> {
   return <any>Input<TextInput<any>>({
     handler: TextInputHandler,
+    type: TextInput,
     props: {
       nullable: nullable || false,
       loaderOptions,

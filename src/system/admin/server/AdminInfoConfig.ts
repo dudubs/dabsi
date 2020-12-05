@@ -14,8 +14,6 @@ export const AdminInfoConfig = RpcConfigResolver(
   c => {
     return async () => {
       if (!c.session.user) return { type: "fail" };
-      console.log(c.session);
-      // c.aclModule.sources.permissions;
       return { type: "success", tokens: [] };
     };
   }

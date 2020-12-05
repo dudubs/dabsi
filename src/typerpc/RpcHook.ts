@@ -34,7 +34,7 @@ export function RpcHook<T extends AnyRpc>(
     {
       [symbol]: true,
       async resolveRpcConfig(config) {
-        const hookConfigMap = config[hookConfigMapSymbol];
+        const hookConfigMap = config?.[hookConfigMapSymbol];
         let hookConfig = hookConfigMap?.[symbol];
 
         [config, hookConfig] = await resolveConfig(config, hookConfig);

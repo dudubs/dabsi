@@ -129,7 +129,7 @@ export type InputOptions<T extends TInput> = PartialUndefinedKeys<
   } & WidgetControllerOptions<T>,
   {
     handler: WidgetHandlerClass<Input<T>>;
-
+    type?: Function;
     getValueDataFromElement: (
       this: Input<T>,
       value: InputValueElement<Input<T>>
@@ -146,11 +146,13 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     handler,
     children = {},
     getValueDataFromElement,
+    type,
   } = (options as any) as InputOptions<InputType<InputWithoutController>>;
 
   return <any>Widget<InputWithoutController>({
     handler,
     children,
+    type,
     commands: { check: true },
     props: assignDescriptors(props, {
       getValueDataFromElement,

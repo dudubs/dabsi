@@ -1,11 +1,7 @@
-import { hasKeys } from "../../common/object/hasKeys";
-import { mapObject } from "../../common/object/mapObject";
-import { pick } from "../../common/object/pick";
 import { Lazy } from "../../common/patterns/lazy";
 import { Cli } from "../../modules/Cli";
 import { ProjectModuleProvider } from "../../modules/ProjectModuleProvider";
 import { AclRequest } from "../../system-old/server/acl/AclRequest";
-import { getPasswordHash } from "../../system-old/server/acl/getPasswordHash";
 import { Group } from "../../system-old/server/acl/Group";
 import { Permission } from "../../system-old/server/acl/Permission";
 import { PermissionManager } from "../../system-old/server/acl/PermissionManager";
@@ -13,6 +9,7 @@ import { User } from "../../system-old/server/acl/User";
 import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
 import { Inject, Module } from "../../typedi";
 import { MakeModule } from "../../typestack/MakeModule";
+import { AclEditUserConfig } from "../acl-admin/server/AclEditUserConfig";
 import { DbModule, DbModuleProvider } from "../core/DbModule";
 import { SystemModuleProvider } from "../core/SystemModule";
 import { AclConfig } from "./server/AclConfig";
@@ -32,7 +29,7 @@ declare global {
       entities: [User, Group, Permission],
     }),
     SystemModuleProvider({
-      configs: [AclConfig],
+      configs: [AclConfig, AclEditUserConfig],
     }),
   ],
 })

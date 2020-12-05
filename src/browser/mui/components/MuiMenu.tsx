@@ -1,32 +1,47 @@
+import { ButtonProps } from "@material-ui/core/Button";
 import Menu, { MenuProps } from "@material-ui/core/Menu";
 import * as React from "react";
-import { cloneElement } from "react";
-import { mergeProps } from "../../../react/utils/mergeProps";
+import { cloneElement, ReactElement, ReactNode, useRef, useState } from "react";
+import { mergeElementProps, mergeProps } from "../../../react/utils/mergeProps";
+import { MuiButton } from "./MuiButton";
 
 export function MuiMenu({
-  closeOnClick,
-  ...props
-}: MenuProps & { closeOnClick?(): void }) {
+  button,
+  children,
+}: {
+  children?: ReactNode;
+
+  button: (props: {
+    buttonRef: ButtonProps["buttonRef"];
+    onClick();
+  }) => ReactElement;
+}): ReactElement {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<any>();
   return (
-    <Menu
-      {...mergeProps(props, {
-        onClose() {
-          closeOnClick?.();
+    <>
+      {button({
+        buttonRef: ref,
+        onClick: () => {
+          setOpen(true);
         },
       })}
-    >
-      {React.Children.map(props.children, child =>
-        React.isValidElement(child)
-          ? cloneElement(
-              child,
-              mergeProps(child.props, {
-                onClick(event) {
-                  closeOnClick?.();
-                },
-              })
-            )
-          : child
-      )}
-    </Menu>
+      <Menu
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorEl={() => ref.current!}
+      >
+        {React.Children.map(children, child => {
+          if (React.isValidElement(child)) {
+            return mergeElementProps(child, {
+              onClick: event => {
+                setOpen(false);
+              },
+            });
+          }
+          return child;
+        })}
+      </Menu>
+    </>
   );
 }

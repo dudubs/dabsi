@@ -1,11 +1,18 @@
+import { WidgetMap } from "../../../typerpc/widget/widget-map/WidgetMap";
 import React from "react";
 import ReactDOM from "react-dom";
-import {
-  commandSystemRpc,
-  SystemRpc,
-  SystemRpcPath,
-} from "../common/SystemRpc";
+import { MuiTextInputView } from "../../../browser/mui/rpc/inputs/MuiTextInputView";
+import { MuiFormView } from "../../../browser/mui/rpc/MuiFormView";
+import { partialProps } from "../../../react/utils/partialProps";
+import { InputMap } from "../../../typerpc/input/input-map/InputMap";
+import { InputMapView } from "../../../typerpc/input/input-map/InputMapView";
+import { TextInput } from "../../../typerpc/input/text-input/TextInput";
+import { Form } from "../../../typerpc/widget/form/Form";
+import { commandSystemRpc, SystemRpcPath } from "../common/SystemRpc";
+import { SystemView } from "../common/SystemView";
+import { MuiInputMapView } from "./MuiInputMapView";
 import { MuiSystemView } from "./MuiSystemView";
+import { MuiWidgetMapView } from "./MuiWidgetMapView";
 
 commandSystemRpc((path, payload) => {
   return fetch(SystemRpcPath, {
@@ -22,3 +29,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.append(container);
   ReactDOM.render(React.createElement(MuiSystemView), container);
 });
+
+SystemView
+  //
+  .register(TextInput, MuiTextInputView)
+  .register(InputMap, MuiInputMapView)
+  .register(Form, MuiFormView)
+  .register(WidgetMap, MuiWidgetMapView);

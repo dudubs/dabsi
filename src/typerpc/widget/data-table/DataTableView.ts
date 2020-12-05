@@ -1,14 +1,12 @@
 import { ReactElement } from "react";
 import { mapAndFilterObject } from "../../../common/object/mapAndFilterObject";
-import { pick } from "../../../common/object/pick";
-import { Manipulator } from "../../../react/manipulate";
 import { Debounce } from "../../../react/utils/hooks/useDebounce";
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyDataTable, DataTableTypes } from "./DataTable";
 import { WidgetElement, WidgetType } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
+import { AnyDataTable } from "./DataTable";
 
 export type DataTableViewProps<
   C extends RpcConnection<AnyDataTable>
@@ -19,6 +17,7 @@ export type DataTableViewState = {
   pageSize?: number;
   pageIndex?: number;
 };
+
 export class DataTableView<
   C extends RpcConnection<AnyDataTable>
 > extends AbstractWidgetView<

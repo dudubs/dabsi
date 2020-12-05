@@ -1,14 +1,14 @@
-import { AclUsersManagerConfig } from "../../../system-old/server/acl/configs/AclUsersManagerConfig";
 import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
-import { AclAdminRpc } from "../common";
+import { AclAdminRpc } from "../common/AclAdminRpc";
+import { AclEditUserConfig } from "./AclEditUserConfig";
 
 export const AclAdminConfig = RpcConfigResolver(
   AclAdminRpc,
   {
-    usersConfig: AclUsersManagerConfig,
+    editUserConfig: AclEditUserConfig,
   },
   c => $ =>
     $({
-      users: c.usersConfig,
+      editUser: c.editUserConfig,
     })
 );

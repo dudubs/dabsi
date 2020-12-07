@@ -3,7 +3,7 @@ import { Module } from "../../typedi";
 import { AclModule } from "../acl/AclModule";
 import { DbModuleProvider } from "../core/DbModule";
 import { SystemModule, SystemModuleProvider } from "../core/SystemModule";
-import { AdminConfig } from "./server/AdminConfig";
+import { AdminRpcConfig } from "./server/AdminRpcConfig";
 import { AdminInfoConfig } from "./server/AdminInfoConfig";
 import { AdminPermission } from "./server/AdminPermission";
 
@@ -12,7 +12,7 @@ import { AdminPermission } from "./server/AdminPermission";
   providers: [
     ProjectModuleProvider(),
     SystemModuleProvider({
-      configs: [AdminConfig, AdminInfoConfig],
+      configs: [AdminRpcConfig, AdminInfoConfig],
     }),
     DbModuleProvider({
       entities: [AdminPermission],

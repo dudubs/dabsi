@@ -17,7 +17,7 @@ import { hasPermissionForUserExp } from "./hasPermissionForUserExp";
 
 const r = Resolver();
 
-export const AdminConfig = RpcConfigResolver(
+export const AdminRpcConfig = RpcConfigResolver(
   AdminRpc,
   {
     sysReq: SystemRequest,

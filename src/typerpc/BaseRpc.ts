@@ -37,7 +37,21 @@ export class BaseRpc implements IRpc<T> {
 
   constructor(public options: RpcOptions<T>) {}
 
-  at(key, callback) {
+  at(key, callback?) {
+    if (typeof key === "function") {
+      const { rpc } = key(makeLoc(this));
+      return rpc;
+      function makeLoc(rpc) {
+        loc.rpc = rpc;
+        return loc;
+        function loc(key, callback?) {
+          const child = rpc.children[key];
+          callback?.(child);
+          return makeLoc(child);
+        }
+      }
+    }
+
     callback?.(this.children[key]);
     return this.children[key];
   }

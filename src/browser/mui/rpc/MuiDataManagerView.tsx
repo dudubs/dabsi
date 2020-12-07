@@ -160,11 +160,11 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
                         <MuiFormView
                           {...props}
                           {...mergeProps(dm.MuiEditFormViewProps, {
-                            resetMuiButtonProps: {
+                            resetButtonProps: {
                               variant: "contained",
                             },
-                            submitMuiButtonProps: {
-                              title: Lang`SAVE_CHANGES`,
+                            submitButtonProps: {
+                              children: Lang`SAVE_CHANGES`,
                               variant: "contained",
                               color: "primary",
                             },

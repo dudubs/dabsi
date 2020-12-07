@@ -5,6 +5,7 @@ import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
+import { AnyWidgetConnection } from "../Widget";
 import { WidgetViewProps } from "../WidgetView";
 import { AnyWidgetMap } from "./WidgetMap";
 
@@ -26,18 +27,19 @@ export class WidgetMapView<
 > extends AbstractWidgetView<C, WidgetMapViewProps<C>> {
   renderView(): React.ReactNode {
     return this.props.children(
-      (key: any): WidgetViewProps<any> => ({
-        key,
-        connection: this.connection.map[key],
-        element: this.element.elementMap[key],
-        elementState: this.elementState?.[key],
-        onElementStateChange: newState => {
-          this.setElementState({
-            ...this.elementState,
-            [key]: newState,
-          });
-        },
-      })
+      (key: any) =>
+        (({
+          key,
+          connection: this.connection.map[key],
+          element: this.element.elementMap[key],
+          elementState: this.elementState?.[key],
+          onElementStateChange: newState => {
+            this.setElementState({
+              ...this.elementState,
+              [key]: newState,
+            });
+          },
+        } as WidgetViewProps<AnyWidgetConnection>) as any)
     );
   }
 }

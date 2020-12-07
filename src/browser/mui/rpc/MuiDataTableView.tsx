@@ -78,6 +78,8 @@ export type MuiDataTableViewProps<
     }>
   >;
 
+  toolbar?: React.ReactElement;
+
   columns?: PartialUndefinedKeys<
     {
       [K in keyof Required<Row>]:
@@ -118,6 +120,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
     MuiTableToolbarProps,
     MuiDeleteButtonProps,
     toolbarActions = {},
+    toolbar,
     disableToolbar,
     title,
     ...nextProps
@@ -219,19 +222,21 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                           },
                         }
                   }
-                  staticActions={mapObjectToArray(
-                    toolbarActions,
-                    (props, key) => (
-                      <MuiButton
-                        iconOnly
-                        key={key}
-                        {...props}
-                        onClick={() => {
-                          props.onClick?.({ table });
-                        }}
-                      />
-                    )
-                  )}
+                  staticActions={
+                    <>
+                      {toolbar}
+                      {mapObjectToArray(toolbarActions, (props, key) => (
+                        <MuiButton
+                          iconOnly
+                          key={key}
+                          {...props}
+                          onClick={() => {
+                            props.onClick?.({ table });
+                          }}
+                        />
+                      ))}
+                    </>
+                  }
                 />
               )}
               <Table {...TableProps}>

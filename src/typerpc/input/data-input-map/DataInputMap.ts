@@ -47,8 +47,9 @@ export type DataInputMap<T extends TDataInputMap> = Input<{
   ValueElement: Record<
     string,
     {
-      $value: InputValueElement<T["Target"]>;
-    } & T["TableRow"]
+      value: InputValueElement<T["Target"]>;
+      label: string;
+    }
   >;
 
   Props: {
@@ -129,6 +130,7 @@ export function DataInputMap<
       target,
       table,
     },
+    type: DataInputMap,
     handler: DataInputMapHandler,
     isGenericConfig: true,
     children: {
@@ -137,7 +139,7 @@ export function DataInputMap<
     },
     getValueDataFromElement(valueMap) {
       return mapObject(valueMap, item =>
-        this.target.getValueDataFromElement(item.$value)
+        this.target.getValueDataFromElement(item.value)
       );
     },
   });

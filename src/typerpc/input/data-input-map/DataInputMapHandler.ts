@@ -49,13 +49,13 @@ export class DataInputMapHandler
       target: await this.getChildHandler("target"),
     };
 
-    let elementMap: Record<string, { $value }> = {};
+    let elementMap: Record<string, { label; value }> = {};
     for (const dataRow of await this.config.source.getRows()) {
       const value =
         valueMap?.[dataRow.$key] ?? (await this.config.getTargetValue(dataRow));
       elementMap[dataRow.$key] = {
-        ...(await table.loadRow(dataRow, true)),
-        $value: await target.getValueElement(value),
+        label: this.config.getLabel?.(dataRow) ?? dataRow.label,
+        value: await target.getValueElement(value),
       };
     }
     return elementMap;

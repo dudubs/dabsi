@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Renderer } from "../../../react/renderer";
@@ -11,13 +12,17 @@ import { AnyDataInputMap } from "./DataInputMap";
 export type DataInputMapViewProps<
   C extends RpcConnection<AnyDataInputMap>
 > = InputViewProps<C> & {
-  target: Renderer<{
-    props: InputViewProps<C["target"]>;
-    row: InputType<C>["Types"]["T"]["TableRow"];
-    index: number;
-    key: string;
-  }>;
-  renderNoKeys?();
+  noKeys?: ReactElement;
+  renderTarget: Renderer<
+    InputViewProps<C["target"]>,
+    [
+      {
+        label: string;
+        index: number;
+        key: string;
+      }
+    ]
+  >;
 };
 
 export class DataInputMapView<
@@ -27,34 +32,36 @@ export class DataInputMapView<
 
   renderView(): React.ReactNode {
     if (!hasKeys(this.value)) {
-      return this.props.renderNoKeys?.();
+      return this.props.noKeys;
     }
 
     return mapObjectToArray(
       this.value! || {},
-      ({ $value, ...row }, key, index) => {
-        return this.props.target({
-          row,
-          index,
-          key,
-          props: {
+      ({ value, label }, key, index) => {
+        return this.props.renderTarget(
+          {
             key,
-            value: $value,
+            value,
             elementState: undefined,
             onElementStateChange: undefined,
             onChange: view =>
               this.setValue({
                 ...this.value,
                 [key]: {
-                  ...row,
-                  $value: view.value,
+                  label,
+                  value: view.value,
                 },
               }),
             connection: this.connection.target,
             element: this.element.target,
             inputRef: this.children.ref(key),
           },
-        });
+          {
+            label,
+            index,
+            key,
+          }
+        );
       }
     );
   }

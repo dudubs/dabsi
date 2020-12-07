@@ -16,7 +16,7 @@ export type FormViewProps<
   T extends TForm = WidgetType<C>["TForm"]
 > = WidgetViewProps<C> & {
   // renderFormError
-  input: Renderer<InputViewProps<C["input"]>>;
+  renderInput: Renderer<InputViewProps<C["input"]>>;
 
   onSubmit?(result: T["Value"]);
 
@@ -76,7 +76,7 @@ export class FormView<
       >
         {this.props.children({
           form: this,
-          input: this.props.input({
+          input: this.props.renderInput({
             connection: this.connection.input,
             value: undefined,
             onChange: undefined,

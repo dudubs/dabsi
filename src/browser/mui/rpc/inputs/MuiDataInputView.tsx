@@ -1,9 +1,9 @@
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import { Autocomplete } from "@material-ui/lab";
-import { makeStyles } from "@material-ui/core/styles";
 import * as React from "react";
 import { useRef, useState } from "react";
 import { If } from "../../../../common/typings2/boolean";
@@ -25,23 +25,15 @@ export type AnyDataInputConnection = RpcConnection<AnyDataInput>;
 
 export const useStyles = makeStyles(theme => ({}));
 
+export type MuiDataInputViewProps<
+  C extends AnyDataInputConnection
+> = InputViewProps<C> & {
+  title?: LangNode;
+};
+
 // TODO: Load the firsts rows
 export function MuiDataInputView<C extends AnyDataInputConnection>(
-  props: PartialUndefinedKeys<
-    {
-      getLabel:
-        | ((row: InputType<C>["Types"]["TableTypes"]["RowWithKey"]) => string)
-        | If<
-            Is<InputType<C>["Types"]["TableTypes"]["Row"], { label: string }>,
-            undefined
-          >;
-    },
-    InputViewProps<C> & {
-      title?: LangNode;
-
-      // TODO: labelColumnTitle?:
-    }
-  >
+  props: MuiDataInputViewProps<C>
 ) {
   type Types = InputType<C>["Types"];
   type TableTypes = Types["TableTypes"];
@@ -81,12 +73,8 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                 onDoubleClick={() => {
                   setOpen(true);
                 }}
-                onInputChange={(_, value) => {
-                  updateOptions(value);
-                }}
-                getOptionLabel={row =>
-                  props["getLabel"] ? props["getLabel"](row) : row["label"]
-                }
+                onInputChange={(_, value) => updateOptions(value)}
+                getOptionLabel={row => row.label}
                 options={options}
                 getOptionSelected={(o, v) => o.$key === v.$key}
                 renderInput={params => (

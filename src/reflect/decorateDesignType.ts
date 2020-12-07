@@ -1,5 +1,4 @@
 import { Type } from "../common/typings2/Type";
-
 export function decorateDesignType<T, K extends string>(
   target: Type<Record<K, T>>,
   key: K,

@@ -7,6 +7,7 @@ import { RpcConnection, RpcType } from "../../../typerpc/Rpc";
 import { BaseWidgetConnection } from "../../../typerpc/widget/BaseWidgetConnection";
 import { AnyWidget, AnyWidgetConnection } from "../../../typerpc/widget/Widget";
 import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
+import { WidgetViewFn } from "../../../typerpc/widget/WidgetViewFn";
 
 export type WidgetFactory<T extends AnyWidget> = (...args: any[]) => T;
 
@@ -28,7 +29,6 @@ export function SystemView(
     props.connection.$widget[viewComponentSymbol] ||
     props.connection.$widget.rpcType?.[viewComponentSymbol];
   if (!component) {
-    console.log(props.connection.$path);
     return createElement(
       Fragment,
       null,
@@ -65,5 +65,11 @@ export namespace SystemView {
       component(props, nextProps => prev(nextProps || props));
 
     return SystemView;
+  }
+
+  export function registerFn(...fns: WidgetViewFn<AnyWidget>[]) {
+    for (let fn of fns) {
+      register(fn.$widget, fn);
+    }
   }
 }

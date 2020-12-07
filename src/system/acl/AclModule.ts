@@ -12,7 +12,7 @@ import { MakeModule } from "../../typestack/MakeModule";
 import { AclEditUserConfig } from "../acl-admin/server/AclEditUserConfig";
 import { DbModule, DbModuleProvider } from "../core/DbModule";
 import { SystemModuleProvider } from "../core/SystemModule";
-import { AclConfig } from "./server/AclConfig";
+import { AclRpcConfig } from "./server/AclRpcConfig";
 
 declare global {
   namespace Express {
@@ -29,7 +29,7 @@ declare global {
       entities: [User, Group, Permission],
     }),
     SystemModuleProvider({
-      configs: [AclConfig, AclEditUserConfig],
+      configs: [AclRpcConfig, AclEditUserConfig],
     }),
   ],
 })

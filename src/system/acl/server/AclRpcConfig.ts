@@ -7,7 +7,7 @@ import { SystemSession } from "../../core/SystemSession";
 import { AclModule } from "../AclModule";
 import { AclRpc } from "../common";
 
-export const AclConfig = RpcConfigResolver(
+export const AclRpcConfig = RpcConfigResolver(
   AclRpc,
   {
     session: DataRow(SystemSession),

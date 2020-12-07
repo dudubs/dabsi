@@ -178,6 +178,15 @@ export class Store<T> {
     );
   }
 
+  toggleKey<T>(
+    this: Store<T>,
+    key: ExtractKeys<T, string | undefined>,
+    value: string
+  ): Store<T> {
+    return this.update<any, any>(key, currentValue => {
+      return currentValue === value ? undefined : value;
+    });
+  }
   toggle<T>(this: Store<T>, key: ExtractKeys<T, boolean>): Store<T> {
     return this.update<any, any>(key, value => !value);
   }

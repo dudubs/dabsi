@@ -44,8 +44,6 @@ export function MuiAdminView(
   const classes = useStyles();
   const theme = useTheme();
 
-  const { state, store } = useStore(props, MuiAdminViewState);
-
   const adminInfo = useEmitted(AdminInfoEvent, adminInfo => {
     console.log(adminInfo);
   });

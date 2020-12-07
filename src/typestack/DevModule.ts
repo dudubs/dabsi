@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { Debounce } from "../common/async/Debounce";
 import { pushHook } from "../common/async/pushHook";
 import { Lazy } from "../common/patterns/lazy";
 import { Awaitable } from "../common/typings2/Async";
@@ -50,9 +51,11 @@ export class DevModule {
     runAsParent: (): Awaitable => void 0,
     buildWatchdog: (watchog: DevWatchdog): Awaitable => void 0,
   };
-
-  protected reload() {
+  protected reloadDebounce = Debounce(200);
+  protected async reload() {
+    // if (this.isReloading) return;
     if (this.process) {
+      if (!(await this.reloadDebounce())) return;
       this.process.kill();
       this.log.info("reloading");
     }

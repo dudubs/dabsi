@@ -16,6 +16,7 @@ import {
   string,
 } from "../../widget/InlineObjectType";
 import { WidgetType } from "../../widget/Widget";
+import { DataInputMap } from "../data-input-map/DataInputMap";
 import { Input } from "../Input";
 import { NullableInput } from "../nullable-input/NullableInput";
 
@@ -37,6 +38,9 @@ type _Types<T extends TDataInput> = {
 
   OptionalConfig: {
     columns: _Types<T>["TableTypes"]["ColumnConfigMap"];
+    getLabel:
+      | ((row: DataRow<T["TableData"]>) => string)
+      | If<Is<T["TableRow"], { label: string }>, undefined>;
   };
 
   RequiredConfig: {
@@ -153,6 +157,7 @@ export function DataInput<
       nullable: options.nullable ?? false,
       isValueDataRow: !!options.loadType,
     },
+    type: DataInputMap,
     isGenericConfig: true,
     children: {
       table: DataTable(options.tableRowType || { label: string }),

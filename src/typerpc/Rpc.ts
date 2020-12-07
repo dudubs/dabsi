@@ -19,6 +19,15 @@ export type TRpc = {
   Props: object;
 };
 
+export interface RpcLocation<T extends AnyRpc> {
+  rpc: T;
+  <K extends keyof RpcChildren<T>>(
+    //
+    key: K,
+    callback?: (child: RpcChild<T, K>) => void
+  ): RpcLocation<RpcChild<T, K>>;
+}
+
 export interface IRpc<T extends TRpc> {
   options: RpcOptions<TRpc>;
 
@@ -26,10 +35,15 @@ export interface IRpc<T extends TRpc> {
 
   rpcType: Function;
 
-  at<K extends keyof T["Children"]>(
+  at<T extends AnyRpc, U extends AnyRpc>(
+    this: T,
+    callback: (loc: RpcLocation<T>) => RpcLocation<U>
+  ): U;
+  at<T extends AnyRpc, K extends keyof RpcChildren<T>>(
+    this: T,
     key: K,
-    callback?: (child: T["Children"][K]) => void
-  ): T["Children"][K];
+    callback?: (child: RpcChild<T, K>) => void
+  ): RpcChild<T, K>;
 
   createRpcConnection(path: any[], command: RpcCommand): T["Connection"];
 

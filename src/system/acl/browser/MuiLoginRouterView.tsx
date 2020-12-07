@@ -8,6 +8,7 @@ import { useReactRouter, useRoute } from "../../../typerouter/ReactRouter";
 import { InputMapView } from "../../../typerpc/input/input-map/InputMapView";
 import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
 import { PaperInCenter } from "../../admin/browser/PaperInCenter";
+import { MuiInputMapView } from "../../core/browser/MuiInputMapView";
 import { AclConnection, AclLoginRouter, LoginInfoEvent } from "../common";
 
 WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
@@ -36,12 +37,9 @@ WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
           }
         }}
         input={props => (
-          <InputMapView.Fields
+          <MuiInputMapView
             {...props}
-            fields={{
-              loginName: props => (
-                <MuiTextInputView {...props} title={Lang`LOGIN_NAME`} />
-              ),
+            children={{
               password: props => (
                 <MuiTextInputView
                   {...props}

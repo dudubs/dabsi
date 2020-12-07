@@ -9,26 +9,20 @@ import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 testm(__filename, () => {
   it("sanity", async () => {
     const a = RpcNamespace();
-    const b = RpcNamespace();
-    const c = RpcNamespace();
+    const [af, afc] = a.register("af", RpcFn());
+    const [bf, bfc] = a.register("bf", RpcFn());
+    const [b, bc] = a.register("b", RpcNamespace());
+    const [c, cc] = b.register("c", RpcNamespace());
+
     const e = RpcNamespace();
+    const [m, mc] = c.register(
+      "m",
+      RpcMap({
+        e,
+      })
+    );
 
-    const af = RpcFn();
-    const afc = a.register("af", af);
-
-    const bf = RpcFn();
-    const bfc = a.register("bf", bf);
-
-    const bc = a.register("b", b);
-    const cc = b.register("c", c);
-
-    const m = RpcMap({
-      e,
-    });
-    const mc = c.register("m", m);
-
-    const mf = RpcFn();
-    const mfc = e.register("mf", mf);
+    const [mf, mfc] = e.register("mf", RpcFn());
 
     const config: RpcUnresolvedConfig<RpcNamespace> = {
       getNamespaceConfig(rpc) {

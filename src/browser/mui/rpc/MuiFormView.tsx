@@ -7,7 +7,7 @@ import { Hook } from "../../../react/Hook";
 import { useEmitter } from "../../../react/reactor/useEmitter";
 
 import { mergeProps } from "../../../react/utils/mergeProps";
-import { SystemView } from "../../../system/core/common/SystemView";
+import { SystemView } from "../../../system/view/SystemView";
 import { RpcConnection } from "../../../typerpc/Rpc";
 import { AnyForm } from "../../../typerpc/widget/form/Form";
 import {

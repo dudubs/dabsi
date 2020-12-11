@@ -1,40 +1,31 @@
+import { Link } from "@material-ui/core";
 import * as React from "react";
-import { ReactElement, ReactNode } from "react";
-import { MuiLink, MuiLinkProps } from "../../../browser/mui/components/MuiLink";
+import { ReactElement } from "react";
+import { MuiLinkProps } from "../../../browser/mui/components/MuiLink";
 import { mergeProps } from "../../../react/utils/mergeProps";
-import { ReactRouterLink } from "../../../typerouter/ReactRouterLink";
 import { AnyRouter } from "../../../typerouter/Router";
+import useRouterLink from "../../../typerouter/useRouterLink";
 
-export function MuiRouterLink({
+export default function ({
   router,
-  children,
-  MuiLinkProps,
+  ...LinkProps
 }: {
-  router: AnyRouter | (() => AnyRouter);
-  children?: ReactNode;
-  MuiLinkProps?: MuiLinkProps;
-}): ReactElement {
+  router: () => AnyRouter;
+} & MuiLinkProps): ReactElement {
+  const link = useRouterLink(router);
+
   return (
-    <ReactRouterLink
-      router={router}
-      children={props => {
-        return (
-          <MuiLink
-            {...mergeProps(MuiLinkProps, {
-              onClick: event => {
-                event.preventDefault();
-                props.push();
-              },
-              onMouseOver: event => {
-                props.update();
-              },
-            })}
-            href={props.path || "#"}
-          >
-            {children}
-          </MuiLink>
-        );
+    <Link
+      href={link.path}
+      onClick={event => {
+        event.preventDefault();
+        link.push();
       }}
+      {...mergeProps(LinkProps, {
+        onMouseOver: () => {
+          link.update();
+        },
+      })}
     />
   );
 }

@@ -14,6 +14,16 @@ import { toReactElement } from "../../react/utils/toReactElement";
 
 export { MuiTheme, MuiThemeProvider };
 
+declare global {
+  namespace MuiSystem {
+    interface Theme {}
+  }
+}
+
+declare module "@material-ui/core/styles/props" {
+  interface ComponentsPropsList extends MuiSystem.Theme {}
+}
+
 declare module "@material-ui/core/styles" {
   interface DefaultTheme extends MuiTheme {}
 }

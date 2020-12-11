@@ -1,25 +1,14 @@
-import AppBar from "@material-ui/core/AppBar";
-import Divider from "@material-ui/core/Divider";
-import Drawer from "@material-ui/core/Drawer";
-import IconButton from "@material-ui/core/IconButton";
 import MenuItem from "@material-ui/core/MenuItem";
-import { useTheme } from "@material-ui/core/styles";
-import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import MenuIcon from "@material-ui/icons/Menu";
-import clsx from "clsx";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
 import { MuiButtonMenu } from "../../../browser/mui/components/MuiButtonMenu";
 import { MuiLink } from "../../../browser/mui/components/MuiLink";
-import { MuiNestedMenu } from "../../../browser/mui/MuiNestedMenu";
+import { MuiNestedMenu } from "../../../browser/mui/nested-menu";
 import { Lang } from "../../../lang/Lang";
 import { useEmitted } from "../../../react/reactor/useEmitted";
 import { useEmitter } from "../../../react/reactor/useEmitter";
-import { useStore } from "../../../react/useStore";
-import { WithStore } from "../../../Store";
+import { Store } from "../../../store";
 import { useRoute } from "../../../typerouter/ReactRouter";
 import { RouterEvent } from "../../../typerouter/RouterEvent";
 import {
@@ -30,19 +19,18 @@ import {
 import { getAdminInfo } from "../common";
 import { MuiAdminMenu } from "./MuiAdminMenu";
 import { AdminInfoEvent } from "./MuiAdminRouterView";
-import { MuiTemplate, useStyles } from "./MuiTemplate";
+import { MuiTemplate } from "./MuiTemplate";
 import { PaperInCenter } from "./PaperInCenter";
 
 export class MuiAdminViewState {
   open = true;
 }
 
-export function MuiAdminView(
-  props: { children?: ReactNode } & WithStore<MuiAdminViewState>
-): ReactElement {
+export function MuiAdminView(props: {
+  children?: ReactNode;
+  store?: Store<MuiAdminViewState>;
+}): ReactElement {
   const { children } = props;
-  const classes = useStyles();
-  const theme = useTheme();
 
   const adminInfo = useEmitted(AdminInfoEvent, adminInfo => {
     console.log(adminInfo);

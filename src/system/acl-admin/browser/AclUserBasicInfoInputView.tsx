@@ -12,7 +12,8 @@ export const UserAvatar = styled(Avatar)`
   width: 120px;
   height: 120px;
 `;
-export const MuiUserBasicInfoInputView: InputViewFn<
+
+export const AclUserBasicInfoInputView: InputViewFn<
   typeof UserBasicInfoInput
 > = props => {
   return (

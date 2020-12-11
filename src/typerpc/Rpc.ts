@@ -243,7 +243,7 @@ export type AnyRpcHandler = RpcResolvedHandler<AnyRpc>;
 export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
   options: RpcOptions<T>
 ): Rpc<T> {
-  const rpc = new BaseRpc(options);
+  const rpc = new BaseRpc(options as RpcOptions<TRpc>);
   (rpc as any).rpcType = options?.type;
   Object.defineProperties(
     rpc,

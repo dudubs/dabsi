@@ -37,8 +37,6 @@ export type MuiTableToolbarProps = {
 
   title?: ReactNode;
 
-  TitleTypographyProps?: TypographyProps;
-
   staticActions?: ReactNode;
 
   selectActions?: ReactNode;
@@ -73,16 +71,7 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
     >
       <Grid container>
         <Grid item xs>
-          {title && (
-            <Typography
-              variant={"h6"}
-              {...mergeProps(props.TitleTypographyProps, {
-                className: classes.title,
-              })}
-            >
-              {title}
-            </Typography>
-          )}
+          {title}
         </Grid>
         <Grid item>
           {props.countSelectedItems ? (

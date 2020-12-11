@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import { ReactNode } from "react";
 import { MuiIcon } from "../../../browser/mui/components/MuiIcon";
 import { AnyRouter } from "../../../typerouter/Router";
 import { AnyRpc, RpcConnection } from "../../../typerpc/Rpc";
@@ -7,12 +7,14 @@ export type MuiAdminMenuProps = {
   connections?: RpcConnection<AnyRpc>;
   title?: ReactNode;
   router?: AnyRouter;
+  subRouters?: AnyRouter[];
   children?: Record<string, MuiAdminMenuProps>;
   icon?: MuiIcon;
 };
 
 export namespace MuiAdminMenu {
-  export const children: Record<string, MuiAdminMenuProps> = {
+  export const children: Record<string, MuiAdminMenuProps> = {};
+  export const devChildren: Record<string, MuiAdminMenuProps> = {
     main: {
       icon: require("@material-ui/icons/Web"),
     },
@@ -73,7 +75,7 @@ export namespace MuiAdminMenu {
   };
 
   export function register(propsMap: Record<string, MuiAdminMenuProps>) {
-    // Object.assign(children, propsMap);
+    Object.assign(children, propsMap);
   }
 
   export function register2({}) {}

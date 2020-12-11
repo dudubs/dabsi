@@ -1,50 +1,27 @@
-import { useState } from "react";
-import { isConstructor } from "../common/object/isConstructor";
-import { getNextState, Store } from "../Store";
+import { useMemo, useState } from "react";
+import { Store } from "../store";
+import { Factory } from "./../common/patterns/Factory";
 
-export function useStore2<T>(
-  create: (() => T) | (new () => T),
-  init?: (store: Store<T>) => void
-): Store<T> {
-  let state, setState;
-
-  [state, setState] = useState(() => {
-    let state: T = isConstructor(create) ? new create() : create();
-    init &&
-      init(
-        new Store<T>(true, state, action => {
-          state = getNextState(action, state);
-        })
-      );
-    return state;
+export function useStore<T>(stateFactory: Factory<T>): Store<T> {
+  const [state] = useState(() => {
+    return { current: Factory(stateFactory) };
   });
-  return new Store(false, state, setState);
-}
+  const [_, setCounter] = useState(0);
 
-export function useStore<T>(
-  propsOrStore: { store?: Store<T> } | Store<T> | undefined,
-  create: (() => T) | (new () => T),
-  init?: (store: Store<T>) => void
-): Store<T> {
-  let state, setState;
-
-  const store: Store<T> | undefined =
-    (propsOrStore as any).store ||
-    ((propsOrStore as any).setState ? propsOrStore : undefined);
-
-  if (store?.constructor === Store) {
-    return store;
-  } else {
-    [state, setState] = useState(() => {
-      let state: T = isConstructor(create) ? new create() : create();
-      init &&
-        init(
-          new Store<T>(true, state, action => {
-            state = getNextState(action, state);
-          })
-        );
-      return state;
-    });
-    return new Store(false, state, setState);
-  }
+  return useMemo(
+    () =>
+      new Store<T>(
+        () => state.current,
+        getNextState => {
+          let nextState = getNextState(state.current);
+          if ((nextState as any) === Store.deleteSymbol) {
+            nextState = Factory(stateFactory);
+          }
+          if (nextState === state.current) return;
+          state.current = nextState;
+          setCounter(count => count + 1);
+        }
+      ),
+    []
+  );
 }

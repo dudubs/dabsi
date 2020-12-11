@@ -11,5 +11,5 @@ export type UndefinedKeys<T> = Union<
 >;
 
 export type PartialUndefinedKeys<T, U = {}> =
-  // | (U & T) |
-  U & PartialKeys<T, UndefinedKeys<T>>;
+  | (U & T) //
+  | (U & PartialKeys<T, UndefinedKeys<T>>);

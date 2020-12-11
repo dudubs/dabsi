@@ -8,12 +8,12 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import clsx from "clsx";
 import React, { ReactElement } from "react";
-import { flat } from "../../common/iterator/flat";
-import { hasKeys } from "../../common/object/hasKeys";
-import { mapObjectToArray } from "../../common/object/mapObjectToArray";
-import { LangKey } from "../../lang/LangKey";
-import { Store } from "../../Store";
-import { MuiIcon } from "./components/MuiIcon";
+import { flat } from "../../../common/iterator/flat";
+import { hasKeys } from "../../../common/object/hasKeys";
+import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
+import { LangKey } from "../../../lang/LangKey";
+import { Store } from "../../../store";
+import { MuiIcon } from "../components/MuiIcon";
 import {
   MuiNestedMenuPath,
   MuiNestedMenuProps,

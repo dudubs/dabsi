@@ -11,6 +11,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import clsx from "clsx";
 import * as React from "react";
 import { useStore } from "../../../react/useStore";
+import { Struct } from "../../../struct";
 
 const drawerWidth = 260;
 export const useStyles = makeStyles(theme => ({
@@ -80,9 +81,9 @@ export const useStyles = makeStyles(theme => ({
     marginLeft: 0,
   },
 }));
-export const MuiTemplateState = {
+export class MuiTemplateState extends Struct({
   open: true,
-};
+}) {}
 
 export function MuiTemplate({
   children,
@@ -93,7 +94,7 @@ export function MuiTemplate({
 }) {
   const classes = useStyles();
   const theme = useTheme();
-  const { state, store } = useStore(props, () => MuiTemplateState);
+  const { state, store } = useStore(MuiTemplateState);
   return (
     <div className={classes.root}>
       <AppBar

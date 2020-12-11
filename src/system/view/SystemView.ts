@@ -1,13 +1,10 @@
-import { worker } from "cluster";
 import { ComponentType, createElement, Fragment, ReactElement } from "react";
-import { EmptyFragment } from "../../../react/utils/EmptyFragment";
-import { AnyInput, AnyInputConnection } from "../../../typerpc/input/Input";
-import { InputViewProps } from "../../../typerpc/input/InputView";
-import { RpcConnection, RpcType } from "../../../typerpc/Rpc";
-import { BaseWidgetConnection } from "../../../typerpc/widget/BaseWidgetConnection";
-import { AnyWidget, AnyWidgetConnection } from "../../../typerpc/widget/Widget";
-import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
-import { WidgetViewFn } from "../../../typerpc/widget/WidgetViewFn";
+import { Renderer } from "../../react/renderer";
+import { AnyInput, AnyInputConnection } from "../../typerpc/input/Input";
+import { InputViewProps } from "../../typerpc/input/InputView";
+import { RpcConnection } from "../../typerpc/Rpc";
+import { AnyWidget, AnyWidgetConnection } from "../../typerpc/widget/Widget";
+import { WidgetViewProps } from "../../typerpc/widget/WidgetView";
 
 export type WidgetFactory<T extends AnyWidget> = (...args: any[]) => T;
 
@@ -41,35 +38,32 @@ export function SystemView(
 export namespace SystemView {
   type F<T> = T | ((...args: any[]) => T) | RpcConnection<T>;
 
-  type Renderer<P> = (
-    props: P,
-    prev: undefined | ((props?: P) => ReactElement)
-  ) => ReactElement;
-
   export function register<T extends AnyInput>(
     input: F<T>,
-    component: Renderer<InputViewProps<RpcConnection<T>>>
+    component: Renderer<
+      InputViewProps<RpcConnection<T>>,
+      [prev: ComponentType<InputViewProps<RpcConnection<T>>>]
+    >
   ): typeof SystemView;
 
   export function register<T extends AnyWidget>(
     widget: F<T>,
-    component: Renderer<WidgetViewProps<RpcConnection<T>>>
+    component: Renderer<
+      WidgetViewProps<RpcConnection<T>>,
+      [prev: ComponentType<WidgetViewProps<RpcConnection<T>>>]
+    >
   ): typeof SystemView;
 
   export function register<T extends AnyWidget>(
     arg,
-    component
+    renderer
   ): typeof SystemView {
-    const prev = arg.rpcType?.[viewComponentSymbol];
-    arg[viewComponentSymbol] = props =>
-      component(props, nextProps => prev(nextProps || props));
+    const prev =
+      arg.$widget?.rpcType?.[viewComponentSymbol] ||
+      arg.rpcType?.[viewComponentSymbol];
+
+    arg[viewComponentSymbol] = props => renderer(props, prev);
 
     return SystemView;
-  }
-
-  export function registerFn(...fns: WidgetViewFn<AnyWidget>[]) {
-    for (let fn of fns) {
-      register(fn.$widget, fn);
-    }
   }
 }

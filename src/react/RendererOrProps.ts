@@ -1,6 +1,6 @@
 import { Renderer } from "./renderer";
 
-export type RendererOrOptions<
+export type RendererOrProps<
   P extends object,
   O extends object,
   U extends any[] = []
@@ -10,16 +10,16 @@ export type RendererOrOptions<
       render?: Renderer<P, U>;
     });
 
-export function RendererOrOptions<
+export function RendererOrProps<
   P extends object,
   O extends object,
   U extends any[] = []
 >(
-  renderOrOptions: RendererOrOptions<P, O, U> | undefined,
+  RendererOrProps: RendererOrProps<P, O, U> | undefined,
   defaultRenderer: Renderer<P, U>
 ): [renderer: Renderer<P, U>, options: O | undefined] {
-  if (typeof renderOrOptions == "function") {
-    return [renderOrOptions, undefined];
+  if (typeof RendererOrProps == "function") {
+    return [RendererOrProps, undefined];
   }
-  return [defaultRenderer, renderOrOptions];
+  return [RendererOrProps?.render || defaultRenderer, RendererOrProps];
 }

@@ -1,11 +1,10 @@
 import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
 import { UserBasicInfoInput } from "../../acl/common/UserBasicInfoInput";
-import { SystemView } from "../../core/common/SystemView";
-import { AclAdminRouter } from "../common";
+import { SystemView } from "../../view/SystemView";
+import AclAdminRouter from "../common/AclAdminRouter";
 import { AclAdminConnection, AclEditUserWidget } from "../common/AclAdminRpc";
-import { AclEditUserWidgetView } from "./AclEditUserWidgetView";
-import { AclGroupsWidgetView } from "./AclGroupsWidgetView";
-import { MuiUserBasicInfoInputView } from "./MuiUserBasicInfoInputView";
+import AclEditUserWidgetView from "./AclEditUserWidgetView";
+import { AclUserBasicInfoInputView } from "./AclUserBasicInfoInputView";
 
 AclEditUserWidget.at("map", $ => {
   $.at("groups").at("input", $ => {
@@ -17,16 +16,10 @@ AclEditUserWidget.at("map", $ => {
 
 SystemView
   // user inputs
-  .register(UserBasicInfoInput, MuiUserBasicInfoInputView);
+  .register(UserBasicInfoInput, AclUserBasicInfoInputView);
 
 WidgetRouterView(
   AclAdminRouter.at("editUser"),
   params => AclAdminConnection.editUser(params.userId),
   AclEditUserWidgetView
-);
-
-WidgetRouterView(
-  AclAdminRouter.at("groups"),
-  () => AclAdminConnection.groups,
-  AclGroupsWidgetView
 );

@@ -23,7 +23,7 @@ import { MuiIcon } from "../components/MuiIcon";
 
 export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 
-export type RendererOrProps<T, P> = [Partial<T>, Renderer<P>] | Renderer<P>;
+export type OldRendererOrProps<T, P> = [Partial<T>, Renderer<P>] | Renderer<P>;
 
 export type MuiTabViewProps<C extends AnyWidgetConnection> = {
   title?: ReactNode;

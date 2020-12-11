@@ -1,8 +1,5 @@
 import * as React from "react";
-import { createElement, Fragment, ReactElement, ReactNode } from "react";
-import { mapObject } from "../../../common/object/mapObject";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { Renderer } from "../../../react/renderer";
+import { ReactNode } from "react";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
 import { AnyWidgetConnection } from "../Widget";

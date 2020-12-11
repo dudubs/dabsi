@@ -6,8 +6,6 @@
     "preserveSymlinks": false,
     "esModuleInterop": true,
     "lib": ["es2020"],
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
     "experimentalDecorators": true,
     "noImplicitThis": true,
     "emitDecoratorMetadata": true,

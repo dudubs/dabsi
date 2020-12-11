@@ -24,6 +24,7 @@ export type InputErrorElementMap<R extends BasedInput, T = InputError<R>> = {
 export type InputViewRenderer<C extends AnyInputConnection> = (
   props: InputViewProps<C>
 ) => ReactElement;
+
 export type InputViewProps<
   C extends AnyInputConnection
 > = WidgetViewProps<C> & {
@@ -37,7 +38,7 @@ export type InputViewProps<
 
   onError?(view: InputView<C>): void;
 
-  value: InputValueElement<C> | undefined;
+  value?: InputValueElement<C> | undefined;
 };
 
 export type InputViewFn<C extends AnyInput> = Renderer<

@@ -12,6 +12,7 @@ import { WidgetMap } from "../../../typerpc/widget/widget-map/WidgetMap";
 import { UserBasicInfoInput } from "../../acl/common/UserBasicInfoInput";
 import { UserContactInfoInput } from "../../acl/common/UserContactInfoInput";
 import { AdminRpc } from "../../admin/common";
+import AclGroupsManager from "./AclGroupsManager";
 
 export const AclEditUserWidget = WidgetMap({
   basicInfo: Form({
@@ -25,12 +26,6 @@ export const AclEditUserWidget = WidgetMap({
   }),
 });
 
-export const AclAddNewGroupForm = Form({
-  input: InputMap({
-    groupName: InputErrorHook<"ALREADY_EXISTS">()(TextInput()),
-  }),
-});
-
 export const AclGroupsWidget = DataTable({
   groupName: String,
 });
@@ -39,7 +34,6 @@ export const [AclAdminRpc, AclAdminConnection] = AdminRpc.register(
   "acl",
   RpcMap({
     editUser: RpcParameter(String, AclEditUserWidget),
-    groups: AclGroupsWidget,
-    addNewGroup: AclAddNewGroupForm,
+    groupsManager: AclGroupsManager,
   })
 );

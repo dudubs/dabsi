@@ -1,3 +1,4 @@
+import { useHistory } from "./History";
 import { History } from "history";
 import {
   createElement,
@@ -20,15 +21,12 @@ import { RouterLocation } from "./RouterLocation";
 
 export type ReactRouterViewProps = {
   router: AnyRouter;
-  history: History<any>;
 };
 
-export function ReactRouter({
-  router: rootRouter,
-  history,
-}: ReactRouterViewProps) {
+export function ReactRouter({ router: rootRouter }: ReactRouterViewProps) {
   const emit = useEmitter();
 
+  const history = useHistory();
   const [state, setState] = useState(() => {
     const route = getRouteByHistory();
     return {
@@ -89,7 +87,9 @@ export function ReactRouter({
 
   function setLocationState(state) {
     history.replace(history.location.pathname, {
-      ...history.location.state,
+      ...(typeof history.location.state === "object"
+        ? history.location.state
+        : null),
       ...state,
     });
   }

@@ -1,8 +1,5 @@
-import { Awaitable } from "../../common/typings2/Async";
 import { If } from "../../common/typings2/boolean";
-import { Is } from "../../common/typings2/boolean/Is";
 import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
-import { IfNever } from "../../common/typings2/IfNever";
 import { OmitKeys } from "../../common/typings2/OmitKeys";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
@@ -11,7 +8,6 @@ import { DataRow } from "../../typedata/DataRow";
 import { DataSource } from "../../typedata/DataSource";
 import { ConfigFactory } from "../ConfigFactory";
 import { GenericConfig } from "../GenericConfig";
-
 import { AnyInput, InputValue, InputValueConfig } from "../input/Input";
 import { NoRpc } from "../NoRpc";
 import { AnyRpc, RpcType, RpcUnresolvedConfig } from "../Rpc";
@@ -62,7 +58,7 @@ export type DataManagerConfig<T extends TDataManager> = PartialUndefinedKeys<
       | ConfigFactory<RpcUnresolvedConfig<T["EditInput"]>, [DataRow<T["Data"]>]>
       | UndefinedIfIsUndefined<RpcUnresolvedConfig<T["EditInput"]>>;
 
-    tableColumnsConfig: _Types<T>["TableTypes"]["ColumnConfigMap"];
+    tableColumns: _Types<T>["TableTypes"]["ColumnConfigMap"];
   },
   {
     source: DataSource<T["Data"]>;

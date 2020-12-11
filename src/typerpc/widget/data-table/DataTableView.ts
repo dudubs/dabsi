@@ -1,6 +1,7 @@
 import { ReactElement } from "react";
+import { Debounce } from "../../../common/async/Debounce";
 import { mapAndFilterObject } from "../../../common/object/mapAndFilterObject";
-import { Debounce } from "../../../react/utils/hooks/useDebounce";
+
 import { ViewState } from "../../../react/view/ViewState";
 import { RpcConnection } from "../../Rpc";
 import { AbstractWidgetView } from "../AbstractWidgetView";
@@ -26,7 +27,7 @@ export class DataTableView<
     children(view: DataTableView<C>): ReactElement;
   }
 > {
-  protected reloadDebounce = Debounce();
+  protected reloadDebounce = Debounce(500);
 
   @ViewState("reloadWithDebounce") searchText: string =
     this.elementState?.query.text || "";
@@ -119,7 +120,7 @@ export class DataTableView<
       return;
     }
     this.isLoading = true;
-    if (await this.reloadDebounce.wait()) return;
+    if (!(await this.reloadDebounce())) return;
     await this.reload();
   }
 

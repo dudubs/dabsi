@@ -124,11 +124,16 @@ export type RouterAt<
 >;
 
 export namespace RouterType {
-  export function register(this: AnyRouter, name: string, child: AnyRouter) {
+  export function register<T extends AnyRouter>(
+    this: AnyRouter,
+    name: string,
+    child: T
+  ): T {
     if (this.children[name]) {
       throw new Error(`Can't register router as "${name}".`);
     }
     this.children[name] = child;
+    return child;
   }
 
   export function at<T extends TRouter, K extends keyof T["Children"]>(
@@ -151,7 +156,7 @@ export namespace RouterType {
   export function create<T extends TRouter>(this: Router<T>): Router<T> {
     const router = Router(
       this.params,
-      mapObject(this.children, (c) => c.create())
+      mapObject(this.children, c => c.create())
     ) as Router<T>;
 
     router.bases.add(this);

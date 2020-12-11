@@ -47,12 +47,12 @@ export type MuiDataManagerViewProps<
     >;
 
     renderEditInput:
-      | FormViewProps<_Types<C>["EditForm"]>["input"]
+      | FormViewProps<_Types<C>["EditForm"]>["renderInput"]
       | If<_Types<C>["AddInputIsEditInput"], undefined>;
   },
   {
     router: DataManagerRouter<_Types<C>["T"]>;
-    renderAddInput: FormViewProps<C["add"]>["input"];
+    renderAddInput: FormViewProps<C["add"]>["renderInput"];
 
     MuiEditFormTabViewProps?: OmitKeys<
       MuiTabViewProps<RpcConnection<_Types<C>["EditForm"]>>,
@@ -134,7 +134,7 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
                   location.parent.at("edit", { id }).push();
                 },
               })}
-              input={dm.renderAddInput}
+              renderInput={dm.renderAddInput}
             />
           );
         }
@@ -172,7 +172,7 @@ export function MuiDataManagerView<C extends RpcConnection<AnyDataManager>>(
                               location.parent.push();
                             },
                           })}
-                          input={dm.renderEditInput || dm.renderAddInput}
+                          renderInput={dm.renderEditInput || dm.renderAddInput}
                         />
                       ),
                     },

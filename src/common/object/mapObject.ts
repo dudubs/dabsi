@@ -3,11 +3,11 @@ import { entries } from "./entries";
 
 export function mapObject<T, R>(
   obj: Record<string, T>,
-  mapper: (value: T, key: string) => R
+  mapper: (value: T, key: string, index: number, isLast: boolean) => R
 ): Record<string, R> {
   const result: any = {};
-  for (const [key, value] of entries(obj)) {
-    result[key] = mapper(value, key);
+  for (const [key, value, index, isLast] of entries(obj)) {
+    result[key] = mapper(value, key, index, isLast);
   }
   return result;
 }

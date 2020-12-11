@@ -13,6 +13,8 @@ export type WidgetViewRenderer<T extends AnyWidget, P = {}> = (
   props: WidgetViewProps<RpcConnection<T>> & P
 ) => ReactElement;
 
+export interface IWidgetViewProps<C extends AnyWidgetConnection> {}
+
 export type WidgetViewProps<C extends AnyWidgetConnection> = {
   key?: string | number;
 
@@ -25,7 +27,7 @@ export type WidgetViewProps<C extends AnyWidgetConnection> = {
   elementState: WidgetElementState<C> | undefined;
 
   onElementStateChange: ((state: WidgetElementState<C>) => void) | undefined;
-};
+} & IWidgetViewProps<C>[keyof IWidgetViewProps<C>];
 
 export type WidgetView<
   C extends AnyWidgetConnection,

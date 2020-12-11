@@ -3,14 +3,12 @@ import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import React, { ReactNode } from "react";
 import { PartialKeys } from "../../../../common/typings2/PartialUndefinedKeys";
 import { Lang } from "../../../../lang/Lang";
-import { SystemView } from "../../../../system/core/common/SystemView";
+import { SystemView } from "../../../../system/view/SystemView";
 import { AnyDataInputMap } from "../../../../typerpc/input/data-input-map/DataInputMap";
 import {
   DataInputMapView,
   DataInputMapViewProps,
 } from "../../../../typerpc/input/data-input-map/DataInputMapView";
-import { InputMapView } from "../../../../typerpc/input/input-map/InputMapView";
-import { InputViewProps } from "../../../../typerpc/input/InputView";
 import { RpcConnection } from "../../../../typerpc/Rpc";
 
 export type MuiDataInputMapViewProps<
@@ -37,7 +35,7 @@ export function MuiDataInputMapView<C extends RpcConnection<AnyDataInputMap>>({
           <Typography {...noKeysTypographyProps}>{noKeysText}</Typography>
         }
         renderTarget={(props, itemProps) => (
-          <Grid {...ItemGridProps} item>
+          <Grid {...ItemGridProps} item key={itemProps.key}>
             {renderTarget(props, itemProps)}
           </Grid>
         )}

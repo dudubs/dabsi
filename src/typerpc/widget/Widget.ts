@@ -2,18 +2,15 @@
 import { assignDescriptors } from "../../common/object/assignDescriptors";
 import { entries } from "../../common/object/entries";
 import { keys } from "../../common/object/keys";
-import { override } from "../../common/object/override";
 import { Lazy } from "../../common/patterns/lazy";
 import { ExtractKeys } from "../../common/typings2/ExtractKeys";
 import { Fn } from "../../common/typings2/Fn";
-import { IfNever } from "../../common/typings2/IfNever";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
 import { PickByValue } from "../../common/typings2/PickByValue";
 import { Pluck } from "../../common/typings2/Pluck";
 import { UndefinedIfEmptyObject } from "../../common/typings2/UndefinedIfEmptyObject";
 import {
-  _RpcHandlerClass,
   AnyRpc,
   BasedRpc,
   IRpcHandler,
@@ -24,8 +21,8 @@ import {
   RpcPropsOption,
   RpcType,
   TRpc,
+  _RpcHandlerClass,
 } from "../Rpc";
-import { RpcFnMap } from "../rpc-fn/RpcFn";
 import { AnyRpcRecord } from "../rpc-map/RpcMap";
 import { BaseWidgetConnection } from "./BaseWidgetConnection";
 
@@ -37,6 +34,8 @@ export type TWidget = {
   Props: TRpc["Props"];
   Element: object;
   ElementState: any;
+
+  // ViewProps: object;
 };
 
 export type ToAsync<T extends Fn> = (

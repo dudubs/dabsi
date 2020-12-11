@@ -1,21 +1,15 @@
 import List from "@material-ui/core/List";
-import { makeStyles } from "@material-ui/core/styles";
 import React, { ReactNode } from "react";
-import { entries } from "../../common/object/entries";
-import { hasKeys } from "../../common/object/hasKeys";
-import { mapObjectToArray } from "../../common/object/mapObjectToArray";
-import { useStore } from "../../react/useStore";
-import { WithStore } from "../../Store";
-import { MuiIcon } from "./components/MuiIcon";
+import { entries } from "../../../common/object/entries";
+import { hasKeys } from "../../../common/object/hasKeys";
+import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
+import { useStore } from "../../../react/useStore";
+import { Store } from "../../../store";
+import { MuiIcon } from "../components/MuiIcon";
 import { MuiNestedMenuChild } from "./MuiNestedMenuChild";
 
-export const useStyles = makeStyles(theme => ({
-  root: {
-    minWidth: "250px",
-  },
-}));
-
-export type MuiNestedMenuProps<T> = WithStore<MuiNestedMenuState<T>> & {
+export type MuiNestedMenuProps<T> = {
+  store?: Store<MuiNestedMenuState<T>>;
   children: Record<string, T>;
   getChildren: (root: T) => Record<string, T>;
 
@@ -38,8 +32,7 @@ export type MuiNestedMenuPath<T> = {
 };
 
 export function MuiNestedMenu<T>(props: MuiNestedMenuProps<T>) {
-  const classes = useStyles();
-  const { store } = useStore(props, MuiNestedMenuState);
+  const { store } = useStore(MuiNestedMenuState);
 
   const children = {};
   const rootChildren = {};
@@ -52,7 +45,7 @@ export function MuiNestedMenu<T>(props: MuiNestedMenuProps<T>) {
     }
   }
   return (
-    <List className={classes.root}>
+    <List>
       {mapObjectToArray(rootChildren, (child, key, index) => (
         <MuiNestedMenuChild<T>
           asRoot

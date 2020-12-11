@@ -1,5 +1,5 @@
 import Grid, { GridProps } from "@material-ui/core/Grid";
-import * as React from "react";
+import React from "react";
 import { Children } from "react";
 
 export type MuiGridProps = { item?: GridProps } & Omit<
@@ -10,12 +10,15 @@ export type MuiGridProps = { item?: GridProps } & Omit<
 export function MuiGrid({ item, children, ...props }: MuiGridProps) {
   return (
     <Grid {...props} container>
-      {Children.map(children, child => (
-        <Grid {...item} item>
-          {/* TODO: child.type===Grid & item.. */}
-          {child}
-        </Grid>
-      ))}
+      {Children.map(children, child => {
+        if (!React.isValidElement(child)) return child;
+        if (child.type === Grid) item = { ...item, ...child.props };
+        return (
+          <Grid {...item} item>
+            {child}
+          </Grid>
+        );
+      })}
     </Grid>
   );
 }

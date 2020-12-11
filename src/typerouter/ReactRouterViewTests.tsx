@@ -55,7 +55,7 @@ testm(__filename, () => {
   beforeEach(async () => {
     t = ReactTesterRenderer.create(
       <TestContext>
-        <ReactRouter history={history} router={TestRouter} />
+        <ReactRouter router={TestRouter} />
       </TestContext>
     );
     await Timeout(0);

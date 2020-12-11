@@ -1,7 +1,6 @@
 import Accordion from "@material-ui/core/Accordion";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
-import Divider, { DividerProps } from "@material-ui/core/Divider";
 import Grid, { GridProps } from "@material-ui/core/Grid";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import React, {
@@ -11,22 +10,58 @@ import React, {
   ReactElement,
   ReactNode,
 } from "react";
+import { mapObject } from "../../../common/object/mapObject";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { LangKey } from "../../../lang/LangKey";
-import { RendererOrOptions } from "../../../react/RendererOrOptions";
-import { useStore, useStore2 } from "../../../react/useStore";
-import { Store } from "../../../Store";
+import { Renderer } from "../../../react/renderer";
+import { RendererOrProps } from "../../../react/RendererOrProps";
+import { State } from "../../../react/State";
+import { useStore } from "../../../react/useStore";
+import { Store } from "../../../store";
+import { AnyWidgetConnection } from "../../../typerpc/widget/Widget";
 import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
-import { SystemView } from "../common/SystemView";
+import { SystemView } from "../../view/SystemView";
 
-export type MuiMapViewOptions = { GridProps?: GridProps; title?: ReactNode };
+export type MuiMapViewChildProps = {
+  GridProps?: GridProps;
+  title?: ReactNode;
+};
 
-export type MuiMapViewProps = {
+export type MuiMapChildRendererOrProps<
+  P extends WidgetViewProps<AnyWidgetConnection>
+> = RendererOrProps<P, MuiMapViewChildProps>;
+
+export type AccordionMap = Record<
+  string,
+  { details: ReactElement; title?: ReactNode }
+>;
+
+export interface MuiMapViewLayout<K extends string, S> {
+  state?: S;
+  renderContainer?: Renderer<ReactElement, [{ store: Store<S> }]>;
+  renderItem?: Renderer<ReactElement, [{ store: State<S> }]>;
+}
+
+export type MuiMapViewProps<K extends string = any> = {
   GridProps?: GridProps;
   titleTypographyProps?: TypographyProps;
   divider?: ReactElement;
   accordion?: boolean;
   store?: Store<MuiMapViewState>;
+  disableDefaultAccordion?: boolean;
+
+  layout?: MuiMapViewLayout<K, any>;
+
+  startAccordion?: AccordionMap;
+  endAccordion?: AccordionMap;
+
+  order?: K[];
+
+  extraAccordions?: {
+    where?: { after: K } | { before: K } | "tail" | "head";
+    title: ReactNode;
+    details: ReactNode;
+  }[];
 };
 
 export class MuiMapViewState /* extends State */ {
@@ -43,15 +78,19 @@ export function MuiMapView<P extends WidgetViewProps<any>>(
     children,
     GridProps,
     titleTypographyProps,
+    disableDefaultAccordion,
+    endAccordion,
+    startAccordion,
     divider,
-    store: { store, state } = useStore2(MuiMapViewState),
+    layout,
+    store: { store, state } = useStore(MuiMapViewState),
     accordion,
     ...MapViewProps
   }: P &
     MuiMapViewProps & {
       children?: Record<
         string,
-        RendererOrOptions<P, MuiMapViewOptions> | undefined
+        RendererOrProps<P, MuiMapViewChildProps> | undefined
       >;
     }
 ) {
@@ -62,27 +101,54 @@ export function MuiMapView<P extends WidgetViewProps<any>>(
   );
 
   if (accordion) {
+    let counter = 0;
+    function renderAccordion({ title, details, key, selectedKey }) {
+      const index = counter++;
+      return (
+        <Accordion
+          expanded={
+            state.selectedKey === selectedKey ||
+            (!disableDefaultAccordion &&
+              state.selectedKey === undefined &&
+              index === 0)
+          }
+        >
+          <AccordionSummary>
+            <Typography {...titleTypographyProps}>
+              <LangKey for={key}>{title}</LangKey>
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>{details}</AccordionDetails>
+        </Accordion>
+      );
+    }
+
     return (
       <>
-        {renderChildren(({ key, index, element, options }) => (
-          <Accordion
-            expanded={
-              state.selectedKey === key ||
-              (state.selectedKey === undefined && index === 0)
-            }
-            key={key}
-            onChange={() => {
-              store.toggleKey("selectedKey", key);
-            }}
-          >
-            <AccordionSummary>
-              <Typography {...titleTypographyProps}>
-                <LangKey for={key}>{options?.title}</LangKey>
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>{element}</AccordionDetails>
-          </Accordion>
-        ))}
+        {mapObject(startAccordion || {}, ({ title, details }, key) =>
+          renderAccordion({
+            title,
+            details,
+            selectedKey: `start:${key}`,
+            key,
+          })
+        )}
+        {renderChildren(({ key, element, options }) => {
+          return renderAccordion({
+            title: options?.title,
+            details: element,
+            selectedKey: `widget:${key}`,
+            key,
+          });
+        })}
+        {mapObject(startAccordion || {}, ({ title, details }, key) =>
+          renderAccordion({
+            title,
+            details,
+            selectedKey: `end:${key}`,
+            key,
+          })
+        )}
       </>
     );
   }
@@ -103,7 +169,7 @@ export function MuiMapView<P extends WidgetViewProps<any>>(
   function renderChildren(
     wrap: (_: {
       element: ReactElement;
-      options: MuiMapViewOptions | undefined;
+      options: MuiMapViewChildProps | undefined;
       index: number;
       isLast: boolean;
       key: string;
@@ -119,7 +185,7 @@ export function MuiMapView<P extends WidgetViewProps<any>>(
           mapObjectToArray(
             MapViewProps.connection.map,
             (_, key, index, isLast) => {
-              const [render, options] = RendererOrOptions(
+              const [render, options] = RendererOrProps(
                 children?.[key],
                 props => SystemView(props as any)
               );

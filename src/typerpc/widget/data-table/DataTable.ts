@@ -11,12 +11,7 @@ import { DataSource } from "../../../typedata/DataSource";
 import { ConfigFactory } from "../../ConfigFactory";
 import { GenericConfig } from "../../GenericConfig";
 import { NoRpc } from "../../NoRpc";
-import {
-  AnyRpc,
-  RpcConfig,
-  RpcConnection,
-  RpcUnresolvedConfig,
-} from "../../Rpc";
+import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "../../Rpc";
 import { RpcParameter } from "../../rpc-parameter/RpcParameter";
 import { InlineObject, InlineObjectType } from "../InlineObjectType";
 import { ToAsync, Widget } from "../Widget";
@@ -148,7 +143,9 @@ export type DataTable<T extends TDataTable> = Widget<{
 
   Handler: {
     query: ToAsync<_Types<T>["QueryFn"]>;
+
     loadRow(dataRow: any): Promise<_Types<T>["RowWithKey"]>;
+
     loadRow(dataRow: any, noKey: true): Promise<T["Row"]>;
 
     columns: Record<
@@ -162,13 +159,6 @@ export type DataTable<T extends TDataTable> = Widget<{
 
   Controller: {
     query: _Types<T>["QueryFn"];
-    row: RpcParameter<{
-      Target: T["RowController"];
-      Data: string;
-    }>;
-  };
-
-  Children: {
     row: RpcParameter<{
       Target: T["RowController"];
       Data: string;
@@ -195,6 +185,7 @@ export function DataTable<
 }> {
   return <any>Widget<AnyDataTable>({
     handler: DataTableHandler,
+    type: DataTable,
     isGenericConfig: true,
     children: {
       row: RpcParameter(String, (options.rowController || NoRpc) as AnyRpc),

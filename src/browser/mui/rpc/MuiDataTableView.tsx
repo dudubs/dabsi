@@ -1,3 +1,6 @@
+import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@material-ui/icons/Edit";
+import IconButton, { IconButtonProps } from "@material-ui/core/IconButton";
 import Table, { TableProps } from "@material-ui/core/Table";
 import TableBody, { TableBodyProps } from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
@@ -5,8 +8,9 @@ import TableFooter, { TableFooterProps } from "@material-ui/core/TableFooter";
 import TableHead, { TableHeadProps } from "@material-ui/core/TableHead";
 import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
+import { TypographyProps } from "@material-ui/core/Typography";
 import * as React from "react";
-import { ComponentProps, ReactNode, useRef } from "react";
+import { ComponentProps, ReactElement, ReactNode, useRef } from "react";
 import { hasKeys } from "../../../common/object/hasKeys";
 import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
 import { Awaitable } from "../../../common/typings2/Async";
@@ -29,6 +33,7 @@ import {
   MuiTableToolbar,
   MuiTableToolbarProps,
 } from "../components/MuiTableToolbar";
+import Button from "@material-ui/core/Button";
 
 type MuiDataTableViewColumnProps<
   C extends RpcConnection<AnyDataTable>,
@@ -94,10 +99,13 @@ export type MuiDataTableViewProps<
 
   actions?: Record<
     string,
-    MuiButtonProps<{
+    {
+      title?: ReactNode;
+      icon: ReactElement;
       visible?: (row: Row) => boolean;
       onClick?(event: MuiDataTableActionEvent<C>);
-    }>
+      IconButtonProps?: IconButtonProps;
+    }
   >;
 
   title?: ReactNode;
@@ -131,21 +139,23 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
   actions = { ...actions };
 
   onEditClick &&
-    (actions.add = {
+    (actions.edit = {
       title: Lang`EDIT`,
-      icon: require("@material-ui/icons/Edit"),
+      icon: <EditIcon />,
       onClick: onEditClick,
     });
 
   onDeleteClick &&
     (actions.delete = {
-      buttonType: MuiDeleteButton,
+      icon: <DeleteIcon />,
+      IconButtonProps: {
+        color: "secondary",
+      },
       onClick: async event => {
         await onDeleteClick!(event);
         await tableRef.current!.reloadAfterRemove(event.key);
       },
     });
-
   return (
     <DataTableView {...nextProps} ref={tableRef}>
       {table => (
@@ -172,14 +182,13 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                 <MuiTableCell fitToContent>
                   {mapObjectToArray(
                     actions!,
-                    ({ visible, onClick, ...MuiButtonProps }, key) => {
+                    ({ visible, icon, onClick, IconButtonProps }, key) => {
                       if (visible && !visible(row.data)) return;
                       return (
-                        <MuiButton
-                          iconOnly
+                        <IconButton
                           size={"small"}
                           key={key}
-                          {...MuiButtonProps}
+                          {...IconButtonProps}
                           onClick={async () => {
                             onClick?.({
                               row: row.data,
@@ -188,7 +197,9 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                               table,
                             });
                           }}
-                        />
+                        >
+                          {icon}
+                        </IconButton>
                       );
                     }
                   )}

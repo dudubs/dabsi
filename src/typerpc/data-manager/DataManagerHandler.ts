@@ -1,7 +1,6 @@
 import { ConfigFactory } from "../ConfigFactory";
 import { RpcConfigHookHandler } from "../RpcConfigHook";
 import { AnyDataManager } from "./DataManager";
-import { Rejectable } from "./Rejectable";
 
 export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
   config,
@@ -13,7 +12,7 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
     table: $ =>
       $({
         ...config.tableConfig,
-        columns: config.tableColumnsConfig,
+        columns: config.tableColumns,
         source: config.source,
       }),
     add: {

@@ -1,9 +1,9 @@
-import {ObjectFactory} from "./ObjectFactory";
+import { Factory } from "./Factory";
 
-export type ValueOrFactory<T> = T | ObjectFactory<T>;
+export type ValueOrFactory<T> = T | Factory<T>;
 
 export function ValueOrFactory<T>(valueOrFactory: ValueOrFactory<T>): T {
-    if (typeof valueOrFactory === "function")
-        return ObjectFactory(<ObjectFactory<T>>valueOrFactory);
-    return valueOrFactory;
+  if (typeof valueOrFactory === "function")
+    return Factory(valueOrFactory as Factory<T>);
+  return valueOrFactory as T;
 }

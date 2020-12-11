@@ -1,19 +1,20 @@
-import React from "react";
-import { RendererOrOptions } from "../../../react/RendererOrOptions";
 import {
   AnyWidgetMapConnection,
   WidgetMapView,
 } from "../../../typerpc/widget/widget-map/WidgetMapView";
 import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
-import { MuiMapView, MuiMapViewOptions, MuiMapViewProps } from "./MuiMapView";
+import {
+  MuiMapChildRendererOrProps,
+  MuiMapView,
+  MuiMapViewProps,
+} from "./MuiMapView";
 
 export function MuiWidgetMapView<C extends AnyWidgetMapConnection>(
   props: WidgetViewProps<C> &
     MuiMapViewProps & {
       children?: {
-        [K in keyof C["map"]]?: RendererOrOptions<
-          WidgetViewProps<C["map"][K]>,
-          MuiMapViewOptions
+        [K in keyof C["map"]]?: MuiMapChildRendererOrProps<
+          WidgetViewProps<C["map"][K]>
         >;
       };
     }

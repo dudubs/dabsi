@@ -5,10 +5,9 @@ import { MuiFormView } from "../../../browser/mui/rpc/MuiFormView";
 import { Lang } from "../../../lang/Lang";
 import { useEmitter } from "../../../react/reactor/useEmitter";
 import { useReactRouter, useRoute } from "../../../typerouter/ReactRouter";
-import { InputMapView } from "../../../typerpc/input/input-map/InputMapView";
 import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
 import { PaperInCenter } from "../../admin/browser/PaperInCenter";
-import { MuiInputMapView } from "../../core/browser/MuiInputMapView";
+import { MuiGridMapView } from "../../core/browser/MuiGridMapView";
 import { AclConnection, AclLoginRouter, LoginInfoEvent } from "../common";
 
 WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
@@ -37,8 +36,8 @@ WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
           }
         }}
         input={props => (
-          <MuiInputMapView
-            {...props}
+          <MuiGridMapView
+            for={props}
             children={{
               password: props => (
                 <MuiTextInputView

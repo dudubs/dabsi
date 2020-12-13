@@ -1,5 +1,5 @@
-export { Struct } from "./Struct";
-export { Field, AsFieldType, AsField } from "./Field";
+export * from "./Struct";
+export * from "./Field";
 import "./ArrayField";
 import "./MapField";
 import "./SetField";

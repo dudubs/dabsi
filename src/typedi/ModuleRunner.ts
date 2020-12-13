@@ -42,10 +42,7 @@ export class ModuleRunner {
 
       const args = Resolver.checkAndResolve(
         Resolver.catch(argsResolver, error => {
-          throw new ResolveError(
-            `module:${module.name}, ${error.message}`,
-            error
-          );
+          throw new ResolveError(`At module ${module.name}, ${error.message}`);
         }),
         this.context
       );

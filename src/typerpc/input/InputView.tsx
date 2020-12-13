@@ -1,4 +1,6 @@
 import { ReactElement, RefCallback } from "react";
+import { If } from "../../common/typings2/boolean";
+import { Is } from "../../common/typings2/boolean/Is";
 import { Renderer } from "../../react/renderer";
 import { RpcConnection } from "../Rpc";
 import { WidgetView, WidgetViewProps } from "../widget/WidgetView";
@@ -25,9 +27,8 @@ export type InputViewRenderer<C extends AnyInputConnection> = (
   props: InputViewProps<C>
 ) => ReactElement;
 
-export type InputViewProps<
-  C extends AnyInputConnection
-> = WidgetViewProps<C> & {
+export interface InputViewProps<C extends AnyInputConnection>
+  extends WidgetViewProps<C> {
   errorMap?: InputErrorElementMap<C>;
 
   onChange?: (view: InputView<C>) => void;
@@ -39,7 +40,7 @@ export type InputViewProps<
   onError?(view: InputView<C>): void;
 
   value?: InputValueElement<C> | undefined;
-};
+}
 
 export type InputViewFn<C extends AnyInput> = Renderer<
   InputViewProps<RpcConnection<C>>

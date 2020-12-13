@@ -3,6 +3,7 @@ import { catchResolveError } from "./operators/catchResolveError";
 import { checkAndResolve } from "./operators/checkAndResolve";
 import { checkResolver, checkResolverSymbol } from "./operators/checkResolver";
 import { checkResolverContext } from "./operators/checkResolverContext";
+import toCheck from "./operators/toCheck";
 import { resolve, resolveSymbol } from "./resolve";
 import { FnResolver, TypeResolver } from "./resolvers/FnResolver";
 import { AnyResolverMap, ObjectResolver } from "./resolvers/ObjectResolver";
@@ -41,10 +42,12 @@ export function Resolver<T>(name?: string): TokenResolver<T> {
 Resolver.touch = Touch;
 Resolver.resolve = resolve;
 Resolver.check = checkResolver;
+
 Resolver.checkContext = checkResolverContext;
 Resolver.checkAndResolve = checkAndResolve;
 Resolver.object = ObjectResolver;
 Resolver.catch = catchResolveError;
+Resolver.toCheck = toCheck;
 Resolver.provide = function (
   context: AnyResolverMap,
   ...args: AnyResolverMap[]

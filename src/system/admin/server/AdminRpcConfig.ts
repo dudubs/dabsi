@@ -2,20 +2,19 @@ import { AclRequest } from "../../../system-old/server/acl/AclRequest";
 import { Permission } from "../../../system-old/server/acl/Permission";
 import { DataResolvers } from "../../../typedata/DataResolvers";
 import { DataRow } from "../../../typedata/DataRow";
-import { Resolver } from "../../../typedi";
 import { RpcError } from "../../../typerpc/Rpc";
 import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
-import { SystemRequest } from "../../core/SystemRequest";
 import { SystemSession } from "../../core/SystemSession";
 import { AdminRpc } from "../common";
-
-const r = Resolver();
+import { Resolver } from "./../../../typedi/Resolver";
+import { SystemModule } from "./../../core/SystemModule";
 
 export const AdminRpcConfig = RpcConfigResolver(
   AdminRpc,
   {
-    sysReq: SystemRequest,
+    systemModule: SystemModule,
     aclReq: AclRequest,
+    context: c => c,
     session: DataRow(SystemSession),
     ...DataResolvers({
       permissions: Permission,
@@ -27,30 +26,8 @@ export const AdminRpcConfig = RpcConfigResolver(
 
     return $({
       getNamespaceConfig: rpc => {
-        return c.sysReq.getUnresolvedConfig(rpc);
+        return c.systemModule.resolveRpcConfig(rpc, c.context);
       },
-      // async checkNamespace(adminHandler, handler) {
-      //   const tokens = [handler]
-      //     .toSeq()
-      //     .flatMap(h => parents(h))
-      //     .takeUntil(p => p === adminHandler)
-      //     .reverse()
-      //     .filter(
-      //       (h): h is RpcNamespaceHandler =>
-      //         isConstructor(h, RpcNamespaceHandler) && !!h.nsInfo?.key
-      //     )
-      //     .map(p => p.nsInfo!.key);
-      //   const rootTokens = [...getRootTokens(["admin"].toSeq().concat(tokens))];
-      //   if (
-      //     !(await c.permissions
-      //       .filter(hasPermissionForUserExp(user.$key, rootTokens))
-      //       .hasRow())
-      //   ) {
-      //     throw new RpcError(
-      //       `Access denied: ${rootTokens[rootTokens.length - 1]}`
-      //     );
-      //   }
-      // },
     });
   }
 );

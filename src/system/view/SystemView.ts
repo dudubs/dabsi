@@ -4,7 +4,7 @@ import { AnyInput, AnyInputConnection } from "../../typerpc/input/Input";
 import { InputViewProps } from "../../typerpc/input/InputView";
 import { RpcConnection } from "../../typerpc/Rpc";
 import { AnyWidget, AnyWidgetConnection } from "../../typerpc/widget/Widget";
-import { WidgetViewProps } from "../../typerpc/widget/WidgetView";
+import { WidgetViewProps } from "./../../typerpc/widget/WidgetView";
 
 export type WidgetFactory<T extends AnyWidget> = (...args: any[]) => T;
 
@@ -15,6 +15,10 @@ declare global {
     [viewComponentSymbol]: ComponentType<WidgetViewProps<AnyWidgetConnection>>;
   }
 }
+
+export type SystemViewProps<
+  C extends AnyWidgetConnection
+> = C extends AnyInputConnection ? InputViewProps<C> : WidgetViewProps<C>;
 
 export function SystemView(
   props:
@@ -35,34 +39,22 @@ export function SystemView(
   return createElement(component, props);
 }
 
+export type SystemViewRendrerer<T extends AnyWidget> = Renderer<
+  SystemViewProps<RpcConnection<T>>,
+  [prev: ComponentType<SystemViewProps<RpcConnection<T>>>]
+>;
+
 export namespace SystemView {
-  type F<T> = T | ((...args: any[]) => T) | RpcConnection<T>;
-
-  export function register<T extends AnyInput>(
-    input: F<T>,
-    component: Renderer<
-      InputViewProps<RpcConnection<T>>,
-      [prev: ComponentType<InputViewProps<RpcConnection<T>>>]
-    >
-  ): typeof SystemView;
-
   export function register<T extends AnyWidget>(
-    widget: F<T>,
-    component: Renderer<
-      WidgetViewProps<RpcConnection<T>>,
-      [prev: ComponentType<WidgetViewProps<RpcConnection<T>>>]
-    >
-  ): typeof SystemView;
-
-  export function register<T extends AnyWidget>(
-    arg,
-    renderer
+    arg: T | ((...args: any[]) => T) | RpcConnection<T>,
+    renderer: SystemViewRendrerer<T>
   ): typeof SystemView {
     const prev =
-      arg.$widget?.rpcType?.[viewComponentSymbol] ||
-      arg.rpcType?.[viewComponentSymbol];
+      (arg as AnyWidgetConnection).$widget?.rpcType?.[viewComponentSymbol] ||
+      (arg as AnyWidget).rpcType?.[viewComponentSymbol];
 
-    arg[viewComponentSymbol] = props => renderer(props, prev);
+    arg[viewComponentSymbol] = props =>
+      (renderer as SystemViewRendrerer<AnyWidget>)(props, prev);
 
     return SystemView;
   }

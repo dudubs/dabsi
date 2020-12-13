@@ -9,9 +9,11 @@ import { User } from "../../system-old/server/acl/User";
 import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
 import { Inject, Module } from "../../typedi";
 import { MakeModule } from "../../typestack/MakeModule";
-import { AclEditUserConfig } from "../acl-admin/server/AclEditUserConfig";
+import AclEditUserConfig from "../acl-admin/server/AclEditUserConfig";
 import { DbModule, DbModuleProvider } from "../core/DbModule";
-import { SystemModuleProvider } from "../core/SystemModule";
+import SystemModuleProvider from "../core/SystemModuleProvider";
+import { AclEditUser } from "./../acl-admin/common/AclAdminRpc";
+import { SystemModule } from "./../core/SystemModule";
 import { AclRpcConfig } from "./server/AclRpcConfig";
 
 declare global {
@@ -30,6 +32,12 @@ declare global {
     }),
     SystemModuleProvider({
       configs: [AclRpcConfig, AclEditUserConfig],
+      contexts: [
+        {
+          for: AclEditUser,
+          types: [User],
+        },
+      ],
     }),
   ],
 })
@@ -70,8 +78,9 @@ export class AclModule {
   constructor(
     @Inject() cli: Cli, //
     @Inject() mMake: MakeModule,
-    @Inject() protected dbModule: DbModule
+    @Inject() protected dbModule: DbModule,
+    @Inject() protected systemModule: SystemModule
   ) {
     cli.command("acl", this.cli);
-  } // // SystemAclModule
+  }
 }

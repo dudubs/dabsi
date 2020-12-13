@@ -107,7 +107,7 @@ export type DataTableConfig<T extends TDataTable> = PartialUndefinedKeys<
 export type AnyDataTable = DataTable<TDataTable>;
 
 export type TDataTable = {
-  Row: object;
+  Row: any;
   RowController: AnyRpc;
   Data: any;
 };

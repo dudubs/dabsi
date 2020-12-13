@@ -1,14 +1,11 @@
-import { If } from "../../common/typings2/boolean";
-import { IsEmptyObject } from "../../common/typings2/boolean/IsEmptyObject";
+import { Expect } from "../../common/typings2/Expect";
 import { OmitKeys } from "../../common/typings2/OmitKeys";
 import { Override } from "../../common/typings2/Override";
 import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
-import { UndefinedIfIsUndefined } from "../../common/typings2/UndefinedIfIsUndefined";
 import { DataRow } from "../../typedata/DataRow";
 import { DataSource } from "../../typedata/DataSource";
-import { ConfigFactory } from "../ConfigFactory";
 import { GenericConfig } from "../GenericConfig";
-import { AnyInput, InputValue, InputValueConfig } from "../input/Input";
+import { InputValue } from "../input/Input";
 import { NoRpc } from "../NoRpc";
 import { AnyRpc, RpcType, RpcUnresolvedConfig } from "../Rpc";
 import { RpcFn } from "../rpc-fn/RpcFn";
@@ -17,13 +14,14 @@ import { RpcParameter } from "../rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "../RpcConfigHook";
 import { DataTable, DataTableOptions } from "../widget/data-table/DataTable";
 import { Form } from "../widget/form/Form";
-import { InlineObject, InlineObjectType } from "../widget/InlineObjectType";
-import { TabsWidget } from "../widget/tabs-widget/TabsWidget";
 import { WidgetType } from "../widget/Widget";
-import { AnyWidgetRecord } from "../widget/widget-map/WidgetMap";
-import { WidgetExtra } from "../widget/WidgetExtra";
+import { ExtractDefault } from "../../common/typings2/boolean/index";
+import { TStruct } from "../../struct";
+import { StructProps } from "../../struct/Struct";
+import { ConfigFactory } from "../ConfigFactory";
+import { AnyInput } from "../input/Input";
 import { DataManagerHandler } from "./DataManagerHandler";
-import { Rejectable } from "./Rejectable";
+import { Rejectable } from "../../common/async/Rejectable";
 
 // Full<Type>Stack
 export type TDataManager = {
@@ -33,56 +31,12 @@ export type TDataManager = {
 
   TableRow: any;
 
-  EditInput: AnyInput;
-
-  EditValue: any;
-
-  EditTabs: AnyWidgetRecord;
-
-  EditError: any;
+  Edit: AnyRpc;
 
   AddInput: AnyInput;
 
   AddError: any;
 };
-
-export type DataManagerConfig<T extends TDataManager> = PartialUndefinedKeys<
-  {
-    getTabsConfigForRow:
-      | ConfigFactory<_Types<T>["EditTabsConfig"], [DataRow<T["Data"]>]>
-      | If<IsEmptyObject<T["EditTabs"]>, undefined>;
-
-    addInputConfig: RpcUnresolvedConfig<T["AddInput"]>;
-
-    editInputConfigForRow:
-      | ConfigFactory<RpcUnresolvedConfig<T["EditInput"]>, [DataRow<T["Data"]>]>
-      | UndefinedIfIsUndefined<RpcUnresolvedConfig<T["EditInput"]>>;
-
-    tableColumns: _Types<T>["TableTypes"]["ColumnConfigMap"];
-  },
-  {
-    source: DataSource<T["Data"]>;
-
-    getTitleForRow: (row: DataRow<T["Data"]>) => string;
-
-    editValueConfigForRow?: ConfigFactory<
-      InputValueConfig<T["EditInput"]>,
-      [row: DataRow<T["Data"]>]
-    >;
-
-    tableConfig?: _Types<T>["TableConfig"];
-
-    addSubmit: Rejectable<InputValue<T["AddInput"]>, string, T["AddError"]>;
-
-    editSubmit: Rejectable<
-      [DataRow<T["Data"]>, InputValue<T["EditInput"]>],
-      T["EditValue"],
-      T["EditError"]
-    >;
-  }
->;
-
-export type AnyDataManager = DataManager<TDataManager>;
 
 type _Types<T extends TDataManager> = {
   Table: DataTable<{
@@ -100,40 +54,42 @@ type _Types<T extends TDataManager> = {
       >
     | undefined;
 
-  EditForm: Form<{
-    Error: T["EditError"];
-    Value: void;
-    Input: T["EditInput"];
-  }>;
-
   AddForm: Form<{
     Error: T["AddError"];
     Value: string;
     Input: T["AddInput"];
   }>;
-
-  EditTabsWithForm: T["EditTabs"] & {
-    form: _Types<T>["EditForm"];
-  };
-
-  EditTabsWidget: TabsWidget<_Types<T>["EditTabsWithForm"]>;
-
-  EditTabsConfig: {
-    [K in keyof T["EditTabs"]]: RpcUnresolvedConfig<T["EditTabs"][K]>;
-  };
 };
-export type DataManagerTypes<T extends TDataManager> = _Types<T>;
+export type DataManagerConfig2<T extends TDataManager> = PartialUndefinedKeys<
+  {
+    addInputConfig: RpcUnresolvedConfig<T["AddInput"]>;
+
+    editConfigFactory: ConfigFactory<
+      RpcUnresolvedConfig<T["Edit"]>,
+      [row: DataRow<T["Data"]>]
+    >;
+
+    tableColumns: _Types<T>["TableTypes"]["ColumnConfigMap"];
+  },
+  {
+    source: DataSource<T["Data"]>;
+
+    tableConfig?: _Types<T>["TableConfig"];
+
+    addSubmit: Rejectable<InputValue<T["AddInput"]>, string, T["AddError"]>;
+  }
+>;
+
+export type AnyDataManager = DataManager<TDataManager>;
+
+export type DataManagerTypes2<T extends TDataManager> = _Types<T>;
 export type DataManagerType<
   T extends AnyDataManager
 > = RpcType<T>["TConfigHook"]["TDataManager"];
 
+// TDataManagerFromOptions
 export type DataManager<T extends TDataManager> = RpcConfigHook<{
   TDataManager: T;
-
-  Props: {
-    editInput: AnyInput;
-    editTabs: AnyWidgetRecord;
-  };
 
   Target: RpcMap<{
     delete: RpcFn<(key: string) => void>;
@@ -144,63 +100,48 @@ export type DataManager<T extends TDataManager> = RpcConfigHook<{
 
     edit: RpcParameter<{
       Data: string;
-      Target: WidgetExtra<
-        _Types<T>["EditTabsWidget"],
-        {
-          title: string;
-        }
-      >;
+      Target: T["Edit"];
     }>;
   }>;
   Config: GenericConfig<
     <Data>(
-      config: DataManagerConfig<Override<T, { Data: Data }>>
-    ) => DataManagerConfig<T>
+      config: DataManagerConfig2<Override<T, { Data: Data }>>
+    ) => DataManagerConfig2<T>
   >;
 }>;
+export type DataManagerStructure = {
+  addInput: AnyInput;
+  addError?: any;
+  tableRowType: TStruct;
+  tableRowController?: AnyRpc;
+  edit?: AnyRpc;
+};
 
-export function DataManager<
-  TableRowType extends InlineObject,
-  AddInput extends AnyInput,
-  AddError = never,
-  EditError = never,
-  EditValue = void,
-  EditInput extends AnyInput = AddInput,
-  TableRowController extends AnyRpc = NoRpc,
-  EditTabs extends AnyWidgetRecord = {}
->(options: {
-  addInput: AddInput;
-  addError?: AddError;
+export type DataManagerOptions<T extends DataManagerStructure> = T & {
+  tableOptions?: OmitKeys<DataTableOptions<NoRpc>, "rowController">;
+};
 
-  tableRowType: TableRowType;
-  tableOptions?: DataTableOptions<TableRowController>;
+export type TDataManagerFromStructure<S extends DataManagerStructure> = Expect<
+  TDataManager,
+  {
+    Data: any;
 
-  editError?: EditError;
-  editValue?: EditValue;
-  editInput?: EditInput;
-  editTabs?: EditTabs;
-}): DataManager<{
-  Data: any;
+    AddInput: S["addInput"];
 
-  TableRowController: TableRowController;
-  TableRow: InlineObjectType<TableRowType>;
-  AddError: AddError;
-  AddInput: AddInput;
-  EditError: EditError;
-  EditInput: EditInput;
-  EditValue: EditValue;
-  EditTabs: EditTabs;
-}> {
-  const editInput: AnyInput = options.editInput || options.addInput;
-  const editTabs = {
-    form: Form({ input: editInput }),
-    ...(options.editTabs as AnyWidgetRecord),
-  };
+    AddError: Exclude<S["addError"], undefined>;
+
+    TableRowController: ExtractDefault<S["tableRowController"], AnyRpc, NoRpc>;
+
+    TableRow: StructProps<S["tableRowType"]>;
+
+    Edit: ExtractDefault<S["edit"], AnyRpc, NoRpc>;
+  }
+>;
+
+export function DataManager<S extends DataManagerStructure>(
+  options: DataManagerOptions<S>
+): DataManager<TDataManagerFromStructure<S>> {
   return <any>RpcConfigHook<AnyDataManager>({
-    props: {
-      editInput,
-      editTabs,
-    },
     isGenericConfig: true,
     handler: DataManagerHandler,
     target: RpcMap({
@@ -215,12 +156,7 @@ export function DataManager<
         input: options.addInput,
       }),
 
-      edit: RpcParameter(
-        String,
-        WidgetExtra(TabsWidget(editTabs), {
-          title: String,
-        })
-      ),
+      edit: RpcParameter(String, options.edit || NoRpc),
     }),
   });
 }

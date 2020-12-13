@@ -10,7 +10,7 @@ export class SystemRequest {
   ) {}
 
   getUnresolvedConfig<T extends AnyRpc>(rpc: T): RpcUnresolvedConfig<T> {
-    const configResolver = this.mSystem.getConfig(rpc);
+    const configResolver = this.mSystem.getRpcConfigResolver(rpc);
     return Resolver.resolve(configResolver, this.context);
   }
 }

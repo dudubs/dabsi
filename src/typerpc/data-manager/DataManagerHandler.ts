@@ -21,31 +21,7 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
     },
     edit: async ($, key) => {
       const row = await config.source.getOrFail(key);
-      return $({
-        getExtraElement() {
-          return { title: config.getTitleForRow(row) };
-        },
-        targetConfig: async $ => {
-          return $({
-            ...(await ConfigFactory(config.getTabsConfigForRow, row)),
-            form: async $ =>
-              $({
-                inputConfig: await ConfigFactory(
-                  config.editInputConfigForRow,
-                  row
-                ), //
-                valueConfig:
-                  config.editValueConfigForRow &&
-                  (() => ConfigFactory(config.editValueConfigForRow, row)),
-                submit(value, reject) {
-                  return config.editSubmit([row, value], reject);
-                },
-
-                /// tabsConfig
-              }),
-          });
-        },
-      });
+      return $(await ConfigFactory(config.editConfigFactory, row));
     },
   });
 };

@@ -8,7 +8,7 @@ import { MuiFormView } from "../../../browser/mui/rpc/MuiFormView";
 import { Lang } from "../../../lang/Lang";
 import { mergeProps } from "../../../react/utils/mergeProps";
 import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
-import { MuiWidgetMapView } from "../../core/browser/MuiWidgetMapView";
+import { MuiGridMapView } from "../../core/browser/MuiGridMapView";
 import { useSystemView } from "../../view/useSystemView";
 import AclAdminRouter from "../common/AclAdminRouter";
 import { AclAdminConnection } from "../common/AclAdminRpc";
@@ -71,8 +71,6 @@ WidgetRouterView(
       return props.element.elementMap.basicInfo.value?.groupName || "";
     });
 
-    // useSystemView()
-
     useSystemView(
       props.connection.map.basicInfo.input.map.groupName,
       (props, InputView) => (
@@ -92,8 +90,8 @@ WidgetRouterView(
         breadcrumbTitle={title}
         Breadcrumbs={AclBreadcrumbs.Groups}
       >
-        <MuiWidgetMapView
-          {...props}
+        <MuiGridMapView
+          for={props}
           children={{
             basicInfo: props => (
               <MuiFormView {...props} submitTitle={Lang`SAVE CHANGES`} />

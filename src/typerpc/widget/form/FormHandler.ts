@@ -1,5 +1,5 @@
 import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { Rejectable } from "../../data-manager/Rejectable";
+import { Rejectable } from "../../../common/async/Rejectable";
 import { AnyInput, InputValueData } from "../../input/Input";
 import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
 import { RpcUnresolvedConfig } from "../../Rpc";

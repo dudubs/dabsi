@@ -1,4 +1,6 @@
 import colors from "colors/safe";
+import { entries } from "../common/object/entries";
+import { values } from "../common/object/values";
 import { inspect } from "./inspect";
 
 export type LogFn = {
@@ -14,6 +16,7 @@ export interface Logger extends LogFn {
   trace: LogFn;
 
   get(name: string): Logger;
+  setLevel(level: number | ((currentLevel: number) => number));
 }
 
 export type LevelName = Exclude<string & keyof typeof LogLevel, "OFF" | "ALL">;
@@ -32,8 +35,9 @@ export enum LogLevel {
 let handlers = new Set<(log: Log) => void>();
 
 export function Logger(loggerName: string = "") {
-  let currentLevel = LogLevel.ALL;
-  const children = {};
+  let currentLevel =
+    LogLevel.INFO | LogLevel.WARN | LogLevel.FATAL | LogLevel.ERROR;
+  const children: Record<string, Logger> = {};
   log.info = logLevel("INFO");
   log.warn = logLevel("WARN");
   log.error = logLevel("ERROR");
@@ -41,10 +45,15 @@ export function Logger(loggerName: string = "") {
   log.debug = logLevel("DEBUG");
   log.trace = logLevel("TRACE");
 
-  log.setLevel = (_level: LogLevel) => {
-    currentLevel = _level;
+  log.setLevel = level => {
+    if (typeof level === "function") level = level(currentLevel);
+    currentLevel = level;
+
+    for (const child of values(children)) {
+      child.setLevel(level);
+    }
   };
-  log.get = (name) => {
+  log.get = name => {
     return (
       children[name] ||
       (children[name] = Logger(loggerName ? `${loggerName}.${name}` : name))
@@ -61,7 +70,7 @@ export function Logger(loggerName: string = "") {
       }
       msg = String(msg);
       if (args.length) {
-        msg += args.map((arg) => inspect(arg)).join("\n");
+        msg += args.map(arg => inspect(arg)).join("\n");
       }
       const log: Log = {
         message: msg,
@@ -97,13 +106,13 @@ export namespace Logger {
 const levelNameToColor: Record<LevelName, (text: string) => string> = {
   INFO: colors.cyan,
   ERROR: colors.red,
-  FATAL: (text) => colors.underline(colors.red(text)),
+  FATAL: text => colors.underline(colors.red(text)),
   WARN: colors.yellow,
   DEBUG: colors.cyan,
   TRACE: colors.blue,
 };
 
-handlers.add((log) => {
+handlers.add(log => {
   if (!Logger.logToConsole) return;
 
   let title = log.levelName;
@@ -116,7 +125,7 @@ handlers.add((log) => {
     log.message
       .split("\n")
       .map(
-        (line) =>
+        line =>
           levelNameToColor[log.levelName](`${colors.bold(`[${title}]:`)}`) +
           " " +
           line

@@ -12,6 +12,7 @@ import { LangKey } from "../../../lang/LangKey";
 import { useStore } from "../../../react/useStore";
 import { Field, Struct } from "../../../struct";
 import {
+  AnySystemMapConnection,
   AnyWidgetConnectionWithWidgetMap,
   SystemMapView,
   SystemMapViewProps,
@@ -49,7 +50,7 @@ declare global {
   }
 }
 
-export function MuiAccordionMapView<C extends AnyWidgetConnectionWithWidgetMap>(
+export function MuiAccordionMapView<C extends AnySystemMapConnection>(
   props: SystemMapViewProps<
     C,
     _ItemOptionalProps & {

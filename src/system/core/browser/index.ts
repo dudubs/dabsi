@@ -1,5 +1,5 @@
-import { WidgetMapView } from "./../../../typerpc/widget/widget-map/WidgetMapView";
-import React, { createElement } from "react";
+import { WidgetNamespaceView } from "./../../../typerpc/widget/widget-namespace/WidgetNamespaceView";
+import React from "react";
 import ReactDOM from "react-dom";
 import { MuiDataInputMapView } from "../../../browser/mui/rpc/inputs/MuiDataInputMapView";
 import { MuiDataInputView } from "../../../browser/mui/rpc/inputs/MuiDataInputView";
@@ -9,18 +9,18 @@ import { MuiFormView } from "../../../browser/mui/rpc/MuiFormView";
 import { DataInputMap } from "../../../typerpc/input/data-input-map/DataInputMap";
 import { DataInput } from "../../../typerpc/input/data-input/DataInput";
 import { InputMap } from "../../../typerpc/input/input-map/InputMap";
+import { InputMapView } from "../../../typerpc/input/input-map/InputMapView";
 import { TextInput } from "../../../typerpc/input/text-input/TextInput";
 import { DataTable } from "../../../typerpc/widget/data-table/DataTable";
 import { Form } from "../../../typerpc/widget/form/Form";
-import { SystemMapView } from "../../view/SystemMapView";
 import { WidgetMap } from "../../../typerpc/widget/widget-map/WidgetMap";
-import { commandSystemRpc, SystemRpcPath } from "../common/SystemRpc";
+import { SystemMapView } from "../../view/SystemMapView";
 import { SystemView } from "../../view/SystemView";
-import { MuiInputMapView } from "./MuiInputMapView";
-import { MuiSystemView } from "./MuiSystemView";
-import { MuiWidgetMapView } from "./MuiWidgetMapView";
+import { commandSystemRpc, SystemRpcPath } from "../common/SystemRpc";
+import { WidgetMapView } from "./../../../typerpc/widget/widget-map/WidgetMapView";
 import { MuiGridMapView } from "./MuiGridMapView";
-import { InputMapView } from "../../../typerpc/input/input-map/InputMapView";
+import { MuiSystemView } from "./MuiSystemView";
+import { WidgetNamespace } from "../../../typerpc/widget/widget-namespace/WidgetNamspace";
 
 commandSystemRpc((path, payload) => {
   return fetch(SystemRpcPath, {
@@ -45,8 +45,7 @@ SystemView
   .register(DataInputMap, MuiDataInputMapView)
   .register(DataInput, MuiDataInputView)
   .register(DataTable, MuiDataTableView);
-// .register(DataInput, Mu)
 
 SystemMapView.register(WidgetMap, WidgetMapView, MuiGridMapView);
-
+SystemMapView.register(WidgetNamespace, WidgetNamespaceView, MuiGridMapView);
 SystemMapView.register(InputMap, InputMapView, MuiGridMapView);

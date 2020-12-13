@@ -1,7 +1,6 @@
 import { Lang } from "../../../lang/Lang";
 import { MuiAdminMenu } from "../../admin/browser/MuiAdminMenu";
 import { AclAdminConnection } from "../common/AclAdminRpc";
-import "./_Dev";
 import "./_Users";
 import "./_Groups";
 import AclAdminRouter from "../common/AclAdminRouter";

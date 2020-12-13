@@ -1,3 +1,5 @@
+import { AnyResolverMap } from "./../typedi/resolvers/ObjectResolver";
+import { Resolver } from "./../typedi/Resolver";
 import { Awaitable } from "../common/typings2/Async";
 import {
   AnyRpc,
@@ -9,16 +11,18 @@ import {
 } from "./Rpc";
 import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
 
-export type RpcNamespace = Rpc<{
+export type RpcNamespace<BaseRpc extends AnyRpc = AnyRpc> = Rpc<{
   Handler: {};
   Connection: RpcCommand;
   Children: {};
   Config: {
     getNamespaceConfig(
-      rpc: AnyRpc,
+      rpc: BaseRpc,
       key: string,
       handler: RpcNamespaceHandler
     ): RpcUnresolvedConfig<AnyRpc>;
+
+    getContext?(): AnyResolverMap;
 
     checkNamespace?(
       nsHandler: RpcNamespaceHandler,
@@ -26,18 +30,15 @@ export type RpcNamespace = Rpc<{
     ): Awaitable;
   };
   Props: {
-    register<T extends AnyRpc>(
-      name: string,
-      rpc: T
-    ): [T, RpcNamespaceConnection<T>];
+    register<T extends BaseRpc>(name: string, rpc: T): [T, RpcConnection<T>];
+
+    connections: Readonly<Record<string, any>>;
   };
 }>;
 
-export type RpcNamespaceConnection<T extends AnyRpc> = RpcConnection<T>;
-
 export function RpcNamespace(): RpcNamespace {
   const children: Record<string, AnyRpc> = {};
-
+  const connections: Record<string, any> = {};
   let nsCommand;
   return Rpc<RpcNamespace>({
     handler: RpcNamespaceHandler,
@@ -48,14 +49,18 @@ export function RpcNamespace(): RpcNamespace {
     },
     children,
     props: {
+      connections,
       register(key: string, rpc: AnyRpc): [any, any] {
         if (children[key]) throw new Error(`Can't register ${key}.`);
         children[key] = rpc;
         return [
           rpc,
-          rpc.createRpcConnection([], (childPath, payload) => {
-            return nsCommand([key, ...childPath], payload);
-          }),
+          (connections[key] = rpc.createRpcConnection(
+            [],
+            (childPath, payload) => {
+              return nsCommand([key, ...childPath], payload);
+            }
+          )),
         ];
       },
     },

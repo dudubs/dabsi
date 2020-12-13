@@ -1,30 +1,40 @@
-import { IndexedSeq } from "./../../immutable2";
 import {
   ComponentType,
   createElement,
   Fragment,
   ReactElement,
   ReactNode,
-  useMemo,
+  useRef,
 } from "react";
-import { keys } from "../../common/object/keys";
-import { mapObject } from "../../common/object/mapObject";
 import { Override } from "../../common/typings2/Override";
 import { RendererOrProps } from "../../react/RendererOrProps";
 import { RpcConnection } from "../../typerpc/Rpc";
 import { RpcMap } from "../../typerpc/rpc-map/RpcMap";
 import { TWidget, Widget } from "../../typerpc/widget/Widget";
 import { AnyWidgetRecord } from "../../typerpc/widget/widget-map/WidgetMap";
+import { WidgetNamespace } from "../../typerpc/widget/widget-namespace/WidgetNamspace";
 import { WidgetViewProps } from "../../typerpc/widget/WidgetView";
+import { Renderer } from "./../../react/renderer";
+import { MapView } from "./../../typerpc/widget/widget-map/WidgetMapView";
 import { SystemView } from "./SystemView";
 
+export type AnyMapViewComponent = ComponentType<{
+  children: Renderer<MapView<WidgetViewProps<any>>>;
+}>;
+
+type SystemMapChildKey<
+  C extends AnySystemMapConnection
+> = C extends AnyWidgetConnectionWithWidgetMap
+  ? string & keyof C["map"]
+  : string;
+
 export type SystemMapViewProps<
-  C extends AnyWidgetConnectionWithWidgetMap,
+  C extends AnySystemMapConnection,
   ItemOptions extends object
 > = {
   for: WidgetViewProps<C>;
-  first?: (string & keyof C["map"])[];
-  last?: (string & keyof C["map"])[];
+  first?: SystemMapChildKey<C>[];
+  last?: SystemMapChildKey<C>[];
   between?: ReactNode;
   children?: Record<string, RendererOrProps<WidgetViewProps<any>, ItemOptions>>;
 };
@@ -43,6 +53,21 @@ export type AnyWidgetConnectionWithWidgetMap = RpcConnection<
     >
   >
 >;
+
+export type AnySystemMapConnection =
+  | AnyWidgetConnectionWithWidgetMap
+  | RpcConnection<WidgetNamespace>;
+
+function getOrdredKeys({ firstKeys, lastKeys, keys }) {
+  const orderedKeys = new Set<string>();
+  firstKeys?.forEach(key => orderedKeys.add(key));
+  keys.forEach(key => orderedKeys.add(key));
+  lastKeys?.forEach(key => {
+    orderedKeys.delete(key);
+    orderedKeys.add(key);
+  });
+  return [...orderedKeys];
+}
 
 export function SystemMapView<
   C extends AnyWidgetConnectionWithWidgetMap,
@@ -66,58 +91,50 @@ export function SystemMapView<
   );
 }) {
   const { connection } = viewMapProps;
-  const mapViewComponent = connection.$widget.rpcType[mapViewComponentSymbol];
 
-  const orderedKeys: string[] = useMemo(() => {
-    const orderedKeys = new Set<string>();
-    firstKeys?.forEach(key => orderedKeys.add(key));
-    Object.keys(connection.map).forEach(key => orderedKeys.add(key));
-    lastKeys?.forEach(key => {
-      orderedKeys.delete(key);
-      orderedKeys.add(key);
-    });
-    return [...orderedKeys];
-  }, []);
+  const mapViewComponent: AnyMapViewComponent =
+    connection.$widget.rpcType[mapViewComponentSymbol];
 
-  return createElement(
-    mapViewComponent as ComponentType<{
-      children(getProps: (key: string) => WidgetViewProps<any>): ReactElement;
-    }>,
-    {
-      ...viewMapProps,
-      children: getProps => {
-        return createElement(
-          Fragment,
-          null,
-          orderedKeys.map((key, index) => {
-            const isLast = orderedKeys.length === index + 1;
-            const [render, options] = RendererOrProps(children?.[key], props =>
-              SystemView(props)
-            );
-            let element = render(getProps(key));
-            if (renderItem) {
-              element = renderItem(element, options! || {}, {
-                key,
-                isLast,
-                index,
-              });
-            }
-            return createElement(Fragment, { key }, element);
-            if (between && index && !isLast) {
-              element = createElement(Fragment, { key }, between, element);
-            }
-            return element;
-          })
-        );
-      },
-    }
-  );
+  const orderedKeysRef = useRef(null as string[] | null);
+
+  return createElement(mapViewComponent, {
+    ...viewMapProps,
+    children: view => {
+      const orderedKeys =
+        orderedKeysRef.current ||
+        (orderedKeysRef.current = getOrdredKeys({
+          firstKeys,
+          lastKeys,
+          keys: [...view.getChildKeys()],
+        }));
+
+      return createElement(
+        Fragment,
+        null,
+        orderedKeys.map((key, index) => {
+          const isLast = orderedKeys.length === index + 1;
+          const [render, options] = RendererOrProps(children?.[key], props =>
+            SystemView(props)
+          );
+          let element = render(view.getChildProps(key));
+          if (renderItem) {
+            element = renderItem(element, options! || {}, {
+              key,
+              isLast,
+              index,
+            });
+          }
+          return createElement(Fragment, { key }, element);
+        })
+      );
+    },
+  });
 }
 
 export namespace SystemMapView {
   export function register(
     mapWidget,
-    mapViewComponent,
+    mapViewComponent: AnyMapViewComponent,
     defaultMapViewComponent
   ) {
     mapWidget[mapViewComponentSymbol] = mapViewComponent;

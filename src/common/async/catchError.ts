@@ -1,37 +1,34 @@
+import { Constructor } from "../typings2/Constructor";
 import { isPromiseLike } from "./isPromiseLike";
 
-export function catchError<T>(
-  filterOrType: Function | ((error: any) => boolean),
-  resultOnError: T
-): {
-  <U>(callback: () => Promise<U>): Promise<T | U>;
-  <U>(callback: () => U): T | U;
-};
-
-export function catchError(filterOrType, resultOnError) {
-  const filter = filterOrType.prototype
-    ? (obj) => obj instanceof filterOrType
-    : filterOrType;
-
-  return (callback) => {
-    let result;
-    try {
-      result = callback();
-    } catch (error) {
-      if (filter(error)) {
-        return resultOnError;
+export default <
+  {
+    <E, T>(errorType: Constructor<E>, callback: () => Promise<T>): Promise<
+      [T, undefined] | [undefined, E]
+    >;
+    <E, T>(errorType: Constructor<E>, callback: () => T):
+      | [T, undefined]
+      | [undefined, E];
+  }
+>function (errorType, callback) {
+  let result;
+  try {
+    result = callback();
+    if (!isPromiseLike(result)) {
+      return [result, undefined];
+    }
+  } catch (error) {
+    if (error instanceof errorType) {
+      return [undefined, error];
+    }
+    throw error;
+  }
+  return Promise.resolve(result)
+    .then(result => [result, undefined])
+    .catch(error => {
+      if (error instanceof errorType) {
+        return [undefined, error];
       }
       throw error;
-    }
-    if (isPromiseLike(result)) {
-      return Promise.resolve(result).catch((error) => {
-        if (filter(error)) {
-          return resultOnError;
-        }
-        throw error;
-      });
-    } else {
-      return result;
-    }
-  };
-}
+    });
+};

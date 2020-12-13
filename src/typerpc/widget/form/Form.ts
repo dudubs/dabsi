@@ -8,7 +8,7 @@ TODO:
  */
 import { Awaitable } from "../../../common/typings2/Async";
 import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { Rejectable } from "../../data-manager/Rejectable";
+import { Rejectable } from "../../../common/async/Rejectable";
 import {
   AnyInput,
   InputError,

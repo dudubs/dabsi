@@ -14,7 +14,11 @@ export TS_NODE_PROJECT="$DABSI_PATH/tsconfig.json"
 export TS_NODE_TRANSPILE_ONLY=true
 
 
-node $O $DABSI_PATH/src/cli/index.ts $*
+if [ ! "$DABSI_MAIN" ]; then
+    DABSI_MAIN="src/cli/index.ts"
+fi
+
+node $O $DABSI_PATH/$DABSI_MAIN $*
 
 
 

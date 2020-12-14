@@ -1,3 +1,9 @@
 {
-  "extends": "../../tsconfig.browser.json"
+  "extends": "../../tsconfig.browser.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": ["src/*"]
+    }
+  }
 }

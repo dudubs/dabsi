@@ -12,7 +12,7 @@ import { MakeModule } from "../../typestack/MakeModule";
 import AclEditUserConfig from "../acl-admin/server/AclEditUserConfig";
 import { DbModule, DbModuleProvider } from "../core/DbModule";
 import SystemModuleProvider from "../core/SystemModuleProvider";
-import { AclEditUser } from "./../acl-admin/common/AclAdminRpc";
+import { AclEditUser } from "../acl-admin/AclAdminRpc";
 import { SystemModule } from "./../core/SystemModule";
 import { AclRpcConfig } from "./server/AclRpcConfig";
 
@@ -32,12 +32,6 @@ declare global {
     }),
     SystemModuleProvider({
       configs: [AclRpcConfig, AclEditUserConfig],
-      contexts: [
-        {
-          for: AclEditUser,
-          types: [User],
-        },
-      ],
     }),
   ],
 })

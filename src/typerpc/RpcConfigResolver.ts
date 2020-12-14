@@ -44,7 +44,7 @@ export function RpcConfigResolver<T extends AnyRpc, U extends ResolverMap<any>>(
   }
 
   resolver = Resolver.catch(resolver, error => {
-    throw new ResolveError(`by ${inspect(resolver)}, ${error.message}`);
+    throw error.at(inspect(resolver));
   });
 
   resolver[inspect.custom] = () => {

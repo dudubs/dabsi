@@ -9,7 +9,7 @@ export function checkResolverContext(context: ResolverMap<any>) {
       checkResolver(resolver, context);
     } catch (error) {
       if (error instanceof ResolveError) {
-        throw new ResolveError(`at key ${key}, ${error.message}`);
+        throw error.at(`key ${key}`);
       }
       throw error;
     }

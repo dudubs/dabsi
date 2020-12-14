@@ -11,9 +11,10 @@ import { WidgetRouterView } from "../../../typerpc/widget/WidgetRouterView";
 import { MuiGridMapView } from "../../core/browser/MuiGridMapView";
 import { useSystemView } from "../../view/useSystemView";
 import AclAdminRouter from "../common/AclAdminRouter";
-import { AclAdminConnection } from "../common/AclAdminRpc";
+
 import { AclBreadcrumbs } from "./AclBreadcrumbs";
-import MuiSystemPage from "./MuiSystemPage";
+import MuiSystemPage from "../../core/browser/MuiSystemPage";
+import { AclAdminConnection } from "../AclAdminRpc";
 
 WidgetRouterView(
   AclAdminRouter.at("groups"),
@@ -23,7 +24,7 @@ WidgetRouterView(
       {...props}
       title={<Typography variant="h5">{Lang`GROUPS`}</Typography>}
       onEditClick={async event => {
-        location.parent.at("editGroup", { id: event.key }).push();
+        location.parent.at("editGroup", { groupId: event.key }).push();
       }}
       onDeleteClick={async event => {
         await AclAdminConnection.groupsManager.delete(event.key);

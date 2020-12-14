@@ -77,6 +77,4 @@ export namespace MuiAdminMenu {
   export function register(propsMap: Record<string, MuiAdminMenuProps>) {
     Object.assign(children, propsMap);
   }
-
-  export function register2({}) {}
 }

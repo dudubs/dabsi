@@ -4,6 +4,7 @@ import { Input } from "../Input";
 import { TextInputHandler } from "./TextInputHandler";
 import { TextLoaderError, TextLoaderOptions } from "./TextInputLoader";
 
+// TODO: Builtin unique error, & error override.
 export type TextInput<N extends boolean = any> = Input<{
   Error: TextLoaderError;
 

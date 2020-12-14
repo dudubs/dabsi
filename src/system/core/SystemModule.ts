@@ -1,11 +1,11 @@
 import CookieParser from "cookie-parser";
 import express from "express";
 import { Connection } from "typeorm";
-import catchError from "../../common/async/catchError";
 import { touchMap } from "../../common/map/touchMap";
 import { entries } from "../../common/object/entries";
 import { mapObject } from "../../common/object/mapObject";
 import { Lazy } from "../../common/patterns/lazy";
+import nested from "../../common/string/nested";
 import { LogLevel } from "../../logging/Logger";
 import { ExpressModule } from "../../modules/ExpressModule";
 import { AclRequest } from "../../system-old/server/acl/AclRequest";
@@ -65,16 +65,6 @@ export class SystemModule {
     );
   }
 
-  protected _catchResolveError<T>(typeKey, key, callback: () => T): T {
-    try {
-      return callback();
-    } catch (error) {
-      if (error instanceof ResolveError) {
-        throw new ResolveError(`${typeKey}:${key}, ${error.message}`);
-      }
-      throw error;
-    }
-  }
   protected _createRpcNamespaceConfigResolver(rpc: RpcNamespace, path) {
     return RpcConfigResolver(
       rpc,
@@ -105,6 +95,9 @@ export class SystemModule {
     );
   }
 
+  protected _formatCheckLog(path, message) {
+    return `At ${path.join(", ")} ${nested(message)}`;
+  }
   getRpcConfigResolver<T extends AnyRpc>(
     rpc: T,
     path: null | any[]
@@ -119,7 +112,7 @@ export class SystemModule {
         if (isRpcMap(rpc))
           return <any>this._createRpcMapConfigResolver(rpc, path);
         if (path) {
-          this.log.warn(`At ${path.join(", ")}, No config resolver`);
+          this.log.warn(this._formatCheckLog(path, "No config resolver"));
           return RpcConfigResolver(rpc, {}, () => {
             throw new ResolveError(`No config resolver.`);
           });
@@ -144,10 +137,33 @@ export class SystemModule {
       }
     }
   }
+
+  protected _catchResolveError(
+    path,
+    callback: () => void
+  ): boolean /* return hasError? */ {
+    try {
+      callback();
+    } catch (error) {
+      if (error instanceof ResolveError) {
+        this.log.error(this._formatCheckLog(path, error.message));
+        return true;
+      }
+      throw error;
+    }
+    return false;
+  }
   protected _checkNsConfig(rpc: RpcNamespace, context, path: any[]) {
     this.log.trace(`ns-check ${path.join("/")}`);
     const configResolver = this.getRpcConfigResolver(rpc, path);
-    Resolver.check(configResolver, context);
+
+    if (
+      this._catchResolveError(path, () =>
+        Resolver.check(configResolver, context)
+      )
+    )
+      return;
+
     const childContext = this._getChildContext(rpc, context);
     for (const [childKey, child] of entries(rpc.children)) {
       const childPath = [...path, `namespace:${childKey}`];
@@ -156,7 +172,12 @@ export class SystemModule {
       } else {
         this._checkRpcConfig(child, childContext, childPath);
         const childConfigResolver = this.getRpcConfigResolver(child, path);
-        Resolver.check(childConfigResolver, childContext!);
+        if (
+          this._catchResolveError(childPath, () =>
+            Resolver.check(childConfigResolver, childContext!)
+          )
+        )
+          continue;
       }
     }
   }

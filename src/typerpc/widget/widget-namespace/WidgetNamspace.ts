@@ -17,6 +17,8 @@ export type WidgetNamespace = Widget<{
       name: string,
       widget: T
     ): [T, RpcConnection<T>];
+
+    registerDefault<T extends AnyWidget>(name: string, widget: T): T;
   };
 
   Element: {
@@ -35,6 +37,10 @@ export function WidgetNamespace(): WidgetNamespace {
     props: {
       register(name, rpc) {
         return ns.register(name, rpc);
+      },
+      registerDefault(name, rpc) {
+        ns.register(name, rpc);
+        return rpc;
       },
     },
   });

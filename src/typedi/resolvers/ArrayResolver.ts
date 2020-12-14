@@ -12,7 +12,7 @@ export function ArrayResolver<T>(resolvers: Resolver<T>[]): Resolver<T[]> {
         checkResolver(item, context);
       } catch (error) {
         if (error instanceof ResolveError) {
-          throw new ResolveError(`at item ${index}, ${error.message}`);
+          throw error.at(`item ${index}`);
         }
         throw error;
       }

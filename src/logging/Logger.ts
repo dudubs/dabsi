@@ -115,21 +115,18 @@ const levelNameToColor: Record<LevelName, (text: string) => string> = {
 handlers.add(log => {
   if (!Logger.logToConsole) return;
 
-  let title = log.levelName;
+  const prefix = `[${log.loggerName ? `${log.loggerName} ` : ""}${
+    log.levelName
+  }]: `;
 
-  if (log.loggerName) {
-    title = `${log.loggerName} ${title}`;
-  }
+  const styledPrefix = levelNameToColor[log.levelName](colors.bold(prefix));
+
+  const prefixPadding = "...".padEnd(prefix.length - 1, " ");
 
   console.log(
     log.message
       .split("\n")
-      .map(
-        line =>
-          levelNameToColor[log.levelName](`${colors.bold(`[${title}]:`)}`) +
-          " " +
-          line
-      )
+      .map((line, index) => `${index ? prefixPadding : styledPrefix}${line}`)
       .join("\n")
   );
 });

@@ -14,17 +14,15 @@ export default function ({
   configs?: RpcConfigResolver<AnyRpc>[];
   contexts?: {
     for: AnyRpc;
-    resolvers?: AnyResolverMap;
-    types?: Constructor<any>[];
+    resolve?: Constructor<any>[];
   }[];
 }): ModuleProvider {
   return Consumer([SystemModule], systemModule => {
     configs?.forEach(config => {
       systemModule.configureRpcResolver(config);
     });
-    contexts?.forEach(({ for: rpc, resolvers, types }) => {
-      resolvers && systemModule.configureRpcChildContext(rpc, resolvers);
-      types?.forEach(type => {
+    contexts?.forEach(({ for: rpc, resolve }) => {
+      resolve?.forEach(type => {
         systemModule.configureRpcChildContext(
           rpc,
           type.provide(() => {

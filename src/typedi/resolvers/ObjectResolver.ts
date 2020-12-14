@@ -25,7 +25,7 @@ export function ObjectResolver<T extends AnyResolverMap>(
         checkResolver(resolver, context);
       } catch (error) {
         if (error instanceof ResolveError) {
-          throw new ResolveError(`at key ${inspect(key)}, ${error.message}`);
+          throw error.at(`key ${inspect(key)}`);
         }
         throw error;
       }

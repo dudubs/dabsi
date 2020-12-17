@@ -1,4 +1,4 @@
-import { getRootTokens } from "../server/getRootTokens";
+import { getRootTokens } from "@dabsi/system/admin/server/getRootTokens";
 
 testm(__filename, () => {
   it("getRootTokens", () => {

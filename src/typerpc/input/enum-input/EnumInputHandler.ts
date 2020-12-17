@@ -1,4 +1,4 @@
-import { Awaitable } from "../../../common/typings2/Async";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   ErrorOrValue,
   InputElement,
@@ -7,9 +7,9 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { AbstractNullableInputHandler } from "../nullable-input/AbstractNullableInputHandler";
-import { AnyEnumInput } from "./EnumInput";
+} from "@dabsi/typerpc/input/Input";
+import { AbstractNullableInputHandler } from "@dabsi/typerpc/input/nullable-input/AbstractNullableInputHandler";
+import { AnyEnumInput } from "@dabsi/typerpc/input/enum-input/EnumInput";
 
 type T = AnyEnumInput;
 

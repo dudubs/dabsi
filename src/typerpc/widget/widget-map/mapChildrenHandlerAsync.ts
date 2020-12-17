@@ -1,9 +1,9 @@
-import { mapObjectAsync } from "../../../common/object/mapObject";
-import { Awaitable } from "../../../common/typings2/Async";
-import { Override } from "../../../common/typings2/Override";
-import { AbstractRpcHandler } from "../../AbstractRpcHandler";
-import { AnyRpc, Rpc, RpcResolvedHandler, RpcType } from "../../Rpc";
-import { AnyRpcRecord, RpcMap } from "../../rpc-map/RpcMap";
+import { mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Override } from "@dabsi/common/typings2/Override";
+import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
+import { AnyRpc, Rpc, RpcResolvedHandler, RpcType } from "@dabsi/typerpc/Rpc";
+import { AnyRpcRecord, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 
 export type AnyRpcWithMapChild = Rpc<
   Override<

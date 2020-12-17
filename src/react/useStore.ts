@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { Store } from "../store";
-import { Factory } from "./../common/patterns/Factory";
+import { Store } from "@dabsi/store";
+import { Factory } from "@dabsi/common/patterns/Factory";
 
 export function useStore<T>(stateFactory: Factory<T>): Store<T> {
   const [state] = useState(() => {

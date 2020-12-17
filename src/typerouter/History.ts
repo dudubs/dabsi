@@ -1,7 +1,7 @@
 import { createElement, ReactNode, useContext } from "react";
-import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
+import { createUndefinedContext } from "@dabsi/react/utils/hooks/createUndefinedContext";
 import { History } from "history";
-import { useDefinedContext } from "../react/utils/hooks/useDefinedContext";
+import { useDefinedContext } from "@dabsi/react/utils/hooks/useDefinedContext";
 
 const context = createUndefinedContext<History>();
 

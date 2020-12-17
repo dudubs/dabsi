@@ -1,5 +1,5 @@
-import { Constructor } from "../../common/typings2/Constructor";
-import { ResolverMap } from "../Resolver";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { ResolverMap } from "@dabsi/typedi/Resolver";
 
 export type FnResolver<T> = (context: ResolverMap<any>) => T;
 

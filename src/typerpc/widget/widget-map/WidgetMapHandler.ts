@@ -1,8 +1,8 @@
-import { mapObjectAsync } from "../../../common/object/mapObject";
-import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
-import { IWidgetHandler, WidgetElement } from "../Widget";
-import { mapChildrenHandlerAsync } from "./mapChildrenHandlerAsync";
-import { AnyWidgetMap } from "./WidgetMap";
+import { mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
+import { IWidgetHandler, WidgetElement } from "@dabsi/typerpc/widget/Widget";
+import { mapChildrenHandlerAsync } from "@dabsi/typerpc/widget/widget-map/mapChildrenHandlerAsync";
+import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
 
 type T = AnyWidgetMap;
 

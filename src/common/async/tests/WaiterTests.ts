@@ -1,4 +1,4 @@
-import {Waiter} from "../Waiter";
+import {Waiter} from "@dabsi/common/async/Waiter";
 
 testm(__filename,()=>{
     it('expected to resolve', async () => {

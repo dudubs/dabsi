@@ -1,9 +1,9 @@
 // TODO
 
-import { testRpc } from "../../RpcTester";
-import { testInput } from "../InputTester";
-import { DataInput } from "./DataInput";
-import { DataInputTester } from "./DataInputTester";
+import { testRpc } from "@dabsi/typerpc/RpcTester";
+import { testInput } from "@dabsi/typerpc/input/InputTester";
+import { DataInput } from "@dabsi/typerpc/input/data-input/DataInput";
+import { DataInputTester } from "@dabsi/typerpc/input/data-input/DataInputTester";
 
 testm(__dirname, () => {
   testRpc(DataInput(), t => {

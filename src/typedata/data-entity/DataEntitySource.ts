@@ -1,20 +1,20 @@
 import { Connection, getConnection } from "typeorm";
-import { entries } from "../../common/object/entries";
-import { hasKeys } from "../../common/object/hasKeys";
-import { Lazy } from "../../common/patterns/lazy";
-import { Type } from "../../common/typings2/Type";
-import { EntityRelation } from "../../typeorm/relations";
-import { DataQueryBuilder } from "../data-query/DataQueryBuilder";
-import { DataCursor, EmptyDataCursor } from "../DataCursor";
-import { DataKey } from "../DataKey";
-import { DataRow } from "../DataRow";
-import { DataSource, GetDataSource } from "../DataSource";
-import { DataSourceRow } from "../DataSourceRow";
-import { DataInsert, DataUpdate } from "../DataValue";
-import { DataEntityCursor } from "./DataEntityCursor";
-import { DataEntityKey } from "./DataEntityKey";
-import { DataEntityLoader } from "./DataEntityLoader";
-import { DataEntityQueryRunner } from "./DataEntityQueryRunner";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { Type } from "@dabsi/common/typings2/Type";
+import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
+import { DataKey } from "@dabsi/typedata/DataKey";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource, GetDataSource } from "@dabsi/typedata/DataSource";
+import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
+import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
+import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
+import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
+import { DataEntityQueryRunner } from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
 
 export type DataEntitySourceOptions<T> = {
   connection?: (() => Connection) | string | Connection;

@@ -1,4 +1,4 @@
-import {Builder} from "../buildObject";
+import {Builder} from "@dabsi/common/object/buildObject";
 
 export function callbackBuilder<T extends ((...args: any[]) => void) | undefined>(
     ...callbacks: T[]

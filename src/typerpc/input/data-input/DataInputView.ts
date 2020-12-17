@@ -1,6 +1,6 @@
-import { RpcConnection } from "../../Rpc";
-import { NullableInputView } from "../nullable-input/NullableInputView";
-import { AnyDataInput } from "./DataInput";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { NullableInputView } from "@dabsi/typerpc/input/nullable-input/NullableInputView";
+import { AnyDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
 
 export class DataInputView<
   C extends RpcConnection<AnyDataInput>

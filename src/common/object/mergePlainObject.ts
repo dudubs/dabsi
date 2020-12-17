@@ -1,5 +1,5 @@
-import {cloneObject} from "./cloneObject";
-import {keys} from "./keys";
+import {cloneObject} from "@dabsi/common/object/cloneObject";
+import {keys} from "@dabsi/common/object/keys";
 
 
 export function mergePlainObject<T, K extends keyof T>(

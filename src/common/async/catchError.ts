@@ -1,34 +1,36 @@
-import { Constructor } from "../typings2/Constructor";
-import { isPromiseLike } from "./isPromiseLike";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { isPromiseLike } from "@dabsi/common/async/isPromiseLike";
 
 export default <
   {
-    <E, T>(errorType: Constructor<E>, callback: () => Promise<T>): Promise<
-      [T, undefined] | [undefined, E]
-    >;
-    <E, T>(errorType: Constructor<E>, callback: () => T):
-      | [T, undefined]
-      | [undefined, E];
+    <E, T, U>(
+      errorType: Constructor<E>,
+      callback: () => Promise<T>,
+      errorCallback: (error: E) => U
+    ): Promise<T | U>;
+    <E, T, U>(
+      errorType: Constructor<E>,
+      callback: () => T,
+      errorCallback: (error: E) => U
+    ): T | U;
   }
->function (errorType, callback) {
+>function (errorType, callback, errorCallback) {
   let result;
   try {
     result = callback();
     if (!isPromiseLike(result)) {
-      return [result, undefined];
+      return result;
     }
   } catch (error) {
     if (error instanceof errorType) {
-      return [undefined, error];
+      return errorCallback(error);
     }
     throw error;
   }
-  return Promise.resolve(result)
-    .then(result => [result, undefined])
-    .catch(error => {
-      if (error instanceof errorType) {
-        return [undefined, error];
-      }
-      throw error;
-    });
+  return Promise.resolve(result).catch(error => {
+    if (error instanceof errorType) {
+      return errorCallback(error);
+    }
+    throw error;
+  });
 };

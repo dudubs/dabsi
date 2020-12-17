@@ -1,5 +1,5 @@
 import { ComponentType, createElement, ReactElement } from "react";
-import { PartialKeys } from "../../common/typings2/PartialUndefinedKeys";
+import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 
 export type WithDefaultProps = {
   <T>(defaultProps: T): <P>(

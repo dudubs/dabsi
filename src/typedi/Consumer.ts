@@ -1,14 +1,14 @@
-import { checkResolver } from "./operators/checkResolver";
-import { resolve } from "./resolve";
-import { ArrayResolver } from "./resolvers/ArrayResolver";
-import { ObjectResolver } from "./resolvers/ObjectResolver";
+import { checkResolver } from "@dabsi/typedi/operators/checkResolver";
+import { resolve } from "@dabsi/typedi/resolve";
+import { ArrayResolver } from "@dabsi/typedi/resolvers/ArrayResolver";
+import { ObjectResolver } from "@dabsi/typedi/resolvers/ObjectResolver";
 import {
   CustomResolver,
   ResolveMapType,
   Resolver,
   ResolverMap,
   ResolverType,
-} from "./Resolver";
+} from "@dabsi/typedi/Resolver";
 
 type A<U extends (Resolver | undefined)[], N extends number> = ResolverType<
   NonNullable<U[N]>
@@ -40,18 +40,6 @@ export type ConsumeFactory<T, U extends ConsumeDeps> = U extends ResolverArray
   ? (...args: ArrayDeps<U>) => T
   : (context: ResolveMapType<Extract<U, ResolverMap<any>>>) => T;
 
-export function _consumeMap<T, U extends ResolverMap<any>>(
-  deps: U,
-  create: (context: ResolveMapType<U>) => T
-): Resolver<T> {
-  const depsResolver = ObjectResolver(deps);
-  return ((context) => {
-    return create(resolve(depsResolver, context));
-  }).toCheck((context) => {
-    checkResolver(depsResolver, context);
-  });
-}
-
 export type Consumer<T> = <U extends ConsumeDeps>(
   deps: U,
   callback: ConsumeFactory<T, U>
@@ -64,16 +52,16 @@ export function Consumer<T, U extends ConsumeDeps>(
 export function Consumer(deps, create): any {
   if (Array.isArray(deps)) {
     const depsResolver = ArrayResolver(deps);
-    return ((context) => create(...resolve(depsResolver, context))).toCheck(
-      (context) => {
+    return (context => create(...resolve(depsResolver, context))).toCheck(
+      context => {
         checkResolver(depsResolver, context);
       }
     );
   }
   const depsResolver = ObjectResolver(deps);
-  return ((context) => {
+  return (context => {
     return create(resolve(depsResolver, context));
-  }).toCheck((context) => {
+  }).toCheck(context => {
     checkResolver(depsResolver, context);
   });
 }

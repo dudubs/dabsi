@@ -8,17 +8,17 @@ import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
 import clsx from "clsx";
 import React, { ReactElement } from "react";
-import { flat } from "../../../common/iterator/flat";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { LangKey } from "../../../lang/LangKey";
-import { Store } from "../../../store";
-import { MuiIcon } from "../components/MuiIcon";
+import { flat } from "@dabsi/common/iterator/flat";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { LangKey } from "@dabsi/lang/LangKey";
+import { Store } from "@dabsi/store";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
 import {
   MuiNestedMenuPath,
   MuiNestedMenuProps,
   MuiNestedMenuState,
-} from "./MuiNestedMenu";
+} from "@dabsi/browser/mui/nested-menu/MuiNestedMenu";
 
 export const useStyles = makeStyles(theme => ({
   itemWithChildText: {},

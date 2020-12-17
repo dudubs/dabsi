@@ -1,8 +1,8 @@
 import { execFileSync } from "child_process";
 import path from "path";
-import { mapObjectToArray } from "../common/object/mapObjectToArray";
-import { DABSI_NODE_OPTIONS, DABSI_ROOT_DIR } from "../index";
-import { TYPESTACK_CLI_ARGS } from "./cli";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { DABSI_NODE_OPTIONS, DABSI_ROOT_DIR } from "@dabsi/index";
+import { TYPESTACK_CLI_ARGS } from "@dabsi/typestack/cli";
 
 testm(__filename, () => {
   xit("", () => {

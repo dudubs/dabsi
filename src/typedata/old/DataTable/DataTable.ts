@@ -1,18 +1,18 @@
 import { ReactNode } from "react";
-import { MuiIcon } from "../../../browser/mui/components/MuiIcon";
-import { Awaitable } from "../../../common/typings";
-import { LangNode } from "../../../lang/Lang";
-import { State } from "../../../react/utils/State";
-import { DataExp } from "../../DataExp";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
+import { Awaitable } from "@dabsi/common/typings";
+import { LangNode } from "@dabsi/lang/Lang";
+import { State } from "@dabsi/react/utils/State";
+import { DataExp } from "@dabsi/typedata/DataExp";
 import {
   AbstractDataList,
   AbstractDataListProps,
-} from "../DataList/AbstractDataList";
-import { DataOrder } from "../../DataOrder";
-import { DataRow } from "../../DataRow";
-import { DataSource } from "../../DataSource";
-import { deleteAction } from "./actions/deleteAction";
-import { removeAction } from "./actions/removeAction";
+} from "@dabsi/typedata/old/DataList/AbstractDataList";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { deleteAction } from "@dabsi/typedata/old/DataTable/actions/deleteAction";
+import { removeAction } from "@dabsi/typedata/old/DataTable/actions/removeAction";
 
 export type DataTableActionType = "single" | "multiple" | "both";
 

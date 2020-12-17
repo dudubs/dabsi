@@ -1,20 +1,20 @@
-import { HasKeys } from "../common/typings2/boolean";
-import { Type } from "../common/typings2/Type";
-import { Union } from "../common/typings2/Union";
-import { BaseTypeKey, WithBaseType } from "./BaseType";
-import { DataKey, WithDataKey } from "./DataKey";
-import { DataSourceRow } from "./DataSourceRow";
+import { HasKeys } from "@dabsi/common/typings2/boolean";
+import { Type } from "@dabsi/common/typings2/Type";
+import { Union } from "@dabsi/common/typings2/Union";
+import { BaseTypeKey, WithBaseType } from "@dabsi/typedata/BaseType";
+import { DataKey, WithDataKey } from "@dabsi/typedata/DataKey";
+import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
 import {
   DataTypeKey,
   DataUnionChildren,
   DataUnionChildrenKey,
-} from "./DataUnion";
+} from "@dabsi/typedata/DataUnion";
 import {
   IfRelationToOne,
   MapRelation,
   DataRelationKeys,
   DataRelationTypeAt,
-} from "./DataRelation";
+} from "@dabsi/typedata/DataRelation";
 
 type _Children<Children> = {
   [K in keyof Children]: Record<DataKey, string> &

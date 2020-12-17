@@ -1,10 +1,10 @@
-import { pick } from "../../../common/object/pick";
-import { Lazy } from "../../../common/patterns/lazy";
-import { Awaitable } from "../../../common/typings2/Async";
-import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { IWidgetHandler } from "../../widget/Widget";
-import { AbstractInputHandler } from "../AbstractInputHandler";
+import { pick } from "@dabsi/common/object/pick";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
+import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
@@ -12,9 +12,9 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { TextInput } from "./TextInput";
-import { TextInputLoader, TextLoaderOptions } from "./TextInputLoader";
+} from "@dabsi/typerpc/input/Input";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { TextInputLoader, TextLoaderOptions } from "@dabsi/typerpc/input/text-input/TextInputLoader";
 
 type T = TextInput<any>;
 

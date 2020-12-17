@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
-import { IfNever } from "../../common/typings2/IfNever";
-import { RpcConnection } from "../Rpc";
+import { IfNever } from "@dabsi/common/typings2/IfNever";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import {
   AnyWidget,
   AnyWidgetConnection,
@@ -8,7 +8,7 @@ import {
   WidgetElement,
   WidgetElementState,
   WidgetType,
-} from "./Widget";
+} from "@dabsi/typerpc/widget/Widget";
 
 export type WidgetViewRenderer<T extends AnyWidget, P = {}> = (
   props: WidgetViewProps<RpcConnection<T>> & P

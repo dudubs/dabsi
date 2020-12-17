@@ -1,14 +1,14 @@
-import { mapObject } from "../common/object/mapObject";
-import { HasKeys, If } from "../common/typings2/boolean";
-import { IsNever } from "../common/typings2/boolean/IsNever";
-import { Constructor } from "../common/typings2/Constructor";
-import { BaseType } from "./BaseType";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { HasKeys, If } from "@dabsi/common/typings2/boolean";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { BaseType } from "@dabsi/typedata/BaseType";
 import {
   MapRelation,
   DataRelationKeys,
   DataRelationTypeAt,
   DataRelationTypeAt as _RelationTypeAt,
-} from "./DataRelation";
+} from "@dabsi/typedata/DataRelation";
 
 export type DataTypeKey = "$type";
 export const DataTypeKey: DataTypeKey = "$type";

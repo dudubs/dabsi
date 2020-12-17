@@ -1,9 +1,9 @@
 import { ReactElement, ReactNode } from "react";
-import { WeakMapFactory } from "../common/map/mapFactory";
-import { Emitter } from "../react/reactor/useEmitter";
-import { Route } from "./Route";
-import { AnyRouter, Router, TRouter } from "./Router";
-import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { Emitter } from "@dabsi/react/reactor/useEmitter";
+import { Route } from "@dabsi/typerouter/Route";
+import { AnyRouter, Router, TRouter } from "@dabsi/typerouter/Router";
+import { AnyRouterLocation, RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 type _RendererProps<T extends TRouter, R extends Route = Route> = {
   location: RouterLocation<T>;

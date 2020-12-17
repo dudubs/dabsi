@@ -5,11 +5,11 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { DataRelation } from "../../../typedata/DataRelation";
-import { getPasswordHash } from "./getPasswordHash";
-import { Group } from "./Group";
-import { Permission } from "./Permission";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { getPasswordHash } from "@dabsi/system-old/server/acl/getPasswordHash";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { Permission } from "@dabsi/system-old/server/acl/Permission";
 
 @Entity({ name: "acl/users" })
 export class User {

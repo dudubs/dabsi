@@ -1,6 +1,6 @@
-import { ExpMap } from "../../common/typings2/ExpMap";
-import { DataOrder } from "../DataOrder";
-import { DataExp, DataExpTypes } from "../data-exp/DataExp";
+import { ExpMap } from "@dabsi/common/typings2/ExpMap";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
+import { DataExp, DataExpTypes } from "@dabsi/typedata/data-exp/DataExp";
 
 export type DataQueryJoinType = "LEFT" | "INNER";
 

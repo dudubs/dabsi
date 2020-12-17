@@ -1,7 +1,7 @@
 import { Connection } from "typeorm";
-import { AbstractDataQueryRunner } from "../data-query/AbstractDataQueryRunner";
-import { DataQuery } from "../data-query/DataQueryExp";
-import { DataEntityQueryExpTranslatorToSql } from "./DataEntityQueryExpTranslatorToSql";
+import { AbstractDataQueryRunner } from "@dabsi/typedata/data-query/AbstractDataQueryRunner";
+import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
+import { DataEntityQueryExpTranslatorToSql } from "@dabsi/typedata/data-entity/DataEntityQueryExpTranslatorToSql";
 
 export class DataEntityQueryRunner extends AbstractDataQueryRunner {
   constructor(public connection: Connection, public query: DataQuery) {

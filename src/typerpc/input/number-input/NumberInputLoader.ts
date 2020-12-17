@@ -1,4 +1,4 @@
-import { Payload } from "../../../common/typings2/Payload";
+import { Payload } from "@dabsi/common/typings2/Payload";
 
 export type NumberInputError = Payload<{
   MAX_VALUE: { maxValue: number };

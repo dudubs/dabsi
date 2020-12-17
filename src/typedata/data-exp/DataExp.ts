@@ -1,16 +1,16 @@
-import { ExpMap } from "../../common/typings2/ExpMap";
-import { ExtractKeys } from "../../common/typings2/ExtractKeys";
-import { Union } from "../../common/typings2/Union";
-import { GetBaseType } from "../BaseType";
-import { DataUnionChildren } from "../DataUnion";
+import { ExpMap } from "@dabsi/common/typings2/ExpMap";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Union } from "@dabsi/common/typings2/Union";
+import { GetBaseType } from "@dabsi/typedata/BaseType";
+import { DataUnionChildren } from "@dabsi/typedata/DataUnion";
 import {
   NonRelationKeys,
   DataRelationKeys,
   DataRelationToManyKeys,
   DataRelationToOneKeys,
   DataRelationTypeAt,
-} from "../DataRelation";
-import { Exp } from "./ExpTranslator";
+} from "@dabsi/typedata/DataRelation";
+import { Exp } from "@dabsi/typedata/data-exp/ExpTranslator";
 
 export type DataSymbolicCompareOperator = keyof {
   "^=";

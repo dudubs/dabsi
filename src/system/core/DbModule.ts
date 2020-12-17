@@ -1,10 +1,10 @@
 import { Connection, ConnectionOptions, createConnection } from "typeorm";
-import { Lazy } from "../../common/patterns/lazy";
-import { Cli } from "../../modules/Cli";
-import { ServerModule } from "../../modules/ServerModule";
-import { Inject, Module, ModuleProvider, Resolver } from "../../typedi";
-import { Consumer } from "../../typedi/Consumer";
-import { ModuleRunner } from "../../typedi/ModuleRunner";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { Cli } from "@dabsi/modules/Cli";
+import { ServerModule } from "@dabsi/modules/ServerModule";
+import { Inject, Module, ModuleProvider, Resolver } from "@dabsi/typedi";
+import { Consumer } from "@dabsi/typedi/Consumer";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 
 @Module({})
 export class DbModule {

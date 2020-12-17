@@ -1,14 +1,14 @@
 import React, { ReactNode, useState } from "react";
-import { HookRef, useUpdateRef } from "../../../../react/HookRef";
-import { mergeProps } from "../../../../react/utils/mergeProps";
+import { HookRef, useUpdateRef } from "@dabsi/react/HookRef";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import {
   AnyArrayInputConnection,
   ArrayInputView,
   ArrayInputViewProps,
-} from "../../../../typerpc/input/array-input/ArrayInputView";
-import { InputViewProps } from "../../../../typerpc/input/InputView";
-import { MuiAddButton } from "../../components/MuiButton";
-import { MuiDialog, MuiDialogProps } from "../../components/MuiDialog";
+} from "@dabsi/typerpc/input/array-input/ArrayInputView";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { MuiAddButton } from "@dabsi/browser/mui/components/MuiButton";
+import { MuiDialog, MuiDialogProps } from "@dabsi/browser/mui/components/MuiDialog";
 
 export function MuiArrayInputView<C extends AnyArrayInputConnection>({
   hookRef,

@@ -2,9 +2,9 @@ import { spawnSync } from "child_process";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import path from "path";
 import yargs from "yargs";
-import { DABSI_CURRENT_PATH, DABSI_ROOT_DIR } from "../index";
-import { relativePosixPath } from "../modules/pathHelpers";
-import { TYPESTACK_CLI_ARGS } from "../typestack/cli";
+import { DABSI_CURRENT_PATH, DABSI_ROOT_DIR } from "@dabsi/index";
+import { relativePosixPath } from "@dabsi/modules/pathHelpers";
+import { TYPESTACK_CLI_ARGS } from "@dabsi/typestack/cli";
 
 let config!: {
   current: string[];

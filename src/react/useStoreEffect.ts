@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Store } from "../store";
+import { Store } from "@dabsi/store";
 
 export function useStoreEffect<T>(
   store: Store<T>,

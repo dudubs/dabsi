@@ -6,9 +6,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { DataRelation } from "../../../typedata/DataRelation";
-import { Permission } from "./Permission";
-import { User } from "./User";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { Permission } from "@dabsi/system-old/server/acl/Permission";
+import { User } from "@dabsi/system-old/server/acl/User";
 
 @Entity({ name: "acl/groups" })
 export class Group {

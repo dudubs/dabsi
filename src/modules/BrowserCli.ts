@@ -1,8 +1,8 @@
 import path from "path";
 import webpack from "webpack";
-import { DABSI_ROOT_DIR } from "../index";
-import { Inject, Module } from "../typedi";
-import { Cli } from "./Cli";
+import { DABSI_ROOT_DIR } from "@dabsi/index";
+import { Inject, Module } from "@dabsi/typedi";
+import { Cli } from "@dabsi/modules/Cli";
 
 @Module()
 export class BrowserCli extends Cli {

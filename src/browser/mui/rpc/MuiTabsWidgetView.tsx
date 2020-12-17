@@ -2,24 +2,24 @@ import Tab, { TabProps } from "@material-ui/core/Tab";
 import Tabs, { TabsProps } from "@material-ui/core/Tabs";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
-import { entries } from "../../../common/object/entries";
-import { keys } from "../../../common/object/keys";
-import { LangKey } from "../../../lang/LangKey";
-import { useEmitter } from "../../../react/reactor/useEmitter";
-import { Renderer } from "../../../react/renderer";
-import { EmptyFragment } from "../../../react/utils/EmptyFragment";
-import { mergeProps } from "../../../react/utils/mergeProps";
-import { RpcConnection } from "../../../typerpc/Rpc";
-import { AnyTabsWidget } from "../../../typerpc/widget/tabs-widget/TabsWidget";
-import { TabsWidgetView } from "../../../typerpc/widget/tabs-widget/TabsWidgetView";
+import { entries } from "@dabsi/common/object/entries";
+import { keys } from "@dabsi/common/object/keys";
+import { LangKey } from "@dabsi/lang/LangKey";
+import { useEmitter } from "@dabsi/react/reactor/useEmitter";
+import { Renderer } from "@dabsi/react/renderer";
+import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyTabsWidget } from "@dabsi/typerpc/widget/tabs-widget/TabsWidget";
+import { TabsWidgetView } from "@dabsi/typerpc/widget/tabs-widget/TabsWidgetView";
 import {
   AnyWidget,
   AnyWidgetConnection,
   WidgetType,
-} from "../../../typerpc/widget/Widget";
-import { AnyWidgetRecord } from "../../../typerpc/widget/widget-map/WidgetMap";
-import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
-import { MuiIcon } from "../components/MuiIcon";
+} from "@dabsi/typerpc/widget/Widget";
+import { AnyWidgetRecord } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
 
 export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 

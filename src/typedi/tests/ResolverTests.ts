@@ -1,6 +1,6 @@
-import { Consumer } from "../Consumer";
-import { Provider } from "../Provider";
-import { Resolver } from "../Resolver";
+import { Consumer } from "@dabsi/typedi/Consumer";
+import { Provider } from "@dabsi/typedi/Provider";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 testm(__filename, () => {
   const r1 = Resolver<string>();

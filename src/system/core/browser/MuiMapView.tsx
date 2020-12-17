@@ -10,17 +10,17 @@ import React, {
   ReactElement,
   ReactNode,
 } from "react";
-import { mapObject } from "../../../common/object/mapObject";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { LangKey } from "../../../lang/LangKey";
-import { Renderer } from "../../../react/renderer";
-import { RendererOrProps } from "../../../react/RendererOrProps";
-import { State } from "../../../react/State";
-import { useStore } from "../../../react/useStore";
-import { Store } from "../../../store";
-import { AnyWidgetConnection } from "../../../typerpc/widget/Widget";
-import { WidgetViewProps } from "../../../typerpc/widget/WidgetView";
-import { SystemView } from "../../view/SystemView";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { LangKey } from "@dabsi/lang/LangKey";
+import { Renderer } from "@dabsi/react/renderer";
+import { RendererOrProps } from "@dabsi/react/RendererOrProps";
+import { State } from "@dabsi/react/State";
+import { useStore } from "@dabsi/react/useStore";
+import { Store } from "@dabsi/store";
+import { AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { SystemView } from "@dabsi/system/view/SystemView";
 
 export type MuiMapViewChildProps = {
   GridProps?: GridProps;

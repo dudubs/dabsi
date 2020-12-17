@@ -1,18 +1,16 @@
-import { AnyRpcMap } from "./rpc-map/RpcMap";
-import { AnyResolverMap } from "./../typedi/resolvers/ObjectResolver";
-import { inspect } from "../logging/inspect";
-import { CallStackInfo } from "../typedi/CallStackInfo";
-import { _consumeMap } from "../typedi/Consumer";
-import { ResolveError } from "../typedi/ResolveError";
+import { inspect } from "@dabsi/logging/inspect";
+import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
+import { Consumer } from "@dabsi/typedi/Consumer";
 import {
   CustomResolver,
   ResolveMapType,
+  Resolver,
   ResolverMap,
-} from "../typedi/Resolver";
-import { Resolver } from "./../typedi/Resolver";
-import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "./Rpc";
-import { WeakId } from "../common/WeakId";
-import { mapObjectToArray } from "../common/object/mapObjectToArray";
+} from "@dabsi/typedi/Resolver";
+import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
+import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { checkResolverSymbol } from "./../typedi/operators/checkResolver";
+import { resolveSymbol } from "./../typedi/resolve";
 
 export type RpcConfigResolver<T extends AnyRpc> = CustomResolver<
   RpcUnresolvedConfig<T>
@@ -25,34 +23,38 @@ export const RpcConfigResolverMap = Resolver<
   Record<any, Resolver<RpcUnresolvedConfig<AnyRpc>>>
 >();
 
+const isRpcConfigResolverSet = new WeakSet();
+
+export function isRpcConfigResolver(obj): obj is RpcConfigResolver<AnyRpc> {
+  return obj && isRpcConfigResolverSet.has(obj);
+}
+
 export function RpcConfigResolver<T extends AnyRpc, U extends ResolverMap<any>>(
   rpc: T,
   resolvers: U,
-  callback: (context: ResolveMapType<U>) => RpcUnresolvedConfig<T>,
-  check?: (context) => void
+  callback: (context: ResolveMapType<U>) => RpcUnresolvedConfig<T>
 ): RpcConfigResolver<T> {
   // TOOD: save stack info
 
   const callStackInfo = new CallStackInfo(new Error(), __filename);
   // stackInfo = {};
-  let resolver = _consumeMap(resolvers, context => {
+  let resolver = Consumer<any, any>(resolvers, context => {
     return RpcConfig(rpc, callback(context));
   });
-
-  if (check) {
-    resolver = Resolver.toCheck(resolver, check);
-  }
 
   resolver = Resolver.catch(resolver, error => {
     throw error.at(inspect(resolver));
   });
 
   resolver[inspect.custom] = () => {
-    return `<RpcConfigResolver ${callStackInfo.description}>`;
+    return `<RpcConfigResolver${
+      rpc.rpcType?.name ? ` for ${rpc.rpcType.name}` : ""
+    } ${callStackInfo.description}>`;
   };
   Object.assign(resolver, {
     rpc,
   });
 
+  isRpcConfigResolverSet.add(resolver);
   return resolver as any;
 }

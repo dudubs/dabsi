@@ -1,13 +1,13 @@
 import { ReactElement } from "react";
-import { Debounce } from "../../../common/async/Debounce";
-import { mapAndFilterObject } from "../../../common/object/mapAndFilterObject";
+import { Debounce } from "@dabsi/common/async/Debounce";
+import { mapAndFilterObject } from "@dabsi/common/object/mapAndFilterObject";
 
-import { ViewState } from "../../../react/view/ViewState";
-import { RpcConnection } from "../../Rpc";
-import { AbstractWidgetView } from "../AbstractWidgetView";
-import { WidgetElement, WidgetType } from "../Widget";
-import { WidgetViewProps } from "../WidgetView";
-import { AnyDataTable } from "./DataTable";
+import { ViewState } from "@dabsi/react/view/ViewState";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 
 export type DataTableViewProps<
   C extends RpcConnection<AnyDataTable>

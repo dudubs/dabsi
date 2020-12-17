@@ -1,5 +1,5 @@
-import adapt from "../../adapt";
-import { GetNextState, Store } from "../../Store";
+import adapt from "@dabsi/store/adapt";
+import { GetNextState, Store } from "@dabsi/store/Store";
 
 export const deleteSymbol = Symbol();
 

@@ -1,5 +1,5 @@
-import { RpcError } from "../../Rpc";
-import { AbstractInputHandler } from "../AbstractInputHandler";
+import { RpcError } from "@dabsi/typerpc/Rpc";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   ErrorOrValue,
   InputError,
@@ -7,8 +7,8 @@ import {
   InputValue,
   InputValueData,
   TInput,
-} from "../Input";
-import { NullableInput } from "./NullableInput";
+} from "@dabsi/typerpc/input/Input";
+import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
 
 export abstract class AbstractNullableInputHandler<
   T extends NullableInput<any, TInput>

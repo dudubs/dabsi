@@ -1,7 +1,7 @@
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
-import { entries } from "../../common/object/entries";
-import { values } from "../../common/object/values";
-import { Renderer } from "../../react/renderer";
+import { entries } from "@dabsi/common/object/entries";
+import { values } from "@dabsi/common/object/values";
+import { Renderer } from "@dabsi/react/renderer";
 
 export function MapView<
   T extends Record<string, ReactElement>,

@@ -1,12 +1,12 @@
-import { Awaited } from "../common/typings2/Async";
-import { If, Not } from "../common/typings2/boolean";
-import { Call } from "../common/typings2/Call";
-import { Fn } from "../common/typings2/Fn";
-import { PartialUndefinedKeys } from "../common/typings2/PartialUndefinedKeys";
-import { ConfigFactory } from "./ConfigFactory";
-import { GenericConfig, IsGenericConfig } from "./GenericConfig";
-import { AnyRpc, RpcType, RpcUnresolvedConfig, TRpc } from "./Rpc";
-import { RpcHook } from "./RpcHook";
+import { Awaited } from "@dabsi/common/typings2/Async";
+import { If, Not } from "@dabsi/common/typings2/boolean";
+import { Call } from "@dabsi/common/typings2/Call";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { GenericConfig, IsGenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { AnyRpc, RpcType, RpcUnresolvedConfig, TRpc } from "@dabsi/typerpc/Rpc";
+import { RpcHook } from "@dabsi/typerpc/RpcHook";
 
 export type RpcConfigHook<
   T extends TConfigHook & {

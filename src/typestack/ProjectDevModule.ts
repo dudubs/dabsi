@@ -1,7 +1,7 @@
-import { mapObjectToArray } from "../common/object/mapObjectToArray";
-import { Inject, Module } from "../typedi";
-import { DevModule } from "./DevModule";
-import { ProjectModule } from "./ProjectModule";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { Inject, Module } from "@dabsi/typedi";
+import { DevModule } from "@dabsi/typestack/DevModule";
+import { ProjectModule } from "@dabsi/typestack/ProjectModule";
 
 @Module()
 export class ProjectDevModule {

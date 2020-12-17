@@ -1,6 +1,6 @@
 import {ReactElement} from "react";
-import {_buildElement} from "../buildElement";
-import {ObjectBuilder, ValueOrBuilder} from "../buildObject";
+import {_buildElement} from "@dabsi/common/object/buildElement";
+import {ObjectBuilder, ValueOrBuilder} from "@dabsi/common/object/buildObject";
 
 export function elementBuilder<P>(
     ...builders: ObjectBuilder<ReactElement<P, any>>[]

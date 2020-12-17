@@ -1,12 +1,12 @@
 import React from "react";
-import { logBeforeEach } from "../../jasmine/logBeforeEach";
-import { testRpc } from "../RpcTester";
-import { testWidgetView } from "../WidgetViewTester";
-import { InputErrorHook } from "./InputErrorHook";
-import { InputErrorHookView } from "./InputErrorHookView";
-import { testInput } from "./InputTester";
-import { TestInput, TestInputView } from "./InputTests";
-import { TextInput } from "./text-input/TextInput";
+import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
+import { testRpc } from "@dabsi/typerpc/RpcTester";
+import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
+import { InputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
+import { InputErrorHookView } from "@dabsi/typerpc/input/InputErrorHookView";
+import { testInput } from "@dabsi/typerpc/input/InputTester";
+import { TestInput, TestInputView } from "@dabsi/typerpc/input/InputTests";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 
 // InputValueHook()
 testm(__filename, () => {

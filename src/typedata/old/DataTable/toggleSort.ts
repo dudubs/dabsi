@@ -1,4 +1,4 @@
-import { OldAnyDataTable, DataTableOld } from "./DataTable";
+import { OldAnyDataTable, DataTableOld } from "@dabsi/typedata/old/DataTable/DataTable";
 
 declare module "./DataTable" {
   interface DataTable<T, Props> {

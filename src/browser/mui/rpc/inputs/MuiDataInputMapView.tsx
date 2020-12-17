@@ -1,15 +1,15 @@
 import Grid, { GridProps } from "@material-ui/core/Grid";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import React, { ReactNode } from "react";
-import { PartialKeys } from "../../../../common/typings2/PartialUndefinedKeys";
-import { Lang } from "../../../../lang/Lang";
-import { SystemView } from "../../../../system/view/SystemView";
-import { AnyDataInputMap } from "../../../../typerpc/input/data-input-map/DataInputMap";
+import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Lang } from "@dabsi/lang/Lang";
+import { SystemView } from "@dabsi/system/view/SystemView";
+import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 import {
   DataInputMapView,
   DataInputMapViewProps,
-} from "../../../../typerpc/input/data-input-map/DataInputMapView";
-import { RpcConnection } from "../../../../typerpc/Rpc";
+} from "@dabsi/typerpc/input/data-input-map/DataInputMapView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
 
 export type MuiDataInputMapViewProps<
   C extends RpcConnection<AnyDataInputMap>

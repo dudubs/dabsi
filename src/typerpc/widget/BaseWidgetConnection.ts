@@ -1,6 +1,9 @@
-import { touchObject } from "../../common/object/touchObject";
-import { RpcCommand } from "../Rpc";
-import { _WidgetConnection, AnyWidget, TWidget } from "./Widget";
+import { RpcCommand } from "@dabsi/typerpc/Rpc";
+import {
+  AnyWidget,
+  TWidget,
+  _WidgetConnection,
+} from "@dabsi/typerpc/widget/Widget";
 
 export class BaseWidgetConnection implements _WidgetConnection<TWidget> {
   constructor(

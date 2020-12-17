@@ -1,12 +1,12 @@
 import { ReactElement } from "react";
-import { Awaitable } from "../../../common/typings2/Async";
-import { ViewState } from "../../../react/view/ViewState";
-import { RpcConnection } from "../../Rpc";
-import { WidgetElement, WidgetType } from "../../widget/Widget";
-import { AbstractInputView } from "../AbstractInputView";
-import { BoolInput } from "./BoolInput";
-import { AnyInput, InputValueData, InputError, InputType } from "../Input";
-import { InputErrorOrData, InputView, InputViewProps } from "../InputView";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { ViewState } from "@dabsi/react/view/ViewState";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
+import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
+import { AnyInput, InputValueData, InputError, InputType } from "@dabsi/typerpc/input/Input";
+import { InputErrorOrData, InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
 
 export type BoolInputViewProps<
   C extends RpcConnection<BoolInput>

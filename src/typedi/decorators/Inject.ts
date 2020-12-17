@@ -1,5 +1,5 @@
-import { getInjectableMetadata, Injectable } from "./Injectable";
-import { Resolver } from "../Resolver";
+import { getInjectableMetadata, Injectable } from "@dabsi/typedi/decorators/Injectable";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 export function Inject<T>(resolver?: Resolver<T>): ParameterDecorator {
   return (target: Function, propertyName, index: number) => {

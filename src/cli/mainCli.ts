@@ -2,14 +2,14 @@ import { spawnSync } from "child_process";
 import fs from "fs";
 import path, { relative, resolve } from "path";
 import yargs from "yargs";
-import { readdirRecursiveSync } from "../filesystem/readdirRecursiveSync";
+import { readdirRecursiveSync } from "@dabsi/filesystem/readdirRecursiveSync";
 import {
   DABSI_CURRENT_PATH,
   DABSI_NODE_OPTIONS,
   DABSI_PATH,
   DABSI_SRC_PATH,
   NODE_MODULES_PATH,
-} from "../index";
+} from "@dabsi/index";
 
 export function mainCli(): boolean {
   yargs.command(

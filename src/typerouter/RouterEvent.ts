@@ -1,5 +1,5 @@
-import { Emittable } from "../react/reactor/Reactor";
-import { RouterLocation } from "./RouterLocation";
+import { Emittable } from "@dabsi/react/reactor/Reactor";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 export const RouterEvent = Emittable<{
   type: "push";

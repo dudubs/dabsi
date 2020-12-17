@@ -1,6 +1,6 @@
 import { Context, createContext } from "react";
-import { touchMap } from "../../common/map/touchMap";
-import { Type } from "../../common/typings2/Type";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { Type } from "@dabsi/common/typings2/Type";
 
 const contexts = new WeakMap();
 

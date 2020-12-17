@@ -1,8 +1,7 @@
-import { isConstructorOf } from "../common/object/isConstructorOf";
-import { Awaitable } from "../common/typings2/Async";
-import { AbstractRpcHandler } from "./AbstractRpcHandler";
-import { AnyRpc, AnyRpcHandler, IRpcHandler, RpcUnresolvedConfig } from "./Rpc";
-import { RpcNamespace } from "./RpcNamespace";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
+import { AnyRpc, IRpcHandler, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 
 type T = RpcNamespace;
 

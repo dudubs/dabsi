@@ -1,10 +1,10 @@
 // TODO: AbstractInputView
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
-import { Awaitable } from "../../common/typings2/Async";
-import { ViewState } from "../../react/view/ViewState";
-import { RpcConnection } from "../Rpc";
-import { AbstractWidgetView } from "../widget/AbstractWidgetView";
-import { WidgetType } from "../widget/Widget";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { ViewState } from "@dabsi/react/view/ViewState";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 // TODO: type InputView
 import {
   AnyInput,
@@ -13,9 +13,9 @@ import {
   InputType,
   InputValueData,
   InputValueElement,
-} from "./Input";
-import { InputErrorElementMap, InputView, InputViewProps } from "./InputView";
-import { InputViewChildren } from "./InputViewChildren";
+} from "@dabsi/typerpc/input/Input";
+import { InputErrorElementMap, InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
 
 export abstract class AbstractInputView<
     C extends AnyInputConnection,

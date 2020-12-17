@@ -1,4 +1,4 @@
-import { IsNever } from "./IsNever";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 
 export type IsAny<T> = 0 extends 1 & T ? true : false;
 export type HasKeys<T> = IsNever<T> extends true

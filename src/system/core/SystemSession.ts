@@ -1,5 +1,5 @@
-import { Session } from "../../system-old/server/acl/Session";
-import { DataSelector } from "../../typedata/DataSelector";
+import { Session } from "@dabsi/system-old/server/acl/Session";
+import { DataSelector } from "@dabsi/typedata/DataSelector";
 
 export class SystemSession extends DataSelector(Session, {
   pick: [],

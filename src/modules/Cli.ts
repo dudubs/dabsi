@@ -1,7 +1,7 @@
 import yargs from "yargs";
-import { Awaitable } from "../common/typings2/Async";
-import { Module } from "../typedi";
-import { HooksInstaller } from "./HooksInstaller";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Module } from "@dabsi/typedi";
+import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
 
 @Module()
 export class Cli {

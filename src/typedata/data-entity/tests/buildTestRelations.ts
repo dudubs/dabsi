@@ -1,5 +1,5 @@
 import {Connection} from "typeorm";
-import {entries} from "../../../common/object/entries";
+import {entries} from "@dabsi/common/object/entries";
 
 
 export async function buildTestRelations(getConnection:()=> Connection,

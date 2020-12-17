@@ -1,5 +1,5 @@
-import adapt from "../adapt";
-import { Store } from "../Store";
+import adapt from "@dabsi/store/adapt";
+import { Store } from "@dabsi/store/Store";
 
 const op = "clear" as const;
 

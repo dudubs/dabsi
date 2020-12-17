@@ -1,25 +1,25 @@
 import { Connection } from "typeorm";
-import { reversed } from "../../../common/array/reversed";
-import { touchMap } from "../../../common/map/touchMap";
-import { entries } from "../../../common/object/entries";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { mapObject } from "../../../common/object/mapObject";
-import { touchObject } from "../../../common/object/touchObject";
-import { values } from "../../../common/object/values";
-import { Type } from "../../../common/typings2/Type";
-import { WeakId } from "../../../common/WeakId";
-import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { getExpNode } from "../../../typedata/data-exp/getExpNode";
-import { DataCursor, EmptyDataCursor } from "../../../typedata/DataCursor";
-import { DataTypeInfo } from "../../../typedata/DataTypeInfo";
-import { DataEntityCursor } from "../../../typedata/data-entity/DataEntityCursor";
-import { DataEntityExpTranslatorToDataQueryExp } from "../../../typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
-import { DataEntityQueryExpTranslatorToSql } from "../../../typedata/data-entity/DataEntityQueryExpTranslatorToSql";
-import { AclCriterion, AclCriterionExps } from "./AclCriterion";
-import { AclCriterionExp, AclExp, AclExpMap } from "./AclExp";
-import { AclTokenTree } from "./AclTokenTree";
-import { Permission } from "./Permission";
-import { User } from "./User";
+import { reversed } from "@dabsi/common/array/reversed";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { touchObject } from "@dabsi/common/object/touchObject";
+import { values } from "@dabsi/common/object/values";
+import { Type } from "@dabsi/common/typings2/Type";
+import { WeakId } from "@dabsi/common/WeakId";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { getExpNode } from "@dabsi/typedata/data-exp/getExpNode";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
+import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
+import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
+import { DataEntityQueryExpTranslatorToSql } from "@dabsi/typedata/data-entity/DataEntityQueryExpTranslatorToSql";
+import { AclCriterion, AclCriterionExps } from "@dabsi/system-old/server/acl/AclCriterion";
+import { AclCriterionExp, AclExp, AclExpMap } from "@dabsi/system-old/server/acl/AclExp";
+import { AclTokenTree } from "@dabsi/system-old/server/acl/AclTokenTree";
+import { Permission } from "@dabsi/system-old/server/acl/Permission";
+import { User } from "@dabsi/system-old/server/acl/User";
 
 export class AclQuery {
   constructor(protected connection: Connection) {}

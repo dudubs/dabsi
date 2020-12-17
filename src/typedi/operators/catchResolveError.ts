@@ -1,7 +1,7 @@
-import { RpcError } from "../../typerpc/Rpc";
-import { resolve } from "../resolve";
-import { ResolveError } from "../ResolveError";
-import { CustomResolver, Resolver } from "../Resolver";
+import { RpcError } from "@dabsi/typerpc/Rpc";
+import { resolve } from "@dabsi/typedi/resolve";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 export function catchResolveError<T>(
   resolver: Resolver<T>,

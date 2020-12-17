@@ -1,4 +1,4 @@
-import nested from "../common/string/nested";
+import nested from "@dabsi/common/string/nested";
 
 export class ResolveError extends Error {
   constructor(message: string) {

@@ -1,6 +1,6 @@
-import { Awaited } from "../typings2/Async";
-import { ExtractKeys } from "../typings2/ExtractKeys";
-import { Fn } from "../typings2/Fn";
+import { Awaited } from "@dabsi/common/typings2/Async";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Fn } from "@dabsi/common/typings2/Fn";
 
 declare global {
   interface Object {

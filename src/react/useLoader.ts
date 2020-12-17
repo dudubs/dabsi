@@ -1,5 +1,5 @@
 import { useAsync } from "react-async-hook";
-import { Awaitable } from "../common/typings2/Async";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 
 export function useLoader<T, S>(
   callback: () => Awaitable<T>,

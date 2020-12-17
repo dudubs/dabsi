@@ -1,4 +1,4 @@
-import { Renderer } from "./renderer";
+import { Renderer } from "@dabsi/react/renderer";
 
 export type RendererOrProps<
   P extends object,

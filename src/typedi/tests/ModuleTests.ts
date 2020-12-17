@@ -1,9 +1,9 @@
 // import yargs from "yargs";
-// import { Inject } from "./Inject";
-// import { Cli } from "../modules/Cli";
-// import { ExpressBuilder } from "../modules/ExpressModule";
-// import { Module } from "./Module";
-// import { ModuleRunner } from "./ModuleRunner";
+// import { Inject } from "@dabsi/typedi/tests/Inject";
+// import { Cli } from "@dabsi/typedi/modules/Cli";
+// import { ExpressBuilder } from "@dabsi/typedi/modules/ExpressModule";
+// import { Module } from "@dabsi/typedi/tests/Module";
+// import { ModuleRunner } from "@dabsi/typedi/tests/ModuleRunner";
 //
 // @Module()
 // export class MyModule {

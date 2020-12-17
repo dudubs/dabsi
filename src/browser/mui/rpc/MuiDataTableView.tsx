@@ -11,28 +11,34 @@ import TableRow from "@material-ui/core/TableRow";
 import { TypographyProps } from "@material-ui/core/Typography";
 import * as React from "react";
 import { ComponentProps, ReactElement, ReactNode, useRef } from "react";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { Awaitable } from "../../../common/typings2/Async";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { Lang } from "../../../lang/Lang";
-import { LangKey } from "../../../lang/LangKey";
-import { TableLayout } from "../../../react/TableLayout";
-import { RpcConnection } from "../../../typerpc/Rpc";
-import { AnyDataTable } from "../../../typerpc/widget/data-table/DataTable";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Lang } from "@dabsi/lang/Lang";
+import { LangKey } from "@dabsi/lang/LangKey";
+import { TableLayout } from "@dabsi/react/TableLayout";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import {
   DataTableView,
   DataTableViewProps,
-} from "../../../typerpc/widget/data-table/DataTableView";
+} from "@dabsi/typerpc/widget/data-table/DataTableView";
 
-import { WidgetType } from "../../../typerpc/widget/Widget";
-import { MuiButton, MuiButtonProps } from "../components/MuiButton";
-import { MuiDeleteButton } from "../components/MuiDeleteButton";
-import { MuiTableCell, MuiTableColumnProps } from "../components/MuiTableCell";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import {
+  MuiButton,
+  MuiButtonProps,
+} from "@dabsi/browser/mui/components/MuiButton";
+import { MuiDeleteButton } from "@dabsi/browser/mui/components/MuiDeleteButton";
+import {
+  MuiTableCell,
+  MuiTableColumnProps,
+} from "@dabsi/browser/mui/components/MuiTableCell";
 import {
   MuiTableToolbar,
   MuiTableToolbarProps,
-} from "../components/MuiTableToolbar";
+} from "@dabsi/browser/mui/components/MuiTableToolbar";
 import Button from "@material-ui/core/Button";
 
 type MuiDataTableViewColumnProps<
@@ -71,19 +77,12 @@ export type MuiDataTableViewProps<
 
   MuiTableToolbarProps?: Omit<MuiTableToolbarProps, "actions">;
 
-  // TODO: onAddClick
-
-  // TODO: selectActions
-
-  // Assign<MuiDataTableActionProps, {}>
   toolbarActions?: Record<
     string,
     MuiButtonProps<{
       onClick(props: { table: Readonly<DataTableView<C>> });
     }>
   >;
-
-  toolbar?: React.ReactElement;
 
   columns?: PartialUndefinedKeys<
     {
@@ -128,9 +127,8 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
     MuiTableToolbarProps,
     MuiDeleteButtonProps,
     toolbarActions = {},
-    toolbar,
     disableToolbar,
-    title,
+    title = MuiTableToolbarProps?.title,
     ...nextProps
   } = props as MuiDataTableViewProps<RpcConnection<AnyDataTable>>;
 
@@ -156,6 +154,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
         await tableRef.current!.reloadAfterRemove(event.key);
       },
     });
+
   return (
     <DataTableView {...nextProps} ref={tableRef}>
       {table => (
@@ -235,7 +234,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                   }
                   staticActions={
                     <>
-                      {toolbar}
+                      {MuiTableToolbarProps?.staticActions}
                       {mapObjectToArray(toolbarActions, (props, key) => (
                         <MuiButton
                           iconOnly

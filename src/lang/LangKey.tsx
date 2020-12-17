@@ -1,9 +1,9 @@
 import { ReactElement, ReactNode, useMemo } from "react";
-import { fromPropertyCase } from "../common/string/fromPropertyCase";
-import { matchCase, SourceCase } from "../common/string/matchCase";
-import { toConstantCase } from "../common/string/toConstantCase";
-import { LangPropsType } from "./Lang";
-import { LangView } from "./LangView";
+import { fromPropertyCase } from "@dabsi/common/string/fromPropertyCase";
+import { matchCase, SourceCase } from "@dabsi/common/string/matchCase";
+import { toConstantCase } from "@dabsi/common/string/toConstantCase";
+import { LangPropsType } from "@dabsi/lang/Lang";
+import { LangView } from "@dabsi/lang/LangView";
 import React from "react";
 
 export function LangKey(props: {

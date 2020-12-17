@@ -5,9 +5,9 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { DataRelation } from "../../../typedata/DataRelation";
-import { Group } from "./Group";
-import { User } from "./User";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { User } from "@dabsi/system-old/server/acl/User";
 
 @Entity({ name: "acl/permissions" })
 @Index(["user", "token"])

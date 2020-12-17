@@ -1,7 +1,7 @@
 import { ReactElement, useState } from "react";
-import { useRoute } from "./ReactRouter";
-import { Router, TRouter } from "./Router";
-import { RouterLocation } from "./RouterLocation";
+import { useRoute } from "@dabsi/typerouter/ReactRouter";
+import { Router, TRouter } from "@dabsi/typerouter/Router";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 export function ReactRouterLink<T extends TRouter>({
   children,

@@ -1,12 +1,18 @@
-import { entries } from "../common/object/entries";
-import { Lazy } from "../common/patterns/lazy";
-import { joinUrl } from "../common/string/joinUrl";
-import { HasKeys } from "../common/typings2/boolean";
-import { Override } from "../common/typings2/Override";
-import { inspect } from "../logging/inspect";
-import { Emitter } from "../react/reactor/useEmitter";
-import { AnyRouter, Router, RouterAt, RouterType, TRouter } from "./Router";
-import { RouterEvent } from "./RouterEvent";
+import { entries } from "@dabsi/common/object/entries";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { joinUrl } from "@dabsi/common/string/joinUrl";
+import { HasKeys } from "@dabsi/common/typings2/boolean";
+import { Override } from "@dabsi/common/typings2/Override";
+import { inspect } from "@dabsi/logging/inspect";
+import { Emitter } from "@dabsi/react/reactor/useEmitter";
+import {
+  AnyRouter,
+  Router,
+  RouterAt,
+  RouterType,
+  TRouter,
+} from "@dabsi/typerouter/Router";
+import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
 
 export type AnyRouterLocation = RouterLocation<TRouter>;
 

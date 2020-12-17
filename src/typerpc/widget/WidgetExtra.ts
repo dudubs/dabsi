@@ -1,16 +1,16 @@
-import { Awaitable } from "../../common/typings2/Async";
-import { Override } from "../../common/typings2/Override";
-import { RpcUnresolvedConfig } from "../Rpc";
-import { RpcHook } from "../RpcHook";
-import { InlineObject, InlineObjectType } from "./InlineObjectType";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Override } from "@dabsi/common/typings2/Override";
+import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcHook } from "@dabsi/typerpc/RpcHook";
+import { InlineObject, InlineObjectType } from "@dabsi/typerpc/widget/InlineObjectType";
 import {
   AnyWidget,
   Widget,
   WidgetElement,
   WidgetElementState,
   WidgetType,
-} from "./Widget";
-import { WidgetExtraHandler } from "./WidgetExtraHandler";
+} from "@dabsi/typerpc/widget/Widget";
+import { WidgetExtraHandler } from "@dabsi/typerpc/widget/WidgetExtraHandler";
 
 // WidgetExtra
 export type WidgetExtra<

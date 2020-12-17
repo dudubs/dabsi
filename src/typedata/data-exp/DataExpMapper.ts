@@ -4,8 +4,8 @@ import {
   DataCompareOperators,
   DataParameterExp,
   DataStringExp,
-} from "./DataExp";
-import { DataExpTranslator } from "./DataExpTranslator";
+} from "@dabsi/typedata/data-exp/DataExp";
+import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
 
 export class DataExpMapper extends DataExpTranslator<DataExp<any>> {
   False: DataExp<any> = false;

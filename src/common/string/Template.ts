@@ -1,4 +1,4 @@
-import {Callable} from "../object/Callable";
+import {Callable} from "@dabsi/common/object/Callable";
 
 
 export type Template<K extends PropertyKey> = Callable<(args: Record<K, any>) => string, { keys: K[] }>;

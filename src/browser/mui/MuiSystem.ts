@@ -10,7 +10,7 @@ import { create } from "jss";
 import { createElement, ReactNode } from "react";
 
 import { ThemeProvider as JssThemeProvider } from "styled-components";
-import { toReactElement } from "../../react/utils/toReactElement";
+import { toReactElement } from "@dabsi/react/utils/toReactElement";
 
 export { MuiTheme, MuiThemeProvider };
 
@@ -34,7 +34,23 @@ const jss = create({
   plugins: [...jssPreset().plugins],
 });
 
-export const MuiDefaultTheme = createMuiTheme({});
+export const MuiDefaultTheme = createMuiTheme({
+  overrides: {
+    MuiButton: {
+      label: {
+        textTransform: "none",
+      },
+    },
+    MuiInputLabel: {
+      root: { fontSize: "13px" },
+    },
+    MuiOutlinedInput: {
+      input: {
+        padding: "15.5px 13px",
+      },
+    },
+  },
+});
 
 export function MuiProvider({ children }: { children: ReactNode }) {
   children = createElement(MuiThemeProvider, {

@@ -1,5 +1,5 @@
-import { setViewStateKey } from "./setViewStateKey";
-import { View } from "./View";
+import { setViewStateKey } from "@dabsi/react/view/setViewStateKey";
+import { View } from "@dabsi/react/view/View";
 
 export function ViewState(): { (target: View<any>, key): void };
 export function ViewState<Method extends PropertyKey>(

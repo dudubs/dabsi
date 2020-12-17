@@ -1,10 +1,10 @@
-import { hasKeys } from "../../../common/object/hasKeys";
-import { mapObjectAsync } from "../../../common/object/mapObject";
-import { Awaitable } from "../../../common/typings2/Async";
-import { AnyRpc, RpcUnresolvedConfig } from "../../Rpc";
-import { IWidgetHandler } from "../../widget/Widget";
-import { mapChildrenHandlerAsync } from "../../widget/widget-map/mapChildrenHandlerAsync";
-import { AbstractInputHandler } from "../AbstractInputHandler";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { AnyRpc, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+import { mapChildrenHandlerAsync } from "@dabsi/typerpc/widget/widget-map/mapChildrenHandlerAsync";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
@@ -12,8 +12,8 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { AnyInputMap } from "./InputMap";
+} from "@dabsi/typerpc/input/Input";
+import { AnyInputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 
 type T = AnyInputMap;
 

@@ -1,4 +1,4 @@
-import { IsNever } from "./boolean/IsNever";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 
 export type NonNullableAt<
   T,

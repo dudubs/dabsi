@@ -1,5 +1,5 @@
 import {createElement, ReactElement, ReactNode} from "react";
-import {toReactElement} from "./toReactElement";
+import {toReactElement} from "@dabsi/react/utils/toReactElement";
 
 export function withHooks<P>(
     renderer: (props: P) => ReactNode

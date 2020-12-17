@@ -1,12 +1,12 @@
 import { ComponentProps, createElement, ReactElement } from "react";
 import * as ReactTesterRenderer from "react-test-renderer";
-import { Timeout } from "../common/async/Timeout";
-import { buildTests } from "../jasmine/buildTests";
-import { RpcConnection } from "./Rpc";
-import { WidgetViewClass } from "./widget/AbstractWidgetView";
-import { AnyWidget, AnyWidgetConnection, WidgetElement } from "./widget/Widget";
-import { WidgetViewProps } from "./widget/WidgetView";
-import { RpcTester } from "./RpcTester";
+import { Timeout } from "@dabsi/common/async/Timeout";
+import { buildTests } from "@dabsi/jasmine/buildTests";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { WidgetViewClass } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { AnyWidget, AnyWidgetConnection, WidgetElement } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { RpcTester } from "@dabsi/typerpc/RpcTester";
 
 export type WidgetTester<T extends AnyWidget> = {
   element: WidgetElement<T>;

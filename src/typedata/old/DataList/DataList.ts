@@ -1,8 +1,8 @@
 import {createElement, Fragment, ReactNode} from "react";
-import {DataKey} from "../../DataKey";
-import {DataOrder} from "../../DataOrder";
-import {DataRow} from "../../DataRow";
-import {AbstractDataList, AbstractDataListProps} from "./AbstractDataList";
+import {DataKey} from "@dabsi/typedata/DataKey";
+import {DataOrder} from "@dabsi/typedata/DataOrder";
+import {DataRow} from "@dabsi/typedata/DataRow";
+import {AbstractDataList, AbstractDataListProps} from "@dabsi/typedata/old/DataList/AbstractDataList";
 
 export type DataListProps<T> = AbstractDataListProps<T> & {
     renderItem(props: {

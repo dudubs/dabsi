@@ -1,3 +1,3 @@
-import { WidgetNamespace } from "../../../typerpc/widget/widget-namespace/WidgetNamspace";
+import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 
 export default WidgetNamespace();

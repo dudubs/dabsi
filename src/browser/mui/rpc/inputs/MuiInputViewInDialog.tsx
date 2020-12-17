@@ -1,12 +1,12 @@
 import React, { MutableRefObject, useRef, useState } from "react";
-import { Renderer } from "../../../../react/renderer";
-import { mergeProps } from "../../../../react/utils/mergeProps";
+import { Renderer } from "@dabsi/react/renderer";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import {
   AnyInputConnection,
   InputValue,
-} from "../../../../typerpc/input/Input";
-import { InputView, InputViewProps } from "../../../../typerpc/input/InputView";
-import { MuiDialog, MuiDialogProps } from "../../components/MuiDialog";
+} from "@dabsi/typerpc/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { MuiDialog, MuiDialogProps } from "@dabsi/browser/mui/components/MuiDialog";
 
 export function MuiInputViewInDialog<C extends AnyInputConnection>({
   children,

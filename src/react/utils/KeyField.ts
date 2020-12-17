@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
-import { ExtractKeys } from "../../common/typings2/ExtractKeys";
-import { withDefaultKey } from "./withDefaultKey";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { withDefaultKey } from "@dabsi/react/utils/withDefaultKey";
 
 export type KeyField<T> = ExtractKeys<T, string> | ((item: T) => string);
 

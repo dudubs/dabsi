@@ -1,4 +1,4 @@
-import {BSON2} from "../BSON2";
+import {BSON2} from "@dabsi/common/BSON2";
 
 
 testm(__filename, () => {

@@ -1,6 +1,6 @@
 import {createElement, ReactElement} from "react";
-import {LangTemplate, LangTemplateProps} from "./LangTemplate";
-import {LangView} from "./LangView";
+import {LangTemplate, LangTemplateProps} from "@dabsi/lang/LangTemplate";
+import {LangView} from "@dabsi/lang/LangView";
 
 export type LangTokenElement = ReactElement<LangTokenProps>;
 

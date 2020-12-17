@@ -9,10 +9,10 @@ import {
   OneToOne,
 } from "typeorm";
 import { JoinTableMultipleColumnsOptions } from "typeorm/decorator/options/JoinTableMultipleColumnsOptions";
-import { MapFactory } from "../../../common/map/mapFactory";
-import { definedAt } from "../../../common/object/definedAt";
-import { Type } from "../../../common/typings2/Type";
-import { DataRelation } from "../../../typedata/DataRelation";
+import { MapFactory } from "@dabsi/common/map/mapFactory";
+import { definedAt } from "@dabsi/common/object/definedAt";
+import { Type } from "@dabsi/common/typings2/Type";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
 
 const targetToRelationKeys = MapFactory(
   (target: Function) => new Set<string>()

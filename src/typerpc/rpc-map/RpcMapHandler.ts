@@ -1,13 +1,13 @@
-import { Awaitable } from "../../common/typings2/Async";
-import { AbstractRpcHandler } from "../AbstractRpcHandler";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
 import {
   AnyRpc,
   IRpcHandler,
   RpcError,
   RpcType,
   RpcUnresolvedConfig,
-} from "../Rpc";
-import { AnyRpcMap } from "./RpcMap";
+} from "@dabsi/typerpc/Rpc";
+import { AnyRpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 
 export type T = AnyRpcMap;
 export class RpcMapHandler<R extends AnyRpcMap>

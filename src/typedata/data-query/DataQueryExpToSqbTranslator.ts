@@ -1,10 +1,10 @@
 import { SelectQueryBuilder } from "typeorm";
-import { entries } from "../../common/object/entries";
-import { hasKeys } from "../../common/object/hasKeys";
-import { DataExp, DataParameterExp } from "../data-exp/DataExp";
-import { AbstractDataEntityQueryExpTranslator } from "../data-entity/AbstractDataEntityQueryExpTranslator";
-import { DataQuery } from "./DataQueryExp";
-import { DataQueryExpTranslator } from "./DataQueryExpTranslator";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { DataExp, DataParameterExp } from "@dabsi/typedata/data-exp/DataExp";
+import { AbstractDataEntityQueryExpTranslator } from "@dabsi/typedata/data-entity/AbstractDataEntityQueryExpTranslator";
+import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
+import { DataQueryExpTranslator } from "@dabsi/typedata/data-query/DataQueryExpTranslator";
 
 let counter = 0;
 

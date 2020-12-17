@@ -1,12 +1,12 @@
 import React from "react";
-import { Override } from "../../../common/typings2/Override";
-import { Renderer } from "../../../react/renderer";
-import { ViewState } from "../../../react/view/ViewState";
-import { RpcConnection } from "../../Rpc";
-import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyWidgetConnection, WidgetElement, WidgetType } from "../Widget";
-import { WidgetViewProps } from "../WidgetView";
-import { AnyTabsWidget } from "./TabsWidget";
+import { Override } from "@dabsi/common/typings2/Override";
+import { Renderer } from "@dabsi/react/renderer";
+import { ViewState } from "@dabsi/react/view/ViewState";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { AnyWidgetConnection, WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { AnyTabsWidget } from "@dabsi/typerpc/widget/tabs-widget/TabsWidget";
 
 export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 

@@ -1,4 +1,4 @@
-import {merge, merger} from "../merge";
+import {merge, merger} from "@dabsi/common/object/merge";
 
 
 

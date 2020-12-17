@@ -1,23 +1,23 @@
-import { HasKeys, IsUndefined } from "../../common/typings2/boolean";
-import { IsNever } from "../../common/typings2/boolean/IsNever";
-import { Pluck } from "../../common/typings2/Pluck";
-import { BaseType, WithBaseType } from "../BaseType";
+import { HasKeys, IsUndefined } from "@dabsi/common/typings2/boolean";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { BaseType, WithBaseType } from "@dabsi/typedata/BaseType";
 
-import { DataFieldsRow } from "../DataFields";
+import { DataFieldsRow } from "@dabsi/typedata/DataFields";
 import {
   DataTypeKey,
   DataUnionChildren,
   DataUnionChildrenKey,
   DataUnionChildrenOf,
   DataUnionWithChildren,
-} from "../DataUnion";
-import { MergeDataSelection } from "./DataSelectionMerger";
+} from "@dabsi/typedata/DataUnion";
+import { MergeDataSelection } from "@dabsi/typedata/data-selection/DataSelectionMerger";
 import {
   MapRelation,
   NonRelationKeys,
   DataRelationKeys,
   DataRelationTypeAt,
-} from "../DataRelation";
+} from "@dabsi/typedata/DataRelation";
 
 type _PickRow<T, S> = S extends { pick: ReadonlyArray<infer K> }
   ? Pick<T, Extract<K | DataTypeKey, NonRelationKeys<T>>>

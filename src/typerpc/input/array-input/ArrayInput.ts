@@ -1,11 +1,11 @@
-import { Awaitable } from "../../../common/typings2/Async";
-import { If, Not } from "../../../common/typings2/boolean";
-import { Is } from "../../../common/typings2/boolean/Is";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { RpcUndefinedConfig, RpcUnresolvedConfig } from "../../Rpc";
-import { RpcFnMap } from "../../rpc-fn/RpcFn";
-import { RpcMap } from "../../rpc-map/RpcMap";
-import { ToAsync, WidgetElement } from "../../widget/Widget";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { If, Not } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { RpcUndefinedConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcFnMap } from "@dabsi/typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { ToAsync, WidgetElement } from "@dabsi/typerpc/widget/Widget";
 import {
   AnyInput,
   ErrorOrValue,
@@ -15,12 +15,12 @@ import {
   InputValue,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { InputErrorMap } from "../input-map/InputMap";
-import { InputErrorHook } from "../InputErrorHook";
-import { LengthError } from "../LengthError";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
-import { ArrayInputHandler } from "./ArrayInputHandler";
+} from "@dabsi/typerpc/input/Input";
+import { InputErrorMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { InputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
+import { LengthError } from "@dabsi/typerpc/input/LengthError";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
+import { ArrayInputHandler } from "@dabsi/typerpc/input/array-input/ArrayInputHandler";
 
 export type TArrayInput = { NewItem: AnyInput; Item: AnyInput };
 

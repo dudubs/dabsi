@@ -1,13 +1,13 @@
 import * as React from "react";
-import { Awaitable } from "../../common/typings2/Async";
-import { Override } from "../../common/typings2/Override";
-import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
-import { NoRpc } from "../NoRpc";
-import { RpcConnection, RpcUnresolvedConfig } from "../Rpc";
-import { testRpc } from "../RpcTester";
-import { testWidgetView } from "../WidgetViewTester";
-import { AbstractInputHandler } from "./AbstractInputHandler";
-import { AbstractInputView } from "./AbstractInputView";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Override } from "@dabsi/common/typings2/Override";
+import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { RpcConnection, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { testRpc } from "@dabsi/typerpc/RpcTester";
+import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
 import {
   AnyInput,
   Input,
@@ -18,8 +18,8 @@ import {
   InputValueData,
   InputValueElement,
   TInput,
-} from "./Input";
-import { InputViewProps } from "./InputView";
+} from "@dabsi/typerpc/input/Input";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
 
 export type TestInput = Input<
   Override<

@@ -1,7 +1,7 @@
-import { WeakMapFactory } from "../../common/map/mapFactory";
-import { WithMetaType } from "../../common/MetaType";
-import { useReactor } from "./hooks";
-import { Emittable, EmittableType } from "./Reactor";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { WithMetaType } from "@dabsi/common/MetaType";
+import { useReactor } from "@dabsi/react/reactor/hooks";
+import { Emittable, EmittableType } from "@dabsi/react/reactor/Reactor";
 
 export type Emitter = {
   <T extends Emittable<any>>(emittable: T, event: EmittableType<T>): void;

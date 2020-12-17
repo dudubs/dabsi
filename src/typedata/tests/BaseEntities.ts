@@ -7,9 +7,9 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from "typeorm";
-import { TestRelation } from "../../typeorm/relations/tests/TestRelation";
-import { DataRelation } from "../DataRelation";
-import { DataUnion } from "../DataUnion";
+import { TestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataUnion } from "@dabsi/typedata/DataUnion";
 
 let randomId = 0;
 

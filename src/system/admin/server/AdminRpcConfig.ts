@@ -1,33 +1,20 @@
-import { AclRequest } from "../../../system-old/server/acl/AclRequest";
-import { Permission } from "../../../system-old/server/acl/Permission";
-import { DataResolvers } from "../../../typedata/DataResolvers";
-import { DataRow } from "../../../typedata/DataRow";
-import { RpcError } from "../../../typerpc/Rpc";
-import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
-import { SystemSession } from "../../core/SystemSession";
-import { AdminRpc } from "../common";
-import { Resolver } from "./../../../typedi/Resolver";
-import { SystemModule } from "./../../core/SystemModule";
+import { AdminRpc } from "@dabsi/system/admin/common";
+import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
+import { SystemSession } from "@dabsi/system/core/SystemSession";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { RpcError } from "@dabsi/typerpc/Rpc";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
-export const AdminRpcConfig = RpcConfigResolver(
+export default RpcConfigResolver(
   AdminRpc,
   {
-    systemModule: SystemModule,
-    aclReq: AclRequest,
-    context: c => c,
+    getConfig: SystemRpcConfigResolver.create(AdminRpc),
     session: DataRow(SystemSession),
-    ...DataResolvers({
-      permissions: Permission,
-    }),
   },
-  c => $ => {
+  c => async $ => {
     const user = c.session.user;
     if (!user) throw new RpcError(`Access denied.`);
 
-    return $({
-      getNamespaceConfig: rpc => {
-        return c.systemModule.resolveRpcConfig(rpc, c.context);
-      },
-    });
+    return $(await c.getConfig());
   }
 );

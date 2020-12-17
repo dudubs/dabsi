@@ -1,11 +1,11 @@
-import React from "react";
 import {
   MuiFormView,
   MuiFormViewProps,
-} from "./MuiFormView";
-import { Lang } from "../../../lang/Lang";
-import { RpcConnection } from "../../../typerpc/Rpc";
-import { AnyForm } from "../../../typerpc/widget/form/Form";
+} from "@dabsi/browser/mui/rpc/MuiFormView";
+import { Lang } from "@dabsi/lang/Lang";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyForm } from "@dabsi/typerpc/widget/form/Form";
+import React from "react";
 
 export function MuiEditFormView<C extends RpcConnection<AnyForm>>(
   props: MuiFormViewProps<C>

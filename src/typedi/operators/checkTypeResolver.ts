@@ -1,7 +1,7 @@
-import { Type } from "../../common/typings2/Type";
-import { getTypeToken } from "../getTypeToken";
-import { ResolverMap } from "../Resolver";
-import { ResolveError } from "../ResolveError";
+import { Type } from "@dabsi/common/typings2/Type";
+import { getTypeToken } from "@dabsi/typedi/getTypeToken";
+import { ResolverMap } from "@dabsi/typedi/Resolver";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export function checkTypeResolver(type: Type<any>, context: ResolverMap<any>) {
   for (

@@ -1,5 +1,5 @@
 import {useEffect} from "react";
-import {useCounter} from "./useCounter";
+import {useCounter} from "@dabsi/react/utils/hooks/useCounter";
 
 export function useInterval(ms): number {
     const [n, next] = useCounter(0);

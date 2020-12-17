@@ -1,8 +1,8 @@
-import { touchMap } from "../common/map/touchMap";
-import { Awaitable } from "../common/typings2/Async";
-import { Is } from "../common/typings2/boolean/Is";
-import { IsNever } from "../common/typings2/boolean/IsNever";
-import { Fn } from "../common/typings2/Fn";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { Fn } from "@dabsi/common/typings2/Fn";
 
 const genericConfigCache = new WeakMap();
 

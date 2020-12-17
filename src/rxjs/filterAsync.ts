@@ -1,6 +1,6 @@
 import { from, MonoTypeOperatorFunction, pipe } from "rxjs";
 import { concatMap, filter, map } from "rxjs/operators";
-import { Awaitable } from "../common/typings2/Async";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 
 export function filterAsync<T>(
   predicate: (value: T, index: number) => Awaitable<boolean>,

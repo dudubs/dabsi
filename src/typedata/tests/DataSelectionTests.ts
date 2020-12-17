@@ -1,7 +1,7 @@
 import {
   AnyDataSelection,
   DataSelection,
-} from "../data-selection/DataSelection";
+} from "@dabsi/typedata/data-selection/DataSelection";
 
 testm(__filename, () => {
   describe("childAt sanity:", () => {

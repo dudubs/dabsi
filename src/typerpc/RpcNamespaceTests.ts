@@ -1,10 +1,10 @@
-import { flat } from "../common/iterator/flat";
-import { entries } from "../common/object/entries";
-import { RpcUnresolvedConfig } from "./Rpc";
-import { RpcFn } from "./rpc-fn/RpcFn";
-import { RpcMap } from "./rpc-map/RpcMap";
-import { RpcNamespace } from "./RpcNamespace";
-import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
+import { flat } from "@dabsi/common/iterator/flat";
+import { entries } from "@dabsi/common/object/entries";
+import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
+import { RpcNamespaceHandler } from "@dabsi/typerpc/RpcNamespaceHandler";
 
 testm(__filename, () => {
   it("sanity", async () => {

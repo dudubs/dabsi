@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
-import { Awaitable } from "../../../common/typings2/Async";
-import { RpcConnection } from "../../Rpc";
-import { AbstractInputView } from "../AbstractInputView";
-import { InputError, InputValueElement } from "../Input";
-import { InputView, InputViewProps } from "../InputView";
-import { NumberInput } from "./NumberInput";
-import { NumberInputLoader, NumberInputOptions } from "./NumberInputLoader";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
+import { InputError, InputValueElement } from "@dabsi/typerpc/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { NumberInput } from "@dabsi/typerpc/input/number-input/NumberInput";
+import { NumberInputLoader, NumberInputOptions } from "@dabsi/typerpc/input/number-input/NumberInputLoader";
 
 export class NumberInputView<
   C extends RpcConnection<NumberInput>

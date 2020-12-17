@@ -1,9 +1,9 @@
-import { WeakMapFactory } from "../common/map/mapFactory";
-import { MetaType, WithMetaType } from "../common/MetaType";
-import { mapObject } from "../common/object/mapObject";
-import { Expect } from "../common/typings2/Expect";
-import { IfNever } from "../common/typings2/IfNever";
-import { Override } from "../common/typings2/Override";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { MetaType, WithMetaType } from "@dabsi/common/MetaType";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { Expect } from "@dabsi/common/typings2/Expect";
+import { IfNever } from "@dabsi/common/typings2/IfNever";
+import { Override } from "@dabsi/common/typings2/Override";
 
 export type AnyRouterMap = Record<string, Router<TRouter>>;
 

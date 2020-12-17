@@ -1,6 +1,6 @@
 import { JoinTable, ManyToMany } from "typeorm";
-import { DataRelation } from "../../typedata/DataRelation";
-import { Owner } from "./acl/Owner";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { Owner } from "@dabsi/system-old/server/acl/Owner";
 
 export function SystemEntity<WithOwners extends boolean = false>({
   withOwners,

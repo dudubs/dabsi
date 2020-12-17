@@ -1,5 +1,5 @@
-import { touchMap } from "../../common/map/touchMap";
-import { MetaType, WithMetaType } from "../../common/MetaType";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { MetaType, WithMetaType } from "@dabsi/common/MetaType";
 
 export type ReactorEvent<T> = new (...args) => T;
 

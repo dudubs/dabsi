@@ -1,5 +1,5 @@
-import { Awaitable } from "../typings2/Async";
-import { entries } from "./entries";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { entries } from "@dabsi/common/object/entries";
 
 export function mapObject<T, R>(
   obj: Record<string, T>,

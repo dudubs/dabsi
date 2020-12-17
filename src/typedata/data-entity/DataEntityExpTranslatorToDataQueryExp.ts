@@ -1,19 +1,19 @@
 import { Connection } from "typeorm";
 import { inspect } from "util";
-import { defined } from "../../common/object/defined";
-import { EntityRelation } from "../../typeorm/relations";
+import { defined } from "@dabsi/common/object/defined";
+import { EntityRelation } from "@dabsi/typeorm/relations";
 import {
   DataCompareOperators,
   DataExp,
   DataParameterExp,
-} from "../data-exp/DataExp";
-import { DataExpMapper } from "../data-exp/DataExpMapper";
-import { DataExpTranslator } from "../data-exp/DataExpTranslator";
-import { DataQueryBuilder } from "../data-query/DataQueryBuilder";
-import { DataQuery, DataQueryExp } from "../data-query/DataQueryExp";
-import { DataTypeInfo } from "../DataTypeInfo";
-import { DataEntityCursor } from "./DataEntityCursor";
-import { DataEntityKey } from "./DataEntityKey";
+} from "@dabsi/typedata/data-exp/DataExp";
+import { DataExpMapper } from "@dabsi/typedata/data-exp/DataExpMapper";
+import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
+import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
+import { DataQuery, DataQueryExp } from "@dabsi/typedata/data-query/DataQueryExp";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
+import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 
 const mapper = Object.seal(new DataExpMapper());
 

@@ -1,6 +1,6 @@
-import { entries } from "../../../common/object/entries";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { values } from "../../../common/object/values";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { values } from "@dabsi/common/object/values";
 
 export class AclTokenTree {
   token?: string;

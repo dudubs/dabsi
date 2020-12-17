@@ -1,5 +1,5 @@
-import { Payload } from "../../../common/typings2/Payload";
-import { getLengthError, LengthError } from "../LengthError";
+import { Payload } from "@dabsi/common/typings2/Payload";
+import { getLengthError, LengthError } from "@dabsi/typerpc/input/LengthError";
 
 export type TextLoaderOptions = {
   pattern?: RegExp;

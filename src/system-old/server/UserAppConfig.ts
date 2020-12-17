@@ -1,16 +1,15 @@
-import { DataRow } from "../../typedata/DataRow";
-import { RpcConfigResolver } from "../../typerpc/RpcConfigResolver";
-import { RpcError } from "../../typerpc/Rpc";
-import { UserApp } from "../common/UserApp";
-import { DataResolvers } from "../../typedata/DataResolvers";
-import { SystemSession } from "../../system/core/SystemSession";
+import { UserApp } from "@dabsi/system-old/common/UserApp";
+import { SystemSession } from "@dabsi/system/core/SystemSession";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { RpcError } from "@dabsi/typerpc/Rpc";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
-export const UserAppConfig = RpcConfigResolver(
+export default RpcConfigResolver(
   UserApp,
   {
     session: DataRow(SystemSession),
   },
-  (c) => ($) => {
+  c => $ => {
     if (!c.session.user) throw new RpcError(`USER_SECURE`);
 
     return $({

@@ -1,9 +1,9 @@
-import { testRpc } from "../../RpcTester";
-import { InputMap } from "../input-map/InputMap";
-import { NumberInput } from "../number-input/NumberInput";
-import { testInput } from "../InputTester";
-import { TextInput } from "../text-input/TextInput";
-import { ArrayInput } from "./ArrayInput";
+import { testRpc } from "@dabsi/typerpc/RpcTester";
+import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { NumberInput } from "@dabsi/typerpc/input/number-input/NumberInput";
+import { testInput } from "@dabsi/typerpc/input/InputTester";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { ArrayInput } from "@dabsi/typerpc/input/array-input/ArrayInput";
 import objectContaining = jasmine.objectContaining;
 
 testm(__filename, () => {

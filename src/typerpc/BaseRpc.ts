@@ -1,22 +1,23 @@
-import { touchMap } from "../common/map/touchMap";
-import { Lazy } from "../common/patterns/lazy";
-import { Fn } from "../common/typings2/Fn";
-import { inspect } from "../logging/inspect";
-import { ConfigFactory } from "./ConfigFactory";
-import { GenericConfig } from "./GenericConfig";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { inspect } from "@dabsi/logging/inspect";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
 import {
+  AnyRpc,
+  AnyRpcHandler,
   IRpc,
+  RpcCommand,
+  RpcOptions,
+  TRpc,
   _RpcResolvedConfig,
   _RpcResolvedHandler,
   _RpcUnresolvedConfig,
-  AnyRpc,
-  AnyRpcHandler,
-  RpcWithoutChildren,
-  RpcCommand,
-  RpcError,
-  RpcOptions,
-  TRpc,
-} from "./Rpc";
+} from "@dabsi/typerpc/Rpc";
+import { Lazy } from "@dabsi/common/patterns/lazy";
 
 type T = TRpc;
 
@@ -30,6 +31,14 @@ const configHandlerCacheMap = new WeakMap<
 
 let isServiceCommand = false;
 
+const getRpcLocator = WeakMapFactory((rpc: AnyRpc) => {
+  const proxy: any = createObjectProxy(rpc.children, child => {
+    return getRpcLocator(child);
+  });
+  proxy.__rpc = rpc;
+  return proxy;
+});
+
 export class BaseRpc implements IRpc<T> {
   rpcType;
 
@@ -37,23 +46,19 @@ export class BaseRpc implements IRpc<T> {
 
   constructor(public options: RpcOptions<T>) {}
 
-  at(key, callback?) {
-    if (typeof key === "function") {
-      const { rpc } = key(makeLoc(this));
-      return rpc;
-      function makeLoc(rpc) {
-        loc.rpc = rpc;
-        return loc;
-        function loc(key, callback?) {
-          const child = rpc.children[key];
-          callback?.(child);
-          return makeLoc(child);
-        }
-      }
+  at(arg) {
+    if (typeof arg === "function") {
+      return arg(getRpcLocator(this)).__rpc;
     }
-
-    callback?.(this.children[key]);
-    return this.children[key];
+    if (typeof arg === "string") {
+      const key = arg;
+      if (key.startsWith(":")) {
+        return (this.children.map || this.children.target).children[
+          key.slice(1)
+        ];
+      }
+      return this.children[key];
+    }
   }
 
   commandRpc(command) {

@@ -1,4 +1,4 @@
-import { useHistory } from "./History";
+import { useHistory } from "@dabsi/typerouter/History";
 import { History } from "history";
 import {
   createElement,
@@ -9,15 +9,15 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useEmittedWithoutState } from "../react/reactor/useEmittedWithoutState";
-import { useEmitter } from "../react/reactor/useEmitter";
-import { createUndefinedContext } from "../react/utils/hooks/createUndefinedContext";
-import { useDefinedContext } from "../react/utils/hooks/useDefinedContext";
-import { getReactRouterMetadata } from "./ReactRouterView";
-import { getRouteByPath, Route } from "./Route";
-import { AnyRouter, Router, TRouter } from "./Router";
-import { RouterEvent } from "./RouterEvent";
-import { RouterLocation } from "./RouterLocation";
+import { useEmittedWithoutState } from "@dabsi/react/reactor/useEmittedWithoutState";
+import { useEmitter } from "@dabsi/react/reactor/useEmitter";
+import { createUndefinedContext } from "@dabsi/react/utils/hooks/createUndefinedContext";
+import { useDefinedContext } from "@dabsi/react/utils/hooks/useDefinedContext";
+import { getReactRouterMetadata } from "@dabsi/typerouter/ReactRouterView";
+import { getRouteByPath, Route } from "@dabsi/typerouter/Route";
+import { AnyRouter, Router, TRouter } from "@dabsi/typerouter/Router";
+import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 export type ReactRouterViewProps = {
   router: AnyRouter;

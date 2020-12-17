@@ -1,5 +1,5 @@
-import {DataTypeInfo} from "../DataTypeInfo";
-import {DBase, DUnion} from "./BaseEntities";
+import {DataTypeInfo} from "@dabsi/typedata/DataTypeInfo";
+import {DBase, DUnion} from "@dabsi/typedata/tests/BaseEntities";
 
 testm(__filename, () => {
     it('DataSelector', () => {

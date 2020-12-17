@@ -1,19 +1,19 @@
 import { Connection, DeepPartial, EntityMetadata, ObjectType } from "typeorm";
-import { mapArrayToObject } from "../../../common/array/mapArrayToObject";
-import { defined } from "../../../common/object/defined";
-import { entries } from "../../../common/object/entries";
-import { isEmptyObject } from "../../../common/object/isEmptyObject";
-import { mapObject } from "../../../common/object/mapObject";
-import { Type } from "../../../common/typings2/Type";
-import { subTest } from "../../../jasmine/subTest";
-import { DataQueryBuilder } from "../../data-query/DataQueryBuilder";
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { defined } from "@dabsi/common/object/defined";
+import { entries } from "@dabsi/common/object/entries";
+import { isEmptyObject } from "@dabsi/common/object/isEmptyObject";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { Type } from "@dabsi/common/typings2/Type";
+import { subTest } from "@dabsi/jasmine/subTest";
+import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import {
   AEntity,
   BEntity,
   CEntity,
-} from "../../../typeorm/relations/tests/Entities";
-import { DataSelection } from "../../data-selection/DataSelection";
-import { DataTypeInfo } from "../../DataTypeInfo";
+} from "@dabsi/typeorm/relations/tests/Entities";
+import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import {
   DBase,
   DChild1,
@@ -25,14 +25,14 @@ import {
   EChild1Child1,
   EChild2,
   EUnion,
-} from "../../tests/BaseEntities";
-import { TestConnection } from "../../tests/TestConnection";
-import { DataEntityKey } from "../DataEntityKey";
-import { DataEntityLoader } from "../DataEntityLoader";
+} from "@dabsi/typedata/tests/BaseEntities";
+import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
+import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
 
-import { getDataEntityInfo } from "../DataEntityInfo";
-import { DataEntitySource } from "../DataEntitySource";
-import { buildTestRelations } from "./buildTestRelations";
+import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { buildTestRelations } from "@dabsi/typedata/data-entity/tests/buildTestRelations";
 import objectContaining = jasmine.objectContaining;
 
 testm(__filename, () => {

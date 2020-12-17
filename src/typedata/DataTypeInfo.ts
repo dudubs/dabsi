@@ -1,8 +1,8 @@
-import { touchMap } from "../common/map/touchMap";
-import { mapObject } from "../common/object/mapObject";
-import { Type } from "../common/typings2/Type";
-import { AnyDataSelection } from "./data-selection/DataSelection";
-import { DataUnion } from "./DataUnion";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { Type } from "@dabsi/common/typings2/Type";
+import { AnyDataSelection } from "@dabsi/typedata/data-selection/DataSelection";
+import { DataUnion } from "@dabsi/typedata/DataUnion";
 
 export type DataTypeInfo = {
   type: Type<any>;

@@ -1,8 +1,8 @@
 import { createElement, ReactElement } from "react";
-import { definedAt } from "../common/object/definedAt";
-import { joinTemplate } from "../common/string/joinTemplate";
-import { LangElement, LangNode, LangPropsType, LangTokenElement } from "./Lang";
-import { LangView } from "./LangView";
+import { definedAt } from "@dabsi/common/object/definedAt";
+import { joinTemplate } from "@dabsi/common/string/joinTemplate";
+import { LangElement, LangNode, LangPropsType, LangTokenElement } from "@dabsi/lang/Lang";
+import { LangView } from "@dabsi/lang/LangView";
 
 export type LangTemplate<K extends string> = {
   token: string;

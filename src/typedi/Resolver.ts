@@ -1,14 +1,23 @@
-import { CallStackInfo } from "./CallStackInfo";
-import { catchResolveError } from "./operators/catchResolveError";
-import { checkAndResolve } from "./operators/checkAndResolve";
-import { checkResolver, checkResolverSymbol } from "./operators/checkResolver";
-import { checkResolverContext } from "./operators/checkResolverContext";
-import toCheck from "./operators/toCheck";
-import { resolve, resolveSymbol } from "./resolve";
-import { FnResolver, TypeResolver } from "./resolvers/FnResolver";
-import { AnyResolverMap, ObjectResolver } from "./resolvers/ObjectResolver";
-import { TokenResolver } from "./resolvers/TokenResolver";
-import { Touch } from "./Touch";
+import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
+import { catchResolveError } from "@dabsi/typedi/operators/catchResolveError";
+import { checkAndResolve } from "@dabsi/typedi/operators/checkAndResolve";
+import {
+  checkResolver,
+  checkResolverSymbol,
+} from "@dabsi/typedi/operators/checkResolver";
+import { checkResolverContext } from "@dabsi/typedi/operators/checkResolverContext";
+import { createResolverContext } from "@dabsi/typedi/operators/createResolverContext";
+import toCheck from "@dabsi/typedi/operators/toCheck";
+import { resolve, resolveSymbol } from "@dabsi/typedi/resolve";
+import { FnResolver, TypeResolver } from "@dabsi/typedi/resolvers/FnResolver";
+import {
+  AnyResolverMap,
+  ObjectResolver,
+} from "@dabsi/typedi/resolvers/ObjectResolver";
+import { TokenResolver } from "@dabsi/typedi/resolvers/TokenResolver";
+import { resolveType } from "@dabsi/typedi/resolveType";
+import { Touch } from "@dabsi/typedi/Touch";
+import { tryResolve } from "@dabsi/typedi/tryResolve";
 
 export type ResolverMap<T> = Record<string, Resolver<T>>;
 
@@ -48,6 +57,10 @@ Resolver.checkAndResolve = checkAndResolve;
 Resolver.object = ObjectResolver;
 Resolver.catch = catchResolveError;
 Resolver.toCheck = toCheck;
+Resolver.resolveType = resolveType;
+Resolver.createContext = createResolverContext;
+Resolver.try = tryResolve;
+
 Resolver.provide = function (
   context: AnyResolverMap,
   ...args: AnyResolverMap[]

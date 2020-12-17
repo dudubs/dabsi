@@ -1,5 +1,5 @@
 import {Ref, RefCallback} from "react";
-import {setRef} from "./setRef";
+import {setRef} from "@dabsi/react/utils/setRef";
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): RefCallback<T> {
     return value => {

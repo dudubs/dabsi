@@ -1,6 +1,6 @@
-import AclEditUser from "./AclEditUser";
-import { DataManager } from "../../../typerpc/data-manager";
-import { AclUserBasicInfoInput } from "./input/BasicInfoInput";
+import AclEditUser from "@dabsi/system/acl-admin/users/AclEditUser";
+import { DataManager } from "@dabsi/typerpc/data-manager";
+import { AclUserBasicInfoInput } from "@dabsi/system/acl-admin/users/inputs/BasicInfoInput";
 
 export default DataManager({
   tableRowType: {

@@ -1,4 +1,4 @@
-import {Merger} from "../../common/object/Merger";
+import {Merger} from "@dabsi/common/object/Merger";
 
 
 type Callback = ((...args) => void) | undefined;

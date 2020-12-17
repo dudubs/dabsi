@@ -1,6 +1,6 @@
 import {Component} from "react";
-import {BaseMapFactory} from "../../common/map/mapFactory";
-import {SymbolMap} from "../../common/map/SymbolMap";
+import {BaseMapFactory} from "@dabsi/common/map/mapFactory";
+import {SymbolMap} from "@dabsi/common/map/SymbolMap";
 
 const didMount = Symbol('didMount');
 

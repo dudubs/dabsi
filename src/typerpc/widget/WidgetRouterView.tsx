@@ -1,16 +1,20 @@
 import React, { createElement, ReactElement, useMemo } from "react";
-import { Fn } from "../../common/typings2/Fn";
-import { OmitKeys } from "../../common/typings2/OmitKeys";
-import { WeakId } from "../../common/WeakId";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
+import { WeakId } from "@dabsi/common/WeakId";
 import {
   ReactRouterProps,
   ReactRouterOptions,
   ReactRouterView,
-} from "../../typerouter/ReactRouterView";
-import { Router, TRouter } from "../../typerouter/Router";
-import { AnyWidgetConnection, WidgetElementState } from "./Widget";
-import { WidgetViewProps } from "./WidgetView";
-import { WidgetViewLoader } from "./WidgetViewLoader";
+} from "@dabsi/typerouter/ReactRouterView";
+import { Router, TRouter } from "@dabsi/typerouter/Router";
+import {
+  AnyWidgetConnection,
+  WidgetElementState,
+} from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
+import { useProvider } from "@dabsi/react/useProvider";
 
 type IndexProps<T extends TRouter> = Parameters<
   NonNullable<ReactRouterOptions<T>["renderIndex"]>
@@ -48,7 +52,7 @@ export function WidgetRouterView<
       ? { renderWidget: optionsOrRenderWidget }
       : optionsOrRenderWidget;
 
-  const { renderWidget, getElementState } = options;
+  const { renderWidget } = options;
 
   ReactRouterView(router, {
     ...options,
@@ -72,6 +76,6 @@ export function WidgetRouterView<
   });
 
   function Component({ props, indexProps }) {
-    return renderWidget(props, indexProps);
+    return useProvider()(renderWidget(props, indexProps));
   }
 }

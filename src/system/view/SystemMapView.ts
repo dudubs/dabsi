@@ -1,26 +1,36 @@
+import { Override } from "@dabsi/common/typings2/Override";
+import { Renderer } from "@dabsi/react/renderer";
+import { RendererOrProps } from "@dabsi/react/RendererOrProps";
+import { SystemView, SystemViewContext } from "@dabsi/system/view/SystemView";
+import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { TWidget, Widget } from "@dabsi/typerpc/widget/Widget";
+import { AnyWidgetRecord } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { MapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import {
   ComponentType,
   createElement,
   Fragment,
   ReactElement,
   ReactNode,
+  useContext,
   useRef,
 } from "react";
-import { Override } from "../../common/typings2/Override";
-import { RendererOrProps } from "../../react/RendererOrProps";
-import { RpcConnection } from "../../typerpc/Rpc";
-import { RpcMap } from "../../typerpc/rpc-map/RpcMap";
-import { TWidget, Widget } from "../../typerpc/widget/Widget";
-import { AnyWidgetRecord } from "../../typerpc/widget/widget-map/WidgetMap";
-import { WidgetNamespace } from "../../typerpc/widget/widget-namespace/WidgetNamspace";
-import { WidgetViewProps } from "../../typerpc/widget/WidgetView";
-import { Renderer } from "./../../react/renderer";
-import { MapView } from "./../../typerpc/widget/widget-map/WidgetMapView";
-import { SystemView } from "./SystemView";
+import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
+import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { WidgetMapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 
 export type AnyMapViewComponent = ComponentType<{
   children: Renderer<MapView<WidgetViewProps<any>>>;
 }>;
+
+export type AnySystemMapConnection =
+  | AnyWidgetConnectionWithWidgetMap
+  | RpcConnection<WidgetNamespace>;
 
 type SystemMapChildKey<
   C extends AnySystemMapConnection
@@ -41,6 +51,10 @@ export type SystemMapViewProps<
 
 const mapViewComponentSymbol = Symbol("mapView");
 
+InputMap[mapViewComponentSymbol] = InputMapView;
+WidgetMap[mapViewComponentSymbol] = WidgetMapView;
+WidgetNamespace[mapViewComponentSymbol] = WidgetNamespaceView;
+
 export type AnyWidgetConnectionWithWidgetMap = RpcConnection<
   Widget<
     Override<
@@ -54,10 +68,6 @@ export type AnyWidgetConnectionWithWidgetMap = RpcConnection<
   >
 >;
 
-export type AnySystemMapConnection =
-  | AnyWidgetConnectionWithWidgetMap
-  | RpcConnection<WidgetNamespace>;
-
 function getOrdredKeys({ firstKeys, lastKeys, keys }) {
   const orderedKeys = new Set<string>();
   firstKeys?.forEach(key => orderedKeys.add(key));
@@ -70,7 +80,7 @@ function getOrdredKeys({ firstKeys, lastKeys, keys }) {
 }
 
 export function SystemMapView<
-  C extends AnyWidgetConnectionWithWidgetMap,
+  C extends AnySystemMapConnection,
   ItemOptions extends object
 >({
   children,
@@ -114,7 +124,7 @@ export function SystemMapView<
         orderedKeys.map((key, index) => {
           const isLast = orderedKeys.length === index + 1;
           const [render, options] = RendererOrProps(children?.[key], props =>
-            SystemView(props)
+            createElement(SystemView, props)
           );
           let element = render(view.getChildProps(key));
           if (renderItem) {
@@ -129,18 +139,4 @@ export function SystemMapView<
       );
     },
   });
-}
-
-export namespace SystemMapView {
-  export function register(
-    mapWidget,
-    mapViewComponent: AnyMapViewComponent,
-    defaultMapViewComponent
-  ) {
-    mapWidget[mapViewComponentSymbol] = mapViewComponent;
-
-    SystemView.register(mapWidget, props =>
-      createElement(defaultMapViewComponent, { for: props })
-    );
-  }
 }

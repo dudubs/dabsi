@@ -1,15 +1,15 @@
 import * as React from "react";
 import { ReactElement } from "react";
-import { keys } from "../../../common/object/keys";
-import { Renderer } from "../../../react/renderer";
-import { RpcConnection } from "../../Rpc";
-import { WidgetElement } from "../../widget/Widget";
-import { MapView } from "../../widget/widget-map/WidgetMapView";
-import { AbstractInputView } from "../AbstractInputView";
-import { AnyInput, AnyInputConnection } from "../Input";
-import { InputViewProps } from "../InputView";
-import { InputViewChildren } from "../InputViewChildren";
-import { AnyInputMap } from "./InputMap";
+import { keys } from "@dabsi/common/object/keys";
+import { Renderer } from "@dabsi/react/renderer";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
+import { MapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
+import { AnyInput, AnyInputConnection } from "@dabsi/typerpc/input/Input";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
+import { AnyInputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 
 export type AnyInputMapConnection = RpcConnection<AnyInputMap>;
 

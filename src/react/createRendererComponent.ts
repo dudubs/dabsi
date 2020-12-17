@@ -1,6 +1,6 @@
 import { createElement, ReactElement, ReactNode } from "react";
-import { EmptyFragment } from "./utils/EmptyFragment";
-import { reactNodeToElement } from "./utils/reactNodeToElement";
+import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
+import { reactNodeToElement } from "@dabsi/react/utils/reactNodeToElement";
 
 export function createRendererComponent<P>(
   renderer: (props: P) => ReactNode

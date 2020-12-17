@@ -1,12 +1,12 @@
 import {createContext, useContext} from "react";
-import {mapObject} from "../common/object/mapObject";
-import {fromConstantCase} from "../common/string/fromConstantCase";
-import {joinTemplate} from "../common/string/joinTemplate";
-import {matchCase} from "../common/string/matchCase";
-import {toTitleCase} from "../common/string/toTitleCase";
-import {LangNode, LangProps, LangPropsType, LangTokenProps} from "./Lang";
-import {LangMap} from "./LangMap";
-import {LangTemplateProps} from "./LangTemplate";
+import {mapObject} from "@dabsi/common/object/mapObject";
+import {fromConstantCase} from "@dabsi/common/string/fromConstantCase";
+import {joinTemplate} from "@dabsi/common/string/joinTemplate";
+import {matchCase} from "@dabsi/common/string/matchCase";
+import {toTitleCase} from "@dabsi/common/string/toTitleCase";
+import {LangNode, LangProps, LangPropsType, LangTokenProps} from "@dabsi/lang/Lang";
+import {LangMap} from "@dabsi/lang/LangMap";
+import {LangTemplateProps} from "@dabsi/lang/LangTemplate";
 
 
 export class LangTranslator {

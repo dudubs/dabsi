@@ -1,6 +1,6 @@
 import { createElement, ReactElement, Ref } from "react";
-import { entries } from "../../common/object/entries";
-import { setRef } from "./setRef";
+import { entries } from "@dabsi/common/object/entries";
+import { setRef } from "@dabsi/react/utils/setRef";
 
 export const $merge = "$merge";
 const $default = "$default";

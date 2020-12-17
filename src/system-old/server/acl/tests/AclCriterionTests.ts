@@ -1,5 +1,5 @@
-import { AclCriterion, AclCriterionExps } from "../AclCriterion";
-import { TestForum, TestForumMemberMode } from "./AclTester";
+import { AclCriterion, AclCriterionExps } from "@dabsi/system-old/server/acl/AclCriterion";
+import { TestForum, TestForumMemberMode } from "@dabsi/system-old/server/acl/tests/AclTester";
 import anything = jasmine.anything;
 import arrayContaining = jasmine.arrayContaining;
 

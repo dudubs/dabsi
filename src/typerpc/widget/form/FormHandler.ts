@@ -1,11 +1,11 @@
-import { RequireOptionalKeys } from "../../../common/typings2/RequireOptionalKeys";
-import { Rejectable } from "../../../common/async/Rejectable";
-import { AnyInput, InputValueData } from "../../input/Input";
-import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
-import { RpcUnresolvedConfig } from "../../Rpc";
-import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
-import { AnyForm, FormSubmitError } from "./Form";
-import { IWidgetHandler, WidgetElement } from "../Widget";
+import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
+import { Rejectable } from "@dabsi/common/async/Rejectable";
+import { AnyInput, InputValueData } from "@dabsi/typerpc/input/Input";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
+import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
+import { AnyForm, FormSubmitError } from "@dabsi/typerpc/widget/form/Form";
+import { IWidgetHandler, WidgetElement } from "@dabsi/typerpc/widget/Widget";
 
 type T = AnyForm;
 

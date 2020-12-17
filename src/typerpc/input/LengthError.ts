@@ -1,4 +1,4 @@
-import { Payload } from "../../common/typings2/Payload";
+import { Payload } from "@dabsi/common/typings2/Payload";
 
 export type LengthError = Payload<{
   MAX_LENGTH: { maxLength: number };

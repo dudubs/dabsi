@@ -1,4 +1,4 @@
-import { entries } from "../common/object/entries";
+import { entries } from "@dabsi/common/object/entries";
 
 export function buildTests(title: string, callback: () => void) {
   const builders: any[] = [];

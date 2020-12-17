@@ -1,13 +1,13 @@
 import { ReactElement } from "react";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { Renderer } from "../../../react/renderer";
-import { RpcConnection } from "../../Rpc";
-import { AbstractInputView } from "../AbstractInputView";
-import { InputType } from "../Input";
-import { InputViewProps } from "../InputView";
-import { InputViewChildren } from "../InputViewChildren";
-import { AnyDataInputMap } from "./DataInputMap";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { Renderer } from "@dabsi/react/renderer";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
+import { InputType } from "@dabsi/typerpc/input/Input";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
+import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 
 export type DataInputMapViewProps<
   C extends RpcConnection<AnyDataInputMap>

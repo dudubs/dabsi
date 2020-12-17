@@ -1,10 +1,10 @@
 import { Link } from "@material-ui/core";
 import * as React from "react";
 import { ReactElement } from "react";
-import { MuiLinkProps } from "../../../browser/mui/components/MuiLink";
-import { mergeProps } from "../../../react/utils/mergeProps";
-import { AnyRouter } from "../../../typerouter/Router";
-import useRouterLink from "../../../typerouter/useRouterLink";
+import { MuiLinkProps } from "@dabsi/browser/mui/components/MuiLink";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { AnyRouter } from "@dabsi/typerouter/Router";
+import useRouterLink from "@dabsi/typerouter/useRouterLink";
 
 export default function ({
   router,

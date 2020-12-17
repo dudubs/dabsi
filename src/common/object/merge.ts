@@ -7,7 +7,7 @@
  */
 
 
-import {entries} from "./entries";
+import {entries} from "@dabsi/common/object/entries";
 
 type Merger<T> = (value: T) => T;
 

@@ -1,5 +1,5 @@
 import {Seq} from "immutable";
-import {SourceCase} from "./matchCase";
+import {SourceCase} from "@dabsi/common/string/matchCase";
 
 
 export const fromPropertyCase: SourceCase = text =>

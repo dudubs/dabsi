@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "types": [
-      "node",
-      "jasmine"
-    ]
+    "types": ["node", "jasmine"],
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": ["src/*"]
+    }
   }
 }

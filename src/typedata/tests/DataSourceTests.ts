@@ -1,19 +1,19 @@
 import exp from "constants";
-import { getJasmineSpecReporterResult } from "../../jasmine/getJasmineSpecReporterResult";
-import { logBeforeEach } from "../../jasmine/logBeforeEach";
-import { subTest } from "../../jasmine/subTest";
-import { inspect } from "../../logging/inspect";
+import { getJasmineSpecReporterResult } from "@dabsi/jasmine/getJasmineSpecReporterResult";
+import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
+import { subTest } from "@dabsi/jasmine/subTest";
+import { inspect } from "@dabsi/logging/inspect";
 import {
   AEntity,
   BEntity,
   CEntity,
-} from "../../typeorm/relations/tests/Entities";
-import { forEachTestRelation } from "../../typeorm/relations/tests/TestRelation";
-import { DataRow } from "../DataRow";
-import { DataSource } from "../DataSource";
-import { DataEntitySource } from "../data-entity/DataEntitySource";
-import { DataRelationKeys } from "../DataRelation";
-import { DUnion, EUnion } from "./BaseEntities";
+} from "@dabsi/typeorm/relations/tests/Entities";
+import { forEachTestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataRelationKeys } from "@dabsi/typedata/DataRelation";
+import { DUnion, EUnion } from "@dabsi/typedata/tests/BaseEntities";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 

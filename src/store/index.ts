@@ -1,14 +1,14 @@
-export { Store } from "./Store";
+export { Store } from "@dabsi/store/Store";
 
-import "./operators/list/add";
-import "./operators/list/remove";
+import "@dabsi/store/operators/list/add";
+import "@dabsi/store/operators/list/remove";
 
-import "./operators/map/update";
-import "./operators/map/at";
-import "./operators/map/set";
-import "./operators/map/delete";
+import "@dabsi/store/operators/map/update";
+import "@dabsi/store/operators/map/at";
+import "@dabsi/store/operators/map/set";
+import "@dabsi/store/operators/map/delete";
 
-import "./operators/enable";
-import "./operators/toggle";
-import "./operators/disable";
-import "./operators/clear";
+import "@dabsi/store/operators/enable";
+import "@dabsi/store/operators/toggle";
+import "@dabsi/store/operators/disable";
+import "@dabsi/store/operators/clear";

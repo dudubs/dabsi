@@ -1,4 +1,4 @@
-import {IndexedSeq} from "../immutable2";
+import {IndexedSeq} from "@dabsi/immutable2";
 
 export function flatToSeq<T>(
     first: T,

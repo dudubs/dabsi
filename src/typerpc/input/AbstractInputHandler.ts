@@ -1,11 +1,11 @@
-import { Awaitable } from "../../common/typings2/Async";
-import { RequireOptionalKeys } from "../../common/typings2/RequireOptionalKeys";
-import { AbstractWidgetHandler } from "../widget/AbstractWidgetHandler";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
+import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
 import {
   IWidgetHandler,
   WidgetElement,
   WidgetElementState,
-} from "../widget/Widget";
+} from "@dabsi/typerpc/widget/Widget";
 import {
   AnyInput,
   InputWithoutController,
@@ -15,7 +15,7 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "./Input";
+} from "@dabsi/typerpc/input/Input";
 
 export abstract class AbstractInputHandler<T extends AnyInput>
   extends AbstractWidgetHandler<T>

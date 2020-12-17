@@ -1,6 +1,6 @@
-// import {DataUnion} from "../DataUnion";
-// import {DBase, DChild1, DChild1Child1, DChild2, EBase, EChild1, EChild1Child1, EChild2} from "./BaseEntities";
-// import {TestConnection} from "./TestConnection";
+// import {DataUnion} from "@dabsi/typedata/DataUnion";
+// import {DBase, DChild1, DChild1Child1, DChild2, EBase, EChild1, EChild1Child1, EChild2} from "@dabsi/typedata/tests/BaseEntities";
+// import {TestConnection} from "@dabsi/typedata/tests/TestConnection";
 //
 //
 // testm(__filename, () => {

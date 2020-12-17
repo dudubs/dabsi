@@ -1,8 +1,8 @@
 import { ReactElement } from "react";
-import { Renderer } from "../../react/renderer";
-import { RpcConnection } from "../Rpc";
-import { AnyWidget } from "./Widget";
-import { WidgetViewProps } from "./WidgetView";
+import { Renderer } from "@dabsi/react/renderer";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 
 export type WidgetViewFn<T extends AnyWidget, P = {}> = {
   (props: WidgetViewProps<RpcConnection<T>> & P): ReactElement;

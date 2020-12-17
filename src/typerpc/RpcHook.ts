@@ -1,6 +1,6 @@
-import { Awaitable } from "../common/typings2/Async";
-import { Call } from "../common/typings2/Call";
-import { Override } from "../common/typings2/Override";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Call } from "@dabsi/common/typings2/Call";
+import { Override } from "@dabsi/common/typings2/Override";
 import {
   AnyRpc,
   AnyRpcHandler,
@@ -9,7 +9,7 @@ import {
   RpcResolvedHandler,
   RpcType,
   TRpc,
-} from "./Rpc";
+} from "@dabsi/typerpc/Rpc";
 
 const hookConfigMapSymbol = Symbol();
 export type RpcHookHandler<T extends AnyRpc> = {

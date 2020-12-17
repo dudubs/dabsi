@@ -1,6 +1,6 @@
-import { ConfigFactory } from "../ConfigFactory";
-import { RpcConfigHookHandler } from "../RpcConfigHook";
-import { AnyDataManager } from "./DataManager";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { RpcConfigHookHandler } from "@dabsi/typerpc/RpcConfigHook";
+import { AnyDataManager } from "@dabsi/typerpc/data-manager/DataManager";
 
 export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
   config,

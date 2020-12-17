@@ -1,8 +1,8 @@
 import { createElement, ReactNode, useMemo } from "react";
-import { Constructor } from "../../common/typings2/Constructor";
-import { Defined } from "../../common/typings2/Defined";
-import { ReactorContext, useReactor } from "./hooks";
-import { Emittable, EmittableType, Reactor } from "./Reactor";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Defined } from "@dabsi/common/typings2/Defined";
+import { ReactorContext, useReactor } from "@dabsi/react/reactor/hooks";
+import { Emittable, EmittableType, Reactor } from "@dabsi/react/reactor/Reactor";
 
 export function ReactorListener<T extends Emittable<any>>({
   emittable: { id: emittableId },

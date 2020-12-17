@@ -1,27 +1,27 @@
-import { MetaType, WithMetaType } from "../common/MetaType";
-import { If, IsUndefined } from "../common/typings2/boolean";
-import { Is } from "../common/typings2/boolean/Is";
-import { Expect } from "../common/typings2/Expect";
-import { ExtractKeys } from "../common/typings2/ExtractKeys";
-import { Fn } from "../common/typings2/Fn";
-import { Nullable } from "../common/typings2/Nullable";
-import { OmitKeys } from "../common/typings2/OmitKeys";
+import { MetaType, WithMetaType } from "@dabsi/common/MetaType";
+import { If, IsUndefined } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { Expect } from "@dabsi/common/typings2/Expect";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { Nullable } from "@dabsi/common/typings2/Nullable";
+import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
 import {
   PartialUndefinedKeys,
   PartialKeys,
-} from "../common/typings2/PartialUndefinedKeys";
-import { PickByValue } from "../common/typings2/PickByValue";
-import { Pluck } from "../common/typings2/Pluck";
-import { RequiredKeys } from "../common/typings2/RequiredKeys";
-import { Union } from "../common/typings2/Union";
-import { GetBaseType } from "./BaseType";
-import { Exp } from "./data-exp/ExpTranslator";
+} from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { PickByValue } from "@dabsi/common/typings2/PickByValue";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { RequiredKeys } from "@dabsi/common/typings2/RequiredKeys";
+import { Union } from "@dabsi/common/typings2/Union";
+import { GetBaseType } from "@dabsi/typedata/BaseType";
+import { Exp } from "@dabsi/typedata/data-exp/ExpTranslator";
 import {
   DataRelation,
   DataRelationKeys,
   DataRelationToManyKeys,
   DataRelationToOneKeys,
-} from "./DataRelation";
+} from "@dabsi/typedata/DataRelation";
 
 //
 /*

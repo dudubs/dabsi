@@ -1,7 +1,7 @@
-import { getNextPath } from "../common/getNextPath";
-import { Payload } from "../common/typings2/Payload";
-import { AnyRouter, Router } from "./Router";
-import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
+import { getNextPath } from "@dabsi/common/getNextPath";
+import { Payload } from "@dabsi/common/typings2/Payload";
+import { AnyRouter, Router } from "@dabsi/typerouter/Router";
+import { AnyRouterLocation, RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 export type Route = Payload<
   {

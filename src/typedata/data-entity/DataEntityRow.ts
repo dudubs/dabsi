@@ -1,8 +1,8 @@
-import { Type } from "../../common/typings2/Type";
-import { DataSelectionRow } from "../data-selection/DataSelectionRow";
-import { DataRow } from "../DataRow";
-import { DataSourceRow } from "../DataSourceRow";
-import { DataEntitySource } from "./DataEntitySource";
+import { Type } from "@dabsi/common/typings2/Type";
+import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 
 export function DataEntityRow<T>(
   entityType: Type<T>,

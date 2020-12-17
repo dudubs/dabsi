@@ -6,7 +6,7 @@ import {
   ReactElement,
   ReactNode,
 } from "react";
-import { reactNodeToElement } from "./reactNodeToElement";
+import { reactNodeToElement } from "@dabsi/react/utils/reactNodeToElement";
 
 export type ReactWrapper = (children: ReactElement) => ReactElement;
 let wrappers: ReactWrapper[] | undefined = undefined;

@@ -1,7 +1,7 @@
-import { entries } from "../../../common/object/entries";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { values } from "../../../common/object/values";
-import { IndexedSeq } from "../../../immutable2";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { values } from "@dabsi/common/object/values";
+import { IndexedSeq } from "@dabsi/immutable2";
 
 export type TableMapNode<V> = {
   value?: V;

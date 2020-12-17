@@ -1,7 +1,7 @@
-import { DataEntitySource } from "../../../../typedata/data-entity/DataEntitySource";
-import { TestConnection } from "../../../../typedata/tests/TestConnection";
-import { Group } from "../Group";
-import { User } from "../User";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { User } from "@dabsi/system-old/server/acl/User";
 
 testm(__filename, () => {
   const getConnection = TestConnection([User, Group]);

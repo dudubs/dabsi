@@ -1,11 +1,11 @@
 // import { Column, Entity, PrimaryColumn } from "typeorm";
-// import { DataEntitySource } from "../../../data/eds/DataEntitySource";
-// import { TestConnection } from "../../../data/tests/TestConnection";
-// import { BoolInput } from "../bool-input/BoolInput";
-// import { DataInput } from "../data-input/DataInput";
-// import { DataInputMap } from "../data-input-map/DataInputMap";
-// import { testCase } from "./CaseTester";
-// import { testRpcOld } from "./RpcTesterOld";
+// import { DataEntitySource } from "@dabsi/data/eds/DataEntitySource";
+// import { TestConnection } from "@dabsi/data/tests/TestConnection";
+// import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
+// import { DataInput } from "@dabsi/typerpc/input/data-input/DataInput";
+// import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
+// import { testCase } from "@dabsi/typerpc/input/tests/CaseTester";
+// import { testRpcOld } from "@dabsi/typerpc/input/tests/RpcTesterOld";
 // import objectContaining = jasmine.objectContaining;
 //
 // testm(__filename, () => {

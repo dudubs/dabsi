@@ -1,5 +1,5 @@
-import { Field } from ".";
-import { Struct } from ".";
+import { Field } from "@dabsi/struct";
+import { Struct } from "@dabsi/struct";
 
 testm(__filename, () => {
   describe("primitive in struct", () => {

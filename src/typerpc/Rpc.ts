@@ -1,14 +1,19 @@
-import { MetaType, WithMetaType } from "../common/MetaType";
-import { Awaitable, Awaited } from "../common/typings2/Async";
-import { If, IsUndefined, Not } from "../common/typings2/boolean";
-import { Is } from "../common/typings2/boolean/Is";
-import { IsEmptyObject } from "../common/typings2/boolean/IsEmptyObject";
-import { Fn } from "../common/typings2/Fn";
-import { Override } from "../common/typings2/Override";
-import { PartialUndefinedKeys } from "../common/typings2/PartialUndefinedKeys";
-import { BaseRpc } from "./BaseRpc";
-import { ConfigFactory } from "./ConfigFactory";
-import { IsGenericConfig } from "./GenericConfig";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { UndefinedIfIsUndefined } from "@dabsi/common/typings2/UndefinedIfIsUndefined";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { Union } from "@dabsi/common/typings2/Union";
+import { MetaType, WithMetaType } from "@dabsi/common/MetaType";
+import { Awaitable, Awaited } from "@dabsi/common/typings2/Async";
+import { If, IsUndefined, Not } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { IsEmptyObject } from "@dabsi/common/typings2/boolean/IsEmptyObject";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { BaseRpc } from "@dabsi/typerpc/BaseRpc";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { IsGenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { Back, BackIndex } from "@dabsi/common/typings2/number";
 
 export type TRpc = {
   Payload?: any;
@@ -19,14 +24,24 @@ export type TRpc = {
   Props: object;
 };
 
-export interface RpcLocation<T extends AnyRpc> {
-  rpc: T;
-  <K extends keyof RpcChildren<T>>(
-    //
-    key: K,
-    callback?: (child: RpcChild<T, K>) => void
-  ): RpcLocation<RpcChild<T, K>>;
-}
+export type AnyRpcWithChildren<T extends TRpc["Children"]> = Rpc<
+  Override<
+    TRpc,
+    {
+      Children: T;
+    }
+  >
+>;
+
+export type AnyRpcWithMap = AnyRpcWithChildren<{ map: AnyRpc }>;
+export type AnyRpcWithTarget = AnyRpcWithChildren<{ target: AnyRpc }>;
+
+export type RpcChildKey<T extends AnyRpc> = string & keyof RpcChildren<T>;
+
+export type RpcLocator<T extends AnyRpc> = WithMetaType<{ rpc: T }> &
+  {
+    [K in RpcChildKey<T>]: RpcLocator<T["children"][K]>;
+  };
 
 export interface IRpc<T extends TRpc> {
   options: RpcOptions<TRpc>;
@@ -37,13 +52,28 @@ export interface IRpc<T extends TRpc> {
 
   at<T extends AnyRpc, U extends AnyRpc>(
     this: T,
-    callback: (loc: RpcLocation<T>) => RpcLocation<U>
+    callback: (locator: RpcLocator<T>) => WithMetaType<{ rpc: U }>
   ): U;
-  at<T extends AnyRpc, K extends keyof RpcChildren<T>>(
+  at<
+    T extends AnyRpcWithMap,
+    K extends string & keyof T["children"]["map"]["children"]
+  >(
     this: T,
-    key: K,
-    callback?: (child: RpcChild<T, K>) => void
-  ): RpcChild<T, K>;
+    key: `:${K}`
+  ): T["children"]["map"]["children"][K];
+
+  at<
+    T extends AnyRpcWithTarget,
+    K extends string & keyof T["children"]["target"]["children"]
+  >(
+    this: T,
+    key: `:${K}`
+  ): T["children"]["target"]["children"][K];
+
+  at<T extends AnyRpc, K extends keyof T["children"]>(
+    this: T,
+    key: K
+  ): T["children"][K];
 
   createRpcConnection(path: any[], command: RpcCommand): T["Connection"];
 
@@ -104,7 +134,7 @@ export type _RpcConnectionFactory<T extends TRpc> = (
 ) => T["Connection"];
 
 export type _RpcUnresolvedConfig<T extends TRpc> =
-  | T["Config"]
+  | (T["Config"] & BasedRpc<T>)
   | If<Not<Is<T["Config"], Fn>>, ConfigFactory<T["Config"]>>
   | {
       $context: ConfigFactory<T["Config"], [Rpc<T>]>;
@@ -188,6 +218,10 @@ export type RpcIsGenericConfigOption<T extends Pick<TRpc, "Config">> =
   | IsGenericConfig<T["Config"]>
   | If<Not<Is<T["Config"], Fn>>, undefined>;
 
+export type RpcIsConfigCanBeUndefinedOption<T extends Pick<TRpc, "Config">> =
+  | IsUndefined<T["Config"]>
+  | If<Not<IsUndefined<T["Config"]>>, undefined>;
+
 export type RpcPropsOption<T extends Pick<TRpc, "Props">> =
   | T["Props"]
   | If<IsEmptyObject<T["Props"]>, undefined>;
@@ -202,16 +236,13 @@ export enum RpcConfigType {
   Factory,
 }
 
-export type RpcOptions<
-  T extends TRpc,
-  ConfigIsFn extends boolean = Is<T["Config"], Fn>,
-  ConfigIsGenericConfig extends boolean = IsGenericConfig<T["Config"]>
-> = PartialUndefinedKeys<
+export type RpcOptions<T extends TRpc> = PartialUndefinedKeys<
   {
-    // TODO: configType: 'factory' | 'generic' | 'unknown'
     isGenericConfig: RpcIsGenericConfigOption<T>;
 
     isConfigFn: boolean | If<Not<Is<T["Config"], Fn>>, undefined>;
+
+    isConfigCanBeUndefined: RpcIsConfigCanBeUndefinedOption<T>;
 
     props: RpcPropsOption<T>;
 
@@ -250,4 +281,8 @@ export function Rpc<R extends BasedRpc, T extends TRpc = RpcType<R>>(
     Object.getOwnPropertyDescriptors(options["props"] || {})
   );
   return <any>rpc;
+}
+
+export function isRpc(obj): obj is AnyRpc {
+  return obj?.constructor == BaseRpc;
 }

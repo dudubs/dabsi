@@ -1,8 +1,8 @@
-import { mapArrayToObject } from "../../common/array/mapArrayToObject";
-import { Awaitable, Awaited } from "../../common/typings2/Async";
-import { Fn } from "../../common/typings2/Fn";
-import { RpcFnHandler } from "./RpcFnHandler";
-import { Rpc } from "../Rpc";
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { Awaitable, Awaited } from "@dabsi/common/typings2/Async";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { RpcFnHandler } from "@dabsi/typerpc/rpc-fn/RpcFnHandler";
+import { Rpc } from "@dabsi/typerpc/Rpc";
 
 export type RpcFn<T extends Fn> = Rpc<{
   Connection: (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>;
@@ -25,6 +25,7 @@ export function RpcFnMap<K extends string>(...keys: K[]): Record<K, RpcFn<Fn>> {
 export function RpcFn<T extends Fn = () => void>(): RpcFn<T> {
   return <any>Rpc<AnyRpcFn>({
     isGenericConfig: false,
+    type: RpcFn,
     isConfigFn: true,
     handler: RpcFnHandler,
     connect(path, command) {

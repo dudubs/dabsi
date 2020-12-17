@@ -1,26 +1,26 @@
 // TODO: DataSource.clone(), DataSource.freeze()
-import { defined } from "../common/object/defined";
-import { entries } from "../common/object/entries";
-import { hasKeys } from "../common/object/hasKeys";
-import { Type } from "../common/typings2/Type";
-import { BaseType, GetBaseType } from "./BaseType";
-import { chunks } from "./chunks";
-import { DataExp } from "./data-exp/DataExp";
+import { defined } from "@dabsi/common/object/defined";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Type } from "@dabsi/common/typings2/Type";
+import { BaseType, GetBaseType } from "@dabsi/typedata/BaseType";
+import { chunks } from "@dabsi/typedata/chunks";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import {
   AnyDataSelection,
   DataPickableKeys,
   DataSelection,
-} from "./data-selection/DataSelection";
-import { DataSelectionRow } from "./data-selection/DataSelectionRow";
-import { DataCursor } from "./DataCursor";
-import { DataFields, DataFieldsRow } from "./DataFields";
-import { DataKey, DataKeyInput } from "./DataKey";
-import { DataNullsSort, DataOrder, DataSort } from "./DataOrder";
-import { DataRelationKeys, DataRelationType } from "./DataRelation";
-import { DataRow } from "./DataRow";
-import { DataSourceRow } from "./DataSourceRow";
-import { DataUnionChildren } from "./DataUnion";
-import { DataInsert, DataUpdate } from "./DataValue";
+} from "@dabsi/typedata/data-selection/DataSelection";
+import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
+import { DataCursor } from "@dabsi/typedata/DataCursor";
+import { DataFields, DataFieldsRow } from "@dabsi/typedata/DataFields";
+import { DataKey, DataKeyInput } from "@dabsi/typedata/DataKey";
+import { DataNullsSort, DataOrder, DataSort } from "@dabsi/typedata/DataOrder";
+import { DataRelationKeys, DataRelationType } from "@dabsi/typedata/DataRelation";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
+import { DataUnionChildren } from "@dabsi/typedata/DataUnion";
+import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
 
 export type DataKeyOrKeysInput<T> = DataKeyInput<T>[] | DataKeyInput<T>;
 export type DataSourceAt<T, K extends DataRelationKeys<T>> = DataSource<

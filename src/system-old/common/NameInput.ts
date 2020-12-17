@@ -1,4 +1,4 @@
-import { TextInput } from "../../typerpc/input/text-input/TextInput";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 
 export const NameInput = TextInput({
   minLength: 2,

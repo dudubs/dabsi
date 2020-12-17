@@ -1,8 +1,7 @@
-import { isPromiseLike } from "../common/async/isPromiseLike";
-import { pushHook } from "../common/async/pushHook";
-import { entries } from "../common/object/entries";
-import { keys } from "../common/object/keys";
-import { Fn } from "../common/typings2/Fn";
+import { isPromiseLike } from "@dabsi/common/async/isPromiseLike";
+import { entries } from "@dabsi/common/object/entries";
+import { keys } from "@dabsi/common/object/keys";
+import { Fn } from "@dabsi/common/typings2/Fn";
 
 function _concat(result, callback) {
   if (isPromiseLike(result)) {
@@ -26,12 +25,19 @@ function _invoke(
   );
 }
 
+HooksInstaller.empty = () => void 0;
+
 export function HooksInstaller<T extends Record<string, Fn>, U = void>(
   hooks: T,
   back?: U
 ): (
   options: {
-    [K in keyof T]?;
+    [K in keyof T]?:
+      | T[K]
+      | {
+          before?: T[K];
+          after?: T[K];
+        };
   }
 ) => U {
   const hookMap: Record<

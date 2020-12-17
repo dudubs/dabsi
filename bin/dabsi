@@ -4,9 +4,10 @@
 O=""
 #O="$O --preserve-symlinks"
 O="$O -r source-map-support/register"
+O="$O -r tsconfig-paths/register"
 O="$O -r ts-node/register"
 
-export DABSI_NODE_OPTIONS=$O
+export DABSI_NODE_OPTIONS="$DABSI_NODE_OPTIONS $O"
 
 O="$O -r $DABSI_PATH/src/register.ts"
 

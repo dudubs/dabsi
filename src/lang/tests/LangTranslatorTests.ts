@@ -1,5 +1,5 @@
-import {Lang, LangPropsType} from "../Lang";
-import {LangTranslator} from "../LangTranslator";
+import {Lang, LangPropsType} from "@dabsi/lang/Lang";
+import {LangTranslator} from "@dabsi/lang/LangTranslator";
 
 
 testm(__filename, () => {

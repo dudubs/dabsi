@@ -1,10 +1,10 @@
-import { inspect } from "../../logging/inspect";
-import { checkResolverSymbol } from "../operators/checkResolver";
-import { CallStackInfo } from "../CallStackInfo";
-import { AnyResolverMap } from "./ObjectResolver";
-import { resolve, resolveSymbol } from "../resolve";
-import { ResolveError } from "../ResolveError";
-import { Resolver } from "../Resolver";
+import { inspect } from "@dabsi/logging/inspect";
+import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
+import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
+import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
+import { resolve, resolveSymbol } from "@dabsi/typedi/resolve";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 export class TokenResolver<T> {
   constructor(public codeStackInfo: CallStackInfo, public token: string) {}

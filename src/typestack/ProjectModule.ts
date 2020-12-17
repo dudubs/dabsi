@@ -1,62 +1,75 @@
+import { ProjectModuleInfo } from "./ProjectModuleInfo";
+import { Cli } from "./../modules/Cli";
+import { touchObject } from "@dabsi/common/object/touchObject";
+import { DABSI_ROOT_DIR } from "@dabsi/index";
+import { Inject, Module } from "@dabsi/typedi";
+import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { MakeModule } from "@dabsi/typestack/MakeModule";
+import { ProjectInfo } from "@dabsi/typestack/ProjectInfo";
 import { existsSync } from "fs";
 import path from "path";
-import { touchObject } from "../common/object/touchObject";
-import { DABSI_ROOT_DIR } from "../index";
-import { CALL_STACK_PATTERN, CallStackInfo } from "../typedi/CallStackInfo";
-import { Inject, Resolver } from "../typedi";
-import { Module } from "../typedi";
-import { ModuleRunner } from "../typedi/ModuleRunner";
-import { MakeModule } from "./MakeModule";
-import { ProjectInfo } from "./ProjectInfo";
+import { Once } from "@dabsi/common/patterns/Once";
+import { PlatformInfo } from "@dabsi/modules/PlatformInfo";
 
 @Module()
 export class ProjectModule {
-  dirNames = new Set<string>();
-
   projectInfoMap: Record<string, ProjectInfo>;
 
-  currentProjectInfo: ProjectInfo;
+  mainProjectInfo: ProjectInfo;
 
   providers: { error: Error; fileName: string }[] = [];
 
   constructor(
     @Inject() mMake: MakeModule,
-    @Inject() moduleRunner: ModuleRunner
+    @Inject() protected runner: ModuleRunner,
+    @Inject() cli: Cli
   ) {
     mMake.cli.install({ run: () => this.init() });
+    cli.command(
+      "testx",
+      new Cli().install({
+        run: async () => {
+          console.log("hello");
+          await this.init();
+        },
+      })
+    );
   }
 
-  async init() {
-    if (this.projectInfoMap) return;
-
-    for (const {
-      error: { stack },
-      fileName,
-    } of this.providers) {
-      const dirName = path.dirname(
-        CallStackInfo.getLineInfo(stack!, fileName)!.fileName
-      );
-      if (!dirName.startsWith(DABSI_ROOT_DIR))
-        throw new Error(`Invalid provider: ${stack}`);
-      this.dirNames.add(dirName);
-    }
-
+  @Once() async init() {
     this.projectInfoMap = {};
-    for (let dirName of this.dirNames) {
-      if (!dirName.startsWith(DABSI_ROOT_DIR))
-        throw new Error(`Project must to be in "${DABSI_ROOT_DIR}".`);
 
-      const [projectDir] = dirName.split(/[\\\/]src([\\\/]|$)/);
-      if (!existsSync(path.join(projectDir, "src")))
-        throw new Error(`Invalid project directory ${dirName}`);
+    for (const m of this.runner.getLoadedModules()) {
+      const moduleFileName = m.metadata.callStackInfo.lineInfo.fileName;
 
+      if (!(/*is index file*/ /[\\\/]index\.ts/.test(moduleFileName))) continue;
+
+      if (
+        !(
+          /*module default is module target*/ (
+            require(moduleFileName)?.["default"] === m.target
+          )
+        )
+      )
+        continue;
+
+      const moduleDir = path.dirname(moduleFileName);
+      const projectDir = moduleFileName.replace(/[\\\/]src[\\\/].*$/, "");
       const projectInfo = touchObject(
         this.projectInfoMap,
         projectDir,
         () => new ProjectInfo(projectDir)
       );
-      projectInfo.dirNames.add(dirName);
-      this.currentProjectInfo = projectInfo;
+
+      projectInfo.moduleMapInfo[moduleDir] = new ProjectModuleInfo(
+        projectInfo,
+        moduleDir
+      );
+
+      if (this.runner.mainModuleTarget === m.target) {
+        this.mainProjectInfo = projectInfo;
+      }
     }
   }
 }

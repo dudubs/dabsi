@@ -1,10 +1,10 @@
 import { Connection, ObjectType, Repository } from "typeorm";
-import { Lazy } from "../../../common/patterns/lazy";
-import { DataTypeInfo } from "../../../typedata/DataTypeInfo";
-import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { DataQueryBuilder } from "../../../typedata/data-query/DataQueryBuilder";
-import { DataQueryExpToSqbTranslator } from "../../../typedata/data-query/DataQueryExpToSqbTranslator";
-import { DataEntityExpTranslatorToDataQueryExp } from "../../../typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
+import { DataQueryExpToSqbTranslator } from "@dabsi/typedata/data-query/DataQueryExpToSqbTranslator";
+import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
 
 export class QbExpTester<T> {
   constructor(

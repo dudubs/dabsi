@@ -1,4 +1,4 @@
-import {BaseMap, MapKey, MapValue} from "./BaseMap";
+import {BaseMap, MapKey, MapValue} from "@dabsi/common/map/BaseMap";
 
 export function updateMap<T extends BaseMap<any, any>>(
     map: T,

@@ -1,6 +1,6 @@
 import {Context, createElement, ReactElement, ReactNode} from "react";
 import {pipe} from "rxjs";
-import {ContextOrType} from "./ContextOrType";
+import {ContextOrType} from "@dabsi/react/utils/ContextOrType";
 
 export function provide<T>(
     context: ContextOrType<T>,

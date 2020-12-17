@@ -1,15 +1,16 @@
 // TODO: remove controller.
-import { assignDescriptors } from "../../common/object/assignDescriptors";
-import { entries } from "../../common/object/entries";
-import { keys } from "../../common/object/keys";
-import { Lazy } from "../../common/patterns/lazy";
-import { ExtractKeys } from "../../common/typings2/ExtractKeys";
-import { Fn } from "../../common/typings2/Fn";
-import { Override } from "../../common/typings2/Override";
-import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
-import { PickByValue } from "../../common/typings2/PickByValue";
-import { Pluck } from "../../common/typings2/Pluck";
-import { UndefinedIfEmptyObject } from "../../common/typings2/UndefinedIfEmptyObject";
+import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
+import { entries } from "@dabsi/common/object/entries";
+import { keys } from "@dabsi/common/object/keys";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { PickByValue } from "@dabsi/common/typings2/PickByValue";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
+import { UndefinedIfIsUndefined } from "@dabsi/common/typings2/UndefinedIfIsUndefined";
 import {
   AnyRpc,
   BasedRpc,
@@ -17,14 +18,15 @@ import {
   Rpc,
   RpcCommand,
   RpcConnection,
+  RpcIsConfigCanBeUndefinedOption,
   RpcIsGenericConfigOption,
   RpcPropsOption,
   RpcType,
   TRpc,
   _RpcHandlerClass,
-} from "../Rpc";
-import { AnyRpcRecord } from "../rpc-map/RpcMap";
-import { BaseWidgetConnection } from "./BaseWidgetConnection";
+} from "@dabsi/typerpc/Rpc";
+import { AnyRpcRecord } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { BaseWidgetConnection } from "@dabsi/typerpc/widget/BaseWidgetConnection";
 
 export type TWidget = {
   Controller: Record<string, Fn | AnyRpc>;
@@ -78,7 +80,7 @@ export type WidgetControllerOptions<T extends Pick<T, "Controller">> = {
 export type WidgetOptions<T extends TWidget> = PartialUndefinedKeys<
   {
     isGenericConfig: RpcIsGenericConfigOption<T>;
-
+    isConfigCanBeUndefined: RpcIsConfigCanBeUndefinedOption<T>;
     props: RpcPropsOption<T>;
   } & WidgetControllerOptions<T>,
   {
@@ -153,6 +155,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     handler,
     type,
     children = {},
+    isConfigCanBeUndefined,
     commands,
   } = (options as any) as WidgetOptions<WidgetType<WidgetWithoutController>>;
 
@@ -177,6 +180,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
   return <any>Rpc<WidgetWithoutController>({
     handler,
     isGenericConfig,
+    isConfigCanBeUndefined,
     children,
     type,
     props: assignDescriptors(props as {}, {

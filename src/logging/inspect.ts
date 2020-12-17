@@ -1,4 +1,4 @@
-import { mapObjectToArray } from "../common/object/mapObjectToArray";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 
 // trying to require "util" module.
 

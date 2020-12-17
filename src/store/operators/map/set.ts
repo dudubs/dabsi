@@ -1,4 +1,4 @@
-import { Store } from "./../../Store";
+import { Store } from "@dabsi/store/Store";
 
 const op = "set";
 

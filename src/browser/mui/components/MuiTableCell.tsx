@@ -2,8 +2,8 @@ import { TableCellProps } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
 import { makeStyles } from "@material-ui/core/styles";
 import { createElement } from "react";
-import { Override } from "../../../common/typings2/Override";
-import { mergeProps } from "../../../react/utils/mergeProps";
+import { Override } from "@dabsi/common/typings2/Override";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
 
 const useStyles = makeStyles({
   fitToContent: {

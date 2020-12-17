@@ -1,6 +1,6 @@
-import { InputMap } from "../../../../typerpc/input/input-map/InputMap";
-import { TextInput } from "../../../../typerpc/input/text-input/TextInput";
-import UniqueInput from "../../../../typerpc/input/UniqueInput";
+import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import UniqueInput from "@dabsi/typerpc/input/UniqueInput";
 
 export const AclGroupBasicInfoInput = InputMap({
   groupName: UniqueInput(TextInput()),

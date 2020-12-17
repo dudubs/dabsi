@@ -1,8 +1,8 @@
-import { keys } from "../../../common/object/keys";
-import { IRpcHandler, RpcResolvedHandler } from "../../Rpc";
-import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
-import { AnyWidget, WidgetElementState } from "./../Widget";
-import { WidgetNamespace } from "./WidgetNamspace";
+import { keys } from "@dabsi/common/object/keys";
+import { IRpcHandler, RpcResolvedHandler } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
+import { AnyWidget, WidgetElementState } from "@dabsi/typerpc/widget/Widget";
+import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 
 export type T = WidgetNamespace;
 

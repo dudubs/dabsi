@@ -1,15 +1,15 @@
 import { Connection, EntityMetadata, ObjectType, Repository } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { entries } from "../../common/object/entries";
-import { EntityRelation } from "../../typeorm/relations";
-import { DataExp } from "../data-exp/DataExp";
-import { DataQueryBuilder } from "../data-query/DataQueryBuilder";
-import { DataCursor } from "../DataCursor";
-import { DataFieldsTranslator } from "../DataFieldsTranslator";
-import { DataTypeInfo } from "../DataTypeInfo";
-import { DataEntityExpTranslatorToDataQueryExp } from "./DataEntityExpTranslatorToDataQueryExp";
-import { DataEntityInfo, getDataEntityInfo } from "./DataEntityInfo";
-import { DataEntityKey } from "./DataEntityKey";
+import { entries } from "@dabsi/common/object/entries";
+import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
+import { DataCursor } from "@dabsi/typedata/DataCursor";
+import { DataFieldsTranslator } from "@dabsi/typedata/DataFieldsTranslator";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
+import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
+import { DataEntityInfo, getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 
 export type DataEntityCursorBase = {
   typeInfo: DataTypeInfo;

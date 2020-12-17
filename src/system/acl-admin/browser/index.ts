@@ -1,10 +1,14 @@
-import { Lang } from "../../../lang/Lang";
-import { MuiAdminMenu } from "../../admin/browser/MuiAdminMenu";
+import { Lang } from "@dabsi/lang/Lang";
+import { MuiAdminMenu } from "@dabsi/system/admin/browser/MuiAdminMenu";
 
-import "./_Users";
-import "./_Groups";
-import AclAdminRouter, from "../common/AclAdminRouter";
-import {AclAdminConnection} from "../AclAdminRpc"
+import "@dabsi/system/acl-admin/browser/_Users";
+import "@dabsi/system/acl-admin/browser/_Groups";
+import AclAdminRouter from "@dabsi/system/acl-admin/AclAdminRouter";
+import { AclAdminConnection } from "@dabsi/system/acl-admin/AclAdminRpc";
+import "@dabsi/system/acl-admin/groups/edit/BasicInfoForm";
+import "@dabsi/system/acl-admin/users/forms/BasicInfoForm";
+import "@dabsi/system/acl-admin/users/forms/ContactInfoForm";
+
 const connections = [AclAdminConnection];
 
 MuiAdminMenu.register({
@@ -17,7 +21,7 @@ MuiAdminMenu.register({
         icon: require("@material-ui/icons/People"),
         // mainRouter
         router: AclAdminRouter.at("users"),
-        subRouters: [AclAdminRouter.at("createNewUSer")],
+        subRouters: [AclAdminRouter.at("createNewUser")],
       },
       aclGroups: {
         connections,

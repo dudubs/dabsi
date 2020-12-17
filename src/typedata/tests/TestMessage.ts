@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from "typeorm";
-import { Group } from "../../system-old/server/acl/Group";
-import { User } from "../../system-old/server/acl/User";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { User } from "@dabsi/system-old/server/acl/User";
 
 @Entity()
 @TableInheritance({ column: "type" })

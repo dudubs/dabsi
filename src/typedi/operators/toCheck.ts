@@ -1,9 +1,11 @@
-import { checkResolver, checkResolverSymbol } from "./checkResolver";
-import { resolve, resolveSymbol } from "../resolve";
-import { Resolver } from "./../Resolver";
-import { check } from "yargs";
+import {
+  checkResolver,
+  checkResolverSymbol,
+} from "@dabsi/typedi/operators/checkResolver";
+import { resolve, resolveSymbol } from "@dabsi/typedi/resolve";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
-export default function <T>(resolver: Resolver<T>, context: (context) => void) {
+export default function <T>(resolver: Resolver<T>, check: (context) => void) {
   return {
     [resolveSymbol](context) {
       return resolve(resolver, context);

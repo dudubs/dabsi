@@ -1,10 +1,10 @@
-import { Union } from "../../../common/typings2/Union";
-import { NoRpc } from "../../NoRpc";
-import { RpcConnection, RpcUnresolvedConfig } from "../../Rpc";
-import { RpcMap } from "../../rpc-map/RpcMap";
-import { Widget, WidgetElement } from "../Widget";
-import { AnyWidgetRecord } from "../widget-map/WidgetMap";
-import { TabsWidgetHandler } from "./TabsWidgetHandler";
+import { Union } from "@dabsi/common/typings2/Union";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { RpcConnection, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { Widget, WidgetElement } from "@dabsi/typerpc/widget/Widget";
+import { AnyWidgetRecord } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { TabsWidgetHandler } from "@dabsi/typerpc/widget/tabs-widget/TabsWidgetHandler";
 
 export type AnyTabsWidget = TabsWidget<AnyWidgetRecord>;
 

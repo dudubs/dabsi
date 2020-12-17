@@ -1,5 +1,5 @@
 import {ComponentProps, ComponentType, createElement, isValidElement, ReactElement} from "react";
-import {_buildObject, ObjectBuilder} from "./buildObject";
+import {_buildObject, ObjectBuilder} from "@dabsi/common/object/buildObject";
 
 export function buildElement<P>(
     element: ReactElement<P>,

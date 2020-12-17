@@ -1,4 +1,4 @@
-import { Field, AsField } from "./Field";
+import { Field, AsField } from "@dabsi/struct/Field";
 
 declare module "./Field" {
   namespace Field {

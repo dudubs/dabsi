@@ -1,4 +1,4 @@
-import {entries} from "./entries";
+import {entries} from "@dabsi/common/object/entries";
 
 export function mapAndFilterObject<T, R>(obj: Record<string, T>,
                                          mapper: (value: T, key: string) => R | undefined): Record<string, R> {

@@ -1,4 +1,4 @@
-import { Constructor } from "../typings2/Constructor";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
 
 export function isConstructorOf<T extends object>(
   obj,

@@ -1,15 +1,15 @@
 import React, { ReactElement } from "react";
-import { Emittable } from "../../../react/reactor/Reactor";
-import { ReactorListener } from "../../../react/reactor/ReactorListener";
-import { Renderer } from "../../../react/renderer";
-import { InputError } from "../../input/Input";
-import { InputView, InputViewProps } from "../../input/InputView";
-import { RpcConnection } from "../../Rpc";
-import { AbstractWidgetView } from "../AbstractWidgetView";
+import { Emittable } from "@dabsi/react/reactor/Reactor";
+import { ReactorListener } from "@dabsi/react/reactor/ReactorListener";
+import { Renderer } from "@dabsi/react/renderer";
+import { InputError } from "@dabsi/typerpc/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
 
-import { WidgetType } from "../Widget";
-import { WidgetViewProps } from "../WidgetView";
-import { AnyForm, TForm } from "./Form";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { AnyForm, TForm } from "@dabsi/typerpc/widget/form/Form";
 
 export type FormViewProps<
   C extends RpcConnection<AnyForm>,

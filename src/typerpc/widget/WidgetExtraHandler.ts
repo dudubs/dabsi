@@ -1,6 +1,6 @@
-import { Call } from "../../common/typings2/Call";
-import { RpcHookHandler } from "../RpcHook";
-import { AnyWidget } from "./Widget";
+import { Call } from "@dabsi/common/typings2/Call";
+import { RpcHookHandler } from "@dabsi/typerpc/RpcHook";
+import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
 
 export const WidgetExtraHandler: RpcHookHandler<AnyWidget> = {
   symbol: Symbol("WidgetExtra"),

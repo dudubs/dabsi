@@ -1,13 +1,13 @@
-import { mapObjectAsync } from "../../common/object/mapObject";
-import { AbstractRpcHandler } from "../AbstractRpcHandler";
-import { RpcPayload } from "../Rpc";
+import { mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
+import { RpcPayload } from "@dabsi/typerpc/Rpc";
 import {
   AnyWidget,
   WidgetWithoutController,
   IWidgetHandler,
   WidgetElement,
   WidgetElementState,
-} from "./Widget";
+} from "@dabsi/typerpc/widget/Widget";
 
 export abstract class AbstractWidgetHandler<T extends AnyWidget>
   extends AbstractRpcHandler<T>

@@ -1,5 +1,5 @@
 import { ReactElement, ReactNode } from "react";
-import { mapObjectToArray } from "../common/object/mapObjectToArray";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 
 type TableLayoutColumnProps<C> = {
   key: string;

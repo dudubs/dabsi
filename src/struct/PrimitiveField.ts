@@ -1,4 +1,4 @@
-import { Field, ToField } from "./Field";
+import { Field, ToField } from "@dabsi/struct/Field";
 
 export function PrimitiveField<T>(
   type: (value: any) => T

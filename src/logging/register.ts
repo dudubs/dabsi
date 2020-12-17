@@ -1,4 +1,4 @@
-import { Logger } from "./Logger";
+import { Logger } from "@dabsi/logging/Logger";
 
 declare global {
   const log: Logger;

@@ -2,13 +2,13 @@ import { createMemoryHistory } from "history";
 import React from "react";
 
 import ReactTesterRenderer from "react-test-renderer";
-import { Timeout } from "../common/async/Timeout";
-import { Emitter, useEmitter } from "../react/reactor/useEmitter";
-import { ReactRouter } from "./ReactRouter";
-import { ReactRouterView } from "./ReactRouterView";
-import { Router, RouterType } from "./Router";
-import { RouterEvent } from "./RouterEvent";
-import { AnyRouterLocation, RouterLocation } from "./RouterLocation";
+import { Timeout } from "@dabsi/common/async/Timeout";
+import { Emitter, useEmitter } from "@dabsi/react/reactor/useEmitter";
+import { ReactRouter } from "@dabsi/typerouter/ReactRouter";
+import { ReactRouterView } from "@dabsi/typerouter/ReactRouterView";
+import { Router, RouterType } from "@dabsi/typerouter/Router";
+import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
+import { AnyRouterLocation, RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 export const TestRouter = Router({
   a: Router({

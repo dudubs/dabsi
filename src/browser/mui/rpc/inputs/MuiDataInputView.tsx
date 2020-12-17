@@ -6,20 +6,20 @@ import TextField from "@material-ui/core/TextField";
 import { Autocomplete } from "@material-ui/lab";
 import * as React from "react";
 import { useRef, useState } from "react";
-import { If } from "../../../../common/typings2/boolean";
-import { Is } from "../../../../common/typings2/boolean/Is";
-import { PartialUndefinedKeys } from "../../../../common/typings2/PartialUndefinedKeys";
-import { Lang, LangNode } from "../../../../lang/Lang";
-import { useLangTranslator } from "../../../../lang/LangTranslator";
-import { AnyDataInput } from "../../../../typerpc/input/data-input/DataInput";
-import { DataInputView } from "../../../../typerpc/input/data-input/DataInputView";
+import { If } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Lang, LangNode } from "@dabsi/lang/Lang";
+import { useLangTranslator } from "@dabsi/lang/LangTranslator";
+import { AnyDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
+import { DataInputView } from "@dabsi/typerpc/input/data-input/DataInputView";
 
-import { InputType } from "../../../../typerpc/input/Input";
-import { InputViewProps } from "../../../../typerpc/input/InputView";
-import { RpcConnection } from "../../../../typerpc/Rpc";
-import { WidgetViewLoader } from "../../../../typerpc/widget/WidgetViewLoader";
-import { MuiLink } from "../../components/MuiLink";
-import { MuiDataTableView } from "../MuiDataTableView";
+import { InputType } from "@dabsi/typerpc/input/Input";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
+import { MuiLink } from "@dabsi/browser/mui/components/MuiLink";
+import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 
 export type AnyDataInputConnection = RpcConnection<AnyDataInput>;
 

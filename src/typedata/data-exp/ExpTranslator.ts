@@ -1,7 +1,7 @@
-import { Union } from "../../common/typings2/Union";
-import { inspect } from "../../logging/inspect";
+import { Union } from "@dabsi/common/typings2/Union";
+import { inspect } from "@dabsi/logging/inspect";
 
-import { ExpNode } from "./getExpNode";
+import { ExpNode } from "@dabsi/typedata/data-exp/getExpNode";
 export type Exp<T> = Union<
   {
     [K in keyof T]: Pick<T, K>;

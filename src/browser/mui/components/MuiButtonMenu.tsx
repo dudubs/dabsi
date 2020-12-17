@@ -1,9 +1,9 @@
 import Menu from "@material-ui/core/Menu";
 import * as React from "react";
 import { ReactElement, ReactNode, useRef, useState } from "react";
-import { mergeRefs } from "../../../react/utils/mergeRefs";
-import { MuiButton, MuiButtonProps } from "./MuiButton";
-import { mergeElementProps, mergeProps } from "../../../react/utils/mergeProps";
+import { mergeRefs } from "@dabsi/react/utils/mergeRefs";
+import { MuiButton, MuiButtonProps } from "@dabsi/browser/mui/components/MuiButton";
+import { mergeElementProps, mergeProps } from "@dabsi/react/utils/mergeProps";
 
 export function MuiButtonMenu({
   children,

@@ -1,7 +1,7 @@
 import * as React from "react";
-import { mergeProps } from "../../../react/utils/mergeProps";
-import { MuiButton, MuiButtonProps } from "./MuiButton";
-import { MuiDangerDialog, MuiDangerDialogProps } from "./MuiDangerDialog";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { MuiButton, MuiButtonProps } from "@dabsi/browser/mui/components/MuiButton";
+import { MuiDangerDialog, MuiDangerDialogProps } from "@dabsi/browser/mui/components/MuiDangerDialog";
 
 export type MuiDangerButtonProps = MuiButtonProps<{
   MuiDangerDialogProps?: Partial<MuiDangerDialogProps>;

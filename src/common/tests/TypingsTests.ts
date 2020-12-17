@@ -1,13 +1,13 @@
-import { HasKeys, IsAny, IsUndefined } from "../typings2/boolean";
-import { Is } from "../typings2/boolean/Is";
-import { IsEmptyObject } from "../typings2/boolean/IsEmptyObject";
-import { IsNever } from "../typings2/boolean/IsNever";
-import { IsSome } from "../typings2/boolean/IsSome";
-import { OptionalKeys } from "../typings2/OptionalKeys";
-import { OptionalObjectArg } from "../typings2/OptionalObjectArg";
-import { PartialUndefinedKeys } from "../typings2/PartialUndefinedKeys";
-import { Pluck } from "../typings2/Pluck";
-import { RequireOptionalKeys } from "../typings2/RequireOptionalKeys";
+import { HasKeys, IsAny, IsUndefined } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { IsEmptyObject } from "@dabsi/common/typings2/boolean/IsEmptyObject";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { IsSome } from "@dabsi/common/typings2/boolean/IsSome";
+import { OptionalKeys } from "@dabsi/common/typings2/OptionalKeys";
+import { OptionalObjectArg } from "@dabsi/common/typings2/OptionalObjectArg";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
 
 (_ => {})(() => {
   // Bool

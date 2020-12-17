@@ -1,12 +1,12 @@
-import { inspect } from "../../logging/inspect";
-import { RpcTester } from "../RpcTester";
+import { inspect } from "@dabsi/logging/inspect";
+import { RpcTester } from "@dabsi/typerpc/RpcTester";
 import {
   AnyInput,
   InputError,
   InputValueData,
   InputValueElement,
-} from "./Input";
-import { ValueOrAwaitableFn } from "./ValueOrAwaitableFn";
+} from "@dabsi/typerpc/input/Input";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
 import objectContaining = jasmine.objectContaining;
 import Expected = jasmine.Expected;
 

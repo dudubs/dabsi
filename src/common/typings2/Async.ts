@@ -1,4 +1,4 @@
-import { Fn } from "./Fn";
+import { Fn } from "@dabsi/common/typings2/Fn";
 
 export type Awaitable<T = any> = Promise<T> | T;
 export type Awaited<T extends Awaitable> = T extends Awaitable<infer U>

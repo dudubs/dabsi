@@ -1,5 +1,5 @@
-import { Lang } from "../Lang";
-import { LangView } from "../LangView";
+import { Lang } from "@dabsi/lang/Lang";
+import { LangView } from "@dabsi/lang/LangView";
 
 testm(__filename, () => {
   const HelloMsg = Lang`HELLO_${"name"}!`;

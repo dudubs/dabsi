@@ -1,4 +1,4 @@
-import {entries} from "./entries";
+import {entries} from "@dabsi/common/object/entries";
 
 export function filterObject(obj, callback: (value, key) => boolean) {
     const result = {};

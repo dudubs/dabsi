@@ -1,4 +1,4 @@
-import {BaseMap} from "./BaseMap";
+import {BaseMap} from "@dabsi/common/map/BaseMap";
 
 export type PropertyMapOptions = {
     bind?: boolean,

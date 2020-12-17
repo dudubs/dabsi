@@ -1,11 +1,11 @@
 import * as fs from "fs";
 import reload from "reload";
 import webpack from "webpack";
-import { Debounce } from "../common/async/Debounce";
-import { Inject, Module } from "../typedi";
-import { DevModule } from "../typestack/DevModule";
-import { BrowserPlatformModule } from "./BrowserPlatformModule";
-import { ExpressModule } from "./ExpressModule";
+import { Debounce } from "@dabsi/common/async/Debounce";
+import { Inject, Module } from "@dabsi/typedi";
+import { DevModule } from "@dabsi/typestack/DevModule";
+import BrowserModule from "@dabsi/modules/BrowserModule";
+import { ExpressModule } from "@dabsi/modules/ExpressModule";
 
 @Module()
 export class BrowserDevModule {
@@ -14,7 +14,7 @@ export class BrowserDevModule {
   constructor(
     @Inject() protected devModule: DevModule,
     @Inject() expressModule: ExpressModule,
-    @Inject() mBrowserPlatform: BrowserPlatformModule
+    @Inject() mBrowserPlatform: BrowserModule
   ) {
     mBrowserPlatform.scripts.push("/reload/reload.js");
 

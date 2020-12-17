@@ -1,17 +1,17 @@
-import { mergeObject } from "../../common/object/mergeObject";
-import { omit } from "../../common/object/omit";
-import { HasKeys, If } from "../../common/typings2/boolean";
-import { DataExp } from "../data-exp/DataExp";
-import { DataFieldsTranslator } from "../DataFieldsTranslator";
-import { DataOrder } from "../DataOrder";
-import { DataUnionChildren, DataUnionChildrenKey } from "../DataUnion";
+import { mergeObject } from "@dabsi/common/object/mergeObject";
+import { omit } from "@dabsi/common/object/omit";
+import { HasKeys, If } from "@dabsi/common/typings2/boolean";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataFieldsTranslator } from "@dabsi/typedata/DataFieldsTranslator";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
+import { DataUnionChildren, DataUnionChildrenKey } from "@dabsi/typedata/DataUnion";
 import {
   IfRelationToMany,
   IfRelationToOne,
   NonRelationKeys,
   DataRelationKeys,
   DataRelationTypeAt,
-} from "../DataRelation";
+} from "@dabsi/typedata/DataRelation";
 
 export type DataPickableKeys<T> = Exclude<
   NonRelationKeys<T>,

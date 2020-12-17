@@ -1,6 +1,6 @@
-import { ExtractKeys } from "../typings2/ExtractKeys";
-import { Fn } from "../typings2/Fn";
-import { isPromiseLike } from "./isPromiseLike";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { isPromiseLike } from "@dabsi/common/async/isPromiseLike";
 
 export function pushHook<T, K extends ExtractKeys<T, Fn>>(
   where: T,

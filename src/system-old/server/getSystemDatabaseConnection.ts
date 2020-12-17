@@ -1,6 +1,6 @@
 import { Connection } from "typeorm";
-import { createSystemDatabaseConnection } from "./createSystemDatabaseConnection";
-import { SystemBootstrap } from "./SystemBootstrap";
+import { createSystemDatabaseConnection } from "@dabsi/system-old/server/createSystemDatabaseConnection";
+import { SystemBootstrap } from "@dabsi/system-old/server/SystemBootstrap";
 
 let connection: Connection;
 

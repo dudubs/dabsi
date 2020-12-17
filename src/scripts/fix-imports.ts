@@ -1,7 +1,7 @@
 import path, { relative } from "path";
-import { readFileSync } from "fs";
-import { DABSI_SRC_PATH } from "./../index";
-import { readdirRecursiveSync } from "../filesystem/readdirRecursiveSync";
+import { readFileSync, writeFileSync } from "fs";
+import { DABSI_SRC_PATH } from "@dabsi/index";
+import { readdirRecursiveSync } from "@dabsi/filesystem/readdirRecursiveSync";
 
 if (require.main === module)
   (async () => {
@@ -11,12 +11,14 @@ if (require.main === module)
       const fileSource = readFileSync(fileName, "utf8");
       const fileDir = path.dirname(fileName);
       const fileFixedSource = fileSource.replace(
-        /(?<type>import|from) "(?<path>[^"\n]+)";/,
+        /(?<type>import|from) "(?<path>[^"\n]+)";/g,
         (...args) => {
-          let { type, path: importPath } = args[args.length - 1] as {
+          const { type, path: originalImportPath } = args[args.length - 1] as {
             path: string;
             type: "import" | "from";
           };
+
+          let importPath = originalImportPath;
 
           if (importPath.startsWith(".")) {
             const importRelativePath = importPath;
@@ -31,13 +33,17 @@ if (require.main === module)
                   .slice(DABSI_SRC_PATH.length + 1)
                   .replace(/\\/g, "/");
             }
+
+            if (importPath !== originalImportPath) {
+              console.log(`Fix "${originalImportPath}" to "${importPath}"`);
+            }
           }
           return `${type} "${importPath}";`;
         }
       );
 
       if (fileFixedSource !== fileSource) {
-        console.log({ fileName });
+        // writeFileSync(fileName, fileFixedSource);
       }
     }
   })();

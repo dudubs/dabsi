@@ -1,6 +1,6 @@
-import { Tester } from "../../../jasmine/Tester";
-import { DbModule } from "../DbModule";
-import { TestModule } from "./TestModule";
+import { Tester } from "@dabsi/jasmine/Tester";
+import { DbModule } from "@dabsi/system/core/DbModule";
+import { TestModule } from "@dabsi/system/core/tests/TestModule";
 
 const TestDbModule = TestModule.resolve(DbModule);
 TestDbModule.connectionOptions = {

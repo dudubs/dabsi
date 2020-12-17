@@ -1,8 +1,11 @@
-import { If } from "../../../common/typings2/boolean";
-import { Override } from "../../../common/typings2/Override";
-import { Input } from "../Input";
-import { TextInputHandler } from "./TextInputHandler";
-import { TextLoaderError, TextLoaderOptions } from "./TextInputLoader";
+import { If } from "@dabsi/common/typings2/boolean";
+import { Override } from "@dabsi/common/typings2/Override";
+import { Input } from "@dabsi/typerpc/input/Input";
+import { TextInputHandler } from "@dabsi/typerpc/input/text-input/TextInputHandler";
+import {
+  TextLoaderError,
+  TextLoaderOptions,
+} from "@dabsi/typerpc/input/text-input/TextInputLoader";
 
 // TODO: Builtin unique error, & error override.
 export type TextInput<N extends boolean = any> = Input<{
@@ -42,6 +45,7 @@ export function TextInput<N extends boolean = false>({
   return <any>Input<TextInput<any>>({
     handler: TextInputHandler,
     type: TextInput,
+    isConfigCanBeUndefined: true,
     props: {
       nullable: nullable || false,
       loaderOptions,

@@ -1,8 +1,8 @@
-import { RouterEvent } from "./RouterEvent";
+import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
 import { useState } from "react";
-import { useEmitter } from "../react/reactor/useEmitter";
-import { useReactRouter } from "./ReactRouter";
-import { AnyRouter } from "./Router";
+import { useEmitter } from "@dabsi/react/reactor/useEmitter";
+import { useReactRouter } from "@dabsi/typerouter/ReactRouter";
+import { AnyRouter } from "@dabsi/typerouter/Router";
 
 export default function (getRouter: () => AnyRouter) {
   const [path, setPath] = useState(() => "#");

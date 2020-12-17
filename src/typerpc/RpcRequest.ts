@@ -1,4 +1,4 @@
-import { touchMap } from "../common/map/touchMap";
+import { touchMap } from "@dabsi/common/map/touchMap";
 
 export class RpcRequest {
   protected handler = firstHandler => firstHandler();

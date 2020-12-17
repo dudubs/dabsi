@@ -1,23 +1,23 @@
-import { mapObject } from "../../../common/object/mapObject";
-import { Awaitable } from "../../../common/typings2/Async";
-import { Override } from "../../../common/typings2/Override";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { Payload } from "../../../common/typings2/Payload";
-import { DataRow } from "../../../typedata/DataRow";
-import { GenericConfig } from "../../GenericConfig";
-import { NoRpc } from "../../NoRpc";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Payload } from "@dabsi/common/typings2/Payload";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
 
-import { RpcParameter } from "../../rpc-parameter/RpcParameter";
-import { AnyRpc, RpcUnresolvedConfig } from "../../Rpc";
-import { RpcMap } from "../../rpc-map/RpcMap";
-import { DataTable } from "../../widget/data-table/DataTable";
+import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
+import { AnyRpc, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import {
   InlineObject,
   InlineObjectType,
   string,
-} from "../../widget/InlineObjectType";
-import { WidgetElement } from "../../widget/Widget";
-import { DataInputTypes, TDataInput } from "../data-input/DataInput";
+} from "@dabsi/typerpc/widget/InlineObjectType";
+import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
+import { DataInputTypes, TDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
 import {
   AnyInput,
   Input,
@@ -25,9 +25,9 @@ import {
   InputValue,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { InputErrorMap } from "../input-map/InputMap";
-import { DataInputMapHandler } from "./DataInputMapHandler";
+} from "@dabsi/typerpc/input/Input";
+import { InputErrorMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { DataInputMapHandler } from "@dabsi/typerpc/input/data-input-map/DataInputMapHandler";
 
 export type AnyDataInputMap = DataInputMap<TDataInputMap>;
 

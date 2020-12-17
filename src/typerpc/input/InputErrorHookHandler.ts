@@ -1,6 +1,6 @@
-import { Call } from "../../common/typings2/Call";
-import { RpcHookHandler } from "../RpcHook";
-import { AnyInput } from "./Input";
+import { Call } from "@dabsi/common/typings2/Call";
+import { RpcHookHandler } from "@dabsi/typerpc/RpcHook";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
 
 export const InputErrorHookHandler: RpcHookHandler<AnyInput> = {
   symbol: Symbol("InputErrorHook"),

@@ -1,11 +1,12 @@
-import { Constructor } from "../common/typings2/Constructor";
-import { Type } from "../common/typings2/Type";
-import { checkResolverSymbol } from "./operators/checkResolver";
-import { checkTypeResolver } from "./operators/checkTypeResolver";
-import { provideType } from "./provideType";
-import { resolveSymbol } from "./resolve";
-import { CustomResolver, Resolver, ResolverMap } from "./Resolver";
-import { resolveType } from "./resolveType";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Type } from "@dabsi/common/typings2/Type";
+import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
+import { checkTypeResolver } from "@dabsi/typedi/operators/checkTypeResolver";
+import { provideType } from "@dabsi/typedi/provideType";
+import { resolveSymbol } from "@dabsi/typedi/resolve";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
+import { resolveType } from "@dabsi/typedi/resolveType";
 
 declare global {
   interface String extends CustomResolver<string> {}
@@ -26,6 +27,8 @@ declare global {
       this: T,
       resolver: Resolver<InstanceType<T>>
     ): ResolverMap<T>;
+
+    provide<T extends Constructor<any>>(this: T): ResolverMap<InstanceType<T>>;
   }
 }
 
@@ -56,6 +59,12 @@ Function.prototype.toCheck = function (checkFn) {
   };
 };
 
-Function.prototype.provide = function (resolver) {
-  return provideType(this, resolver);
+Function.prototype.provide = function (resolver?) {
+  return provideType(
+    this,
+    resolver ??
+      (() => {
+        throw new ResolveError(`No resolve for "${this.name}".`);
+      })
+  );
 };

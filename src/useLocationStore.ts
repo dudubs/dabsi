@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { Debounce } from "./common/async/Debounce";
+import { Debounce } from "@dabsi/common/async/Debounce";
 
-import { Store } from "./store";
-import { AsField } from "./struct";
-import { Field, AsFieldType } from "./struct/Field";
-import { useHistory } from "./typerouter/History";
+import { Store } from "@dabsi/store";
+import { AsField } from "@dabsi/struct";
+import { Field, AsFieldType } from "@dabsi/struct/Field";
+import { useHistory } from "@dabsi/typerouter/History";
 
 const STORE_STATE = "STORE_STATE";
 

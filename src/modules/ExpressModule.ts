@@ -1,10 +1,10 @@
 import express from "express";
-import { pushHook } from "../common/async/pushHook";
-import { Awaitable } from "../common/typings2/Async";
-import { Inject } from "../typedi";
-import { Module } from "../typedi";
-import { HooksInstaller } from "./HooksInstaller";
-import { ServerModule } from "./ServerModule";
+import { pushHook } from "@dabsi/common/async/pushHook";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Inject } from "@dabsi/typedi";
+import { Module } from "@dabsi/typedi";
+import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
+import { ServerModule } from "@dabsi/modules/ServerModule";
 
 @Module()
 export class ExpressModule {

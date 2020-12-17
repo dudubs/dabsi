@@ -1,6 +1,6 @@
-import { Flatter } from "../common/iterator/flat";
-import { entries } from "../common/object/entries";
-import { AnyRpc } from "./Rpc";
+import { Flatter } from "@dabsi/common/iterator/flat";
+import { entries } from "@dabsi/common/object/entries";
+import { AnyRpc } from "@dabsi/typerpc/Rpc";
 
 export const flatRpc = Flatter(
   (rpc: AnyRpc) => ({ rpc, path: [] as string[] }),

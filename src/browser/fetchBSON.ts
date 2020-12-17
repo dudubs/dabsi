@@ -1,4 +1,4 @@
-import {BSON2} from "../common/BSON2";
+import {BSON2} from "@dabsi/common/BSON2";
 
 export function fetchBSON(url: string, data: any):Promise<any> {
     return fetch(url, {

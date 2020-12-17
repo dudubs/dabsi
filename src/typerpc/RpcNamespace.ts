@@ -1,6 +1,6 @@
-import { AnyResolverMap } from "./../typedi/resolvers/ObjectResolver";
-import { Resolver } from "./../typedi/Resolver";
-import { Awaitable } from "../common/typings2/Async";
+import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
+import { Resolver } from "@dabsi/typedi/Resolver";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   AnyRpc,
   AnyRpcHandler,
@@ -8,8 +8,8 @@ import {
   RpcCommand,
   RpcConnection,
   RpcUnresolvedConfig,
-} from "./Rpc";
-import { RpcNamespaceHandler } from "./RpcNamespaceHandler";
+} from "@dabsi/typerpc/Rpc";
+import { RpcNamespaceHandler } from "@dabsi/typerpc/RpcNamespaceHandler";
 
 export type RpcNamespace<BaseRpc extends AnyRpc = AnyRpc> = Rpc<{
   Handler: {};
@@ -42,6 +42,7 @@ export function RpcNamespace(): RpcNamespace {
   let nsCommand;
   return Rpc<RpcNamespace>({
     handler: RpcNamespaceHandler,
+    type: RpcNamespace,
     connect(path, command) {
       return (nsCommand = (childPath, payload) => {
         return command([...path, ...childPath], payload);

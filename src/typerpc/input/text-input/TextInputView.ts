@@ -1,15 +1,15 @@
 import { ReactElement } from "react";
-import { Timeout } from "../../../common/async/Timeout";
-import { Awaitable } from "../../../common/typings2/Async";
-import { Lang } from "../../../lang/Lang";
-import { ViewState } from "../../../react/view/ViewState";
-import { RpcConnection } from "../../Rpc";
-import { WidgetType } from "../../widget/Widget";
-import { AbstractInputView } from "../AbstractInputView";
-import { InputError, InputValueElement } from "../Input";
-import { InputErrorElementMap, InputViewProps } from "../InputView";
-import { TextInput } from "./TextInput";
-import { TextInputLoader, TextLoaderOptions } from "./TextInputLoader";
+import { Timeout } from "@dabsi/common/async/Timeout";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Lang } from "@dabsi/lang/Lang";
+import { ViewState } from "@dabsi/react/view/ViewState";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
+import { InputError, InputValueElement } from "@dabsi/typerpc/input/Input";
+import { InputErrorElementMap, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { TextInputLoader, TextLoaderOptions } from "@dabsi/typerpc/input/text-input/TextInputLoader";
 
 export type TextInputViewProps<
   C extends RpcConnection<TextInput>

@@ -1,11 +1,11 @@
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import * as React from "react";
 import { ReactNode } from "react";
-import { Override } from "../../../common/typings2/Override";
-import { MuiDialog, MuiDialogProps } from "./MuiDialog";
-import { Lang, LangNode } from "../../../lang/Lang";
-import { ReactCallback } from "../../../react/ReactCallback";
-import { MuiButton, MuiCancelButton, MuiConfirmButton } from "./MuiButton";
+import { Override } from "@dabsi/common/typings2/Override";
+import { MuiDialog, MuiDialogProps } from "@dabsi/browser/mui/components/MuiDialog";
+import { Lang, LangNode } from "@dabsi/lang/Lang";
+import { ReactCallback } from "@dabsi/react/ReactCallback";
+import { MuiButton, MuiCancelButton, MuiConfirmButton } from "@dabsi/browser/mui/components/MuiButton";
 
 export type MuiDangerDialogProps = Override<
   MuiDialogProps,

@@ -1,4 +1,4 @@
-import { entries } from "./entries";
+import { entries } from "@dabsi/common/object/entries";
 
 export function mapObjectToArray<T extends Record<string, any>, U>(
   obj: T,

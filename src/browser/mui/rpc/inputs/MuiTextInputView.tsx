@@ -6,17 +6,17 @@ import {
 } from "@material-ui/core/TextField/TextField";
 import * as React from "react";
 import { ReactNode, useRef } from "react";
-import { LangKey } from "../../../../lang/LangKey";
-import { useEmitter } from "../../../../react/reactor/useEmitter";
-import { mergeProps } from "../../../../react/utils/mergeProps";
-import { TextInput } from "../../../../typerpc/input/text-input/TextInput";
+import { LangKey } from "@dabsi/lang/LangKey";
+import { useEmitter } from "@dabsi/react/reactor/useEmitter";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 import {
   TextInputView,
   TextInputViewProps,
-} from "../../../../typerpc/input/text-input/TextInputView";
+} from "@dabsi/typerpc/input/text-input/TextInputView";
 
-import { RpcConnection } from "../../../../typerpc/Rpc";
-import { FormViewEvent } from "../../../../typerpc/widget/form/FormView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { FormViewEvent } from "@dabsi/typerpc/widget/form/FormView";
 
 export type MuiTextInputViewProps<
   C extends RpcConnection<TextInput>

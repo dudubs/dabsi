@@ -1,11 +1,11 @@
-import { ArrayTypeOrObject } from "../common/typings2/ArrayTypeOrObject";
-import { ExtractKeys } from "../common/typings2/ExtractKeys";
-import { DataExp } from "./data-exp/DataExp";
-import { DataOrder } from "./DataOrder";
+import { ArrayTypeOrObject } from "@dabsi/common/typings2/ArrayTypeOrObject";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
 import {
   AnyDataSelection,
   DataSelection,
-} from "./data-selection/DataSelection";
+} from "@dabsi/typedata/data-selection/DataSelection";
 
 export type DataLoadMapValue<T> = boolean | DataRelationMap<T>;
 

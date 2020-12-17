@@ -1,6 +1,6 @@
-import { ExcludeKeys } from "../typings2/ExcludeKeys";
-import { ExtractKeys } from "../typings2/ExtractKeys";
-import { entries } from "./entries";
+import { ExcludeKeys } from "@dabsi/common/typings2/ExcludeKeys";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { entries } from "@dabsi/common/object/entries";
 
 export type Builder<T> = (prev: T) => T;
 

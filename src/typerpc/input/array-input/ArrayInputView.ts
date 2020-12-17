@@ -1,12 +1,12 @@
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
-import { RandomId } from "../../../common/patterns/RandomId";
-import { RequiredOnly } from "../../../common/typings2/RequiredOnly";
-import { RpcConnection } from "../../Rpc";
-import { AbstractInputView } from "../AbstractInputView";
-import { InputType } from "../Input";
-import { InputView, InputViewProps } from "../InputView";
-import { InputViewChildren } from "../InputViewChildren";
-import { AnyArrayInput, TArrayInput } from "./ArrayInput";
+import { RandomId } from "@dabsi/common/patterns/RandomId";
+import { RequiredOnly } from "@dabsi/common/typings2/RequiredOnly";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
+import { InputType } from "@dabsi/typerpc/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
+import { AnyArrayInput, TArrayInput } from "@dabsi/typerpc/input/array-input/ArrayInput";
 
 export type AnyArrayInputConnection = RpcConnection<AnyArrayInput>;
 

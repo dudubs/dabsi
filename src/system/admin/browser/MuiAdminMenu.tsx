@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
-import { MuiIcon } from "../../../browser/mui/components/MuiIcon";
-import { AnyRouter } from "../../../typerouter/Router";
-import { AnyRpc, RpcConnection } from "../../../typerpc/Rpc";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
+import { AnyRouter } from "@dabsi/typerouter/Router";
+import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
 
 export type MuiAdminMenuProps = {
   connections?: RpcConnection<AnyRpc>;

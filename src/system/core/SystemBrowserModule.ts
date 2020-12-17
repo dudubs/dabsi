@@ -1,13 +1,22 @@
-import { BrowserPlatformModule } from "../../modules/BrowserPlatformModule";
-import { ExpressModule } from "../../modules/ExpressModule";
-import { ProjectModuleProvider } from "../../modules/ProjectModuleProvider";
-import { Inject, Module } from "../../typedi";
-import { SystemModule } from "./SystemModule";
+import BrowserModule from "@dabsi/modules/BrowserModule";
+import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import { SystemModule } from "@dabsi/system/core/SystemModule";
+import { Inject, Module } from "@dabsi/typedi";
 
-@Module({
-  dependencies: [SystemModule, BrowserPlatformModule],
-  providers: [ProjectModuleProvider()],
-})
-export class SystemBrowserModule {
-  constructor(@Inject() expressModule: ExpressModule) {}
+@Module({})
+export class SystemBrowserPlatform {
+  constructor(
+    @Inject() expressModule: ExpressModule,
+    @Inject() systemModule: SystemModule,
+    @Inject() browserModule: BrowserModule
+  ) {
+    browserModule.install({
+      make: async ({ indexFileNames }) => {
+        await systemModule.loadSystem();
+        systemModule.indexFileNames.forEach(indexFileName => {
+          indexFileNames.add(indexFileName);
+        });
+      },
+    });
+  }
 }

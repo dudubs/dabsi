@@ -1,5 +1,5 @@
 import { Handler } from "express";
-import { RpcCommand } from "./Rpc";
+import { RpcCommand } from "@dabsi/typerpc/Rpc";
 
 export function RpcOverExpressHandler<T extends RpcCommand>(
   command: RpcCommand

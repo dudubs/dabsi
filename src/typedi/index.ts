@@ -1,7 +1,7 @@
-export { Resolver } from "./Resolver";
+export { Resolver } from "@dabsi/typedi/Resolver";
 
-export { ModuleProvider } from "./decorators/Module";
-export { Module } from "./decorators/Module";
-export { Inject } from "./decorators/Inject";
+export { ModuleProvider } from "@dabsi/typedi/decorators/Module";
+export { Module } from "@dabsi/typedi/decorators/Module";
+export { Inject } from "@dabsi/typedi/decorators/Inject";
 
-export { Injectable } from "./decorators/Injectable";
+export { Injectable } from "@dabsi/typedi/decorators/Injectable";

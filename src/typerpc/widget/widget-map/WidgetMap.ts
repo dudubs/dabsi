@@ -1,14 +1,12 @@
-import { mapObject } from "../../../common/object/mapObject";
-import { NoRpc } from "../../NoRpc";
-import { RpcConfig, RpcConnection } from "../../Rpc";
-import { RpcConfigMap, RpcMap } from "../../rpc-map/RpcMap";
+import { RpcConfig } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import {
   AnyWidget,
   Widget,
   WidgetElement,
   WidgetElementState,
-} from "../Widget";
-import { WidgetMapHandler } from "./WidgetMapHandler";
+} from "@dabsi/typerpc/widget/Widget";
+import { WidgetMapHandler } from "@dabsi/typerpc/widget/widget-map/WidgetMapHandler";
 
 export type AnyWidgetRecord = Record<string, AnyWidget>;
 

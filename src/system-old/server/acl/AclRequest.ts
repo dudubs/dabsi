@@ -1,8 +1,8 @@
 import { Connection } from "typeorm";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { AclExp } from "./AclExp";
-import { AclQuery } from "./AclQuery";
-import { AclTokenTree } from "./AclTokenTree";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { AclExp } from "@dabsi/system-old/server/acl/AclExp";
+import { AclQuery } from "@dabsi/system-old/server/acl/AclQuery";
+import { AclTokenTree } from "@dabsi/system-old/server/acl/AclTokenTree";
 
 export class AclRequest {
   protected allowed: AclExp[] = [];

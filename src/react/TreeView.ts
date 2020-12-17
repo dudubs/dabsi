@@ -1,8 +1,8 @@
 import { createElement } from "react";
-import { toIndexedSeq } from "../typedata/toIndexedSeq";
-import { IndexedSeq } from "../immutable2";
-import { createUndefinedContext } from "./utils/hooks/createUndefinedContext";
-import { View } from "./view/View";
+import { toIndexedSeq } from "@dabsi/typedata/toIndexedSeq";
+import { IndexedSeq } from "@dabsi/immutable2";
+import { createUndefinedContext } from "@dabsi/react/utils/hooks/createUndefinedContext";
+import { View } from "@dabsi/react/view/View";
 
 export const TreeViewContext = createUndefinedContext<TreeView>();
 

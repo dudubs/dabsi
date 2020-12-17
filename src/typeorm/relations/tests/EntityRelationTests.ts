@@ -1,6 +1,6 @@
 // TODO: rename to EntityRelationTests.
 import { Connection, Repository } from "typeorm";
-import { DataEntityKey } from "../../../typedata/data-entity/DataEntityKey";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import {
   DBase,
   DChild1,
@@ -10,10 +10,10 @@ import {
   EChild1,
   EChild1Child1,
   EChild2,
-} from "../../../typedata/tests/BaseEntities";
-import { TestConnection } from "../../../typedata/tests/TestConnection";
-import { EntityRelation } from "../EntityRelation";
-import { AEntity, BEntity, CEntity } from "./Entities";
+} from "@dabsi/typedata/tests/BaseEntities";
+import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
+import { AEntity, BEntity, CEntity } from "@dabsi/typeorm/relations/tests/Entities";
 
 testm(__filename, () => {
   const getConnection = TestConnection([

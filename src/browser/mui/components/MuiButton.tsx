@@ -10,11 +10,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { Override } from "../../../common/typings2/Override";
-import { Lang } from "../../../lang/Lang";
-import { updateRef } from "../../../react/HookRef";
-import { partialProps } from "../../../react/utils/partialProps";
-import { MuiIcon } from "./MuiIcon";
+import { Override } from "@dabsi/common/typings2/Override";
+import { Lang } from "@dabsi/lang/Lang";
+import { updateRef } from "@dabsi/react/HookRef";
+import { partialProps } from "@dabsi/react/utils/partialProps";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
 
 export type MuiButtonProps<P = {}> =
   | Override<ButtonProps, BaseProps & P>

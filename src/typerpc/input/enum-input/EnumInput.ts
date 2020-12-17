@@ -1,9 +1,9 @@
-import { If } from "../../../common/typings2/boolean";
-import { NoRpc } from "../../NoRpc";
-import { Input } from "../Input";
-import { NullableInput } from "../nullable-input/NullableInput";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
-import { EnumInputHandler } from "./EnumInputHandler";
+import { If } from "@dabsi/common/typings2/boolean";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { Input } from "@dabsi/typerpc/input/Input";
+import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
+import { EnumInputHandler } from "@dabsi/typerpc/input/enum-input/EnumInputHandler";
 
 export type EnumInput<K extends string, N extends boolean> = NullableInput<
   N,

@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { FSWatcher } from "fs";
-import { Debounce } from "../common/async/Debounce";
+import { Debounce } from "@dabsi/common/async/Debounce";
 
 export type WatchdogExclude = (path: string) => boolean;
 export type WatchdogEvent = { filename; event };

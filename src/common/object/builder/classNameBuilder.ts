@@ -1,4 +1,4 @@
-import {Builder} from "../buildObject";
+import {Builder} from "@dabsi/common/object/buildObject";
 
 export function classNameBuilder<T>(
     ...classNames: (string | undefined | false)[]

@@ -4,15 +4,15 @@ import FormControlLabel, {
 } from "@material-ui/core/FormControlLabel";
 import * as React from "react";
 import { ReactNode } from "react";
-import { OmitKeys } from "../../../../common/typings2/OmitKeys";
-import { mergeProps } from "../../../../react/utils/mergeProps";
-import { BoolInput } from "../../../../typerpc/input/bool-input/BoolInput";
+import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
 import {
   BoolInputView,
   BoolInputViewProps,
-} from "../../../../typerpc/input/bool-input/BoolInputView";
+} from "@dabsi/typerpc/input/bool-input/BoolInputView";
 
-import { RpcConnection } from "../../../../typerpc/Rpc";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
 
 export type MuiCheckBoxInputViewProps<
   C extends RpcConnection<BoolInput>

@@ -8,17 +8,17 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { mapArrayToObject } from "../../../../common/array/mapArrayToObject";
-import { mapObjectAsync } from "../../../../common/object/mapObject";
-import { Tester } from "../../../../jasmine/Tester";
-import { decorateDesignType } from "../../../../reflect/decorateDesignType";
-import { DataEntitySource } from "../../../../typedata/data-entity/DataEntitySource";
-import { DataRelation } from "../../../../typedata/DataRelation";
-import { DataRow } from "../../../../typedata/DataRow";
-import { createTestConnection } from "../../../../typedata/tests/TestConnection";
-import { PermissionManager } from "../PermissionManager";
-import { User } from "../User";
-import { TEST_FORUMS_ADMIN_TOKEN, TEST_GOD_TOKEN } from "./TestForumAcl";
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { Tester } from "@dabsi/jasmine/Tester";
+import { decorateDesignType } from "@dabsi/reflect/decorateDesignType";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
+import { User } from "@dabsi/system-old/server/acl/User";
+import { TEST_FORUMS_ADMIN_TOKEN, TEST_GOD_TOKEN } from "@dabsi/system-old/server/acl/tests/TestForumAcl";
 
 @Entity()
 export class TestForum {

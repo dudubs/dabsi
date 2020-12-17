@@ -1,12 +1,12 @@
-import { Constructor } from "../common/typings2/Constructor";
-import { Type } from "../common/typings2/Type";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Type } from "@dabsi/common/typings2/Type";
 import {
   AnyDataSelection,
   DataSelection,
-} from "./data-selection/DataSelection";
-import { DataSelectionRow } from "./data-selection/DataSelectionRow";
-import { DataSource } from "./DataSource";
-import { DataTypeInfo } from "./DataTypeInfo";
+} from "@dabsi/typedata/data-selection/DataSelection";
+import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 
 export function DataSelector<T, S extends DataSelection<T>>(
   type: Constructor<T>,

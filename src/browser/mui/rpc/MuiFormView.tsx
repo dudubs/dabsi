@@ -1,23 +1,24 @@
 import Button, { ButtonProps } from "@material-ui/core/Button";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
-import { PartialKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { Lang } from "../../../lang/Lang";
-import { Hook } from "../../../react/Hook";
-import { useEmitter } from "../../../react/reactor/useEmitter";
+import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Lang } from "@dabsi/lang/Lang";
+import { Hook } from "@dabsi/react/Hook";
+import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 
-import { mergeProps } from "../../../react/utils/mergeProps";
-import { SystemView } from "../../../system/view/SystemView";
-import { RpcConnection } from "../../../typerpc/Rpc";
-import { AnyForm } from "../../../typerpc/widget/form/Form";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { SystemView } from "@dabsi/system/view/SystemView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyForm } from "@dabsi/typerpc/widget/form/Form";
 import {
   FormView,
   FormViewEvent,
   FormViewProps,
-} from "../../../typerpc/widget/form/FormView";
-import { MuiGrid } from "../components/MuiGrid";
-import { MuiThemeProvider } from "../MuiSystem";
-import { MuiFormViewTheme } from "./MuiFormViewTheme";
+} from "@dabsi/typerpc/widget/form/FormView";
+import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
+import { MuiThemeProvider } from "@dabsi/browser/mui/MuiSystem";
+import { MuiFormViewTheme } from "@dabsi/browser/mui/rpc/MuiFormViewTheme";
+import { Renderer } from "@dabsi/react/renderer";
 
 export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = PartialKeys<
   FormViewProps<C>,
@@ -40,7 +41,7 @@ export const MuiFormView = <C extends RpcConnection<AnyForm>>(
     <MuiThemeProvider theme={MuiFormViewTheme}>
       <FormView
         {...props}
-        renderInput={props.renderInput || SystemView}
+        renderInput={props.renderInput || Renderer(SystemView)}
         children={({ input }) => (
           <MuiGrid direction={"column"} spacing={2}>
             {input}

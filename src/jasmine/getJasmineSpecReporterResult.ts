@@ -1,4 +1,4 @@
-import { defined } from "../common/object/defined";
+import { defined } from "@dabsi/common/object/defined";
 
 export let currentJasmineSpecReporterResult: jasmine.CustomReporterResult | null = null;
 

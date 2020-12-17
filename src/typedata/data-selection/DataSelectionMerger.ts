@@ -1,7 +1,7 @@
-import { AssignKeys } from "../../common/typings2/AssignKeys";
-import { HasKeys } from "../../common/typings2/boolean";
-import { Merge } from "../../common/typings2/Merge";
-import { Pluck } from "../../common/typings2/Pluck";
+import { AssignKeys } from "@dabsi/common/typings2/AssignKeys";
+import { HasKeys } from "@dabsi/common/typings2/boolean";
+import { Merge } from "@dabsi/common/typings2/Merge";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
 
 type _MergeRelation<L, R> = L extends boolean
   ? R

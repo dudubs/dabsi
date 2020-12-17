@@ -1,6 +1,6 @@
-import { RootReactor } from "../react/reactor/Reactor";
-import { Router } from "./Router";
-import { RouterLocation } from "./RouterLocation";
+import { RootReactor } from "@dabsi/react/reactor/Reactor";
+import { Router } from "@dabsi/typerouter/Router";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 describe(__filename, () => {
   const baseRouter = Router({

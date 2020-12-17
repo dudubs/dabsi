@@ -1,5 +1,5 @@
-import { Nullable } from "../typings2/Nullable";
-import { entries } from "./entries";
+import { Nullable } from "@dabsi/common/typings2/Nullable";
+import { entries } from "@dabsi/common/object/entries";
 
 export function mergeObject<T>(
   a: Record<string, T> | undefined,

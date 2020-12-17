@@ -1,3 +1,3 @@
-import "./common/register";
-import "./typedi/register";
-import "./logging/register";
+import "@dabsi/common/register";
+import "@dabsi/typedi/register";
+import "@dabsi/logging/register";

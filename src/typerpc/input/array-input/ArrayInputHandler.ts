@@ -1,8 +1,8 @@
-import { hasKeys } from "../../../common/object/hasKeys";
-import { Awaitable } from "../../../common/typings2/Async";
-import { IRpcHandler } from "../../Rpc";
-import { IWidgetHandler } from "../../widget/Widget";
-import { AbstractInputHandler } from "../AbstractInputHandler";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { IRpcHandler } from "@dabsi/typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
@@ -10,9 +10,9 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { getLengthError } from "../LengthError";
-import { AnyArrayInput } from "./ArrayInput";
+} from "@dabsi/typerpc/input/Input";
+import { getLengthError } from "@dabsi/typerpc/input/LengthError";
+import { AnyArrayInput } from "@dabsi/typerpc/input/array-input/ArrayInput";
 
 type T = AnyArrayInput;
 

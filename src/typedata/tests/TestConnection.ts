@@ -4,8 +4,8 @@ import {
   getMetadataArgsStorage,
   ObjectType,
 } from "typeorm";
-import { defined } from "../../common/object/defined";
-import { findEntities } from "../../typeorm/findEntities";
+import { defined } from "@dabsi/common/object/defined";
+import { findEntities } from "@dabsi/typeorm/findEntities";
 
 let counter = 0;
 

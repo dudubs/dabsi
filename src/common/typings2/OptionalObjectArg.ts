@@ -1,6 +1,6 @@
-import { IsNever } from "./boolean/IsNever";
-import { NeverKeys } from "./NeverKeys";
-import { Union } from "./Union";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { NeverKeys } from "@dabsi/common/typings2/NeverKeys";
+import { Union } from "@dabsi/common/typings2/Union";
 
 export type OptionalObjectArg<T> = IsNever<Union<T>> extends true
   ? []

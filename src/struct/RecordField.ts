@@ -1,5 +1,5 @@
-import { mapObject } from "../common/object/mapObject";
-import { Field, AsField, AsFieldType } from "./Field";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { Field, AsField, AsFieldType } from "@dabsi/struct/Field";
 
 export interface RecordField<V> extends Field<Record<string, V>> {
   value: Field<V>;

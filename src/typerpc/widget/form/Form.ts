@@ -6,19 +6,19 @@ TODO:
   }
 
  */
-import { Awaitable } from "../../../common/typings2/Async";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { Rejectable } from "../../../common/async/Rejectable";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Rejectable } from "@dabsi/common/async/Rejectable";
 import {
   AnyInput,
   InputError,
   InputValue,
   InputValueConfig,
   InputValueData,
-} from "../../input/Input";
-import { ValueOrAwaitableFn } from "../../input/ValueOrAwaitableFn";
-import { NoRpc } from "../../NoRpc";
-import { RpcConnection, RpcUnresolvedConfig } from "../../Rpc";
+} from "@dabsi/typerpc/input/Input";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { RpcConnection, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import {
   BasedWidget,
   ToAsync,
@@ -26,8 +26,8 @@ import {
   WidgetElement,
   WidgetElementState,
   WidgetType,
-} from "../Widget";
-import { FormHandler } from "./FormHandler";
+} from "@dabsi/typerpc/widget/Widget";
+import { FormHandler } from "@dabsi/typerpc/widget/form/FormHandler";
 
 export type TForm = {
   Input: AnyInput;

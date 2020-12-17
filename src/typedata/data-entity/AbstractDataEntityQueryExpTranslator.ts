@@ -1,15 +1,15 @@
 import { Connection, SelectQueryBuilder } from "typeorm";
-import { defined } from "../../common/object/defined";
-import { entries } from "../../common/object/entries";
+import { defined } from "@dabsi/common/object/defined";
+import { entries } from "@dabsi/common/object/entries";
 import {
   DataCompareOperator,
   DataExp,
   DataCompareOperators,
   DataStringExp,
-} from "../data-exp/DataExp";
-import { DataExpTranslator } from "../data-exp/DataExpTranslator";
-import { DataQuery } from "../data-query/DataQueryExp";
-import { DataQueryExpTranslator } from "../data-query/DataQueryExpTranslator";
+} from "@dabsi/typedata/data-exp/DataExp";
+import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
+import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
+import { DataQueryExpTranslator } from "@dabsi/typedata/data-query/DataQueryExpTranslator";
 
 const SqlOperators: Record<DataCompareOperators, string> = {
   $equals: "=",

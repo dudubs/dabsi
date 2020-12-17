@@ -1,8 +1,8 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
-import { logBeforeEach } from "../../../jasmine/logBeforeEach";
-import { Tester } from "../../../jasmine/Tester";
-import { DataEntitySource } from "../../../typedata/data-entity/DataEntitySource";
-import { createTestConnection } from "../../../typedata/tests/TestConnection";
+import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
+import { Tester } from "@dabsi/jasmine/Tester";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 
 @Entity()
 class TestA {

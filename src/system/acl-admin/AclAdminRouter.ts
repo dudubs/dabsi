@@ -1,5 +1,6 @@
-import { Router } from "../../../typerouter/Router";
-import { AdminRouter } from "./../../admin/common/index";
+import { Router } from "@dabsi/typerouter/Router";
+import { AdminRouter } from "@dabsi/system/admin/common/index";
+
 export default AdminRouter.register(
   "acl",
   Router({

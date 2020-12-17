@@ -2,12 +2,12 @@ import {
   AEntity,
   BEntity,
   CEntity,
-} from "../../../typeorm/relations/tests/Entities";
-import { DataSelector } from "../../DataSelector";
-import { DBase, DUnion, EBase, EUnion } from "../../tests/BaseEntities";
-import { DataSourceTests } from "../../tests/DataSourceTests";
-import { TestConnection } from "../../tests/TestConnection";
-import { DataEntitySource } from "../DataEntitySource";
+} from "@dabsi/typeorm/relations/tests/Entities";
+import { DataSelector } from "@dabsi/typedata/DataSelector";
+import { DBase, DUnion, EBase, EUnion } from "@dabsi/typedata/tests/BaseEntities";
+import { DataSourceTests } from "@dabsi/typedata/tests/DataSourceTests";
+import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 
 const getConnection = TestConnection([AEntity, BEntity, CEntity]);
 export const EDSTesters = {

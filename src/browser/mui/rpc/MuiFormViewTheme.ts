@@ -1,4 +1,4 @@
-import { MuiTheme } from "../MuiSystem";
+import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
 
 export function MuiFormViewTheme(theme: MuiTheme): MuiTheme {
   return {

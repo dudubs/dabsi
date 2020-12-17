@@ -4,14 +4,15 @@ import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import Toolbar, { ToolbarProps } from "@material-ui/core/Toolbar";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, MuiThemeProvider } from "@material-ui/core/styles";
 import clsx from "clsx";
 import * as React from "react";
 import { ReactNode, useEffect, useState } from "react";
-import { Lang } from "../../../lang/Lang";
-import { useLangTranslator } from "../../../lang/LangTranslator";
-import { mergeProps } from "../../../react/utils/mergeProps";
-import { MuiIcon } from "./MuiIcon";
+import { Lang } from "@dabsi/lang/Lang";
+import { useLangTranslator } from "@dabsi/lang/LangTranslator";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
+import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
 
 const useStyles = makeStyles(theme => ({
   toolbar: {
@@ -26,9 +27,24 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export type MuiTableToolbarProps = {
-  ToolbarProps?: ToolbarProps;
+export function MuiStaticActionsTheme(theme: MuiTheme): MuiTheme {
+  return {
+    ...theme,
+    props: {
+      MuiButton: {
+        variant: "contained",
+        color: "primary",
+      },
+    },
+  };
+}
 
+export type MuiTableToolbarThemeProps = {
+  titleTypographyProps?: TypographyProps;
+  ToolbarProps?: ToolbarProps;
+};
+
+export type MuiTableToolbarProps = MuiTableToolbarThemeProps & {
   search?: {
     text: string;
     onSearch?(text: string);
@@ -48,7 +64,7 @@ const COUNT_SELECTED_ITEMS = Lang`SELECTED_${"count"}_ITEMS`;
 
 export function MuiTableToolbar(props: MuiTableToolbarProps) {
   const classes = useStyles();
-  const { search: searchProps } = props;
+  const { search: searchProps, titleTypographyProps } = props;
 
   const lang = useLangTranslator();
   const [searchText, setSearchText] = useState(props.search?.text || "");
@@ -71,14 +87,24 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
     >
       <Grid container>
         <Grid item xs>
-          {title}
+          {title && (
+            <Typography variant="h5" {...titleTypographyProps}>
+              {title}
+            </Typography>
+          )}
         </Grid>
         <Grid item>
           {props.countSelectedItems ? (
             props.selectActions
           ) : (
             <Grid container alignItems="center">
-              {props.staticActions && <Grid item>{props.staticActions}</Grid>}
+              {props.staticActions && (
+                <Grid item>
+                  <MuiThemeProvider theme={MuiStaticActionsTheme}>
+                    {props.staticActions}
+                  </MuiThemeProvider>
+                </Grid>
+              )}
               {searchProps && (
                 <Grid item>
                   <TextField

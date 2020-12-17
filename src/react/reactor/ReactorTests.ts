@@ -1,4 +1,4 @@
-import { Emittable, Reactor } from "./Reactor";
+import { Emittable, Reactor } from "@dabsi/react/reactor/Reactor";
 
 testm(__dirname, () => {
   it("expect to listen", () => {

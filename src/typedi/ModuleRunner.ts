@@ -1,9 +1,13 @@
-import { touchMap } from "../common/map/touchMap";
-import { Constructor } from "../common/typings2/Constructor";
-import { Resolver } from "./index";
-import { getInjectableResolver } from "./decorators/Injectable";
-import { moduleOptionsMap } from "./decorators/Module";
-import { ResolveError } from "./ResolveError";
+import { ModuleMetadata } from "./decorators/Module";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Resolver } from "@dabsi/typedi/index";
+import { getInjectableResolver } from "@dabsi/typedi/decorators/Injectable";
+import {
+  moduleMetadataMap,
+  ModuleTarget,
+} from "@dabsi/typedi/decorators/Module";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export type IChildModule<Child> = {
   registerChildModule(child: Child);
@@ -18,19 +22,38 @@ export type IModule<Parent = any, Child = Parent> = Partial<
 >;
 
 export class ModuleRunner {
-  cache = new Map();
+  protected cache = new Map<ModuleTarget, any>();
 
   context = { ...ModuleRunner.provide(() => this) };
 
   constructor() {}
 
-  get<T>(module: Constructor<T>): T {
-    return touchMap(this.cache, module, () => {
+  *getLoadedModules(): IterableIterator<{
+    target: ModuleTarget;
+    instance: any;
+    metadata: ModuleMetadata;
+  }> {
+    for (const [target, instance] of this.cache.entries()) {
+      yield { target, instance, metadata: moduleMetadataMap.get(target)! };
+    }
+  }
+
+  protected _mainModuleTarget: ModuleTarget | null = null;
+
+  get mainModuleTarget(): ModuleTarget | null {
+    return this._mainModuleTarget;
+  }
+
+  getModuleInstance<T>(target: ModuleTarget): T {
+    return touchMap(this.cache, target, () => {
+      if (!this._mainModuleTarget) {
+        this._mainModuleTarget = target;
+      }
       // console.log("init", module.name);
-      const argsResolver = getInjectableResolver(module);
-      const options = moduleOptionsMap.get(module)!;
+      const argsResolver = getInjectableResolver(target);
+      const options = moduleMetadataMap.get(target)!;
       for (const dependencyModule of options.dependencies || []) {
-        const parent: IModule = this.get(dependencyModule);
+        const parent: IModule = this.getModuleInstance(dependencyModule);
         // parent.registerChildModule?.(instance);
         // instance.registerParentModule?.(parent);
       }
@@ -42,12 +65,12 @@ export class ModuleRunner {
 
       const args = Resolver.checkAndResolve(
         Resolver.catch(argsResolver, error => {
-          throw new ResolveError(`At module ${module.name}, ${error.message}`);
+          throw new ResolveError(`At module ${target.name}, ${error.message}`);
         }),
         this.context
       );
 
-      const instance: IModule = new module(...args);
+      const instance: IModule = new target(...args);
 
       return instance;
     });

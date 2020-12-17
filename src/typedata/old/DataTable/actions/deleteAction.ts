@@ -1,5 +1,5 @@
-import { Lang } from "../../../../lang/Lang";
-import { DataTableAction } from "../DataTable";
+import { Lang } from "@dabsi/lang/Lang";
+import { DataTableAction } from "@dabsi/typedata/old/DataTable/DataTable";
 
 export const deleteAction: DataTableAction<any> = {
   icon: "delete",

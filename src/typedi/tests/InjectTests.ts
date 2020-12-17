@@ -1,8 +1,8 @@
 import "reflect-metadata";
-import { Forward } from "../Forward";
-import { Inject } from "..";
-import { Injectable } from "../decorators/Injectable";
-import { Resolver } from "../Resolver";
+import { Forward } from "@dabsi/typedi/Forward";
+import { Inject } from "@dabsi/typedi";
+import { Injectable } from "@dabsi/typedi/decorators/Injectable";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 testm(__filename, () => {
   it("sanity", (done) => {

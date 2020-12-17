@@ -1,5 +1,5 @@
-import { ExtractKeys } from "../../common/typings2/ExtractKeys";
-import { Store } from "../Store";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Store } from "@dabsi/store/Store";
 
 const op = "disable";
 

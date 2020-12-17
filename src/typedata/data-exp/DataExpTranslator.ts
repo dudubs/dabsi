@@ -1,5 +1,5 @@
-import { firstDefinedEntry } from "../../common/object/firstDefinedEntry";
-import { mapObjectToArray } from "../../common/object/mapObjectToArray";
+import { firstDefinedEntry } from "@dabsi/common/object/firstDefinedEntry";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import {
   DataCompareExp,
   DataCompareOperator,
@@ -8,8 +8,8 @@ import {
   DataCompareOperators,
   DataParameterExp,
   DataSymbolicCompareOperator,
-} from "./DataExp";
-import { IExpTranslator } from "./ExpTranslator";
+} from "@dabsi/typedata/data-exp/DataExp";
+import { IExpTranslator } from "@dabsi/typedata/data-exp/ExpTranslator";
 
 const SymbolicToNamedOperator: Record<
   DataSymbolicCompareOperator,

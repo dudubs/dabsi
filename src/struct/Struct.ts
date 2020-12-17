@@ -1,6 +1,6 @@
-import { mapObject } from "../common/object/mapObject";
-import "./Field";
-import { Field, AsField, AsFieldType, ToField } from "./Field";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import "@dabsi/struct/Field";
+import { Field, AsField, AsFieldType, ToField } from "@dabsi/struct/Field";
 
 export type TStruct = Record<string, AsField<any>>;
 

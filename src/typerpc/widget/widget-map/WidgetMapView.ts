@@ -1,13 +1,13 @@
-import { Renderer } from "./../../../react/renderer";
+import { Renderer } from "@dabsi/react/renderer";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
-import { keys } from "../../../common/object/keys";
-import { Expect } from "../../../common/typings2/Expect";
-import { RpcConnection } from "../../Rpc";
-import { AbstractWidgetView } from "../AbstractWidgetView";
-import { AnyWidgetConnection } from "../Widget";
-import { WidgetViewProps } from "../WidgetView";
-import { AnyWidgetMap } from "./WidgetMap";
+import { keys } from "@dabsi/common/object/keys";
+import { Expect } from "@dabsi/common/typings2/Expect";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
 
 export type MapView<P extends WidgetViewProps<AnyWidgetConnection>> = {
   getChildProps(key: string): P;

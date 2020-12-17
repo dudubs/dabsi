@@ -4,14 +4,15 @@ import { Divider } from "@material-ui/core";
 import Grid, { GridProps } from "@material-ui/core/Grid";
 import React, { ReactElement, ReactNode } from "react";
 import {
+  AnySystemMapConnection,
   AnyWidgetConnectionWithWidgetMap,
   SystemMapView,
   SystemMapViewProps,
-} from "../../view/SystemMapView";
+} from "@dabsi/system/view/SystemMapView";
 
-export function MuiGridMapView<C extends AnyWidgetConnectionWithWidgetMap>({
+export function MuiGridMapView<C extends AnySystemMapConnection>({
   GridProps,
-  ItemGridProps,
+  itemGridProps,
   divider,
   ...props
 }: SystemMapViewProps<
@@ -23,7 +24,7 @@ export function MuiGridMapView<C extends AnyWidgetConnectionWithWidgetMap>({
   }
 > & {
   GridProps?: GridProps;
-  ItemGridProps?: GridProps;
+  itemGridProps?: GridProps;
   divider?: boolean | ReactElement;
 }): ReactElement {
   if (divider === true) {
@@ -42,7 +43,7 @@ export function MuiGridMapView<C extends AnyWidgetConnectionWithWidgetMap>({
         }
         renderItem={(
           element,
-          { GridProps = ItemGridProps, before, after },
+          { GridProps = itemGridProps, before, after },
           { key }
         ) => {
           element = (

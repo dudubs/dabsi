@@ -1,12 +1,12 @@
 import List from "@material-ui/core/List";
 import React, { ReactNode } from "react";
-import { entries } from "../../../common/object/entries";
-import { hasKeys } from "../../../common/object/hasKeys";
-import { mapObjectToArray } from "../../../common/object/mapObjectToArray";
-import { useStore } from "../../../react/useStore";
-import { Store } from "../../../store";
-import { MuiIcon } from "../components/MuiIcon";
-import { MuiNestedMenuChild } from "./MuiNestedMenuChild";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { useStore } from "@dabsi/react/useStore";
+import { Store } from "@dabsi/store";
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
+import { MuiNestedMenuChild } from "@dabsi/browser/mui/nested-menu/MuiNestedMenuChild";
 
 export type MuiNestedMenuProps<T> = {
   store?: Store<MuiNestedMenuState<T>>;

@@ -1,5 +1,5 @@
-import { Override } from "../typings2/Override";
-import { entries } from "./entries";
+import { Override } from "@dabsi/common/typings2/Override";
+import { entries } from "@dabsi/common/object/entries";
 
 export function override<T extends object, U extends object>(
   target: T,

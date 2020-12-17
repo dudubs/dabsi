@@ -1,6 +1,7 @@
+import { values } from "@dabsi/common/object/values";
 import * as fs from "fs";
 import path from "path";
-import { ProjectInfo } from "../typestack/ProjectInfo";
+import { ProjectInfo } from "@dabsi/typestack/ProjectInfo";
 
 export class PlatformInfo {
   bundleDir = path.join(this.projectInfo.bundleDir, this.name);
@@ -11,13 +12,18 @@ export class PlatformInfo {
 
   tsConfigBaseName = `tsconfig.${this.name}.json`;
 
-  tsConfigFileName = path.join(this.projectInfo.rootDir, this.tsConfigBaseName);
+  tsConfigFileName = path.join(this.projectInfo.dir, this.tsConfigBaseName);
 
   constructor(public projectInfo: ProjectInfo, public name: string) {}
 
   *findIndexDirNames() {
-    for (const dirName of this.projectInfo.dirNames) {
-      const indexDir = path.join(dirName, this.name);
+    const srcDir = path.join(this.projectInfo.srcDir, this.name);
+    if (fs.existsSync(path.join(srcDir, "index.ts"))) {
+      yield srcDir;
+    }
+
+    for (const moduleInfoMap of values(this.projectInfo.moduleMapInfo)) {
+      const indexDir = path.join(moduleInfoMap.dir, this.name);
       const indexFileName = path.join(indexDir, "index.ts");
       if (fs.existsSync(indexFileName)) {
         yield indexDir;

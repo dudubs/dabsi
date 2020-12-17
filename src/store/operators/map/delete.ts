@@ -1,6 +1,6 @@
-import adapt from "../../adapt";
-import { Store } from "../../Store";
-import { deleteSymbol } from "./update";
+import adapt from "@dabsi/store/adapt";
+import { Store } from "@dabsi/store/Store";
+import { deleteSymbol } from "@dabsi/store/operators/map/update";
 
 export function _delete(): Store<undefined>;
 export function _delete<K, V>(

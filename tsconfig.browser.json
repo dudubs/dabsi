@@ -2,7 +2,11 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2020", "DOM"],
-    "types": ["node"]
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": ["src/*"]
+    }
   },
-  "include": ["src/typerouter"]
+  "include": ["./src"]
 }

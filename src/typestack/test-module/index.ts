@@ -1,7 +1,4 @@
-import { ProjectModuleProvider } from "../../modules/ProjectModuleProvider";
-import { Module } from "../../typedi";
+import { Module } from "@dabsi/typedi";
 
-@Module({
-  providers: [ProjectModuleProvider()],
-})
+@Module({})
 export class TestFrameworkModule {}

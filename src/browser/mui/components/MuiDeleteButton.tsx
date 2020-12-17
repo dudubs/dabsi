@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react";
-import { Override } from "../../../common/typings2/Override";
-import { MuiDangerButton, MuiDangerButtonProps } from "./MuiDangerButton";
-import { Lang, LangNode } from "../../../lang/Lang";
-import { mergeProps } from "../../../react/utils/mergeProps";
+import { Override } from "@dabsi/common/typings2/Override";
+import { MuiDangerButton, MuiDangerButtonProps } from "@dabsi/browser/mui/components/MuiDangerButton";
+import { Lang, LangNode } from "@dabsi/lang/Lang";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
 
 export function MuiDeleteButton({
   objectTitle,

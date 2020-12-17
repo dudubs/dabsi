@@ -1,6 +1,6 @@
 import {Ref} from "react";
-import {setRef} from "../../react/utils/setRef";
-import {PropsBuilder} from "./buildObject";
+import {setRef} from "@dabsi/react/utils/setRef";
+import {PropsBuilder} from "@dabsi/common/object/buildObject";
 
 export type RefBuilder<K extends string, T> = PropsBuilder<Partial<Record<K, Ref<T>>>>;
 

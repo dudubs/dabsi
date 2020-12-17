@@ -1,14 +1,14 @@
-import { Awaitable } from "../../../common/typings2/Async";
-import { AbstractInputHandler } from "../AbstractInputHandler";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
   InputValue,
   InputValueConfig,
   InputValueElement,
-} from "../Input";
-import { NumberInput } from "./NumberInput";
-import { NumberInputLoader } from "./NumberInputLoader";
+} from "@dabsi/typerpc/input/Input";
+import { NumberInput } from "@dabsi/typerpc/input/number-input/NumberInput";
+import { NumberInputLoader } from "@dabsi/typerpc/input/number-input/NumberInputLoader";
 
 export type T = NumberInput;
 

@@ -1,5 +1,5 @@
-import {Waiter} from "../../../common/async/Waiter";
-import {mergeProp, mergeProps} from "../mergeProps";
+import {Waiter} from "@dabsi/common/async/Waiter";
+import {mergeProp, mergeProps} from "@dabsi/react/utils/mergeProps";
 
 
 testm(__filename, () => {

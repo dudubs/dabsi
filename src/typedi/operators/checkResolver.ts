@@ -1,5 +1,5 @@
-import { ResolveError } from "../ResolveError";
-import { ResolverMap, Resolver } from "../Resolver";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { ResolverMap, Resolver } from "@dabsi/typedi/Resolver";
 
 export const checkResolverSymbol = Symbol("checkResolver");
 

@@ -1,5 +1,5 @@
-import { Awaitable } from "../common/typings2/Async";
-import { inspect } from "../logging/inspect";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { inspect } from "@dabsi/logging/inspect";
 import {
   AnyRpc,
   AnyRpcHandler,
@@ -11,7 +11,7 @@ import {
   RpcResolvedConfig,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
-} from "./Rpc";
+} from "@dabsi/typerpc/Rpc";
 
 export abstract class AbstractRpcHandler<T extends AnyRpc>
   implements IRpcHandler<RpcWithoutChildren> {

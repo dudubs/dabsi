@@ -1,8 +1,8 @@
-import { BasedType } from "../../../typedata/BaseType";
-import { DataRow } from "../../../typedata/DataRow";
-import { BasedDataSource, DataSource } from "../../../typedata/DataSource";
-import { generateSessionToken } from "./generateSessionToken";
-import { Session } from "./Session";
+import { BasedType } from "@dabsi/typedata/BaseType";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { BasedDataSource, DataSource } from "@dabsi/typedata/DataSource";
+import { generateSessionToken } from "@dabsi/system-old/server/acl/generateSessionToken";
+import { Session } from "@dabsi/system-old/server/acl/Session";
 
 export async function getSession<T extends BasedType<Session>>({
   cookie,

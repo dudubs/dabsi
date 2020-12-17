@@ -1,9 +1,9 @@
 import { ReactElement, RefCallback } from "react";
-import { If } from "../../common/typings2/boolean";
-import { Is } from "../../common/typings2/boolean/Is";
-import { Renderer } from "../../react/renderer";
-import { RpcConnection } from "../Rpc";
-import { WidgetView, WidgetViewProps } from "../widget/WidgetView";
+import { If } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { Renderer } from "@dabsi/react/renderer";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { WidgetView, WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import {
   AnyInput,
   AnyInputConnection,
@@ -12,8 +12,8 @@ import {
   InputError,
   InputValueData,
   InputValueElement,
-} from "./Input";
-import { InputViewChildren } from "./InputViewChildren";
+} from "@dabsi/typerpc/input/Input";
+import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
 
 type InputErrorKey<T> =
   | Extract<T, string>

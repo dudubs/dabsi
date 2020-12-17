@@ -1,7 +1,7 @@
 import { EntityMetadata } from "typeorm";
-import { mapArrayToObject } from "../../common/array/mapArrayToObject";
-import { definedAt } from "../../common/object/definedAt";
-import { KeyObject } from "../KeyObject";
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { definedAt } from "@dabsi/common/object/definedAt";
+import { KeyObject } from "@dabsi/typedata/KeyObject";
 
 export namespace DataEntityKey {
   export function parse(metadata: EntityMetadata, text: string): KeyObject {

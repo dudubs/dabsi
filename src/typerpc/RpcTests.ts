@@ -1,12 +1,12 @@
-import { Fn } from "../common/typings2/Fn";
-import { Override } from "../common/typings2/Override";
-import { AbstractRpcHandler } from "./AbstractRpcHandler";
-import { GenericConfig } from "./GenericConfig";
-import { AnyRpc, Rpc, RpcConnection, RpcUnresolvedConfig, TRpc } from "./Rpc";
-import { RpcMap } from "./rpc-map/RpcMap";
-import { RpcConfigHook } from "./RpcConfigHook";
-import { RpcFn } from "./rpc-fn/RpcFn";
-import { testRpc } from "./RpcTester";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { Override } from "@dabsi/common/typings2/Override";
+import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { AnyRpc, Rpc, RpcConnection, RpcUnresolvedConfig, TRpc } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
+import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
+import { testRpc } from "@dabsi/typerpc/RpcTester";
 
 type AnyRpcWithGenericConfig = Rpc<
   Override<

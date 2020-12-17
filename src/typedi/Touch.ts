@@ -1,6 +1,6 @@
-import { checkResolver } from "./operators/checkResolver";
-import { resolve } from "./resolve";
-import { CustomResolver, Resolver } from "./Resolver";
+import { checkResolver } from "@dabsi/typedi/operators/checkResolver";
+import { resolve } from "@dabsi/typedi/resolve";
+import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 export function Touch<T>(resolver: Resolver<T>): CustomResolver<T> {
   const cache = new WeakMap();

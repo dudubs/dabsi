@@ -1,11 +1,11 @@
 import { EntityMetadata, ValueTransformer } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { mapArrayToObject } from "../../common/array/mapArrayToObject";
-import { WeakMapFactory } from "../../common/map/mapFactory";
-import { setDefinedValue } from "../../common/object/setDefinedValue";
-import { EntityRelation } from "../../typeorm/relations";
-import { mergeValueTransformer } from "../../typeorm/mergeValueTransformer";
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { setDefinedValue } from "@dabsi/common/object/setDefinedValue";
+import { EntityRelation } from "@dabsi/typeorm/relations";
+import { mergeValueTransformer } from "@dabsi/typeorm/mergeValueTransformer";
 
 /*
     columns (data, relation)

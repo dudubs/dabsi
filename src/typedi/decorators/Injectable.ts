@@ -1,13 +1,16 @@
-import { WeakMapFactory } from "../../common/map/mapFactory";
-import { checkResolver, checkResolverSymbol } from "../operators/checkResolver";
-import { checkTypeResolver } from "../operators/checkTypeResolver";
-import { resolve, resolveSymbol } from "../resolve";
-import { ArrayResolver } from "../resolvers/ArrayResolver";
-import { Forward } from "../Forward";
-import { Resolver } from "../Resolver";
-import { resolveType } from "../resolveType";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import {
+  checkResolver,
+  checkResolverSymbol,
+} from "@dabsi/typedi/operators/checkResolver";
+import { checkTypeResolver } from "@dabsi/typedi/operators/checkTypeResolver";
+import { resolve, resolveSymbol } from "@dabsi/typedi/resolve";
+import { ArrayResolver } from "@dabsi/typedi/resolvers/ArrayResolver";
+import { Forward } from "@dabsi/typedi/Forward";
+import { Resolver } from "@dabsi/typedi/Resolver";
+import { resolveType } from "@dabsi/typedi/resolveType";
 
-import "../resolvers/FnResolver";
+import "@dabsi/typedi/resolvers/FnResolver";
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   return {
     target,
@@ -27,9 +30,9 @@ export const getInjectableResolver = WeakMapFactory(
         let resolverCache;
         return (
           metadata.resolvers[index] ??
-          ((context) => {
+          (context => {
             return resolve(getResolver(), context);
-          }).toCheck((context) => {
+          }).toCheck(context => {
             checkResolver(getResolver(), context);
           })
         );
@@ -47,10 +50,11 @@ export const getInjectableResolver = WeakMapFactory(
 );
 
 export function Injectable() {
-  return (target) => {
+  return target => {
     const metadata = getInjectableMetadata(target);
     metadata.isInjectable = true;
     const paramsResolver = getInjectableResolver(target);
+
     target[resolveSymbol] = function (context) {
       if (metadata.target !== this) {
         return resolveType(this, context);

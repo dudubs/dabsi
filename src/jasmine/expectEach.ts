@@ -1,5 +1,5 @@
-import {entries} from "../common/object/entries";
-import {subTest} from "./subTest";
+import {entries} from "@dabsi/common/object/entries";
+import {subTest} from "@dabsi/jasmine/subTest";
 
 export function expectEach<T>(iterable: Iterable<T>, callback: (item: T, index: number) => void): void {
     let length = 0;

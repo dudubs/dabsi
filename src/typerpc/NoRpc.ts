@@ -1,5 +1,5 @@
-import { AbstractRpcHandler } from "./AbstractRpcHandler";
-import { IRpcHandler, Rpc, RpcType } from "./Rpc";
+import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
+import { IRpcHandler, Rpc, RpcType } from "@dabsi/typerpc/Rpc";
 
 export type NoRpc = Rpc<{
   Handler: {};

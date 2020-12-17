@@ -10,8 +10,8 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import MenuIcon from "@material-ui/icons/Menu";
 import clsx from "clsx";
 import * as React from "react";
-import { useStore } from "../../../react/useStore";
-import { Struct } from "../../../struct";
+import { useStore } from "@dabsi/react/useStore";
+import { Struct } from "@dabsi/struct";
 
 const drawerWidth = 260;
 export const useStyles = makeStyles(theme => ({

@@ -1,4 +1,4 @@
-import { entries } from "./entries";
+import { entries } from "@dabsi/common/object/entries";
 
 const proxyContext = Symbol();
 

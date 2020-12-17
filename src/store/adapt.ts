@@ -1,5 +1,5 @@
-import { hasKeys } from "../common/object/hasKeys";
-import { Fn } from "../common/typings2/Fn";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Fn } from "@dabsi/common/typings2/Fn";
 
 const adapterSymbol = Symbol("adapterSymbol");
 export interface Adapter<T> {

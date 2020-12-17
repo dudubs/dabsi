@@ -1,24 +1,25 @@
-import { checkUniqueName } from "../../../../system-old/server/acl/checkUniqueName";
-import { RpcConfigResolver } from "../../../../typerpc/RpcConfigResolver";
-import AclDataSources from "../../AclDataSources";
-import { Group } from "./../../../../system-old/server/acl/Group";
-import { DataRow } from "./../../../../typedata/DataRow";
-import { AclGroupBasicInfoForm } from "./BasicInfoForm";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { AclGroupBasicInfoForm } from "@dabsi/system/acl-admin/groups/edit/BasicInfoForm";
+import AclDataSources from "@dabsi/system/acl/AclDataSources";
+import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
-export const AclGroupBasicInfoConfig = RpcConfigResolver(
+export default RpcConfigResolver(
   AclGroupBasicInfoForm,
   {
     sources: AclDataSources,
+    createInputConfig: SystemRpcConfigResolver(
+      AclGroupBasicInfoForm.at("input")
+    ),
     group: DataRow(Group),
   },
   c => $ =>
     $({
-      inputConfig: {
-        groupName: {
-          $check: groupName =>
-            checkUniqueName(c.sources.groups, "name", groupName, c.group.name),
-        },
+      valueConfig: {
+        groupName: c.group.name,
       },
+      inputConfig: c.createInputConfig(),
       async submit({ groupName }) {
         await c.group.update({ name: groupName });
       },

@@ -1,9 +1,9 @@
-import { GetBaseType, WithBaseType } from "./BaseType";
-import { WithDataKey } from "./DataKey";
-import { DataRow } from "./DataRow";
-import { DataSource, DataSourceAt } from "./DataSource";
-import { DataUpdate } from "./DataValue";
-import { DataRelationKeys } from "./DataRelation";
+import { GetBaseType, WithBaseType } from "@dabsi/typedata/BaseType";
+import { WithDataKey } from "@dabsi/typedata/DataKey";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource, DataSourceAt } from "@dabsi/typedata/DataSource";
+import { DataUpdate } from "@dabsi/typedata/DataValue";
+import { DataRelationKeys } from "@dabsi/typedata/DataRelation";
 
 export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
 

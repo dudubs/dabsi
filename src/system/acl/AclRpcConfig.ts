@@ -1,13 +1,12 @@
-import { getPasswordHash } from "../../../system-old/server/acl/getPasswordHash";
-import { User, UserFullName } from "../../../system-old/server/acl/User";
-import { DataRow } from "../../../typedata/DataRow";
-import { DataSources } from "../../../typedata/DataSources";
-import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
-import { SystemSession } from "../../core/SystemSession";
-import { AclModule } from "../AclModule";
-import { AclRpc } from "../common";
+import { getPasswordHash } from "@dabsi/system-old/server/acl/getPasswordHash";
+import { User, UserFullName } from "@dabsi/system-old/server/acl/User";
+import { AclRpc } from "@dabsi/system/acl/AclRpc";
+import { SystemSession } from "@dabsi/system/core/SystemSession";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSources } from "@dabsi/typedata/DataSources";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
-export const AclRpcConfig = RpcConfigResolver(
+export default RpcConfigResolver(
   AclRpc,
   {
     session: DataRow(SystemSession),

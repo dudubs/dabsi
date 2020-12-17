@@ -1,7 +1,7 @@
-import { NonNullableAt } from "./typings2/NonNullableAt";
-import { Override } from "./typings2/Override";
+import { NonNullableAt } from "@dabsi/common/typings2/NonNullableAt";
+import { Override } from "@dabsi/common/typings2/Override";
 
-export declare const TMetaType: unique symbol;
+declare const TMetaType: unique symbol;
 
 export type WithMetaType<T> = { [TMetaType]?: T };
 

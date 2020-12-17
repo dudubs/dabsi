@@ -1,7 +1,7 @@
-import {entries} from "../../common/object/entries";
-import {isEmptyObject} from "../../common/object/isEmptyObject";
-import {split} from "../../common/string/split";
-import {LangMap} from "../LangMap";
+import {entries} from "@dabsi/common/object/entries";
+import {isEmptyObject} from "@dabsi/common/object/isEmptyObject";
+import {split} from "@dabsi/common/string/split";
+import {LangMap} from "@dabsi/lang/LangMap";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 

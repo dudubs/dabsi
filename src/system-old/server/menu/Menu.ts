@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from "typeorm";
-import { DataRelation } from "../../../typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
 
 @Entity("menu")
 @TableInheritance({ column: "type" })

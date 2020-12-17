@@ -1,20 +1,16 @@
-import { Lazy } from "../../common/patterns/lazy";
-import { Cli } from "../../modules/Cli";
-import { ProjectModuleProvider } from "../../modules/ProjectModuleProvider";
-import { AclRequest } from "../../system-old/server/acl/AclRequest";
-import { Group } from "../../system-old/server/acl/Group";
-import { Permission } from "../../system-old/server/acl/Permission";
-import { PermissionManager } from "../../system-old/server/acl/PermissionManager";
-import { User } from "../../system-old/server/acl/User";
-import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
-import { Inject, Module } from "../../typedi";
-import { MakeModule } from "../../typestack/MakeModule";
-import AclEditUserConfig from "../acl-admin/server/AclEditUserConfig";
-import { DbModule, DbModuleProvider } from "../core/DbModule";
-import SystemModuleProvider from "../core/SystemModuleProvider";
-import { AclEditUser } from "../acl-admin/AclAdminRpc";
-import { SystemModule } from "./../core/SystemModule";
-import { AclRpcConfig } from "./server/AclRpcConfig";
+import { Cli } from "@dabsi/modules/Cli";
+import { AclRequest } from "@dabsi/system-old/server/acl/AclRequest";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { Permission } from "@dabsi/system-old/server/acl/Permission";
+import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
+import { User } from "@dabsi/system-old/server/acl/User";
+import AclDataSources from "@dabsi/system/acl/AclDataSources";
+import { DbModule, DbModuleProvider } from "@dabsi/system/core/DbModule";
+import { SystemModule } from "@dabsi/system/core/SystemModule";
+
+import { Inject, Module } from "@dabsi/typedi";
+import { ResolverType } from "@dabsi/typedi/Resolver";
+import { MakeModule } from "@dabsi/typestack/MakeModule";
 
 declare global {
   namespace Express {
@@ -26,12 +22,8 @@ declare global {
 
 @Module({
   providers: [
-    ProjectModuleProvider(),
     DbModuleProvider({
       entities: [User, Group, Permission],
-    }),
-    SystemModuleProvider({
-      configs: [AclRpcConfig, AclEditUserConfig],
     }),
   ],
 })
@@ -58,22 +50,12 @@ export class AclModule {
 
   log = log.get("ACL");
 
-  @Lazy() get sources() {
-    return {
-      users: DataEntitySource.create(User, this.dbModule.getConnection),
-      groups: DataEntitySource.create(Group, this.dbModule.getConnection),
-      permissions: DataEntitySource.create(
-        Permission,
-        this.dbModule.getConnection
-      ),
-    };
-  }
-
   constructor(
     @Inject() cli: Cli, //
     @Inject() mMake: MakeModule,
     @Inject() protected dbModule: DbModule,
-    @Inject() protected systemModule: SystemModule
+    @Inject() protected systemModule: SystemModule,
+    @Inject(AclDataSources) public sources: ResolverType<typeof AclDataSources>
   ) {
     cli.command("acl", this.cli);
   }

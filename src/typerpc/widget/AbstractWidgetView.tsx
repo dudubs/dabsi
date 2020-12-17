@@ -1,6 +1,6 @@
-import { View } from "../../react/view/View";
-import { ViewState } from "../../react/view/ViewState";
-import { RpcConnection } from "../Rpc";
+import { View } from "@dabsi/react/view/View";
+import { ViewState } from "@dabsi/react/view/ViewState";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import {
   AnyWidget,
   AnyWidgetConnection,
@@ -8,8 +8,8 @@ import {
   WidgetElement,
   WidgetElementState,
   WidgetType,
-} from "./Widget";
-import { WidgetView, WidgetViewProps } from "./WidgetView";
+} from "@dabsi/typerpc/widget/Widget";
+import { WidgetView, WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 
 export abstract class AbstractWidgetView<
     C extends AnyWidgetConnection,
@@ -43,10 +43,12 @@ export abstract class AbstractWidgetView<
     return this.props.connection;
   }
 
-  constructor(props: P) {
-    super(props);
-    this._element = this.props.element;
-    this.updateElement?.(this.props.element);
+  render() {
+    if (!this.isDidMount) {
+      this._element = this.props.element;
+      this.updateElement?.(this.props.element);
+    }
+    return super.render();
   }
 
   forceUpdateElement() {

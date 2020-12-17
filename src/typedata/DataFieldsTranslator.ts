@@ -1,7 +1,7 @@
-import { mapObject } from "../common/object/mapObject";
-import { DataExp, DataStringExp } from "./data-exp/DataExp";
-import { DataFields } from "./DataFields";
-import { DataExpMapper } from "./data-exp/DataExpMapper";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { DataExp, DataStringExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataFields } from "@dabsi/typedata/DataFields";
+import { DataExpMapper } from "@dabsi/typedata/data-exp/DataExpMapper";
 
 export class DataFieldsTranslator extends DataExpMapper {
   constructor(public fields: DataFields<any>, public isBase = false) {

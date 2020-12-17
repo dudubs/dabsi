@@ -1,4 +1,4 @@
-import { Awaitable } from "../../common/typings2/Async";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 
 export type ValueOrAwaitableFn<T> = T | (() => Awaitable<T>);
 

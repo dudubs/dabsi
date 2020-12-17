@@ -1,26 +1,26 @@
 import { Connection, EntityMetadata } from "typeorm";
-import { defined } from "../../common/object/defined";
-import { definedAt } from "../../common/object/definedAt";
-import { entries } from "../../common/object/entries";
-import { hasKeys } from "../../common/object/hasKeys";
-import { Awaitable } from "../../common/typings2/Async";
-import { EntityRelation } from "../../typeorm/relations";
-import { DataExp } from "../data-exp/DataExp";
-import { ColumnLoader, DataQueryBuilder } from "../data-query/DataQueryBuilder";
+import { defined } from "@dabsi/common/object/defined";
+import { definedAt } from "@dabsi/common/object/definedAt";
+import { entries } from "@dabsi/common/object/entries";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { ColumnLoader, DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import {
   AnyDataSelection,
   DataSelection,
-} from "../data-selection/DataSelection";
-import { DataFieldsTranslator } from "../DataFieldsTranslator";
-import { DataOrder } from "../DataOrder";
-import { DataSource } from "../DataSource";
-import { DataSourceRow } from "../DataSourceRow";
-import { DataTypeInfo } from "../DataTypeInfo";
-import { KeyObject } from "../KeyObject";
-import { DataEntityCursor } from "./DataEntityCursor";
-import { DataEntityExpTranslatorToDataQueryExp } from "./DataEntityExpTranslatorToDataQueryExp";
-import { getDataEntityInfo } from "./DataEntityInfo";
-import { DataEntityQueryRunner } from "./DataEntityQueryRunner";
+} from "@dabsi/typedata/data-selection/DataSelection";
+import { DataFieldsTranslator } from "@dabsi/typedata/DataFieldsTranslator";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
+import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
+import { KeyObject } from "@dabsi/typedata/KeyObject";
+import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
+import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
+import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
+import { DataEntityQueryRunner } from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
 
 export type DataEntityLoader = ReturnType<typeof DataEntityLoader.create>;
 export namespace DataEntityLoader {

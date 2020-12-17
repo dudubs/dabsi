@@ -1,29 +1,29 @@
-import { HasKeys } from "../../common/typings2/boolean";
-import { Constructor } from "../../common/typings2/Constructor";
-import { Expect } from "../../common/typings2/Expect";
-import { IsNever } from "../../common/typings2/boolean/IsNever";
-import { Pluck } from "../../common/typings2/Pluck";
+import { HasKeys } from "@dabsi/common/typings2/boolean";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Expect } from "@dabsi/common/typings2/Expect";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { Pluck } from "@dabsi/common/typings2/Pluck";
 
-import { DataExp } from "../data-exp/DataExp";
-import { AEntity, BEntity } from "../../typeorm/relations/tests/Entities";
-import { DataRow } from "../DataRow";
-import { DataSelection } from "../data-selection/DataSelection";
-import { DataSelectionRow } from "../data-selection/DataSelectionRow";
-import { DataSource } from "../DataSource";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { AEntity, BEntity } from "@dabsi/typeorm/relations/tests/Entities";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
+import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
 
 import {
   DataUnion,
   DataUnionChildren,
   DataUnionChildrenKey,
-} from "../DataUnion";
-import { MergeDataSelection } from "../data-selection/DataSelectionMerger";
+} from "@dabsi/typedata/DataUnion";
+import { MergeDataSelection } from "@dabsi/typedata/data-selection/DataSelectionMerger";
 import {
   MapRelation,
   DataRelationKeys,
   DataRelationTypeAt,
-} from "../DataRelation";
-import { DataInsert } from "../DataValue";
-import { DBase, DChild1, DUnion, EUnion } from "./BaseEntities";
+} from "@dabsi/typedata/DataRelation";
+import { DataInsert } from "@dabsi/typedata/DataValue";
+import { DBase, DChild1, DUnion, EUnion } from "@dabsi/typedata/tests/BaseEntities";
 
 pass(() => {
   // DataSelectionRow

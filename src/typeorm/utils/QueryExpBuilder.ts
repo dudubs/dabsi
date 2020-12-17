@@ -1,5 +1,5 @@
-import {entries} from "../../common/object/entries";
-import {keys} from "../../common/object/keys";
+import {entries} from "@dabsi/common/object/entries";
+import {keys} from "@dabsi/common/object/keys";
 
 export function isDeepEqual(a, b) {
     if (a === b)

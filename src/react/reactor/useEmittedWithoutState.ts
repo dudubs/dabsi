@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { Defined } from "../../common/typings2/Defined";
-import { useReactor } from "./hooks";
-import { Emittable, EmittableType, ReactorEvent } from "./Reactor";
+import { Defined } from "@dabsi/common/typings2/Defined";
+import { useReactor } from "@dabsi/react/reactor/hooks";
+import { Emittable, EmittableType, ReactorEvent } from "@dabsi/react/reactor/Reactor";
 
 export function useEmittedWithoutState<T extends Emittable<any>>(
   emittable: T,

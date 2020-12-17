@@ -1,15 +1,15 @@
-import { entries } from "../../../common/object/entries";
-import { mapObject, mapObjectAsync } from "../../../common/object/mapObject";
-import { Lazy } from "../../../common/patterns/lazy";
-import { inspect } from "../../../logging/inspect";
-import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { DataOrder } from "../../../typedata/DataOrder";
-import { DataRow } from "../../../typedata/DataRow";
-import { ConfigFactory } from "../../ConfigFactory";
-import { RpcChildConfig } from "../../Rpc";
-import { AbstractWidgetHandler } from "../AbstractWidgetHandler";
-import { IWidgetHandler, WidgetElement, WidgetElementState } from "../Widget";
-import { AnyDataTable, DataTableTypes, TDataTable } from "./DataTable";
+import { entries } from "@dabsi/common/object/entries";
+import { mapObject, mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { inspect } from "@dabsi/logging/inspect";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
+import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
+import { IWidgetHandler, WidgetElement, WidgetElementState } from "@dabsi/typerpc/widget/Widget";
+import { AnyDataTable, DataTableTypes, TDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 
 type T = AnyDataTable;
 

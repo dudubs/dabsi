@@ -1,6 +1,11 @@
-import { ConfigFactory } from "../ConfigFactory";
-import { AnyRpc, Rpc, RpcConnection, RpcUnresolvedConfig } from "../Rpc";
-import { RpcParameterHandler } from "./RpcParameterHandler";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import {
+  AnyRpc,
+  Rpc,
+  RpcConnection,
+  RpcUnresolvedConfig,
+} from "@dabsi/typerpc/Rpc";
+import { RpcParameterHandler } from "@dabsi/typerpc/rpc-parameter/RpcParameterHandler";
 
 export type TRpcParameter = { Target: AnyRpc; Data: any };
 
@@ -38,7 +43,7 @@ export function RpcParameter<Target extends AnyRpc, Data>(
     props: { parameterDataType: dataType },
     connect(path, command) {
       return data =>
-        this.children.target.createRpcConnection([...path, ...data], command);
+        this.children.target.createRpcConnection([...path, data], command);
     },
   });
 }

@@ -1,15 +1,14 @@
 import { readFileSync } from "fs";
 import path from "path";
-import { entries } from "../common/object/entries";
-import { Lazy } from "../common/patterns/lazy";
-import { posixPath, relativePosixPath } from "../modules/pathHelpers";
-import { TsConfig } from "../modules/TsConfig";
+import { entries } from "@dabsi/common/object/entries";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { posixPath, relativePosixPath } from "@dabsi/modules/pathHelpers";
+import { TsConfig } from "@dabsi/modules/TsConfig";
 
 export class TsConfigInfo {
   constructor(public fileName: string) {}
 
   @Lazy() get config(): TsConfig {
-    console.log({ thisFileName: this.fileName });
     return JSON.parse(readFileSync(this.fileName, "utf-8")) as TsConfig;
   }
 

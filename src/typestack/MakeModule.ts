@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
-import { touchSet } from "../common/map/touchSet";
-import { DABSI_CURRENT_PATH, DABSI_PATH } from "../index";
-import { Cli, CliError } from "../modules/Cli";
-import { relativePosixPath } from "../modules/pathHelpers";
-import { Inject } from "../typedi";
-import { Module } from "../typedi";
+import { touchSet } from "@dabsi/common/map/touchSet";
+import { DABSI_CURRENT_PATH, DABSI_PATH } from "@dabsi/index";
+import { Cli, CliError } from "@dabsi/modules/Cli";
+import { relativePosixPath } from "@dabsi/modules/pathHelpers";
+import { Inject } from "@dabsi/typedi";
+import { Module } from "@dabsi/typedi";
 
 @Module()
 export class MakeModule {

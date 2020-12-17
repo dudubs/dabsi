@@ -1,5 +1,5 @@
-import { Awaitable } from "./typings2/Async";
-import { Type } from "./typings2/Type";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Type } from "@dabsi/common/typings2/Type";
 
 export const IgnoredError = Symbol();
 

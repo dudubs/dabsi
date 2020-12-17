@@ -1,24 +1,26 @@
 // TODO: Rename to *Input
-import { assignDescriptors } from "../../common/object/assignDescriptors";
-import { Awaitable } from "../../common/typings2/Async";
-import { Override } from "../../common/typings2/Override";
-import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
+import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { UndefinedIfIsUndefined } from "@dabsi/common/typings2/UndefinedIfIsUndefined";
 import {
   AnyRpc,
   BasedRpc,
   RpcConnection,
+  RpcIsConfigCanBeUndefinedOption,
   RpcIsGenericConfigOption,
   RpcPropsOption,
   RpcType,
   TRpc,
-} from "../Rpc";
+} from "@dabsi/typerpc/Rpc";
 import {
   TWidget,
   Widget,
   WidgetControllerOptions,
   WidgetHandlerClass,
   WidgetType,
-} from "../widget/Widget";
+} from "@dabsi/typerpc/widget/Widget";
 
 export type InputWithoutController<T extends AnyInput = AnyInput> = Input<
   Override<
@@ -118,7 +120,7 @@ export type AnyInputConnection = RpcConnection<AnyInput>;
 export type InputOptions<T extends TInput> = PartialUndefinedKeys<
   {
     isGenericConfig: RpcIsGenericConfigOption<T>;
-
+    isConfigCanBeUndefined: RpcIsConfigCanBeUndefinedOption<T>;
     props: RpcPropsOption<T>;
   } & WidgetControllerOptions<T>,
   {
@@ -138,6 +140,7 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     props = {},
     isGenericConfig,
     handler,
+    isConfigCanBeUndefined,
     children = {},
     getValueDataFromElement,
     type,
@@ -147,6 +150,7 @@ export function Input<R extends BasedInput, T extends TInput = InputType<R>>(
     handler,
     children,
     type,
+    isConfigCanBeUndefined,
     commands: { check: true },
     props: assignDescriptors(props, {
       getValueDataFromElement,

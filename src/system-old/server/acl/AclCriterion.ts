@@ -1,19 +1,19 @@
-import { ExtractKeys } from "../../../common/typings2/ExtractKeys";
-import { Type } from "../../../common/typings2/Type";
-import { EmptyFragment } from "../../../react/utils/EmptyFragment";
-import { BasedType, GetBaseType } from "../../../typedata/BaseType";
-import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { DataCursor, EmptyDataCursor } from "../../../typedata/DataCursor";
-import { BasedDataRow } from "../../../typedata/DataSourceRow";
-import { DataEntitySource } from "../../../typedata/data-entity/DataEntitySource";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Type } from "@dabsi/common/typings2/Type";
+import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
+import { BasedType, GetBaseType } from "@dabsi/typedata/BaseType";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
+import { BasedDataRow } from "@dabsi/typedata/DataSourceRow";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import {
   DataRelation,
   DataRelationToManyKeys,
   DataRelationToOneKeys,
   DataRelationType,
-} from "../../../typedata/DataRelation";
-import { Group } from "./Group";
-import { User } from "./User";
+} from "@dabsi/typedata/DataRelation";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import { User } from "@dabsi/system-old/server/acl/User";
 
 export type AclRow<T> = BasedDataRow<T> | [Type<T>, string];
 export type AclRowType<T extends AclRow<any>> = T extends AclRow<infer U>

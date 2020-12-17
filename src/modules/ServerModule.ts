@@ -1,5 +1,5 @@
-import { Inject, Module } from "../typedi";
-import { Cli } from "./Cli";
+import { Inject, Module } from "@dabsi/typedi";
+import { Cli } from "@dabsi/modules/Cli";
 
 @Module()
 export class ServerModule {

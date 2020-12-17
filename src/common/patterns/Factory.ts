@@ -1,4 +1,4 @@
-import { isConstructor } from "../object/isConstructor";
+import { isConstructor } from "@dabsi/common/object/isConstructor";
 
 export type Factory<T> = (() => T) | (new () => T);
 

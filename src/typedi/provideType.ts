@@ -1,6 +1,6 @@
-import { Type } from "../common/typings2/Type";
-import { getTypeToken } from "./getTypeToken";
-import { ResolverMap, Resolver } from "./Resolver";
+import { Type } from "@dabsi/common/typings2/Type";
+import { getTypeToken } from "@dabsi/typedi/getTypeToken";
+import { ResolverMap, Resolver } from "@dabsi/typedi/Resolver";
 
 export function provideType<T>(
   type: Type<T>,

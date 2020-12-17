@@ -1,5 +1,5 @@
-import { Router } from "../../typerouter/Router";
-import { AdminRouter } from "../common/admin/AdminRouter";
+import { Router } from "@dabsi/typerouter/Router";
+import { AdminRouter } from "@dabsi/system-old/common/admin/AdminRouter";
 
 export const SystemRouter = Router({
   admin: AdminRouter,

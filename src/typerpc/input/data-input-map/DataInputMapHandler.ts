@@ -1,8 +1,8 @@
-import { hasKeys } from "../../../common/object/hasKeys";
-import { Awaitable } from "../../../common/typings2/Async";
-import { RpcChildConfig } from "../../Rpc";
-import { IWidgetHandler } from "../../widget/Widget";
-import { AbstractInputHandler } from "../AbstractInputHandler";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
@@ -10,8 +10,8 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { AnyDataInputMap } from "./DataInputMap";
+} from "@dabsi/typerpc/input/Input";
+import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 
 type T = AnyDataInputMap;
 

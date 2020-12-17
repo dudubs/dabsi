@@ -1,1 +1,1 @@
-import "../common/register";
+import "@dabsi/common/register";

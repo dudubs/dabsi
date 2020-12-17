@@ -1,11 +1,11 @@
-import { buildTests } from "../jasmine/buildTests";
+import { buildTests } from "@dabsi/jasmine/buildTests";
 import {
   AnyRpc,
   AnyRpcHandler,
   RpcConnection,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
-} from "./Rpc";
+} from "@dabsi/typerpc/Rpc";
 
 export type RpcTester<T extends AnyRpc> = {
   rpc: T;

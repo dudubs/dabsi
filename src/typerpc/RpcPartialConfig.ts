@@ -1,8 +1,8 @@
-import { Override } from "../common/typings2/Override";
-import { PartialKeys } from "../common/typings2/PartialUndefinedKeys";
-import { UndefinedIfEmptyObject } from "../common/typings2/UndefinedIfEmptyObject";
-import { AnyRpc, Rpc, RpcConfig, TRpc } from "./Rpc";
-import { AnyRpcConfigHook, RpcConfigHook } from "./RpcConfigHook";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
+import { AnyRpc, Rpc, RpcConfig, TRpc } from "@dabsi/typerpc/Rpc";
+import { AnyRpcConfigHook, RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
 
 export type AnyRpcWithObjectConfig = Rpc<
   Override<TRpc, { Config: object | undefined }>

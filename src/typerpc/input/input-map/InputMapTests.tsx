@@ -1,15 +1,15 @@
 import * as React from "react";
-import { Constructor } from "../../../common/typings2/Constructor";
-import { focusNextTest } from "../../../typeorm/exp/tests/focusNextTest";
-import { RpcConnection } from "../../Rpc";
-import { testRpc } from "../../RpcTester";
-import { AnyWidgetMap } from "../../widget/widget-map/WidgetMap";
-import { testWidgetView } from "../../WidgetViewTester";
-import { testInput } from "../InputTester";
-import { TestInputView } from "../InputTests";
-import { TextInput } from "../text-input/TextInput";
-import { AnyInputMap, InputMap } from "./InputMap";
-import { InputMapView } from "./InputMapView";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { focusNextTest } from "@dabsi/typeorm/exp/tests/focusNextTest";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { testRpc } from "@dabsi/typerpc/RpcTester";
+import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
+import { testInput } from "@dabsi/typerpc/input/InputTester";
+import { TestInputView } from "@dabsi/typerpc/input/InputTests";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { AnyInputMap, InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
 import objectContaining = jasmine.objectContaining;
 
 testm(__dirname, () => {
@@ -31,10 +31,10 @@ testm(__dirname, () => {
             <View
               {...props}
               value={undefined}
-              children={getProps => (
+              children={view => (
                 <>
-                  <TestInputView {...getProps("text1")} />
-                  <TestInputView {...getProps("text2")} />
+                  <TestInputView {...view.getChildProps("text1")} />
+                  <TestInputView {...view.getChildProps("text2")} />
                 </>
               )}
             />

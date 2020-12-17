@@ -1,27 +1,27 @@
-import { If } from "../../../common/typings2/boolean";
-import { Is } from "../../../common/typings2/boolean/Is";
-import { IsNever } from "../../../common/typings2/boolean/IsNever";
-import { OmitKeys } from "../../../common/typings2/OmitKeys";
-import { Override } from "../../../common/typings2/Override";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { DataRow } from "../../../typedata/DataRow";
-import { DataSource } from "../../../typedata/DataSource";
-import { GenericConfig } from "../../GenericConfig";
-import { NoRpc } from "../../NoRpc";
-import { AnyRpc } from "../../Rpc";
-import { DataTable } from "../../widget/data-table/DataTable";
+import { If } from "@dabsi/common/typings2/boolean";
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import {
   InlineObject,
   InlineObjectType,
   string,
-} from "../../widget/InlineObjectType";
-import { WidgetType } from "../../widget/Widget";
-import { DataInputMap } from "../data-input-map/DataInputMap";
-import { Input } from "../Input";
-import { NullableInput } from "../nullable-input/NullableInput";
+} from "@dabsi/typerpc/widget/InlineObjectType";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
+import { Input } from "@dabsi/typerpc/input/Input";
+import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
 
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
-import { DataInputHandler } from "./DataInputHandler";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
+import { DataInputHandler } from "@dabsi/typerpc/input/data-input/DataInputHandler";
 
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
 

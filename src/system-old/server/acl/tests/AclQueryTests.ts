@@ -1,16 +1,16 @@
-import { mapObjectAsync } from "../../../../common/object/mapObject";
-import { Awaited } from "../../../../common/typings2/Async";
-import { logBeforeEach } from "../../../../jasmine/logBeforeEach";
-import { DataRow } from "../../../../typedata/DataRow";
-import { AclQuery } from "../AclQuery";
-import { User } from "../User";
-import { AclTester } from "./AclTester";
+import { mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { Awaited } from "@dabsi/common/typings2/Async";
+import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { AclQuery } from "@dabsi/system-old/server/acl/AclQuery";
+import { User } from "@dabsi/system-old/server/acl/User";
+import { AclTester } from "@dabsi/system-old/server/acl/tests/AclTester";
 import {
   TEST_FORUMS_ADMIN_TOKEN,
   TEST_GOD_TOKEN,
   TestForumAcl,
-} from "./TestForumAcl";
-import { TestPostAcl } from "./TestPostAcl";
+} from "@dabsi/system-old/server/acl/tests/TestForumAcl";
+import { TestPostAcl } from "@dabsi/system-old/server/acl/tests/TestPostAcl";
 
 const t = AclTester.beforeAll(async t => {
   const forumAcl = new TestForumAcl(t.forum);

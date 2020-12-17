@@ -1,12 +1,12 @@
 import { Component, ReactNode } from "react";
-import { ImmutableSet } from "../../../immutable2";
-import { DataExp } from "../../DataExp";
-// import { Debounce } from "../../../react/utils/hooks/useDebounce";
-import { State } from "../../../react/utils/State";
-import { DataKeyInput } from "../../DataKey";
-import { DataOrder } from "../../DataOrder";
-import { DataRow } from "../../DataRow";
-import { DataSource } from "../../DataSource";
+import { ImmutableSet } from "@dabsi/immutable2";
+import { DataExp } from "@dabsi/typedata/DataExp";
+// import { Debounce } from "@dabsi/react/utils/hooks/useDebounce";
+import { State } from "@dabsi/react/utils/State";
+import { DataKeyInput } from "@dabsi/typedata/DataKey";
+import { DataOrder } from "@dabsi/typedata/DataOrder";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
 
 export type AbstractDataListProps<T> = {
   source: DataSource<T>;

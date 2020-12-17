@@ -1,6 +1,6 @@
-import { checkResolver } from "./checkResolver";
-import { resolve } from "../resolve";
-import { ResolverMap, Resolver } from "../Resolver";
+import { checkResolver } from "@dabsi/typedi/operators/checkResolver";
+import { resolve } from "@dabsi/typedi/resolve";
+import { ResolverMap, Resolver } from "@dabsi/typedi/Resolver";
 
 export function checkAndResolve<T>(
   resolver: Resolver<T>,

@@ -1,5 +1,5 @@
-import {assert} from "../assert";
-import {BaseMap, MapKey, MapValue} from "./BaseMap";
+import {assert} from "@dabsi/common/assert";
+import {BaseMap, MapKey, MapValue} from "@dabsi/common/map/BaseMap";
 
 export type MapFactory<T extends BaseMap<any, any>> = {
     map: T;

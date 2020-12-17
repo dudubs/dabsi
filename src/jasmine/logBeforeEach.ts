@@ -1,5 +1,5 @@
-import { CallStackInfo } from "../typedi/CallStackInfo";
-import { getJasmineSpecReporterResult } from "./getJasmineSpecReporterResult";
+import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
+import { getJasmineSpecReporterResult } from "@dabsi/jasmine/getJasmineSpecReporterResult";
 
 export function logBeforeEach(
   propertyName: "description" | "fullName" = "fullName"

@@ -1,6 +1,6 @@
 import Typography from "@material-ui/core/Typography";
 import React, { ComponentType } from "react";
-import { MuiGrid } from "../../../browser/mui/components/MuiGrid";
+import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
 
 export default function ({
   title,
@@ -9,7 +9,7 @@ export default function ({
   Breadcrumbs = undefined as undefined | ComponentType,
 }) {
   return (
-    <MuiGrid spacing={3} direction="column">
+    <MuiGrid spacing={3} direction="column" item={{ xl: 6 }}>
       <MuiGrid direction="column" spacing={1}>
         <Typography variant="h5">{title}</Typography>
 

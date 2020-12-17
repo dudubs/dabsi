@@ -1,26 +1,24 @@
+import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
+import AclLoginRouter from "@dabsi/system/acl/common/AclLoginRouter";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
-import { MuiButtonMenu } from "../../../browser/mui/components/MuiButtonMenu";
-import { MuiLink } from "../../../browser/mui/components/MuiLink";
-import { MuiNestedMenu } from "../../../browser/mui/nested-menu";
-import { Lang } from "../../../lang/Lang";
-import { useEmitted } from "../../../react/reactor/useEmitted";
-import { useEmitter } from "../../../react/reactor/useEmitter";
-import { Store } from "../../../store";
-import { useRoute } from "../../../typerouter/ReactRouter";
-import { RouterEvent } from "../../../typerouter/RouterEvent";
-import {
-  AclConnection,
-  AclLoginRouter,
-  LoginInfoEvent,
-} from "../../acl/common";
-import { getAdminInfo } from "../common";
-import { MuiAdminMenu } from "./MuiAdminMenu";
-import { AdminInfoEvent } from "./MuiAdminRouterView";
-import { MuiTemplate } from "./MuiTemplate";
-import { PaperInCenter } from "./PaperInCenter";
+import { MuiButtonMenu } from "@dabsi/browser/mui/components/MuiButtonMenu";
+import { MuiLink } from "@dabsi/browser/mui/components/MuiLink";
+import { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu";
+import { Lang } from "@dabsi/lang/Lang";
+import { useEmitted } from "@dabsi/react/reactor/useEmitted";
+import { useEmitter } from "@dabsi/react/reactor/useEmitter";
+import { Store } from "@dabsi/store";
+import { useRoute } from "@dabsi/typerouter/ReactRouter";
+import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
+import { getAdminInfo } from "@dabsi/system/admin/common";
+import { MuiAdminMenu } from "@dabsi/system/admin/browser/MuiAdminMenu";
+import { AdminInfoEvent } from "@dabsi/system/admin/browser/MuiAdminRouterView";
+import { MuiTemplate } from "@dabsi/system/admin/browser/MuiTemplate";
+import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
+import { AclConnection } from "@dabsi/system/acl/AclRpc";
 
 export class MuiAdminViewState {
   open = true;
@@ -36,7 +34,7 @@ export function MuiAdminView(props: {
     console.log(adminInfo);
   });
 
-  const loginInfo = useEmitted(LoginInfoEvent, async loginInfo => {
+  const loginInfo = useEmitted(AclLoginInfoEvent, async loginInfo => {
     console.log({ loginInfoType: loginInfo.type });
     if (loginInfo.type === "success") {
       emit(AdminInfoEvent, await getAdminInfo());
@@ -93,7 +91,7 @@ export function MuiAdminView(props: {
           <MenuItem
             onClick={() => {
               AclConnection.logout();
-              emit(LoginInfoEvent, { type: "logout" });
+              emit(AclLoginInfoEvent, { type: "logout" });
             }}
           >
             Logout

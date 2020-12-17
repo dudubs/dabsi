@@ -1,4 +1,4 @@
-import { DataExp } from "./data-exp/DataExp";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 
 export type DataSort = "ASC" | "DESC";
 export type DataNullsSort = "FIRST" | "LAST";

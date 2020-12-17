@@ -1,7 +1,7 @@
-import { entries } from "../../common/object/entries";
-import { checkResolver } from "./checkResolver";
-import { ResolverMap, Resolver } from "../Resolver";
-import { ResolveError } from "../ResolveError";
+import { entries } from "@dabsi/common/object/entries";
+import { checkResolver } from "@dabsi/typedi/operators/checkResolver";
+import { ResolverMap, Resolver } from "@dabsi/typedi/Resolver";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export function checkResolverContext(context: ResolverMap<any>) {
   for (let [key, resolver] of entries(context)) {

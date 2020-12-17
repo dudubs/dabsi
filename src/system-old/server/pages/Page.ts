@@ -1,7 +1,7 @@
 import { ChildEntity, Column, Entity, ManyToOne, OneToMany } from "typeorm";
-import { DataRelation } from "../../../typedata/DataRelation";
-import { Menu } from "../menu/Menu";
-import { SystemEntity } from "../SystemEntity";
+import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { Menu } from "@dabsi/system-old/server/menu/Menu";
+import { SystemEntity } from "@dabsi/system-old/server/SystemEntity";
 
 @Entity()
 export class Page extends SystemEntity({ withOwners: true }) {

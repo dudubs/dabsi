@@ -1,6 +1,6 @@
 import { createConnection } from "typeorm";
-import { findEntities } from "../../typeorm/findEntities";
-import { SystemEntities } from "./SystemEntities";
+import { findEntities } from "@dabsi/typeorm/findEntities";
+import { SystemEntities } from "@dabsi/system-old/server/SystemEntities";
 
 export function createSystemDatabaseConnection() {
   return createConnection({

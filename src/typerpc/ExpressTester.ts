@@ -1,7 +1,7 @@
 import express, { Handler, Request } from "express";
 import * as http from "http";
 import fetch, { RequestInit } from "node-fetch";
-import { Awaitable } from "../common/typings2/Async";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 
 const _fetch = fetch;
 

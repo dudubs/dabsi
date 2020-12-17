@@ -1,15 +1,19 @@
-import { checkUniqueName } from "../../../system-old/server/acl/checkUniqueName";
-import { Group } from "../../../system-old/server/acl/Group";
-import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
-import { SystemModule } from "../../core/SystemModule";
-import SystemRpcConfigResolver from "../../core/SystemRpcConfigResolver";
-import AclDataSources from "../AclDataSources";
-import AclGroupsManager from "./AclGroupsManager";
+import { Group } from "@dabsi/system-old/server/acl/Group";
+import AclEditGroup from "@dabsi/system/acl-admin/groups/AclEditGroup";
+import AclGroupsManager from "@dabsi/system/acl-admin/groups/AclGroupsManager";
+import AclDataSources from "@dabsi/system/acl/AclDataSources";
+import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
 export default RpcConfigResolver(
   AclGroupsManager,
   {
-    getRpcConfig: SystemRpcConfigResolver(),
+    getEditConfig: SystemRpcConfigResolver(AclEditGroup, {
+      ...Group.provide(),
+    }),
+    createAddInputConfig: SystemRpcConfigResolver(
+      AclGroupsManager.at("add").at("input")
+    ),
     sources: AclDataSources,
   },
   c => $ =>
@@ -19,20 +23,8 @@ export default RpcConfigResolver(
         groupName: "name",
       },
       editConfigFactory: ($, group) =>
-        $({
-          getNamespaceConfig(rpc) {
-            return c.getRpcConfig(
-              rpc,
-              Group.provide(() => group)
-            );
-          },
-        }),
-      addInputConfig: {
-        groupName: {
-          $check: groupName =>
-            checkUniqueName(c.sources.groups, "name", groupName),
-        },
-      },
+        $(c.getEditConfig(Group.provide(() => group))),
+      addInputConfig: c.createAddInputConfig(),
       addSubmit({ groupName }) {
         return c.sources.groups.insertKey({ name: groupName });
       },

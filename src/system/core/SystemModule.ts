@@ -1,34 +1,47 @@
+import { Immutable, ImmutableSet, Seq } from "@dabsi/immutable2";
+import { inspect } from "@dabsi/logging/inspect";
+import { DABSI_CURRENT_PATH } from "./../../index";
+import { relativePosixPath } from "@dabsi/modules/pathHelpers";
+import path, { join } from "path";
+import fs from "fs";
+import catchError from "@dabsi/common/async/catchError";
+
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { touchSet } from "@dabsi/common/map/touchSet";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { values } from "@dabsi/common/object/values";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import nested from "@dabsi/common/string/nested";
+import { LogLevel } from "@dabsi/logging/Logger";
+import { Cli } from "@dabsi/modules/Cli";
+import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import { getSession } from "@dabsi/system-old/server/acl/getSession";
+import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/common/SystemRpc";
+import { DbModule } from "@dabsi/system/core/DbModule";
+import { SessionModule } from "@dabsi/system/core/SessionModule";
+import { SystemSession } from "@dabsi/system/core/SystemSession";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { Inject, Module } from "@dabsi/typedi";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { Resolver } from "@dabsi/typedi/Resolver";
+import { AnyRpc, RpcError } from "@dabsi/typerpc/Rpc";
+import { AnyRpcMap, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import {
+  isRpcConfigResolver,
+  RpcConfigResolver,
+  RpcContextResolver,
+} from "@dabsi/typerpc/RpcConfigResolver";
+import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
+import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import CookieParser from "cookie-parser";
 import express from "express";
-import { Connection } from "typeorm";
-import { touchMap } from "../../common/map/touchMap";
-import { entries } from "../../common/object/entries";
-import { mapObject } from "../../common/object/mapObject";
-import { Lazy } from "../../common/patterns/lazy";
-import nested from "../../common/string/nested";
-import { LogLevel } from "../../logging/Logger";
-import { ExpressModule } from "../../modules/ExpressModule";
-import { AclRequest } from "../../system-old/server/acl/AclRequest";
-import { getSession } from "../../system-old/server/acl/getSession";
-import { DataEntitySource } from "../../typedata/data-entity/DataEntitySource";
-import { DataRow } from "../../typedata/DataRow";
-import { Inject, Module } from "../../typedi";
-import { ModuleRunner } from "../../typedi/ModuleRunner";
-import { AnyRpc, RpcError, RpcUnresolvedConfig } from "../../typerpc/Rpc";
-import { RpcConfigResolver } from "../../typerpc/RpcConfigResolver";
-import { RpcNamespace } from "../../typerpc/RpcNamespace";
-import { Cli } from "./../../modules/Cli";
-import { ResolveError } from "./../../typedi/ResolveError";
-import { Resolver } from "./../../typedi/Resolver";
-import { AnyResolverMap } from "./../../typedi/resolvers/ObjectResolver";
-import { AnyRpcMap } from "./../../typerpc/rpc-map/RpcMap";
-import { RpcMapHandler } from "./../../typerpc/rpc-map/RpcMapHandler";
-import { RpcContextResolver } from "./../../typerpc/RpcConfigResolver";
-import { RpcNamespaceHandler } from "./../../typerpc/RpcNamespaceHandler";
-import { SystemRpc, SystemRpcPath } from "./common/SystemRpc";
-import { DbModule } from "./DbModule";
-import { SessionModule } from "./SessionModule";
-import { SystemSession } from "./SystemSession";
+import { InputMap } from "./../../typerpc/input/input-map/InputMap";
+import { AnyRpcWithMap } from "./../../typerpc/Rpc";
+import { ProjectModule } from "./../../typestack/ProjectModule";
+import { Once } from "@dabsi/common/patterns/Once";
 
 @Module({
   dependencies: [SessionModule],
@@ -45,189 +58,46 @@ export class SystemModule {
     };
   }
 
-  @Lazy()
-  protected get configResolverMap(): Map<AnyRpc, RpcConfigResolver<AnyRpc>> {
-    return new Map();
-  }
+  protected _rpcConfigResolverMap = new Map<
+    AnyRpc,
+    RpcConfigResolver<AnyRpc>
+  >();
 
-  @Lazy()
-  protected get requestContext() {
-    return Object.setPrototypeOf(
-      {
-        ...AclRequest.provide(() => {
-          throw new Error();
-        }),
-        ...SystemSession.provide(() => {
-          throw new Error();
-        }),
-      },
-      this.mRunner.context
-    );
-  }
+  protected _rpcCreatedConfigResolverMap = new Map();
 
-  protected _createRpcNamespaceConfigResolver(rpc: RpcNamespace, path) {
-    return RpcConfigResolver(
-      rpc,
-      mapObject(rpc.children, (child, childKey) => {
-        return this.getRpcConfigResolver(
-          child as AnyRpc,
-          path && [...path, `namespace:${childKey}`]
-        );
-      }),
-      c => ({
-        getNamespaceConfig: (rpc, key) => {
-          return c[key];
+  protected _isChecking = false;
+
+  cli = new Cli()
+    .command(
+      "check",
+      new Cli().install({
+        run: async ({ traceSystem, trace = traceSystem }) => {
+          this.log("checking..");
+          trace && this.log.setLevel(x => x | LogLevel.TRACE);
+          await this._checkSystem();
+        },
+      })
+    )
+    .command(
+      "make [path]",
+      new Cli().install({
+        run: () => {
+          return this._make();
         },
       })
     );
-  }
-
-  protected _createRpcMapConfigResolver(rpc: AnyRpcMap, path: null | any[]) {
-    return RpcConfigResolver(
-      rpc,
-      mapObject(rpc.children, (child, childKey) => {
-        return this.getRpcConfigResolver(
-          child as AnyRpc,
-          path && [...path, `map:${childKey}`]
-        );
-      }),
-      c => $ => $(c)
-    );
-  }
-
-  protected _formatCheckLog(path, message) {
-    return `At ${path.join(", ")} ${nested(message)}`;
-  }
-  getRpcConfigResolver<T extends AnyRpc>(
-    rpc: T,
-    path: null | any[]
-  ): RpcConfigResolver<T> {
-    return <any>touchMap(
-      this.configResolverMap,
-      rpc,
-
-      (): RpcConfigResolver<T> => {
-        if (isRpcNamespace(rpc))
-          return <any>this._createRpcNamespaceConfigResolver(rpc, path);
-        if (isRpcMap(rpc))
-          return <any>this._createRpcMapConfigResolver(rpc, path);
-        if (path) {
-          this.log.warn(this._formatCheckLog(path, "No config resolver"));
-          return RpcConfigResolver(rpc, {}, () => {
-            throw new ResolveError(`No config resolver.`);
-          });
-        }
-        throw new ResolveError(
-          `No config resolver. ${rpc.options.handler.name}`
-        );
-      }
-    );
-  }
-
-  protected _checkRpcConfig(rpc: AnyRpc, context, path: any[]) {
-    this.log.trace(`rpc-check ${path.join("/")} ${rpc.options.handler.name}`);
-
-    for (const [childKey, child] of entries(rpc.children)) {
-      const childContext = this._getChildContext(child, context);
-      const childPath = [...path, `child:${childKey}`];
-      if (isRpcNamespace(child)) {
-        this._checkNsConfig(child, childContext, childPath);
-      } else {
-        this._checkRpcConfig(child, childContext, childPath);
-      }
-    }
-  }
-
-  protected _catchResolveError(
-    path,
-    callback: () => void
-  ): boolean /* return hasError? */ {
-    try {
-      callback();
-    } catch (error) {
-      if (error instanceof ResolveError) {
-        this.log.error(this._formatCheckLog(path, error.message));
-        return true;
-      }
-      throw error;
-    }
-    return false;
-  }
-  protected _checkNsConfig(rpc: RpcNamespace, context, path: any[]) {
-    this.log.trace(`ns-check ${path.join("/")}`);
-    const configResolver = this.getRpcConfigResolver(rpc, path);
-
-    if (
-      this._catchResolveError(path, () =>
-        Resolver.check(configResolver, context)
-      )
-    )
-      return;
-
-    const childContext = this._getChildContext(rpc, context);
-    for (const [childKey, child] of entries(rpc.children)) {
-      const childPath = [...path, `namespace:${childKey}`];
-      if (isRpcNamespace(child)) {
-        this._checkNsConfig(child, childContext, childPath);
-      } else {
-        this._checkRpcConfig(child, childContext, childPath);
-        const childConfigResolver = this.getRpcConfigResolver(child, path);
-        if (
-          this._catchResolveError(childPath, () =>
-            Resolver.check(childConfigResolver, childContext!)
-          )
-        )
-          continue;
-      }
-    }
-  }
-
-  protected rpcConfigResolverChildContext = new Map<AnyRpc, AnyResolverMap>();
-
-  protected _getChildContext(rpc, context) {
-    const childContext = this.rpcConfigResolverChildContext.get(rpc);
-    if (!childContext) return context;
-    return Object.setPrototypeOf({ ...childContext }, context);
-  }
-
-  resolveRpcConfig<T extends AnyRpc>(
-    rpc: T,
-    context: AnyResolverMap
-  ): RpcUnresolvedConfig<T> {
-    const configResolver = this.getRpcConfigResolver(rpc, null);
-    return Resolver.resolve(configResolver, context);
-  }
-
-  cli = new Cli().command(
-    "check",
-    new Cli().install({
-      run: ({ trace }) => {
-        trace && this.log.setLevel(x => x | LogLevel.TRACE);
-        this.log("checking..");
-        try {
-          this._checkNsConfig(SystemRpc, this.requestContext, []);
-        } catch (error) {
-          if (error instanceof ResolveError) {
-            this.log.error(error.toString());
-            return;
-          }
-          throw error;
-        }
-      },
-    })
-  );
 
   constructor(
     @Inject() expressModule: ExpressModule,
     @Inject() protected mRunner: ModuleRunner,
     @Inject() protected dbModule: DbModule,
-    cli: Cli
+    @Inject() cli: Cli,
+    @Inject() protected projectModule: ProjectModule
   ) {
     cli.command("system", this.cli);
+
     expressModule.install({
-      run: () => {
-        this._checkNsConfig(SystemRpc, this.requestContext, []);
-      },
+      run: () => this._checkSystem(),
       routes: app => {
         const handlers = [express.json(), CookieParser()];
 
@@ -236,7 +106,6 @@ export class SystemModule {
           for (const handler of handlers) {
             await new Promise(next => handler(req, res, next));
           }
-          const context = Object.create(this.requestContext);
           const session = await getSession({
             source: this.sources.sessions,
             cookie: req.cookies["system"],
@@ -245,14 +114,12 @@ export class SystemModule {
             },
           });
 
-          const connection = Resolver.resolve(Connection, context);
-          const aclReq = new AclRequest(connection, session.$key);
-
-          Resolver.provide(
-            context,
-            AclRequest.provide(() => aclReq),
-            DataRow(SystemSession).provide(() => session),
-            RpcContextResolver.provide(() => context)
+          const context = Resolver.createContext(
+            {
+              ...DataRow(SystemSession).provide(() => session),
+              ...RpcContextResolver.provide(() => context),
+            },
+            this.requestContext
           );
 
           const { path, payload } = req.body;
@@ -267,12 +134,18 @@ export class SystemModule {
                 .join("/")}`
           );
 
-          const command = await SystemRpc.createRpcCommand(
-            this.resolveRpcConfig(SystemRpc, context)
+          const config = catchError(
+            ResolveError,
+            () => {
+              const configResolver = this.getRpcConfigResolver(SystemRpc);
+              return Resolver.resolve(configResolver, context);
+            },
+            error => {
+              throw new RpcError(error.message);
+            }
           );
-          if (!(await aclReq.ask())) {
-            throw new RpcError(`Access denied.`);
-          }
+          const command = await SystemRpc.createRpcCommand(config);
+
           res.json({
             result: await command(path, payload),
           });
@@ -280,25 +153,214 @@ export class SystemModule {
       },
     });
   }
+  @Lazy()
+  protected get requestContext() {
+    return Object.setPrototypeOf(
+      {
+        ...SystemSession.provide(),
+      },
+      this.mRunner.context
+    );
+  }
+
+  protected _createRpcChildrenResolvers(rpc: AnyRpc) {
+    let message = "";
+
+    const resolvers = mapObject(rpc.children, (child, childKey) => {
+      try {
+        return this.getRpcConfigResolver(child as AnyRpc);
+      } catch (error) {
+        if (error instanceof ResolveError) {
+          message += `${
+            message ? `\nAlso at` : `At`
+          } key '${childKey}':${nested(error.message)}`;
+          return;
+        }
+        throw error;
+      }
+    });
+
+    if (message) {
+      throw new ResolveError(message);
+    }
+    return resolvers as Record<string, RpcConfigResolver<AnyRpc>>;
+  }
+
+  protected _createRpcNamespaceConfigResolver(rpc: RpcNamespace) {
+    return RpcConfigResolver(rpc, this._createRpcChildrenResolvers(rpc), c => ({
+      getNamespaceConfig: (childRpc, key) => {
+        if (!(key in c)) {
+          throw new ResolveError(
+            `No config for ${key} ${childRpc.rpcType?.name}. ${Object.keys(
+              rpc.children
+            )}`
+          );
+        }
+        return c[key];
+      },
+    }));
+  }
+
+  protected _createWidgetNamespaceConfigResolver(rpc: WidgetNamespace) {
+    return RpcConfigResolver(
+      rpc,
+      this._createRpcChildrenResolvers(rpc.children.ns),
+      c => ({
+        getNamespaceConfig: (childRpc, key) => {
+          if (!(key in c)) {
+            throw new ResolveError(`No config for ${key}`);
+          }
+          return c[key];
+        },
+      })
+    );
+  }
+
+  protected _createAnyRpcWithMapConfigResolver(rpc: AnyRpcWithMap) {
+    return RpcConfigResolver(
+      rpc,
+      this._createRpcChildrenResolvers(rpc.children.map),
+      c => $ => $(c)
+    );
+  }
+
+  protected _createRpcMapConfigResolver(rpc: AnyRpcMap) {
+    return RpcConfigResolver(
+      rpc,
+      this._createRpcChildrenResolvers(rpc),
+      c => $ => $(c)
+    );
+  }
+
+  createRpcConfigResolver<T extends AnyRpc>(rpc: T) {
+    return touchMap(this._rpcCreatedConfigResolverMap, rpc, () => {
+      switch (rpc.rpcType) {
+        case RpcNamespace:
+          return <any>this._createRpcNamespaceConfigResolver(<any>rpc);
+        case WidgetNamespace:
+          return <any>this._createWidgetNamespaceConfigResolver(<any>rpc);
+        case RpcMap:
+          return <any>this._createRpcMapConfigResolver(<any>rpc);
+        case WidgetMap:
+        case InputMap:
+          return <any>this._createAnyRpcWithMapConfigResolver(<any>rpc);
+      }
+      if (rpc.options.isConfigCanBeUndefined) {
+        return RpcConfigResolver(rpc, {}, () => $ => $(undefined));
+      }
+    });
+  }
+
+  getRpcConfigResolver<T extends AnyRpc>(rpc: T): RpcConfigResolver<T> {
+    return <any>touchMap(
+      this._rpcConfigResolverMap,
+      rpc,
+      (): RpcConfigResolver<T> => {
+        const configResolver = this.createRpcConfigResolver(rpc);
+        if (configResolver) return configResolver;
+
+        throw new ResolveError(
+          `No config resolver ${rpc.rpcType?.name}, ${rpc.options.isConfigCanBeUndefined}`
+        );
+      }
+    );
+  }
+
+  protected _checkNsConfig(rpc: RpcNamespace, context) {
+    const configResolver = this.getRpcConfigResolver(rpc);
+    Resolver.check(configResolver, context);
+  }
+
+  protected _make() {}
 
   configureRpcResolver(configResolver: RpcConfigResolver<AnyRpc>) {
-    this.configResolverMap.set(configResolver.rpc, configResolver);
+    this._rpcConfigResolverMap.set(configResolver.rpc, configResolver);
+  }
+  protected async _checkSystem() {
+    this._isChecking = true;
+    await this.loadSystem();
+    try {
+      const configResolver = this.getRpcConfigResolver(SystemRpc);
+      Resolver.check(configResolver, this.requestContext);
+    } catch (error) {
+      if (error instanceof ResolveError) {
+        this.log.error(error.toString());
+        return;
+      }
+      throw error;
+    } finally {
+      this._isChecking = false;
+    }
   }
 
-  configureRpcChildContext(rpc: AnyRpc, resolverMap: AnyResolverMap) {
-    const context = touchMap(
-      this.rpcConfigResolverChildContext,
-      rpc,
-      () => ({})
-    );
-    Object.assign(context, resolverMap);
+  _loadedDirs: Set<string>;
+  _loadedConfigsInfo: {
+    nodeModule: NodeModule;
+    resolver: RpcConfigResolver<AnyRpc>;
+  }[];
+
+  @Lazy() get indexFileNames() {
+    const fileNames = new Set<string>();
+    for (const info of this._loadedConfigsInfo) {
+      const rpcModule = info.nodeModule.children.find(child => {
+        return Seq.Keyed(child.exports).find(x => {
+          return x === info.resolver.rpc || x?.[0] === info.resolver.rpc;
+        });
+      });
+
+      if (!rpcModule?.filename) {
+        this.log.warn(() => `No found rpc file for ${info.resolver}`);
+      } else {
+        fileNames.add(rpcModule?.filename);
+      }
+    }
+    return [...fileNames];
   }
-}
 
-function isRpcNamespace(rpc: AnyRpc): rpc is RpcNamespace {
-  return rpc.options.handler === RpcNamespaceHandler;
-}
+  protected async _loadSystemConfig(configFileName: string) {
+    const configModule = require(configFileName);
+    const configResolver = configModule?.default;
+    if (isRpcConfigResolver(configResolver)) {
+      this.log.trace(() => `Load config ${inspect(configResolver)}`);
+      this._loadedConfigsInfo.push({
+        nodeModule: require.cache[require.resolve(configFileName)]!,
+        resolver: configResolver,
+      });
+      this.configureRpcResolver(configResolver);
+    } else {
+      this.log.trace(() => `No default config "${configFileName}".`);
+    }
+  }
 
-function isRpcMap(rpc: AnyRpc): rpc is AnyRpcMap {
-  return rpc.options.handler === RpcMapHandler;
+  protected async _loadSystemDir(dir: string) {
+    if (!touchSet(this._loadedDirs, dir)) return;
+
+    this.log.trace(() => `Scan dir ${dir}.`);
+    let configFiles: string[] = [];
+    let fileNames = new Set();
+
+    for (const baseName of await fs.promises.readdir(dir)) {
+      const fileName = path.join(dir, baseName);
+      const state = await fs.promises.stat(fileName);
+      if (state.isDirectory()) {
+        await this._loadSystemDir(fileName);
+        continue;
+      } else if (/Config\.ts$/.test(fileName)) {
+        await this._loadSystemConfig(fileName);
+      }
+    }
+  }
+
+  @Once() async loadSystem() {
+    this.log.trace("Load system.");
+    await this.projectModule.init();
+    this._loadedDirs = new Set();
+    this._loadedConfigsInfo = [];
+
+    for (const projectInfo of values(this.projectModule.projectInfoMap)) {
+      for (const projectModuleInfo of values(projectInfo.moduleMapInfo)) {
+        await this._loadSystemDir(projectModuleInfo.dir);
+      }
+    }
+  }
 }

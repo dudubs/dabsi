@@ -1,8 +1,8 @@
-import { NoRpc } from "../../NoRpc";
-import { Input } from "../Input";
-import { ValueOrAwaitableFn } from "../ValueOrAwaitableFn";
-import { NumberInputHandler } from "./NumberInputHandler";
-import { NumberInputError, NumberInputOptions } from "./NumberInputLoader";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { Input } from "@dabsi/typerpc/input/Input";
+import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
+import { NumberInputHandler } from "@dabsi/typerpc/input/number-input/NumberInputHandler";
+import { NumberInputError, NumberInputOptions } from "@dabsi/typerpc/input/number-input/NumberInputLoader";
 
 export type NumberInput = Input<{
   Controller: {};

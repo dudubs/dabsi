@@ -1,4 +1,4 @@
-import { assert } from "../assert";
+import { assert } from "@dabsi/common/assert";
 
 const markToDelete = Symbol("deleted");
 

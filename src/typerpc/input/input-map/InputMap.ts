@@ -1,10 +1,10 @@
-import { mapObject } from "../../../common/object/mapObject";
-import { PartialUndefinedKeys } from "../../../common/typings2/PartialUndefinedKeys";
-import { Payload } from "../../../common/typings2/Payload";
-import { UndefinedIfEmptyObject } from "../../../common/typings2/UndefinedIfEmptyObject";
-import { NoRpc } from "../../NoRpc";
-import { RpcConfig } from "../../Rpc";
-import { RpcConfigMap, RpcMap, RpcMap2 } from "../../rpc-map/RpcMap";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { Payload } from "@dabsi/common/typings2/Payload";
+import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { RpcConfig } from "@dabsi/typerpc/Rpc";
+import { RpcConfigMap, RpcMap, RpcMap2 } from "@dabsi/typerpc/rpc-map/RpcMap";
 
 import {
   AnyInput,
@@ -15,8 +15,8 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "../Input";
-import { InputMapHandler } from "./InputMapHandler";
+} from "@dabsi/typerpc/input/Input";
+import { InputMapHandler } from "@dabsi/typerpc/input/input-map/InputMapHandler";
 
 export type AnyInputRecord = Record<string, AnyInput>;
 export type AnyInputMap = InputMap<AnyInputRecord>;
@@ -54,7 +54,7 @@ export function InputMap<T extends AnyInputRecord>(children: T): InputMap<T> {
     handler: InputMapHandler,
     type: InputMap,
     children: {
-      map: RpcMap(children),
+      map: RpcMap(children as AnyInputRecord),
     },
     getValueDataFromElement(valueElementMap) {
       return mapObject(this.children.map.children, (child: AnyInput, key) => {

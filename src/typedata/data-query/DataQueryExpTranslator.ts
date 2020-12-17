@@ -1,6 +1,6 @@
-import { Constructor } from "../../common/typings2/Constructor";
-import { DataExpTranslator } from "../data-exp/DataExpTranslator";
-import { DataQuery, DataQueryExp, DataQueryExpTypes } from "./DataQueryExp";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
+import { DataQuery, DataQueryExp, DataQueryExpTypes } from "@dabsi/typedata/data-query/DataQueryExp";
 
 export type DataQueryExpTranslator<T> = {
   translateQueryCount(query: DataQuery): T;

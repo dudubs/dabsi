@@ -1,5 +1,5 @@
-import { buildTestEntities } from "../../../typedata/data-entity/tests/buildTestEntities";
-import { buildTestRelations } from "../../../typedata/data-entity/tests/buildTestRelations";
+import { buildTestEntities } from "@dabsi/typedata/data-entity/tests/buildTestEntities";
+import { buildTestRelations } from "@dabsi/typedata/data-entity/tests/buildTestRelations";
 import {
   DBase,
   DChild1,
@@ -10,12 +10,12 @@ import {
   EChild1,
   EChild1Child1,
   EChild2,
-} from "../../../typedata/tests/BaseEntities";
-import { TestConnection } from "../../../typedata/tests/TestConnection";
-import { DataExp } from "../../../typedata/data-exp/DataExp";
-import { AEntity, BEntity, CEntity } from "../../relations/tests/Entities";
-import { useQueryBuilderExp } from "../useQueryBuilderExp";
-import { QbExpTester } from "./QbExpTester";
+} from "@dabsi/typedata/tests/BaseEntities";
+import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { AEntity, BEntity, CEntity } from "@dabsi/typeorm/relations/tests/Entities";
+import { useQueryBuilderExp } from "@dabsi/typeorm/exp/useQueryBuilderExp";
+import { QbExpTester } from "@dabsi/typeorm/exp/tests/QbExpTester";
 
 useQueryBuilderExp();
 

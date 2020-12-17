@@ -1,11 +1,11 @@
-import { entries } from "../../../common/object/entries";
-import { DataRow } from "../../../typedata/DataRow";
-import { RpcConfigResolver } from "../../../typerpc/RpcConfigResolver";
-import { AclModule } from "../../acl/AclModule";
-import { SystemSession } from "../../core/SystemSession";
-import { AdminInfoRpc, AdminRpc } from "../common";
+import { entries } from "@dabsi/common/object/entries";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
+import { AclModule } from "@dabsi/system/acl/AclModule";
+import { SystemSession } from "@dabsi/system/core/SystemSession";
+import { AdminInfoRpc, AdminRpc } from "@dabsi/system/admin/common";
 
-export const AdminInfoConfig = RpcConfigResolver(
+export default RpcConfigResolver(
   AdminInfoRpc,
   {
     aclModule: AclModule,

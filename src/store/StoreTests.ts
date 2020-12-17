@@ -1,4 +1,4 @@
-import { Store } from ".";
+import { Store } from "@dabsi/store";
 
 testm(__filename, () => {
   // getState, setState

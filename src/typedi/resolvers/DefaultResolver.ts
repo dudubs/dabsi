@@ -1,5 +1,5 @@
-import { ResolveError } from "../ResolveError";
-import { CustomResolver, Resolver } from "../Resolver";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 export function DefaultResolver<T>(
   resolver: Resolver<T>,

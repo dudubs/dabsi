@@ -1,13 +1,13 @@
 import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { assert } from "../../common/assert";
-import { defined } from "../../common/object/defined";
-import { definedAt } from "../../common/object/definedAt";
-import { Lazy } from "../../common/patterns/lazy";
-import { ArrayTypeOrObject } from "../../common/typings2/ArrayTypeOrObject";
-import { DataExp } from "../../typedata/data-exp/DataExp";
-import { DataQueryBuilder } from "../../typedata/data-query/DataQueryBuilder";
-import { ByTableOrColumn, EntityRelationSide } from "./EntityRelationSide";
+import { assert } from "@dabsi/common/assert";
+import { defined } from "@dabsi/common/object/defined";
+import { definedAt } from "@dabsi/common/object/definedAt";
+import { Lazy } from "@dabsi/common/patterns/lazy";
+import { ArrayTypeOrObject } from "@dabsi/common/typings2/ArrayTypeOrObject";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
+import { ByTableOrColumn, EntityRelationSide } from "@dabsi/typeorm/relations/EntityRelationSide";
 
 export class EntityRelation<T = any> {
   static of<T, K extends keyof T>(

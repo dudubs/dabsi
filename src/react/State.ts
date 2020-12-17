@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { touchObject } from "../common/object/touchObject";
+import { touchObject } from "@dabsi/common/object/touchObject";
 
 export class State<T> {
   protected listeners = new Set<(prevValue: T, nextValue: T) => void>();

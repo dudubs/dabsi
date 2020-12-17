@@ -1,27 +1,30 @@
-import { Expect } from "../../common/typings2/Expect";
-import { OmitKeys } from "../../common/typings2/OmitKeys";
-import { Override } from "../../common/typings2/Override";
-import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
-import { DataRow } from "../../typedata/DataRow";
-import { DataSource } from "../../typedata/DataSource";
-import { GenericConfig } from "../GenericConfig";
-import { InputValue } from "../input/Input";
-import { NoRpc } from "../NoRpc";
-import { AnyRpc, RpcType, RpcUnresolvedConfig } from "../Rpc";
-import { RpcFn } from "../rpc-fn/RpcFn";
-import { RpcMap } from "../rpc-map/RpcMap";
-import { RpcParameter } from "../rpc-parameter/RpcParameter";
-import { RpcConfigHook } from "../RpcConfigHook";
-import { DataTable, DataTableOptions } from "../widget/data-table/DataTable";
-import { Form } from "../widget/form/Form";
-import { WidgetType } from "../widget/Widget";
-import { ExtractDefault } from "../../common/typings2/boolean/index";
-import { TStruct } from "../../struct";
-import { StructProps } from "../../struct/Struct";
-import { ConfigFactory } from "../ConfigFactory";
-import { AnyInput } from "../input/Input";
-import { DataManagerHandler } from "./DataManagerHandler";
-import { Rejectable } from "../../common/async/Rejectable";
+import { Expect } from "@dabsi/common/typings2/Expect";
+import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
+import { Override } from "@dabsi/common/typings2/Override";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { InputValue } from "@dabsi/typerpc/input/Input";
+import { NoRpc } from "@dabsi/typerpc/NoRpc";
+import { AnyRpc, RpcType, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
+import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
+import {
+  DataTable,
+  DataTableOptions,
+} from "@dabsi/typerpc/widget/data-table/DataTable";
+import { Form } from "@dabsi/typerpc/widget/form/Form";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { ExtractDefault } from "@dabsi/common/typings2/boolean/index";
+import { TStruct } from "@dabsi/struct";
+import { StructProps } from "@dabsi/struct/Struct";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
+import { DataManagerHandler } from "@dabsi/typerpc/data-manager/DataManagerHandler";
+import { Rejectable } from "@dabsi/common/async/Rejectable";
 
 // Full<Type>Stack
 export type TDataManager = {
@@ -73,7 +76,6 @@ export type DataManagerConfig2<T extends TDataManager> = PartialUndefinedKeys<
   },
   {
     source: DataSource<T["Data"]>;
-
     tableConfig?: _Types<T>["TableConfig"];
 
     addSubmit: Rejectable<InputValue<T["AddInput"]>, string, T["AddError"]>;

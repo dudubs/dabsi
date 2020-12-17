@@ -1,16 +1,14 @@
-import { mapObject } from "../../common/object/mapObject";
-import { PartialUndefinedKeys } from "../../common/typings2/PartialUndefinedKeys";
-import { UndefinedIfEmptyObject } from "../../common/typings2/UndefinedIfEmptyObject";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
 import {
   AnyRpc,
   Rpc,
   RpcConnection,
   RpcError,
-  RpcResolvedHandler,
   RpcUnresolvedConfig,
-  TRpc,
-} from "../Rpc";
-import { RpcMapHandler } from "./RpcMapHandler";
+} from "@dabsi/typerpc/Rpc";
+import { RpcMapHandler } from "@dabsi/typerpc/rpc-map/RpcMapHandler";
 
 export type AnyRpcRecord = Record<string, AnyRpc>;
 
@@ -66,7 +64,7 @@ export type RpcMap<T extends AnyRpcRecord> = Rpc<{
 export function RpcMap<T extends AnyRpcRecord>(children: T): RpcMap<T> {
   return <any>Rpc<AnyRpcMap>({
     handler: RpcMapHandler,
-
+    type: RpcMap,
     children: children,
 
     connect(path, command) {

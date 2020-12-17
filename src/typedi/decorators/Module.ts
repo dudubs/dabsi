@@ -1,38 +1,50 @@
-import { Constructor } from "../../common/typings2/Constructor";
-import { checkResolverSymbol } from "../operators/checkResolver";
-import { Consumer } from "../Consumer";
-import { Resolver } from "../index";
-import { ModuleRunner } from "../ModuleRunner";
-import { AnyResolverMap } from "../resolvers/ObjectResolver";
-import { resolveSymbol } from "../resolve";
-import { ResolverType } from "../Resolver";
+import { inspect } from "@dabsi/logging/inspect";
+import { CallStackInfo } from "./../CallStackInfo";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Consumer } from "@dabsi/typedi/Consumer";
+import { Injectable } from "@dabsi/typedi/decorators/Injectable";
+import { Resolver } from "@dabsi/typedi/index";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
+import { resolveSymbol } from "@dabsi/typedi/resolve";
+import { ResolverType } from "@dabsi/typedi/Resolver";
+import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
 
-let lastModule: any = undefined;
+let lastModule: Function | null = null;
 
-export type Module = Constructor<any>;
+export type ModuleTarget = Constructor<any>;
 
 export const getLastModule = () => lastModule;
 
 export type ModuleProvider = Resolver<AnyResolverMap>;
 
 export const ModuleProvider: Consumer<ResolverType<ModuleProvider>> = Consumer;
+export type ModuleMetadata = { callStackInfo: CallStackInfo } & ModuleOptions;
 
-export const moduleOptionsMap = new WeakMap<Module, ModuleOptions>();
+export const moduleMetadataMap = new WeakMap<ModuleTarget, ModuleMetadata>();
+
 export type ModuleOptions = {
-  dependencies?: Module[];
+  dependencies?: ModuleTarget[];
   providers?: ModuleProvider[];
 };
 
 export function Module(options: ModuleOptions = {}) {
-  return (module: Module) => {
-    lastModule = module;
+  const callStackInfo = new CallStackInfo(new Error(), __filename);
+  return (target: ModuleTarget) => {
+    lastModule = target;
 
-    moduleOptionsMap.set(module, options);
+    moduleMetadataMap.set(target, { ...options, callStackInfo });
 
-    module[resolveSymbol] = function (this: Constructor<any>, context) {
-      return Resolver.resolve(ModuleRunner, context).get(this);
-    };
-    module[checkResolverSymbol] = function (context) {
+    Injectable()(target);
+
+    Object.defineProperty(target, resolveSymbol, {
+      configurable: false,
+      value(context) {
+        return Resolver.resolve(ModuleRunner, context).getModuleInstance(this);
+      },
+    });
+
+    target[checkResolverSymbol] = function (context) {
       Resolver.check(ModuleRunner, context);
     };
   };

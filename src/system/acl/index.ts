@@ -27,7 +27,7 @@ declare global {
     }),
   ],
 })
-export class AclModule {
+export default class AclModule {
   cli = new Cli() //
     .install({ runAsParent: () => this.dbModule.init() })
     .command(

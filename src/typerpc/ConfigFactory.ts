@@ -45,6 +45,7 @@ export async function ConfigFactory(config, context, ...args) {
   }
   while (configSymbol in result) {
     result = result[configSymbol];
+    if (result == null) return;
   }
   return result;
 }

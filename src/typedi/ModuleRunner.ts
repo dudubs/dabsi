@@ -44,7 +44,7 @@ export class ModuleRunner {
     return this._mainModuleTarget;
   }
 
-  getModuleInstance<T>(target: ModuleTarget): T {
+  getModuleInstance<T>(target: Constructor<T>): T {
     return touchMap(this.cache, target, () => {
       if (!this._mainModuleTarget) {
         this._mainModuleTarget = target;

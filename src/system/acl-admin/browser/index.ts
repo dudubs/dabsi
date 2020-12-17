@@ -5,9 +5,6 @@ import "@dabsi/system/acl-admin/browser/_Users";
 import "@dabsi/system/acl-admin/browser/_Groups";
 import AclAdminRouter from "@dabsi/system/acl-admin/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl-admin/AclAdminRpc";
-import "@dabsi/system/acl-admin/groups/edit/BasicInfoForm";
-import "@dabsi/system/acl-admin/users/forms/BasicInfoForm";
-import "@dabsi/system/acl-admin/users/forms/ContactInfoForm";
 
 const connections = [AclAdminConnection];
 

@@ -1,7 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
-import { mapObject } from "@dabsi/common/object/mapObject";
 import { touchMap } from "@dabsi/common/map/touchMap";
+import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { inspect } from "@dabsi/logging/inspect";
 import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
@@ -17,7 +16,6 @@ import {
   _RpcResolvedHandler,
   _RpcUnresolvedConfig,
 } from "@dabsi/typerpc/Rpc";
-import { Lazy } from "@dabsi/common/patterns/lazy";
 
 type T = TRpc;
 
@@ -75,9 +73,7 @@ export class BaseRpc implements IRpc<T> {
     return this.options.connect.call(this, path, command);
   }
 
-  async resolveRpcConfig(
-    config: _RpcUnresolvedConfig<T>
-  ): Promise<_RpcResolvedConfig<T>> {
+  async resolveRpcConfig(config: any): Promise<_RpcResolvedConfig<T>> {
     if (config && typeof config === "object" && "$context" in config) {
       config = await ConfigFactory(config.$context, this);
     }

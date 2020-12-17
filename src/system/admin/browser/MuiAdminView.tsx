@@ -1,24 +1,23 @@
-import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
-import AclLoginRouter from "@dabsi/system/acl/common/AclLoginRouter";
-import MenuItem from "@material-ui/core/MenuItem";
-import Typography from "@material-ui/core/Typography";
-import * as React from "react";
-import { ReactElement, ReactNode } from "react";
 import { MuiButtonMenu } from "@dabsi/browser/mui/components/MuiButtonMenu";
-import { MuiLink } from "@dabsi/browser/mui/components/MuiLink";
 import { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu";
 import { Lang } from "@dabsi/lang/Lang";
 import { useEmitted } from "@dabsi/react/reactor/useEmitted";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { Store } from "@dabsi/store";
-import { useRoute } from "@dabsi/typerouter/ReactRouter";
-import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
-import { getAdminInfo } from "@dabsi/system/admin/common";
+import { AclConnection } from "@dabsi/system/acl/AclRpc";
+import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
+import AclLoginRouter from "@dabsi/system/acl/common/AclLoginRouter";
 import { MuiAdminMenu } from "@dabsi/system/admin/browser/MuiAdminMenu";
 import { AdminInfoEvent } from "@dabsi/system/admin/browser/MuiAdminRouterView";
+import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 import { MuiTemplate } from "@dabsi/system/admin/browser/MuiTemplate";
 import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
-import { AclConnection } from "@dabsi/system/acl/AclRpc";
+import { getAdminInfo } from "@dabsi/system/admin/common";
+import { useRoute } from "@dabsi/typerouter/ReactRouter";
+import MenuItem from "@material-ui/core/MenuItem";
+import Typography from "@material-ui/core/Typography";
+import * as React from "react";
+import { ReactElement, ReactNode } from "react";
 
 export class MuiAdminViewState {
   open = true;
@@ -49,17 +48,9 @@ export function MuiAdminView(props: {
     return (
       <PaperInCenter title={Lang`ACCESS_DENIED`}>
         <Typography>
-          <MuiLink
-            href={"#"}
-            onClick={e => {
-              e.preventDefault();
-              emit(RouterEvent, {
-                type: "push",
-                location: route.location.find(AclLoginRouter)!,
-                redirection: { type: "location", location: route.location },
-              });
-            }}
-          >{Lang`LOGIN`}</MuiLink>
+          <MuiRouterLink
+            router={() => AclLoginRouter}
+          >{Lang`LOGIN`}</MuiRouterLink>
         </Typography>
       </PaperInCenter>
     );

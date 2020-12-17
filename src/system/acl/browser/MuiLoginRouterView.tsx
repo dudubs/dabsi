@@ -26,7 +26,7 @@ WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
     />
   ));
 
-  return provider(
+  return (
     <PaperInCenter>
       <Typography variant={"h6"}>{Lang`LOGIN`}</Typography>
       <MuiFormView

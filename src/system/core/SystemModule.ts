@@ -42,9 +42,10 @@ import { InputMap } from "./../../typerpc/input/input-map/InputMap";
 import { AnyRpcWithMap } from "./../../typerpc/Rpc";
 import { ProjectModule } from "./../../typestack/ProjectModule";
 import { Once } from "@dabsi/common/patterns/Once";
+import SystemCoreModule from "@dabsi/system/core";
 
 @Module({
-  dependencies: [SessionModule],
+  dependencies: [SessionModule, SystemCoreModule],
 })
 export class SystemModule {
   log = log.get("SYSTEM");
@@ -304,7 +305,9 @@ export class SystemModule {
     for (const info of this._loadedConfigsInfo) {
       const rpcModule = info.nodeModule.children.find(child => {
         return Seq.Keyed(child.exports).find(x => {
-          return x === info.resolver.rpc || x?.[0] === info.resolver.rpc;
+          return (
+            x === info.resolver.rpc || (x as any)?.[0] === info.resolver.rpc
+          );
         });
       });
 

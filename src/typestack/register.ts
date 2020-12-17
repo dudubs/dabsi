@@ -1,9 +1,8 @@
-import { LogLevel } from "./../logging/Logger";
-import yargs from "yargs";
 import { Cli } from "@dabsi/modules/Cli";
 import { getLastModule } from "@dabsi/typedi/decorators/Module";
-
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import yargs from "yargs";
+import { LogLevel } from "./../logging/Logger";
 
 setImmediate(async () => {
   const moduleRunner = new ModuleRunner();
@@ -12,7 +11,7 @@ setImmediate(async () => {
 
   cli.install({
     runAsParent: ({ trace }) => {
-      log.setLevel(x => x | LogLevel.TRACE);
+      trace && log.setLevel(x => x | LogLevel.TRACE);
     },
   });
   await cli.main(yargs.scriptName("ts"));

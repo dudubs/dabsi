@@ -6,3 +6,5 @@ import { RootReactor } from "@dabsi/react/reactor/Reactor";
 AclConnection.getLoginInfo().then(loginInfo => {
   RootReactor.emit(AclLoginInfoEvent, loginInfo);
 });
+
+import "./MuiLoginRouterView";

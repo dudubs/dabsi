@@ -13,7 +13,6 @@ import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
 import { useSystemView } from "@dabsi/system/view/useSystemView";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
 import AddIcon from "@material-ui/icons/Add";
 import CreateIcon from "@material-ui/icons/Create";
 import React, { useState } from "react";

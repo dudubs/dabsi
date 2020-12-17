@@ -1,5 +1,5 @@
 import "@dabsi/system/acl-admin/AclAdminRpc";
-import { AclModule } from "@dabsi/system/acl/AclModule";
+import AclModule from "@dabsi/system/acl";
 import { Module } from "@dabsi/typedi";
 
 @Module({

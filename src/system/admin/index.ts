@@ -1,4 +1,4 @@
-import { AclModule } from "@dabsi/system/acl/AclModule";
+import AclModule from "@dabsi/system/acl";
 import { AdminPermission } from "@dabsi/system/admin/server/AdminPermission";
 import { DbModuleProvider } from "@dabsi/system/core/DbModule";
 import { SystemModule } from "@dabsi/system/core/SystemModule";

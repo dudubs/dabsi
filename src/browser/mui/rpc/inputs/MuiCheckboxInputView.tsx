@@ -1,53 +1,35 @@
-import Checkbox, { CheckboxProps } from "@material-ui/core/Checkbox";
-import FormControlLabel, {
-  FormControlLabelProps,
-} from "@material-ui/core/FormControlLabel";
-import * as React from "react";
-import { ReactNode } from "react";
 import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
-import {
-  BoolInputView,
+import BoolInputView, {
   BoolInputViewProps,
 } from "@dabsi/typerpc/input/bool-input/BoolInputView";
-
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import Checkbox, { CheckboxProps } from "@material-ui/core/Checkbox";
+import * as React from "react";
+import { ReactNode } from "react";
 
 export type MuiCheckBoxInputViewProps<
   C extends RpcConnection<BoolInput>
 > = OmitKeys<BoolInputViewProps<C>, "children"> & {
   title?: ReactNode;
-  FormControlLabelProps?: Partial<FormControlLabelProps>;
   CheckboxProps?: Partial<CheckboxProps>;
 };
+export const kaka = 11;
 
-export function MuiCheckboxInputView<C extends RpcConnection<BoolInput>>({
-  title,
-  CheckboxProps,
-  FormControlLabelProps,
-  ...props
-}: MuiCheckBoxInputViewProps<C>) {
+export default function MuiCheckboxInputView<
+  C extends RpcConnection<BoolInput>
+>({ title, CheckboxProps, ...props }: MuiCheckBoxInputViewProps<C>) {
   return (
     <BoolInputView {...props}>
       {view => {
-        const checkbox = (
+        return (
           <Checkbox
             {...mergeProps(CheckboxProps, {
               onChange: () => view.setValue(!view.value),
             })}
             checked={view.value}
           />
-        );
-
-        return title ? (
-          <FormControlLabel
-            {...FormControlLabelProps}
-            label={title}
-            control={checkbox}
-          />
-        ) : (
-          checkbox
         );
       }}
     </BoolInputView>

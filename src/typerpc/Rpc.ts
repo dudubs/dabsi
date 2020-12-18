@@ -1,3 +1,4 @@
+import { Defined } from "@dabsi/common/typings2/Defined";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { UndefinedIfIsUndefined } from "@dabsi/common/typings2/UndefinedIfIsUndefined";
 import { Pluck } from "@dabsi/common/typings2/Pluck";
@@ -134,7 +135,8 @@ export type _RpcConnectionFactory<T extends TRpc> = (
 ) => T["Connection"];
 
 export type _RpcUnresolvedConfig<T extends TRpc> =
-  | (T["Config"] & BasedRpc<T>)
+  | Extract<T["Config"], undefined>
+  | (Defined<T["Config"]> & BasedRpc<T>)
   | If<Not<Is<T["Config"], Fn>>, ConfigFactory<T["Config"]>>
   | {
       $context: ConfigFactory<T["Config"], [Rpc<T>]>;
@@ -219,7 +221,9 @@ export type RpcIsGenericConfigOption<T extends Pick<TRpc, "Config">> =
   | If<Not<Is<T["Config"], Fn>>, undefined>;
 
 export type RpcIsConfigCanBeUndefinedOption<T extends Pick<TRpc, "Config">> =
-  | IsUndefined<T["Config"]>
+  | boolean
+  // If config is not undefined is false by default
+  // if no children and is
   | If<Not<IsUndefined<T["Config"]>>, undefined>;
 
 export type RpcPropsOption<T extends Pick<TRpc, "Props">> =

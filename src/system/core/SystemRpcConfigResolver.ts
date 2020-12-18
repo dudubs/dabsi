@@ -20,7 +20,7 @@ function _SystemRpcConfigResolver<T extends AnyRpc>(
         const cr = getRpcConfigResolver(sm);
         return rpc.resolveRpcConfig(
           Resolver.resolve(cr, Resolver.createContext(nextContext, context))
-        );
+        ) as RpcUnresolvedConfig<T>;
       };
     }),
     context => {

@@ -6,12 +6,13 @@ import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import AclAdminRouter from "@dabsi/system/acl-admin/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl-admin/AclAdminRpc";
 import { AclBreadcrumbs } from "@dabsi/system/acl-admin/browser/AclBreadcrumbs";
-import { AclGroupBasicInfoForm } from "@dabsi/system/acl-admin/groups/edit/BasicInfoForm";
+import { AclGroupBasicInfoForm } from "@dabsi/system/acl-admin/groups/forms/BasicInfoForm";
 import { AclGroupBasicInfoInput } from "@dabsi/system/acl-admin/groups/input/BasicInfoInput";
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
 import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
 import { useSystemView } from "@dabsi/system/view/useSystemView";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
 import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
 import CreateIcon from "@material-ui/icons/Create";
@@ -98,8 +99,24 @@ WidgetRouterView(
         breadcrumbTitle={title}
         Breadcrumbs={AclBreadcrumbs.Groups}
       >
-        <MuiAccordionMapView for={props} />
+        <MuiAccordionMapView
+          for={props}
+          children={{
+            basicInfo: {
+              before: [{ title: `USERS`, details: <GroupUsers /> }],
+            },
+          }}
+        />
       </MuiSystemPage>
     );
   }
 );
+
+function GroupUsers() {
+  return (
+    <WidgetViewLoader
+      connection={AclAdminConnection.usersManager.table}
+      children={props => <MuiDataTableView {...props} />}
+    />
+  );
+}

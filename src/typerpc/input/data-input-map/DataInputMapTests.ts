@@ -11,11 +11,9 @@ testm(__dirname, () => {
     t.testConfig($ =>
       $({
         source: DataInputTester.source,
-        columns: {
-          label: "text",
-        },
         targetConfig: { maxValue: 10 },
-        getTargetValue: row => row.text.length,
+        getRowValue: row => row.text.length,
+        getRowLabel: row => row.text,
       })
     );
 

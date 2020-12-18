@@ -5,11 +5,14 @@ import { inspect } from "@dabsi/logging/inspect";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataOrder } from "@dabsi/typedata/DataOrder";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
 import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
-import { IWidgetHandler, WidgetElement, WidgetElementState } from "@dabsi/typerpc/widget/Widget";
-import { AnyDataTable, DataTableTypes, TDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
+import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
+import {
+  IWidgetHandler,
+  WidgetElement,
+  WidgetElementState,
+} from "@dabsi/typerpc/widget/Widget";
+import { AnyDataTableTypes } from "./DataTable";
 
 type T = AnyDataTable;
 
@@ -18,16 +21,8 @@ export class DataTableHandler
   implements IWidgetHandler<T> {
   $queryCommand = query => this.query(query);
 
-  $rowConfig: RpcChildConfig<T, "row"> = async ($, key) =>
-    $(
-      await ConfigFactory(this.config.getRowControllerConfig, {
-        key,
-        source: this.config.source,
-      })
-    );
-
   @Lazy() get columns() {
-    return mapObject(this.rpc.rowType, (columnType, key) => {
+    return mapObject(this.rpc.row.fields, (columnType, key) => {
       const columnConfig = this.config.columns?.[key];
       let load, field;
 
@@ -70,8 +65,8 @@ export class DataTableHandler
   }
 
   async query(
-    query: DataTableTypes<TDataTable>["Query"]
-  ): Promise<DataTableTypes<TDataTable>["QueryResult"]> {
+    query: AnyDataTableTypes["Query"]
+  ): Promise<AnyDataTableTypes["QueryResult"]> {
     const orders: DataOrder<any>[] = [];
     for (const [key, order] of entries(query.order)) {
       const column = this.columns[key];

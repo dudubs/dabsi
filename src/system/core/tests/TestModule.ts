@@ -1,3 +1,4 @@
+import { ModuleTarget } from "./../../../typedi/decorators/Module";
 import { reversed } from "@dabsi/common/array/reversed";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
@@ -11,7 +12,7 @@ export interface ITestModule {
   afterAll?(): Awaitable;
 }
 
-let testModules = new Set<Module>();
+let testModules = new Set<ModuleTarget>();
 
 export function TestModule(options: ModuleOptions = {}) {
   return (module: Constructor<any>) => {

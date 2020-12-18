@@ -89,6 +89,12 @@ export function MuiAccordionMapView<C extends AnySystemMapConnection>(
         },
         { key }
       ) => {
+        const beforeElement = before?.map((props, index) =>
+          renderAccordition({
+            ...props,
+            key: "after:" + key + ":" + index,
+          })
+        );
         element = renderAccordition({
           key: "item:" + key,
           details: element,
@@ -97,23 +103,19 @@ export function MuiAccordionMapView<C extends AnySystemMapConnection>(
           description,
           descriptionTypographyProps,
         });
+        const afterElement = after?.map((props, index) =>
+          renderAccordition({
+            ...props,
+            key: "after:" + key + ":" + index,
+          })
+        );
 
-        if (after || before) {
+        if (beforeElement?.length || afterElement?.length) {
           element = (
             <>
-              {before?.map((props, index) =>
-                renderAccordition({
-                  ...props,
-                  key: "after:" + key + ":" + index,
-                })
-              )}
+              {beforeElement}
               {element}
-              {after?.map((props, index) =>
-                renderAccordition({
-                  ...props,
-                  key: "after:" + key + ":" + index,
-                })
-              )}
+              {afterElement}
             </>
           );
         }

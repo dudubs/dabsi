@@ -66,6 +66,7 @@ export function RpcMap<T extends AnyRpcRecord>(children: T): RpcMap<T> {
     handler: RpcMapHandler,
     type: RpcMap,
     children: children,
+    isConfigCanBeUndefined: false,
 
     connect(path, command) {
       return mapObject(this.children, (child, key) => {

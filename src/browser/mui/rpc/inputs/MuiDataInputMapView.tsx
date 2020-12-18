@@ -10,20 +10,21 @@ import {
   DataInputMapViewProps,
 } from "@dabsi/typerpc/input/data-input-map/DataInputMapView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { FormControlLabel } from "@material-ui/core";
 
 export type MuiDataInputMapViewProps<
   C extends RpcConnection<AnyDataInputMap>
 > = PartialKeys<DataInputMapViewProps<C>, "renderTarget"> & {
   GridProps?: GridProps;
-  ItemGridProps?: GridProps;
+  itemGridProps?: GridProps;
   noKeysText?: ReactNode;
   noKeysTypographyProps?: TypographyProps;
 };
 
 export function MuiDataInputMapView<C extends RpcConnection<AnyDataInputMap>>({
   GridProps,
-  ItemGridProps,
-  renderTarget = props => SystemView(props),
+  itemGridProps,
+  renderTarget = props => <SystemView {...props} />,
   noKeysText = Lang`NO_KEYS`,
   noKeysTypographyProps,
   ...props
@@ -35,8 +36,11 @@ export function MuiDataInputMapView<C extends RpcConnection<AnyDataInputMap>>({
           <Typography {...noKeysTypographyProps}>{noKeysText}</Typography>
         }
         renderTarget={(props, itemProps) => (
-          <Grid {...ItemGridProps} item key={itemProps.key}>
-            {renderTarget(props, itemProps)}
+          <Grid {...itemGridProps} item key={itemProps.key}>
+            <FormControlLabel
+              label={itemProps.label}
+              control={renderTarget(props, itemProps)}
+            />
           </Grid>
         )}
         {...props}

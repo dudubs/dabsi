@@ -1,5 +1,5 @@
 import { Group } from "@dabsi/system-old/server/acl/Group";
-import { AclGroupBasicInfoForm } from "@dabsi/system/acl-admin/groups/edit/BasicInfoForm";
+import { AclGroupBasicInfoForm } from "@dabsi/system/acl-admin/groups/forms/BasicInfoForm";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
 import { DataRow } from "@dabsi/typedata/DataRow";

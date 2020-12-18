@@ -1,38 +1,33 @@
+import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
+import { PartialConfigKeys } from "./../Config";
+import { Rejectable } from "@dabsi/common/async/Rejectable";
+import { ExtractDefault } from "@dabsi/common/typings2/boolean/index";
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource } from "@dabsi/typedata/DataSource";
+import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { DataManagerHandler } from "@dabsi/typerpc/data-manager/DataManagerHandler";
 import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { InputValue } from "@dabsi/typerpc/input/Input";
+import { AnyInput, InputValue } from "@dabsi/typerpc/input/Input";
 import { NoRpc } from "@dabsi/typerpc/NoRpc";
 import { AnyRpc, RpcType, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
-import {
-  DataTable,
-  DataTableOptions,
-} from "@dabsi/typerpc/widget/data-table/DataTable";
+import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { ExtractDefault } from "@dabsi/common/typings2/boolean/index";
-import { TStruct } from "@dabsi/struct";
-import { StructProps } from "@dabsi/struct/Struct";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { AnyInput } from "@dabsi/typerpc/input/Input";
-import { DataManagerHandler } from "@dabsi/typerpc/data-manager/DataManagerHandler";
-import { Rejectable } from "@dabsi/common/async/Rejectable";
+import { DataTableOf } from "./../widget/data-table/DataTable";
 
 // Full<Type>Stack
 export type TDataManager = {
   Data: any;
 
-  TableRowController: AnyRpc;
-
-  TableRow: any;
+  Table: AnyDataTable;
 
   Edit: AnyRpc;
 
@@ -41,28 +36,19 @@ export type TDataManager = {
   AddError: any;
 };
 
-type _Types<T extends TDataManager> = {
-  Table: DataTable<{
-    Row: T["TableRow"];
-    RowController: T["TableRowController"];
-    Data: T["Data"];
-  }>;
+interface _Types<T extends TDataManager> {
+  Table: DataTableOf<T["Table"], T["Data"]>;
 
   TableTypes: WidgetType<_Types<T>["Table"]>["Types"];
 
-  TableConfig:
-    | PartialUndefinedKeys<
-        OmitKeys<_Types<T>["TableTypes"]["OptionalConfig"], "columns"> &
-          OmitKeys<_Types<T>["TableTypes"]["RequiredConfig"], "source">
-      >
-    | undefined;
+  TableConfig: PartialConfigKeys<_Types<T>["TableTypes"], "source">;
 
   AddForm: Form<{
     Error: T["AddError"];
     Value: string;
     Input: T["AddInput"];
   }>;
-};
+}
 export type DataManagerConfig2<T extends TDataManager> = PartialUndefinedKeys<
   {
     addInputConfig: RpcUnresolvedConfig<T["AddInput"]>;
@@ -71,12 +57,10 @@ export type DataManagerConfig2<T extends TDataManager> = PartialUndefinedKeys<
       RpcUnresolvedConfig<T["Edit"]>,
       [row: DataRow<T["Data"]>]
     >;
-
-    tableColumns: _Types<T>["TableTypes"]["ColumnConfigMap"];
   },
   {
     source: DataSource<T["Data"]>;
-    tableConfig?: _Types<T>["TableConfig"];
+    tableConfig: UndefinedIfEmptyObject<_Types<T>["TableConfig"]>;
 
     addSubmit: Rejectable<InputValue<T["AddInput"]>, string, T["AddError"]>;
   }
@@ -96,7 +80,7 @@ export type DataManager<T extends TDataManager> = RpcConfigHook<{
   Target: RpcMap<{
     delete: RpcFn<(key: string) => void>;
 
-    table: _Types<T>["Table"];
+    table: T["Table"];
 
     add: _Types<T>["AddForm"];
 
@@ -111,54 +95,48 @@ export type DataManager<T extends TDataManager> = RpcConfigHook<{
     ) => DataManagerConfig2<T>
   >;
 }>;
-export type DataManagerStructure = {
+export type TDataManagerOptions = {
   addInput: AnyInput;
   addError?: any;
-  tableRowType: TStruct;
-  tableRowController?: AnyRpc;
+  table: AnyDataTable;
   edit?: AnyRpc;
 };
 
-export type DataManagerOptions<T extends DataManagerStructure> = T & {
-  tableOptions?: OmitKeys<DataTableOptions<NoRpc>, "rowController">;
-};
+export type DataManagerOptions<T extends TDataManagerOptions> = T;
 
-export type TDataManagerFromStructure<S extends DataManagerStructure> = Expect<
+export type TDataManagerFromOptions<T extends TDataManagerOptions> = Expect<
   TDataManager,
   {
     Data: any;
 
-    AddInput: S["addInput"];
+    AddInput: T["addInput"];
 
-    AddError: Exclude<S["addError"], undefined>;
+    AddError: Exclude<T["addError"], undefined>;
 
-    TableRowController: ExtractDefault<S["tableRowController"], AnyRpc, NoRpc>;
+    Table: T["table"];
 
-    TableRow: StructProps<S["tableRowType"]>;
-
-    Edit: ExtractDefault<S["edit"], AnyRpc, NoRpc>;
+    Edit: ExtractDefault<T["edit"], AnyRpc, NoRpc>;
   }
 >;
 
-export function DataManager<S extends DataManagerStructure>(
-  options: DataManagerOptions<S>
-): DataManager<TDataManagerFromStructure<S>> {
+export function DataManager<T extends TDataManagerOptions>(
+  options: DataManagerOptions<T>
+): DataManager<TDataManagerFromOptions<T>> {
+  const {
+    edit = NoRpc,
+    table,
+    addInput,
+  } = options as DataManagerOptions<TDataManagerOptions>;
   return <any>RpcConfigHook<AnyDataManager>({
     isGenericConfig: true,
     handler: DataManagerHandler,
     target: RpcMap({
       delete: RpcFn<(key: string) => void>(),
-
-      table: DataTable(
-        options.tableRowType as any,
-        options.tableOptions as DataTableOptions<AnyRpc>
-      ),
-
+      table: table as AnyDataTable,
       add: Form({
-        input: options.addInput,
+        input: addInput as AnyInput,
       }),
-
-      edit: RpcParameter(String, options.edit || NoRpc),
+      edit: RpcParameter(String, edit),
     }),
   });
 }

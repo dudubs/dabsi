@@ -1,11 +1,12 @@
+import { RpcIsConfigCanBeUndefinedOption } from "./Rpc";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { Override } from "@dabsi/common/typings2/Override";
 import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
 import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { AnyRpc, Rpc, RpcConnection, RpcUnresolvedConfig, TRpc } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, Rpc, TRpc } from "@dabsi/typerpc/Rpc";
+import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { testRpc } from "@dabsi/typerpc/RpcTester";
 
 type AnyRpcWithGenericConfig = Rpc<
@@ -67,8 +68,10 @@ testm(__dirname, () => {
     expect(
       await RpcConfigHook({
         isGenericConfig: false,
-        target: Rpc({
+
+        target: Rpc<AnyRpc>({
           isGenericConfig: false,
+          isConfigCanBeUndefined: false,
           connect() {
             return undefined as any;
           },
@@ -85,7 +88,7 @@ testm(__dirname, () => {
         .resolveRpcHandler(
           {
             firstConfig: 1,
-          },
+          } as any,
           null
         )
         .then(h => h.config)

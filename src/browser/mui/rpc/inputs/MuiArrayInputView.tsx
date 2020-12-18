@@ -8,7 +8,10 @@ import {
 } from "@dabsi/typerpc/input/array-input/ArrayInputView";
 import { InputViewProps } from "@dabsi/typerpc/input/InputView";
 import { MuiAddButton } from "@dabsi/browser/mui/components/MuiButton";
-import { MuiDialog, MuiDialogProps } from "@dabsi/browser/mui/components/MuiDialog";
+import {
+  MuiDialog,
+  MuiDialogProps,
+} from "@dabsi/browser/mui/components/MuiDialog";
 
 export function MuiArrayInputView<C extends AnyArrayInputConnection>({
   hookRef,

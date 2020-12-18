@@ -2,7 +2,10 @@ import { NoRpc } from "@dabsi/typerpc/NoRpc";
 import { Input } from "@dabsi/typerpc/input/Input";
 import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
 import { NumberInputHandler } from "@dabsi/typerpc/input/number-input/NumberInputHandler";
-import { NumberInputError, NumberInputOptions } from "@dabsi/typerpc/input/number-input/NumberInputLoader";
+import {
+  NumberInputError,
+  NumberInputOptions,
+} from "@dabsi/typerpc/input/number-input/NumberInputLoader";
 
 export type NumberInput = Input<{
   Controller: {};
@@ -27,6 +30,8 @@ export type NumberInput = Input<{
 export function NumberInput(): NumberInput {
   return <any>Input<NumberInput>({
     handler: NumberInputHandler,
+
+    isConfigCanBeUndefined: true,
 
     getValueDataFromElement(value) {
       return value;

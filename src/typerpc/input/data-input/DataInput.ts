@@ -1,29 +1,26 @@
 import { If } from "@dabsi/common/typings2/boolean";
+import { ExtractDefault } from "@dabsi/common/typings2/boolean/index";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
-import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { Expect } from "@dabsi/common/typings2/Expect";
 import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource } from "@dabsi/typedata/DataSource";
 import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { NoRpc } from "@dabsi/typerpc/NoRpc";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
-import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
-import {
-  InlineObject,
-  InlineObjectType,
-  string,
-} from "@dabsi/typerpc/widget/InlineObjectType";
-import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
+import { DataInputHandler } from "@dabsi/typerpc/input/data-input/DataInputHandler";
 import { Input } from "@dabsi/typerpc/input/Input";
 import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
-
 import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
-import { DataInputHandler } from "@dabsi/typerpc/input/data-input/DataInputHandler";
+import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { IfUndefined } from "./../../../common/typings2/boolean/index";
+import { TStruct } from "./../../../struct/Struct";
 
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
+export type AnyDataInputTypes = _Types<TDataInput>;
 
 type _Types<T extends TDataInput> = {
   T: T;
@@ -31,7 +28,6 @@ type _Types<T extends TDataInput> = {
   Table: DataTable<{
     Row: T["TableRow"];
     Data: T["TableData"];
-    RowController: NoRpc;
   }>;
 
   TableTypes: WidgetType<_Types<T>["Table"]>["Types"];
@@ -40,7 +36,7 @@ type _Types<T extends TDataInput> = {
     columns: _Types<T>["TableTypes"]["ColumnConfigMap"];
     getLabel:
       | ((row: DataRow<T["TableData"]>) => string)
-      | If<Is<T["TableRow"], { label: string }>, undefined>;
+      | If<Is<T["TableRow"], { label }>, undefined>;
   };
 
   RequiredConfig: {
@@ -58,10 +54,7 @@ export type DataInputConfig<T extends TDataInput> = PartialUndefinedKeys<
   _Types<T>["OptionalConfig"] & {
     valueSource:
       | DataSource<T["LoadData"]>
-      | If<
-          Is<T["Value"], string> | Is<T["TableData"], T["LoadRow"]>,
-          undefined
-        >;
+      | If<Is<T["Value"], string>, undefined>;
   },
   _Types<T>["RequiredConfig"]
 >;
@@ -71,13 +64,9 @@ export type AnyDataInput = DataInput<any, TDataInput>;
 export type TDataInput = {
   TableRow: any;
 
-  TableRowController: AnyRpc;
-
   TableData: any;
 
   LoadData: any;
-
-  LoadRow: any;
 
   Value: any;
 };
@@ -125,42 +114,49 @@ export type DataInput<N extends boolean, T extends TDataInput> = NullableInput<
   }
 >;
 
-export function DataInput<
-  TableRowType extends InlineObject = {
-    label: typeof string;
-  },
-  TableRowController extends AnyRpc = NoRpc,
-  Nullable extends boolean = false,
-  LoadType = never
->(
-  options: {
-    nullable?: Nullable;
-    tableRowType?: TableRowType;
-    tableRowController?: TableRowController;
-    loadType?: LoadType;
-  } = {}
-): DataInput<
-  Nullable,
+export type TDataInputOptions = {
+  tableRowType?: TStruct;
+  valueType?: any;
+  nullable?: boolean;
+};
+
+export type TDataInputFromOptions<T extends TDataInputOptions> = Expect<
+  TDataInput,
   {
-    TableRow: InlineObjectType<TableRowType>;
-    TableRowController: TableRowController;
-    Data: any;
-    LoadRow: LoadType;
+    TableRow: ExtractDefault<
+      T["tableRowType"],
+      TStruct,
+      {
+        label: typeof String;
+      }
+    >;
+
+    Value: IfUndefined<T["valueType"], string>;
+
     TableData: any;
+
     LoadData: any;
-    Value: IsNever<LoadType> extends true ? string : DataRow<LoadType>;
-    Row: any;
   }
-> {
+>;
+
+export function DataInput<T extends TDataInputOptions = {}>(
+  options?: T
+): DataInput<IfUndefined<T["nullable"], false>, TDataInputFromOptions<T>> {
+  const {
+    nullable = false,
+    valueType,
+    tableRowType = { label: String },
+  } = (options || {}) as TDataInputOptions;
+
   return <any>Input<AnyDataInput>({
     props: {
-      nullable: options.nullable ?? false,
-      isValueDataRow: !!options.loadType,
+      nullable,
+      isValueDataRow: !!valueType,
     },
     type: DataInputMap,
     isGenericConfig: true,
     children: {
-      table: DataTable(options.tableRowType || { label: string }),
+      table: DataTable(tableRowType),
     },
     handler: DataInputHandler,
     getValueDataFromElement(value) {

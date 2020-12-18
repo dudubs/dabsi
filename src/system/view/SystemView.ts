@@ -37,7 +37,7 @@ export function SystemView(
     return createElement(
       Fragment,
       null,
-      `No system-view for ${props.connection.$path.join("/")}, ${rpcType.name}`
+      `No system-view for ${props.connection.$path.join("/")}, ${rpcType?.name}`
     );
   return createElement(component, props);
 }

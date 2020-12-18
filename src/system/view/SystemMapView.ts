@@ -68,15 +68,33 @@ export type AnyWidgetConnectionWithWidgetMap = RpcConnection<
   >
 >;
 
-function getOrdredKeys({ firstKeys, lastKeys, keys }) {
+function getOrdredKeys({
+  firstKeys,
+  lastKeys,
+  keys,
+}: {
+  keys: Set<string>;
+  firstKeys?: string[];
+  lastKeys?: string[];
+}) {
   const orderedKeys = new Set<string>();
-  firstKeys?.forEach(key => orderedKeys.add(key));
+  firstKeys?.forEach(key => isKey(key) && orderedKeys.add(key));
   keys.forEach(key => orderedKeys.add(key));
   lastKeys?.forEach(key => {
-    orderedKeys.delete(key);
-    orderedKeys.add(key);
+    if (isKey(key)) {
+      orderedKeys.delete(key);
+      orderedKeys.add(key);
+    }
   });
   return [...orderedKeys];
+
+  function isKey(key) {
+    if (!keys.has(key)) {
+      console.warn(`invalid key ${key}`);
+      return false;
+    }
+    return true;
+  }
 }
 
 export function SystemMapView<
@@ -115,7 +133,7 @@ export function SystemMapView<
         (orderedKeysRef.current = getOrdredKeys({
           firstKeys,
           lastKeys,
-          keys: [...view.getChildKeys()],
+          keys: new Set(view.getChildKeys()),
         }));
 
       return createElement(

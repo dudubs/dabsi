@@ -9,7 +9,7 @@ export default function ({
   Breadcrumbs = undefined as undefined | ComponentType,
 }) {
   return (
-    <MuiGrid spacing={3} direction="column" item={{ xl: 6 }}>
+    <MuiGrid spacing={3} direction="column">
       <MuiGrid direction="column" spacing={1}>
         <Typography variant="h5">{title}</Typography>
 

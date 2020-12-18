@@ -1,3 +1,4 @@
+import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
 import { MuiDataInputMapView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputMapView";
 import { MuiDataInputView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputView";
 import { MuiTextInputView } from "@dabsi/browser/mui/rpc/inputs/MuiTextInputView";
@@ -17,12 +18,14 @@ import {
   useSystemViewTheme,
   UseSystemViewThemeCallback,
 } from "@dabsi/system/view/useSystemViewTheme";
+import MuiCheckboxInputView from "@dabsi/browser/mui/rpc/inputs/MuiCheckboxInputView";
 
 export function useMuiSystemViewTheme(callback?: UseSystemViewThemeCallback) {
   useSystemViewTheme(use => {
     use(TextInput, MuiTextInputView);
     use(Form, MuiFormView);
     use(DataInputMap, MuiDataInputMapView);
+    use(BoolInput, MuiCheckboxInputView);
     use(DataInput, MuiDataInputView);
     use(DataTable, MuiDataTableView);
 

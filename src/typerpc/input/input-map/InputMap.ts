@@ -52,6 +52,7 @@ export type InputMap<T extends AnyInputRecord> = Input<{
 export function InputMap<T extends AnyInputRecord>(children: T): InputMap<T> {
   return <any>Input<AnyInputMap>({
     handler: InputMapHandler,
+    isConfigCanBeUndefined: false,
     type: InputMap,
     children: {
       map: RpcMap(children as AnyInputRecord),

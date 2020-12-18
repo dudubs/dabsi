@@ -1,3 +1,13 @@
+import { MuiLink } from "@dabsi/browser/mui/components/MuiLink";
+import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
+import { Lang, LangNode } from "@dabsi/lang/Lang";
+import { useLangTranslator } from "@dabsi/lang/LangTranslator";
+import { AnyDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
+import { DataInputView } from "@dabsi/typerpc/input/data-input/DataInputView";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyDataTableTypes } from "@dabsi/typerpc/widget/data-table/DataTable";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -6,20 +16,6 @@ import TextField from "@material-ui/core/TextField";
 import { Autocomplete } from "@material-ui/lab";
 import * as React from "react";
 import { useRef, useState } from "react";
-import { If } from "@dabsi/common/typings2/boolean";
-import { Is } from "@dabsi/common/typings2/boolean/Is";
-import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { Lang, LangNode } from "@dabsi/lang/Lang";
-import { useLangTranslator } from "@dabsi/lang/LangTranslator";
-import { AnyDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
-import { DataInputView } from "@dabsi/typerpc/input/data-input/DataInputView";
-
-import { InputType } from "@dabsi/typerpc/input/Input";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
-import { MuiLink } from "@dabsi/browser/mui/components/MuiLink";
-import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 
 export type AnyDataInputConnection = RpcConnection<AnyDataInput>;
 
@@ -35,13 +31,12 @@ export type MuiDataInputViewProps<
 export function MuiDataInputView<C extends AnyDataInputConnection>(
   props: MuiDataInputViewProps<C>
 ) {
-  type Types = InputType<C>["Types"];
-  type TableTypes = Types["TableTypes"];
-
   const lang = useLangTranslator();
   const inputRef = useRef<DataInputView<C>>(null);
   const [isOpen, setOpen] = useState(false);
-  const [queryResult, setQueryResult] = useState<TableTypes["QueryResult"]>();
+  const [queryResult, setQueryResult] = useState<
+    AnyDataTableTypes["QueryResult"]
+  >();
 
   async function updateOptions(text: string) {
     setQueryResult(
@@ -59,7 +54,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
         {...props}
         ref={inputRef}
         children={view => {
-          const options: TableTypes["RowWithKey"][] =
+          const options: AnyDataTableTypes["RowWithKey"][] =
             queryResult?.rows || (view.value ? [view.value] : []);
 
           return (

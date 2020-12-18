@@ -1,8 +1,7 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
-import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
 import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
+import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 import {
   InputElement,
   InputErrorOrValue,
@@ -11,20 +10,14 @@ import {
   InputValueData,
   InputValueElement,
 } from "@dabsi/typerpc/input/Input";
-import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
+import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
 
 type T = AnyDataInputMap;
 
 export class DataInputMapHandler
   extends AbstractInputHandler<T>
   implements IWidgetHandler<T> {
-  $tableConfig: RpcChildConfig<T, "table"> = $ =>
-    $({
-      ...this.config.tableConfig,
-      source: this.config.source,
-      columns: this.config.columns,
-    });
-
   $targetConfig: RpcChildConfig<T, "target"> = this.config.targetConfig;
 
   getValueFromConfig(
@@ -44,17 +37,16 @@ export class DataInputMapHandler
   async getValueElement(
     valueMap: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    const { table, target } = {
-      table: await this.getChildHandler("table"),
+    const { target } = {
       target: await this.getChildHandler("target"),
     };
 
     let elementMap: Record<string, { label; value }> = {};
     for (const dataRow of await this.config.source.getRows()) {
       const value =
-        valueMap?.[dataRow.$key] ?? (await this.config.getTargetValue(dataRow));
+        valueMap?.[dataRow.$key] ?? (await this.config.getRowValue(dataRow));
       elementMap[dataRow.$key] = {
-        label: this.config.getLabel?.(dataRow) ?? dataRow.label,
+        label: this.config.getRowLabel?.(dataRow) ?? dataRow.label,
         value: await target.getValueElement(value),
       };
     }

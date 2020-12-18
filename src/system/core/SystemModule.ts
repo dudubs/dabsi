@@ -247,7 +247,7 @@ export class SystemModule {
           return <any>this._createAnyRpcWithMapConfigResolver(<any>rpc);
       }
       if (rpc.options.isConfigCanBeUndefined) {
-        return RpcConfigResolver(rpc, {}, () => $ => $(undefined));
+        return RpcConfigResolver(rpc as AnyRpc, {}, () => $ => $(undefined));
       }
     });
   }

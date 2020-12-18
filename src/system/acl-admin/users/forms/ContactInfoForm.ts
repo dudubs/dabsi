@@ -1,10 +1,16 @@
-import { Form } from "@dabsi/typerpc/widget/form/Form";
 import AclEditUser from "@dabsi/system/acl-admin/users/AclEditUser";
-import { AclUserContactInfoInput } from "@dabsi/system/acl-admin/users/inputs/ContactInfoInput";
-
-export const AclUserContactInfoForm = AclEditUser.registerDefault(
+import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { Form } from "@dabsi/typerpc/widget/form/Form";
+import "./BasicInfoForm";
+export const [AclUserContactInfoForm] = AclEditUser.register(
   "contactInfo",
   Form({
-    input: AclUserContactInfoInput,
+    input: InputMap({
+      phoneNumber: TextInput({ nullable: true, trim: true }),
+
+      // TODO: Unique, also builtin- unique error
+      email: TextInput({ nullable: true, trim: true }),
+    }),
   })
 );

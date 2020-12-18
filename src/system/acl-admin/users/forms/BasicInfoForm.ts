@@ -2,11 +2,9 @@ import { AclUserBasicInfoInput } from "@dabsi/system/acl-admin/users/inputs/Basi
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import AclEditUser from "@dabsi/system/acl-admin/users/AclEditUser";
 
-export const AclUserBasicInfoForm = AclEditUser.registerDefault(
+export const [AclUserBasicInfoForm] = AclEditUser.register(
   "basicInfo",
   Form({
     input: AclUserBasicInfoInput,
   })
 );
-
-export default AclUserBasicInfoForm;

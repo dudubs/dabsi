@@ -1,3 +1,4 @@
+import { Column } from "typeorm";
 import { Group } from "@dabsi/system-old/server/acl/Group";
 import AclEditGroup from "@dabsi/system/acl-admin/groups/AclEditGroup";
 import AclGroupsManager from "@dabsi/system/acl-admin/groups/AclGroupsManager";
@@ -19,8 +20,9 @@ export default RpcConfigResolver(
   c => $ =>
     $({
       source: c.sources.groups,
-      tableColumns: {
-        groupName: "name",
+
+      tableConfig: {
+        columns: { groupName: "name" },
       },
       editConfigFactory: ($, group) =>
         $(c.getEditConfig(Group.provide(() => group))),

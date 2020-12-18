@@ -12,7 +12,6 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
     table: $ =>
       $({
         ...config.tableConfig,
-        columns: config.tableColumns,
         source: config.source,
       }),
     add: {

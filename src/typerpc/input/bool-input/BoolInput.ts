@@ -18,6 +18,8 @@ export type BoolInput = Input<{
 export function BoolInput(): BoolInput {
   return Input({
     handler: BoolInputHandler,
+    type: BoolInput,
+    isConfigCanBeUndefined: true,
     getValueDataFromElement(value) {
       return value;
     },

@@ -1,10 +1,9 @@
 import { Union } from "@dabsi/common/typings2/Union";
-import { NoRpc } from "@dabsi/typerpc/NoRpc";
-import { RpcConnection, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { TabsWidgetHandler } from "@dabsi/typerpc/widget/tabs-widget/TabsWidgetHandler";
 import { Widget, WidgetElement } from "@dabsi/typerpc/widget/Widget";
 import { AnyWidgetRecord } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
-import { TabsWidgetHandler } from "@dabsi/typerpc/widget/tabs-widget/TabsWidgetHandler";
 
 export type AnyTabsWidget = TabsWidget<AnyWidgetRecord>;
 
@@ -44,7 +43,8 @@ export function TabsWidget<T extends AnyWidgetRecord>(
 ): TabsWidget<T> {
   return <any>Widget<AnyTabsWidget>({
     handler: TabsWidgetHandler,
-    children: { map: RpcMap(children) },
+    isConfigCanBeUndefined: false,
+    children: { map: RpcMap(children as AnyWidgetRecord) },
     commands: { getTabElement: true },
   });
 }

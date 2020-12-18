@@ -30,9 +30,10 @@ export function WidgetMap<T extends AnyWidgetRecord>(
 ): WidgetMap<T> {
   return <any>Widget<WidgetMap<AnyWidgetRecord>>({
     handler: WidgetMapHandler,
+    isConfigCanBeUndefined: false,
     type: WidgetMap,
     children: {
-      map: RpcMap(children),
+      map: RpcMap(children as AnyWidgetRecord),
     },
   });
 }

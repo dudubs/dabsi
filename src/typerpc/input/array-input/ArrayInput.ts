@@ -2,16 +2,12 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { If, Not } from "@dabsi/common/typings2/boolean";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { RpcUndefinedConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcFnMap } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { ToAsync, WidgetElement } from "@dabsi/typerpc/widget/Widget";
+import { ArrayInputHandler } from "@dabsi/typerpc/input/array-input/ArrayInputHandler";
 import {
   AnyInput,
   ErrorOrValue,
   Input,
   InputError,
-  InputType,
   InputValue,
   InputValueData,
   InputValueElement,
@@ -19,8 +15,8 @@ import {
 import { InputErrorMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { InputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
 import { LengthError } from "@dabsi/typerpc/input/LengthError";
-import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
-import { ArrayInputHandler } from "@dabsi/typerpc/input/array-input/ArrayInputHandler";
+import { RpcUndefinedConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
 
 export type TArrayInput = { NewItem: AnyInput; Item: AnyInput };
 
@@ -121,6 +117,7 @@ export type ArrayInputOptions<
   }
 >;
 
+// TODO: TArrayOptions = {item, newItem, isUniqueItem}
 export function ArrayInput<
   Item extends AnyInput,
   NewItem extends AnyInput = Item,
@@ -139,6 +136,7 @@ export function ArrayInput<
   } = (options || {}) as ArrayInputOptions<AnyInput, AnyInput, boolean>;
 
   return <any>Input<AnyArrayInput>({
+    isConfigCanBeUndefined: false,
     children: {
       item,
       newItem,

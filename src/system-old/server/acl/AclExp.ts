@@ -2,8 +2,12 @@ import { Union } from "@dabsi/common/typings2/Union";
 import { GetBaseType } from "@dabsi/typedata/BaseType";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { BasedDataRow } from "@dabsi/typedata/DataSourceRow";
-import { AclCriterion, AclRow, AclRowType } from "@dabsi/system-old/server/acl/AclCriterion";
-import { User } from "@dabsi/system-old/server/acl/User";
+import {
+  AclCriterion,
+  AclRow,
+  AclRowType,
+} from "@dabsi/system-old/server/acl/AclCriterion";
+import { User } from "@dabsi/system/acl/entities/User";
 export type AclCriterionExp = (
   callback: <T extends AclRow<any>>(dataRow: T) => AclCriterion<AclRowType<T>>
 ) => AclCriterion<any>;

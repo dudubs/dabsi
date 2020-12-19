@@ -1,6 +1,6 @@
 import AclEditGroup from "@dabsi/system/acl-admin/groups/AclEditGroup";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import { Group } from "./../../../system-old/server/acl/Group";
+import { Group } from "./../../../system/acl/entities/Group";
 import { DataRow } from "./../../../typedata/DataRow";
 import { RpcConfigResolver } from "./../../../typerpc/RpcConfigResolver";
 

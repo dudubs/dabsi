@@ -1,9 +1,9 @@
 import { Cli } from "@dabsi/modules/Cli";
 import { AclRequest } from "@dabsi/system-old/server/acl/AclRequest";
-import { Group } from "@dabsi/system-old/server/acl/Group";
+import { Group } from "@dabsi/system/acl/entities/Group";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
 import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
-import { User } from "@dabsi/system-old/server/acl/User";
+import { User } from "@dabsi/system/acl/entities/User";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { DbModule, DbModuleProvider } from "@dabsi/system/core/DbModule";
 import { SystemModule } from "@dabsi/system/core/SystemModule";
@@ -21,11 +21,7 @@ declare global {
 }
 
 @Module({
-  providers: [
-    DbModuleProvider({
-      entities: [User, Group, Permission],
-    }),
-  ],
+  dependencies: [DbModule],
 })
 export default class AclModule {
   cli = new Cli() //

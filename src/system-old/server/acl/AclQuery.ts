@@ -15,11 +15,18 @@ import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
 import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
 import { DataEntityQueryExpTranslatorToSql } from "@dabsi/typedata/data-entity/DataEntityQueryExpTranslatorToSql";
-import { AclCriterion, AclCriterionExps } from "@dabsi/system-old/server/acl/AclCriterion";
-import { AclCriterionExp, AclExp, AclExpMap } from "@dabsi/system-old/server/acl/AclExp";
+import {
+  AclCriterion,
+  AclCriterionExps,
+} from "@dabsi/system-old/server/acl/AclCriterion";
+import {
+  AclCriterionExp,
+  AclExp,
+  AclExpMap,
+} from "@dabsi/system-old/server/acl/AclExp";
 import { AclTokenTree } from "@dabsi/system-old/server/acl/AclTokenTree";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
-import { User } from "@dabsi/system-old/server/acl/User";
+import { User } from "@dabsi/system/acl/entities/User";
 
 export class AclQuery {
   constructor(protected connection: Connection) {}

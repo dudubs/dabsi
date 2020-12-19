@@ -1,5 +1,5 @@
 import { Column } from "typeorm";
-import { Group } from "@dabsi/system-old/server/acl/Group";
+import { Group } from "@dabsi/system/acl/entities/Group";
 import AclEditGroup from "@dabsi/system/acl-admin/groups/AclEditGroup";
 import AclGroupsManager from "@dabsi/system/acl-admin/groups/AclGroupsManager";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";

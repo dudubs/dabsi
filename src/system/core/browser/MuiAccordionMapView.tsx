@@ -1,3 +1,11 @@
+import { LangKey } from "@dabsi/lang/LangKey";
+import { useStore } from "@dabsi/react/useStore";
+import { Field, Struct } from "@dabsi/struct";
+import {
+  AnySystemMapConnection,
+  SystemMapView,
+  SystemMapViewProps,
+} from "@dabsi/system/view/SystemMapView";
 import {
   AccordionDetails,
   AccordionSummary,
@@ -8,15 +16,6 @@ import Grid from "@material-ui/core/Grid";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import React, { ReactElement, ReactNode } from "react";
-import { LangKey } from "@dabsi/lang/LangKey";
-import { useStore } from "@dabsi/react/useStore";
-import { Field, Struct } from "@dabsi/struct";
-import {
-  AnySystemMapConnection,
-  AnyWidgetConnectionWithWidgetMap,
-  SystemMapView,
-  SystemMapViewProps,
-} from "@dabsi/system/view/SystemMapView";
 
 type _ThemeProps = _ItemThemeProps & {
   multiple?: boolean;

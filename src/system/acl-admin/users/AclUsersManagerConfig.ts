@@ -1,5 +1,5 @@
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
-import { User } from "@dabsi/system-old/server/acl/User";
+import { User } from "@dabsi/system/acl/entities/User";
 import AclEditUser from "@dabsi/system/acl-admin/users/AclEditUser";
 import AclUsersManager from "@dabsi/system/acl-admin/users/AclUsersManager";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";

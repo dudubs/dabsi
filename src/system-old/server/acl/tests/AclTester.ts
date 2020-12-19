@@ -17,8 +17,11 @@ import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
-import { User } from "@dabsi/system-old/server/acl/User";
-import { TEST_FORUMS_ADMIN_TOKEN, TEST_GOD_TOKEN } from "@dabsi/system-old/server/acl/tests/TestForumAcl";
+import { User } from "@dabsi/system/acl/entities/User";
+import {
+  TEST_FORUMS_ADMIN_TOKEN,
+  TEST_GOD_TOKEN,
+} from "@dabsi/system-old/server/acl/tests/TestForumAcl";
 
 @Entity()
 export class TestForum {

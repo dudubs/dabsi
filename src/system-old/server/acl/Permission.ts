@@ -6,8 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
-import { Group } from "@dabsi/system-old/server/acl/Group";
-import { User } from "@dabsi/system-old/server/acl/User";
+import { Group } from "@dabsi/system/acl/entities/Group";
+import { User } from "@dabsi/system/acl/entities/User";
 
 @Entity({ name: "acl/permissions" })
 @Index(["user", "token"])
@@ -26,9 +26,9 @@ export class Permission {
   @Column()
   ownerToken: string;
 
-  @ManyToOne(() => User, (user) => user.permissions)
+  @ManyToOne(() => User, user => user.permissions)
   user?: DataRelation<User>;
 
-  @ManyToOne(() => Group, (group) => group.permissions)
+  @ManyToOne(() => Group, group => group.permissions)
   group?: DataRelation<Group>;
 }

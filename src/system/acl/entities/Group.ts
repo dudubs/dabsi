@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
-import { User } from "@dabsi/system-old/server/acl/User";
+import { User } from "@dabsi/system/acl/entities/User";
 
 @Entity({ name: "acl/groups" })
 export class Group {
@@ -19,9 +19,9 @@ export class Group {
   name: string;
 
   @JoinTable()
-  @ManyToMany(() => User, (user) => user.groups)
+  @ManyToMany(() => User, user => user.groups)
   users: DataRelation<User>[];
 
-  @ManyToOne(() => Permission, (p) => p.group)
+  @ManyToOne(() => Permission, p => p.group)
   permissions: DataRelation<Permission>[];
 }

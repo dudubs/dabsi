@@ -1,3 +1,4 @@
+import { values } from "@dabsi/common/object/values";
 import { entries } from "@dabsi/common/object/entries";
 import { mapObject, mapObjectAsync } from "@dabsi/common/object/mapObject";
 import { Lazy } from "@dabsi/common/patterns/lazy";
@@ -22,9 +23,9 @@ export class DataTableHandler
   $queryCommand = query => this.query(query);
 
   @Lazy() get columns() {
-    return mapObject(this.rpc.row.fields, (columnType, key) => {
+    return mapObject(this.rpc.row.fields, (columnType, key, index) => {
       const columnConfig = this.config.columns?.[key];
-      let load, field;
+      let load, field, fieldKey;
 
       switch (typeof columnConfig) {
         case "function":
@@ -36,9 +37,13 @@ export class DataTableHandler
           break;
         case "object":
           ({ load, field } = columnConfig || ({} as any));
-          if (!load) {
+          if (typeof load === "function") {
             load = dataRow => dataRow[key];
             field = key;
+          } else if (load) {
+            field = load;
+            fieldKey = "_" + key + "_" + index;
+            load = dataRow => dataRow[fieldKey];
           }
           break;
         case "undefined":
@@ -50,6 +55,7 @@ export class DataTableHandler
       return {
         load,
         field,
+        fieldKey,
       };
     });
   }
@@ -68,6 +74,13 @@ export class DataTableHandler
     query: AnyDataTableTypes["Query"]
   ): Promise<AnyDataTableTypes["QueryResult"]> {
     const orders: DataOrder<any>[] = [];
+    const fields = {};
+
+    for (const column of values(this.columns)) {
+      if (column.fieldKey) {
+        fields[column.fieldKey] = column.field;
+      }
+    }
     for (const [key, order] of entries(query.order)) {
       const column = this.columns[key];
       if (column.field === undefined) {
@@ -109,8 +122,10 @@ export class DataTableHandler
       .sort(orders)
       .take(pageSize)
       .skip(pageSize * (query.pageIndex || 0))
+      .addFields(fields)
       .filter({ $and: filters });
 
+    console.log({ fields });
     let totalRows: number;
     let dataRows: DataRow<any>[];
 

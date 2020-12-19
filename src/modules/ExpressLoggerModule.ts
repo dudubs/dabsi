@@ -1,7 +1,5 @@
-import { Consumer } from "@dabsi/typedi/Consumer";
-import { Inject } from "@dabsi/typedi";
-import { Module, ModuleProvider } from "@dabsi/typedi";
 import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import { Inject, Module } from "@dabsi/typedi";
 
 @Module()
 export class ExpressLoggerModule {

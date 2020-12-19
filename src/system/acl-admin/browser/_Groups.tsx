@@ -2,7 +2,6 @@ import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
 import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
-import { Lang } from "@dabsi/lang/Lang";
 import { useLoader } from "@dabsi/react/useLoader";
 import { useStore } from "@dabsi/react/useStore";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
@@ -32,7 +31,7 @@ WidgetRouterView(
   (props, { location }) => (
     <MuiDataTableView
       {...props}
-      title={Lang`GROUPS`}
+      title={lang`GROUPS`}
       onEditClick={async event => {
         location.parent.at("editGroup", { groupId: event.row.$key }).push();
       }}
@@ -49,7 +48,7 @@ WidgetRouterView(
               onClick={() => {
                 location.parent.at("createNewGroup").push();
               }}
-            >{Lang`CREATE_NEW_GROUP`}</Button>
+            >{lang`CREATE_NEW_GROUP`}</Button>
           </>
         ),
       }}
@@ -62,12 +61,12 @@ WidgetRouterView(
   AclAdminConnection.groupsManager.add,
   (props, { location }) => (
     <MuiSystemPage
-      title={Lang`CREATE_NEW_GROUP`}
+      title={lang`CREATE_NEW_GROUP`}
       Breadcrumbs={AclBreadcrumbs.Groups}
     >
       <MuiFormView
         {...props}
-        submitTitle={Lang`CREATE`}
+        submitTitle={lang`CREATE`}
         submitButtonProps={{ endIcon: <CreateIcon /> }}
         disableResetButton
         onSubmit={() => location.parent.at("groups").push()}
@@ -113,7 +112,7 @@ WidgetRouterView(
             [childKeys[childKeys.length - 1]]: {
               after: [
                 {
-                  title: Lang`GROUP_USERS`,
+                  title: lang`GROUP_USERS`,
                   details: <GroupUsers groupId={params.groupId} />,
                 },
               ],
@@ -177,7 +176,7 @@ function GroupUsers({ groupId }) {
                 color="primary"
                 variant="contained"
                 onClick={saveChanges}
-              >{Lang`SAVE_CHANGES`}</Button>
+              >{lang`SAVE_CHANGES`}</Button>
             </div>
           </MuiGrid>
         );
@@ -193,7 +192,7 @@ function GroupUsers({ groupId }) {
                 },
                 staticActions: changes.size > 0 && (
                   <Typography>
-                    {Lang`HAVE_${"count"}_CHANGES`({
+                    {lang`HAVE_${"count"}_CHANGES`({
                       count: changes.size,
                     })}
                   </Typography>

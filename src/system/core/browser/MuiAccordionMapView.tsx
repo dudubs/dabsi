@@ -1,4 +1,4 @@
-import { LangKey } from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/lang/LangKey";
 import { useStore } from "@dabsi/react/useStore";
 import { Field, Struct } from "@dabsi/struct";
 import {
@@ -97,7 +97,7 @@ export function MuiAccordionMapView<C extends AnySystemMapConnection>(
         element = renderAccordition({
           key: "item:" + key,
           details: element,
-          title: title || <LangKey for={key}>{title}</LangKey>,
+          title: title || <LangKey token={key}>{title}</LangKey>,
           titleTypographyProps,
           description,
           descriptionTypographyProps,

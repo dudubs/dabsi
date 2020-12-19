@@ -6,7 +6,7 @@ import {
 } from "@material-ui/core/TextField/TextField";
 import * as React from "react";
 import { ReactNode, useRef } from "react";
-import { LangKey } from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/lang/LangKey";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
@@ -61,7 +61,7 @@ export function MuiTextInputView<C extends RpcConnection<TextInput>>({
             title ||
             (disableLangKey
               ? undefined
-              : props.mapKey && <LangKey for={props.mapKey}>{title}</LangKey>)
+              : props.mapKey && <LangKey token={props.mapKey}>{title}</LangKey>)
           }
           error={view.error != null}
           helperText={view.renderError()}

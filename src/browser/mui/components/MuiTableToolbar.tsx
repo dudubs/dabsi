@@ -1,20 +1,18 @@
+import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
+import useLangService from "@dabsi/lang/useLangService";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import Grid from "@material-ui/core/Grid";
 import InputAdornment from "@material-ui/core/InputAdornment";
+import { makeStyles, MuiThemeProvider } from "@material-ui/core/styles";
 import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import Toolbar, { ToolbarProps } from "@material-ui/core/Toolbar";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
-import { makeStyles, MuiThemeProvider } from "@material-ui/core/styles";
+import CloseIcon from "@material-ui/icons/Close";
+import SearchIcon from "@material-ui/icons/Search";
 import clsx from "clsx";
 import * as React from "react";
 import { ReactNode, useEffect, useState } from "react";
-import { Lang } from "@dabsi/lang/Lang";
-import { useLangTranslator } from "@dabsi/lang/LangTranslator";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
-import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
-import SearchIcon from "@material-ui/icons/Search";
-import CloseIcon from "@material-ui/icons/Close";
 
 const useStyles = makeStyles(theme => ({
   toolbar: {
@@ -63,13 +61,12 @@ export type MuiTableToolbarProps = MuiTableToolbarThemeProps & {
   countSelectedItems?: number;
 };
 
-const COUNT_SELECTED_ITEMS = Lang`SELECTED_${"count"}_ITEMS`;
+const COUNT_SELECTED_ITEMS = lang`SELECTED_${"count"}_ITEMS`;
 
 export function MuiTableToolbar(props: MuiTableToolbarProps) {
   const classes = useStyles();
   const { search: searchProps, titleTypographyProps } = props;
-
-  const lang = useLangTranslator();
+  const langService = useLangService();
   const [searchText, setSearchText] = useState(props.search?.text || "");
 
   useEffect(() => {
@@ -143,7 +140,7 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
         <Grid item>
           <TextField
             value={searchText}
-            placeholder={lang.translateNode(Lang`SEARCH`)}
+            placeholder={langService.translateToken("SEARCH")}
             {...mergeProps(props.searchTextFieldProps, {
               onChange: event => {
                 const text = event.target.value;
@@ -177,7 +174,7 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
               InputProps: {
                 endAdornment: (
                   <InputAdornment position={"end"}>
-                    <Tooltip title={Lang`SEARCH`}>
+                    <Tooltip title={lang`SEARCH`}>
                       <SearchIcon />
                     </Tooltip>
                   </InputAdornment>

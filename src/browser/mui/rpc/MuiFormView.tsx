@@ -2,7 +2,6 @@ import Button, { ButtonProps } from "@material-ui/core/Button";
 import * as React from "react";
 import { ReactElement, ReactNode } from "react";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { Lang } from "@dabsi/lang/Lang";
 import { Hook } from "@dabsi/react/Hook";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 
@@ -35,7 +34,7 @@ export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = PartialKeys<
 export const MuiFormView = <C extends RpcConnection<AnyForm>>(
   props: MuiFormViewProps<C>
 ): ReactElement => {
-  const { submitTitle = Lang`SUBMIT`, resetTitle = Lang`RESET` } = props;
+  const { submitTitle = lang`SUBMIT`, resetTitle = lang`RESET` } = props;
 
   return (
     <MuiThemeProvider theme={MuiFormViewTheme}>

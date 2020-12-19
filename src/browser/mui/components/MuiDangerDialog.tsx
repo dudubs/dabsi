@@ -1,28 +1,33 @@
+import {
+  MuiCancelButton,
+  MuiConfirmButton,
+} from "@dabsi/browser/mui/components/MuiButton";
+import {
+  MuiDialog,
+  MuiDialogProps,
+} from "@dabsi/browser/mui/components/MuiDialog";
+import { Override } from "@dabsi/common/typings2/Override";
+import { ReactCallback } from "@dabsi/react/ReactCallback";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import * as React from "react";
 import { ReactNode } from "react";
-import { Override } from "@dabsi/common/typings2/Override";
-import { MuiDialog, MuiDialogProps } from "@dabsi/browser/mui/components/MuiDialog";
-import { Lang, LangNode } from "@dabsi/lang/Lang";
-import { ReactCallback } from "@dabsi/react/ReactCallback";
-import { MuiButton, MuiCancelButton, MuiConfirmButton } from "@dabsi/browser/mui/components/MuiButton";
 
 export type MuiDangerDialogProps = Override<
   MuiDialogProps,
   {
     TypographyProps?: TypographyProps;
 
-    actionTitle?: LangNode;
+    actionTitle?: ReactNode;
     title?: ReactNode;
-    objectTitle?: LangNode;
+    objectTitle?: ReactNode;
     text?: ReactNode;
 
     onCancel?: ReactCallback;
     onConfirm?: ReactCallback;
   }
 >;
-const DEFAULT_TITLE = Lang`CONFIRM_TO_${"action"}`;
-const DEFAULT_TEXT = Lang`YOU_ARE_SURE_YOU_WANT_TO_${"action"}_${"object"}?`;
+const DEFAULT_TITLE = lang`CONFIRM_TO_${"action"}`;
+const DEFAULT_TEXT = lang`YOU_ARE_SURE_YOU_WANT_TO_${"action"}_${"object"}?`;
 
 export function MuiDangerDialog({
   onCancel,
@@ -34,7 +39,7 @@ export function MuiDangerDialog({
   TypographyProps,
   ...MuiDialogProps
 }: MuiDangerDialogProps) {
-  const action = actionTitle ?? Lang`ACTION`;
+  const action = actionTitle ?? lang`ACTION`;
   return (
     <MuiDialog
       {...MuiDialogProps}
@@ -48,7 +53,7 @@ export function MuiDangerDialog({
           />
           <MuiConfirmButton
             danger
-            title={Lang`CONFIRM`}
+            title={lang`CONFIRM`}
             onClick={event => {
               onConfirm?.(event);
             }}
@@ -60,7 +65,7 @@ export function MuiDangerDialog({
         {text ??
           DEFAULT_TEXT({
             action,
-            object: objectTitle ?? Lang`OBJECT`,
+            object: objectTitle ?? lang`OBJECT`,
           })}
       </Typography>
     </MuiDialog>

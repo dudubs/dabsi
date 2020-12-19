@@ -1,30 +1,25 @@
-import { ReactElement, ReactNode, useMemo } from "react";
 import { fromPropertyCase } from "@dabsi/common/string/fromPropertyCase";
 import { matchCase, SourceCase } from "@dabsi/common/string/matchCase";
 import { toConstantCase } from "@dabsi/common/string/toConstantCase";
-import { LangPropsType } from "@dabsi/lang/Lang";
-import { LangView } from "@dabsi/lang/LangView";
-import React from "react";
+import LangComponent from "@dabsi/lang/LangComponent";
+import React, { createElement, ReactElement, ReactNode, useMemo } from "react";
 
-export function LangKey(props: {
-  for: string;
+export default function ({
+  token,
+  children,
+  sourceCase = fromPropertyCase,
+}: {
+  token: string;
   children: ReactNode;
   sourceCase?: SourceCase;
 }): ReactElement {
   return useMemo(() => {
-    if (props.children != undefined) {
-      return <>{props.children}</>;
+    if (children != undefined) {
+      return <>{children}</>;
     }
 
-    return (
-      <LangView
-        type={LangPropsType.token}
-        token={matchCase(
-          props.for,
-          props.sourceCase || fromPropertyCase,
-          toConstantCase
-        )}
-      />
-    );
-  }, [props.children, props.for]);
+    return createElement(LangComponent, {
+      token: matchCase(token, sourceCase, toConstantCase),
+    });
+  }, [token, typeof children]);
 }

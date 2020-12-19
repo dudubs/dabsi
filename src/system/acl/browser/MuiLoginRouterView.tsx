@@ -1,6 +1,5 @@
 import { MuiTextInputView } from "@dabsi/browser/mui/rpc/inputs/MuiTextInputView";
 import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
-import { Lang } from "@dabsi/lang/Lang";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { AclConnection } from "@dabsi/system/acl/AclRpc";
 import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
@@ -19,7 +18,7 @@ WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
   useSystemView(props.connection.input.map.password.$widget, props => (
     <MuiTextInputView
       {...props}
-      title={Lang`PASSWORD`}
+      title={lang`PASSWORD`}
       TextFieldProps={{
         type: "password",
       }}
@@ -28,7 +27,7 @@ WidgetRouterView(AclLoginRouter, AclConnection.login, props => {
 
   return (
     <PaperInCenter>
-      <Typography variant={"h6"}>{Lang`LOGIN`}</Typography>
+      <Typography variant={"h6"}>{lang`LOGIN`}</Typography>
       <MuiFormView
         {...props}
         onSubmit={result => {

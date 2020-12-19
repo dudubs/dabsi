@@ -3,7 +3,7 @@ import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { User } from "@dabsi/system/acl/entities/AclUser";
 
 // TODO: Resource
-@Entity({ name: "session" })
+@Entity({ name: "system/session" })
 export class Session {
   @PrimaryGeneratedColumn()
   id: number;
@@ -17,3 +17,5 @@ export class Session {
   @ManyToOne(() => User)
   user?: DataRelation<User>;
 }
+
+export default Session;

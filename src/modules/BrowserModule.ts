@@ -197,7 +197,7 @@ export default class BrowserModule {
       this.mainProjectPlatform.generatedIndexFileName,
       `import "${this.projectManager.mainProject.tsConfigInfo.resolvePath(
         this.mainProjectPlatform.generatedDir,
-        path.join(DABSI_SRC_PATH, "common/register.ts")
+        path.join(DABSI_SRC_PATH, "browser/register.ts")
       )}";\n${indexFileCode}`
     );
   }

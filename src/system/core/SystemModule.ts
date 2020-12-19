@@ -1,3 +1,4 @@
+import colors from "colors/safe";
 import catchError from "@dabsi/common/async/catchError";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
@@ -123,7 +124,7 @@ export class SystemModule {
           const { path, payload } = req.body;
 
           log.info(
-            i =>
+            () =>
               `${(path as any[])
                 .toSeq()
                 .map(path =>
@@ -131,6 +132,8 @@ export class SystemModule {
                 )
                 .join("/")}`
           );
+
+          log.trace(() => colors.gray(JSON.stringify(payload)));
 
           const config = catchError(
             ResolveError,

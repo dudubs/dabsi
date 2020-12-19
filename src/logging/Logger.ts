@@ -1,7 +1,6 @@
-import colors from "colors/safe";
-import { entries } from "@dabsi/common/object/entries";
 import { values } from "@dabsi/common/object/values";
 import { inspect } from "@dabsi/logging/inspect";
+import colors from "colors/safe";
 
 export type LogFn = {
   (callback): void;

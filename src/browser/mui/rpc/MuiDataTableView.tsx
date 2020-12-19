@@ -17,8 +17,7 @@ import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { Lang } from "@dabsi/lang/Lang";
-import { LangKey } from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/lang/LangKey";
 import { Renderer } from "@dabsi/react/renderer";
 import { mergeRefs } from "@dabsi/react/utils/mergeRefs";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
@@ -151,7 +150,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
 
   onEditClick &&
     (actions.edit = {
-      title: Lang`EDIT`,
+      title: lang`EDIT`,
       icon: <EditIcon />,
       onClick: onEditClick,
     });
@@ -248,7 +247,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
               {column.props.renderHeadColumn ? (
                 column.props.renderHeadColumn({ table })
               ) : (
-                <LangKey for={column.key}>{column.props.title}</LangKey>
+                <LangKey token={column.key}>{column.props.title}</LangKey>
               )}
             </>
           );
@@ -335,7 +334,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
             table.isLoading && (
               <TableRow>
                 <TableCell colSpan={1000} align={"center"}>
-                  {Lang`LOADING_IN_PROGRESS`}
+                  {lang`LOADING_IN_PROGRESS`}
                 </TableCell>
               </TableRow>
             )
@@ -346,7 +345,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
           return (
             <TableRow>
               <TableCell colSpan={1000} align={"center"}>
-                {Lang`NO_HAVE_MORE_ROWS`}
+                {lang`NO_HAVE_MORE_ROWS`}
               </TableCell>
             </TableRow>
           );

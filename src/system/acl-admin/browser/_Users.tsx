@@ -1,7 +1,6 @@
 import { MuiDataInputMapView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputMapView";
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
-import { Lang } from "@dabsi/lang/Lang";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import AclAdminRouter from "@dabsi/system/acl-admin/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl-admin/AclAdminRpc";
@@ -27,7 +26,7 @@ WidgetRouterView(
     return (
       <MuiDataTableView
         {...props}
-        title={Lang`USERS`}
+        title={lang`USERS`}
         onEditClick={async event => {
           console.log({ event });
           location.parent.at("editUser", { userId: event.row.$key }).push();
@@ -40,7 +39,7 @@ WidgetRouterView(
                 onClick={() => {
                   location.parent.at("createNewUser").push();
                 }}
-              >{Lang`CREATE_NEW_USER`}</Button>
+              >{lang`CREATE_NEW_USER`}</Button>
             </>
           ),
         }}
@@ -69,7 +68,7 @@ WidgetRouterView(
 
     return (
       <MuiSystemPage
-        title={Lang`CREATE_NEW_USER`}
+        title={lang`CREATE_NEW_USER`}
         Breadcrumbs={AclBreadcrumbs.Users}
       >
         <SystemView {...props} />
@@ -116,7 +115,7 @@ WidgetRouterView(
 
     return (
       <MuiSystemPage
-        title={Lang`EDIT_USER`}
+        title={lang`EDIT_USER`}
         breadcrumbTitle={title}
         Breadcrumbs={AclBreadcrumbs.Users}
       >

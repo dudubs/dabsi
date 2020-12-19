@@ -1,3 +1,7 @@
+import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
+import { Override } from "@dabsi/common/typings2/Override";
+import { updateRef } from "@dabsi/react/HookRef";
+import { partialProps } from "@dabsi/react/utils/partialProps";
 import Button, { ButtonProps } from "@material-ui/core/Button";
 import IconButton, { IconButtonProps } from "@material-ui/core/IconButton";
 import Tooltip, { TooltipProps } from "@material-ui/core/Tooltip";
@@ -10,11 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Override } from "@dabsi/common/typings2/Override";
-import { Lang } from "@dabsi/lang/Lang";
-import { updateRef } from "@dabsi/react/HookRef";
-import { partialProps } from "@dabsi/react/utils/partialProps";
-import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
 
 export type MuiButtonProps<P = {}> =
   | Override<ButtonProps, BaseProps & P>
@@ -118,35 +117,35 @@ export function MuiButton(props: MuiButtonProps) {
 
 export const MuiCancelButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Cancel"),
-  title: Lang`CANCEL`,
+  title: lang`CANCEL`,
 });
 
 export const MuiConfirmButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Done"),
-  title: Lang`CONFIRM`,
+  title: lang`CONFIRM`,
 });
 
 export const MuiResetButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Clear"),
-  title: Lang`RESET`,
+  title: lang`RESET`,
 });
 
 export const MuiCloseButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Close"),
-  title: Lang`CLOSE`,
+  title: lang`CLOSE`,
 });
 
 export const MuiAddButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Add"),
-  title: Lang`ADD`,
+  title: lang`ADD`,
 });
 
 export const MuiSubmitButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Send"),
-  title: Lang`Submit`,
+  title: lang`Submit`,
 });
 
 export const MuiEditButton = partialProps(MuiButton, {
   icon: require("@material-ui/icons/Edit"),
-  title: Lang`EDIT`,
+  title: lang`EDIT`,
 });

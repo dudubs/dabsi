@@ -2,7 +2,7 @@ import { BasedType } from "@dabsi/typedata/BaseType";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { BasedDataSource, DataSource } from "@dabsi/typedata/DataSource";
 import { generateSessionToken } from "@dabsi/system-old/server/acl/generateSessionToken";
-import { Session } from "@dabsi/system/core/entities/Session";
+import { Session } from "@dabsi/system/core/entities/SystemSession";
 
 export async function getSession<T extends BasedType<Session>>({
   cookie,

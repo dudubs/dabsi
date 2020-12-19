@@ -29,10 +29,9 @@ export class DataTableView<
 > {
   protected reloadDebounce = Debounce(500);
 
-  @ViewState("reloadWithDebounce") searchText: string =
-    this.elementState?.query.text || "";
-  @ViewState("reload") pageSize;
-  @ViewState("reload") pageIndex = this.elementState?.query.pageIndex || 0;
+  @ViewState() searchText: string = this.elementState?.query.text || "";
+  @ViewState() pageSize;
+  @ViewState() pageIndex = this.elementState?.query.pageIndex || 0;
 
   @ViewState() totalRows: number;
   @ViewState() rows: WidgetType<C>["Types"]["RowWithKey"][];
@@ -46,6 +45,7 @@ export class DataTableView<
     this.totalRows = element.totalRows ?? 0;
     this.pageSize =
       this.elementState?.query?.pageSize || element.pageSize || 10;
+    this.reload();
   }
 
   @ViewState() columns: Record<
@@ -62,6 +62,7 @@ export class DataTableView<
 
   setPageIndex(pageIndex: number) {
     this.pageIndex = Math.min(this.lastPage - 1, pageIndex);
+    this.reload();
   }
 
   setRelativePage(count: number) {
@@ -75,10 +76,15 @@ export class DataTableView<
   async search(text: string) {
     this.searchText = text;
     this.pageIndex = 0;
+    this.reloadWithDebounce();
   }
 
   clearSearch() {
     this.searchText = "";
+  }
+  componentDidMount() {
+    super.componentDidMount();
+    console.log("int");
   }
 
   protected _toggleSortOrNulls<K extends "sort" | "nulls">(
@@ -146,6 +152,7 @@ export class DataTableView<
       this.totalRows = totalRows;
     }
     this.rows = rows;
+
     this.isLoading = false;
   }
 

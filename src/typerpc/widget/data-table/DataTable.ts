@@ -26,7 +26,10 @@ type _ColumnTypes<
     undefined
   >
 > = {
-  ColumnLoader: ((row: DataRow<T["Data"]>) => any) | NonRelationKeys<T["Data"]>;
+  ColumnLoader:
+    | ((row: DataRow<T["Data"]>) => any)
+    | NonRelationKeys<T["Data"]>
+    | DataExp<T["Data"]>;
 
   ColumnConfig:
     | _ColumnTypes<T>["ColumnLoader"]

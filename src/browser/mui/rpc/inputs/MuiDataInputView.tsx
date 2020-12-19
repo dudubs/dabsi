@@ -1,7 +1,5 @@
 import { MuiLink } from "@dabsi/browser/mui/components/MuiLink";
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
-import { Lang, LangNode } from "@dabsi/lang/Lang";
-import { useLangTranslator } from "@dabsi/lang/LangTranslator";
 import { AnyDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
 import { DataInputView } from "@dabsi/typerpc/input/data-input/DataInputView";
 import { InputViewProps } from "@dabsi/typerpc/input/InputView";
@@ -24,14 +22,13 @@ export const useStyles = makeStyles(theme => ({}));
 export type MuiDataInputViewProps<
   C extends AnyDataInputConnection
 > = InputViewProps<C> & {
-  title?: LangNode;
+  title?: React.ReactNode;
 };
 
 // TODO: Load the firsts rows
 export function MuiDataInputView<C extends AnyDataInputConnection>(
   props: MuiDataInputViewProps<C>
 ) {
-  const lang = useLangTranslator();
   const inputRef = useRef<DataInputView<C>>(null);
   const [isOpen, setOpen] = useState(false);
   const [queryResult, setQueryResult] = useState<
@@ -77,7 +74,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                     {...params}
                     error={!!view.error}
                     helperText={view.renderError()}
-                    label={lang.translateNode(props.title)}
+                    label={props.title}
                   />
                 )}
               />
@@ -90,7 +87,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
         <Dialog open onClose={() => setOpen(false)}>
           <DialogContent>
             <DialogTitle>
-              {Lang`PICK_${"subject"}`({
+              {lang`PICK_${"subject"}`({
                 subject: props.title,
               })}
             </DialogTitle>
@@ -102,7 +99,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                   {...props}
                   actions={{
                     pick: {
-                      title: Lang`PICK`,
+                      title: lang`PICK`,
                       icon: require("@material-ui/icons/KeyboardReturn"),
                       onClick: event => {
                         setQueryResult(undefined);
@@ -113,12 +110,12 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                   }}
                   columns={{
                     label: {
-                      title: Lang`ACCOUNT_FULL_NAME`,
-                      renderRow: (data, props) => (
+                      title: lang`ACCOUNT_FULL_NAME`,
+                      renderRowColumn: ({ row, data }) => (
                         <MuiLink
                           onClick={() => {
                             setQueryResult(undefined);
-                            inputRef.current!.setValue(props.row);
+                            inputRef.current!.setValue(row);
                             setOpen(false);
                           }}
                         >

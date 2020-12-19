@@ -4,7 +4,7 @@ import * as React from "react";
 import { ReactElement, ReactNode } from "react";
 import { entries } from "@dabsi/common/object/entries";
 import { keys } from "@dabsi/common/object/keys";
-import { LangKey } from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/lang/LangKey";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { Renderer } from "@dabsi/react/renderer";
 import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
@@ -85,7 +85,7 @@ export function MuiTabsWidgetView<C extends AnyTabsWidgetConnection>(
               key={tabKey}
               {...TabProps}
               {...(isSelected ? SelectedTabProps : null)}
-              label={<LangKey for={tabKey}>{tabOptions?.title}</LangKey>}
+              label={<LangKey token={tabKey}>{tabOptions?.title}</LangKey>}
               icon={MuiIcon(tabOptions?.icon)}
               value={tabKey}
             />

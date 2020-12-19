@@ -2,7 +2,6 @@ import Grid, { GridProps } from "@material-ui/core/Grid";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import React, { ReactNode } from "react";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { Lang } from "@dabsi/lang/Lang";
 import { SystemView } from "@dabsi/system/view/SystemView";
 import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 import {
@@ -25,7 +24,7 @@ export function MuiDataInputMapView<C extends RpcConnection<AnyDataInputMap>>({
   GridProps,
   itemGridProps,
   renderTarget = props => <SystemView {...props} />,
-  noKeysText = Lang`NO_KEYS`,
+  noKeysText = lang`NO_KEYS`,
   noKeysTypographyProps,
   ...props
 }: MuiDataInputMapViewProps<C>) {

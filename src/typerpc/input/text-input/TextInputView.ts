@@ -1,15 +1,20 @@
 import { ReactElement } from "react";
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { Lang } from "@dabsi/lang/Lang";
 import { ViewState } from "@dabsi/react/view/ViewState";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
 import { InputError, InputValueElement } from "@dabsi/typerpc/input/Input";
-import { InputErrorElementMap, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import {
+  InputErrorElementMap,
+  InputViewProps,
+} from "@dabsi/typerpc/input/InputView";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { TextInputLoader, TextLoaderOptions } from "@dabsi/typerpc/input/text-input/TextInputLoader";
+import {
+  TextInputLoader,
+  TextLoaderOptions,
+} from "@dabsi/typerpc/input/text-input/TextInputLoader";
 
 export type TextInputViewProps<
   C extends RpcConnection<TextInput>
@@ -72,10 +77,10 @@ export class TextInputView<
 
   protected getErrorElementMap(): InputErrorElementMap<TextInput> {
     return {
-      INVALID_PATTERN: Lang`EXPECTED_TO_PATTERN_${"pattern"}`,
-      REQUIRED: Lang`REQUIRED`,
-      MAX_LENGTH: Lang`REQUIRED_MAXIMUM_${"maxLength"}`,
-      MIN_LENGTH: Lang`REQUIRED_MINIMUM_${"minLength"}`,
+      INVALID_PATTERN: lang`EXPECTED_TO_PATTERN_${"pattern"}`,
+      REQUIRED: lang`REQUIRED`,
+      MAX_LENGTH: lang`REQUIRED_MAXIMUM_${"maxLength"}`,
+      MIN_LENGTH: lang`REQUIRED_MINIMUM_${"minLength"}`,
     };
   }
 

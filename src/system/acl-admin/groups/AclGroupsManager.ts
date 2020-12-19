@@ -6,6 +6,7 @@ import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 export default DataManager({
   table: DataTable({
     groupName: String,
+    countUsers: Number,
   }),
   addInput: AclGroupBasicInfoInput,
   edit: AclEditGroup,

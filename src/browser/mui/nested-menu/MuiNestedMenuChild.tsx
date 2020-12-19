@@ -11,7 +11,8 @@ import React, { ReactElement } from "react";
 import { flat } from "@dabsi/common/iterator/flat";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { LangKey } from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/lang/LangKey";
+
 import { Store } from "@dabsi/store";
 import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
 import {
@@ -61,7 +62,7 @@ export function MuiNestedMenuChild<T>({
 
   const isOpen = depth === 0 ? true : state.currentPath[depth]?.child === child;
 
-  const title = <LangKey for={key}>{menuProps.getChildTitle(child)}</LangKey>;
+  const title = <LangKey token={key}>{menuProps.getChildTitle(child)}</LangKey>;
 
   const children = menuProps.getChildren(child);
 

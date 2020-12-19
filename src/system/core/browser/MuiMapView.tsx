@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { LangKey } from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/lang/LangKey";
 import { Renderer } from "@dabsi/react/renderer";
 import { RendererOrProps } from "@dabsi/react/RendererOrProps";
 import { State } from "@dabsi/react/State";
@@ -115,7 +115,7 @@ export function MuiMapView<P extends WidgetViewProps<any>>(
         >
           <AccordionSummary>
             <Typography {...titleTypographyProps}>
-              <LangKey for={key}>{title}</LangKey>
+              <LangKey token={key}>{title}</LangKey>
             </Typography>
           </AccordionSummary>
           <AccordionDetails>{details}</AccordionDetails>

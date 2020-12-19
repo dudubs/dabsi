@@ -1,4 +1,4 @@
-import { Session } from "@dabsi/system/core/entities/Session";
+import { Session } from "@dabsi/system/core/entities/SystemSession";
 import { DbModule } from "@dabsi/system/core/DbModule";
 import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
 import { DataRow } from "@dabsi/typedata/DataRow";

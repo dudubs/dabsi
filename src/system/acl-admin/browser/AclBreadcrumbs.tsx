@@ -1,14 +1,13 @@
 import { Breadcrumbs } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
 import React from "react";
-import { Lang } from "@dabsi/lang/Lang";
 import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 import AclAdminRouter from "@dabsi/system/acl-admin/AclAdminRouter";
 
 export function AclBreadcrumbs({ children }) {
   return (
     <Breadcrumbs>
-      <Typography>{Lang`ACL`}</Typography>
+      <Typography>{lang`ACL`}</Typography>
       {children}
     </Breadcrumbs>
   );
@@ -19,7 +18,7 @@ AclBreadcrumbs.Groups = ({ children }) => {
     <AclBreadcrumbs>
       <MuiRouterLink
         router={() => AclAdminRouter.at("groups")}
-      >{Lang`GROUPS`}</MuiRouterLink>
+      >{lang`GROUPS`}</MuiRouterLink>
       {children}
     </AclBreadcrumbs>
   );
@@ -30,7 +29,7 @@ AclBreadcrumbs.Users = ({ children }) => {
     <AclBreadcrumbs>
       <MuiRouterLink
         router={() => AclAdminRouter.at("users")}
-      >{Lang`USERS`}</MuiRouterLink>
+      >{lang`USERS`}</MuiRouterLink>
       {children}
     </AclBreadcrumbs>
   );

@@ -1,6 +1,5 @@
 import { MuiButtonMenu } from "@dabsi/browser/mui/components/MuiButtonMenu";
 import { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu";
-import { Lang } from "@dabsi/lang/Lang";
 import { useEmitted } from "@dabsi/react/reactor/useEmitted";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { Store } from "@dabsi/store";
@@ -46,18 +45,18 @@ export function MuiAdminView(props: {
 
   if (loginInfo.type !== "success")
     return (
-      <PaperInCenter title={Lang`ACCESS_DENIED`}>
+      <PaperInCenter title={lang`ACCESS_DENIED`}>
         <Typography>
           <MuiRouterLink
             router={() => AclLoginRouter}
-          >{Lang`LOGIN`}</MuiRouterLink>
+          >{lang`LOGIN`}</MuiRouterLink>
         </Typography>
       </PaperInCenter>
     );
 
   return (
     <MuiTemplate
-      title={Lang`ADMIN`}
+      title={lang`ADMIN`}
       drawerMenu={
         <>
           <MuiNestedMenu

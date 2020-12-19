@@ -22,7 +22,12 @@ export default RpcConfigResolver(
       source: c.sources.groups,
 
       tableConfig: {
-        columns: { groupName: "name" },
+        columns: {
+          groupName: "name",
+          countUsers: {
+            load: { $count: "users" },
+          },
+        },
       },
       editConfigFactory: ($, group) =>
         $(c.getEditConfig(Group.provide(() => group))),

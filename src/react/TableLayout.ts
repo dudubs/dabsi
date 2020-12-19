@@ -6,6 +6,7 @@ type TableLayoutColumnProps<C> = {
   props: C;
   index: number;
 };
+
 type TableLayoutRowProps<D> = {
   key: string;
   data: D;
@@ -13,16 +14,21 @@ type TableLayoutRowProps<D> = {
 };
 type TableLayoutProps<T, C, D> = {
   columns: Record<string, C>;
+
   rows: T[];
+
   getRowKey: (row: T) => string;
+
   getRowData: (row: T) => D;
+
   renderColumn: (
     props: TableLayoutColumnProps<C>,
     children: ReactNode
   ) => ReactNode;
-  // TODO: rename to renderColumnTitle
+  // TODO: rename to renderHeadColumn
 
-  renderColumnTitle: (props: TableLayoutColumnProps<C>) => ReactNode;
+  renderHeadColumn: (props: TableLayoutColumnProps<C>) => ReactNode;
+
   renderRowColumn: (
     data: any,
     row: TableLayoutRowProps<D>,
@@ -36,13 +42,15 @@ type TableLayoutProps<T, C, D> = {
 };
 
 export function TableLayout<T, C, D>(props: TableLayoutProps<T, C, D>) {
-  const columns = mapObjectToArray(props.columns, (props, key, index) => {
-    return { props, key, index };
-  });
+  const columns = mapObjectToArray(props.columns, (props, key, index) => ({
+    props,
+    key,
+    index,
+  }));
 
   return props.render({
-    columns: columns.map((column) =>
-      props.renderColumn(column, props.renderColumnTitle(column))
+    columns: columns.map(column =>
+      props.renderColumn(column, props.renderHeadColumn(column))
     ),
     rows: props.rows.map((item, index) => {
       const row = {
@@ -52,12 +60,12 @@ export function TableLayout<T, C, D>(props: TableLayoutProps<T, C, D>) {
       };
       return props.renderRow(
         row,
-        columns.map((column) => {
-          return props.renderColumn(
+        columns.map(column =>
+          props.renderColumn(
             column,
             props.renderRowColumn(row.data[column.key], row, column, row.key)
-          );
-        })
+          )
+        )
       );
     }),
   });

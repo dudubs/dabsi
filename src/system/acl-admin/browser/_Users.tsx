@@ -2,7 +2,7 @@ import { MuiDataInputMapView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputM
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
 import { Lang } from "@dabsi/lang/Lang";
-import { mergeProp, mergeProps } from "@dabsi/react/utils/mergeProps";
+import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import AclAdminRouter from "@dabsi/system/acl-admin/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl-admin/AclAdminRpc";
 import { AclBreadcrumbs } from "@dabsi/system/acl-admin/browser/AclBreadcrumbs";
@@ -11,7 +11,6 @@ import { AclUserBasicInfoInput } from "@dabsi/system/acl-admin/users/inputs/Basi
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
-import { useMuiSystemViewTheme } from "@dabsi/system/core/browser/useMuiSystemViewTheme";
 import { SystemView } from "@dabsi/system/view/SystemView";
 import { useSystemView } from "@dabsi/system/view/useSystemView";
 import { useSystemViewTheme } from "@dabsi/system/view/useSystemViewTheme";
@@ -30,7 +29,8 @@ WidgetRouterView(
         {...props}
         title={Lang`USERS`}
         onEditClick={async event => {
-          location.parent.at("editUser", { userId: event.key }).push();
+          console.log({ event });
+          location.parent.at("editUser", { userId: event.row.$key }).push();
         }}
         MuiTableToolbarProps={{
           staticActions: (

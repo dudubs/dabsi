@@ -3,21 +3,24 @@ import {
   MuiButtonProps,
 } from "@dabsi/browser/mui/components/MuiButton";
 import { MuiDeleteButton } from "@dabsi/browser/mui/components/MuiDeleteButton";
+import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
 import {
   MuiTableCell,
-  MuiTableColumnProps,
+  MuiTableCellProps,
 } from "@dabsi/browser/mui/components/MuiTableCell";
 import {
   MuiTableToolbar,
   MuiTableToolbarProps,
 } from "@dabsi/browser/mui/components/MuiTableToolbar";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { Lang } from "@dabsi/lang/Lang";
 import { LangKey } from "@dabsi/lang/LangKey";
-import { TableLayout } from "@dabsi/react/TableLayout";
+import { Renderer } from "@dabsi/react/renderer";
+import { mergeRefs } from "@dabsi/react/utils/mergeRefs";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import {
@@ -43,30 +46,36 @@ type MuiDataTableViewColumnProps<
   RowColumn,
   Row
 > = {
-  MuiTableColumnProps?: MuiTableColumnProps;
+  MuiTableCellProps?: MuiTableCellProps;
   title?: ReactNode;
-  renderRowColumn?(
-    data: RowColumn,
-    props: {
-      key: string;
-      row: WidgetType<C>["Types"]["RowWithKey"];
-    }
-  ): ReactNode;
+  renderHeadColumn?(props: { table: DataTableView<C> }): ReactElement;
+  renderRowColumn?(props: RowCellProps<C>);
+};
+
+export type RowCellProps<C extends RpcConnection<AnyDataTable>> = {
+  row: WidgetType<C>["Types"]["RowWithKey"];
+  column;
+  rowIndex;
+  data;
 };
 
 type MuiDataTableActionEvent<C extends RpcConnection<AnyDataTable>> = {
   row: WidgetType<C>["Types"]["RowWithKey"];
-  key: string;
   table: Readonly<DataTableView<C>>;
 };
 
 export type MuiDataTableViewProps<
   C extends RpcConnection<AnyDataTable>,
-  Row = WidgetType<C>["Types"]["Row"]
+  Row = WidgetType<C>["TDataTable"]["Row"]
 > = DataTableViewProps<C> & {
   TableProps?: TableProps;
+
+  tableRef?: React.Ref<DataTableView<C>>;
+
   TableHeadProps?: TableHeadProps;
+
   TableBodyProps?: TableBodyProps;
+
   TableFooterProps?: TableFooterProps;
 
   disableToolbar?: boolean;
@@ -78,6 +87,11 @@ export type MuiDataTableViewProps<
     MuiButtonProps<{
       onClick(props: { table: Readonly<DataTableView<C>> });
     }>
+  >;
+
+  renderRow?: Renderer<
+    { row; rowIndex; children: ReactElement },
+    [component: typeof TableRow]
   >;
 
   columns?: PartialUndefinedKeys<
@@ -119,11 +133,14 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
     onDeleteClick,
     onEditClick,
     actions,
-    columns,
+    columns: columnPropsMap,
     MuiTableToolbarProps,
     MuiDeleteButtonProps,
     toolbarActions = {},
     disableToolbar,
+    renderRow: rowRenderer = ({ children, key }) => (
+      <TableRow key={key}>{children}</TableRow>
+    ),
     title = MuiTableToolbarProps?.title,
     ...nextProps
   } = props as MuiDataTableViewProps<RpcConnection<AnyDataTable>>;
@@ -147,33 +164,129 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
       },
       onClick: async event => {
         await onDeleteClick!(event);
-        await tableRef.current!.reloadAfterRemove(event.key);
+        await tableRef.current!.reloadAfterRemove(event.row.$key);
       },
     });
 
+  const columns = mapObject(props.element.columns, (element, key, index) => {
+    return { element, key, props: columnPropsMap?.[key] || {}, index };
+  });
+
+  type Column = typeof columns[string];
+  type RowCell = { column: Column; row; rowIndex: number; data };
+
+  const hasActions = hasKeys(actions);
   return (
-    <DataTableView {...nextProps} ref={tableRef}>
-      {table => (
-        <TableLayout<{ $key: string }, { sortable: boolean }, any>
-          getRowKey={row => row.$key}
-          getRowData={row => row}
-          rows={table.rows}
-          columns={table.element?.columns || {}}
-          renderColumnTitle={column => (
-            <LangKey for={column.key}>{columns?.[column.key]?.title}</LangKey>
-          )}
-          renderColumn={(column, children) => (
-            <TableCell
-              key={column.key}
-              {...columns?.[column.key]?.MuiTableColumnProps}
-            >
-              {children}
-            </TableCell>
-          )}
-          renderRow={(row, children) => (
-            <TableRow key={row.key}>
-              {children}
-              {hasKeys(actions) && (
+    <DataTableView {...nextProps} ref={mergeRefs(props.tableRef, tableRef)}>
+      {table => {
+        return (
+          <MuiGrid direction="column">
+            <div>{renderToolbar()}</div>
+            <div>
+              <Table {...TableProps}>
+                {renderHead()}
+                {renderBody()}
+                {renderFooter()}
+              </Table>
+            </div>
+          </MuiGrid>
+        );
+
+        function renderToolbar() {
+          return (
+            !disableToolbar && (
+              <MuiTableToolbar
+                title={title}
+                {...MuiTableToolbarProps}
+                search={
+                  !table.element?.searchable
+                    ? undefined
+                    : {
+                        text: table.searchText,
+                        onSearch: async text => {
+                          table.search(text);
+                        },
+                      }
+                }
+                staticActions={
+                  <>
+                    {MuiTableToolbarProps?.staticActions}
+                    {mapObjectToArray(toolbarActions, (props, key) => (
+                      <MuiButton
+                        iconOnly
+                        key={key}
+                        {...props}
+                        onClick={() => {
+                          props.onClick?.({ table });
+                        }}
+                      />
+                    ))}
+                  </>
+                }
+              />
+            )
+          );
+        }
+
+        function renderHead() {
+          return (
+            <TableHead {...TableHeadProps}>
+              {!table.isLoading && (
+                <TableRow>
+                  {mapObjectToArray(columns, renderHeadCell)}
+                  {hasActions && <MuiTableCell fitToContent />}
+                </TableRow>
+              )}
+            </TableHead>
+          );
+        }
+
+        function renderHeadCell(column: Column): ReactNode {
+          return renderColumn(
+            column,
+            <>
+              {column.props.renderHeadColumn ? (
+                column.props.renderHeadColumn({ table })
+              ) : (
+                <LangKey for={column.key}>{column.props.title}</LangKey>
+              )}
+            </>
+          );
+        }
+
+        function renderBody() {
+          return (
+            <TableBody {...TableBodyProps}>
+              {renderLoadingRow()}
+              {table.rows.length ? table.rows.map(renderRow) : renderNoRows()}
+            </TableBody>
+          );
+
+          function renderRow(row, rowIndex) {
+            return rowRenderer(
+              {
+                key: row.$key,
+                rowIndex,
+                row,
+                children: (
+                  <>
+                    {mapObjectToArray(columns, column =>
+                      renderRowCell({
+                        column,
+                        row,
+                        rowIndex,
+                        data: row[column.key],
+                      })
+                    )}
+                    {hasActions && renderActions()}
+                  </>
+                ),
+              },
+              TableRow
+            );
+
+            function renderActions() {
+              return (
                 <MuiTableCell fitToContent>
                   {mapObjectToArray(
                     actions!,
@@ -186,8 +299,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                           {...IconButtonProps}
                           onClick={async () => {
                             onClick?.({
-                              row: row.data,
-                              key: row.key,
+                              row: row,
                               table,
                             });
                           }}
@@ -198,100 +310,76 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                     }
                   )}
                 </MuiTableCell>
-              )}
+              );
+            }
+          }
+
+          function renderRowCell(props: RowCellProps<any>): ReactNode {
+            const {
+              column,
+              data,
+              column: {
+                props: { renderRowColumn },
+              },
+            } = props;
+
+            return renderColumn(
+              column,
+              renderRowColumn ? renderRowColumn(props) : <>{String(data)}</>
+            );
+          }
+        }
+
+        function renderLoadingRow() {
+          return (
+            table.isLoading && (
+              <TableRow>
+                <TableCell colSpan={1000} align={"center"}>
+                  {Lang`LOADING_IN_PROGRESS`}
+                </TableCell>
+              </TableRow>
+            )
+          );
+        }
+
+        function renderNoRows() {
+          return (
+            <TableRow>
+              <TableCell colSpan={1000} align={"center"}>
+                {Lang`NO_HAVE_MORE_ROWS`}
+              </TableCell>
             </TableRow>
-          )}
-          renderRowColumn={(data, row, column) => {
-            const { renderRowColumn } = columns?.[column.key] || {};
+          );
+        }
 
-            if (renderRowColumn)
-              return renderRowColumn(data, {
-                key: row.key,
-                row: row.data,
-              });
-            return String(data);
-          }}
-          render={({ columns, rows }) => (
-            <>
-              {!disableToolbar && (
-                <MuiTableToolbar
-                  title={title}
-                  {...MuiTableToolbarProps}
-                  search={
-                    !table.element?.searchable
-                      ? undefined
-                      : {
-                          text: table.searchText,
-                          onSearch: async text => {
-                            table.search(text);
-                          },
-                        }
-                  }
-                  staticActions={
-                    <>
-                      {MuiTableToolbarProps?.staticActions}
-                      {mapObjectToArray(toolbarActions, (props, key) => (
-                        <MuiButton
-                          iconOnly
-                          key={key}
-                          {...props}
-                          onClick={() => {
-                            props.onClick?.({ table });
-                          }}
-                        />
-                      ))}
-                    </>
-                  }
+        function renderFooter() {
+          return (
+            <TableFooter {...TableFooterProps}>
+              <TableRow>
+                <TablePagination
+                  count={table.pageSize}
+                  page={table.pageIndex}
+                  rowsPerPage={table.pageSize}
+                  onChangeRowsPerPage={event => {
+                    table.setPageSize(parseInt(event.target.value));
+                  }}
+                  onChangePage={(event, page) => {
+                    table.setPageIndex(page);
+                  }}
                 />
-              )}
-              <Table {...TableProps}>
-                <TableHead {...TableHeadProps}>
-                  {!table.isLoading && (
-                    <TableRow>
-                      {columns}
-                      {hasKeys(actions) && <MuiTableCell fitToContent />}
-                    </TableRow>
-                  )}
-                </TableHead>
-                <TableBody {...TableBodyProps}>
-                  {table.isLoading && (
-                    <TableRow>
-                      <TableCell colSpan={1000} align={"center"}>
-                        {Lang`LOADING_IN_PROGRESS`}
-                      </TableCell>
-                    </TableRow>
-                  )}
+              </TableRow>
+            </TableFooter>
+          );
+        }
 
-                  {rows.length ? (
-                    rows
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={1000} align={"center"}>
-                        {Lang`NO_HAVE_MORE_ROWS`}
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-                <TableFooter {...TableFooterProps}>
-                  <TableRow>
-                    <TablePagination
-                      count={table.pageSize}
-                      page={table.pageIndex}
-                      rowsPerPage={table.pageSize}
-                      onChangeRowsPerPage={event => {
-                        table.setPageSize(parseInt(event.target.value));
-                      }}
-                      onChangePage={(event, page) => {
-                        table.setPageIndex(page);
-                      }}
-                    />
-                  </TableRow>
-                </TableFooter>
-              </Table>
-            </>
-          )}
-        />
-      )}
+        function renderColumn(column: Column, children) {
+          return (
+            <MuiTableCell {...column.props.MuiTableCellProps} key={column.key}>
+              {children}
+            </MuiTableCell>
+          );
+        }
+      }}
     </DataTableView>
   );
 }

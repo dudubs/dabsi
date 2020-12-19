@@ -22,7 +22,7 @@ export default RpcConfigResolver(
       editConfigFactory: ($, user) =>
         $(c.getEditConfig(User.provide(() => user))),
 
-      tableConfig: undefined,
+      tableConfig: {},
 
       addInputConfig: {
         loginName: {

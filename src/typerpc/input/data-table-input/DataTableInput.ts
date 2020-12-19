@@ -1,68 +1,106 @@
-import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { DataTableTypes } from "./../../widget/data-table/DataTable";
-import { isValidElement } from "react";
-import { Override } from "@dabsi/common/typings2/Override";
-import { WidgetType } from "./../../widget/Widget";
-import {
-  AnyDataTable,
-  DataTable,
-  DataTableType,
-  DataTableTypes,
-} from "@dabsi/typerpc/widget/data-table/DataTable";
-import {
-  AnyInput,
-  Input,
-  InputValue,
-  InputValueConfig,
-  InputValueData,
-  InputValueElement,
-} from "./../Input";
+// import { Expect } from "@dabsi/common/typings2/Expect";
+// import { Override } from "@dabsi/common/typings2/Override";
+// import { DataTableInputHandler } from "@dabsi/typerpc/input/data-table-input/DataTableInputHandler";
+// import { InputValue } from "@dabsi/typerpc/input/Input";
+// import {
+//   AnyDataTable,
+//   DataTable,
+//   DataTableType,
+// } from "@dabsi/typerpc/widget/data-table/DataTable";
+// import { DataRow } from "./../../../typedata/DataRow";
+// import { PartialConfigKeys } from "./../../Config";
+// import { GenericConfig } from "./../../GenericConfig";
+// import { RpcUnresolvedConfig } from "./../../Rpc";
+// import { DataTableTypes } from "./../../widget/data-table/DataTable";
+// import {
+//   AnyInput,
+//   Input,
+//   InputValueConfig,
+//   InputValueData,
+//   InputValueElement,
+// } from "./../Input";
 
-type TDataTableInput = {
-  Data: any;
-  Table: AnyDataTable;
-  Target: AnyInput;
-};
+// type TDataTableInput = {
+//   Data: any;
+//   Table: AnyDataTable;
+//   Target: AnyInput;
+// };
 
-interface _Types<T extends TDataTableInput> {
-  Table: DataTable<
-    Override<
-      DataTableType<T["Table"]>,
-      {
-        Data: T["Data"];
-        Row: DataTableType<T["Table"]>["Row"] & {
-          $value: InputValueElement<T["Target"]>;
-        };
-      }
-    >
-  >;
+// interface _Types<T extends TDataTableInput> {
+//   Table: DataTable<
+//     Override<
+//       DataTableType<T["Table"]>,
+//       {
+//         Data: T["Data"];
+//         Row: DataTableType<T["Table"]>["Row"] & {
+//           $value: InputValueElement<T["Target"]>;
+//         };
+//       }
+//     >
+//   >;
 
-  TableTypes: DataTableTypes<DataTableType<_Types<T>["Table"]>>;
-}
+//   TableTypes: DataTableTypes<DataTableType<_Types<T>["Table"]>>;
 
-type DataTableInput<T extends TDataTableInput> = Input<{
-  ValueData: Record<string, InputValueData<T["Target"]>>;
+//   OptionalConfig: {
+//     targetConfig: RpcUnresolvedConfig<T["Target"]>;
+//   };
 
-  ValueConfig: Record<string, InputValueConfig<T["Target"]>>;
+//   RequiredConfig: {
+//     tableConfig: RpcUnresolvedConfig<_Types<T>["Table"]>;
+//     getRowValue: (row: DataRow<T["Data"]>) => InputValue<T["Target"]>;
+//   };
 
-  Value: Record<string, InputValue<T["Target"]>>;
+//   Config: PartialConfigKeys<_Types<T>>;
+// }
 
-  ValueElement;
+// export type DataTableInput<T extends TDataTableInput> = Input<{
+//   ValueData: Record<string, InputValueData<T["Target"]>>;
 
-  Controller: {};
+//   ValueConfig: Record<string, InputValueConfig<T["Target"]>>;
 
-  Props: {};
+//   Value: Record<string, InputValue<T["Target"]>>;
 
-  Config: {};
+//   ValueElement: Record<string, InputValueElement<T["Target"]>>;
 
-  Element: {};
+//   Controller: {};
 
-  Error: never;
-}>;
+//   Props: {};
 
-declare function DataTableInput<
-  T extends {
-    table: AnyDataTable;
-    target: AnyInput;
-  }
->(options: T);
+//   Config: GenericConfig<{
+//     <Data>(
+//       config: _Types<Override<T, { Data: Data }>>["Config"]
+//     ): _Types<T>["Config"];
+//   }>;
+
+//   Element: {};
+
+//   Error: never;
+// }>;
+
+// export type TOptions = {
+//   table: AnyDataTable;
+//   target: AnyInput;
+// };
+
+// type TFromOptions<T extends TOptions> = Expect<
+//   TDataTableInput,
+//   {
+//     Data: any;
+//     Table: T["table"];
+//     Target: T["target"];
+//   }
+// >;
+
+// export type AnyDataTableInput = DataTableInput<TDataTableInput>;
+
+// export function DataTableInput<T extends TOptions>(
+//   options: T
+// ): DataTableInput<TFromOptions<T>> {
+//   const { table, target } = options as TOptions;
+//   return <any>Input<AnyDataTableInput>({
+//     handler: DataTableInputHandler as any,
+//     getValueDataFromElement() {
+//       return {};
+//     },
+//   });
+// }

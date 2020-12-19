@@ -4,6 +4,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { createElement } from "react";
 import { Override } from "@dabsi/common/typings2/Override";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import clsx from "clsx";
 
 const useStyles = makeStyles({
   fitToContent: {
@@ -12,19 +13,19 @@ const useStyles = makeStyles({
   },
 });
 
-export type MuiTableColumnProps = Override<
+export type MuiTableCellProps = Override<
   TableCellProps,
   {
     fitToContent?: boolean;
   }
 >;
 
-export function MuiTableCell({ fitToContent, ...props }: MuiTableColumnProps) {
+export function MuiTableCell({ fitToContent, ...props }: MuiTableCellProps) {
   const classes = useStyles();
-  return createElement(
-    TableCell,
-    mergeProps(props, {
-      className: classes.fitToContent,
-    })
-  );
+  return createElement(TableCell, {
+    ...props,
+    className: clsx({
+      [classes.fitToContent]: fitToContent,
+    }),
+  });
 }

@@ -1,11 +1,7 @@
-import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
-import { PartialConfigKeys } from "./../Config";
 import { Rejectable } from "@dabsi/common/async/Rejectable";
 import { ExtractDefault } from "@dabsi/common/typings2/boolean/index";
 import { Expect } from "@dabsi/common/typings2/Expect";
-import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
 import { Override } from "@dabsi/common/typings2/Override";
-import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource } from "@dabsi/typedata/DataSource";
 import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
@@ -21,6 +17,7 @@ import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
 import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { PartialConfigKeys } from "./../Config";
 import { DataTableOf } from "./../widget/data-table/DataTable";
 
 // Full<Type>Stack
@@ -48,22 +45,25 @@ interface _Types<T extends TDataManager> {
     Value: string;
     Input: T["AddInput"];
   }>;
-}
-export type DataManagerConfig2<T extends TDataManager> = PartialUndefinedKeys<
-  {
+
+  OptionalConfig: {
     addInputConfig: RpcUnresolvedConfig<T["AddInput"]>;
 
     editConfigFactory: ConfigFactory<
       RpcUnresolvedConfig<T["Edit"]>,
       [row: DataRow<T["Data"]>]
     >;
-  },
-  {
+  };
+  RequiredConfig: {
     source: DataSource<T["Data"]>;
-    tableConfig: UndefinedIfEmptyObject<_Types<T>["TableConfig"]>;
+
+    tableConfig: _Types<T>["TableConfig"];
 
     addSubmit: Rejectable<InputValue<T["AddInput"]>, string, T["AddError"]>;
-  }
+  };
+}
+export type DataManagerConfig2<T extends TDataManager> = PartialConfigKeys<
+  _Types<T>
 >;
 
 export type AnyDataManager = DataManager<TDataManager>;

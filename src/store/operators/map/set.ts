@@ -9,6 +9,11 @@ declare module "../../Store" {
 Store.prototype[op] = method;
 
 function method<T, K extends keyof T>(this: Store<T>, value: T): Store<T>;
+function method<K, V>(
+  this: Store<Map<K, V>>,
+  key: K,
+  value: V
+): Store<Map<K, V>>;
 function method<T, K extends keyof T>(
   this: Store<T>,
   key: K,

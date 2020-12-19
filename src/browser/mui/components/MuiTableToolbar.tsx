@@ -13,6 +13,8 @@ import { useLangTranslator } from "@dabsi/lang/LangTranslator";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
 import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
+import SearchIcon from "@material-ui/icons/Search";
+import CloseIcon from "@material-ui/icons/Close";
 
 const useStyles = makeStyles(theme => ({
   toolbar: {
@@ -48,8 +50,9 @@ export type MuiTableToolbarProps = MuiTableToolbarThemeProps & {
   search?: {
     text: string;
     onSearch?(text: string);
-    TextFieldProps?: Partial<TextFieldProps>;
   };
+
+  searchTextFieldProps?: TextFieldProps;
 
   title?: ReactNode;
 
@@ -79,97 +82,124 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
     props.title
   );
 
+  const titleElement = renderTitle();
+
+  const panelElement = (
+    <>
+      {props.countSelectedItems ? (
+        props.selectActions
+      ) : (
+        <Grid container alignItems="center">
+          {renderActions()}
+          {renderSearch()}
+        </Grid>
+      )}
+    </>
+  );
+
   return (
     <Toolbar
       {...mergeProps(props.ToolbarProps, {
         className: classes.toolbar,
       })}
     >
-      <Grid container>
-        <Grid item xs>
-          {title && (
-            <Typography variant="h5" {...titleTypographyProps}>
-              {title}
-            </Typography>
-          )}
+      {titleElement ? (
+        <Grid container>
+          {titleElement}
+          <Grid item>{panelElement}</Grid>
         </Grid>
-        <Grid item>
-          {props.countSelectedItems ? (
-            props.selectActions
-          ) : (
-            <Grid container alignItems="center">
-              {props.staticActions && (
-                <Grid item>
-                  <MuiThemeProvider theme={MuiStaticActionsTheme}>
-                    {props.staticActions}
-                  </MuiThemeProvider>
-                </Grid>
-              )}
-              {searchProps && (
-                <Grid item>
-                  <TextField
-                    value={searchText}
-                    placeholder={lang.translateNode(Lang`SEARCH`)}
-                    {...mergeProps(searchProps.TextFieldProps, {
-                      onChange: event => {
-                        const text = event.target.value;
-                        setSearchText(text || "");
-                        searchProps?.onSearch?.(text);
-                      },
-
-                      onBlur: () => {
-                        searchProps?.onSearch?.(searchText);
-                      },
-                      onKeyDown: event => {
-                        if (event.key === "Escape") {
-                          event.preventDefault();
-                          setSearchText("");
-                          searchProps?.onSearch?.("");
-                        }
-                      },
-                      onKeyPress: event => {
-                        // console.log({eventKey:event.key});
-
-                        switch (event.key) {
-                          case "Enter":
-                            searchProps?.onSearch?.(searchText);
-                            break;
-
-                          case "Escape":
-                            setSearchText("");
-                            break;
-                        }
-                      },
-                      InputProps: {
-                        endAdornment: (
-                          <InputAdornment position={"end"}>
-                            <Tooltip title={Lang`SEARCH`}>
-                              {MuiIcon("search")}
-                            </Tooltip>
-                          </InputAdornment>
-                        ),
-                        startAdornment: (
-                          <InputAdornment
-                            className={clsx({
-                              [classes.hidden]: !searchText,
-                            })}
-                            position={"start"}
-                            onClick={() => {
-                              setSearchText("");
-                            }}
-                          >
-                            {MuiIcon("close")}
-                          </InputAdornment>
-                        ),
-                      },
-                    })}
-                  />
-                </Grid>
-              )}
-            </Grid>
-          )}
-        </Grid>
-      </Grid>
+      ) : (
+        panelElement
+      )}
     </Toolbar>
   );
+
+  function renderTitle() {
+    return (
+      title && (
+        <Grid item xs>
+          <Typography variant="h5" {...titleTypographyProps}>
+            {title}
+          </Typography>
+        </Grid>
+      )
+    );
+  }
+  function renderActions() {
+    return (
+      props.staticActions && (
+        <Grid item xs>
+          <MuiThemeProvider theme={MuiStaticActionsTheme}>
+            {props.staticActions}
+          </MuiThemeProvider>
+        </Grid>
+      )
+    );
+  }
+
+  function renderSearch() {
+    return (
+      searchProps && (
+        <Grid item>
+          <TextField
+            value={searchText}
+            placeholder={lang.translateNode(Lang`SEARCH`)}
+            {...mergeProps(props.searchTextFieldProps, {
+              onChange: event => {
+                const text = event.target.value;
+                setSearchText(text || "");
+                searchProps?.onSearch?.(text);
+              },
+
+              onBlur: () => {
+                searchProps?.onSearch?.(searchText);
+              },
+              onKeyDown: event => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  setSearchText("");
+                  searchProps?.onSearch?.("");
+                }
+              },
+              onKeyPress: event => {
+                // console.log({eventKey:event.key});
+
+                switch (event.key) {
+                  case "Enter":
+                    searchProps?.onSearch?.(searchText);
+                    break;
+
+                  case "Escape":
+                    setSearchText("");
+                    break;
+                }
+              },
+              InputProps: {
+                endAdornment: (
+                  <InputAdornment position={"end"}>
+                    <Tooltip title={Lang`SEARCH`}>
+                      <SearchIcon />
+                    </Tooltip>
+                  </InputAdornment>
+                ),
+                startAdornment: (
+                  <InputAdornment
+                    className={clsx({
+                      [classes.hidden]: !searchText,
+                    })}
+                    position={"start"}
+                    onClick={() => {
+                      setSearchText("");
+                    }}
+                  >
+                    <CloseIcon />
+                  </InputAdornment>
+                ),
+              },
+            })}
+          />
+        </Grid>
+      )
+    );
+  }
 }

@@ -114,7 +114,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                   columns={{
                     label: {
                       title: Lang`ACCOUNT_FULL_NAME`,
-                      renderRowColumn: (data, props) => (
+                      renderRow: (data, props) => (
                         <MuiLink
                           onClick={() => {
                             setQueryResult(undefined);

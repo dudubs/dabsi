@@ -116,10 +116,6 @@ export class DataTableView<
   }
 
   async reloadWithDebounce() {
-    if (!this.isDidMount) {
-      return;
-    }
-    this.isLoading = true;
     if (!(await this.reloadDebounce())) return;
     await this.reload();
   }

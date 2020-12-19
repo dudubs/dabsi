@@ -1,3 +1,4 @@
+import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { entries } from "@dabsi/common/object/entries";
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { joinUrl } from "@dabsi/common/string/joinUrl";
@@ -34,7 +35,23 @@ export class RouterLocation<T extends TRouter> {
     protected _parent: AnyRouterLocation | undefined,
     public name: string | undefined,
     public emit: Emitter
-  ) {}
+  ) {
+    if (!_router.params.length) {
+      if (hasKeys(_params)) {
+        throw new Error(
+          `No expected to params (${_router.params.join(", ")}).`
+        );
+      }
+    } else {
+      if (!hasKeys(_params)) {
+        _router.params.forEach(param => {
+          if (_params?.[param] == null) {
+            throw new Error(`Expect to "${param}" parameter.`);
+          }
+        });
+      }
+    }
+  }
 
   @Lazy() get path(): string {
     let path: string = joinUrl(this._parent?.path || "", this.name);

@@ -13,7 +13,7 @@ import { Cli } from "@dabsi/modules/Cli";
 import { ExpressModule } from "@dabsi/modules/ExpressModule";
 import { getSession } from "@dabsi/system-old/server/acl/getSession";
 import SystemCoreModule from "@dabsi/system/core";
-import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/common/SystemRpc";
+import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/SystemRpc";
 import { DbModule } from "@dabsi/system/core/DbModule";
 import { SessionModule } from "@dabsi/system/core/SessionModule";
 import { SystemSession } from "@dabsi/system/core/SystemSession";
@@ -33,13 +33,13 @@ import {
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
+import ProjectManager from "@dabsi/typestack/ProjectManager";
 import CookieParser from "cookie-parser";
 import express from "express";
 import fs from "fs";
 import path from "path";
 import { InputMap } from "./../../typerpc/input/input-map/InputMap";
 import { AnyRpcWithMap } from "./../../typerpc/Rpc";
-import { ProjectModule } from "./../../typestack/ProjectModule";
 
 @Module({
   dependencies: [SessionModule, SystemCoreModule],
@@ -87,10 +87,10 @@ export class SystemModule {
 
   constructor(
     @Inject() expressModule: ExpressModule,
-    @Inject() protected mRunner: ModuleRunner,
+    @Inject() protected runner: ModuleRunner,
     @Inject() protected dbModule: DbModule,
     @Inject() cli: Cli,
-    @Inject() protected projectModule: ProjectModule
+    @Inject() protected projectManager: ProjectManager
   ) {
     cli.command("system", this.cli);
 
@@ -157,7 +157,7 @@ export class SystemModule {
       {
         ...SystemSession.provide(),
       },
-      this.mRunner.context
+      this.runner.context
     );
   }
 
@@ -309,7 +309,10 @@ export class SystemModule {
       });
 
       if (!rpcModule?.filename) {
-        this.log.warn(() => `No found rpc file for ${info.resolver}`);
+        this.log.trace(
+          () =>
+            `No found rpc file for ${info.resolver} at "${info.nodeModule.filename}".`
+        );
       } else {
         fileNames.add(rpcModule?.filename);
       }
@@ -353,14 +356,12 @@ export class SystemModule {
 
   @Once() async loadSystem() {
     this.log.trace("Load system.");
-    await this.projectModule.init();
+    await this.projectManager.init();
     this._loadedDirs = new Set();
     this._loadedConfigsInfo = [];
 
-    for (const projectInfo of values(this.projectModule.projectInfoMap)) {
-      for (const projectModuleInfo of values(projectInfo.moduleMapInfo)) {
-        await this._loadSystemDir(projectModuleInfo.dir);
-      }
+    for (const projectModule of this.projectManager.allProjectModules) {
+      await this._loadSystemDir(projectModule.dir);
     }
   }
 }

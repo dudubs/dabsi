@@ -1,4 +1,3 @@
-import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { StructProps } from "./../../../struct/Struct";
 import { WidgetType } from "./../Widget";
 import { If } from "@dabsi/common/typings2/boolean";

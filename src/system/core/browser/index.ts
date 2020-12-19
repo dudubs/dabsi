@@ -11,10 +11,7 @@ import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { SystemView } from "@dabsi/system/view/SystemView";
-import {
-  commandSystemRpc,
-  SystemRpcPath,
-} from "@dabsi/system/core/common/SystemRpc";
+import { commandSystemRpc, SystemRpcPath } from "@dabsi/system/core/SystemRpc";
 import { MuiSystemView } from "@dabsi/system/core/browser/MuiSystemView";
 
 commandSystemRpc((path, payload) => {

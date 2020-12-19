@@ -1,4 +1,4 @@
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/AclUser";
 import { AclUserBasicInfoForm } from "@dabsi/system/acl-admin/users/forms/BasicInfoForm";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";

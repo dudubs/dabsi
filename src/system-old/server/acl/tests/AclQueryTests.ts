@@ -3,7 +3,7 @@ import { Awaited } from "@dabsi/common/typings2/Async";
 import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { AclQuery } from "@dabsi/system-old/server/acl/AclQuery";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/AclUser";
 import { AclTester } from "@dabsi/system-old/server/acl/tests/AclTester";
 import {
   TEST_FORUMS_ADMIN_TOKEN,

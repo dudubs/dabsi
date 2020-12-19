@@ -1,19 +1,19 @@
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { Inject, Module } from "@dabsi/typedi";
 import { DevModule } from "@dabsi/typestack/DevModule";
-import { ProjectModule } from "@dabsi/typestack/ProjectModule";
+import ProjectManager from "@dabsi/typestack/ProjectManager";
 
 @Module()
 export class ProjectDevModule {
   constructor(
     @Inject() devModule: DevModule,
-    @Inject() projectModule: ProjectModule
+    @Inject() projectManager: ProjectManager
   ) {
     devModule.install({
       buildWatchdog: async w => {
-        await projectModule.init();
+        await projectManager.init();
         w.paths.push(
-          ...mapObjectToArray(projectModule.projectInfoMap, pi => pi.srcDir)
+          ...mapObjectToArray(projectManager.projectMap, pi => pi.srcDir)
         );
       },
     });

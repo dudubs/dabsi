@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/AclUser";
 
 @Entity()
 export class Post {

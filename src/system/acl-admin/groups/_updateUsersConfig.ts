@@ -1,4 +1,4 @@
-import { Group } from "./../../../system/acl/entities/Group";
+import { Group } from "../../acl/entities/AclGroup";
 import { DataRow } from "./../../../typedata/DataRow";
 import AclEditGroup from "@dabsi/system/acl-admin/groups/AclEditGroup";
 import { RpcConfigResolver } from "./../../../typerpc/RpcConfigResolver";

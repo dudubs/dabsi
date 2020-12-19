@@ -1,4 +1,4 @@
-import { Group } from "@dabsi/system/acl/entities/Group";
+import { Group } from "@dabsi/system/acl/entities/AclGroup";
 import { AclGroupBasicInfoForm } from "@dabsi/system/acl-admin/groups/forms/BasicInfoForm";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";

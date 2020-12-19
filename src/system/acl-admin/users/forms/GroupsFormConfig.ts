@@ -1,4 +1,4 @@
-import { User } from "./../../../../system/acl/entities/User";
+import { User } from "../../../acl/entities/AclUser";
 import { DataRow } from "./../../../../typedata/DataRow";
 import { AclUserGroupsForm } from "@dabsi/system/acl-admin/users/forms/GroupsForm";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";

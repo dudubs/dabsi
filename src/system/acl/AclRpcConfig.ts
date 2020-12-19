@@ -1,5 +1,5 @@
 import { getPasswordHash } from "@dabsi/system-old/server/acl/getPasswordHash";
-import { User, UserFullName } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/AclUser";
 import { AclRpc } from "@dabsi/system/acl/AclRpc";
 import { SystemSession } from "@dabsi/system/core/SystemSession";
 import { DataRow } from "@dabsi/typedata/DataRow";
@@ -26,7 +26,7 @@ export default RpcConfigResolver(
               loginName,
               password: getPasswordHash(password),
             })
-            .pick({ fullName: UserFullName })
+            .pick({ fullName: User.FullName })
             .get();
           if (!user) return { type: "fail" };
           await c.session.update({ user: user.$key });
@@ -37,7 +37,7 @@ export default RpcConfigResolver(
         if (!c.session.user) return { type: "fail" };
         const { fullName } = await c.session.user
           .getSource(true)
-          .pick({ fullName: { $base: UserFullName } })
+          .pick({ fullName: { $base: User.FullName } })
           .getOrFail();
         return { type: "success", fullName };
       },

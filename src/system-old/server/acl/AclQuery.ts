@@ -26,7 +26,7 @@ import {
 } from "@dabsi/system-old/server/acl/AclExp";
 import { AclTokenTree } from "@dabsi/system-old/server/acl/AclTokenTree";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/AclUser";
 
 export class AclQuery {
   constructor(protected connection: Connection) {}

@@ -1,5 +1,6 @@
+import { WeakId } from "@dabsi/common/WeakId";
+import { RootReactor } from "@dabsi/react/reactor/Reactor";
 import React from "react";
-import { Reactor, RootReactor } from "@dabsi/react/reactor/Reactor";
 
 export const ReactorContext = React.createContext(RootReactor);
 export const useReactor = () => React.useContext(ReactorContext);

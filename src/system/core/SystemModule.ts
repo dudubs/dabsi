@@ -1,22 +1,20 @@
-import colors from "colors/safe";
 import catchError from "@dabsi/common/async/catchError";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { mapObject } from "@dabsi/common/object/mapObject";
-import { values } from "@dabsi/common/object/values";
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import nested from "@dabsi/common/string/nested";
-import { Seq } from "@dabsi/immutable2";
 import { inspect } from "@dabsi/logging/inspect";
 import { LogLevel } from "@dabsi/logging/Logger";
 import { Cli } from "@dabsi/modules/Cli";
-import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import { getSession } from "@dabsi/system-old/server/acl/getSession";
-import SystemCoreModule from "@dabsi/system/core";
-import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/SystemRpc";
+import CoreSystemModule from "@dabsi/system/core";
 import { DbModule } from "@dabsi/system/core/DbModule";
 import { SessionModule } from "@dabsi/system/core/SessionModule";
+import SystemRequest from "@dabsi/system/core/SystemRequest";
+import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/SystemRpc";
 import { SystemSession } from "@dabsi/system/core/SystemSession";
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import { DataRow } from "@dabsi/typedata/DataRow";
@@ -24,7 +22,8 @@ import { Inject, Module } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Resolver } from "@dabsi/typedi/Resolver";
-import { AnyRpc, RpcError } from "@dabsi/typerpc/Rpc";
+import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { AnyRpc, AnyRpcWithMap, RpcError } from "@dabsi/typerpc/Rpc";
 import { AnyRpcMap, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import {
   isRpcConfigResolver,
@@ -35,15 +34,16 @@ import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import ProjectManager from "@dabsi/typestack/ProjectManager";
+import BodyParser from "body-parser";
+import colors from "colors/safe";
 import CookieParser from "cookie-parser";
-import express from "express";
 import fs from "fs";
+import { Seq } from "immutable";
+import multer from "multer";
 import path from "path";
-import { InputMap } from "./../../typerpc/input/input-map/InputMap";
-import { AnyRpcWithMap } from "./../../typerpc/Rpc";
 
 @Module({
-  dependencies: [SessionModule, SystemCoreModule],
+  dependencies: [SessionModule, CoreSystemModule],
 })
 export class SystemModule {
   log = log.get("SYSTEM");
@@ -89,7 +89,7 @@ export class SystemModule {
   constructor(
     @Inject() expressModule: ExpressModule,
     @Inject() protected runner: ModuleRunner,
-    @Inject() protected dbModule: DbModule,
+    @Inject() public readonly dbModule: DbModule,
     @Inject() cli: Cli,
     @Inject() protected projectManager: ProjectManager
   ) {
@@ -98,67 +98,76 @@ export class SystemModule {
     expressModule.install({
       run: () => this._checkSystem(),
       routes: app => {
-        const handlers = [express.json(), CookieParser()];
+        app.post(
+          SystemRpcPath,
+          CookieParser(),
+          BodyParser.json(),
+          BodyParser.urlencoded({ extended: true }),
+          multer().array(),
+          async (req, res) => {
+            const { path, payload } =
+              typeof req.body.command === "string"
+                ? JSON.parse(req.body.command)
+                : req.body;
 
-        app.post(SystemRpcPath, async (req, res) => {
-          const log = this.log.get("RPC");
-          for (const handler of handlers) {
-            await new Promise(next => handler(req, res, next));
+            const sysReq = new SystemRequest(path, payload, req.body);
+            const log = this.log.get("RPC");
+            const session = await getSession({
+              source: this.sources.sessions,
+              cookie: req.cookies["system"],
+              setCookie(value: string) {
+                res.cookie("system", value);
+              },
+            });
+
+            const context = Resolver.createContext(
+              {
+                ...DataRow(SystemSession).provide(() => session),
+                ...RpcContextResolver.provide(() => context),
+                ...SystemRequest.provide(() => sysReq),
+              },
+              this.requestContext
+            );
+
+            log.info(
+              () =>
+                `${(path as any[])
+                  .toSeq()
+                  .map(path =>
+                    typeof path === "object" ? JSON.stringify(path) : path
+                  )
+                  .join("/")}`
+            );
+
+            log.trace(() => colors.gray(JSON.stringify(payload)));
+
+            const config = catchError(
+              ResolveError,
+              () => {
+                const configResolver = this.getRpcConfigResolver(SystemRpc);
+                return Resolver.resolve(configResolver, context);
+              },
+              error => {
+                throw new RpcError(error.message);
+              }
+            );
+            const command = await SystemRpc.createRpcCommand(config);
+
+            res.json({
+              result: await command(path, payload),
+            });
           }
-          const session = await getSession({
-            source: this.sources.sessions,
-            cookie: req.cookies["system"],
-            setCookie(value: string) {
-              res.cookie("system", value);
-            },
-          });
-
-          const context = Resolver.createContext(
-            {
-              ...DataRow(SystemSession).provide(() => session),
-              ...RpcContextResolver.provide(() => context),
-            },
-            this.requestContext
-          );
-
-          const { path, payload } = req.body;
-
-          log.info(
-            () =>
-              `${(path as any[])
-                .toSeq()
-                .map(path =>
-                  typeof path === "object" ? JSON.stringify(path) : path
-                )
-                .join("/")}`
-          );
-
-          log.trace(() => colors.gray(JSON.stringify(payload)));
-
-          const config = catchError(
-            ResolveError,
-            () => {
-              const configResolver = this.getRpcConfigResolver(SystemRpc);
-              return Resolver.resolve(configResolver, context);
-            },
-            error => {
-              throw new RpcError(error.message);
-            }
-          );
-          const command = await SystemRpc.createRpcCommand(config);
-
-          res.json({
-            result: await command(path, payload),
-          });
-        });
+        );
       },
     });
   }
+
   @Lazy()
   protected get requestContext() {
     return Object.setPrototypeOf(
       {
         ...SystemSession.provide(),
+        ...SystemRequest.provide(),
       },
       this.runner.context
     );
@@ -277,6 +286,7 @@ export class SystemModule {
   configureRpcResolver(configResolver: RpcConfigResolver<AnyRpc>) {
     this._rpcConfigResolverMap.set(configResolver.rpc, configResolver);
   }
+  
   protected async _checkSystem() {
     this._isChecking = true;
     await this.loadSystem();

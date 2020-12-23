@@ -17,7 +17,7 @@ import {
 import { InputErrorMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
-import { AnyInput } from "./../Input";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
 
 export type AnyDataInputMap = DataInputMap<TDataInputMap>;
 

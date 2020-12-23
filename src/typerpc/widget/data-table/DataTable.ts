@@ -1,5 +1,5 @@
-import { StructProps } from "./../../../struct/Struct";
-import { WidgetType } from "./../Widget";
+import { StructProps } from "@dabsi/struct/Struct";
+import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { If } from "@dabsi/common/typings2/boolean";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { Override } from "@dabsi/common/typings2/Override";

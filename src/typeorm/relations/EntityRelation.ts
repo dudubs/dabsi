@@ -7,7 +7,10 @@ import { Lazy } from "@dabsi/common/patterns/lazy";
 import { ArrayTypeOrObject } from "@dabsi/common/typings2/ArrayTypeOrObject";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
-import { ByTableOrColumn, EntityRelationSide } from "@dabsi/typeorm/relations/EntityRelationSide";
+import {
+  ByTableOrColumn,
+  EntityRelationSide,
+} from "@dabsi/typeorm/relations/EntityRelationSide";
 
 export class EntityRelation<T = any> {
   static of<T, K extends keyof T>(
@@ -237,11 +240,19 @@ export class EntityRelation<T = any> {
   isToMany =
     this.relationMetadata.isManyToMany || this.relationMetadata.isOneToMany;
 
-  update(
-    action: "addOrSet" | "removeOrUnset",
+  get addOrSetAction(): "add" | "set" {
+    return this.isToMany ? "add" : "set";
+  }
+
+  get removeOrUnsetAction(): "remove" | "unset" {
+    return this.isToMany ? "remove" : "unset";
+  }
+
+  async update(
+    action: "addOrSet" | "removeOrUnset" | "set" | "add" | "remove" | "unset",
     leftKey: object,
     rightKey: object
-  ): Promise<void> {
+  ): Promise<"add" | "set" | "unset" | "remove"> {
     [leftKey, rightKey] = [
       this.left.getKey(leftKey, rightKey),
       this.right.getKey(leftKey, rightKey),
@@ -255,12 +266,26 @@ export class EntityRelation<T = any> {
 
     switch (action) {
       case "addOrSet":
-        return this.isToOne ? qb.set(rightKey) : qb.add(rightKey);
+      case "add":
+      case "set":
+        if (this.isToOne) {
+          await qb.set(rightKey);
+          return "set";
+        } else {
+          await qb.add(rightKey);
+          return "add";
+        }
+      case "remove":
+      case "unset":
       case "removeOrUnset":
-        return this.isToOne ? qb.set(null) : qb.remove(rightKey);
+        if (this.isToOne) {
+          await qb.set(null);
+          return "unset";
+        } else {
+          await qb.remove(rightKey);
+          return "remove";
+        }
     }
-
-    throw new Error(`Invalid action ${action}.`);
   }
 
   @Lazy() get leftEntityType(): ObjectType<T> {

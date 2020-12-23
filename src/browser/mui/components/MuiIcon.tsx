@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { ComponentClass, createElement, ReactElement } from "react";
 import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
 

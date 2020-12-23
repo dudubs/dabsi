@@ -1,5 +1,5 @@
 import { Renderer } from "@dabsi/react/renderer";
-import * as React from "react";
+import React from "react";
 import { ReactElement, ReactNode } from "react";
 import { keys } from "@dabsi/common/object/keys";
 import { Expect } from "@dabsi/common/typings2/Expect";

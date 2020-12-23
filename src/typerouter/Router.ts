@@ -1,8 +1,6 @@
-import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { MetaType, WithMetaType } from "@dabsi/common/MetaType";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Expect } from "@dabsi/common/typings2/Expect";
-import { IfNever } from "@dabsi/common/typings2/IfNever";
 import { Override } from "@dabsi/common/typings2/Override";
 
 export type AnyRouterMap = Record<string, Router<TRouter>>;
@@ -170,3 +168,5 @@ export namespace RouterType {
     return this === base || this.bases.has(base);
   }
 }
+
+export default Router;

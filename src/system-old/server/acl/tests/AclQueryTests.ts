@@ -3,7 +3,7 @@ import { Awaited } from "@dabsi/common/typings2/Async";
 import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { AclQuery } from "@dabsi/system-old/server/acl/AclQuery";
-import { User } from "@dabsi/system/acl/entities/AclUser";
+import { User } from "@dabsi/system/acl/entities/User";
 import { AclTester } from "@dabsi/system-old/server/acl/tests/AclTester";
 import {
   TEST_FORUMS_ADMIN_TOKEN,
@@ -47,44 +47,42 @@ const t = AclTester.beforeAll(async t => {
   }
 });
 
-testm(__filename, () => {
-  it("expect admin to be FORUM_ADMIN_MEMBER", () => {
-    expect(t.reviews.admin.IS_FORUM_ADMIN).toBeTrue();
+it("expect admin to be FORUM_ADMIN_MEMBER", () => {
+  expect(t.reviews.admin.IS_FORUM_ADMIN).toBeTrue();
+});
+it("expect admin to be FORUM_MEMBER", () => {
+  expect(t.reviews.admin.IS_FORUM_MEMBER).toBeTrue();
+});
+it("expect blockedByForum to not be FORUM_MEMBER", () => {
+  expect(t.reviews.blockedByForum.IS_FORUM_MEMBER).toBeFalse();
+});
+describe("test $user exp:", () => {
+  it("expect 'admin' first-name will be 'admin'", () => {
+    expect(t.reviews.admin.IS_ADMIN_FIRST_NAME).toBeTrue();
   });
-  it("expect admin to be FORUM_MEMBER", () => {
-    expect(t.reviews.admin.IS_FORUM_MEMBER).toBeTrue();
+  it("expect 'member' last name not will be 'admin'", () => {
+    expect(t.reviews.member.IS_ADMIN_FIRST_NAME).toBeFalse();
   });
-  it("expect blockedByForum to not be FORUM_MEMBER", () => {
-    expect(t.reviews.blockedByForum.IS_FORUM_MEMBER).toBeFalse();
-  });
-  describe("test $user exp:", () => {
-    it("expect 'admin' first-name will be 'admin'", () => {
-      expect(t.reviews.admin.IS_ADMIN_FIRST_NAME).toBeTrue();
-    });
-    it("expect 'member' last name not will be 'admin'", () => {
-      expect(t.reviews.member.IS_ADMIN_FIRST_NAME).toBeFalse();
-    });
-  });
-  it("expect 'blockedByMember' can't write comment", () => {
-    expect(t.reviews.blockedByMember.CAN_WRITE_COMMENT).toBeFalse();
-  });
-  it("expect 'adminBlockedByMember' can write comment", () => {
-    expect(t.reviews.adminBlockedByMember.CAN_WRITE_COMMENT).toBeTrue();
-  });
-  it("expect 'otherMember' can write comment", () => {
-    expect(t.reviews.otherMember.CAN_WRITE_COMMENT).toBeTrue();
-  });
-  it("expect 'god' to be god", () => {
-    expect(t.reviews.god.IS_GOD).toBeTrue();
-  });
-  it("expect 'adminBlockedByMember' to can write post comment", () => {
-    expect(t.reviews.adminBlockedByMember.CAN_WRITE_COMMENT).toBeTrue();
-  });
-  it("expect 'admin' can edit post", () => {
-    expect(t.reviews.adminBlockedByMember.CAN_EDIT_POST).toBeTrue();
-    expect(t.reviews.forumsAdmin.CAN_EDIT_POST).toBeTrue();
-    expect(t.reviews.god.CAN_EDIT_POST).toBeTrue();
-    expect(t.reviews.member.CAN_EDIT_POST).toBeTrue();
-    expect(t.reviews.otherMember.CAN_EDIT_POST).toBeFalse();
-  });
+});
+it("expect 'blockedByMember' can't write comment", () => {
+  expect(t.reviews.blockedByMember.CAN_WRITE_COMMENT).toBeFalse();
+});
+it("expect 'adminBlockedByMember' can write comment", () => {
+  expect(t.reviews.adminBlockedByMember.CAN_WRITE_COMMENT).toBeTrue();
+});
+it("expect 'otherMember' can write comment", () => {
+  expect(t.reviews.otherMember.CAN_WRITE_COMMENT).toBeTrue();
+});
+it("expect 'god' to be god", () => {
+  expect(t.reviews.god.IS_GOD).toBeTrue();
+});
+it("expect 'adminBlockedByMember' to can write post comment", () => {
+  expect(t.reviews.adminBlockedByMember.CAN_WRITE_COMMENT).toBeTrue();
+});
+it("expect 'admin' can edit post", () => {
+  expect(t.reviews.adminBlockedByMember.CAN_EDIT_POST).toBeTrue();
+  expect(t.reviews.forumsAdmin.CAN_EDIT_POST).toBeTrue();
+  expect(t.reviews.god.CAN_EDIT_POST).toBeTrue();
+  expect(t.reviews.member.CAN_EDIT_POST).toBeTrue();
+  expect(t.reviews.otherMember.CAN_EDIT_POST).toBeFalse();
 });

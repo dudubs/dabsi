@@ -75,8 +75,6 @@ export namespace ExpressTester {
   }
 }
 
-testm(__filename, () => {
-  it("testExpressText", async () => {
-    expect(await ExpressTester.testText({}, () => "hello!")).toEqual("hello!");
-  });
+it("testExpressText", async () => {
+  expect(await ExpressTester.testText({}, () => "hello!")).toEqual("hello!");
 });

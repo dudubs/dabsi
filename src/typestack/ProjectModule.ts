@@ -2,7 +2,7 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { readdirSync, Stats, statSync } from "fs";
 import path from "path";
-import Project from "./Project";
+import Project from "@dabsi/typestack/Project";
 
 type ProjectFile = { baseName: string; fileName: string; stat: Stats };
 export default class ProjectModule {

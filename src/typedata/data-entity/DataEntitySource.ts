@@ -1,25 +1,26 @@
-import { Connection, getConnection } from "typeorm";
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Lazy } from "@dabsi/common/patterns/lazy";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
-import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
+import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
+import { DataEntityQueryRunner } from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { DataKey } from "@dabsi/typedata/DataKey";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource, GetDataSource } from "@dabsi/typedata/DataSource";
-import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
 import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
-import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
-import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
-import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
-import { DataEntityQueryRunner } from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
+import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
+import { Connection, getConnection } from "typeorm";
+import {
+  AnyDataSelection,
+  DataSelection,
+} from "./../data-selection/DataSelection";
 
-export type DataEntitySourceOptions<T> = {
-  connection?: (() => Connection) | string | Connection;
-};
-
+type DataEntityConnection = (() => Connection) | string | Connection;
 export class DataEntitySource<T> extends DataSource<T> {
   static getConnection: undefined | (() => Connection);
 
@@ -29,23 +30,23 @@ export class DataEntitySource<T> extends DataSource<T> {
 
   static create<T>(
     entityType: Type<T>,
-    connection?: (() => Connection) | string | Connection
+    connection?: DataEntityConnection
   ): DataEntitySource<T>;
 
-  static create(entityType, connection?) {
-    return new DataEntitySource(entityType, { connection }, EmptyDataCursor);
+  static create(entityType, connection?: DataEntityConnection) {
+    return new DataEntitySource(entityType, connection, EmptyDataCursor);
   }
 
   constructor(
     public entityType: Type<T>,
-    public options: DataEntitySourceOptions<any> = {},
+    protected _connection: DataEntityConnection = getConnection,
     public cursor: DataCursor
   ) {
     super();
   }
 
   withCursor<U = T>(cursor: DataCursor): DataEntitySource<U> {
-    return new DataEntitySource<U>(this.entityType, <any>this.options, cursor);
+    return new DataEntitySource<U>(this.entityType, this._connection, cursor);
   }
 
   createQueryBuilder(): DataQueryBuilder {
@@ -77,45 +78,67 @@ export class DataEntitySource<T> extends DataSource<T> {
     return this.createRunner().hasRow();
   }
 
-  protected _createEntity(valueMap, isInsert: boolean) {
+  protected _createEntityRow(
+    valueMap: Record<string, any>,
+    isInsert: boolean,
+    emit?: (event: RowChange) => void
+  ) {
     const row = {};
     const relationKeys: {
       relation: EntityRelation;
-      key: object;
+      key: DataEntityKey;
     }[] = [];
 
-    // build relation to parent on on insert.
+    // on insert it's take build  relation to parent-cursor
     if (isInsert) {
       const { parent } = this.entityCursor;
       parent && buildRelation(parent.relation, parent.relationKey);
     }
 
-    // check relations in value, throw error if had relation value that
-    //  override relation key.
-    for (const { relation, key } of this.entityCursor.relationKeys) {
+    // checking if cursor-relations-keys is override by cursor
+    for (const { relation, key: relationKey } of this.entityCursor
+      .relationKeys) {
       if (relation.propertyName in valueMap) {
         throw new Error(`Can't override relation ${relation.propertyName}.`);
       }
       // build relation on insert.
-      isInsert && buildRelation(relation, key);
+      isInsert && buildRelation(relation, relationKey);
     }
 
-    for (const column of this.entityCursor.columnKeys) {
-      if (column.metadata.propertyName in valueMap) {
-        throw new Error(
-          `Can't override field ${column.metadata.propertyName}.`
-        );
+    for (const {
+      metadata: { propertyName },
+      key,
+    } of this.entityCursor.columnKeys) {
+      if (propertyName in valueMap) {
+        throw new Error(`Can't override field ${propertyName}.`);
       }
-      if (isInsert) row[column.metadata.propertyName] = column.key;
+      if (isInsert) {
+        row[propertyName] = key;
+        emit?.({
+          type: "value",
+          propertyName,
+          value: key,
+        });
+      }
     }
 
-    for (const [propertyName, value] of entries(valueMap)) {
+    for (let [propertyName, value] of entries(valueMap)) {
       const relation = this.entityCursor.entityInfo.propertyNameToRelation[
         propertyName
       ];
+      if (value === undefined) {
+        // skip on property if is undefined - no if is null.
+        continue;
+      }
       if (relation) {
+        if (value && typeof value === "object") {
+          if (typeof value.$key === "string") {
+            value = value.$key;
+          }
+        }
+
         const key = DataEntityKey.parse(relation.right.entityMetadata, value);
-        buildRelation(relation, key);
+        buildRelation(relation, { object: key, text: value });
         continue;
       }
       const column = this.entityCursor.entityInfo.propertyNameToColumnMetadata[
@@ -123,6 +146,7 @@ export class DataEntitySource<T> extends DataSource<T> {
       ];
       if (column) {
         row[propertyName] = value;
+        emit?.({ type: "value", propertyName, value });
         continue;
       }
       throw new Error(`Invalid property ${propertyName}`);
@@ -130,13 +154,34 @@ export class DataEntitySource<T> extends DataSource<T> {
 
     return { row, relationKeys };
 
-    function buildRelation(relation: EntityRelation, key: object) {
-      if (isInsert && key == null)
-        // dont build relation on insert when the key is null.
-        return;
+    function buildRelation(
+      relation: EntityRelation,
 
+      key: DataEntityKey
+      // key: DataEntityKey
+    ) {
+      if (isInsert) {
+        if (!key.object) {
+          // dont build relation on insert when the key is null.
+          return;
+        }
+      }
+      if (key.object) {
+        emit?.({
+          type: "set",
+          propertyName: relation.propertyName,
+          relation,
+          key,
+        });
+      } else {
+        emit?.({
+          type: "unset",
+          propertyName: relation.propertyName,
+          relation,
+        });
+      }
       if (relation.left.isOwning && relation.isJoinColumn) {
-        row[relation.propertyName] = key;
+        row[relation.propertyName] = key.object;
         return;
       }
       relationKeys.push({ relation, key });
@@ -149,16 +194,36 @@ export class DataEntitySource<T> extends DataSource<T> {
   ): Promise<string[]> {
     const entityMetadata = this.entityCursor.repository.metadata;
     const keys: string[] = [];
+
     for (const value of values) {
-      const { row, relationKeys } = this._createEntity(value, true);
+      const changeMap: RowChangeMap = {};
+      const { row, relationKeys } = this._createEntityRow(
+        value,
+        true,
+        change => {
+          changeMap[change.propertyName] = change;
+        }
+      );
       const entity = await this.entityCursor.repository.save(
         this.entityCursor.repository.create(<any>row)
       );
-      const entityKey = DataEntityKey.pick(entityMetadata, entity);
-      for (let { relation, key } of relationKeys) {
-        await relation.update("addOrSet", entityKey, key);
+      const entityObjectKey = DataEntityKey.pick(entityMetadata, entity);
+      const entityKey: DataEntityKey = {
+        object: entityObjectKey,
+        text: DataEntityKey.stringify(entityMetadata, entityObjectKey),
+      };
+
+      for (const { relation, key } of relationKeys) {
+        await relation.update("set", entityObjectKey, key.object);
       }
-      keys.push(DataEntityKey.stringify(entityMetadata, entityKey));
+
+      keys.push(entityKey.text);
+
+      await this.emit?.({
+        type: "insert",
+        entityKey,
+        changeMap,
+      });
     }
     return keys;
   }
@@ -166,81 +231,174 @@ export class DataEntitySource<T> extends DataSource<T> {
   async updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
     if (!hasKeys(value)) return 0;
     let affectedRows = 0;
-    const { row, relationKeys } = this._createEntity(value, false);
     const entityMetadata = this.entityCursor.repository.metadata;
-    for (const key of keys) {
-      const entityKey = DataEntityKey.parse(entityMetadata, DataKey(key));
-      const result = await this.entityCursor.repository.update(entityKey, row);
-      for (const { relation, key } of relationKeys) {
-        if (key == null) {
-          await relation.update("removeOrUnset", entityKey, key);
+    const changeMap: RowChangeMap = {};
+
+    const { row, relationKeys } = await this._createEntityRow(
+      value,
+      false,
+      change => {
+        changeMap[change.propertyName] = change;
+      }
+    );
+    let source: DataSource<any> | null = null;
+
+    const { loader, getEntityMap } = createEventLoader(this);
+    await this.emit?.({
+      type: "update.start",
+      changeMap,
+      ...loader,
+    });
+
+    const entityMap = await getEntityMap();
+    for (const entityTextKey of keys) {
+      const entity = entityMap[entityTextKey] || {};
+      const entityKey = DataEntityKey.parse2(
+        entityMetadata,
+        DataKey(entityTextKey)
+      );
+
+      await this.emit?.({
+        type: "update.before",
+        changeMap,
+        entity,
+        entityKey,
+        row,
+      });
+
+      // update.before
+      const result = await this.entityCursor.repository.update(
+        entityKey.object,
+        row
+      );
+      for (const { relation, key: relationKey } of relationKeys) {
+        if (relationKey.object == null) {
+          await relation.update("unset", entityKey.object, relationKey.object);
         } else {
-          await relation.update("addOrSet", entityKey, key);
+          await relation.update("set", entityKey.object, relationKey.object);
         }
       }
+
       if (typeof result.affected == "number") {
         affectedRows += result.affected;
       } else {
         affectedRows++;
       }
+      // update.after
+      await this.emit?.({
+        type: "update.after",
+        changeMap,
+        entityKey,
+        entity,
+      });
     }
+    await this.emit?.({
+      type: "update.end",
+      changeMap,
+      entityMap,
+    });
     return affectedRows;
   }
 
-  async addKeys(keys: string[]): Promise<void> {
-    for (let key of keys) {
-      await this._addOrRemove(key, false);
+  emit?(event: BaseDataEntityEvent): Awaitable;
+
+  protected async updateRelationKeys(
+    keysToAdd: string[],
+    keysToRemove: string[]
+  ): Promise<void> {
+    for (let key of keysToAdd) {
+      await this._updateRelationKeys(key, "addOrSet");
+    }
+    for (let key of keysToRemove) {
+      await this._updateRelationKeys(key, "removeOrUnset");
     }
   }
 
-  protected async _addOrRemove(key: string, toRemove: boolean) {
-    const method = toRemove
-      ? ("removeOrUnset" as const)
-      : ("addOrSet" as const);
-    const entityKey = DataEntityKey.parse(
+  protected async _updateRelationKeys(
+    entityTextKey: string,
+    method: "removeOrUnset" | "addOrSet"
+  ) {
+    const entityKey = DataEntityKey.parse2(
       this.entityCursor.repository.metadata,
-      key
+      entityTextKey
     );
 
     if (this.entityCursor.parent) {
       await this.entityCursor.parent.relation.update(
         method,
-        entityKey,
-        this.entityCursor.parent.relationKey!
+        entityKey.object,
+        this.entityCursor.parent.relationKey.object!
       );
     }
 
     for (const { relation, key } of this.entityCursor.relationKeys) {
-      await relation.update(method, entityKey, key);
-    }
-  }
+      const action = await relation.update(
+        method,
+        entityKey.object,
+        key.object
+      );
 
-  async removeKeys(keys: string[]): Promise<void> {
-    for (let key of keys) {
-      await this._addOrRemove(key, true);
+      await this.emit?.({
+        type: "relation",
+        entityKey,
+        relation,
+        action: {
+          type: action,
+          key,
+        },
+      });
     }
   }
 
   async deleteKeys(keys: string[]): Promise<void> {
     const { repository } = this.entityCursor;
-    for (let key of keys) {
-      await repository.delete(
-        <any>DataEntityKey.parse(repository.metadata, key)
+
+    const { loader, getEntityMap } = createEventLoader(this);
+
+    await this.emit?.({
+      type: "delete.start",
+      ...loader,
+    });
+
+    const entityMap = await getEntityMap();
+
+    for (const entityTextKey of keys) {
+      const entityKey = DataEntityKey.parse2(
+        repository.metadata,
+        entityTextKey
       );
+      await this.emit?.({
+        type: "delete.before",
+        entity: entityMap[entityTextKey],
+        entityKey,
+      });
+      await repository.delete(entityKey.object);
+      await this.emit?.({
+        type: "delete.after",
+        entity: entityMap[entityTextKey],
+        entityKey,
+      });
     }
+
+    await this.emit?.({
+      type: "delete.end",
+      entityMap,
+    });
+
+    // delete.init delete.clean delete.before delete.after
   }
 
   @Lazy() get entityCursor(): DataEntityCursor {
     let connection: Connection;
-    switch (typeof this.options.connection) {
+    switch (typeof this._connection) {
       case "object":
-        connection = this.options.connection;
+        connection = this._connection;
         break;
       case "string":
-        connection = getConnection(this.options.connection);
+        connection = getConnection(this._connection);
         break;
       case "function":
-        connection = this.options.connection();
+        connection = this._connection();
         break;
       case "undefined":
         connection = getConnection();
@@ -252,3 +410,120 @@ export class DataEntitySource<T> extends DataSource<T> {
     return DataEntityCursor.create(connection, this.cursor, this.entityType);
   }
 }
+
+type RowChange<T = { propertyName: string }> =
+  | (T & {
+      type: "value";
+      value: any;
+    })
+  | (T & {
+      type: "set";
+      relation: EntityRelation;
+      key: DataEntityKey;
+    })
+  | (T & { type: "unset"; relation: EntityRelation });
+
+type RowChangeMap = Record<string, RowChange | undefined>;
+
+function createEventLoader(source: DataSource<any>) {
+  let selection: AnyDataSelection | undefined = undefined;
+  return {
+    loader: {
+      select({ pick = [], fields = {} }: AnyDataSelection) {
+        selection = DataSelection.merge(selection, {
+          pick: [...(selection?.pick || []), ...pick],
+          fields: { ...selection?.fields, ...fields },
+        });
+      },
+    },
+    async getEntityMap() {
+      if (selection) {
+        return source
+          .withCursor({
+            ...source.cursor,
+            selection,
+          })
+          .getRowMap();
+      }
+      return {};
+    },
+  };
+}
+
+export type DataEntityEvent<T> = BaseDataEntityEvent;
+
+export type DataEntityEventType = BaseDataEntityEvent["type"];
+export type BaseDataEntityEvent<
+  T = {},
+  WithEntity = {
+    entity: Record<string, any> | undefined;
+  },
+  WithEntityKey = {
+    entityKey: DataEntityKey;
+  },
+  WithChangeMap = { changeMap: RowChangeMap },
+  WithLoader = {
+    select(selection: AnyDataSelection): void;
+  },
+  WithEntityMap = { entityMap: Record<string, any> },
+  UpdateEvents =
+    | (T &
+        WithLoader &
+        WithChangeMap & {
+          type: "update.start";
+        })
+    | (T &
+        WithEntity &
+        WithEntityKey &
+        WithChangeMap & {
+          type: "update.before";
+          row: Record<string, any>;
+        })
+    | (WithChangeMap &
+        WithEntityMap & {
+          type: "update.end";
+        })
+    | (T &
+        WithEntity &
+        WithEntityKey &
+        WithChangeMap & {
+          type: "update.after";
+        }),
+  DeleteEvents =
+    | (T &
+        WithLoader & {
+          type: "delete.start";
+        })
+    | (T &
+        WithEntityMap & {
+          type: "delete.end";
+        })
+    | (T &
+        WithEntity &
+        WithEntityKey & {
+          type: "delete.before";
+        })
+    | (T &
+        WithEntity &
+        WithEntityKey & {
+          type: "delete.after";
+        })
+> =
+  | (T &
+      WithEntityKey &
+      WithChangeMap & {
+        type: "insert";
+      })
+  | UpdateEvents
+  | DeleteEvents
+  | (T &
+      WithEntityKey & {
+        type: "relation";
+        relation: EntityRelation;
+        action:
+          | {
+              type: "add" | "remove" | "set";
+              key: DataEntityKey;
+            }
+          | { type: "unset" };
+      });

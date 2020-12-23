@@ -1,4 +1,4 @@
-import { _testm } from "@dabsi/jasmine/testm";
+import { _testm } from "./testm";
 
 declare global {
   export let testm: typeof _testm;

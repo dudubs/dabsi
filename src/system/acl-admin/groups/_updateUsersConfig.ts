@@ -1,7 +1,7 @@
-import { Group } from "../../acl/entities/AclGroup";
-import { DataRow } from "./../../../typedata/DataRow";
+import { Group } from "@dabsi/system/acl/entities/Group";
+import { DataRow } from "@dabsi/typedata/DataRow";
 import AclEditGroup from "@dabsi/system/acl-admin/groups/AclEditGroup";
-import { RpcConfigResolver } from "./../../../typerpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
 export default RpcConfigResolver(
   AclEditGroup.at("updateUsers"),

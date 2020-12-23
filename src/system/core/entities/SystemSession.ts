@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
-import { User } from "@dabsi/system/acl/entities/AclUser";
+import { User } from "@dabsi/system/acl/entities/User";
 
 // TODO: Resource
 @Entity({ name: "system/session" })

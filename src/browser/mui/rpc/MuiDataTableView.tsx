@@ -3,7 +3,7 @@ import {
   MuiButtonProps,
 } from "@dabsi/browser/mui/components/MuiButton";
 import { MuiDeleteButton } from "@dabsi/browser/mui/components/MuiDeleteButton";
-import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
+import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 import {
   MuiTableCell,
   MuiTableCellProps,
@@ -37,7 +37,7 @@ import TablePagination from "@material-ui/core/TablePagination";
 import TableRow from "@material-ui/core/TableRow";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
-import * as React from "react";
+import React from "react";
 import { ComponentProps, ReactElement, ReactNode, useRef } from "react";
 
 type MuiDataTableViewColumnProps<

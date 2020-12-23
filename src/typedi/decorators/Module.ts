@@ -1,6 +1,5 @@
-import { inspect } from "@dabsi/logging/inspect";
-import { CallStackInfo } from "./../CallStackInfo";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
 import { Consumer } from "@dabsi/typedi/Consumer";
 import { Injectable } from "@dabsi/typedi/decorators/Injectable";
 import { Resolver } from "@dabsi/typedi/index";

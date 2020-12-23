@@ -1,7 +1,6 @@
+import { Lazy } from "@dabsi/common/patterns/lazy";
 import { readFileSync, realpathSync } from "fs";
 import path from "path";
-import { Lazy } from "@dabsi/common/patterns/lazy";
-import { IndexedSeq } from "@dabsi/immutable2";
 
 export const CALL_STACK_PATTERN = /at [^(]+\((?<fileName>.+):(?<lineNumber>\d+):(?<lineColumn>\d+)\)/g;
 

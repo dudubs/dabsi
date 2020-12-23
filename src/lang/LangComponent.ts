@@ -26,7 +26,7 @@ export default function ({
       return strings
         .toSeq()
         .flatMap(
-          (string, index) =>
+          (string, index: number) =>
             typeof params[index] === "string"
               ? [string, "{", params[index], "}"]
               : [string],

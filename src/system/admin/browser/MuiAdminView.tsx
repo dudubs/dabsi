@@ -15,7 +15,7 @@ import { getAdminInfo } from "@dabsi/system/admin/common";
 import { useRoute } from "@dabsi/typerouter/ReactRouter";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
-import * as React from "react";
+import React from "react";
 import { ReactElement, ReactNode } from "react";
 
 export class MuiAdminViewState {

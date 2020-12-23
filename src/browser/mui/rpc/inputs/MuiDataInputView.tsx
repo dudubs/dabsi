@@ -12,7 +12,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import { Autocomplete } from "@material-ui/lab";
-import * as React from "react";
+import React from "react";
 import { useRef, useState } from "react";
 
 export type AnyDataInputConnection = RpcConnection<AnyDataInput>;

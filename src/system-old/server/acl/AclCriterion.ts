@@ -12,8 +12,8 @@ import {
   DataRelationToOneKeys,
   DataRelationType,
 } from "@dabsi/typedata/DataRelation";
-import { Group } from "@dabsi/system/acl/entities/AclGroup";
-import { User } from "@dabsi/system/acl/entities/AclUser";
+import { Group } from "@dabsi/system/acl/entities/Group";
+import { User } from "@dabsi/system/acl/entities/User";
 
 export type AclRow<T> = BasedDataRow<T> | [Type<T>, string];
 export type AclRowType<T extends AclRow<any>> = T extends AclRow<infer U>

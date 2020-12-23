@@ -1,7 +1,5 @@
-import { Connection } from "typeorm";
-import { inspect } from "util";
 import { defined } from "@dabsi/common/object/defined";
-import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import {
   DataCompareOperators,
   DataExp,
@@ -10,22 +8,24 @@ import {
 import { DataExpMapper } from "@dabsi/typedata/data-exp/DataExpMapper";
 import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
-import { DataQuery, DataQueryExp } from "@dabsi/typedata/data-query/DataQueryExp";
+import {
+  DataQuery,
+  DataQueryExp,
+} from "@dabsi/typedata/data-query/DataQueryExp";
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
-import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
-import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
+import { EntityRelation } from "@dabsi/typeorm/relations";
+import { Connection } from "typeorm";
+import { inspect } from "util";
 
 const mapper = Object.seal(new DataExpMapper());
 
-function MapToDataExp(target: DataExpTranslator<any>, propertyName, desc) {
+function UseDataExpMapper(target: DataExpTranslator<any>, propertyName, desc) {
   desc.value = function () {
     return mapper[propertyName].apply(mapper, arguments);
   };
 }
 
-export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<
-  DataQueryExp
-> {
+export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<DataQueryExp> {
   False: DataExp<any> = false;
 
   Null: DataExp<any> = null;
@@ -218,22 +218,22 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<
     return { $at: { [this.schema]: propertyName } };
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateParameter(value: DataParameterExp): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateBase(exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateAnd(exps: DataExp<any>[]): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateCompare(
     op: DataCompareOperators,
     left: DataExp<any>,
@@ -242,12 +242,12 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateConcat(exps: DataExp<any>[]): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateIf(
     condition: DataExp<any>,
     then: DataExp<any>,
@@ -256,12 +256,12 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateIfNull(exp: DataExp<any>, alt_value: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateIn(
     inverse: boolean,
     where: DataExp<any>,
@@ -270,22 +270,22 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateIsNull(inverse: boolean, exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateLength(exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateNot(exp: DataExp<any>): DataQueryExp {
     throw new Error();
   }
 
-  @MapToDataExp
+  @UseDataExpMapper
   translateOr(exps: DataExp<any>[]): DataQueryExp {
     throw new Error();
   }

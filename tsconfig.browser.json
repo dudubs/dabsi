@@ -1,12 +1,12 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.base.browser.json",
   "compilerOptions": {
-    "lib": ["ES2020", "DOM"],
-    "types": ["node"],
     "baseUrl": ".",
+    "lib": ["DOM", "ES2020"],
+    "types": ["node"],
     "paths": {
       "@dabsi/*": ["src/*"]
     }
   },
-  "include": ["./src"]
+  "include": ["./src/browser", "./src/**/browser/*"]
 }

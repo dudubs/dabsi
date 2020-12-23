@@ -1,6 +1,6 @@
 import Tab, { TabProps } from "@material-ui/core/Tab";
 import Tabs, { TabsProps } from "@material-ui/core/Tabs";
-import * as React from "react";
+import React from "react";
 import { ReactElement, ReactNode } from "react";
 import { entries } from "@dabsi/common/object/entries";
 import { keys } from "@dabsi/common/object/keys";

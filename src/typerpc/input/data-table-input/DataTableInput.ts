@@ -7,18 +7,18 @@
 //   DataTable,
 //   DataTableType,
 // } from "@dabsi/typerpc/widget/data-table/DataTable";
-// import { DataRow } from "./../../../typedata/DataRow";
-// import { PartialConfigKeys } from "./../../Config";
-// import { GenericConfig } from "./../../GenericConfig";
-// import { RpcUnresolvedConfig } from "./../../Rpc";
-// import { DataTableTypes } from "./../../widget/data-table/DataTable";
+// import { DataRow } from "@dabsi/typedata/DataRow";
+// import { PartialConfigKeys } from "@dabsi/typerpc/Config";
+// import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+// import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+// import { DataTableTypes } from "@dabsi/typerpc/widget/data-table/DataTable";
 // import {
 //   AnyInput,
 //   Input,
 //   InputValueConfig,
 //   InputValueData,
 //   InputValueElement,
-// } from "./../Input";
+// } from "@dabsi/typerpc/input/Input";
 
 // type TDataTableInput = {
 //   Data: any;

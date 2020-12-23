@@ -1,19 +1,14 @@
-import exp from "constants";
-import { getJasmineSpecReporterResult } from "@dabsi/jasmine/getJasmineSpecReporterResult";
-import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
 import { subTest } from "@dabsi/jasmine/subTest";
-import { inspect } from "@dabsi/logging/inspect";
+import { DataRelationKeys } from "@dabsi/typedata/DataRelation";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { DUnion, EUnion } from "@dabsi/typedata/tests/BaseEntities";
 import {
   AEntity,
   BEntity,
   CEntity,
 } from "@dabsi/typeorm/relations/tests/Entities";
 import { forEachTestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSource } from "@dabsi/typedata/DataSource";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
-import { DataRelationKeys } from "@dabsi/typedata/DataRelation";
-import { DUnion, EUnion } from "@dabsi/typedata/tests/BaseEntities";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 
@@ -337,5 +332,38 @@ export function DataSourceTests(
     expect(await a.oneAToOneB!.reload()).toEqual(
       objectContaining({ bText: "b" })
     );
+  });
+
+  describe("insert relation", () => {
+    it("relation by { $key }", async () => {
+      const aKey = await ADS.insertKey({});
+      const bKey = await BDS.select({ relations: { oneBToOneA: true } }).insert(
+        {
+          oneBToOneA: { $key: aKey },
+        }
+      );
+      expect(bKey.oneBToOneA!.$key).toEqual(aKey);
+    });
+  });
+
+  describe("rootAt", () => {
+    it("to one b", async () => {
+      const bKey = await ADS.rootAt("oneAToOneB").insertKey({
+        bText: "hello",
+      });
+      expect(await BDS.filter({ $is: bKey }).hasRow()).toBeTrue();
+    });
+    it("to many b", async () => {
+      const bKey = await ADS.rootAt("oneAToManyB").insertKey({
+        bText: "hello",
+      });
+      expect(await BDS.filter({ $is: bKey }).hasRow()).toBeTrue();
+    });
+    it("to one b to one c", async () => {
+      const cKey = await ADS.rootAt("oneAToOneB")
+        .rootAt("oneBToOneC")
+        .insertKey({});
+      expect(await CDS.filter({ $is: cKey }).hasRow()).toBeTrue();
+    });
   });
 }

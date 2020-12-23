@@ -1,10 +1,10 @@
 import Paper, { PaperProps } from "@material-ui/core/Paper";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import { ReactNode } from "react";
-import * as React from "react";
+import React from "react";
 import styled from "styled-components";
 import { Override } from "@dabsi/common/typings2/Override";
-import { BoxInCenter } from "@dabsi/system/acl/browser/BoxInCenter";
+import BoxInCenter from "@dabsi/system/acl/browser/BoxInCenter";
 
 const StyledPaper = styled(Paper)`
   padding: ${t => t.theme.spacing(1)}px;

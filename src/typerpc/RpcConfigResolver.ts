@@ -9,8 +9,8 @@ import {
 } from "@dabsi/typedi/Resolver";
 import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
 import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { checkResolverSymbol } from "./../typedi/operators/checkResolver";
-import { resolveSymbol } from "./../typedi/resolve";
+import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
+import { resolveSymbol } from "@dabsi/typedi/resolve";
 
 export type RpcConfigResolver<T extends AnyRpc> = CustomResolver<
   RpcUnresolvedConfig<T>

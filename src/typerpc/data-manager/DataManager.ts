@@ -17,8 +17,8 @@ import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
 import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { PartialConfigKeys } from "./../Config";
-import { DataTableOf } from "./../widget/data-table/DataTable";
+import { PartialConfigKeys } from "@dabsi/typerpc/Config";
+import { DataTableOf } from "@dabsi/typerpc/widget/data-table/DataTable";
 
 // Full<Type>Stack
 export type TDataManager = {

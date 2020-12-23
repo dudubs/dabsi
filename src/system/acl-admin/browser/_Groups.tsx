@@ -1,4 +1,4 @@
-import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
+import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
 import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";

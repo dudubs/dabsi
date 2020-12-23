@@ -1,6 +1,6 @@
 import Typography from "@material-ui/core/Typography";
 import React, { ComponentType } from "react";
-import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
+import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 
 export default function ({
   title,

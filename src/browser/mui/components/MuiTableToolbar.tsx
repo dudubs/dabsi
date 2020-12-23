@@ -11,7 +11,7 @@ import Typography, { TypographyProps } from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
 import SearchIcon from "@material-ui/icons/Search";
 import clsx from "clsx";
-import * as React from "react";
+import React from "react";
 import { ReactNode, useEffect, useState } from "react";
 
 const useStyles = makeStyles(theme => ({

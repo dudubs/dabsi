@@ -1,6 +1,6 @@
-import { fromConstantCase } from "@dabsi/common/string/fromConstantCase";
+import fromConstantCase from "@dabsi/common/string/fromConstantCase";
 import { matchCase } from "@dabsi/common/string/matchCase";
-import { toTitleCase } from "@dabsi/common/string/toTitleCase";
+import toTitleCase from "@dabsi/common/string/toTitleCase";
 
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
 
@@ -27,6 +27,7 @@ export default class LangSerivce {
             ? [matchTokenCase(string), props[params[index]]]
             : [matchTokenCase(string)]
         )
+        [Symbol.iterator]()
     );
   }
 }

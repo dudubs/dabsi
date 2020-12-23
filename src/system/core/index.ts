@@ -1,4 +1,4 @@
-import { Module } from "@dabsi/typedi/decorators/Module";
+import { Module } from "@dabsi/typedi";
 
 @Module()
-export default class SystemCoreModule {}
+export default class CoreSystemModule {}

@@ -1,15 +1,14 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
 import {
   AnyRpc,
   AnyRpcHandler,
   Rpc,
   RpcCommand,
   RpcConnection,
+  RpcError,
   RpcUnresolvedConfig,
 } from "@dabsi/typerpc/Rpc";
 import { RpcNamespaceHandler } from "@dabsi/typerpc/RpcNamespaceHandler";
-import { RpcError } from "./Rpc";
 
 export type RpcNamespace<BaseRpc extends AnyRpc = AnyRpc> = Rpc<{
   Handler: {};
@@ -27,8 +26,6 @@ export type RpcNamespace<BaseRpc extends AnyRpc = AnyRpc> = Rpc<{
       key: string,
       handler: RpcNamespaceHandler
     ): RpcUnresolvedConfig<AnyRpc>;
-
-    getContext?(): AnyResolverMap;
 
     checkNamespace?(
       nsHandler: RpcNamespaceHandler,

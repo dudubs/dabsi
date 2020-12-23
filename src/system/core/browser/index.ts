@@ -1,18 +1,11 @@
+import { MuiSystemView } from "@dabsi/system/core/browser/MuiSystemView";
+import {
+  catchSystemCommand,
+  commandSystemRpc,
+  SystemRpcPath,
+} from "@dabsi/system/core/SystemRpc";
 import React from "react";
 import ReactDOM from "react-dom";
-import { MuiDataInputMapView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputMapView";
-import { MuiDataInputView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputView";
-import { MuiTextInputView } from "@dabsi/browser/mui/rpc/inputs/MuiTextInputView";
-import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
-import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
-import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
-import { DataInput } from "@dabsi/typerpc/input/data-input/DataInput";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
-import { Form } from "@dabsi/typerpc/widget/form/Form";
-import { SystemView } from "@dabsi/system/view/SystemView";
-import { commandSystemRpc, SystemRpcPath } from "@dabsi/system/core/SystemRpc";
-import { MuiSystemView } from "@dabsi/system/core/browser/MuiSystemView";
 
 commandSystemRpc((path, payload) => {
   return fetch(SystemRpcPath, {
@@ -23,6 +16,28 @@ commandSystemRpc((path, payload) => {
     .then(res => res.json())
     .then(res => res.result);
 });
+
+export async function commandSystemRpcOnBrowser<T>(
+  { formData }: { formData?: FormData },
+  callback: () => Promise<T>
+) {
+  if (!formData) formData = new FormData();
+  if (formData.has("command")) {
+    throw new Error();
+  }
+
+  const { path, payload, resolve } = catchSystemCommand(callback);
+  formData.set("command", JSON.stringify({ path, payload }));
+
+  resolve(
+    await fetch(SystemRpcPath, {
+      method: "POST",
+      body: formData,
+    })
+      .then(res => res.json())
+      .then(res => res.result)
+  );
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   const container = document.createElement("div");

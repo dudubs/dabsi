@@ -7,7 +7,7 @@ import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
 import { ServerModule } from "@dabsi/modules/ServerModule";
 
 @Module()
-export class ExpressModule {
+export default class ExpressModule {
   log = this.server.log.get("EXPRESS");
 
   constructor(@Inject() protected server: ServerModule) {

@@ -11,7 +11,7 @@ if (require.main === module)
       const fileSource = readFileSync(fileName, "utf8");
       const fileDir = path.dirname(fileName);
       const fileFixedSource = fileSource.replace(
-        /(?<type>import|from) "(?<path>[^"\n]+)";/g,
+        /(?<type>import|from|module) "(?<path>[^"\n]+)"/g,
         (...args) => {
           const { type, path: originalImportPath } = args[args.length - 1] as {
             path: string;

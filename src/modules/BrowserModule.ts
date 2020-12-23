@@ -7,7 +7,7 @@ import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DABSI_PATH, DABSI_SRC_PATH } from "@dabsi/index";
 import { Cli } from "@dabsi/modules/Cli";
-import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import ProjectPlatform from "@dabsi/modules/ProjectPlatform";
@@ -22,7 +22,7 @@ import fs from "fs";
 import * as path from "path";
 import tsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
-import { DABSI_CURRENT_PATH } from "../index";
+import { DABSI_CURRENT_PATH } from "@dabsi/index";
 
 @Module({
   dependencies: [DevModule, ExpressModule],
@@ -60,6 +60,7 @@ export default class BrowserModule {
           res.setHeader("Content-Type", "text/html");
           res.send(
             makeHtml({
+              head: '<meta charset="utf-8" />',
               scripts: [
                 ...this.scripts,
                 ...["vendor", "index", "runtime"].map(
@@ -116,7 +117,7 @@ export default class BrowserModule {
     await this.makeModule.makeJsonFile(projectPlatform.tsConfigFileName, {
       extends: relativePosixPath(
         projectPlatform.project.dir,
-        path.join(DABSI_PATH, projectPlatform.tsConfigBaseName)
+        path.join(DABSI_PATH, `tsconfig.base.${projectPlatform.name}.json`)
       ),
       ...pick(projectPlatform.project.tsConfigInfo.config, "compilerOptions"),
       include: [

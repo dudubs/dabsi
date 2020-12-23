@@ -1,11 +1,16 @@
-import { isConstructor } from "@dabsi/common/object/isConstructor";
+import { WeakId } from "@dabsi/common/WeakId";
+import { touchMap } from "@dabsi/common/map/touchMap";
+import { PropertyMap } from "@dabsi/common/map/PropertyMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Cli } from "@dabsi/modules/Cli";
+import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
 import { ServerModule } from "@dabsi/modules/ServerModule";
-import { Inject, Module, ModuleProvider, Resolver } from "@dabsi/typedi";
-import { Consumer } from "@dabsi/typedi/Consumer";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
+import { Inject, Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectManager from "@dabsi/typestack/ProjectManager";
 import { readdirSync } from "fs";
@@ -50,7 +55,10 @@ export class DbModule {
     });
     Resolver.provide(
       runner.context,
-      Connection.provide(() => this.connection)
+      Connection.provide(() => this.connection),
+      DataSourceResolver.provide(() => entityType =>
+        DataEntitySource.create(entityType, () => this.connection)
+      )
     );
   }
 
@@ -109,10 +117,25 @@ export class DbModule {
 
   connectionOptions: ConnectionOptions | null = null;
 
+  protected hooks = {
+    beforeInit: HooksInstaller.empty as () => Awaitable,
+    afterInit: HooksInstaller.empty as () => Awaitable,
+
+    initRelation: HooksInstaller.empty as (props: {
+      entityType: Function;
+      entityPropertyName: string;
+      relationType: Function;
+      relation;
+    }) => Awaitable,
+  };
+
+  install = HooksInstaller(this.hooks);
+
   @Once()
   async init() {
     await this.projectManager.init();
     await this._load();
+    await this.hooks.beforeInit();
     this.connection = await createConnection({
       logging: ["schema"],
       ...(this.connectionOptions || {
@@ -127,11 +150,13 @@ export class DbModule {
         ]),
       ],
     });
+    await this.hooks.afterInit();
   }
 }
 
 /*
 
+TypeMap();
 @DbProvider({})
 
  */

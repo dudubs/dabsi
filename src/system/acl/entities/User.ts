@@ -8,7 +8,7 @@ import {
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { getPasswordHash } from "@dabsi/system-old/server/acl/getPasswordHash";
-import { Group } from "@dabsi/system/acl/entities/AclGroup";
+import { Group } from "@dabsi/system/acl/entities/Group";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
 
 @Entity({ name: "acl/users" })

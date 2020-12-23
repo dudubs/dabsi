@@ -8,7 +8,10 @@ import { DataCursor } from "@dabsi/typedata/DataCursor";
 import { DataFieldsTranslator } from "@dabsi/typedata/DataFieldsTranslator";
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
-import { DataEntityInfo, getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
+import {
+  DataEntityInfo,
+  getDataEntityInfo,
+} from "@dabsi/typedata/data-entity/DataEntityInfo";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 
 export type DataEntityCursorBase = {
@@ -20,7 +23,7 @@ export type DataEntityCursorBase = {
 
   relationKeys: {
     relation: EntityRelation;
-    key: object;
+    key: DataEntityKey;
   }[];
 
   columnKeys: { metadata: ColumnMetadata; key: any }[];
@@ -28,7 +31,7 @@ export type DataEntityCursorBase = {
 
 export type DataEntityCursorParent = DataEntityCursorBase & {
   relation: EntityRelation;
-  relationKey: object;
+  relationKey: DataEntityKey;
 };
 
 export type DataEntityCursor = DataEntityCursorBase & {
@@ -51,6 +54,14 @@ export namespace DataEntityCursor {
     cursor: DataCursor,
     entityType: ObjectType<any>
   ): DataEntityCursor {
+    for (const propertyName of cursor.root) {
+      const entityMetadata = connection.getMetadata(entityType);
+      const relationMetadata = entityMetadata.relations.find(
+        r => r.propertyName === propertyName
+      );
+      entityType = <Function>relationMetadata!.type;
+    }
+
     let typeInfo = DataTypeInfo.get(entityType);
     let parent: DataEntityCursor["parent"] = undefined;
 
@@ -73,10 +84,11 @@ export namespace DataEntityCursor {
         typeInfo,
         parent,
         relation,
-        relationKey: DataEntityKey.parse(
-          relation.right.entityMetadata,
-          path.key
-        ),
+        relationKey: {
+          object: DataEntityKey.parse(relation.right.entityMetadata, path.key),
+          text: path.key,
+        },
+
         ...getChildKeys(typeInfo.type, path.keys),
       };
 
@@ -138,8 +150,14 @@ export namespace DataEntityCursor {
       for (const [propertyName, value] of entries(dataChildKeys)) {
         const relation = DataEntityInfo.propertyNameToRelation[propertyName];
         if (relation) {
-          const key = DataEntityKey.parse(relation.right.entityMetadata, value);
-          relationKeys.push({ relation, key: key });
+          const objectKey = DataEntityKey.parse(
+            relation.right.entityMetadata,
+            value
+          );
+          relationKeys.push({
+            relation,
+            key: { object: objectKey, text: value },
+          });
           continue;
         }
 
@@ -171,7 +189,12 @@ export namespace DataEntityCursor {
 
     let schema = qb.query.alias;
     for (let path = cursor.parent; path; path = path.parent) {
-      schema = path.relation.joinQeb("INNER", qb, schema, path.relationKey!);
+      schema = path.relation.joinQeb(
+        "INNER",
+        qb,
+        schema,
+        path.relationKey.object!
+      );
       join(schema, path);
     }
 
@@ -194,7 +217,7 @@ export namespace DataEntityCursor {
         });
       }
       for (const { relation, key } of path.relationKeys) {
-        relation.joinQeb("INNER", qb, schema, key);
+        relation.joinQeb("INNER", qb, schema, key.object);
       }
       qb.filter({
         $and: path.columnKeys.map(column => ({

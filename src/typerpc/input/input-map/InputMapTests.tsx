@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { focusNextTest } from "@dabsi/typeorm/exp/tests/focusNextTest";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";

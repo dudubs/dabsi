@@ -6,7 +6,7 @@ import BoolInputView, {
 } from "@dabsi/typerpc/input/bool-input/BoolInputView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import Checkbox, { CheckboxProps } from "@material-ui/core/Checkbox";
-import * as React from "react";
+import React from "react";
 import { ReactNode } from "react";
 
 export type MuiCheckBoxInputViewProps<

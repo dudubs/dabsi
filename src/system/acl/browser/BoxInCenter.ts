@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-export const BoxInCenter = styled.div`
+export default styled.div`
   display: block;
   text-align: center;
   position: absolute;

@@ -77,7 +77,7 @@ export class EntityRelationSide<T> {
   getIdCondition(
     qb: SelectQueryBuilder<any>,
     schema: string,
-    key: object
+    objectKey: object
   ): string {
     let sql = "";
     for (let column of this.entityMetadata.primaryColumns) {
@@ -85,7 +85,7 @@ export class EntityRelationSide<T> {
       sql += `${sql ? " AND " : ""}${schema}.${
         column.databaseName
       }=:${parameterName}`;
-      qb.setParameter(parameterName, key[column.propertyName]);
+      qb.setParameter(parameterName, objectKey[column.propertyName]);
     }
     return sql;
   }

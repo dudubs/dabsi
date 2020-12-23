@@ -9,7 +9,7 @@ import {
 import { Override } from "@dabsi/common/typings2/Override";
 import { ReactCallback } from "@dabsi/react/ReactCallback";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";
-import * as React from "react";
+import React from "react";
 import { ReactNode } from "react";
 
 export type MuiDangerDialogProps = Override<

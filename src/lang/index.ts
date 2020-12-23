@@ -1,5 +1,5 @@
 import LangFactory from "@dabsi/lang/LangFactory";
-export * from "./LangFactory";
+export * from "@dabsi/lang/LangFactory";
 
 declare global {
   let lang: typeof LangFactory;

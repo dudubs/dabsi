@@ -5,7 +5,7 @@ import { partialProps } from "@dabsi/react/utils/partialProps";
 import Button, { ButtonProps } from "@material-ui/core/Button";
 import IconButton, { IconButtonProps } from "@material-ui/core/IconButton";
 import Tooltip, { TooltipProps } from "@material-ui/core/Tooltip";
-import * as React from "react";
+import React from "react";
 import {
   ComponentType,
   createElement,

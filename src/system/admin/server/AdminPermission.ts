@@ -5,8 +5,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Group } from "@dabsi/system/acl/entities/AclGroup";
-import { User } from "@dabsi/system/acl/entities/AclUser";
+import { Group } from "@dabsi/system/acl/entities/Group";
+import { User } from "@dabsi/system/acl/entities/User";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 
 @Entity({ name: "admin/permissions" })

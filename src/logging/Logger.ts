@@ -35,7 +35,11 @@ let handlers = new Set<(log: Log) => void>();
 
 export function Logger(loggerName: string = "") {
   let currentLevel =
-    LogLevel.INFO | LogLevel.WARN | LogLevel.FATAL | LogLevel.ERROR;
+    LogLevel.INFO |
+    LogLevel.WARN |
+    LogLevel.FATAL |
+    LogLevel.ERROR |
+    (process.env.LOG_TRACE ? LogLevel.TRACE : 0);
   const children: Record<string, Logger> = {};
   log.info = logLevel("INFO");
   log.warn = logLevel("WARN");

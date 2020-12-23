@@ -5,7 +5,7 @@ import { Debounce } from "@dabsi/common/async/Debounce";
 import { Inject, Module } from "@dabsi/typedi";
 import { DevModule } from "@dabsi/typestack/DevModule";
 import BrowserModule from "@dabsi/modules/BrowserModule";
-import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 
 @Module()
 export class BrowserDevModule {
@@ -14,9 +14,9 @@ export class BrowserDevModule {
   constructor(
     @Inject() protected devModule: DevModule,
     @Inject() expressModule: ExpressModule,
-    @Inject() mBrowserPlatform: BrowserModule
+    @Inject() browserModule: BrowserModule
   ) {
-    mBrowserPlatform.scripts.push("/reload/reload.js");
+    browserModule.scripts.push("/reload/reload.js");
 
     devModule.install({
       buildWatchdog: watchdog => {
@@ -25,10 +25,10 @@ export class BrowserDevModule {
         });
       },
       runAsParent: async () => {
-        await mBrowserPlatform.init();
-        webpack(mBrowserPlatform.webpackConfig).watch(
+        await browserModule.init();
+        webpack(browserModule.webpackConfig).watch(
           {},
-          mBrowserPlatform.webpackCallback
+          browserModule.webpackCallback
         );
       },
     });

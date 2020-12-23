@@ -23,6 +23,7 @@ export type DataCursorPath<T = any> = {
 };
 
 export const EmptyDataCursor: DataCursor = {
+  root: [],
   selection: {},
   location: [],
   keys: {},
@@ -31,10 +32,12 @@ export const EmptyDataCursor: DataCursor = {
   take: 0,
   order: [],
   type: "",
+  // textFilters: {...} // TODO
 };
 
 // TODO: change to type, EmptyDataCursor const.
 export type DataCursor<T = any> = {
+  root: string[];
   location: DataCursorPath[];
 
   type: string;
@@ -87,26 +90,6 @@ export namespace DataCursor {
     return {
       ...cursor,
       keys: { ...cursor.keys, [propertyName]: key },
-    };
-  }
-
-  export function concat(left: DataCursor, right: DataCursor): DataCursor {
-    if (right.location.length) {
-      return {
-        ...right,
-        location: [...left.location, ...right.location],
-        selection: DataSelection.merge(left.selection, right.selection),
-      };
-    }
-    return {
-      location: left.location,
-      keys: { ...right.keys, ...left.keys },
-      filter: DataExp(left.filter, right.filter),
-      selection: DataSelection.merge(left.selection, right.selection),
-      skip: right.skip,
-      take: right.take,
-      order: right.order,
-      type: right.type,
     };
   }
 }

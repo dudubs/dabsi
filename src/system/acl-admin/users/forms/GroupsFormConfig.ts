@@ -1,8 +1,8 @@
-import { User } from "../../../acl/entities/AclUser";
-import { DataRow } from "./../../../../typedata/DataRow";
+import { User } from "@dabsi/system/acl/entities/User";
+import { DataRow } from "@dabsi/typedata/DataRow";
 import { AclUserGroupsForm } from "@dabsi/system/acl-admin/users/forms/GroupsForm";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import { RpcConfigResolver } from "./../../../../typerpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
 export default RpcConfigResolver(
   AclUserGroupsForm,

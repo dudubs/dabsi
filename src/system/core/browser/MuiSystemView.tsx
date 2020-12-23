@@ -1,7 +1,7 @@
 import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
 import { useProvider } from "@dabsi/react/useProvider";
 import { useMuiSystemViewTheme } from "@dabsi/system/core/browser/useMuiSystemViewTheme";
-import { SystemRouter } from "@dabsi/system/core/SystemRouter";
+import SystemRouter from "@dabsi/system/core/SystemRouter";
 import { HistoryProvider } from "@dabsi/typerouter/History";
 import { ReactRouter } from "@dabsi/typerouter/ReactRouter";
 import { createBrowserHistory } from "history";
@@ -19,6 +19,5 @@ export function MuiSystemView() {
   useProvider(children => <MuiProvider children={children} />);
 
   useMuiSystemViewTheme();
-
   return provider(<ReactRouter router={SystemRouter} />);
 }

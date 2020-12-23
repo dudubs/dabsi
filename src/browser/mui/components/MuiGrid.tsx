@@ -7,7 +7,7 @@ export type MuiGridProps = { item?: GridProps } & Omit<
   "item" | "container"
 >;
 
-export function MuiGrid({ item, children, ...props }: MuiGridProps) {
+export default function MuiGrid({ item, children, ...props }: MuiGridProps) {
   return (
     <Grid {...props} container>
       {Children.map(children, child => {

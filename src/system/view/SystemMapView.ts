@@ -1,14 +1,22 @@
 import { Override } from "@dabsi/common/typings2/Override";
 import { Renderer } from "@dabsi/react/renderer";
 import { RendererOrProps } from "@dabsi/react/RendererOrProps";
-import { SystemView, SystemViewContext } from "@dabsi/system/view/SystemView";
+import { SystemView } from "@dabsi/system/view/SystemView";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { TWidget, Widget } from "@dabsi/typerpc/widget/Widget";
-import { AnyWidgetRecord } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
-import { MapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+import {
+  AnyWidgetRecord,
+  WidgetMap,
+} from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import {
+  MapView,
+  WidgetMapView,
+} from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
 import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
+import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import {
   ComponentType,
@@ -16,13 +24,8 @@ import {
   Fragment,
   ReactElement,
   ReactNode,
-  useContext,
   useRef,
 } from "react";
-import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
-import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
-import { WidgetMapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
-import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 
 export type AnyMapViewComponent = ComponentType<{
   children: Renderer<MapView<WidgetViewProps<any>>>;

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { ReactElement } from "react";
 import { keys } from "@dabsi/common/object/keys";
 import { Renderer } from "@dabsi/react/renderer";

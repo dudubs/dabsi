@@ -1,5 +1,5 @@
 import Button, { ButtonProps } from "@material-ui/core/Button";
-import * as React from "react";
+import React from "react";
 import { ReactElement, ReactNode } from "react";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { Hook } from "@dabsi/react/Hook";
@@ -14,7 +14,7 @@ import {
   FormViewEvent,
   FormViewProps,
 } from "@dabsi/typerpc/widget/form/FormView";
-import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
+import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 import { MuiThemeProvider } from "@dabsi/browser/mui/MuiSystem";
 import { MuiFormViewTheme } from "@dabsi/browser/mui/rpc/MuiFormViewTheme";
 import { Renderer } from "@dabsi/react/renderer";

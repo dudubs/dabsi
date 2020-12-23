@@ -26,7 +26,7 @@ export function useMuiSystemViewTheme(callback?: UseSystemViewThemeCallback) {
     use(Form, MuiFormView);
     use(DataInputMap, MuiDataInputMapView);
     use(BoolInput, MuiCheckboxInputView);
-    use(DataInput, MuiDataInputView);
+    // use(DataInput, MuiDataInputView);
     use(DataTable, MuiDataTableView);
 
     use(InputMap, props => createElement(MuiGridMapView, { for: props }));

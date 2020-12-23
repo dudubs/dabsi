@@ -4,7 +4,7 @@ import { ResolverMap, Resolver } from "@dabsi/typedi/Resolver";
 
 export function checkAndResolve<T>(
   resolver: Resolver<T>,
-  context: ResolverMap<any> = {}
+  context: ResolverMap<any>
 ): T {
   checkResolver(resolver, context);
   return resolve(resolver, context);

@@ -3,7 +3,7 @@
 // import {TestConnection} from "@dabsi/typedata/tests/TestConnection";
 //
 //
-// testm(__filename, () => {
+
 //
 //     class BData extends DataUnion(EBase, "bType", {
 //         EChild1,

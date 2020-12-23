@@ -2,6 +2,7 @@ import { EntityMetadata } from "typeorm";
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { KeyObject } from "@dabsi/typedata/KeyObject";
+export type DataEntityKey = { object: object; text: string };
 
 export namespace DataEntityKey {
   export function parse(metadata: EntityMetadata, text: string): KeyObject {
@@ -10,6 +11,12 @@ export namespace DataEntityKey {
     } else {
       return pick(metadata, KeyObject.parse(text));
     }
+  }
+  export function parse2(
+    metadata: EntityMetadata,
+    text: string
+  ): DataEntityKey {
+    return { text, object: parse(metadata, text) };
   }
 
   export function stringify(metadata: EntityMetadata, keyObject: KeyObject) {
@@ -26,50 +33,4 @@ export namespace DataEntityKey {
       definedAt(entity, column.propertyName),
     ]);
   }
-
-  // export function load(
-  //     metadata: EntityMetadata,
-  //     keyPropertyNameToAliasName: Record<string, string>,
-  //     selector: QueryBuilderSelector,
-  //     raw: Record<string, any>,
-  // ): string {
-  //     if (metadata.primaryColumns.length === 1) {
-  //         const [column] = metadata.primaryColumns;
-  //         return String(
-  //             selector.load(raw,
-  //                 keyPropertyNameToAliasName[column.propertyName]
-  //             )
-  //         )
-  //     } else {
-  //         return KeyObject.stringify(
-  //             mapObject(keyPropertyNameToAliasName, aliasName =>
-  //                 selector.load(
-  //                     raw,
-  //                     keyPropertyNameToAliasName[aliasName]
-  //                 )
-  //             )
-  //         )
-  //     }
-  // }
-  //
-  // export function select(
-  //     metadata: EntityMetadata,
-  //     selector: QueryBuilderSelector,
-  //     schema: string
-  // ): (raw: object) => string {
-  //     const keyAliasNamePrefix = schema + '__key_';
-  //     const keyPropertyNameToAliasName: Record<string, string> = {};
-  //     for (const column of metadata.primaryColumns) {
-  //         const keyAliasName = keyAliasNamePrefix + column.propertyName;
-  //         keyPropertyNameToAliasName[column.propertyName] = keyAliasName;
-  //         selector.select(column.databaseName, keyAliasName, schema)
-  //     }
-  //
-  //     return raw => load(
-  //         metadata,
-  //         keyPropertyNameToAliasName,
-  //         selector,
-  //         raw
-  //     )
-  // }
 }

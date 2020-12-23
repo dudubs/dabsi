@@ -3,7 +3,10 @@ import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Emitter } from "@dabsi/react/reactor/useEmitter";
 import { Route } from "@dabsi/typerouter/Route";
 import { AnyRouter, Router, TRouter } from "@dabsi/typerouter/Router";
-import { AnyRouterLocation, RouterLocation } from "@dabsi/typerouter/RouterLocation";
+import {
+  AnyRouterLocation,
+  RouterLocation,
+} from "@dabsi/typerouter/RouterLocation";
 
 type _RendererProps<T extends TRouter, R extends Route = Route> = {
   location: RouterLocation<T>;
@@ -38,7 +41,7 @@ export type ReactRouterProps = {
   find(router);
 };
 
-export function ReactRouterView<T extends TRouter>(
+export default function ReactRouterView<T extends TRouter>(
   router: Router<T>,
   optionsOrRenderer: ReactRouterOptions<T> | _Renderer<T>
 ) {

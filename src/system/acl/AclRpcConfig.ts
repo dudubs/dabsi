@@ -1,9 +1,9 @@
 import { getPasswordHash } from "@dabsi/system-old/server/acl/getPasswordHash";
-import { User } from "@dabsi/system/acl/entities/AclUser";
+import { User } from "@dabsi/system/acl/entities/User";
 import { AclRpc } from "@dabsi/system/acl/AclRpc";
 import { SystemSession } from "@dabsi/system/core/SystemSession";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSources } from "@dabsi/typedata/DataSources";
+import DataSources from "@dabsi/typedata/DataSources";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
 export default RpcConfigResolver(

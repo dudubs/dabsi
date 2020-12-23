@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
 import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";

@@ -1,3 +1,4 @@
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 // TODO: DataSource.clone(), DataSource.freeze()
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
@@ -12,11 +13,14 @@ import {
   DataSelection,
 } from "@dabsi/typedata/data-selection/DataSelection";
 import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
-import { DataCursor } from "@dabsi/typedata/DataCursor";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { DataFields, DataFieldsRow } from "@dabsi/typedata/DataFields";
 import { DataKey, DataKeyInput } from "@dabsi/typedata/DataKey";
 import { DataNullsSort, DataOrder, DataSort } from "@dabsi/typedata/DataOrder";
-import { DataRelationKeys, DataRelationType } from "@dabsi/typedata/DataRelation";
+import {
+  DataRelationKeys,
+  DataRelationType,
+} from "@dabsi/typedata/DataRelation";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
 import { DataUnionChildren } from "@dabsi/typedata/DataUnion";
@@ -34,13 +38,6 @@ export function DataKeyOrKeys<T>(keyOrKeys: DataKeyOrKeysInput<T>): string[] {
 
 export type BasedDataSource<T> = DataSource<BaseType<T> & { _ }>;
 
-type _Path = {
-  type: "at" | "hasAt";
-  parent?: _Path;
-  filter?: DataExp<any>;
-  propertyName: string;
-};
-
 export abstract class DataSource<T> {
   // TODO: rename to getCountAndRows
 
@@ -54,6 +51,9 @@ export abstract class DataSource<T> {
   // TODO: rename to getRows()
   abstract getRows(): Promise<DataRow<T>[]>;
 
+  async getRowMap(): Promise<Record<string, DataRow<T>>> {
+    return mapArrayToObject(await this.getRows(), row => [row.$key, row]);
+  }
   next(pageSize: number): DataSource<T> {
     return this.updateCursor({
       skip: this.cursor.skip + pageSize,
@@ -125,6 +125,11 @@ export abstract class DataSource<T> {
 
   // relation
 
+  protected abstract updateRelationKeys(
+    keysToAdd: string[],
+    keysToRemove: string[]
+  ): Promise<void>;
+
   async updateRelations(keyMap: Record<string, boolean>) {
     const existsKeys = new Set(
       await this.filter({
@@ -142,13 +147,16 @@ export abstract class DataSource<T> {
         existsKeys.has(key) && keysToRemove.push(key);
       }
     }
-    keysToAdd.length && (await this.addKeys(keysToAdd));
-    keysToRemove.length && (await this.removeKeys(keysToRemove));
+    await this.updateRelationKeys(keysToAdd, keysToRemove);
   }
 
-  protected abstract addKeys(keys: string[]): Promise<void>;
+  protected addKeys(keys: string[]): Promise<void> {
+    return this.updateRelationKeys(keys, []);
+  }
 
-  protected abstract removeKeys(keys: string[]): Promise<void>;
+  protected removeKeys(keys: string[]): Promise<void> {
+    return this.updateRelationKeys([], keys);
+  }
 
   protected abstract deleteKeys(keys: string[]): Promise<void>;
 
@@ -233,7 +241,7 @@ export abstract class DataSource<T> {
 
   abstract cursor: DataCursor;
 
-  protected abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
+  abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
 
   // asMutable()
   // asImmutable()
@@ -364,6 +372,21 @@ export abstract class DataSource<T> {
     return this.updateCursor(cursor => {
       cursor.filter = DataExp(this.cursor.filter, filter);
       return cursor;
+    });
+  }
+
+  rootAt<T, K extends DataRelationKeys<T>>(
+    this: DataSource<T>,
+    key: K
+  ): DataSource<DataRelationType<T[K]>> {
+    return this.withCursor({
+      ...this.cursor,
+      ...EmptyDataCursor,
+      root: [
+        ...this.cursor.root,
+        ...this.cursor.location.map(p => p.propertyName),
+        key,
+      ],
     });
   }
 }

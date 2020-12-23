@@ -1,4 +1,4 @@
-import { Router } from "@dabsi/typerouter/Router";
+import Router from "@dabsi/typerouter/Router";
 import { AdminRouter } from "@dabsi/system/admin/common/index";
 
 export default AdminRouter.register(

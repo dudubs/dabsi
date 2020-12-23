@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
 import { testRpc } from "@dabsi/typerpc/RpcTester";
 import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";

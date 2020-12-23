@@ -162,21 +162,19 @@ export function forEachTestRelation(
   }
 }
 
-testm(__filename, () => {
-  forEachTestRelation(
-    [
-      ["A", "B"],
-      ["A", "A"],
-    ],
-    relationName => {
-      it(`expect to inverse ${relationName}`, () => {
-        const inverseRelationName = getInverseRelationName(
-          parseRelationName(relationName)
-        );
-        expect(relationName).toEqual(
-          getInverseRelationName(parseRelationName(inverseRelationName))
-        );
-      });
-    }
-  );
-});
+forEachTestRelation(
+  [
+    ["A", "B"],
+    ["A", "A"],
+  ],
+  relationName => {
+    it(`expect to inverse ${relationName}`, () => {
+      const inverseRelationName = getInverseRelationName(
+        parseRelationName(relationName)
+      );
+      expect(relationName).toEqual(
+        getInverseRelationName(parseRelationName(inverseRelationName))
+      );
+    });
+  }
+);

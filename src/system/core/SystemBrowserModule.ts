@@ -1,12 +1,11 @@
 import BrowserModule from "@dabsi/modules/BrowserModule";
-import { ExpressModule } from "@dabsi/modules/ExpressModule";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import { SystemModule } from "@dabsi/system/core/SystemModule";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module({})
-export class SystemBrowserPlatform {
+export class SystemBrowserModule {
   constructor(
-    @Inject() expressModule: ExpressModule,
     @Inject() systemModule: SystemModule,
     @Inject() browserModule: BrowserModule
   ) {

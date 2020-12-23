@@ -1,6 +1,9 @@
-import {TargetCase} from "@dabsi/common/string/matchCase";
+import { TargetCase } from "@dabsi/common/string/matchCase";
 
-export const toTitleCase: TargetCase = words => words
-    .map(text => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase())
-    .join(" ");
-
+export default <TargetCase>(words => {
+  let text = "";
+  for (const word of words) {
+    text += text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  }
+  return text;
+});

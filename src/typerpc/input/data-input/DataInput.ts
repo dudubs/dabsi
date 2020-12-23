@@ -16,8 +16,8 @@ import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { IfUndefined } from "./../../../common/typings2/boolean/index";
-import { TStruct } from "./../../../struct/Struct";
+import { IfUndefined } from "@dabsi/common/typings2/boolean/index";
+import { TStruct } from "@dabsi/struct/Struct";
 
 export type DataInputTypes<T extends TDataInput> = _Types<T>;
 export type AnyDataInputTypes = _Types<TDataInput>;

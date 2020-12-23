@@ -9,10 +9,10 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import MenuIcon from "@material-ui/icons/Menu";
 import clsx from "clsx";
-import * as React from "react";
+import React from "react";
 import { useStore } from "@dabsi/react/useStore";
 import { Struct } from "@dabsi/struct";
-import { MuiGrid } from "@dabsi/browser/mui/components/MuiGrid";
+import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 
 const drawerWidth = 260;
 export const useStyles = makeStyles(theme => ({

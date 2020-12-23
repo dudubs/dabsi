@@ -1,7 +1,13 @@
-import * as React from "react";
+import React from "react";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import { MuiButton, MuiButtonProps } from "@dabsi/browser/mui/components/MuiButton";
-import { MuiDangerDialog, MuiDangerDialogProps } from "@dabsi/browser/mui/components/MuiDangerDialog";
+import {
+  MuiButton,
+  MuiButtonProps,
+} from "@dabsi/browser/mui/components/MuiButton";
+import {
+  MuiDangerDialog,
+  MuiDangerDialogProps,
+} from "@dabsi/browser/mui/components/MuiDangerDialog";
 
 export type MuiDangerButtonProps = MuiButtonProps<{
   MuiDangerDialogProps?: Partial<MuiDangerDialogProps>;
@@ -16,11 +22,11 @@ export function MuiDangerButton({
     <MuiButton
       danger
       {...props}
-      renderOnClick={(close) => (
+      renderOnClick={close => (
         <MuiDangerDialog
           {...mergeProps(MuiDangerDialogProps, {
             onCancel: () => close(),
-            onConfirm: (event) => {
+            onConfirm: event => {
               close();
               onClick?.(event);
             },

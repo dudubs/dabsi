@@ -5,8 +5,8 @@ import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { MakeModule } from "@dabsi/typestack/MakeModule";
 import Project from "@dabsi/typestack/Project";
 import path from "path";
-import { Cli } from "../modules/Cli";
-import ProjectModule from "./ProjectModule";
+import { Cli } from "@dabsi/modules/Cli";
+import ProjectModule from "@dabsi/typestack/ProjectModule";
 
 @Module()
 export default class ProjectManager {

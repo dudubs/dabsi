@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
-import { User } from "@dabsi/system/acl/entities/AclUser";
+import { User } from "@dabsi/system/acl/entities/User";
 
 @Entity({ name: "acl/groups" })
 export class Group {

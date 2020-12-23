@@ -6,7 +6,7 @@ import DialogContent, {
   DialogContentProps,
 } from "@material-ui/core/DialogContent";
 import DialogTitle, { DialogTitleProps } from "@material-ui/core/DialogTitle";
-import * as React from "react";
+import React from "react";
 import { ReactNode } from "react";
 import {
   MuiButton,

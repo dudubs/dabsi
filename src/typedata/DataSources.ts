@@ -1,12 +1,12 @@
-import { Connection } from "typeorm";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Type } from "@dabsi/common/typings2/Type";
+import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
+import { DataSource } from "@dabsi/typedata/DataSource";
 import { Consumer } from "@dabsi/typedi/Consumer";
 import { CustomResolver } from "@dabsi/typedi/Resolver";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
-import { DataSource } from "@dabsi/typedata/DataSource";
 
-export function DataSources<T extends Record<string, Type<any>>>(
+//
+export default function DataSources<T extends Record<string, Type<any>>>(
   typeMap: T
 ): CustomResolver<
   {
@@ -14,8 +14,7 @@ export function DataSources<T extends Record<string, Type<any>>>(
   }
 > {
   return Consumer(
-    [Connection],
-    connection =>
-      <any>mapObject(typeMap, type => DataEntitySource.create(type, connection))
+    { resolve: DataSourceResolver },
+    c => <any>mapObject(typeMap, type => c.resolve(type))
   );
 }

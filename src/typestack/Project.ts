@@ -1,7 +1,7 @@
 import path from "path";
 import { DABSI_ROOT_DIR } from "@dabsi/index";
 import { TsConfigInfo } from "@dabsi/typestack/TsConfigInfo";
-import ProjectModule from "./ProjectModule";
+import ProjectModule from "@dabsi/typestack/ProjectModule";
 
 export default class Project {
   constructor(public dir: string) {}

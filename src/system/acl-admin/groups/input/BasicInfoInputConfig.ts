@@ -1,5 +1,5 @@
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
-import { Group } from "@dabsi/system/acl/entities/AclGroup";
+import { Group } from "@dabsi/system/acl/entities/Group";
 import { AclGroupBasicInfoInput } from "@dabsi/system/acl-admin/groups/input/BasicInfoInput";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { DataRow } from "@dabsi/typedata/DataRow";

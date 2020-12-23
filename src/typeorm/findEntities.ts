@@ -1,5 +1,6 @@
 import { getMetadataArgsStorage } from "typeorm";
 
+export function getEntityChildren() {}
 export function findEntities(targets: Function[]): Function[] {
   const cache = new Set<Function>();
   const args = getMetadataArgsStorage();

@@ -6,8 +6,6 @@
     "./dist",
     "./**/browser",
     "./src/system-old/browser",
-    "./src/typedata/old",
-    "./src/typedata/DataTable",
-    "./src/system-old/server/acl/old/**"
+    "./src/**/old"
   ]
 }

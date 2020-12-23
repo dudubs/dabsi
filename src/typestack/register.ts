@@ -1,8 +1,8 @@
 import { Cli } from "@dabsi/modules/Cli";
-import { getLastModule } from "@dabsi/typedi/decorators/Module";
+import { getLastModule } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import yargs from "yargs";
-import { LogLevel } from "./../logging/Logger";
+import { LogLevel } from "@dabsi/logging/Logger";
 
 setImmediate(async () => {
   const moduleRunner = new ModuleRunner();

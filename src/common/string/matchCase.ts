@@ -1,12 +1,10 @@
-import {Seq} from "immutable";
-
-export type TargetCase = (words: Seq.Indexed<string>) => string;
-export type SourceCase = (text: string) => Seq.Indexed<string>;
+export type TargetCase = (words: Iterable<string>) => string;
+export type SourceCase = (text: string) => Iterable<string>;
 
 export function matchCase(
-    text: string,
-    source: SourceCase,
-    target: TargetCase
+  text: string,
+  source: SourceCase,
+  target: TargetCase
 ) {
-    return target(source(text))
+  return target(source(text));
 }

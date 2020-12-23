@@ -7,4 +7,4 @@ AclConnection.getLoginInfo().then(loginInfo => {
   RootReactor.emit(AclLoginInfoEvent, loginInfo);
 });
 
-import "./MuiLoginRouterView";
+import "@dabsi/system/acl/browser/MuiLoginRouterView";

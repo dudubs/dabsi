@@ -41,9 +41,11 @@ export type ResolverType<T extends Resolver> = T extends Resolver<infer U>
 
 let count = 0;
 
-export function Resolver<T>(name?: string): TokenResolver<T> {
+export function Resolver<T>(
+  name?: string /* or __filename */
+): TokenResolver<T> {
   return new TokenResolver(
-    new CallStackInfo(new Error()),
+    new CallStackInfo(new Error(), __filename),
     `token:${count++}_${name || "unknown"}`
   );
 }

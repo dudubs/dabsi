@@ -1,8 +1,8 @@
-import { RpcFn } from "./../../../typerpc/rpc-fn/RpcFn";
+import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import AclUsersManager from "@dabsi/system/acl-admin/users/AclUsersManager";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
-import { RpcMap } from "./../../../typerpc/rpc-map/RpcMap";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 
 export default RpcMap({
   root: WidgetNamespace(),

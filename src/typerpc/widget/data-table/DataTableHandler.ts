@@ -13,7 +13,7 @@ import {
   WidgetElement,
   WidgetElementState,
 } from "@dabsi/typerpc/widget/Widget";
-import { AnyDataTableTypes } from "./DataTable";
+import { AnyDataTableTypes } from "@dabsi/typerpc/widget/data-table/DataTable";
 
 type T = AnyDataTable;
 

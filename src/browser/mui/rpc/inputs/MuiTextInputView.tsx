@@ -4,7 +4,7 @@ import {
   OutlinedTextFieldProps,
   StandardTextFieldProps,
 } from "@material-ui/core/TextField/TextField";
-import * as React from "react";
+import React from "react";
 import { ReactNode, useRef } from "react";
 import LangKey from "@dabsi/lang/LangKey";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";

@@ -6,10 +6,10 @@ O=""
 O="$O -r source-map-support/register"
 O="$O -r tsconfig-paths/register"
 O="$O -r ts-node/register"
+O="$O -r @dabsi/register"
 
 export DABSI_NODE_OPTIONS="$DABSI_NODE_OPTIONS $O"
 
-O="$O -r $DABSI_PATH/src/register.ts"
 
 export TS_NODE_PROJECT="$DABSI_PATH/tsconfig.json"
 export TS_NODE_TRANSPILE_ONLY=true

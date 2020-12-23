@@ -1,11 +1,9 @@
-import React, { createElement, ReactElement, useMemo } from "react";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
 import { WeakId } from "@dabsi/common/WeakId";
-import {
-  ReactRouterProps,
+import { useProvider } from "@dabsi/react/useProvider";
+import ReactRouterView, {
   ReactRouterOptions,
-  ReactRouterView,
 } from "@dabsi/typerouter/ReactRouterView";
 import { Router, TRouter } from "@dabsi/typerouter/Router";
 import {
@@ -14,7 +12,7 @@ import {
 } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
-import { useProvider } from "@dabsi/react/useProvider";
+import React, { createElement, ReactElement, useMemo } from "react";
 
 type IndexProps<T extends TRouter> = Parameters<
   NonNullable<ReactRouterOptions<T>["renderIndex"]>

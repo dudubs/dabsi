@@ -200,7 +200,7 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
     const exp = {
       $or: this.translateOr(
         keys.map(textKey => {
-          const key = DataEntityKey.parse(entityMetadata, textKey);
+          const key = DataEntityKey.parseObject(entityMetadata, textKey);
           return {
             $and: entityMetadata.primaryColumns.map(column => [
               column.databaseName,

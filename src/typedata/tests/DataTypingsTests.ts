@@ -5,7 +5,7 @@ import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Pluck } from "@dabsi/common/typings2/Pluck";
 
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { AEntity, BEntity } from "@dabsi/typeorm/relations/tests/Entities";
+import { AEntity, BEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
 import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
@@ -23,7 +23,12 @@ import {
   DataRelationTypeAt,
 } from "@dabsi/typedata/DataRelation";
 import { DataInsert } from "@dabsi/typedata/DataValue";
-import { DBase, DChild1, DUnion, EUnion } from "@dabsi/typedata/tests/BaseEntities";
+import {
+  DBase,
+  DChild1,
+  DUnion,
+  EUnion,
+} from "@dabsi/typedata/tests/BaseEntities";
 
 pass(() => {
   // DataSelectionRow

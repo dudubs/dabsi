@@ -2,7 +2,7 @@ import {
   AEntity,
   BEntity,
   CEntity,
-} from "@dabsi/typeorm/relations/tests/Entities";
+} from "@dabsi/typeorm/relations/tests/TestEntities";
 import { DataSelector } from "@dabsi/typedata/DataSelector";
 import {
   DBase,

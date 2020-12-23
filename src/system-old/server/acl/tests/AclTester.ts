@@ -91,7 +91,7 @@ decorateDesignType(User, "blockedUsers", Object as Function, [
   ManyToMany(() => User),
 ]);
 
-declare module "@dabsi/system/acl/entities/AclUser" {
+declare module "@dabsi/system/acl/entities/User" {
   interface User {
     blockedUsers: DataRelation<User>[];
   }

@@ -3,12 +3,12 @@ import { Inject, Module } from "@dabsi/typedi";
 
 @Module()
 export default class TestDbModule {
-  constructor(@Inject() dbm: DbModule) {
+  constructor(@Inject() public dbm: DbModule) {
     dbm.connectionOptions = {
       type: "sqlite",
       database: ":memory:",
       synchronize: true,
-      logging: true,
+      logging: false,
     };
   }
 }

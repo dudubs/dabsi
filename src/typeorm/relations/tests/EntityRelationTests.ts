@@ -17,7 +17,7 @@ import {
   AEntity,
   BEntity,
   CEntity,
-} from "@dabsi/typeorm/relations/tests/Entities";
+} from "@dabsi/typeorm/relations/tests/TestEntities";
 
 const getConnection = TestConnection([
   AEntity,

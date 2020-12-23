@@ -7,7 +7,7 @@ import {
   AEntity,
   BEntity,
   CEntity,
-} from "@dabsi/typeorm/relations/tests/Entities";
+} from "@dabsi/typeorm/relations/tests/TestEntities";
 import { forEachTestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;

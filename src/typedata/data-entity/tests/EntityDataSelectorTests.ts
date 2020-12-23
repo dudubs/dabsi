@@ -28,7 +28,7 @@ import {
   AEntity,
   BEntity,
   CEntity,
-} from "@dabsi/typeorm/relations/tests/Entities";
+} from "@dabsi/typeorm/relations/tests/TestEntities";
 import { Connection, DeepPartial, EntityMetadata, ObjectType } from "typeorm";
 
 import objectContaining = jasmine.objectContaining;

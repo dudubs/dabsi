@@ -84,10 +84,10 @@ export namespace DataEntityCursor {
         typeInfo,
         parent,
         relation,
-        relationKey: {
-          object: DataEntityKey.parse(relation.right.entityMetadata, path.key),
-          text: path.key,
-        },
+        relationKey: DataEntityKey.parse(
+          relation.right.entityMetadata,
+          path.key
+        ),
 
         ...getChildKeys(typeInfo.type, path.keys),
       };
@@ -150,13 +150,10 @@ export namespace DataEntityCursor {
       for (const [propertyName, value] of entries(dataChildKeys)) {
         const relation = DataEntityInfo.propertyNameToRelation[propertyName];
         if (relation) {
-          const objectKey = DataEntityKey.parse(
-            relation.right.entityMetadata,
-            value
-          );
+          const key = DataEntityKey.parse(relation.right.entityMetadata, value);
           relationKeys.push({
             relation,
-            key: { object: objectKey, text: value },
+            key,
           });
           continue;
         }

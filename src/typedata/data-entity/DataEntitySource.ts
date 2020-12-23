@@ -138,7 +138,7 @@ export class DataEntitySource<T> extends DataSource<T> {
         }
 
         const key = DataEntityKey.parse(relation.right.entityMetadata, value);
-        buildRelation(relation, { object: key, text: value });
+        buildRelation(relation, key);
         continue;
       }
       const column = this.entityCursor.entityInfo.propertyNameToColumnMetadata[
@@ -245,7 +245,7 @@ export class DataEntitySource<T> extends DataSource<T> {
 
     const { loader, getEntityMap } = createEventLoader(this);
     await this.emit?.({
-      type: "update.start",
+      type: "beforeUpdateAll",
       changeMap,
       ...loader,
     });
@@ -253,20 +253,20 @@ export class DataEntitySource<T> extends DataSource<T> {
     const entityMap = await getEntityMap();
     for (const entityTextKey of keys) {
       const entity = entityMap[entityTextKey] || {};
-      const entityKey = DataEntityKey.parse2(
+      const entityKey = DataEntityKey.parse(
         entityMetadata,
         DataKey(entityTextKey)
       );
 
       await this.emit?.({
-        type: "update.before",
+        type: "beforeUpdateOne",
         changeMap,
         entity,
         entityKey,
         row,
       });
 
-      // update.before
+      // beforeUpdateOne
       const result = await this.entityCursor.repository.update(
         entityKey.object,
         row
@@ -284,23 +284,28 @@ export class DataEntitySource<T> extends DataSource<T> {
       } else {
         affectedRows++;
       }
-      // update.after
+      // afterUpdateOne
       await this.emit?.({
-        type: "update.after",
+        type: "afterUpdateOne",
         changeMap,
         entityKey,
         entity,
       });
     }
     await this.emit?.({
-      type: "update.end",
+      type: "afterUpdateAll",
       changeMap,
       entityMap,
     });
     return affectedRows;
   }
 
-  emit?(event: BaseDataEntityEvent): Awaitable;
+  protected getEmitter?(): undefined | ((event: DataEntityEvent) => Awaitable);
+  @Lazy() protected get emit():
+    | undefined
+    | ((event: DataEntityEvent) => Awaitable) {
+    return this.getEmitter?.();
+  }
 
   protected async updateRelationKeys(
     keysToAdd: string[],
@@ -318,7 +323,7 @@ export class DataEntitySource<T> extends DataSource<T> {
     entityTextKey: string,
     method: "removeOrUnset" | "addOrSet"
   ) {
-    const entityKey = DataEntityKey.parse2(
+    const entityKey = DataEntityKey.parse(
       this.entityCursor.repository.metadata,
       entityTextKey
     );
@@ -356,36 +361,33 @@ export class DataEntitySource<T> extends DataSource<T> {
     const { loader, getEntityMap } = createEventLoader(this);
 
     await this.emit?.({
-      type: "delete.start",
+      type: "beforeDeleteAll",
       ...loader,
     });
 
     const entityMap = await getEntityMap();
 
     for (const entityTextKey of keys) {
-      const entityKey = DataEntityKey.parse2(
-        repository.metadata,
-        entityTextKey
-      );
+      const entityKey = DataEntityKey.parse(repository.metadata, entityTextKey);
       await this.emit?.({
-        type: "delete.before",
+        type: "beforeDeleteOne",
         entity: entityMap[entityTextKey],
         entityKey,
       });
       await repository.delete(entityKey.object);
       await this.emit?.({
-        type: "delete.after",
+        type: "afterDeleteOne",
         entity: entityMap[entityTextKey],
         entityKey,
       });
     }
 
     await this.emit?.({
-      type: "delete.end",
+      type: "afterDeleteAll",
       entityMap,
     });
 
-    // delete.init delete.clean delete.before delete.after
+    // delete.init delete.clean beforeDeleteOne afterDeleteOne
   }
 
   @Lazy() get entityCursor(): DataEntityCursor {
@@ -450,10 +452,8 @@ function createEventLoader(source: DataSource<any>) {
   };
 }
 
-export type DataEntityEvent<T> = BaseDataEntityEvent;
-
-export type DataEntityEventType = BaseDataEntityEvent["type"];
-export type BaseDataEntityEvent<
+export type DataEntityEventType = DataEntityEvent["type"];
+export type DataEntityEvent<
   T = {},
   WithEntity = {
     entity: Record<string, any> | undefined;
@@ -470,43 +470,43 @@ export type BaseDataEntityEvent<
     | (T &
         WithLoader &
         WithChangeMap & {
-          type: "update.start";
+          type: "beforeUpdateAll";
         })
     | (T &
         WithEntity &
         WithEntityKey &
         WithChangeMap & {
-          type: "update.before";
+          type: "beforeUpdateOne";
           row: Record<string, any>;
         })
     | (WithChangeMap &
         WithEntityMap & {
-          type: "update.end";
+          type: "afterUpdateAll";
         })
     | (T &
         WithEntity &
         WithEntityKey &
         WithChangeMap & {
-          type: "update.after";
+          type: "afterUpdateOne";
         }),
   DeleteEvents =
     | (T &
         WithLoader & {
-          type: "delete.start";
+          type: "beforeDeleteAll";
         })
     | (T &
         WithEntityMap & {
-          type: "delete.end";
+          type: "afterDeleteAll";
         })
     | (T &
         WithEntity &
         WithEntityKey & {
-          type: "delete.before";
+          type: "beforeDeleteOne";
         })
     | (T &
         WithEntity &
         WithEntityKey & {
-          type: "delete.after";
+          type: "afterDeleteOne";
         })
 > =
   | (T &

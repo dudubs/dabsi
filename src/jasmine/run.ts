@@ -17,17 +17,25 @@ if (!where.length) {
   });
 }
 
+function loadTests(fileName) {
+  const moduleName = "@dabsi/" + relativePosixPath(DABSI_SRC_PATH, fileName);
+  describe(moduleName.replace(/\.tsx?$/, ""), () => {
+    require("@dabsi/" + relativePosixPath(DABSI_SRC_PATH, fileName));
+  });
+}
+
 function searchTests(dir: string) {
   if (!touchSet(searchedDirs, dir)) return;
+
+  if (!statSync(dir).isDirectory()) {
+    loadTests(dir);
+    return;
+  }
 
   readdirSync(dir).forEach(baseName => {
     const fileName = path.join(dir, baseName);
     if (/Tests.tsx?$/.test(baseName)) {
-      const moduleName =
-        "@dabsi/" + relativePosixPath(DABSI_SRC_PATH, fileName);
-      describe(moduleName.replace(/\.tsx?$/, ""), () => {
-        require("@dabsi/" + relativePosixPath(DABSI_SRC_PATH, fileName));
-      });
+      loadTests(fileName);
     } else if (statSync(fileName).isDirectory()) {
       searchTests(fileName);
     }

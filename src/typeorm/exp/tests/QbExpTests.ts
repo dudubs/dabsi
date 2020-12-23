@@ -17,7 +17,7 @@ import {
   AEntity,
   BEntity,
   CEntity,
-} from "@dabsi/typeorm/relations/tests/Entities";
+} from "@dabsi/typeorm/relations/tests/TestEntities";
 import { useQueryBuilderExp } from "@dabsi/typeorm/exp/useQueryBuilderExp";
 import { QbExpTester } from "@dabsi/typeorm/exp/tests/QbExpTester";
 

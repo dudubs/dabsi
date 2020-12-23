@@ -160,3 +160,4 @@ export class CEntity {
   @TestRelation(() => BEntity)
   manyCToManyB: DataRelation<BEntity>[];
 }
+export default [AEntity, BEntity, CEntity];

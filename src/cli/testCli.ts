@@ -1,13 +1,12 @@
-import { spawnSync } from "child_process";
-import fs from "fs";
-import path, { relative, resolve } from "path";
-import { readdirRecursiveSync } from "@dabsi/filesystem/readdirRecursiveSync";
 import {
   DABSI_CURRENT_PATH,
   DABSI_NODE_OPTIONS,
   DABSI_SRC_PATH,
   NODE_MODULES_PATH,
 } from "@dabsi/index";
+import { spawnSync } from "child_process";
+import fs from "fs";
+import path, { relative, resolve } from "path";
 
 export default function testCli(args) {
   const tests: string[] = [];

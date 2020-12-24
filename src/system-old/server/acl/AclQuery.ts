@@ -203,7 +203,7 @@ export class AclQuery {
     cursor: DataCursor,
     filter: DataExp<T>
   ) {
-    const entityCursor = DataEntityCursor.create(
+    const entityCursor = DataEntityCursor.createFromConnection(
       this.connection,
       {
         ...cursor,

@@ -409,7 +409,11 @@ export class DataEntitySource<T> extends DataSource<T> {
         throw new Error();
     }
 
-    return DataEntityCursor.create(connection, this.cursor, this.entityType);
+    return DataEntityCursor.createFromConnection(
+      connection,
+      this.cursor,
+      this.entityType
+    );
   }
 }
 

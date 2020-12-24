@@ -1,4 +1,10 @@
-import { Connection, EntityMetadata, ObjectType, Repository } from "typeorm";
+import {
+  Connection,
+  EntityManager,
+  EntityMetadata,
+  ObjectType,
+  Repository,
+} from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { entries } from "@dabsi/common/object/entries";
 import { EntityRelation } from "@dabsi/typeorm/relations";
@@ -14,7 +20,7 @@ import {
 } from "@dabsi/typedata/data-entity/DataEntityInfo";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 
-export type DataEntityCursorBase = {
+export type BaseDataEntityCursor = {
   typeInfo: DataTypeInfo;
 
   filter: DataExp<any>;
@@ -29,12 +35,12 @@ export type DataEntityCursorBase = {
   columnKeys: { metadata: ColumnMetadata; key: any }[];
 };
 
-export type DataEntityCursorParent = DataEntityCursorBase & {
+export type DataEntityCursorParent = BaseDataEntityCursor & {
   relation: EntityRelation;
   relationKey: DataEntityKey;
 };
 
-export type DataEntityCursor = DataEntityCursorBase & {
+export type DataEntityCursor = BaseDataEntityCursor & {
   connection: Connection;
 
   cursor: DataCursor;
@@ -43,13 +49,15 @@ export type DataEntityCursor = DataEntityCursorBase & {
 
   entityInfo: DataEntityInfo;
 
+  entityManager: EntityManager;
+
   entityMetadata: EntityMetadata;
 };
 
 const __doNotTranslateFilter = false;
 
 export namespace DataEntityCursor {
-  export function create(
+  export function createFromConnection(
     connection: Connection,
     cursor: DataCursor,
     entityType: ObjectType<any>
@@ -113,6 +121,7 @@ export namespace DataEntityCursor {
       connection,
       cursor,
       repository: connection.getRepository(typeInfo.type),
+      entityManager: connection.createEntityManager(),
       typeInfo,
 
       filter: __doNotTranslateFilter

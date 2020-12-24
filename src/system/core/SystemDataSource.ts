@@ -9,7 +9,11 @@ export default class DataSystemSource<T> extends DataEntitySource<T> {
     entityType: Function,
     cursor: DataCursor
   ) {
-    super(entityType, () => this.module.getConnection(), cursor);
+    super(
+      entityType,
+      () => this.module.getConnection().createQueryRunner(),
+      cursor
+    );
   }
 
   getEmitter() {

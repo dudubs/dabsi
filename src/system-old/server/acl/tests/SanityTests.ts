@@ -5,8 +5,8 @@ import { User } from "@dabsi/system/acl/entities/User";
 
 const getConnection = TestConnection([User, Group]);
 
-const Users = DataEntitySource.create(User, getConnection);
-const Groups = DataEntitySource.create(Group, getConnection);
+const Users = DataEntitySource.createFromConnection(User, getConnection);
+const Groups = DataEntitySource.createFromConnection(Group, getConnection);
 
 let g1: string;
 let g2: string;

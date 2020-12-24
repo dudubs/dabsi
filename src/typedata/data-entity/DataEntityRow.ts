@@ -9,6 +9,8 @@ export function DataEntityRow<T>(
   key: string
 ): DataRow<DataSelectionRow<T, { pick: [] }>> {
   return <any>(
-    new DataSourceRow(DataEntitySource.create(entityType).filter({ $is: key }))
+    new DataSourceRow(
+      DataEntitySource.createFromConnection(entityType).filter({ $is: key })
+    )
   );
 }

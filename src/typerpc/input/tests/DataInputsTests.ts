@@ -19,7 +19,7 @@
 //   }
 //
 //   const getConnection = TestConnection([A]);
-//   const source = DataEntitySource.create(A, getConnection);
+//   const source = DataEntitySource.createFromConnection(A, getConnection);
 //
 //   const rows = [
 //     { id: "1", text: "hello" },

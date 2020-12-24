@@ -1,37 +1,33 @@
-import { Connection } from "typeorm";
-import { AbstractDataQueryRunner } from "@dabsi/typedata/data-query/AbstractDataQueryRunner";
-import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
 import { DataEntityQueryExpTranslatorToSql } from "@dabsi/typedata/data-entity/DataEntityQueryExpTranslatorToSql";
+import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
+import { QueryRunner } from "typeorm";
 
-export class DataEntityQueryRunner extends AbstractDataQueryRunner {
-  constructor(public connection: Connection, public query: DataQuery) {
-    super();
-  }
+export default class DataEntityQueryRunner {
+  constructor(public query: DataQuery, public queryRunner: QueryRunner) {}
 
   getQueryAndParameters(): [string, any[]] {
     return DataEntityQueryExpTranslatorToSql.getQueryAndParameters(
-      this.connection,
+      this.queryRunner.connection,
       this.query
     );
   }
 
   getRows(): Promise<any> {
     const [query, parameters] = this.getQueryAndParameters();
-    // console.log({ query, parameters });
-    return this.connection.query(query, parameters);
+    return this.queryRunner.query(query, parameters);
   }
 
   hasRow(): Promise<boolean> {
     const [sql, params] = this.getQueryAndParameters();
     const query = `SELECT COUNT(*) value FROM (SELECT * FROM (${sql}) x LIMIT 1) _rec`;
-    return this.connection.query(query, params).then(rows => {
+    return this.queryRunner.query(query, params).then(rows => {
       return (rows[0]?.value ?? 0) > 0;
     });
   }
 
   async getCount(): Promise<number> {
     const [sql, params] = this.getQueryAndParameters();
-    return this.connection
+    return this.queryRunner
       .query(`SELECT COUNT(*) value FROM (${sql}) _rec`, params)
       .then(rows => {
         return rows[0]?.value ?? 0;

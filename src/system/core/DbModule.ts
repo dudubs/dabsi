@@ -57,7 +57,7 @@ export class DbModule {
       runner.context,
       Connection.provide(() => this.connection),
       DataSourceResolver.provide(() => entityType =>
-        DataEntitySource.create(entityType, () => this.connection)
+        DataEntitySource.createFromConnection(entityType, () => this.connection)
       )
     );
   }

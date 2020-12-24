@@ -49,7 +49,8 @@ export class ModuleRunner {
       if (!this._mainModuleTarget) {
         this._mainModuleTarget = target;
       }
-      // console.log("init", module.name);
+
+      log.trace(() => `init module ${target.name}`);
       const argsResolver = getInjectableResolver(target);
       const options = moduleMetadataMap.get(target)!;
       for (const dependencyModule of options.dependencies || []) {

@@ -22,15 +22,6 @@ export default class ProjectManager {
     @Inject() cli: Cli
   ) {
     mMake.cli.install({ run: () => this.init() });
-    cli.command(
-      "testx",
-      new Cli().install({
-        run: async () => {
-          console.log("hello");
-          await this.init();
-        },
-      })
-    );
   }
 
   allProjectModules: ProjectModule[];

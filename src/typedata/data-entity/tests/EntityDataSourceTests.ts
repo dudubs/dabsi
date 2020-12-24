@@ -16,11 +16,11 @@ import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 
 const getConnection = TestConnection([AEntity, BEntity, CEntity]);
 export const EDSTesters = {
-  A: DataEntitySource.create(AEntity, getConnection),
-  B: DataEntitySource.create(BEntity, getConnection),
-  C: DataEntitySource.create(CEntity, getConnection),
-  D: DataEntitySource.create(DUnion, getConnection),
-  E: DataEntitySource.create(EUnion, getConnection),
+  A: DataEntitySource.createFromConnection(AEntity, getConnection),
+  B: DataEntitySource.createFromConnection(BEntity, getConnection),
+  C: DataEntitySource.createFromConnection(CEntity, getConnection),
+  D: DataEntitySource.createFromConnection(DUnion, getConnection),
+  E: DataEntitySource.createFromConnection(EUnion, getConnection),
 };
 
 DataSourceTests(
@@ -57,7 +57,8 @@ describe("DataEntitySelector", () => {
 
   it("expect to load relation because type selection.", async () => {
     expect(
-      (await DataEntitySource.create(A, getConnection).get(key))?.oneAToOneB
+      (await DataEntitySource.createFromConnection(A, getConnection).get(key))
+        ?.oneAToOneB
     ).toBeTruthy();
   });
 });

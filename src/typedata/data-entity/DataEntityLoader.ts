@@ -1,4 +1,4 @@
-import { Connection, EntityMetadata } from "typeorm";
+import { Connection, EntityMetadata, QueryRunner } from "typeorm";
 import { defined } from "@dabsi/common/object/defined";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { entries } from "@dabsi/common/object/entries";
@@ -6,7 +6,10 @@ import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { EntityRelation } from "@dabsi/typeorm/relations";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { ColumnLoader, DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
+import {
+  ColumnLoader,
+  DataQueryBuilder,
+} from "@dabsi/typedata/data-query/DataQueryBuilder";
 import {
   AnyDataSelection,
   DataSelection,
@@ -20,7 +23,7 @@ import { KeyObject } from "@dabsi/typedata/KeyObject";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
 import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
 import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
-import { DataEntityQueryRunner } from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
+import DataEntityQueryRunner from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
 
 export type DataEntityLoader = ReturnType<typeof DataEntityLoader.create>;
 export namespace DataEntityLoader {
@@ -52,6 +55,7 @@ export namespace DataEntityLoader {
     { qb = DataEntityCursor.createQueryBuilder(entityCursor) } = {}
   ) {
     return createRoot({
+      qureyRunner: entityCursor.queryRunner,
       connection: entityCursor.connection,
       typeInfo: entityCursor.typeInfo,
       qb,
@@ -62,6 +66,7 @@ export namespace DataEntityLoader {
 
   type Props = {
     connection: Connection;
+    qureyRunner: QueryRunner;
     typeInfo: DataTypeInfo;
     qb: DataQueryBuilder;
     selection: AnyDataSelection;
@@ -74,6 +79,7 @@ export namespace DataEntityLoader {
 
   export function create({
     connection,
+    qureyRunner,
     typeInfo,
     qb,
     selection,
@@ -171,7 +177,7 @@ export namespace DataEntityLoader {
     async function loadRows(baseRow?: object): Promise<any[]> {
       const rows: any[] = [];
 
-      const runner = new DataEntityQueryRunner(connection, qb.query);
+      const runner = new DataEntityQueryRunner(qb.query, qureyRunner);
 
       for (const raw of await runner.getRows()) {
         const context = await loadOneRaw(raw, baseRow);
@@ -328,6 +334,7 @@ export namespace DataEntityLoader {
 
           const relationLoader = create({
             connection,
+            qureyRunner,
             typeInfo: relationTypeInfo,
             qb,
             selection: relationSelection,
@@ -386,6 +393,7 @@ export namespace DataEntityLoader {
               DataTypeInfo.get(relation.left.entityType);
 
             const loader = createRoot({
+              qureyRunner,
               connection,
               typeInfo: relationTypeInfo,
               qb,

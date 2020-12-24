@@ -18,7 +18,6 @@ export type RpcConfigResolver<T extends AnyRpc> = CustomResolver<
   rpc: T;
 };
 
-export const RpcContextResolver = Resolver<AnyResolverMap>();
 export const RpcConfigResolverMap = Resolver<
   Record<any, Resolver<RpcUnresolvedConfig<AnyRpc>>>
 >();

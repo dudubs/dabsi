@@ -1,11 +1,11 @@
-import SystemRequest from "@dabsi/system/core/SystemRequest";
+import SystemRpcRequest from "@dabsi/system/core/SystemRpcRequest";
 import ImageRpc from "@dabsi/system/storage/image/ImageRpc";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
 export default RpcConfigResolver(
   ImageRpc,
   {
-    sysReq: SystemRequest,
+    sysReq: SystemRpcRequest,
   },
   c => () => {
     console.log("works", c.sysReq);

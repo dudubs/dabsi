@@ -49,7 +49,7 @@ export interface IRpc<T extends TRpc> {
 
   children: T["Children"];
 
-  rpcType: Function;
+  rpcType: (...args) => AnyRpc;
 
   at<T extends AnyRpc, U extends AnyRpc>(
     this: T,

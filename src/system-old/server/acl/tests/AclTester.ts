@@ -113,8 +113,11 @@ export const AclTester = Tester.beforeAll(async t => ({
   connection: await createTestConnection([TestPost]),
 }))
   .beforeAll(async t => ({
-    forums: DataEntitySource.create(TestForum, t.connection),
-    users: DataEntitySource.create(User, t.connection),
+    forums: DataEntitySource.createFromConnection(
+      TestForum,
+      () => t.connection
+    ),
+    users: DataEntitySource.createFromConnection(User, () => t.connection),
   }))
   .beforeAll(async t => ({
     users: (await mapObjectAsync(

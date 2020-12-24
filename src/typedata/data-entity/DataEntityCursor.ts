@@ -3,6 +3,7 @@ import {
   EntityManager,
   EntityMetadata,
   ObjectType,
+  QueryRunner,
   Repository,
 } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
@@ -45,7 +46,9 @@ export type DataEntityCursor = BaseDataEntityCursor & {
 
   cursor: DataCursor;
 
-  repository: Repository<any>;
+  // repository: Repository<any>;
+
+  queryRunner: QueryRunner;
 
   entityInfo: DataEntityInfo;
 
@@ -57,11 +60,12 @@ export type DataEntityCursor = BaseDataEntityCursor & {
 const __doNotTranslateFilter = false;
 
 export namespace DataEntityCursor {
-  export function createFromConnection(
-    connection: Connection,
+  export function create(
+    queryRunner: QueryRunner,
     cursor: DataCursor,
-    entityType: ObjectType<any>
+    entityType: Function
   ): DataEntityCursor {
+    const connection = queryRunner.connection;
     for (const propertyName of cursor.root) {
       const entityMetadata = connection.getMetadata(entityType);
       const relationMetadata = entityMetadata.relations.find(
@@ -120,8 +124,8 @@ export namespace DataEntityCursor {
     return {
       connection,
       cursor,
-      repository: connection.getRepository(typeInfo.type),
-      entityManager: connection.createEntityManager(),
+      queryRunner,
+      entityManager: connection.createEntityManager(queryRunner),
       typeInfo,
 
       filter: __doNotTranslateFilter
@@ -183,12 +187,20 @@ export namespace DataEntityCursor {
     }
   }
 
+  export function createFromConnection(
+    connection: Connection,
+    cursor: DataCursor,
+    entityType: ObjectType<any>
+  ): DataEntityCursor {
+    return create(connection.createQueryRunner(), cursor, entityType);
+  }
+
   export function createQueryBuilder(
     cursor: DataEntityCursor,
     aliasName?: string
   ) {
     const qb = DataQueryBuilder.createRoot(
-      cursor.repository.metadata.tableName,
+      cursor.entityMetadata.tableName,
       aliasName
     );
     join(qb.query.alias, cursor);

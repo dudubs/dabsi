@@ -6,7 +6,7 @@ import { Type } from "@dabsi/common/typings2/Type";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
-import { DataEntityQueryRunner } from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
+import DataEntityQueryRunner from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { DataKey } from "@dabsi/typedata/DataKey";
@@ -14,39 +14,50 @@ import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource, GetDataSource } from "@dabsi/typedata/DataSource";
 import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
 import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
-import { Connection, getConnection } from "typeorm";
+import { Connection, EntityManager, getConnection, QueryRunner } from "typeorm";
 import {
   AnyDataSelection,
   DataSelection,
 } from "./../data-selection/DataSelection";
 
-type DataEntityConnection = (() => Connection) | string | Connection;
+type GetConnection = () => Connection;
+type GetQueryRunner = () => QueryRunner;
+
+/*
+ getEntityManager();
+
+ starttransaction()
+
+*/
+
 export class DataEntitySource<T> extends DataSource<T> {
   static getConnection: undefined | (() => Connection);
 
-  static createFactory(getConnection): GetDataSource {
-    return type => this.create(type, getConnection);
-  }
-
-  static create<T>(
+  static createFromConnection<T>(
     entityType: Type<T>,
-    connection?: DataEntityConnection
-  ): DataEntitySource<T>;
-
-  static create(entityType, connection?: DataEntityConnection) {
-    return new DataEntitySource(entityType, connection, EmptyDataCursor);
+    connection?: GetConnection
+  ): DataEntitySource<T> {
+    return new DataEntitySource(
+      entityType,
+      () => (connection || getConnection)().createQueryRunner(),
+      EmptyDataCursor
+    );
   }
 
   constructor(
     public entityType: Type<T>,
-    protected _connection: DataEntityConnection = getConnection,
+    protected getQueryRunner: GetQueryRunner,
     public cursor: DataCursor
   ) {
     super();
   }
 
   withCursor<U = T>(cursor: DataCursor): DataEntitySource<U> {
-    return new DataEntitySource<U>(this.entityType, this._connection, cursor);
+    return new DataEntitySource<U>(
+      this.entityType,
+      this.getQueryRunner,
+      cursor
+    );
   }
 
   createQueryBuilder(): DataQueryBuilder {
@@ -55,8 +66,8 @@ export class DataEntitySource<T> extends DataSource<T> {
 
   createRunner(): DataEntityQueryRunner {
     return new DataEntityQueryRunner(
-      this.entityCursor.connection,
-      this.createQueryBuilder().query
+      this.createQueryBuilder().query,
+      this.entityCursor.queryRunner
     );
   }
 
@@ -192,7 +203,7 @@ export class DataEntitySource<T> extends DataSource<T> {
     this: DataEntitySource<T>,
     values: DataInsert<T>[]
   ): Promise<string[]> {
-    const entityMetadata = this.entityCursor.repository.metadata;
+    const entityMetadata = this.entityCursor.entityMetadata;
     const keys: string[] = [];
 
     for (const value of values) {
@@ -204,8 +215,11 @@ export class DataEntitySource<T> extends DataSource<T> {
           changeMap[change.propertyName] = change;
         }
       );
-      const entity = await this.entityCursor.repository.save(
-        this.entityCursor.repository.create(<any>row)
+      const entity = await this.entityCursor.entityManager.save(
+        this.entityCursor.entityManager.create(
+          this.entityCursor.typeInfo.type,
+          <any>row
+        )
       );
       const entityObjectKey = DataEntityKey.pick(entityMetadata, entity);
       const entityKey: DataEntityKey = {
@@ -231,7 +245,7 @@ export class DataEntitySource<T> extends DataSource<T> {
   async updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
     if (!hasKeys(value)) return 0;
     let affectedRows = 0;
-    const entityMetadata = this.entityCursor.repository.metadata;
+    const entityMetadata = this.entityCursor.entityMetadata;
     const changeMap: RowChangeMap = {};
 
     const { row, relationKeys } = await this._createEntityRow(
@@ -267,7 +281,9 @@ export class DataEntitySource<T> extends DataSource<T> {
       });
 
       // beforeUpdateOne
-      const result = await this.entityCursor.repository.update(
+
+      const result = await this.entityCursor.entityManager.update(
+        this.entityCursor.typeInfo.type,
         entityKey.object,
         row
       );
@@ -324,7 +340,7 @@ export class DataEntitySource<T> extends DataSource<T> {
     method: "removeOrUnset" | "addOrSet"
   ) {
     const entityKey = DataEntityKey.parse(
-      this.entityCursor.repository.metadata,
+      this.entityCursor.entityMetadata,
       entityTextKey
     );
 
@@ -356,8 +372,6 @@ export class DataEntitySource<T> extends DataSource<T> {
   }
 
   async deleteKeys(keys: string[]): Promise<void> {
-    const { repository } = this.entityCursor;
-
     const { loader, getEntityMap } = createEventLoader(this);
 
     await this.emit?.({
@@ -368,13 +382,19 @@ export class DataEntitySource<T> extends DataSource<T> {
     const entityMap = await getEntityMap();
 
     for (const entityTextKey of keys) {
-      const entityKey = DataEntityKey.parse(repository.metadata, entityTextKey);
+      const entityKey = DataEntityKey.parse(
+        this.entityCursor.entityMetadata,
+        entityTextKey
+      );
       await this.emit?.({
         type: "beforeDeleteOne",
         entity: entityMap[entityTextKey],
         entityKey,
       });
-      await repository.delete(entityKey.object);
+      await this.entityCursor.entityManager.delete(
+        this.entityCursor.typeInfo.type,
+        entityKey.object
+      );
       await this.emit?.({
         type: "afterDeleteOne",
         entity: entityMap[entityTextKey],
@@ -391,26 +411,8 @@ export class DataEntitySource<T> extends DataSource<T> {
   }
 
   @Lazy() get entityCursor(): DataEntityCursor {
-    let connection: Connection;
-    switch (typeof this._connection) {
-      case "object":
-        connection = this._connection;
-        break;
-      case "string":
-        connection = getConnection(this._connection);
-        break;
-      case "function":
-        connection = this._connection();
-        break;
-      case "undefined":
-        connection = getConnection();
-        break;
-      default:
-        throw new Error();
-    }
-
-    return DataEntityCursor.createFromConnection(
-      connection,
+    return DataEntityCursor.create(
+      this.getQueryRunner(),
       this.cursor,
       this.entityType
     );

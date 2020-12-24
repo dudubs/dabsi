@@ -8,7 +8,7 @@ import { AclRequest } from "@dabsi/system-old/server/acl/AclRequest";
 import { SystemResolvers } from "@dabsi/system-old/server/SystemResolvers";
 import { SystemSession } from "@dabsi/system/core/SystemSession";
 
-export const SystemRequestResolvers = {
+export const SystemRpcRequestResolvers = {
   ...SystemResolvers,
   ...RpcRequest.provide(Resolver.touch(() => new RpcRequest())),
   ...AclRequest.provide(
@@ -19,9 +19,9 @@ export const SystemRequestResolvers = {
           session: DataRow(SystemSession),
           rpcReq: RpcRequest,
         },
-        (c) => {
+        c => {
           const aclReq = new AclRequest(c.connection, c.session.user?.$key);
-          c.rpcReq.push(async (next) => {
+          c.rpcReq.push(async next => {
             if (!(await aclReq.ask())) {
               throw new RpcError(`Access denied.`);
             }

@@ -1,4 +1,4 @@
-import { SystemModule } from "@dabsi/system/core/SystemModule";
+import SystemRpcModule from "@dabsi/system/core/SystemRpcModule";
 import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 import {
   AnyResolverMap,
@@ -8,14 +8,15 @@ import { RpcResolvedConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { Consumer } from "@dabsi/typedi/Consumer";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 function _SystemRpcConfigResolver<T extends AnyRpc>(
   rpc: T,
   nextContext,
-  getRpcConfigResolver: (sm: SystemModule) => RpcConfigResolver<T>
+  getRpcConfigResolver: (sm: SystemRpcModule) => RpcConfigResolver<T>
 ): CustomResolver<(context?) => RpcUnresolvedConfig<T>> {
   return Resolver.toCheck(
-    Consumer([SystemModule, c => c], (sm, context) => {
+    Consumer([SystemRpcModule, c => c], (sm, context) => {
       return nextContext => {
         const cr = getRpcConfigResolver(sm);
         return rpc.resolveRpcConfig(
@@ -24,7 +25,7 @@ function _SystemRpcConfigResolver<T extends AnyRpc>(
       };
     }),
     context => {
-      const sm = Resolver.resolve(SystemModule, context);
+      const sm = Resolver.resolve(SystemRpcModule, context);
       const cr = getRpcConfigResolver(sm);
       checkResolverMap(nextContext, context);
       Resolver.check(cr, Resolver.createContext(nextContext, context));
@@ -47,9 +48,13 @@ SystemRpcConfigResolver.create = function <T extends AnyRpc>(
 ): CustomResolver<(context?: AnyResolverMap) => Promise<RpcResolvedConfig<T>>> {
   return Consumer(
     [
-      _SystemRpcConfigResolver<T>(rpc, nextContext, sm =>
-        sm.createRpcConfigResolver(rpc)
-      ),
+      _SystemRpcConfigResolver(rpc, nextContext, sm => {
+        const configResolver = sm.createRpcConfigResolver(rpc);
+        if (!configResolver) {
+          throw new ResolveError(``);
+        }
+        return configResolver;
+      }),
     ],
     getUnresolvedConfig => context => {
       return rpc.resolveRpcConfig(getUnresolvedConfig(context)) as Promise<

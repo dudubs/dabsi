@@ -9,7 +9,7 @@ function method<T extends any[] | Set<any> | Map<any, any> | Record<any, any>>(
   return this.update(state => adapt("empty", state));
 }
 
-declare module "../Store" {
+declare module "@dabsi/store/Store" {
   interface Store<T> extends Record<typeof op, typeof method> {}
 }
 

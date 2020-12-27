@@ -1,7 +1,7 @@
 import { User } from "@dabsi/system/acl/entities/User";
 import { AclUserBasicInfoForm } from "@dabsi/system/acl-admin/users/forms/BasicInfoForm";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
+import SystemRpcConfigResolver from "@dabsi/system/rpc/SystemRpcConfigResolver";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 

@@ -1,13 +1,11 @@
 import { getSession } from "@dabsi/system-old/server/acl/getSession";
-import { SystemModule } from "@dabsi/system/core/SystemModule";
+import { SystemModule } from "@dabsi/system/core";
 import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import CookieParser from "cookie-parser";
-import { DataRow } from "./../../typedata/DataRow";
-import { Consumer } from "./../../typedi/Consumer";
-import { SystemSession } from "./SystemSession";
-
-const r = Resolver();
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { Consumer } from "@dabsi/typedi/Consumer";
+import { SystemSession } from "@dabsi/system/session/SystemSession";
 
 @Module()
 export default class SystemSessionModule {

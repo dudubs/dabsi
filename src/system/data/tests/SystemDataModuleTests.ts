@@ -1,35 +1,35 @@
 import addAll from "@dabsi/common/map/addAll";
-import DataSystemModule from "@dabsi/system/core/DataSystemModule";
-import { DbModule } from "@dabsi/system/core/DbModule";
-import TestDbModule from "@dabsi/system/core/tests/TestDbModule";
+import SystemDataModule from "@dabsi/system/data";
+import { DbModule } from "@dabsi/modules/DbModule";
+import TestDbModule from "@dabsi/modules/tests/TestDbModule";
 import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { Resolver } from "@dabsi/typedi";
 import TestEntities, {
   AEntity,
-} from "../../typeorm/relations/tests/TestEntities";
-import { DataEntityEvent } from "./../../typedata/data-entity/DataEntitySource";
-import { ModuleRunner } from "./../../typedi/ModuleRunner";
+} from "@dabsi/typeorm/relations/tests/TestEntities";
+import { DataEntityEvent } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 
 const events: DataEntityEvent[] = [];
 beforeAll(async () => {
   const runner = new ModuleRunner();
 
   const dbm = runner.getModuleInstance(DbModule);
-  const dsm = runner.getModuleInstance(DataSystemModule);
+  const dsm = runner.getModuleInstance(SystemDataModule);
   runner.getModuleInstance(TestDbModule);
 
   addAll(dbm.entityTypes, TestEntities);
 
-  dsm.listenToEntity(AEntity, "beforeDeleteAll", event => {
-    event.select({ pick: ["aText"] });
-  });
-
-  dsm.listenToEntity(AEntity, "beforeUpdateAll", event => {
-    event.select({ pick: ["aText"] });
-  });
-
-  dsm.listenToEntity(AEntity, "*", event => {
-    events.push(event);
+  dsm.listen(AEntity, {
+    beforeDeleteAll: event => {
+      event.select({ pick: ["aText"] });
+    },
+    beforeUpdateAll: event => {
+      event.select({ pick: ["aText"] });
+    },
+    "*": event => {
+      events.push(event);
+    },
   });
 
   await dbm.init();

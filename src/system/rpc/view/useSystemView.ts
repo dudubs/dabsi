@@ -1,12 +1,12 @@
-import { entries } from "@dabsi/common/object/entries";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { SystemViewProps } from "@dabsi/system/view/SystemView";
-import { useProviderContext } from "@dabsi/react/useProvider";
-import { SystemViewContext } from "@dabsi/system/view/SystemView";
-import { createElement } from "react";
-import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
-import React from "react";
 import { useContextHook } from "@dabsi/react/useContextHook";
+import { useProviderContext } from "@dabsi/react/useProvider";
+import {
+  SystemViewContext,
+  SystemViewProps,
+} from "@dabsi/system/rpc/view/SystemView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
+import React, { createElement } from "react";
 
 export function useSystemView<T extends AnyWidget>(
   widget: T,

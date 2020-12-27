@@ -9,12 +9,12 @@ export function Provider(
 export function Provider(context) {
   context = flatObject(context);
 
-  return (resolver) => {
-    return ((parentContext) => {
+  return resolver => {
+    return (parentContext => {
       return resolver[resolveSymbol](
         Object.setPrototypeOf({ ...context }, parentContext)
       );
-    }).toCheck((parentContext) => {
+    }).toCheck(parentContext => {
       resolver[checkResolverSymbol]?.(
         Object.setPrototypeOf({ ...context }, parentContext)
       );

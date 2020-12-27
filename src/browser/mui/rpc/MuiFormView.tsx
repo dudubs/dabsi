@@ -6,7 +6,7 @@ import { Hook } from "@dabsi/react/Hook";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import { SystemView } from "@dabsi/system/view/SystemView";
+import { SystemView } from "@dabsi/system/rpc/view/SystemView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyForm } from "@dabsi/typerpc/widget/form/Form";
 import {

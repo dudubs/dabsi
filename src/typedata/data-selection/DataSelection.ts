@@ -4,7 +4,10 @@ import { HasKeys, If } from "@dabsi/common/typings2/boolean";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataFieldsTranslator } from "@dabsi/typedata/DataFieldsTranslator";
 import { DataOrder } from "@dabsi/typedata/DataOrder";
-import { DataUnionChildren, DataUnionChildrenKey } from "@dabsi/typedata/DataUnion";
+import {
+  DataUnionChildren,
+  DataUnionChildrenKey,
+} from "@dabsi/typedata/DataUnion";
 import {
   IfRelationToMany,
   IfRelationToOne,

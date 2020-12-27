@@ -1,6 +1,7 @@
-import { Seq } from "immutable";
-
-export function* split(text: string, sep: string): IterableIterator<string> {
+export default function* split(
+  text: string,
+  sep: string
+): IterableIterator<string> {
   let start = 0;
   while (true) {
     const pos = text.indexOf(sep, start);

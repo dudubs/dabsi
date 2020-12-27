@@ -1,6 +1,6 @@
 import { Field, AsField } from "@dabsi/struct/Field";
 
-declare module "./Field" {
+declare module "@dabsi/struct/Field" {
   namespace Field {
     export { ArrayField as array };
   }

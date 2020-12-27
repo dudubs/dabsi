@@ -4,7 +4,7 @@ import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import { readdirSync, statSync } from "fs";
 import "jasmine";
 import path from "path";
-import "./register";
+import "@dabsi/jasmine/register";
 
 const searchedDirs = new Set<string>();
 const where = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);

@@ -1,6 +1,9 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
-import { DataQuery, DataQueryExp, DataQueryExpTypes } from "@dabsi/typedata/data-query/DataQueryExp";
+import {
+  DataQuery,
+  DataQueryExpTypes,
+} from "@dabsi/typedata/data-query/DataQueryExp";
 
 export type DataQueryExpTranslator<T> = {
   translateQueryCount(query: DataQuery): T;
@@ -10,10 +13,16 @@ export type DataQueryExpTranslator<T> = {
   translateQuery(query: DataQuery): T;
 };
 
+type _Translator<T> = {
+  [K in keyof DataQueryExpTypes]: (exp: DataQueryExpTypes[K]) => T;
+};
+
 export abstract class AbstractDataQueryExpTranslator<U>
   extends DataExpTranslator<U>
-  implements DataQueryExpTranslator<U> {
+  implements DataQueryExpTranslator<U>, _Translator<U> {
   abstract translateQueryCount(query: DataQuery): U;
+
+  abstract translateQueryFind(query: DataQuery): U;
 
   abstract translateQueryHas(inverse: boolean, query: DataQuery): U;
 

@@ -1,61 +1,36 @@
-import { Timeout } from "@dabsi/common/async/Timeout";
-import TestEntities, {
-  AEntity,
-} from "@dabsi/typeorm/relations/tests/TestEntities";
-import { Connection, createConnection, EntityManager } from "typeorm";
-
-let conn: Connection;
-
-beforeAll(async () => {
-  conn = await createConnection({
-    type: "mysql",
-    database: "test",
-    username: "dudubs",
-    // synchronize: true,
-    entities: TestEntities,
-    logging: true,
-  });
-});
+import TestEntities from "@dabsi/typeorm/relations/tests/TestEntities";
+import { createConnection } from "typeorm";
+import { SqliteDriver } from "typeorm/driver/sqlite/SqliteDriver";
+import { SqliteQueryRunner } from "typeorm/driver/sqlite/SqliteQueryRunner";
+export type Timeout = ReturnType<typeof setTimeout>;
 
 fit("", async () => {
-  //   conn.entityManager;
+  const conn = await createConnection({
+    type: "sqlite",
+    database: "test.sqlite",
 
-  expect(conn.createEntityManager()).toEqual(conn.createEntityManager());
-  //   const ar1 = conn.createQueryRunner();
-  //   const ar2 = conn.createQueryRunner();
-  //   await ar1.connect();
-  //   await ar2.connect();
-  //   await ar1.startTransaction();
-  //   await ar2.startTransaction();
-  //   await ar1.commitTransaction();
-  //   await ar2.commitTransaction();
+    // type: "mysql",
+    // username: "dudubs",
+    // database: "dev",
 
-  const x = [await conn.createQueryRunner().connect()];
+    entities: TestEntities,
+    // synchronize: true,
+    logging: true,
+    extra: {
+      connectionLimit: 2,
+    },
+  });
 
-  const qr1 = conn.createQueryRunner();
-  await qr1.connect();
+  const dr = new SqliteDriver(conn);
+  await dr.connect();
 
-  const qr2 = conn.createQueryRunner();
-  //   await qr2.connect();
+  const qr1 = dr.createQueryRunner("master");
+
+  const qr2 = dr.createQueryRunner("master");
+
   await qr1.startTransaction();
-  await qr1.query("START TRANSACTION");
-  await qr2.startTransaction();
-
+  console.log(qr1.isTransactionActive);
   await qr1.release();
-
-  await conn.createQueryRunner().connect();
-  await qr2.release();
-
-  await Timeout(10000);
-  //   await conn.transaction(async () => {
-  //     await conn.transaction(async (x: EntityManager) => {
-  //       x.q;
-  //     });
-  //   });
-});
-
-afterAll(() => {
-  return conn.close();
 });
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 100000;

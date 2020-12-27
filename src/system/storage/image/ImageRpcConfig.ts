@@ -1,4 +1,4 @@
-import SystemRpcRequest from "@dabsi/system/core/SystemRpcRequest";
+import SystemRpcRequest from "@dabsi/system/rpc/SystemRpcRequest";
 import ImageRpc from "@dabsi/system/storage/image/ImageRpc";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 

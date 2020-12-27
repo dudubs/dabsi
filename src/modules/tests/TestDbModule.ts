@@ -1,4 +1,5 @@
-import { DbModule } from "@dabsi/system/core/DbModule";
+import { WeakId } from "@dabsi/common/WeakId";
+import { DbModule } from "@dabsi/modules/DbModule";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module()
@@ -9,6 +10,7 @@ export default class TestDbModule {
       database: ":memory:",
       synchronize: true,
       logging: false,
+      name: `TestDbModule_${WeakId(this)}`,
     };
   }
 }

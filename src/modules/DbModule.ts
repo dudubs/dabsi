@@ -1,6 +1,3 @@
-import { WeakId } from "@dabsi/common/WeakId";
-import { touchMap } from "@dabsi/common/map/touchMap";
-import { PropertyMap } from "@dabsi/common/map/PropertyMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";

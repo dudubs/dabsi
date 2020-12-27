@@ -1,9 +1,7 @@
-import {Builder} from "@dabsi/common/object/buildObject";
+import { Builder } from "@dabsi/common/object/buildObject";
 
-export function assignBuilder<T>(
-    props: Partial<T>
-): Builder<T> {
-    return obj => {
-        return {...obj, ...props}
-    }
+export function assignBuilder<T>(props: Partial<T>): Builder<T> {
+  return obj => {
+    return { ...obj, ...props };
+  };
 }

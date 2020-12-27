@@ -1,4 +1,4 @@
-import { fromPropertyCase } from "@dabsi/common/string/fromPropertyCase";
+import fromPropertyCase from "@dabsi/common/string/fromPropertyCase";
 import { matchCase, SourceCase } from "@dabsi/common/string/matchCase";
 import { toConstantCase } from "@dabsi/common/string/toConstantCase";
 import LangComponent from "@dabsi/lang/LangComponent";

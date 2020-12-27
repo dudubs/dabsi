@@ -24,7 +24,7 @@ export function _delete(this: Store<any>, ...keys) {
   });
 }
 
-declare module "../../Store" {
+declare module "@dabsi/store/Store" {
   interface Store<T> {
     delete: typeof _delete;
   }

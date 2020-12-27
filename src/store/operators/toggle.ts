@@ -3,7 +3,7 @@ import { Store } from "@dabsi/store/Store";
 
 const op = "toggle";
 
-declare module "../Store" {
+declare module "@dabsi/store/Store" {
   interface Store<T> extends Record<typeof op, typeof method> {}
 }
 

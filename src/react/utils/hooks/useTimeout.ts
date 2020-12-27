@@ -1,10 +1,10 @@
-import {useEffect} from "react";
+import { useEffect } from "react";
 
 export function useTimeout(ms: number, callback: () => void) {
-    useEffect(() => {
-        const id = setTimeout(callback, ms);
-        return () => {
-            clearTimeout(id);
-        }
-    }, [])
+  useEffect(() => {
+    const id = setTimeout(callback, ms);
+    return () => {
+      clearTimeout(id);
+    };
+  }, []);
 }

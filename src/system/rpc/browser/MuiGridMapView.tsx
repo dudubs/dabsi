@@ -8,7 +8,7 @@ import {
   AnyWidgetConnectionWithWidgetMap,
   SystemMapView,
   SystemMapViewProps,
-} from "@dabsi/system/view/SystemMapView";
+} from "@dabsi/system/rpc/view/SystemMapView";
 
 export function MuiGridMapView<C extends AnySystemMapConnection>({
   GridProps,

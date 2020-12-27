@@ -10,7 +10,7 @@ export type DataQueryJoin = {
   condition?: DataExp<any>;
 };
 
-export type DataQueryExpTypes = DataExpTypes<any> & {
+export type DataQueryExpTypes = {
   $queryCount: DataQuery;
 
   $queryHas: DataQuery;

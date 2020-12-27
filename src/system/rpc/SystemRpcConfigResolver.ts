@@ -1,4 +1,4 @@
-import SystemRpcModule from "@dabsi/system/core/SystemRpcModule";
+import SystemRpcModule from "@dabsi/system/rpc";
 import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 import {
   AnyResolverMap,

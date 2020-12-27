@@ -1,5 +1,8 @@
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataQuery, DataQueryExp } from "@dabsi/typedata/data-query/DataQueryExp";
+import {
+  DataQuery,
+  DataQueryExp,
+} from "@dabsi/typedata/data-query/DataQueryExp";
 import { isDeepEqual } from "@dabsi/typeorm/utils/QueryExpBuilder";
 
 export type ColumnLoader = (raw: object) => any;

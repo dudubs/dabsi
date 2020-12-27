@@ -2,8 +2,8 @@ import { ManyToOne } from "typeorm";
 import { decorateDesignType } from "@dabsi/reflect/decorateDesignType";
 import { User } from "@dabsi/system/acl/entities/User";
 import { Module } from "@dabsi/typedi";
-import { Image } from "./../storage/image/entities/Image";
-import ImageStorageModule from "@dabsi/system/storage/image";
+import { Image } from "@dabsi/system/storage/image/entities/Image";
+import SystemImageStorageModule from "@dabsi/system/storage/image";
 
 declare module "@dabsi/system/acl/entities/User" {
   interface User {
@@ -14,6 +14,6 @@ declare module "@dabsi/system/acl/entities/User" {
 decorateDesignType(User, "avatar", Image, [ManyToOne(() => Image)]);
 
 @Module({
-  dependencies: [ImageStorageModule],
+  dependencies: [SystemImageStorageModule],
 })
 export default class AclUserAvatarModule {}

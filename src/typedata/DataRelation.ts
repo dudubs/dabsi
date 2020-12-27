@@ -17,9 +17,9 @@ export type MapRelation<T, U> =
   | IfRelationToOne<T, DataRelation<U>>
   | IfRelationToMany<T, DataRelation<U>[]>;
 
-export type IfRelationToOne<T, U> = Required<NonNullable<T>> extends Required<
-  DataRelation
->
+export type IfRelationToOne<T, U> = Required<
+  NonNullable<T>
+> extends Required<DataRelation>
   ? U
   : never;
 

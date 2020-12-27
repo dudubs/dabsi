@@ -20,7 +20,7 @@ export function EnumField(options: string[]) {
   };
 }
 
-declare module "./Field" {
+declare module "@dabsi/struct/Field" {
   namespace Field {
     export { EnumField as enum };
   }

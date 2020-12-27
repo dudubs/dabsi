@@ -366,4 +366,28 @@ export function DataSourceTests(
       expect(await CDS.filter({ $is: cKey }).hasRow()).toBeTrue();
     });
   });
+
+  describe("$find sanity", () => {
+    it("", async () => {
+      const a = await ADS.insert({});
+      const [b1, b2] = [
+        await BDS.insert({ bText: "hello" }),
+        await BDS.insert({ bText: "world" }),
+      ];
+      await a.at("oneAToManyB").add([b1.$key, b2.$key]);
+
+      expect(await get(b1.bText)).toEqual(b1.$key);
+      expect(await get(b2.bText)).toEqual(b2.$key);
+
+      function get(bText) {
+        return ADS.pick([], {
+          bKey: {
+            $find: { oneAToManyB: { bText } },
+          },
+        })
+          .getOrFail(a.$key)
+          .then(x => x.bKey);
+      }
+    });
+  });
 }

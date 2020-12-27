@@ -1,14 +1,14 @@
-import {BaseMap, MapKey, MapValue} from "@dabsi/common/map/BaseMap";
+import { BaseMap, MapKey, MapValue } from "@dabsi/common/map/BaseMap";
 
 export function touchMap<T extends BaseMap<any, any>>(
-    map: T, key:
-        MapKey<T>,
-    callback: (key: MapKey<T>) => MapValue<T>): MapValue<T> {
-    let value = map.get(key);
-    if (value || map.has(key)) {
-        return value;
-    }
-    map.set(key, value = callback(key));
+  map: T,
+  key: MapKey<T>,
+  callback: (key: MapKey<T>) => MapValue<T>
+): MapValue<T> {
+  let value = map.get(key);
+  if (value || map.has(key)) {
     return value;
+  }
+  map.set(key, (value = callback(key)));
+  return value;
 }
-

@@ -3,7 +3,10 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
 import { AnyInput, Input, InputType } from "@dabsi/typerpc/input/Input";
-import { AnyInputErrorHook, TInputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
+import {
+  AnyInputErrorHook,
+  TInputErrorHook,
+} from "@dabsi/typerpc/input/InputErrorHook";
 import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
 
 export class InputErrorHookView<

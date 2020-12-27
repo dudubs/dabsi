@@ -6,7 +6,10 @@ import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
 import { InputType } from "@dabsi/typerpc/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
 import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
-import { AnyArrayInput, TArrayInput } from "@dabsi/typerpc/input/array-input/ArrayInput";
+import {
+  AnyArrayInput,
+  TArrayInput,
+} from "@dabsi/typerpc/input/array-input/ArrayInput";
 
 export type AnyArrayInputConnection = RpcConnection<AnyArrayInput>;
 

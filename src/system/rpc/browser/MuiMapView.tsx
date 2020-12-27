@@ -20,7 +20,7 @@ import { useStore } from "@dabsi/react/useStore";
 import { Store } from "@dabsi/store";
 import { AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
-import { SystemView } from "@dabsi/system/view/SystemView";
+import { SystemView } from "@dabsi/system/rpc/view/SystemView";
 
 export type MuiMapViewChildProps = {
   GridProps?: GridProps;

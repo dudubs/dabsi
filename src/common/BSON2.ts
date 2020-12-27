@@ -1,26 +1,24 @@
-import {deserialize, serialize} from "bson";
+import { deserialize, serialize } from "bson";
 
 function buildArrays(obj) {
-    if (obj && (typeof obj === "object")) {
-        if (0 in obj) {
-            let arr: any[] = [];
-            for (let index = 0; index in obj; index++) {
-                arr[index] = buildArrays(obj[index]);
-            }
-            return arr;
-        }
+  if (obj && typeof obj === "object") {
+    if (0 in obj) {
+      let arr: any[] = [];
+      for (let index = 0; index in obj; index++) {
+        arr[index] = buildArrays(obj[index]);
+      }
+      return arr;
     }
-    return obj;
+  }
+  return obj;
 }
 
-
 export namespace BSON2 {
+  export function unpack<T = any>(buffer: Buffer): T {
+    return buildArrays(deserialize(buffer))?.raw;
+  }
 
-    export function unpack<T = any>(buffer: Buffer): T {
-        return buildArrays(deserialize(buffer))?.raw
-    }
-
-    export function pack(data: any): Buffer {
-        return serialize({raw: data})
-    }
+  export function pack(data: any): Buffer {
+    return serialize({ raw: data });
+  }
 }

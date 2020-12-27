@@ -1,6 +1,6 @@
 import { AdminRpc } from "@dabsi/system/admin/common";
-import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
-import { SystemSession } from "@dabsi/system/core/SystemSession";
+import SystemRpcConfigResolver from "@dabsi/system/rpc/SystemRpcConfigResolver";
+import { SystemSession } from "@dabsi/system/session/SystemSession";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { RpcError } from "@dabsi/typerpc/Rpc";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";

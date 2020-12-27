@@ -28,7 +28,7 @@ const SqlOperators: Record<DataCompareOperators, string> = {
   $notContains: " NOT LIKE ",
 };
 
-export abstract class AbstractDataEntityQueryExpTranslator
+export default abstract class AbstractDataEntityQueryExpTranslator
   extends DataExpTranslator<string>
   implements DataQueryExpTranslator<string> {
   True = "1";
@@ -160,6 +160,10 @@ export abstract class AbstractDataEntityQueryExpTranslator
     throw new Error("Not support.");
   }
 
+  translateFind(relationName: string, exp: DataExp<any>): string {
+    throw new Error("Not support.");
+  }
+
   translateIs(inverse: boolean, keys: string[]): string {
     throw new Error("Not support.");
   }
@@ -168,6 +172,9 @@ export abstract class AbstractDataEntityQueryExpTranslator
     return `(SELECT COUNT(*) AS value ${this.translateQueryWithoutFields(
       query
     )})`;
+  }
+  translateQueryFind(query: DataQuery): string {
+    return "1";
   }
 
   translateQueryHas(inverse: boolean, query: DataQuery): string {
@@ -186,7 +193,9 @@ export abstract class AbstractDataEntityQueryExpTranslator
     for (let [aliasName, selection] of entries(query.fields)) {
       sql +=
         (sql ? ", " : "") +
+        "(" +
         this.translate(selection) +
+        ")" +
         " AS " +
         this.escape(aliasName);
     }

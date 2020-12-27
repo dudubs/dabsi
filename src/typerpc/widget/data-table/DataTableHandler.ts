@@ -125,7 +125,6 @@ export class DataTableHandler
       .addFields(fields)
       .filter({ $and: filters });
 
-    console.log({ fields });
     let totalRows: number;
     let dataRows: DataRow<any>[];
 

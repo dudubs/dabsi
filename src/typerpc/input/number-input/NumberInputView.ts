@@ -5,7 +5,10 @@ import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
 import { InputError, InputValueElement } from "@dabsi/typerpc/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
 import { NumberInput } from "@dabsi/typerpc/input/number-input/NumberInput";
-import { NumberInputLoader, NumberInputOptions } from "@dabsi/typerpc/input/number-input/NumberInputLoader";
+import {
+  NumberInputLoader,
+  NumberInputOptions,
+} from "@dabsi/typerpc/input/number-input/NumberInputLoader";
 
 export class NumberInputView<
   C extends RpcConnection<NumberInput>

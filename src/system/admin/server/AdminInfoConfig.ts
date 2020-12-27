@@ -2,7 +2,7 @@ import { entries } from "@dabsi/common/object/entries";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 import AclModule from "@dabsi/system/acl";
-import { SystemSession } from "@dabsi/system/core/SystemSession";
+import { SystemSession } from "@dabsi/system/session/SystemSession";
 import { AdminInfoRpc, AdminRpc } from "@dabsi/system/admin/common";
 
 export default RpcConfigResolver(

@@ -1,6 +1,6 @@
 import addAll from "@dabsi/common/map/addAll";
 import BrowserModule from "@dabsi/modules/BrowserModule";
-import { SystemModule } from "@dabsi/system/core/SystemModule";
+import { SystemModule } from "@dabsi/system/core";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module()

@@ -23,9 +23,13 @@ type _PickRow<T, S> = S extends { pick: ReadonlyArray<infer K> }
   ? Pick<T, Extract<K | DataTypeKey, NonRelationKeys<T>>>
   : T;
 
-type _ChildrenRow<T, S, SChildren, SWithoutChildren, UChildren> = HasKeys<
+type _ChildrenRow<
+  T,
+  S,
+  SChildren,
+  SWithoutChildren,
   UChildren
-> extends false
+> = HasKeys<UChildren> extends false
   ? {}
   : DataUnionWithChildren<
       {

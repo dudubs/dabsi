@@ -2,7 +2,10 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcHook } from "@dabsi/typerpc/RpcHook";
-import { InlineObject, InlineObjectType } from "@dabsi/typerpc/widget/InlineObjectType";
+import {
+  InlineObject,
+  InlineObjectType,
+} from "@dabsi/typerpc/widget/InlineObjectType";
 import {
   AnyWidget,
   Widget,

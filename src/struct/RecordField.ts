@@ -19,7 +19,7 @@ export function RecordField<V extends AsField<any>>(
   };
 }
 
-declare module "./Field" {
+declare module "@dabsi/struct/Field" {
   namespace Field {
     let record: typeof RecordField;
   }

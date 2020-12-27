@@ -8,27 +8,20 @@ import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
 import DataEntityQueryRunner from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
-import { DataKey } from "@dabsi/typedata/DataKey";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSource, GetDataSource } from "@dabsi/typedata/DataSource";
-import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
-import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
-import { Connection, EntityManager, getConnection, QueryRunner } from "typeorm";
 import {
   AnyDataSelection,
   DataSelection,
-} from "./../data-selection/DataSelection";
+} from "@dabsi/typedata/data-selection/DataSelection";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
+import { DataKey } from "@dabsi/typedata/DataKey";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
+import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
+import { Connection, EntityManager, getConnection, QueryRunner } from "typeorm";
 
 type GetConnection = () => Connection;
 type GetQueryRunner = () => QueryRunner;
-
-/*
- getEntityManager();
-
- starttransaction()
-
-*/
 
 export class DataEntitySource<T> extends DataSource<T> {
   static getConnection: undefined | (() => Connection);
@@ -92,7 +85,7 @@ export class DataEntitySource<T> extends DataSource<T> {
   protected _createEntityRow(
     valueMap: Record<string, any>,
     isInsert: boolean,
-    emit?: (event: RowChange) => void
+    changeMap: DataEntityChangeMap
   ) {
     const row = {};
     const relationKeys: {
@@ -126,7 +119,8 @@ export class DataEntitySource<T> extends DataSource<T> {
       if (isInsert) {
         row[propertyName] = key;
         emit?.({
-          type: "value",
+          type: "set",
+          isRelation: false,
           propertyName,
           value: key,
         });
@@ -134,6 +128,7 @@ export class DataEntitySource<T> extends DataSource<T> {
     }
 
     for (let [propertyName, value] of entries(valueMap)) {
+      if (isInsert && value == null) continue;
       const relation = this.entityCursor.entityInfo.propertyNameToRelation[
         propertyName
       ];
@@ -142,6 +137,7 @@ export class DataEntitySource<T> extends DataSource<T> {
         continue;
       }
       if (relation) {
+        // TODO: by data-source.
         if (value && typeof value === "object") {
           if (typeof value.$key === "string") {
             value = value.$key;
@@ -157,7 +153,12 @@ export class DataEntitySource<T> extends DataSource<T> {
       ];
       if (column) {
         row[propertyName] = value;
-        emit?.({ type: "value", propertyName, value });
+        emit?.({
+          type: isInsert ? "set" : value == null ? "unset" : "set",
+          propertyName,
+          isRelation: false,
+          value,
+        });
         continue;
       }
       throw new Error(`Invalid property ${propertyName}`);
@@ -165,6 +166,9 @@ export class DataEntitySource<T> extends DataSource<T> {
 
     return { row, relationKeys };
 
+    function emit(change: DataEntityChange) {
+      changeMap[change.propertyName] = change;
+    }
     function buildRelation(
       relation: EntityRelation,
 
@@ -181,12 +185,14 @@ export class DataEntitySource<T> extends DataSource<T> {
         emit?.({
           type: "set",
           propertyName: relation.propertyName,
+          isRelation: true,
           relation,
-          key,
+          relationKey: key,
         });
       } else {
         emit?.({
           type: "unset",
+          isRelation: true,
           propertyName: relation.propertyName,
           relation,
         });
@@ -199,140 +205,182 @@ export class DataEntitySource<T> extends DataSource<T> {
     }
   }
 
+  @Lazy() get entityEmitter(): DataEntityEmitter | undefined {
+    return this.getEntityEmitter?.(this.entityCursor.typeInfo.type);
+  }
+  protected getEntityEmitter?(
+    entityType: Function
+  ): DataEntityEmitter | undefined;
+
+  async withTransaction<T = void>(callback: () => Promise<T>): Promise<T> {
+    const {
+      entityCursor: { queryRunner },
+    } = this;
+    if (queryRunner.isTransactionActive) {
+      return await callback();
+    }
+    let result;
+    await queryRunner.startTransaction();
+    try {
+      result = await callback();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    }
+    await queryRunner.commitTransaction();
+    return result;
+  }
+
   async insertKeys<T>(
     this: DataEntitySource<T>,
-    values: DataInsert<T>[]
+    valueMap: DataInsert<T>[]
   ): Promise<string[]> {
-    const entityMetadata = this.entityCursor.entityMetadata;
-    const keys: string[] = [];
+    return this.withTransaction(async () => {
+      const entityMetadata = this.entityCursor.entityMetadata;
+      const entityType = this.entityCursor.typeInfo.type;
+      const keys: string[] = [];
+      for (const value of valueMap) {
+        const changeMap: Record<string, DataEntityInsertChange> = {};
+        const { row, relationKeys } = this._createEntityRow(
+          value,
+          true,
+          changeMap
+        );
 
-    for (const value of values) {
-      const changeMap: RowChangeMap = {};
-      const { row, relationKeys } = this._createEntityRow(
+        const entity = await this.entityCursor.entityManager.save(
+          this.entityCursor.entityManager.create(
+            this.entityCursor.typeInfo.type,
+            <any>row
+          )
+        );
+
+        const entityObjectKey = DataEntityKey.pick(entityMetadata, entity);
+        const entityKey: DataEntityKey = {
+          object: entityObjectKey,
+          text: DataEntityKey.stringify(entityMetadata, entityObjectKey),
+        };
+
+        for (const { relation, key } of relationKeys) {
+          await relation.update("set", entityObjectKey, key.object);
+        }
+
+        keys.push(entityKey.text);
+
+        await this.entityEmitter?.({
+          manager: this.entityCursor.entityManager,
+          type: "insert",
+          entityKey,
+          entityType,
+          changeMap,
+        });
+      }
+      return keys;
+    });
+  }
+
+  updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
+    return this.withTransaction(async () => {
+      if (!hasKeys(value)) return 0;
+      let affectedRows = 0;
+
+      const {
+        entityCursor: {
+          typeInfo: { type: entityType },
+          entityMetadata,
+        },
+      } = this;
+
+      const changeMap: DataEntityChangeMap = {};
+
+      const { row, relationKeys } = await this._createEntityRow(
         value,
-        true,
-        change => {
-          changeMap[change.propertyName] = change;
-        }
+        false,
+        changeMap
       );
-      const entity = await this.entityCursor.entityManager.save(
-        this.entityCursor.entityManager.create(
+
+      const { loader, getEntityMap } = createEventLoader(this);
+
+      await this.entityEmitter?.({
+        manager: this.entityCursor.entityManager,
+        type: "beforeUpdateAll",
+        entityType,
+        changeMap,
+        ...loader,
+      });
+
+      const entityMap = await getEntityMap();
+      for (const entityTextKey of keys) {
+        const entity = entityMap[entityTextKey] || {};
+        const entityKey = DataEntityKey.parse(
+          entityMetadata,
+          DataKey(entityTextKey)
+        );
+
+        await this.entityEmitter?.({
+          manager: this.entityCursor.entityManager,
+          type: "beforeUpdateOne",
+          entity,
+          entityKey,
+          entityType,
+          changeMap,
+          row,
+        });
+
+        // beforeUpdateOne
+
+        const result = await this.entityCursor.entityManager.update(
           this.entityCursor.typeInfo.type,
-          <any>row
-        )
-      );
-      const entityObjectKey = DataEntityKey.pick(entityMetadata, entity);
-      const entityKey: DataEntityKey = {
-        object: entityObjectKey,
-        text: DataEntityKey.stringify(entityMetadata, entityObjectKey),
-      };
-
-      for (const { relation, key } of relationKeys) {
-        await relation.update("set", entityObjectKey, key.object);
-      }
-
-      keys.push(entityKey.text);
-
-      await this.emit?.({
-        type: "insert",
-        entityKey,
-        changeMap,
-      });
-    }
-    return keys;
-  }
-
-  async updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
-    if (!hasKeys(value)) return 0;
-    let affectedRows = 0;
-    const entityMetadata = this.entityCursor.entityMetadata;
-    const changeMap: RowChangeMap = {};
-
-    const { row, relationKeys } = await this._createEntityRow(
-      value,
-      false,
-      change => {
-        changeMap[change.propertyName] = change;
-      }
-    );
-    let source: DataSource<any> | null = null;
-
-    const { loader, getEntityMap } = createEventLoader(this);
-    await this.emit?.({
-      type: "beforeUpdateAll",
-      changeMap,
-      ...loader,
-    });
-
-    const entityMap = await getEntityMap();
-    for (const entityTextKey of keys) {
-      const entity = entityMap[entityTextKey] || {};
-      const entityKey = DataEntityKey.parse(
-        entityMetadata,
-        DataKey(entityTextKey)
-      );
-
-      await this.emit?.({
-        type: "beforeUpdateOne",
-        changeMap,
-        entity,
-        entityKey,
-        row,
-      });
-
-      // beforeUpdateOne
-
-      const result = await this.entityCursor.entityManager.update(
-        this.entityCursor.typeInfo.type,
-        entityKey.object,
-        row
-      );
-      for (const { relation, key: relationKey } of relationKeys) {
-        if (relationKey.object == null) {
-          await relation.update("unset", entityKey.object, relationKey.object);
-        } else {
-          await relation.update("set", entityKey.object, relationKey.object);
+          entityKey.object,
+          row
+        );
+        for (const { relation, key: relationKey } of relationKeys) {
+          if (relationKey.object == null) {
+            await relation.update(
+              "unset",
+              entityKey.object,
+              relationKey.object
+            );
+          } else {
+            await relation.update("set", entityKey.object, relationKey.object);
+          }
         }
-      }
 
-      if (typeof result.affected == "number") {
-        affectedRows += result.affected;
-      } else {
-        affectedRows++;
+        if (typeof result.affected == "number") {
+          affectedRows += result.affected;
+        } else {
+          affectedRows++;
+        }
+        // afterUpdateOne
+        await this.entityEmitter?.({
+          manager: this.entityCursor.entityManager,
+          type: "afterUpdateOne",
+          changeMap,
+          entityKey,
+          entity,
+        });
       }
-      // afterUpdateOne
-      await this.emit?.({
-        type: "afterUpdateOne",
+      await this.entityEmitter?.({
+        manager: this.entityCursor.entityManager,
+        type: "afterUpdateAll",
         changeMap,
-        entityKey,
-        entity,
+        entityMap,
       });
-    }
-    await this.emit?.({
-      type: "afterUpdateAll",
-      changeMap,
-      entityMap,
+      return affectedRows;
     });
-    return affectedRows;
   }
 
-  protected getEmitter?(): undefined | ((event: DataEntityEvent) => Awaitable);
-  @Lazy() protected get emit():
-    | undefined
-    | ((event: DataEntityEvent) => Awaitable) {
-    return this.getEmitter?.();
-  }
-
-  protected async updateRelationKeys(
+  protected updateRelationKeys(
     keysToAdd: string[],
     keysToRemove: string[]
   ): Promise<void> {
-    for (let key of keysToAdd) {
-      await this._updateRelationKeys(key, "addOrSet");
-    }
-    for (let key of keysToRemove) {
-      await this._updateRelationKeys(key, "removeOrUnset");
-    }
+    return this.withTransaction(async () => {
+      for (let key of keysToAdd) {
+        await this._updateRelationKeys(key, "addOrSet");
+      }
+      for (let key of keysToRemove) {
+        await this._updateRelationKeys(key, "removeOrUnset");
+      }
+    });
   }
 
   protected async _updateRelationKeys(
@@ -345,69 +393,84 @@ export class DataEntitySource<T> extends DataSource<T> {
     );
 
     if (this.entityCursor.parent) {
-      await this.entityCursor.parent.relation.update(
-        method,
-        entityKey.object,
-        this.entityCursor.parent.relationKey.object!
-      );
-    }
+      const { relation, relationKey } = this.entityCursor.parent;
 
-    for (const { relation, key } of this.entityCursor.relationKeys) {
       const action = await relation.update(
         method,
         entityKey.object,
-        key.object
+        relationKey.object!
+      );
+      await this.getEntityEmitter?.(relation.entityType)?.({
+        manager: this.entityCursor.entityManager,
+        type: "relation",
+        method,
+        action,
+        relation,
+        entityKey: relationKey,
+        relationKey: entityKey,
+      });
+    }
+
+    for (const { relation, key: relationKey } of this.entityCursor
+      .relationKeys) {
+      const action = await relation.update(
+        method,
+        entityKey.object,
+        relationKey.object
       );
 
-      await this.emit?.({
+      await this.getEntityEmitter?.(relation.entityType)?.({
+        manager: this.entityCursor.entityManager,
         type: "relation",
-        entityKey,
+        method,
+        action,
         relation,
-        action: {
-          type: action,
-          key,
-        },
+
+        entityKey,
+        relationKey,
       });
     }
   }
 
-  async deleteKeys(keys: string[]): Promise<void> {
-    const { loader, getEntityMap } = createEventLoader(this);
+  deleteKeys(textKeys: string[]): Promise<void> {
+    return this.withTransaction(async () => {
+      const { loader, getEntityMap } = createEventLoader(this);
 
-    await this.emit?.({
-      type: "beforeDeleteAll",
-      ...loader,
-    });
-
-    const entityMap = await getEntityMap();
-
-    for (const entityTextKey of keys) {
-      const entityKey = DataEntityKey.parse(
-        this.entityCursor.entityMetadata,
-        entityTextKey
-      );
-      await this.emit?.({
-        type: "beforeDeleteOne",
-        entity: entityMap[entityTextKey],
-        entityKey,
+      await this.entityEmitter?.({
+        manager: this.entityCursor.entityManager,
+        type: "beforeDeleteAll",
+        ...loader,
       });
-      await this.entityCursor.entityManager.delete(
-        this.entityCursor.typeInfo.type,
-        entityKey.object
-      );
-      await this.emit?.({
-        type: "afterDeleteOne",
-        entity: entityMap[entityTextKey],
-        entityKey,
+
+      const entityMap = await getEntityMap();
+      for (const entityTextKey of textKeys) {
+        const entityKey = DataEntityKey.parse(
+          this.entityCursor.entityMetadata,
+          entityTextKey
+        );
+        await this.entityEmitter?.({
+          manager: this.entityCursor.entityManager,
+          type: "beforeDeleteOne",
+          entity: entityMap[entityTextKey],
+          entityKey,
+        });
+        await this.entityCursor.entityManager.delete(
+          this.entityCursor.typeInfo.type,
+          entityKey.object
+        );
+        await this.entityEmitter?.({
+          manager: this.entityCursor.entityManager,
+          type: "afterDeleteOne",
+          entity: entityMap[entityTextKey],
+          entityKey,
+        });
+      }
+      await this.entityEmitter?.({
+        manager: this.entityCursor.entityManager,
+        type: "afterDeleteAll",
+        entityMap,
       });
-    }
-
-    await this.emit?.({
-      type: "afterDeleteAll",
-      entityMap,
     });
-
-    // delete.init delete.clean beforeDeleteOne afterDeleteOne
   }
 
   @Lazy() get entityCursor(): DataEntityCursor {
@@ -419,28 +482,137 @@ export class DataEntitySource<T> extends DataSource<T> {
   }
 }
 
-type RowChange<T = { propertyName: string }> =
+export type DataEntityChange<
+  T = {
+    propertyName: string;
+  }
+> =
   | (T & {
-      type: "value";
+      type: "set";
+      isRelation: false;
       value: any;
     })
   | (T & {
       type: "set";
+      isRelation: true;
       relation: EntityRelation;
-      key: DataEntityKey;
+      relationKey: DataEntityKey;
     })
-  | (T & { type: "unset"; relation: EntityRelation });
+  | (T & {
+      type: "unset";
+      isRelation: false;
+    })
+  | (T & {
+      type: "unset";
+      isRelation: true;
+      relation: EntityRelation;
+    });
 
-type RowChangeMap = Record<string, RowChange | undefined>;
+export type DataEntityRelationEvent = {
+  type: "addOrSet" | "removeOrUnset";
+  entityKey: DataEntityKey;
+  relation: EntityRelation;
+  relationKey: DataEntityKey;
+  action: "add" | "set" | "remove" | "unset";
+};
+export type DataEntityInsertChange = Extract<DataEntityChange, { type: "set" }>;
+export type DataEntityEvent<
+  WithEntityManager = {
+    manager: EntityManager;
+  },
+  WithEntityType = {
+    entityType: Function;
+  },
+  WithLoader = {
+    select(selection: AnyDataSelection): void;
+  },
+  WithEntity = {
+    entity: object | undefined;
+  },
+  WithEntityKey = {
+    entityKey: DataEntityKey;
+  },
+  WithChangeMap = { changeMap: DataEntityChangeMap },
+  WithEntityMap = { entityMap: Record<string, object | undefined> },
+  UpdateEvents =
+    | (WithEntityManager &
+        WithEntityType &
+        WithChangeMap &
+        WithLoader & {
+          type: "beforeUpdateAll";
+        })
+    | (WithEntityManager &
+        WithEntityType &
+        WithChangeMap &
+        WithEntityKey &
+        WithEntity & {
+          type: "beforeUpdateOne";
+          row: object;
+        })
+    | (WithEntityManager &
+        WithChangeMap & //
+        WithEntityKey &
+        WithEntity & {
+          //
+          type: "afterUpdateOne";
+        })
+    | (WithEntityManager &
+        WithChangeMap &
+        WithEntityMap & {
+          type: "afterUpdateAll";
+        }),
+  DeleteEvents =
+    | (WithEntityManager & (WithLoader & { type: "beforeDeleteAll" }))
+    | (WithEntityManager &
+        WithEntity &
+        WithEntityKey & { type: "beforeDeleteOne" })
+    | (WithEntityManager &
+        WithEntity &
+        WithEntityKey & { type: "afterDeleteOne" })
+    | (WithEntityManager & WithEntityMap & { type: "afterDeleteAll" }),
+  RelationEvents = WithEntityManager &
+    WithEntityKey & {
+      type: "relation";
+      method: "addOrSet" | "removeOrUnset";
+      action: "add" | "set" | "unset" | "remove";
+      relation: EntityRelation;
+      relationKey: DataEntityKey;
+    }
+> =
+  | (WithEntityManager &
+      WithEntityType &
+      WithEntityKey & {
+        type: "insert";
+        changeMap: Record<
+          string,
+          | undefined
+          | Extract<
+              DataEntityChange,
+              {
+                type: "set";
+              }
+            >
+        >;
+      })
+  | UpdateEvents
+  | DeleteEvents
+  | RelationEvents;
+
+export type DataEntityPropertyEvent = DataEntityChange & {
+  entityType: Function;
+  entityKey: DataEntityKey;
+};
+export type DataEntityChangeMap = Record<string, DataEntityChange | undefined>;
 
 function createEventLoader(source: DataSource<any>) {
   let selection: AnyDataSelection | undefined = undefined;
   return {
     loader: {
-      select({ pick = [], fields = {} }: AnyDataSelection) {
+      select({ pick = [], fields = {}, ...otherSelection }: AnyDataSelection) {
         selection = DataSelection.merge(selection, {
           pick: [...(selection?.pick || []), ...pick],
           fields: { ...selection?.fields, ...fields },
+          ...otherSelection,
         });
       },
     },
@@ -458,78 +630,4 @@ function createEventLoader(source: DataSource<any>) {
   };
 }
 
-export type DataEntityEventType = DataEntityEvent["type"];
-export type DataEntityEvent<
-  T = {},
-  WithEntity = {
-    entity: Record<string, any> | undefined;
-  },
-  WithEntityKey = {
-    entityKey: DataEntityKey;
-  },
-  WithChangeMap = { changeMap: RowChangeMap },
-  WithLoader = {
-    select(selection: AnyDataSelection): void;
-  },
-  WithEntityMap = { entityMap: Record<string, any> },
-  UpdateEvents =
-    | (T &
-        WithLoader &
-        WithChangeMap & {
-          type: "beforeUpdateAll";
-        })
-    | (T &
-        WithEntity &
-        WithEntityKey &
-        WithChangeMap & {
-          type: "beforeUpdateOne";
-          row: Record<string, any>;
-        })
-    | (WithChangeMap &
-        WithEntityMap & {
-          type: "afterUpdateAll";
-        })
-    | (T &
-        WithEntity &
-        WithEntityKey &
-        WithChangeMap & {
-          type: "afterUpdateOne";
-        }),
-  DeleteEvents =
-    | (T &
-        WithLoader & {
-          type: "beforeDeleteAll";
-        })
-    | (T &
-        WithEntityMap & {
-          type: "afterDeleteAll";
-        })
-    | (T &
-        WithEntity &
-        WithEntityKey & {
-          type: "beforeDeleteOne";
-        })
-    | (T &
-        WithEntity &
-        WithEntityKey & {
-          type: "afterDeleteOne";
-        })
-> =
-  | (T &
-      WithEntityKey &
-      WithChangeMap & {
-        type: "insert";
-      })
-  | UpdateEvents
-  | DeleteEvents
-  | (T &
-      WithEntityKey & {
-        type: "relation";
-        relation: EntityRelation;
-        action:
-          | {
-              type: "add" | "remove" | "set";
-              key: DataEntityKey;
-            }
-          | { type: "unset" };
-      });
+export type DataEntityEmitter = (event: DataEntityEvent) => Awaitable;

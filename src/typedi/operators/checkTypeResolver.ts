@@ -14,5 +14,5 @@ export function checkTypeResolver(type: Type<any>, context: ResolverMap<any>) {
       return;
     }
   }
-  throw new ResolveError(`Can't resolve <Type ${getTypeToken(type)}>`);
+  throw new ResolveError(`Can't resolve <Type ${type.name}>`);
 }

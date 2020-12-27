@@ -1,10 +1,9 @@
-import {cloneElement, createElement, Fragment, ReactElement} from "react";
+import { cloneElement, createElement, Fragment, ReactElement } from "react";
 
 export function withDefaultKey(key, element: ReactElement) {
-    if (element.key) {
-        return element;
-    }
+  if (element.key) {
+    return element;
+  }
 
-    return cloneElement(element, {...element.props, key})
-
+  return cloneElement(element, { ...element.props, key });
 }

@@ -125,6 +125,8 @@ export type DataExpTypes<T> = {
   // to-many relations
   $has: HasExp<T>;
 
+  $find: FindExp<T>;
+
   $notHas: HasExp<T>;
 
   $as: AsExp<T>;
@@ -137,6 +139,11 @@ export type HasExp<T> =
       }
     >;
 
+export type FindExp<T> = Union<
+  {
+    [K in DataRelationToManyKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
+  }
+>;
 type DataRelationAtExp<T, K extends DataRelationKeys<T>> = DataExp<
   Required<DataRelationTypeAt<T, K>>
 >;

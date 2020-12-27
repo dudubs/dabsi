@@ -14,7 +14,10 @@ import {
   InputValueElement,
 } from "@dabsi/typerpc/input/Input";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { TextInputLoader, TextLoaderOptions } from "@dabsi/typerpc/input/text-input/TextInputLoader";
+import {
+  TextInputLoader,
+  TextLoaderOptions,
+} from "@dabsi/typerpc/input/text-input/TextInputLoader";
 
 type T = TextInput<any>;
 

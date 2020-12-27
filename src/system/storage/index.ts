@@ -1,4 +1,4 @@
 import { Module } from "@dabsi/typedi";
 
 @Module({})
-export default class CoreStorageModule {}
+export default class SystemStorageModule {}

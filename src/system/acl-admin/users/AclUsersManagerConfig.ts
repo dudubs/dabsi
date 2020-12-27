@@ -3,7 +3,7 @@ import { User } from "@dabsi/system/acl/entities/User";
 import AclEditUser from "@dabsi/system/acl-admin/users/AclEditUser";
 import AclUsersManager from "@dabsi/system/acl-admin/users/AclUsersManager";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import SystemRpcConfigResolver from "@dabsi/system/core/SystemRpcConfigResolver";
+import SystemRpcConfigResolver from "@dabsi/system/rpc/SystemRpcConfigResolver";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 

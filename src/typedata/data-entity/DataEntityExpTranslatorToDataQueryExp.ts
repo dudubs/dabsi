@@ -1,3 +1,5 @@
+import { DataExp } from "./../data-exp/DataExp";
+import { inspect } from "@dabsi/logging/inspect";
 import { defined } from "@dabsi/common/object/defined";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import {
@@ -15,7 +17,6 @@ import {
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import { EntityRelation } from "@dabsi/typeorm/relations";
 import { Connection } from "typeorm";
-import { inspect } from "util";
 
 const mapper = Object.seal(new DataExpMapper());
 
@@ -98,16 +99,16 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
 
   counter = 0;
 
-  translateRelation(propertyName: string, whereExp: DataExp<any>): DataQuery {
+  translateRelation(relationName: string, whereExp: DataExp<any>) {
     const relation = new EntityRelation(
       this.connection,
       this.typeInfo.type,
-      propertyName,
+      relationName,
       false
     );
 
     if (!relation.isToMany)
-      throw new Error(`SubQuery allowed only to *-to-many relation.`);
+      throw new TypeError(`$find can translate only for *-to-many relation.`);
 
     const rightSchema = `${relation.left.entityMetadata.tableName}_${
       relation.propertyName
@@ -115,12 +116,12 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
       whereExp === undefined ? "all" : ++this.counter
     }`;
 
-    let subSelect: DataQuery;
+    let query: DataQuery;
 
     if (relation.ownerRelationMetadata.joinTableName) {
       const joinSchema = rightSchema + "_join";
 
-      subSelect = {
+      query = {
         alias: joinSchema,
         from: relation.ownerRelationMetadata.joinTableName,
         joins: {
@@ -143,34 +144,57 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
         },
       };
     } else {
-      subSelect = {
+      query = {
         alias: rightSchema,
         from: relation.right.entityMetadata.tableName,
         where: relation.getJoinConditionExpByColumn(this.schema, rightSchema),
       };
     }
+    const subTypeInfo =
+      this.typeInfo.relations?.[relationName] ||
+      DataTypeInfo.get(relation.right.entityType);
+
+    const subTranslator = new DataEntityExpTranslatorToDataQueryExp(
+      this.connection,
+      subTypeInfo,
+      new DataQueryBuilder(query),
+      rightSchema
+    );
 
     if (whereExp !== undefined) {
-      const subTypeInfo =
-        this.typeInfo.relations?.[propertyName] ||
-        DataTypeInfo.get(relation.right.entityType);
-
-      const subTranslator = new DataEntityExpTranslatorToDataQueryExp(
-        this.connection,
-        subTypeInfo,
-        new DataQueryBuilder(subSelect),
-        rightSchema
-      );
-
-      subSelect.where = {
-        $at: { [rightSchema]: subTranslator.translate(whereExp) },
-      };
+      query.where = DataExp(query.where, {
+        $at: { [rightSchema]: translate(whereExp) },
+      });
     }
-    return subSelect;
+
+    function translate(exp) {
+      return subTranslator.translate(exp);
+    }
+    return { relation, query, translate };
   }
 
-  translateCount(propertyName: string, whereExp: DataExp<any>): DataQueryExp {
-    return { $queryCount: this.translateRelation(propertyName, whereExp) };
+  translateCount(relationName: string, whereExp: DataExp<any>): DataQueryExp {
+    return {
+      $queryCount: this.translateRelation(relationName, whereExp).query,
+    };
+  }
+
+  translateFind(relationName, exp): DataQueryExp {
+    const { query, relation, translate } = this.translateRelation(
+      relationName,
+      exp
+    );
+
+    if (relation.right.entityMetadata.primaryColumns.length > 1)
+      throw new Error(`Not supported yet.`);
+    query.take = 1;
+    query.fields = {
+      foundKey: translate(
+        relation.right.entityMetadata.primaryColumns[0].propertyName
+      ),
+    };
+
+    return { $query: query };
   }
 
   translateHas(
@@ -182,7 +206,7 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
       [inverse ? "$queryNotHas" : "$queryHas"]: this.translateRelation(
         propertyName,
         exp
-      ),
+      ).query,
     };
   }
 

@@ -1,7 +1,11 @@
 import { keys } from "@dabsi/common/object/keys";
 import { IRpcHandler, RpcError } from "@dabsi/typerpc/Rpc";
 import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
-import { AnyWidget, WidgetElement, WidgetElementState } from "@dabsi/typerpc/widget/Widget";
+import {
+  AnyWidget,
+  WidgetElement,
+  WidgetElementState,
+} from "@dabsi/typerpc/widget/Widget";
 import { AnyTabsWidget } from "@dabsi/typerpc/widget/tabs-widget/TabsWidget";
 
 type T = AnyTabsWidget;

@@ -16,6 +16,8 @@ export default class ProjectManager {
 
   providers: { error: Error; fileName: string }[] = [];
 
+  allProjectModules: ProjectModule[];
+
   constructor(
     @Inject() mMake: MakeModule,
     @Inject() protected runner: ModuleRunner,
@@ -23,8 +25,6 @@ export default class ProjectManager {
   ) {
     mMake.cli.install({ run: () => this.init() });
   }
-
-  allProjectModules: ProjectModule[];
 
   @Once() async init() {
     this.projectMap = {};

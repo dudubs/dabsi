@@ -320,6 +320,13 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
     return this.$has(exp, true);
   }
 
+  abstract translateFind(relationName: string, exp: DataExp<any>);
+
+  $find(relationNameExpMap: O["$find"]): U {
+    const [realtionName, exp] = firstDefinedEntry(relationNameExpMap);
+    return this.translateFind(realtionName, exp);
+  }
+
   $search(exp: O["$search"]): U {
     const words = exp.text.split(/[\s\t\r\n]+/g).filter(text => text);
     if (words.length === 0) return this.True;

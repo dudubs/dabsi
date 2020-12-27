@@ -8,7 +8,7 @@ export class ExpressLoggerModule {
       preRoutes: app => {
         app.use((req, res, next) => {
           expressModule.log.info(
-            `${req.httpVersion} ${req.method} ${req.path}`
+            `${req.method} ${req.path} HTTP/${req.httpVersion}`
           );
           next();
         });

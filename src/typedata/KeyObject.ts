@@ -1,6 +1,6 @@
 import { entries } from "@dabsi/common/object/entries";
 import { sliceString } from "@dabsi/common/string/sliceString";
-import { split } from "@dabsi/common/string/split";
+import split from "@dabsi/common/string/split";
 
 export type KeyObject = Record<string, any>;
 

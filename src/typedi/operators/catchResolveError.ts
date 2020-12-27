@@ -5,7 +5,7 @@ import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 export function catchResolveError<T>(
   resolver: Resolver<T>,
-  callback: (error: ResolveError) => void
+  callback: (error: ResolveError) => any
 ): CustomResolver<T> {
   return (context => resolve(resolver, context)).toCheck(context => {
     try {

@@ -30,7 +30,7 @@ export function SetField<V extends AsField<any>>(
   };
 }
 
-declare module "./Field" {
+declare module "@dabsi/struct/Field" {
   namespace Field {
     let set: typeof SetField;
   }

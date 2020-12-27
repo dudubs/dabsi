@@ -25,6 +25,10 @@ export class DataExpMapper extends DataExpTranslator<DataExp<any>> {
     };
   }
 
+  translateFind(relationName, exp) {
+    return { $find: { [relationName]: exp } };
+  }
+
   translateAs(unionKey: string, exp: DataExp<any>): DataExp<any> {
     return <DataExp<any>>{ $as: { [unionKey]: exp } };
   }

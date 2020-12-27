@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "./../../typerpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";

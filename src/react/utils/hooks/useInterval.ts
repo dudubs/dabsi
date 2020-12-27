@@ -1,15 +1,15 @@
-import {useEffect} from "react";
-import {useCounter} from "@dabsi/react/utils/hooks/useCounter";
+import { useEffect } from "react";
+import { useCounter } from "@dabsi/react/utils/hooks/useCounter";
 
 export function useInterval(ms): number {
-    const [n, next] = useCounter(0);
-    useEffect(() => {
-        const id = setInterval(() => {
-            next();
-        }, ms);
-        return () => {
-            clearInterval(id);
-        }
-    }, [n]);
-    return n;
+  const [n, next] = useCounter(0);
+  useEffect(() => {
+    const id = setInterval(() => {
+      next();
+    }, ms);
+    return () => {
+      clearInterval(id);
+    };
+  }, [n]);
+  return n;
 }

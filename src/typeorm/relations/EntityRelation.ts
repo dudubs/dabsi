@@ -1,3 +1,4 @@
+import { inspect } from "@dabsi/logging/inspect";
 import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { assert } from "@dabsi/common/assert";
@@ -65,7 +66,7 @@ export class EntityRelation<T = any> {
 
   right = new EntityRelationSide(this, this.rightEntityType, false);
 
-  getRelationType(): ObjectType<any> {
+  get relationType(): Function {
     assert(typeof this.relationMetadata?.type === "function");
     return this.relationMetadata.type;
   }
@@ -289,15 +290,15 @@ export class EntityRelation<T = any> {
   }
 
   @Lazy() get leftEntityType(): ObjectType<T> {
-    return this.invert ? this.getRelationType() : this.entityType;
+    return this.invert ? this.relationType : this.entityType;
   }
 
   @Lazy() get rightEntityType(): ObjectType<any> {
-    return !this.invert ? this.getRelationType() : this.entityType;
+    return !this.invert ? this.relationType : this.entityType;
   }
 
-  inspect() {
-    return `Relation ${this.entityType.name}.${this.propertyName}`;
+  [inspect.custom]() {
+    return `<${this.constructor.name} ${this.entityType.name}.${this.propertyName}: ${this.relationType.name}>`;
   }
 }
 

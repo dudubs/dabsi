@@ -1,13 +1,12 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { Lazy } from "@dabsi/common/patterns/lazy";
-import { Once } from "@dabsi/common/patterns/Once";
 import { inspect } from "@dabsi/logging/inspect";
 import ExpressModule from "@dabsi/modules/ExpressModule";
-import createConfigResolverFactory from "@dabsi/system/core/configResolverFactory";
-import { SystemModule } from "@dabsi/system/core/SystemModule";
-import { SystemRpc } from "@dabsi/system/core/SystemRpc";
-import SystemRpcRequest from "@dabsi/system/core/SystemRpcRequest";
+import createConfigResolverFactory from "@dabsi/system/rpc/configResolverFactory";
+import { SystemModule } from "@dabsi/system/core";
+import { SystemRpc, SystemRpcPath } from "@dabsi/system/rpc/SystemRpc";
+import SystemRpcRequest from "@dabsi/system/rpc/SystemRpcRequest";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
@@ -15,14 +14,12 @@ import {
   isRpcConfigResolver,
   RpcConfigResolver,
 } from "@dabsi/typerpc/RpcConfigResolver";
-import ProjectManager from "@dabsi/typestack/ProjectManager";
 import BodyParser from "body-parser";
 import colors from "colors/safe";
 import fs from "fs";
 import { Seq } from "immutable";
-import { multer } from "multer";
+import multer from "multer";
 import path from "path";
-import { SystemRpcPath } from "./SystemRpc";
 
 @Module()
 export default class SystemRpcModule {
@@ -48,13 +45,13 @@ export default class SystemRpcModule {
     @Inject() protected expressModule: ExpressModule
   ) {
     expressModule.install({
-      run: () => this.check(),
+      run: () => this.systemModule.check(),
       routes: app => {
         app.post(
           SystemRpcPath,
           BodyParser.json(),
           BodyParser.urlencoded({ extended: true }),
-          multer().array(),
+          multer().any(),
           systemModule.createHandler(),
           async (req, res) => {
             const { path, payload } =
@@ -118,7 +115,7 @@ export default class SystemRpcModule {
         }
       },
       check: async () => {
-        await this.check();
+        await this._check();
       },
     });
   }
@@ -164,9 +161,6 @@ export default class SystemRpcModule {
     if (!touchSet(this._loadedDirs, dir)) return;
 
     this.log.trace(() => `Scan dir ${dir}.`);
-    let configFiles: string[] = [];
-    let fileNames = new Set();
-
     for (const baseName of await fs.promises.readdir(dir)) {
       const fileName = path.join(dir, baseName);
       const state = await fs.promises.stat(fileName);
@@ -179,7 +173,7 @@ export default class SystemRpcModule {
     }
   }
 
-  async check() {
+  protected async _check() {
     this._isChecking = true;
     this.log.trace(() => "checking");
 
@@ -201,28 +195,5 @@ export default class SystemRpcModule {
     } finally {
       this._isChecking = false;
     }
-  }
-
-  @Lazy() get indexFileNames() {
-    const fileNames = new Set<string>();
-    for (const info of this._loadedConfigsInfo) {
-      const rpcModule = info.nodeModule.children.find(child => {
-        return Seq.Keyed(child.exports).find(x => {
-          return (
-            x === info.resolver.rpc || (x as any)?.[0] === info.resolver.rpc
-          );
-        });
-      });
-
-      if (!rpcModule?.filename) {
-        this.log.trace(
-          () =>
-            `No found rpc file for ${info.resolver} at "${info.nodeModule.filename}".`
-        );
-      } else {
-        fileNames.add(rpcModule?.filename);
-      }
-    }
-    return [...fileNames];
   }
 }

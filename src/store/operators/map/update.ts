@@ -5,7 +5,7 @@ export const deleteSymbol = Symbol();
 
 const op = "update";
 
-declare module "../../Store" {
+declare module "@dabsi/store/Store" {
   interface Store<T> extends Record<typeof op, typeof method> {}
   namespace Store {
     export { deleteSymbol };

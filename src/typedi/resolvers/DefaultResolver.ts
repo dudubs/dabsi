@@ -5,7 +5,7 @@ export function DefaultResolver<T>(
   resolver: Resolver<T>,
   nextResolver: Resolver<T>
 ): CustomResolver<T> {
-  return ((context) => {
+  return (context => {
     try {
       return Resolver.resolve(resolver, context);
     } catch (error) {
@@ -14,7 +14,7 @@ export function DefaultResolver<T>(
       }
       throw error;
     }
-  }).toCheck((context) => {
+  }).toCheck(context => {
     Resolver.check(nextResolver, context);
   });
 }

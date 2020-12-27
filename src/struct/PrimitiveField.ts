@@ -13,7 +13,7 @@ export function PrimitiveField<T>(
   };
 }
 
-declare module "./Field" {
+declare module "@dabsi/struct/Field" {
   namespace Field {
     let primitive: typeof PrimitiveField;
   }

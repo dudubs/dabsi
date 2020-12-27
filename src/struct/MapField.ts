@@ -34,7 +34,7 @@ export function MapField<K extends AsField<any>, V extends AsField<any>>(
   };
 }
 
-declare module "./Field" {
+declare module "@dabsi/struct/Field" {
   namespace Field {
     export { MapField as map };
   }

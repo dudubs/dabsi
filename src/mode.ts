@@ -4,4 +4,5 @@ export function getMode(): "production" | "testing" | "development" {
 
 export const isDevMode = () => getMode() === "development";
 export const isProdMode = () => getMode() === "production";
+//
 export const isTestingMode = () => getMode() === "testing";

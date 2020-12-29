@@ -30,7 +30,7 @@ import { DABSI_CURRENT_PATH } from "@dabsi/index";
 export default class BrowserModule {
   packCli = new Cli().install({
     run: {
-      after: () => this.pack(),
+      after: ({ w, watch = w }) => this.pack({ watch }),
     },
   });
 
@@ -256,7 +256,10 @@ export default class BrowserModule {
       },
       resolve: {
         // symlinks: false,
-        plugins: [new tsConfigPathsWebpackPlugin()],
+        plugins: [
+          // @ts-expect-error
+          new tsConfigPathsWebpackPlugin(),
+        ],
         alias: {
           // TODO: @dabsi
         },
@@ -280,7 +283,7 @@ export default class BrowserModule {
     };
   }
 
-  protected async pack() {
+  protected async pack({ watch = false }) {
     await this.init();
     webpack(this.webpackConfig).run(this.webpackCallback);
   }

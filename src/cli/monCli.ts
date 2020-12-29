@@ -1,7 +1,7 @@
-import { spawn } from "child_process";
-import * as fs from "fs";
 import { Debounce } from "@dabsi/common/async/Debounce";
+import watch from "@dabsi/filesystem/watch";
 import { DABSI_SRC_PATH } from "@dabsi/index";
+import { spawn } from "child_process";
 
 export function monCli(): boolean {
   const argsWithoutMon = process.argv.filter(x => x !== "--mon");
@@ -12,20 +12,19 @@ export function monCli(): boolean {
   console.log("watching", DABSI_SRC_PATH);
   let p: { kill() } | null = null;
   reload();
-  const watch = fs.watch(
+
+  const watcher = watch(
     DABSI_SRC_PATH,
     { recursive: true },
     async (e, filename) => {
-      if (!/\.tsx?$/.test(filename)) {
-        return;
-      }
       if (await debounce()) {
         reload();
       }
     }
   );
+
   process.on("SIGINT", () => {
-    watch.close();
+    watcher.close();
     p?.kill();
   });
 

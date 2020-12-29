@@ -1,16 +1,15 @@
 import { mapObjectAsync } from "@dabsi/common/object/mapObject";
 import { Awaited } from "@dabsi/common/typings2/Async";
-import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
-import { DataRow } from "@dabsi/typedata/DataRow";
 import { AclQuery } from "@dabsi/system-old/server/acl/AclQuery";
-import { User } from "@dabsi/system/acl/entities/User";
 import { AclTester } from "@dabsi/system-old/server/acl/tests/AclTester";
 import {
+  TestForumAcl,
   TEST_FORUMS_ADMIN_TOKEN,
   TEST_GOD_TOKEN,
-  TestForumAcl,
 } from "@dabsi/system-old/server/acl/tests/TestForumAcl";
 import { TestPostAcl } from "@dabsi/system-old/server/acl/tests/TestPostAcl";
+import { User } from "@dabsi/system/acl/entities/User";
+import { DataRow } from "@dabsi/typedata/DataRow";
 
 const t = AclTester.beforeAll(async t => {
   const forumAcl = new TestForumAcl(t.forum);
@@ -25,6 +24,7 @@ const t = AclTester.beforeAll(async t => {
   };
 
   function getReview(user: DataRow<User>) {
+    //
     return new AclQuery(t.connection).askFor(user.$key).askMap({
       IS_FORUM_MEMBER: forumAcl.IS_MEMBER,
       IS_FORUM_ADMIN: forumAcl.IS_ADMIN,
@@ -45,6 +45,10 @@ const t = AclTester.beforeAll(async t => {
       },
     });
   }
+});
+
+fit("", () => {
+  console.log(t.reviews, t.users, t);
 });
 
 it("expect admin to be FORUM_ADMIN_MEMBER", () => {

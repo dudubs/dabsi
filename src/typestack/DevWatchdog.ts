@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import { FSWatcher } from "fs";
 import { Debounce } from "@dabsi/common/async/Debounce";
+import watch from "@dabsi/filesystem/watch";
+import { FSWatcher } from "fs";
 
 export type WatchdogExclude = (path: string) => boolean;
 export type WatchdogEvent = { filename; event };
@@ -44,9 +44,9 @@ export class DevWatchdog {
     for (let path of this.paths) {
       this.log.info(() => `watching ${path}`);
       this.watchers.push(
-        fs.watch(path, { recursive: true }, async (event, filename) => {
+        watch(path, { recursive: true }, async (event, filename) => {
           for (let exclude of this.exclude) {
-            if (exclude(filename)) return;
+            if (filename && exclude(filename)) return;
           }
           this.events.push({ event, filename });
 

@@ -1,13 +1,11 @@
-import { spawn } from "child_process";
 import { Debounce } from "@dabsi/common/async/Debounce";
 import { pushHook } from "@dabsi/common/async/pushHook";
-import { Lazy } from "@dabsi/common/patterns/lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Cli } from "@dabsi/modules/Cli";
 import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
-import { Inject } from "@dabsi/typedi";
-import { Module } from "@dabsi/typedi";
+import { Inject, Module } from "@dabsi/typedi";
 import { DevWatchdog } from "@dabsi/typestack/DevWatchdog";
+import { spawn } from "child_process";
 
 @Module()
 export class DevModule {

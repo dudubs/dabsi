@@ -18,6 +18,7 @@ import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 import Button from "@material-ui/core/Button";
 import AddIcon from "@material-ui/icons/Add";
 import React, { useState } from "react";
+import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
 
 WidgetRouterView(
   AclAdminRouter.at("users"),
@@ -51,7 +52,14 @@ WidgetRouterView(
 WidgetRouterView(
   AclAdminRouter.at("createNewUser"),
   AclAdminConnection.usersManager.add,
-  props => {
+  (props, { location }) => {
+    useSystemView(props.connection.$widget, props => (
+      <MuiFormView
+        {...props}
+        onSubmit={() => location.parent.at("users").push()}
+      />
+    ));
+
     useSystemView(props.connection.input.$widget, props => (
       <MuiGridMapView
         for={props}

@@ -29,11 +29,11 @@ export function MuiAdminView(props: {
   const { children } = props;
 
   const adminInfo = useEmitted(AdminInfoEvent, adminInfo => {
-    console.log(adminInfo);
+    // console.log(adminInfo);
   });
 
   const loginInfo = useEmitted(AclLoginInfoEvent, async loginInfo => {
-    console.log({ loginInfoType: loginInfo.type });
+    // console.log({ loginInfoType: loginInfo.type });
     if (loginInfo.type === "success") {
       emit(AdminInfoEvent, await getAdminInfo());
     } else {

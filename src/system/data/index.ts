@@ -18,10 +18,9 @@ import { EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { Inject, Module } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { Resolver } from "@dabsi/typedi/Resolver";
-import GenericConnectionPool from "@dabsi/typeorm/GenericConnectionPool";
 import { EntityRelation } from "@dabsi/typeorm/relations";
+import SqlliteQueryRunnerPool from "@dabsi/typeorm/SqlliteQueryRunnerPool";
 import { Connection, QueryRunner } from "typeorm";
-import { SqliteDriver } from "typeorm/driver/sqlite/SqliteDriver";
 
 type OnRelationCallback = (event: {
   relationType: Function;
@@ -178,19 +177,8 @@ export default class SystemDataModule {
 
   @Lazy() get queryRunnerPool() {
     if (this.connection.options.type === "sqlite") {
-      return new GenericConnectionPool<QueryRunner>(
-        async () => {
-          const driver = new SqliteDriver(this.connection);
-          await driver.connect();
-          return driver.createQueryRunner("master");
-        },
-        async queryRunner => {
-          if (queryRunner.isTransactionActive) {
-            await queryRunner.rollbackTransaction();
-          }
-          queryRunner.connection.driver.disconnect();
-        }
-      );
+      if (this.connection.options.database === ":memory:") return;
+      return new SqlliteQueryRunnerPool(this.connection);
     }
   }
 
@@ -198,7 +186,7 @@ export default class SystemDataModule {
     callback: (queryRunner: QueryRunner) => Promise<T>
   ): Promise<T> {
     if (this.queryRunnerPool) {
-      const queryRunner = await this.queryRunnerPool.connect();
+      const queryRunner = await this.queryRunnerPool.acquire();
       try {
         return callback(queryRunner);
       } finally {

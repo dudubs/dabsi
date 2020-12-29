@@ -16,6 +16,8 @@ export interface Logger extends LogFn {
 
   get(name: string): Logger;
   setLevel(level: number | ((currentLevel: number) => number));
+
+  enable(level: string & keyof typeof LogLevel): Logger;
 }
 
 export type LevelName = Exclude<string & keyof typeof LogLevel, "OFF" | "ALL">;
@@ -61,6 +63,10 @@ export function Logger(loggerName: string = "") {
       children[name] ||
       (children[name] = Logger(loggerName ? `${loggerName}.${name}` : name))
     );
+  };
+  log.enable = name => {
+    log.setLevel(x => x | ((<any>LogLevel)[name] as number));
+    return log;
   };
   return log;
 

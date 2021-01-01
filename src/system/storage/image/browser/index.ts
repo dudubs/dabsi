@@ -15,3 +15,5 @@ commandSystemRpcOnBrowser(
       field: "test",
     })
 );
+
+console.log("x");

@@ -1,7 +1,7 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DbModule } from "@dabsi/modules/DbModule";
 import TestDbModule from "@dabsi/modules/tests/TestDbModule";
-import SystemDataModule from "@dabsi/system/data";
+import DataSystemModule from "@dabsi/system/data";
 import buildCountRefs from "@dabsi/system/data/buildCountRefs";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 import DataSources from "@dabsi/typedata/DataSources";
@@ -65,7 +65,7 @@ let t: ResolverType<typeof testResolver>;
 
 beforeAll(async () => {
   const runner = new ModuleRunner();
-  const sdm = runner.getModuleInstance(SystemDataModule);
+  const sdm = runner.getModuleInstance(DataSystemModule);
   const dbm = runner.getModuleInstance(DbModule);
   runner.getModuleInstance(TestDbModule);
   buildCountRefs(sdm, TestResource, "countRefs");

@@ -5,5 +5,4 @@ dist
 bundle
 **/bundle
 
-packages/*/lib
-packages/*/index.*
+packages/**/dist

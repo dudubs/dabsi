@@ -177,7 +177,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     Object.defineProperty(Connection.prototype, key, desc);
   }
 
-  return <any>Rpc<WidgetWithoutController>({
+  const widget = <any>Rpc<WidgetWithoutController>({
     handler,
     isGenericConfig,
     isConfigCanBeUndefined,
@@ -190,6 +190,8 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
       return new this.widgetConnectionClass(this, $path, $command);
     },
   });
+  isWidgetSet.add(widget);
+  return widget;
 }
 
 /////////////
@@ -206,3 +208,8 @@ export type WidgetElementState<
 > = WidgetType<T>["ElementState"];
 
 export type WidgetElement<T extends BasedWidget> = WidgetType<T>["Element"];
+
+const isWidgetSet = new WeakSet();
+export function isWidget(obj): obj is AnyWidget {
+  return isWidgetSet.has(obj);
+}

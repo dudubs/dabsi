@@ -8,7 +8,7 @@
 // import { testRpcOld } from "@dabsi/typerpc/input/tests/RpcTesterOld";
 // import objectContaining = jasmine.objectContaining;
 //
-// testm(__filename, () => {
+
 //   @Entity()
 //   class A {
 //     @PrimaryColumn()

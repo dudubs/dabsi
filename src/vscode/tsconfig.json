@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.server.json",
+  "compilerOptions": {
+    "outDir": "../../packages/vscode/dist",
+    "module": "commonjs",
+    "target": "es2019",
+    "lib": ["ES2019"],
+    "types": ["vscode", "node"],
+    "noEmit": false
+  }
+}

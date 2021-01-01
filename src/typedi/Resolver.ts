@@ -30,6 +30,7 @@ export type CustomResolver<T> = {
   [checkResolverSymbol]?(context: ResolverMap<any>): void;
 };
 
+// TODO: Function implements CustromResolver()
 export type Resolver<T = any> =
   | CustomResolver<T>
   | FnResolver<T>

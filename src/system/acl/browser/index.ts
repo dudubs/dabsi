@@ -1,5 +1,5 @@
 import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
-import { AclConnection } from "@dabsi/system/acl/AclRpc";
+import { AclConnection } from "@dabsi/system/acl/common/AclRpc";
 import "@dabsi/system/acl/browser/MuiLoginRouterView";
 import { RootReactor } from "@dabsi/react/reactor/Reactor";
 

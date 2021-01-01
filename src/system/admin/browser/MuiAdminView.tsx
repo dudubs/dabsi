@@ -3,7 +3,7 @@ import { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu";
 import { useEmitted } from "@dabsi/react/reactor/useEmitted";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { Store } from "@dabsi/store";
-import { AclConnection } from "@dabsi/system/acl/AclRpc";
+import { AclConnection } from "@dabsi/system/acl/common/AclRpc";
 import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
 import AclLoginRouter from "@dabsi/system/acl/common/AclLoginRouter";
 import { MuiAdminMenu } from "@dabsi/system/admin/browser/MuiAdminMenu";

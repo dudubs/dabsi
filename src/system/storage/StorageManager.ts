@@ -1,0 +1,27 @@
+import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
+import Storage from "@dabsi/system/storage/Storage";
+import StorageDataSources from "@dabsi/system/storage/StorageDataSources";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { Inject, Injectable } from "@dabsi/typedi";
+
+@Injectable()
+export default class StorageManager {
+  constructor(
+    @Inject() protected storage: Storage,
+    @Inject()
+    protected sources: StorageDataSources
+  ) {}
+
+  async upload(
+    tag: string,
+    type: string,
+    buffer: Buffer
+  ): Promise<DataRow<StorageFile>> {
+    const { url } = await this.storage.upload(tag, type, buffer);
+    return this.sources.files.insert({
+      url,
+      countRefs: 0,
+      time: new Date().getTime(),
+    });
+  }
+}

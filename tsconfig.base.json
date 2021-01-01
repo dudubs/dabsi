@@ -18,6 +18,10 @@
     "resolveJsonModule": true,
     "strictNullChecks": true,
     "preserveWatchOutput": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": ["src/*"]
+    }
   }
 }

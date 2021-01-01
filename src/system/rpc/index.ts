@@ -20,6 +20,7 @@ import fs from "fs";
 import { Seq } from "immutable";
 import multer from "multer";
 import path from "path";
+import { WeakId } from "@dabsi/common/WeakId";
 
 @Module()
 export default class SystemRpcModule {
@@ -34,11 +35,11 @@ export default class SystemRpcModule {
 
   log = this.systemModule.log.get("RPC");
 
-  protected _loadedDirs: Set<string>;
+  protected _loadedDirs = new Set<string>();
   protected _loadedConfigsInfo: {
     nodeModule: NodeModule;
     resolver: RpcConfigResolver<AnyRpc>;
-  }[];
+  }[] = [];
 
   constructor(
     @Inject() protected systemModule: SystemModule,
@@ -91,12 +92,13 @@ export default class SystemRpcModule {
 
     systemModule.install({
       loadProjectModule: async projectModule => {
-        this._loadedDirs = new Set();
-        this._loadedConfigsInfo = [];
         await this._loadDir(projectModule.dir);
       },
       loadIndexFiles: async callback => {
         for (const info of this._loadedConfigsInfo) {
+          this.log.trace(
+            () => `Find index file for ${inspect(info.resolver)}.`
+          );
           const rpcModule = info.nodeModule.children.find(child => {
             return Seq.Keyed(child.exports).find(x => {
               return (
@@ -110,6 +112,7 @@ export default class SystemRpcModule {
                 `No found rpc file for ${info.resolver} at "${info.nodeModule.filename}".`
             );
           } else if (rpcModule?.filename) {
+            this.log.trace(() => `Include index file "${rpcModule.filename}".`);
             await callback(rpcModule?.filename);
           }
         }
@@ -143,10 +146,11 @@ export default class SystemRpcModule {
   }
 
   protected async _loadConfig(configFileName: string) {
+    this.log.trace(() => `Load config "${configFileName}".`);
     const configModule = require(configFileName);
     const configResolver = configModule?.default;
     if (isRpcConfigResolver(configResolver)) {
-      this.log.trace(() => `Load config ${inspect(configResolver)}`);
+      this.log.trace(() => `Found config resolver ${inspect(configResolver)}}`);
       this._loadedConfigsInfo.push({
         nodeModule: require.cache[require.resolve(configFileName)]!,
         resolver: configResolver,

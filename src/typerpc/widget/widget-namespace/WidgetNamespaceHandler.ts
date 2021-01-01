@@ -18,10 +18,12 @@ export class WidgetNamespaceHandler
     const elementMap: any = {};
 
     for (const key of keys(nsHandler.rpc.children)) {
+      // TODO: isWidget?
       const childHandler = (await nsHandler.getChildHandler(
         key as never
       )) as RpcResolvedHandler<AnyWidget>;
 
+      if (typeof childHandler.getElement !== "function") continue;
       elementMap[key] = await childHandler.getElement(state?.[key]);
     }
     return { elementMap };

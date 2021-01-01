@@ -13,12 +13,6 @@ export class Image {
   @Column()
   url: string;
 
-  @Column({ nullable: true }) // ~120x120
-  iconUrl: string;
-
-  @Column({ nullable: true }) // ~64x64
-  thumUrl: string;
-
   @Column()
   width: number;
 

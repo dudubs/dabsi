@@ -1,0 +1,12 @@
+{
+  "name": "dabsi.vscode",
+  "displayName": "dabsi vscode",
+  "version": "1.0.1",
+  "engines": {
+    "vscode": "^1.22.0"
+  },
+  "main": "./dist/extension",
+  "activationEvents": [
+    "*"
+  ]
+}

@@ -12,9 +12,12 @@ export default function MuiGrid({ item, children, ...props }: MuiGridProps) {
     <Grid {...props} container>
       {Children.map(children, child => {
         if (!React.isValidElement(child)) return child;
-        if (child.type === Grid) item = { ...item, ...child.props };
+
         return (
-          <Grid {...item} item>
+          <Grid
+            {...(child.type === Grid ? { ...item, ...child.props } : item)}
+            item
+          >
             {child}
           </Grid>
         );

@@ -47,7 +47,7 @@ export default class AclModule {
     @Inject() mMake: MakeModule,
     @Inject() protected dbModule: DbModule,
     @Inject() protected systemModule: SystemModule,
-    @Inject(AclDataSources) public sources: ResolverType<typeof AclDataSources>
+    @Inject() public sources: AclDataSources
   ) {
     cli.command("acl", this.cli);
   }

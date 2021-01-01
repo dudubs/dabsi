@@ -1,5 +1,6 @@
 import { AnyInputConnection } from "@dabsi/typerpc/input/Input";
 import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyWidget, AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import {
@@ -17,7 +18,8 @@ export type SystemViewProps<
 > = C extends AnyInputConnection ? InputViewProps<C> : WidgetViewProps<C>;
 
 export type SystemViewContext = Map<any, any>;
-export const SystemViewContext = createContext(new Map());
+const SystemViewMap = new Map();
+export const SystemViewContext = createContext(SystemViewMap);
 
 export function SystemView(
   props:
@@ -38,3 +40,10 @@ export function SystemView(
     );
   return createElement(component, props);
 }
+
+SystemView.register = function <T extends AnyWidget>(
+  widget: T,
+  component: (props: WidgetViewProps<RpcConnection<T>>) => ReactElement
+) {
+  SystemViewMap.set(widget, component);
+};

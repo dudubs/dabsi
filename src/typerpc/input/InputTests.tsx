@@ -66,33 +66,31 @@ export class TestInputView<
   }
 }
 
-testm(__dirname, () => {
-  testRpc(TestInput, t => {
-    t.testConfig({});
+testRpc(TestInput, t => {
+  t.testConfig({});
 
-    testWidgetView(t, TestInputView, t => {
-      t.testRender(
-        "with-errorMap",
-        (View, props) => (
-          <View
-            {...props}
-            value={undefined}
-            errorMap={{ ERR1: <>CUSTOM_ERR1</> }}
-          />
-        ),
-        () => {
-          it("expect defined errorElement for ERR1", async () => {
-            await t.view.setError("ERR1");
-            expect(t.view.error).toEqual("ERR1");
-            expect(t.view.errorElement).toBeDefined();
-          });
-          it("expect undefined errorElement for ERR2", async () => {
-            await t.view.setError("ERR2");
-            expect(t.view.error).toEqual("ERR2");
-            expect(t.view.errorElement).toBeUndefined();
-          });
-        }
-      );
-    });
+  testWidgetView(t, TestInputView, t => {
+    t.testRender(
+      "with-errorMap",
+      (View, props) => (
+        <View
+          {...props}
+          value={undefined}
+          errorMap={{ ERR1: <>CUSTOM_ERR1</> }}
+        />
+      ),
+      () => {
+        it("expect defined errorElement for ERR1", async () => {
+          await t.view.setError("ERR1");
+          expect(t.view.error).toEqual("ERR1");
+          expect(t.view.errorElement).toBeDefined();
+        });
+        it("expect undefined errorElement for ERR2", async () => {
+          await t.view.setError("ERR2");
+          expect(t.view.error).toEqual("ERR2");
+          expect(t.view.errorElement).toBeUndefined();
+        });
+      }
+    );
   });
 });

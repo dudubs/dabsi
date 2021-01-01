@@ -5,7 +5,7 @@ import { values } from "@dabsi/common/object/values";
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { DABSI_PATH, DABSI_SRC_PATH } from "@dabsi/index";
+import { DABSI_CURRENT_PATH, DABSI_PATH, DABSI_SRC_PATH } from "@dabsi/index";
 import { Cli } from "@dabsi/modules/Cli";
 import ExpressModule from "@dabsi/modules/ExpressModule";
 import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
@@ -22,7 +22,6 @@ import fs from "fs";
 import * as path from "path";
 import tsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
-import { DABSI_CURRENT_PATH } from "@dabsi/index";
 
 @Module({
   dependencies: [DevModule, ExpressModule],
@@ -30,7 +29,7 @@ import { DABSI_CURRENT_PATH } from "@dabsi/index";
 export default class BrowserModule {
   packCli = new Cli().install({
     run: {
-      after: ({ w, watch = w }) => this.pack({ watch }),
+      after: ({}) => this.pack(),
     },
   });
 
@@ -117,7 +116,7 @@ export default class BrowserModule {
     await this.makeModule.makeJsonFile(projectPlatform.tsConfigFileName, {
       extends: relativePosixPath(
         projectPlatform.project.dir,
-        path.join(DABSI_PATH, `tsconfig.base.${projectPlatform.name}.json`)
+        path.join(DABSI_PATH, `tsconfig.${projectPlatform.name}.json`)
       ),
       ...pick(projectPlatform.project.tsConfigInfo.config, "compilerOptions"),
       include: [
@@ -144,18 +143,14 @@ export default class BrowserModule {
         continue;
       }
 
-      const platformModuleIndexFileName = path.join(
-        projectPlatformModuleDir.fileName,
-        "index.ts"
-      );
-
-      if (!fs.existsSync(platformModuleIndexFileName)) continue;
-      this._indexFileNames!.add(platformModuleIndexFileName);
+      if (!hasIndexFile(projectPlatformModuleDir.fileName)) continue;
+      this._indexFileNames!.add(projectPlatformModuleDir.fileName);
 
       const platformModuleTsConfigFileName = path.join(
         projectPlatformModuleDir.fileName,
         "tsconfig.json"
       );
+
       this.log.trace(
         () =>
           `Make project module ts-config "${relativePathToCurrent(
@@ -198,7 +193,7 @@ export default class BrowserModule {
       this.mainProjectPlatform.generatedIndexFileName,
       `import "${this.projectManager.mainProject.tsConfigInfo.resolvePath(
         this.mainProjectPlatform.generatedDir,
-        path.join(DABSI_SRC_PATH, "browser/register.ts")
+        path.join(DABSI_SRC_PATH, "browser/register")
       )}";\n${indexFileCode}`
     );
   }
@@ -283,12 +278,39 @@ export default class BrowserModule {
     };
   }
 
-  protected async pack({ watch = false }) {
+  @Lazy() get webpackCompiler() {
+    return webpack(this.webpackConfig);
+  }
+
+  protected _runWebpackAgain = false;
+
+  runWebpackCompiler() {
+    if (this.webpackCompiler.running) {
+      this._runWebpackAgain = true;
+      return;
+    }
+    this.webpackCompiler.run((...args) => {
+      if (this._runWebpackAgain) {
+        this._runWebpackAgain = false;
+        this.runWebpackCompiler();
+      }
+      this.webpackCallback(...args);
+    });
+  }
+
+  protected async pack() {
     await this.init();
-    webpack(this.webpackConfig).run(this.webpackCallback);
+    this.runWebpackCompiler();
   }
 }
 
 function relativePathToCurrent(path: string) {
   return relativePosixPath(DABSI_CURRENT_PATH, path);
+}
+
+function hasIndexFile(dir: string) {
+  return (
+    fs.existsSync(path.join(dir, "index.ts")) ||
+    fs.existsSync(path.join(dir, "index.tsx"))
+  );
 }

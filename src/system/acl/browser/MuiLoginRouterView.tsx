@@ -1,7 +1,7 @@
 import { MuiTextInputView } from "@dabsi/browser/mui/rpc/inputs/MuiTextInputView";
 import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
-import { AclConnection } from "@dabsi/system/acl/AclRpc";
+import { AclConnection } from "@dabsi/system/acl/common/AclRpc";
 import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
 import AclLoginRouter from "@dabsi/system/acl/common/AclLoginRouter";
 import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";

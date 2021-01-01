@@ -18,80 +18,78 @@ type AnyRpcWithGenericConfig = Rpc<
   >
 >;
 
-testm(__dirname, () => {
-  testRpc(
-    Rpc<AnyRpcWithGenericConfig>({
-      isGenericConfig: true,
-      isConfigFn: false,
-      connect() {
-        return {};
-      },
-      handler: class extends AbstractRpcHandler<AnyRpcWithGenericConfig> {
-        handle(payload: any): Promise<any> {
-          return Promise.resolve(undefined);
-        }
-      },
-    }),
-    t => {
-      t.testConfig($ => $({ isConfig: true }));
+testRpc(
+  Rpc<AnyRpcWithGenericConfig>({
+    isGenericConfig: true,
+    isConfigFn: false,
+    connect() {
+      return {};
+    },
+    handler: class extends AbstractRpcHandler<AnyRpcWithGenericConfig> {
+      handle(payload: any): Promise<any> {
+        return Promise.resolve(undefined);
+      }
+    },
+  }),
+  t => {
+    t.testConfig($ => $({ isConfig: true }));
 
-      it("expect to resolve config", () => {
-        expect(t.handler.config).toEqual({ isConfig: true });
-      });
-    }
-  );
-
-  it("RpcFn", async () => {
-    const r = RpcFn<any>();
-    expect(await RpcFn<any>().configureRpc(() => "hello")()).toEqual("hello");
-  });
-
-  it("RpcMap", async () => {
-    expect(
-      await RpcMap({
-        f: RpcFn<any>(),
-      })
-        .configureRpc({ f: () => "hello" })
-        .f()
-    ).toEqual("hello");
-  });
-
-  describe("rpc service >", () => {
-    it("expect to use service config", done => {
-      RpcFn().configureRpc(() => {
-        done();
-      })();
+    it("expect to resolve config", () => {
+      expect(t.handler.config).toEqual({ isConfig: true });
     });
-  });
+  }
+);
 
-  it("RpcConfigHook", async () => {
-    expect(
-      await RpcConfigHook({
+it("RpcFn", async () => {
+  const r = RpcFn<any>();
+  expect(await RpcFn<any>().configureRpc(() => "hello")()).toEqual("hello");
+});
+
+it("RpcMap", async () => {
+  expect(
+    await RpcMap({
+      f: RpcFn<any>(),
+    })
+      .configureRpc({ f: () => "hello" })
+      .f()
+  ).toEqual("hello");
+});
+
+describe("rpc service >", () => {
+  it("expect to use service config", done => {
+    RpcFn().configureRpc(() => {
+      done();
+    })();
+  });
+});
+
+it("RpcConfigHook", async () => {
+  expect(
+    await RpcConfigHook({
+      isGenericConfig: false,
+
+      target: Rpc<AnyRpc>({
         isGenericConfig: false,
-
-        target: Rpc<AnyRpc>({
-          isGenericConfig: false,
-          isConfigCanBeUndefined: false,
-          connect() {
-            return undefined as any;
-          },
-          handler: class extends AbstractRpcHandler<AnyRpc> {
-            handle() {
-              return Promise.resolve();
-            }
-          },
-        }),
-        handler: function ({ config }) {
-          return $ => $({ ...config, secondConfig: 2 });
+        isConfigCanBeUndefined: false,
+        connect() {
+          return undefined as any;
         },
-      })
-        .resolveRpcHandler(
-          {
-            firstConfig: 1,
-          } as any,
-          null
-        )
-        .then(h => h.config)
-    ).toEqual({ firstConfig: 1, secondConfig: 2 });
-  });
+        handler: class extends AbstractRpcHandler<AnyRpc> {
+          handle() {
+            return Promise.resolve();
+          }
+        },
+      }),
+      handler: function ({ config }) {
+        return $ => $({ ...config, secondConfig: 2 });
+      },
+    })
+      .resolveRpcHandler(
+        {
+          firstConfig: 1,
+        } as any,
+        null
+      )
+      .then(h => h.config)
+  ).toEqual({ firstConfig: 1, secondConfig: 2 });
 });

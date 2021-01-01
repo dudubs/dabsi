@@ -47,10 +47,6 @@ const t = AclTester.beforeAll(async t => {
   }
 });
 
-fit("", () => {
-  console.log(t.reviews, t.users, t);
-});
-
 it("expect admin to be FORUM_ADMIN_MEMBER", () => {
   expect(t.reviews.admin.IS_FORUM_ADMIN).toBeTrue();
 });

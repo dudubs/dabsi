@@ -1,9 +1,11 @@
-import { readFileSync } from "fs";
-import path from "path";
+import { MapFactory } from "@dabsi/common/map/mapFactory";
 import { entries } from "@dabsi/common/object/entries";
+import { mapObject } from "@dabsi/common/object/mapObject";
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { posixPath, relativePosixPath } from "@dabsi/modules/pathHelpers";
 import { TsConfig } from "@dabsi/modules/TsConfig";
+import { existsSync, readFileSync } from "fs";
+import path from "path";
 
 export class TsConfigInfo {
   constructor(public fileName: string) {}
@@ -15,13 +17,12 @@ export class TsConfigInfo {
   dirName = path.dirname(this.fileName);
 
   @Lazy() get pathResolvers() {
+    const paths = getConfigPaths(this.fileName) || {};
     const resolvers: {
       template: { start: string; end: string };
       path: { start: string; end: string };
     }[] = [];
-    for (const [template, templatePaths] of entries(
-      this.config.compilerOptions!.paths!
-    )) {
+    for (const [template, templatePaths] of entries(paths || {})) {
       for (let templatePath of templatePaths) {
         const [start, end] = templatePath.split("*");
         const [startTemplate, endTemplate] = template.split("*");
@@ -47,5 +48,21 @@ export class TsConfigInfo {
       }
     }
     return relativePosixPath(from, tsPath);
+  }
+}
+
+function getConfigPaths(fileName: string) {
+  const text = readFileSync(fileName, "utf8");
+  const config = JSON.parse(text);
+
+  const co = config?.compilerOptions;
+  if (co?.paths) {
+    const baseUrl = path.resolve(path.dirname(fileName), co.baseUrl);
+    return mapObject(co.paths as Record<string, string[]>, tsPaths =>
+      tsPaths.map(tsPath => path.resolve(baseUrl, tsPath))
+    );
+  }
+  if (typeof config?.extends === "string") {
+    return getConfigPaths(path.resolve(path.dirname(fileName), config.extends));
   }
 }

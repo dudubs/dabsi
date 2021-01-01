@@ -5,19 +5,14 @@ import { AnyWidget, Widget, WidgetElement } from "@dabsi/typerpc/widget/Widget";
 
 export type WidgetNamespace = Widget<{
   Controller: {
-    ns: RpcNamespace<AnyWidget>;
+    ns: RpcNamespace;
   };
 
-  Config: RpcConfig<RpcNamespace<AnyWidget>>;
+  Config: RpcConfig<RpcNamespace>;
 
   Handler: {};
 
-  Props: {
-    register<T extends AnyWidget>(
-      name: string,
-      widget: T
-    ): [T, RpcConnection<T>];
-  };
+  Props: {};
 
   Element: {
     elementMap: Record<string, WidgetElement<AnyWidget>>;
@@ -26,16 +21,12 @@ export type WidgetNamespace = Widget<{
   ElementState: Record<string, any>;
 }>;
 
-export function WidgetNamespace(): WidgetNamespace {
-  const ns = RpcNamespace();
+export function WidgetNamespace(
+  ns: RpcNamespace = RpcNamespace()
+): WidgetNamespace {
   return Widget<WidgetNamespace>({
     handler: WidgetNamespaceHandler,
     type: WidgetNamespace,
     children: { ns },
-    props: {
-      register(name, rpc) {
-        return ns.register(name, rpc);
-      },
-    },
   });
 }

@@ -1,5 +1,4 @@
-import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { ResolverMap, Resolver } from "@dabsi/typedi/Resolver";
+import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 export const resolveSymbol = Symbol();
 
@@ -13,5 +12,6 @@ export function resolve<T>(
   if (resolver == null) {
     throw new Error("No resolver");
   }
+
   return resolver[resolveSymbol](context);
 }

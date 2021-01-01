@@ -1,14 +1,14 @@
 import buildCountRefs from "@dabsi/system/data/buildCountRefs";
-import SystemDataModule from "@dabsi/system/data";
-import SystemStorageModule from "@dabsi/system/storage";
+import DataSystemModule from "@dabsi/system/data";
+import StorageModule from "@dabsi/system/storage";
 import { Image } from "@dabsi/system/storage/image/entities/Image";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module({
-  dependencies: [SystemStorageModule],
+  dependencies: [StorageModule],
 })
-export default class SystemImageStorageModule {
-  constructor(@Inject() dsm: SystemDataModule) {
+export default class ImageStorageModule {
+  constructor(@Inject() dsm: DataSystemModule) {
     buildCountRefs(dsm, Image, "countRefs");
   }
 }

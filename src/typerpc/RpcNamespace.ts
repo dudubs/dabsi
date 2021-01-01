@@ -1,3 +1,4 @@
+import { touchMap } from "@dabsi/common/map/touchMap";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   AnyRpc,
@@ -10,19 +11,18 @@ import {
 } from "@dabsi/typerpc/Rpc";
 import { RpcNamespaceHandler } from "@dabsi/typerpc/RpcNamespaceHandler";
 
-export type RpcNamespace<BaseRpc extends AnyRpc = AnyRpc> = Rpc<{
+export type RpcNamespace = Rpc<{
   Handler: {};
   Connection: {
     path: any[];
     command: RpcCommand;
     rpc: RpcNamespace;
-    getChild<T extends AnyRpc>(rpc: T): RpcConnection<T>;
-    getChildKey(rpc: AnyRpc): string;
+    getChild<T extends AnyRpc>(rpc: T): RpcConnection<T> | undefined;
   };
   Children: {};
   Config: {
     getNamespaceConfig(
-      rpc: BaseRpc,
+      rpc: AnyRpc,
       key: string,
       handler: RpcNamespaceHandler
     ): RpcUnresolvedConfig<AnyRpc>;
@@ -33,11 +33,12 @@ export type RpcNamespace<BaseRpc extends AnyRpc = AnyRpc> = Rpc<{
     ): Awaitable;
   };
   Props: {
-    register<T extends BaseRpc>(name: string, rpc: T): [T, RpcConnection<T>];
+    register<T extends AnyRpc>(name: string, rpc: T): [T, RpcConnection<T>];
+    registerDefault<T extends AnyRpc>(name: string, rpc: T): T;
 
     connections: Readonly<Record<string, any>>;
 
-    getKey(child: AnyRpc): string;
+    getChildKey(child: AnyRpc): string | undefined;
   };
 }>;
 
@@ -55,30 +56,28 @@ export function RpcNamespace(): RpcNamespace {
       nsCommand = (childPath, payload) => {
         return command([...path, ...childPath], payload);
       };
+      const cache = new Map();
       return {
         path,
         rpc,
         command,
-        getChildKey(rpc) {
-          const key = childKeyMap.get(rpc);
-          if (!key) {
-            throw new RpcError(`Invalid rpc.`);
-          }
-          return key;
-        },
         getChild(rpc) {
-          return rpc.createRpcConnection(
-            [...path, this.getChildKey(rpc)],
-            command
-          );
+          return touchMap(cache, rpc, () => {
+            const childKey = this.rpc.getChildKey(rpc);
+            if (!childKey) throw new RpcError(`No child key for ${rpc}.`);
+            return rpc.createRpcConnection([...path, childKey], command);
+          });
         },
       };
     },
     children,
     props: {
       connections,
-      getKey(child) {
+      getChildKey(child) {
         return childKeyMap.get(child)!;
+      },
+      registerDefault(key, rpc) {
+        return this.register(key, rpc)[0];
       },
       register(key: string, rpc: AnyRpc): [any, any] {
         if (children[key]) throw new Error(`Can't register ${key}.`);

@@ -1,12 +1,12 @@
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Type } from "@dabsi/common/typings2/Type";
-import SystemDataModule from "@dabsi/system/data";
+import DataSystemModule from "@dabsi/system/data";
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import { EntityManager } from "typeorm";
 import { DataEntityKey } from "./../../typedata/data-entity/DataEntityKey";
 
 export default function buildCountRefs<T, K extends ExtractKeys<T, number>>(
-  sdm: SystemDataModule,
+  sdm: DataSystemModule,
   relationType: Type<T>,
   relationPropertyName: string & K
 ) {

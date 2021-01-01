@@ -38,8 +38,6 @@ export default abstract class AbstractObjectPool<T extends object>
   protected _acquireInstance(instance: T) {
     this._acquiredInstanceMap.set(instance, {
       timeout: setTimeout(() => {
-        log.debug(() => `acquire timeout instance ${WeakId(instance)}`);
-
         this.release(instance);
       }, this.options.acquireTimeout || AbstractObjectPool.DEFAULT_ALIVE_TIMEOUT),
     });
@@ -51,7 +49,6 @@ export default abstract class AbstractObjectPool<T extends object>
     if (this._releasedInstanceMap.size) {
       const [[instance, info]] = this._releasedInstanceMap.entries();
       this._releasedInstanceMap.delete(instance);
-      log.debug(() => `reuse<connect> instance #${WeakId(instance)} to waiter`);
       clearTimeout(info.timeout);
       return this._acquireInstance(instance);
     }
@@ -65,28 +62,25 @@ export default abstract class AbstractObjectPool<T extends object>
       });
     }
 
-    log.debug(() => `create new instance`);
     return this._acquireInstance(await this.createInstance());
   }
 
   async release(instance: T) {
     const info = this._acquiredInstanceMap.get(instance);
     if (!info) {
-      log.warn("Connection not in pool.");
+      console.warn("Connection not in pool.");
       return;
     }
     clearTimeout(info.timeout);
 
     const waiter = this._waiters.shift();
     if (waiter) {
-      log.debug(() => `reuse<waiter> instance #${WeakId(instance)}`);
       waiter(this._acquireInstance(instance));
       return;
     }
 
     this._releasedInstanceMap.set(instance, {
       timeout: setTimeout(() => {
-        log.debug(() => `release timeout instance #${WeakId(instance)}`);
         this._releasedInstanceMap.delete(instance);
         this._acquiredInstanceMap.delete(instance);
         this.deleteInstance(instance);

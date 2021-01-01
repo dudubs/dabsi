@@ -7,7 +7,7 @@ import { SystemModule } from "@dabsi/system/core";
 import {
   default as DataSystemSource,
   default as SystemDataSource,
-} from "@dabsi/system/data/SystemDataSource";
+} from "@dabsi/system/data/DataSystemSource";
 import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
 import {
   DataEntityEmitter,
@@ -31,7 +31,7 @@ type OnRelationCallback = (event: {
 }) => Awaitable;
 
 @Module()
-export default class SystemDataModule {
+export default class DataSystemModule {
   constructor(
     @Inject() protected dbm: DbModule,
     @Inject() protected runner: ModuleRunner,
@@ -49,6 +49,7 @@ export default class SystemDataModule {
       )
     );
 
+    // have to be plugin
     systemModule.use([
       "create query runner per request",
       () => async (req, res, next) => {

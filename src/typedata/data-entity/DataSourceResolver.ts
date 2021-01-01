@@ -4,5 +4,5 @@ import { Resolver } from "@dabsi/typedi/Resolver";
 
 export default Resolver<<T>(entityType: Type<T>) => DataSource<T>>();
 
-// SystemDataModule
+// DataSystemModule
 // CoreSystemModule

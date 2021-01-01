@@ -1,5 +1,5 @@
 import addAll from "@dabsi/common/map/addAll";
-import SystemDataModule from "@dabsi/system/data";
+import DataSystemModule from "@dabsi/system/data";
 import { DbModule } from "@dabsi/modules/DbModule";
 import TestDbModule from "@dabsi/modules/tests/TestDbModule";
 import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
@@ -15,7 +15,7 @@ beforeAll(async () => {
   const runner = new ModuleRunner();
 
   const dbm = runner.getModuleInstance(DbModule);
-  const dsm = runner.getModuleInstance(SystemDataModule);
+  const dsm = runner.getModuleInstance(DataSystemModule);
   runner.getModuleInstance(TestDbModule);
 
   addAll(dbm.entityTypes, TestEntities);

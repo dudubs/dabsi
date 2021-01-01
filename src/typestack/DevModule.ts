@@ -1,10 +1,9 @@
 import { Debounce } from "@dabsi/common/async/Debounce";
-import { pushHook } from "@dabsi/common/async/pushHook";
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import watchReloadFile from "@dabsi/filesystem/watchReloadFile";
 import { Cli } from "@dabsi/modules/Cli";
 import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
 import { Inject, Module } from "@dabsi/typedi";
-import { DevWatchdog } from "@dabsi/typestack/DevWatchdog";
 import { spawn } from "child_process";
 
 @Module()
@@ -28,13 +27,10 @@ export class DevModule {
           }
           if (dev || watch) {
             if (!this.watchOnly) await this.hooks.runAsParent();
-            const watchdog = new DevWatchdog();
-            await this.hooks.buildWatchdog(watchdog);
-            watchdog.listen(() => {
+            this.reload();
+            watchReloadFile("server", () => {
               this.reload();
             });
-            watchdog.watch();
-            this.reload();
             return;
           }
           return next();
@@ -47,7 +43,6 @@ export class DevModule {
   protected hooks = {
     runAsChild: (): Awaitable => void 0,
     runAsParent: (): Awaitable => void 0,
-    buildWatchdog: (watchog: DevWatchdog): Awaitable => void 0,
   };
   protected reloadDebounce = Debounce(200);
   protected async reload() {
@@ -71,15 +66,4 @@ export class DevModule {
   }
 
   install = HooksInstaller(this.hooks, this);
-  push({
-    asParent = undefined as undefined | (() => Awaitable),
-    asChild = undefined as undefined | (() => void),
-    buildWatchdog = undefined as
-      | undefined
-      | ((watchdog: DevWatchdog) => Awaitable),
-  }) {
-    pushHook(this.hooks, "runAsParent", asParent);
-    pushHook(this.hooks, "runAsChild", asChild);
-    pushHook(this.hooks, "buildWatchdog", buildWatchdog);
-  }
 }

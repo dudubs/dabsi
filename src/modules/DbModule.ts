@@ -1,15 +1,14 @@
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
-import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Cli } from "@dabsi/modules/Cli";
-import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
+import { Hookable } from "@dabsi/modules/Hookable";
 import { ServerModule } from "@dabsi/modules/ServerModule";
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import ProjectManager from "@dabsi/typestack/ProjectManager";
+import ProjectModule from "@dabsi/typestack/ProjectModule";
 import { readdirSync } from "fs";
 import path from "path";
 import {
@@ -25,10 +24,7 @@ export class DbModule {
 
   cli = new Cli().command(
     "sync",
-    new Cli().install({
-      build: y => y.boolean("force"),
-      run: args => this.sync(args),
-    })
+    new Cli().onBuild(y => y.boolean("force")).onBuild(args => this.sync(args))
   );
 
   protected connection: Connection;
@@ -44,12 +40,11 @@ export class DbModule {
     @Inject() cli: Cli,
     @Inject() serverModule: ServerModule,
     @Inject() runner: ModuleRunner,
-    @Inject() protected projectManager: ProjectManager
+    @Inject() protected projectManager: ProjectModule
   ) {
     cli.command("db", this.cli);
-    serverModule.cli.install({
-      run: () => this.init(),
-    });
+    serverModule.cli.onRun(() => this.init());
+
     Resolver.provide(
       runner.context,
       Connection.provide(() => this.connection),
@@ -86,7 +81,7 @@ export class DbModule {
 
   @Once() async load() {
     await this.projectManager.load();
-    for (const projectModule of this.projectManager.allProjectModules) {
+    for (const projectModule of this.projectManager.allProjectModuleEntitys) {
       const {
         entities: entitiesDir,
         ["entities.ts"]: entitiesFile,
@@ -115,16 +110,12 @@ export class DbModule {
 
   connectionOptions: ConnectionOptions | null = null;
 
-  protected hooks = {
-    beforeInit: HooksInstaller.empty as () => Awaitable,
-    afterInit: HooksInstaller.empty as () => Awaitable,
-  };
-
-  install = HooksInstaller(this.hooks);
+  beforeInit = Hookable();
+  afterInit = Hookable();
 
   @Once()
   async init() {
-    await this.hooks.beforeInit();
+    await this.beforeInit.invoke();
     this.connection = await createConnection({
       logging: ["schema"],
       ...(this.connectionOptions || {
@@ -139,7 +130,7 @@ export class DbModule {
         ]),
       ],
     });
-    await this.hooks.afterInit();
+    await this.afterInit.invoke();
   }
 }
 

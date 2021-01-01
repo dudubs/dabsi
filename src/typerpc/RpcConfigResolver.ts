@@ -6,7 +6,7 @@ import {
   ResolveMapType,
   Resolver,
   ResolverMap,
-} from "@dabsi/typedi/Resolver";
+} from "@dabsi/typedi";
 import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 
 export type RpcConfigResolver<T extends AnyRpc> = CustomResolver<

@@ -34,7 +34,6 @@ export function _Resolver(...args) {
   const callStackInfo = new CallStackInfo(new Error(), __filename);
   return Resolver.createResolver(callStackInfo, args);
 }
-
 export interface IResolver {
   checkSymbol: typeof checkResolveSymbol;
   resolveSymbol: typeof resolveSymbol;

@@ -1,6 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { Forward } from "@dabsi/typedi/Forward";
 import { Resolver } from "@dabsi/typedi";
+import { Forward } from "@dabsi/typedi/Forward";
 
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   return {
@@ -9,11 +9,12 @@ export const getInjectableMetadata = WeakMapFactory((target: Function) => {
     resolvers: [] as Resolver[],
   };
 });
-
+export function getDesignParamTypes(target: Function): Function[] {
+  return Reflect.getMetadata("design:paramtypes", target) || [];
+}
 export const getInjectableResolver = WeakMapFactory(
   (target: Function): Resolver<any[]> => {
-    const designParamTypes: Function[] =
-      Reflect.getMetadata("design:paramtypes", target) || [];
+    const designParamTypes = getDesignParamTypes(target);
 
     const metadata = getInjectableMetadata(target);
     return Resolver.array(

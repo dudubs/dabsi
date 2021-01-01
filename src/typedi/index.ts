@@ -7,22 +7,22 @@ export * from "@dabsi/typedi/decorators/Inject";
 
 export * from "@dabsi/typedi/decorators/Injectable";
 
-import "./operators/toCheck.ts";
-import "./operators/checkObject.ts";
-import "./operators/consume.ts";
-import "./operators/checkContext.ts";
-import "./operators/resolveType.ts";
-import "./operators/try.ts";
-import "./operators/array.ts";
-import "./operators/resolve.ts";
-import "./operators/provide.ts";
-import "./operators/checkAndResolve.ts";
-import "./operators/object.ts";
-import "./operators/checkType.ts";
-import "./operators/catch.ts";
-import "./operators/check.ts";
-import "./operators/touch.ts";
-import "./operators/createContext.ts";
+import "./operators/toCheck";
+import "./operators/checkObject";
+import "./operators/consume";
+import "./operators/checkContext";
+import "./operators/resolveType";
+import "./operators/try";
+import "./operators/array";
+import "./operators/resolve";
+import "./operators/provide";
+import "./operators/checkAndResolve";
+import "./operators/object";
+import "./operators/checkType";
+import "./operators/catch";
+import "./operators/check";
+import "./operators/touch";
+import "./operators/createContext";
 
 import "./register";
 import "./TokenResolver";

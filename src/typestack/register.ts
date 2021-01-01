@@ -9,10 +9,8 @@ setImmediate(async () => {
   const module = moduleRunner.getInstance(getLastModule()! as any);
   const cli = moduleRunner.getInstance(Cli);
 
-  cli.install({
-    runAsParent: ({ trace }) => {
-      trace && log.setLevel(x => x | LogLevel.TRACE);
-    },
+  cli.onRunAsParent(({ trace }) => {
+    trace && log.setLevel(x => x | LogLevel.TRACE);
   });
   await cli.main(yargs.scriptName("ts"));
 });

@@ -3,7 +3,7 @@ import { User } from "@dabsi/system/acl/entities/User";
 import AclUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoInput";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { Resolver } from "@dabsi/typedi";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 
 export default RpcConfigResolver(

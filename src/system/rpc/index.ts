@@ -2,11 +2,11 @@ import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
-import ExpressModule from "@dabsi/modules/ExpressModule";
+import ExpressModule from "@dabsi/modules/express";
 import createConfigResolverFactory from "@dabsi/system/rpc/configResolverFactory";
 import { SystemModule } from "@dabsi/system/core";
 import { SystemRpc, SystemRpcPath } from "@dabsi/system/rpc/SystemRpc";
-import SystemRpcRequest from "@dabsi/system/rpc/SystemRpcRequest";
+import RpcRequest from "@dabsi/system/rpc/RpcRequest";
 import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
@@ -21,9 +21,10 @@ import { Seq } from "immutable";
 import multer from "multer";
 import path from "path";
 import { WeakId } from "@dabsi/common/WeakId";
+import ProjectModule from "@dabsi/typestack/ProjectModule";
 
 @Module()
-export default class SystemRpcModule {
+export default class RpcModule {
   protected _rpcConfigResolverMap = new Map<
     AnyRpc,
     RpcConfigResolver<AnyRpc>
@@ -33,7 +34,7 @@ export default class SystemRpcModule {
 
   protected _rpcCreatedConfigResolverMap = new Map();
 
-  log = this.systemModule.log.get("RPC");
+  log = log.get("RPC");
 
   protected _loadedDirs = new Set<string>();
   protected _loadedConfigsInfo: {
@@ -41,60 +42,12 @@ export default class SystemRpcModule {
     resolver: RpcConfigResolver<AnyRpc>;
   }[] = [];
 
-  constructor(
-    @Inject() protected systemModule: SystemModule,
-    @Inject() protected expressModule: ExpressModule
-  ) {
-    expressModule.install({
-      run: () => this.systemModule.check(),
-      routes: app => {
-        app.post(
-          SystemRpcPath,
-          BodyParser.json(),
-          BodyParser.urlencoded({ extended: true }),
-          multer().any(),
-          systemModule.createHandler(),
-          async (req, res) => {
-            const { path, payload } =
-              typeof req.body.command === "string"
-                ? JSON.parse(req.body.command)
-                : req.body;
-
-            const sysReq = new SystemRpcRequest(path, payload, req.body);
-
-            this.log.info(
-              () =>
-                `${(path as any[])
-                  .toSeq()
-                  .map(path =>
-                    typeof path === "object" ? JSON.stringify(path) : path
-                  )
-                  .join("/")}`
-            );
-
-            this.log.trace(() => colors.gray(JSON.stringify(payload)));
-
-            Resolver.provide(
-              req.systemContext,
-              SystemRpcRequest.provide(() => sysReq)
-            );
-
-            const configResolver = this.getRpcConfigResolver(SystemRpc);
-            const config = Resolver.resolve(configResolver, req.systemContext);
-            const command = await SystemRpc.createRpcCommand(config);
-            res.json({
-              result: await command(path, payload),
-            });
-          }
-        );
-      },
-    });
-
-    systemModule.install({
-      loadProjectModule: async projectModule => {
+  constructor(@Inject() projectModule: ProjectModule) {
+    projectModule
+      .onLoadPorjectModuleEntity(async projectModule => {
         await this._loadDir(projectModule.dir);
-      },
-      loadIndexFiles: async callback => {
+      })
+      .onFindCommonModules(async callback => {
         for (const info of this._loadedConfigsInfo) {
           this.log.trace(
             () => `Find index file for ${inspect(info.resolver)}.`
@@ -116,11 +69,7 @@ export default class SystemRpcModule {
             await callback(rpcModule?.filename);
           }
         }
-      },
-      check: async () => {
-        await this._check();
-      },
-    });
+      });
   }
 
   configureRpcResolver(configResolver: RpcConfigResolver<AnyRpc>) {
@@ -177,16 +126,17 @@ export default class SystemRpcModule {
     }
   }
 
-  protected async _check() {
+  protected async check(context: AnyResolverMap) {
     this._isChecking = true;
     this.log.trace(() => "checking");
 
-    const context = Resolver.createContext(
+    context = Resolver.createContext(
       {
-        ...SystemRpcRequest.provide(),
+        ...RpcRequest.provide(),
       },
-      this.systemModule.requestContext
+      context
     );
+
     try {
       const configResolver = this.getRpcConfigResolver(SystemRpc);
       Resolver.check(configResolver, context);
@@ -201,8 +151,9 @@ export default class SystemRpcModule {
     }
   }
 
-  async processRequest(sysReq: SystemRpcRequest, context: AnyResolverMap) {
-    const { path, payload } = sysReq;
+  async processRequest(rpcReq: RpcRequest, context: AnyResolverMap) {
+    const { path, payload } = rpcReq;
+
     this.log.info(
       () =>
         `${(path as any[])
@@ -215,7 +166,7 @@ export default class SystemRpcModule {
 
     Resolver.provide(
       context,
-      SystemRpcRequest.provide(() => sysReq)
+      RpcRequest.provide(() => rpcReq)
     );
 
     const configResolver = this.getRpcConfigResolver(SystemRpc);

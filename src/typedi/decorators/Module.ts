@@ -49,3 +49,7 @@ export function Module(options: ModuleOptions = {}) {
     };
   };
 }
+
+export function isModuleTarget(obj): obj is ModuleTarget {
+  return moduleMetadataMap.has(obj);
+}

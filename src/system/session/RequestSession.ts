@@ -1,8 +1,8 @@
-import { Session } from "@dabsi/system/session/entities/SystemSession";
+import { Session } from "@dabsi/system/session/entities/Session";
 
 import { DataSelector } from "@dabsi/typedata/DataSelector";
 
-export class SystemSession extends DataSelector(Session, {
+export default class RequestSession extends DataSelector(Session, {
   pick: [],
   relations: {
     user: {

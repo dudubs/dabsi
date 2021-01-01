@@ -10,10 +10,8 @@ export class ServerModule {
   constructor(@Inject() cli: Cli) {
     cli.command(
       "start",
-      this.cli.install({
-        run: () => {
-          this.log.info("starting...");
-        },
+      this.cli.onRun(() => {
+        this.log.info("starting...");
       })
     );
   }

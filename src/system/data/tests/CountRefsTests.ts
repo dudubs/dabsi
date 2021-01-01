@@ -6,7 +6,7 @@ import buildCountRefs from "@dabsi/system/data/buildCountRefs";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 import DataSources from "@dabsi/typedata/DataSources";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { Resolver, ResolverType } from "@dabsi/typedi/Resolver";
+import { Resolver, ResolverType } from "@dabsi/typedi";
 
 import {
   BeforeInsert,

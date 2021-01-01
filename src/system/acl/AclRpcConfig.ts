@@ -1,7 +1,7 @@
-import { getPasswordHash } from "@dabsi/system-old/server/acl/getPasswordHash";
+import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
 import { User } from "@dabsi/system/acl/entities/User";
 import { AclRpc } from "@dabsi/system/acl/common/AclRpc";
-import { SystemSession } from "@dabsi/system/session/SystemSession";
+import RequestSession from "@dabsi/system/session/RequestSession";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import DataSources from "@dabsi/typedata/DataSources";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
@@ -9,7 +9,7 @@ import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 export default RpcConfigResolver(
   AclRpc,
   {
-    session: DataRow(SystemSession),
+    session: DataRow(RequestSession),
     sources: DataSources({ users: User }),
   },
   c => $ => {

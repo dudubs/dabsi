@@ -1,8 +1,10 @@
-import { DataSource } from "@dabsi/typedata/DataSource";
 import { Type } from "@dabsi/common/typings2/Type";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { DataSource } from "@dabsi/typedata/DataSource";
+import { Resolver } from "@dabsi/typedi";
 
-export default Resolver<<T>(entityType: Type<T>) => DataSource<T>>();
+export default Resolver<<T>(entityType: Type<T>) => DataSource<T>>(
+  "DataResolver"
+);
 
 // DataSystemModule
 // CoreSystemModule

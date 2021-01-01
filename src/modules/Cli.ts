@@ -1,47 +1,48 @@
 import yargs from "yargs";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Module } from "@dabsi/typedi";
-import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
+import { Hookable } from "@dabsi/modules/Hookable";
+import { touchSet } from "@dabsi/common/map/touchSet";
 
 @Module()
 export class Cli {
+  protected commandNames = new Set();
+
   command(name: string, cli: Cli): Cli {
-    cli.install({
-      runAsParent: args => {
-        return this.hooks.runAsParent(args);
-      },
+    if (!touchSet(this.commandNames, name)) {
+      throw new Error("Already in use");
+    }
+
+    cli.onRunAsParent(args => {
+      return this.onRunAsParent.invoke(args);
     });
-    return this.install({
-      build: y =>
-        y.command(
-          name,
-          "",
-          y => cli.hooks.build(y),
-          async args => {
-            await this.hooks.runAsParent(args);
-            await cli.run(args);
-          }
-        ),
-    });
+    return this.onBuild(y =>
+      y.command(
+        name,
+        "",
+        y => cli.onBuild.invoke(y),
+        async args => {
+          await this.onRunAsParent.invoke(args);
+          await cli.run(args);
+        }
+      )
+    );
   }
 
-  protected hooks = {
-    runAsParent: (args): Awaitable => void 0,
-    run: (args): Awaitable => void 0,
-    build: (y: yargs.Argv) => y,
-  };
-
-  install = HooksInstaller(this.hooks, this);
+  onRunAsParent = Hookable<(args: any) => Awaitable>();
+  onRun = Hookable<(args: any) => Awaitable>();
+  onBuild = Hookable<(args: any) => Awaitable>();
 
   args?: any;
 
   async main(y: yargs.Argv) {
-    return this.run(this.hooks.build(y).help().argv);
+    this.onBuild.invoke(y);
+    return this.run(y.help().argv);
   }
 
   async run(args) {
     this.args = args;
-    await this.hooks.run(args);
+    await this.onRun.invoke(args);
   }
 }
 

@@ -1,7 +1,7 @@
 // import yargs from "yargs";
 // import { Inject } from "@dabsi/typedi/tests/Inject";
 // import { Cli } from "@dabsi/typedi/modules/Cli";
-// import { ExpressBuilder } from "@dabsi/typedi/modules/ExpressModule";
+// import { ExpressBuilder } from "@dabsi/typedi/modules";
 // import { Module } from "@dabsi/typedi/tests/Module";
 // import { ModuleRunner } from "@dabsi/typedi/tests/ModuleRunner";
 //

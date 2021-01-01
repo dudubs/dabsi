@@ -1,7 +1,7 @@
 import Router from "@dabsi/typerouter/Router";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
-import SystemRouter from "@dabsi/system/core/SystemRouter";
+import SystemRouter from "@dabsi/system/core/common/SystemRouter";
 import { SystemRpc } from "@dabsi/system/rpc/SystemRpc";
 
 export const AdminRouter = Router({});

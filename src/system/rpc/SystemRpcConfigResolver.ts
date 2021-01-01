@@ -1,11 +1,7 @@
-import SystemRpcModule from "@dabsi/system/rpc";
+import RpcModule from "@dabsi/system/rpc";
 
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import {
-  AnyResolverMap,
-  CustomResolver,
-  Resolver,
-} from "@dabsi/typedi/Resolver";
+import { AnyResolverMap, CustomResolver, Resolver } from "@dabsi/typedi";
 import {
   AnyRpc,
   RpcResolvedConfig,
@@ -16,10 +12,10 @@ import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
 function _SystemRpcConfigResolver<T extends AnyRpc>(
   rpc: T,
   nextContext,
-  getRpcConfigResolver: (sm: SystemRpcModule) => RpcConfigResolver<T>
+  getRpcConfigResolver: (sm: RpcModule) => RpcConfigResolver<T>
 ): CustomResolver<(context?) => RpcUnresolvedConfig<T>> {
   return Resolver.toCheck(
-    Resolver.consume([SystemRpcModule, c => c], (sm, context) => {
+    Resolver.consume([RpcModule, c => c], (sm, context) => {
       return nextContext => {
         const cr = getRpcConfigResolver(sm);
         return rpc.resolveRpcConfig(
@@ -28,7 +24,7 @@ function _SystemRpcConfigResolver<T extends AnyRpc>(
       };
     }),
     context => {
-      const sm = Resolver.resolve(SystemRpcModule, context);
+      const sm = Resolver.resolve(RpcModule, context);
       const cr = getRpcConfigResolver(sm);
       Resolver.checkObject(nextContext, context);
       Resolver.check(cr, Resolver.createContext(nextContext, context));

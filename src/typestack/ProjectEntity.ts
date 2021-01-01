@@ -1,9 +1,8 @@
-import path from "path";
-import { DABSI_ROOT_DIR } from "@dabsi/index";
+import ProjectModuleEntity from "@dabsi/typestack/ProjectModuleEntity";
 import { TsConfigInfo } from "@dabsi/typestack/TsConfigInfo";
-import ProjectModule from "@dabsi/typestack/ProjectModule";
+import path from "path";
 
-export default class Project {
+export default class ProjectEntity {
   constructor(public dir: string) {}
 
   dirNames = new Set<string>();
@@ -16,5 +15,5 @@ export default class Project {
 
   tsConfigInfo = new TsConfigInfo(path.join(this.dir, "tsconfig.json"));
 
-  moduleMap: Record<string, ProjectModule> = {};
+  moduleDirMap: Record<string, ProjectModuleEntity> = {};
 }

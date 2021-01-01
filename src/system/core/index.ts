@@ -1,18 +1,14 @@
 import { Lazy } from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import nested from "@dabsi/common/string/nested";
-import { Awaitable } from "@dabsi/common/typings2/Async";
 import { LogLevel } from "@dabsi/logging/Logger";
 import { Cli } from "@dabsi/modules/Cli";
 import { DbModule } from "@dabsi/modules/DbModule";
-import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
 import { Inject, Module } from "@dabsi/typedi";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { AnyResolverMap, Resolver } from "@dabsi/typedi/Resolver";
-
-import ProjectManager from "@dabsi/typestack/ProjectManager";
+import { AnyResolverMap, Resolver } from "@dabsi/typedi";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import express from "express";
 
@@ -30,11 +26,9 @@ export class SystemModule {
 
   cli = new Cli().command(
     "check",
-    new Cli().install({
-      run: async ({ traceSystem, trace = traceSystem }) => {
-        trace && this.log.setLevel(x => x | LogLevel.TRACE);
-        await this.check();
-      },
+    new Cli().onRun(async ({ traceSystem, trace = traceSystem }) => {
+      trace && this.log.setLevel(x => x | LogLevel.TRACE);
+      await this.check();
     })
   );
 
@@ -54,7 +48,7 @@ export class SystemModule {
       }
     }
 
-    await this.hooks.check();
+    // await this.hooks.check();
   }
 
   protected _handlerResolvers: Resolver<express.Handler>[] = [];
@@ -104,39 +98,25 @@ export class SystemModule {
     @Inject() protected runner: ModuleRunner,
     @Inject() public readonly dbModule: DbModule,
     @Inject() cli: Cli,
-    @Inject() protected projectManager: ProjectManager
+    @Inject() protected projectManager: ProjectModule
   ) {
     cli.command("system", this.cli);
   }
 
-  protected hooks = {
-    loadProjectModule: HooksInstaller.empty as (
-      projectModule: ProjectModule
-    ) => Awaitable,
-
-    loadIndexFiles: HooksInstaller.empty as (
-      callback: (indexFileName: string) => Awaitable
-    ) => Awaitable,
-
-    check: HooksInstaller.empty as () => Awaitable,
-  };
-
-  install = HooksInstaller(this.hooks);
-
   @Once() async load() {
     this.log.trace("Load system .");
     await this.projectManager.load();
-    for (const projectModule of this.projectManager.allProjectModules) {
-      await this.hooks.loadProjectModule(projectModule);
+    for (const projectModule of this.projectManager.allProjectModuleEntitys) {
+      // await this.hooks.loadProjectModuleEntity(projectModule);
     }
   }
 
   @Once() async getIndexFileNames(): Promise<Set<string>> {
     await this.load();
     const fileNames = new Set<string>();
-    await this.hooks.loadIndexFiles(fileName => {
-      fileNames.add(fileName);
-    });
+    // await this.hooks.loadIndexFiles(fileName => {
+    //   fileNames.add(fileName);
+    // });
     return fileNames;
   }
 

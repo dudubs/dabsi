@@ -17,7 +17,7 @@ import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { Inject, Module } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { Resolver } from "@dabsi/typedi";
 import { EntityRelation } from "@dabsi/typeorm/relations";
 import SqlliteQueryRunnerPool from "@dabsi/typeorm/SqlliteQueryRunnerPool";
 import { Connection, QueryRunner } from "typeorm";
@@ -70,36 +70,34 @@ export default class DataSystemModule {
       },
     ]);
     // SystemRequest.start();
-    dbm.install({
-      afterInit: async () => {
-        const connection = dbm.getConnection();
-        for (const entityMetadata of connection.entityMetadatas) {
-          if (typeof entityMetadata.target !== "function") continue;
-          for (const relationMetadata of entityMetadata.relations) {
-            if (typeof relationMetadata.type !== "function") continue;
+    dbm.afterInit(async () => {
+      const connection = dbm.getConnection();
+      for (const entityMetadata of connection.entityMetadatas) {
+        if (typeof entityMetadata.target !== "function") continue;
+        for (const relationMetadata of entityMetadata.relations) {
+          if (typeof relationMetadata.type !== "function") continue;
 
-            const relationType = relationMetadata.type;
-            const relation = new EntityRelation(
+          const relationType = relationMetadata.type;
+          const relation = new EntityRelation(
+            connection,
+            entityMetadata.target as Function,
+            relationMetadata.propertyName,
+            false
+          );
+          getDataEntityInfo;
+          for (const callback of this._buildRelationCallbacksMap.get(
+            relationType
+          ) || []) {
+            await callback({
+              entityType: entityMetadata.target,
+              relation,
+              relationType,
+              entityPropertyName: relationMetadata.propertyName,
               connection,
-              entityMetadata.target as Function,
-              relationMetadata.propertyName,
-              false
-            );
-            getDataEntityInfo;
-            for (const callback of this._buildRelationCallbacksMap.get(
-              relationType
-            ) || []) {
-              await callback({
-                entityType: entityMetadata.target,
-                relation,
-                relationType,
-                entityPropertyName: relationMetadata.propertyName,
-                connection,
-              });
-            }
+            });
           }
         }
-      },
+      }
     });
   }
 

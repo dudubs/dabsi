@@ -1,4 +1,4 @@
-export default class SystemRpcRequest {
+export default class RpcRequest {
   constructor(
     public path: any[],
     public payload: any,

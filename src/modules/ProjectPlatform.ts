@@ -1,7 +1,7 @@
 import { values } from "@dabsi/common/object/values";
 import * as fs from "fs";
 import path from "path";
-import Project from "@dabsi/typestack/Project";
+import ProjectEntity from "@dabsi/typestack/ProjectEntity";
 
 export default class ProjectPlatform {
   bundleDir = path.join(this.project.bundleDir, this.name);
@@ -14,5 +14,5 @@ export default class ProjectPlatform {
 
   tsConfigFileName = path.join(this.project.dir, this.tsConfigBaseName);
 
-  constructor(public project: Project, public name: string) {}
+  constructor(public project: ProjectEntity, public name: string) {}
 }

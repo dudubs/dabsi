@@ -10,7 +10,7 @@ import {
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export class ModuleRunner {
-  protected cache = new Map<ModuleTarget, any>();
+  moduleInstanceMap = new Map<ModuleTarget, any>();
 
   context = { ...ModuleRunner.provide(() => this) };
 
@@ -21,7 +21,7 @@ export class ModuleRunner {
     instance: any;
     metadata: ModuleMetadata;
   }> {
-    for (const [target, instance] of this.cache.entries()) {
+    for (const [target, instance] of this.moduleInstanceMap.entries()) {
       yield { target, instance, metadata: moduleMetadataMap.get(target)! };
     }
   }
@@ -33,7 +33,7 @@ export class ModuleRunner {
   }
 
   getInstance<T>(target: Constructor<T>): T {
-    return touchMap(this.cache, target, () => {
+    return touchMap(this.moduleInstanceMap, target, () => {
       if (!this._mainModuleTarget) {
         this._mainModuleTarget = target;
       }

@@ -2,14 +2,14 @@ import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
 import Storage from "@dabsi/system/storage/Storage";
 import StorageDataSources from "@dabsi/system/storage/StorageDataSources";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import { Inject, Injectable } from "@dabsi/typedi";
+import { Inject, Injectable, ResolverType } from "@dabsi/typedi";
 
 @Injectable()
 export default class StorageManager {
   constructor(
     @Inject() protected storage: Storage,
-    @Inject()
-    protected sources: StorageDataSources
+    @Inject(StorageDataSources)
+    protected sources: ResolverType<typeof StorageDataSources>
   ) {}
 
   async upload(

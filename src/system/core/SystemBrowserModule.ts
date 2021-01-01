@@ -9,10 +9,8 @@ export default class SystemBrowserModule {
     @Inject() systemModule: SystemModule,
     @Inject() browserModule: BrowserModule
   ) {
-    browserModule.install({
-      make: async ({ indexFileNames }) => {
-        addAll(indexFileNames, await systemModule.getIndexFileNames());
-      },
+    browserModule.onMake(async ({ indexFileNames }) => {
+      addAll(indexFileNames, await systemModule.getIndexFileNames());
     });
   }
 }

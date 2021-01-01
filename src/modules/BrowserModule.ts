@@ -7,15 +7,15 @@ import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DABSI_CURRENT_PATH, DABSI_PATH, DABSI_SRC_PATH } from "@dabsi/index";
 import { Cli } from "@dabsi/modules/Cli";
-import ExpressModule from "@dabsi/modules/ExpressModule";
-import { HooksInstaller } from "@dabsi/modules/HooksInstaller";
+import ExpressModule from "@dabsi/modules/express";
+import { Hookable } from "@dabsi/modules/Hookable";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import ProjectPlatform from "@dabsi/modules/ProjectPlatform";
 import { Inject, Module } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { DevModule } from "@dabsi/typestack/DevModule";
 import { MakeModule } from "@dabsi/typestack/MakeModule";
-import ProjectManager from "@dabsi/typestack/ProjectManager";
+import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import express from "express";
 import fs from "fs";
@@ -27,10 +27,8 @@ import webpack from "webpack";
   dependencies: [DevModule, ExpressModule],
 })
 export default class BrowserModule {
-  packCli = new Cli().install({
-    run: {
-      after: ({}) => this.pack(),
-    },
+  packCli = new Cli().onRun({
+    after: () => this.pack(),
   });
 
   cli = new Cli() //
@@ -41,7 +39,7 @@ export default class BrowserModule {
   log = log.get("BROWSER");
 
   constructor(
-    @Inject() protected projectManager: ProjectManager,
+    @Inject() protected projectManager: ProjectModule,
     @Inject() protected makeModule: MakeModule,
     @Inject() expressModule: ExpressModule,
     @Inject() protected runner: ModuleRunner,
@@ -49,12 +47,11 @@ export default class BrowserModule {
   ) {
     cli.command("browser", this.cli);
 
-    makeModule.cli.install({
-      run: () => this.make(),
-    });
+    makeModule.cli.onRun(() => this.make());
 
-    expressModule.install({
-      postRoutes: app => {
+    // ).onBuildRoutes(
+    expressModule
+      .afterBuildRoutes(app => {
         app.get("/*", (req, res) => {
           res.setHeader("Content-Type", "text/html");
           res.send(
@@ -69,8 +66,8 @@ export default class BrowserModule {
             })
           );
         });
-      },
-      routes: app => {
+      })
+      .onBuildRoutes(app => {
         const bundlePath = fs.realpathSync("./bundle/browser");
         const bundleStatic = express.static(bundlePath);
         app.use("/bundle/browser", (req, res, next) => {
@@ -84,8 +81,7 @@ export default class BrowserModule {
           });
         });
         //
-      },
-    });
+      });
   }
 
   projectPlatformMap: Record<string, ProjectPlatform>;
@@ -131,7 +127,7 @@ export default class BrowserModule {
   protected async _makeProjectPlatformModules(
     projectPlatform: ProjectPlatform
   ) {
-    for (const projectModule of values(projectPlatform.project.moduleMap)) {
+    for (const projectModule of values(projectPlatform.project.moduleDirMap)) {
       const projectPlatformModuleDir =
         projectModule.fileMap[projectPlatform.name];
       if (!projectPlatformModuleDir) continue;
@@ -198,13 +194,7 @@ export default class BrowserModule {
     );
   }
 
-  protected hooks = {
-    make: HooksInstaller.empty as (_: {
-      indexFileNames: Set<string>;
-    }) => Awaitable,
-  };
-
-  install = HooksInstaller(this.hooks);
+  onMake = Hookable<(_: { indexFileNames: Set<string> }) => Awaitable>();
 
   async make() {
     await this.init();
@@ -212,7 +202,7 @@ export default class BrowserModule {
     this._indexFileNames = new Set();
     // await this.hooks.make();
     await this._makeConfigs();
-    await this.hooks.make({ indexFileNames: this._indexFileNames });
+    await this.onMake.invoke({ indexFileNames: this._indexFileNames });
     await this._makeIndexFile();
 
     this._indexFileNames = null;

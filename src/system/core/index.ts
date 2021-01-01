@@ -10,15 +10,12 @@ import { Inject, Module } from "@dabsi/typedi";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { Resolver } from "@dabsi/typedi/Resolver";
-import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
+import { AnyResolverMap, Resolver } from "@dabsi/typedi/Resolver";
+
 import ProjectManager from "@dabsi/typestack/ProjectManager";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import express from "express";
 
-export interface SystemProvider {
-  getHandler();
-}
 declare global {
   namespace Express {
     interface Request {
@@ -26,9 +23,8 @@ declare global {
     }
   }
 }
-@Module({
-  dependencies: [],
-})
+
+@Module({})
 export class SystemModule {
   log = log.get("SYSTEM");
 
@@ -124,11 +120,12 @@ export class SystemModule {
 
     check: HooksInstaller.empty as () => Awaitable,
   };
+
   install = HooksInstaller(this.hooks);
 
   @Once() async load() {
     this.log.trace("Load system .");
-    await this.projectManager.init();
+    await this.projectManager.load();
     for (const projectModule of this.projectManager.allProjectModules) {
       await this.hooks.loadProjectModule(projectModule);
     }

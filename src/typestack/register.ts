@@ -6,8 +6,8 @@ import { LogLevel } from "@dabsi/logging/Logger";
 
 setImmediate(async () => {
   const moduleRunner = new ModuleRunner();
-  const module = moduleRunner.getModuleInstance(getLastModule()! as any);
-  const cli = moduleRunner.getModuleInstance(Cli);
+  const module = moduleRunner.getInstance(getLastModule()! as any);
+  const cli = moduleRunner.getInstance(Cli);
 
   cli.install({
     runAsParent: ({ trace }) => {

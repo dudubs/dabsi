@@ -3,7 +3,7 @@ import { Type } from "@dabsi/common/typings2/Type";
 import { ClassResolver } from "@dabsi/typedata/ClassResolver";
 import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { DataSource } from "@dabsi/typedata/DataSource";
-import { Consumer } from "@dabsi/typedi/Consumer";
+import { Resolver } from "@dabsi/typedi";
 
 //
 export default function DataSources<T extends Record<string, Type<any>>>(
@@ -14,7 +14,7 @@ export default function DataSources<T extends Record<string, Type<any>>>(
   }
 > {
   return ClassResolver(
-    Consumer(
+    Resolver.consume(
       { resolve: DataSourceResolver },
       c => <any>mapObject(typeMap, type => c.resolve(type))
     )

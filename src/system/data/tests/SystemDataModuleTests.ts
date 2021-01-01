@@ -14,9 +14,9 @@ const events: DataEntityEvent[] = [];
 beforeAll(async () => {
   const runner = new ModuleRunner();
 
-  const dbm = runner.getModuleInstance(DbModule);
-  const dsm = runner.getModuleInstance(DataSystemModule);
-  runner.getModuleInstance(TestDbModule);
+  const dbm = runner.getInstance(DbModule);
+  const dsm = runner.getInstance(DataSystemModule);
+  runner.getInstance(TestDbModule);
 
   addAll(dbm.entityTypes, TestEntities);
 

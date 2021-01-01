@@ -3,7 +3,19 @@ import { getTypeToken } from "@dabsi/typedi/getTypeToken";
 import { ResolverMap } from "@dabsi/typedi/Resolver";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 
-export function checkTypeResolver(type: Type<any>, context: ResolverMap<any>) {
+import { IResolver } from "@dabsi/typedi/Resolver";
+
+const _operator = "checkType";
+
+IResolver[_operator] = _method;
+
+declare module "../Resolver" {
+  interface IResolver {
+    [_operator]: typeof _method;
+  }
+}
+
+function _method(type: Type<any>, context: ResolverMap<any>) {
   for (
     let baseType = type;
     typeof baseType === "function";

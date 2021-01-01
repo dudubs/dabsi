@@ -1,8 +1,5 @@
-import "reflect-metadata";
+import { Inject, Injectable, Resolver } from "@dabsi/typedi";
 import { Forward } from "@dabsi/typedi/Forward";
-import { Inject } from "@dabsi/typedi";
-import { Injectable } from "@dabsi/typedi/decorators/Injectable";
-import { Resolver } from "@dabsi/typedi/Resolver";
 
 it("sanity", done => {
   class B {

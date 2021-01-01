@@ -19,18 +19,18 @@ export default class ProjectManager {
   allProjectModules: ProjectModule[];
 
   constructor(
-    @Inject() mMake: MakeModule,
+    @Inject() makeModule: MakeModule,
     @Inject() protected runner: ModuleRunner,
     @Inject() cli: Cli
   ) {
-    mMake.cli.install({ run: () => this.init() });
+    makeModule.cli.install({ run: () => this.load() });
   }
 
-  @Once() async init() {
+  @Once() async load() {
     this.projectMap = {};
     this.allProjectModules = [];
 
-    for (const m of this.runner.getLoadedModules()) {
+    for (const m of this.runner.getAllInstances()) {
       const moduleFileName = m.metadata.callStackInfo.lineInfo.fileName;
 
       if (!(/*is index file*/ /[\\\/]index\.ts/.test(moduleFileName))) continue;

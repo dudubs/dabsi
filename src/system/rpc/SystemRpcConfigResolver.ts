@@ -1,14 +1,17 @@
 import SystemRpcModule from "@dabsi/system/rpc";
-import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
+
+import { ResolveError } from "@dabsi/typedi/ResolveError";
 import {
   AnyResolverMap,
-  checkResolverMap,
-} from "@dabsi/typedi/resolvers/ObjectResolver";
-import { RpcResolvedConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { Consumer } from "@dabsi/typedi/Consumer";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
+  CustomResolver,
+  Resolver,
+} from "@dabsi/typedi/Resolver";
+import {
+  AnyRpc,
+  RpcResolvedConfig,
+  RpcUnresolvedConfig,
+} from "@dabsi/typerpc/Rpc";
 import { RpcConfigResolver } from "@dabsi/typerpc/RpcConfigResolver";
-import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 function _SystemRpcConfigResolver<T extends AnyRpc>(
   rpc: T,
@@ -16,7 +19,7 @@ function _SystemRpcConfigResolver<T extends AnyRpc>(
   getRpcConfigResolver: (sm: SystemRpcModule) => RpcConfigResolver<T>
 ): CustomResolver<(context?) => RpcUnresolvedConfig<T>> {
   return Resolver.toCheck(
-    Consumer([SystemRpcModule, c => c], (sm, context) => {
+    Resolver.consume([SystemRpcModule, c => c], (sm, context) => {
       return nextContext => {
         const cr = getRpcConfigResolver(sm);
         return rpc.resolveRpcConfig(
@@ -27,7 +30,7 @@ function _SystemRpcConfigResolver<T extends AnyRpc>(
     context => {
       const sm = Resolver.resolve(SystemRpcModule, context);
       const cr = getRpcConfigResolver(sm);
-      checkResolverMap(nextContext, context);
+      Resolver.checkObject(nextContext, context);
       Resolver.check(cr, Resolver.createContext(nextContext, context));
     }
   );
@@ -46,7 +49,7 @@ SystemRpcConfigResolver.create = function <T extends AnyRpc>(
   rpc: T,
   nextContext?: AnyResolverMap
 ): CustomResolver<(context?: AnyResolverMap) => Promise<RpcResolvedConfig<T>>> {
-  return Consumer(
+  return Resolver.consume(
     [
       _SystemRpcConfigResolver(rpc, nextContext, sm => {
         const configResolver = sm.createRpcConfigResolver(rpc);

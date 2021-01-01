@@ -1,12 +1,8 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { Type } from "@dabsi/common/typings2/Type";
-import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
-import { checkTypeResolver } from "@dabsi/typedi/operators/checkTypeResolver";
+
 import { provideType } from "@dabsi/typedi/provideType";
-import { resolveSymbol } from "@dabsi/typedi/resolve";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
-import { resolveType } from "@dabsi/typedi/resolveType";
 
 declare global {
   interface String extends CustomResolver<string> {}
@@ -33,29 +29,29 @@ declare global {
 }
 
 [String, Number, Boolean, Date].forEach(type => {
-  type.prototype[resolveSymbol] = function () {
+  type.prototype[Resolver.resolveSymbol] = function () {
     return this as any;
   };
 });
 
-Function.prototype[resolveSymbol] = function (context) {
+Function.prototype[Resolver.resolveSymbol] = function (context) {
   if (this.prototype) {
-    return resolveType(this, context);
+    return Resolver.resolveType(this, context);
   } else {
     return this(context);
   }
 };
 
-Function.prototype[checkResolverSymbol] = function (context) {
+Function.prototype[Resolver.checkSymbol] = function (context) {
   if (this.prototype) {
-    checkTypeResolver(this, context);
+    Resolver.checkType(this, context);
   }
 };
 
 Function.prototype.toCheck = function (checkFn) {
   return {
-    [resolveSymbol]: this,
-    [checkResolverSymbol]: checkFn,
+    [Resolver.resolveSymbol]: this,
+    [Resolver.checkSymbol]: checkFn,
   };
 };
 

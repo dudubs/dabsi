@@ -1,6 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
-import { Consumer } from "@dabsi/typedi/Consumer";
+
 import {
   CustomResolver,
   ResolveMapType,
@@ -34,7 +34,7 @@ export function RpcConfigResolver<T extends AnyRpc, U extends ResolverMap<any>>(
 
   const callStackInfo = new CallStackInfo(new Error(), __filename);
   // stackInfo = {};
-  let resolver = Consumer<any, any>(resolvers, context => {
+  let resolver = Resolver.consume<any, any>(resolvers, context => {
     return RpcConfig(rpc, callback(context));
   });
 

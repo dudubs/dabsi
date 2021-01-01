@@ -1,6 +1,4 @@
 import { flatObject } from "@dabsi/common/object/flatObject";
-import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
-import { resolveSymbol } from "@dabsi/typedi/resolve";
 import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 export function Provider(
@@ -11,11 +9,11 @@ export function Provider(context) {
 
   return resolver => {
     return (parentContext => {
-      return resolver[resolveSymbol](
+      return resolver[Resolver.resolveSymbol](
         Object.setPrototypeOf({ ...context }, parentContext)
       );
     }).toCheck(parentContext => {
-      resolver[checkResolverSymbol]?.(
+      resolver[Resolver.checkSymbol]?.(
         Object.setPrototypeOf({ ...context }, parentContext)
       );
     });

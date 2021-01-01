@@ -1,16 +1,7 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import {
-  checkResolver,
-  checkResolverSymbol,
-} from "@dabsi/typedi/operators/checkResolver";
-import { checkTypeResolver } from "@dabsi/typedi/operators/checkTypeResolver";
-import { resolve, resolveSymbol } from "@dabsi/typedi/resolve";
-import { ArrayResolver } from "@dabsi/typedi/resolvers/ArrayResolver";
 import { Forward } from "@dabsi/typedi/Forward";
-import { Resolver } from "@dabsi/typedi/Resolver";
-import { resolveType } from "@dabsi/typedi/resolveType";
+import { Resolver } from "@dabsi/typedi";
 
-import "@dabsi/typedi/resolvers/FnResolver";
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   return {
     target,
@@ -25,15 +16,15 @@ export const getInjectableResolver = WeakMapFactory(
       Reflect.getMetadata("design:paramtypes", target) || [];
 
     const metadata = getInjectableMetadata(target);
-    return ArrayResolver(
+    return Resolver.array(
       designParamTypes.map((designType, index) => {
         let resolverCache;
         return (
           metadata.resolvers[index] ??
           (context => {
-            return resolve(getResolver(), context);
+            return Resolver.resolve(getResolver(), context);
           }).toCheck(context => {
-            checkResolver(getResolver(), context);
+            Resolver.check(getResolver(), context);
           })
         );
 
@@ -55,18 +46,18 @@ export function Injectable() {
     metadata.isInjectable = true;
     const paramsResolver = getInjectableResolver(target);
 
-    target[resolveSymbol] = function (context) {
+    target[Resolver.resolveSymbol] = function (context) {
       if (metadata.target !== this) {
-        return resolveType(this, context);
+        return Resolver.resolveType(this, context);
       }
-      return new this(...resolve(paramsResolver, context));
+      return new this(...Resolver.resolve(paramsResolver, context));
     };
 
-    target[checkResolverSymbol] = function (context) {
+    target[Resolver.checkSymbol] = function (context) {
       if (metadata.target !== this) {
-        return checkTypeResolver(this, context);
+        return Resolver.checkType(this, context);
       }
-      checkResolver(paramsResolver, context);
+      Resolver.check(paramsResolver, context);
     };
   };
 }

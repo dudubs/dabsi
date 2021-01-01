@@ -93,7 +93,7 @@ export default class BrowserModule {
   mainProjectPlatform: ProjectPlatform;
 
   @Once() async init() {
-    await this.projectManager.init();
+    await this.projectManager.load();
     this.projectPlatformMap = mapObject(
       this.projectManager.projectMap,
       p => new ProjectPlatform(p, "browser")

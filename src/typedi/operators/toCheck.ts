@@ -1,17 +1,22 @@
-import {
-  checkResolver,
-  checkResolverSymbol,
-} from "@dabsi/typedi/operators/checkResolver";
-import { resolve, resolveSymbol } from "@dabsi/typedi/resolve";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { IResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
-export default function <T>(resolver: Resolver<T>, check: (context) => void) {
+const _operator = "toCheck";
+
+IResolver[_operator] = _method;
+
+declare module "../Resolver" {
+  interface IResolver {
+    [_operator]: typeof _method;
+  }
+}
+
+function _method<T>(resolver: Resolver<T>, check: (context) => void) {
   return {
-    [resolveSymbol](context) {
-      return resolve(resolver, context);
+    [Resolver.resolveSymbol](context) {
+      return Resolver.resolve(resolver, context);
     },
-    [checkResolverSymbol](context) {
-      checkResolver(resolver, context);
+    [Resolver.checkSymbol](context) {
+      Resolver.check(resolver, context);
       check(context);
     },
   };

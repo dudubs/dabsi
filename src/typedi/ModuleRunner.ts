@@ -9,18 +9,6 @@ import {
 } from "@dabsi/typedi/decorators/Module";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 
-export type IChildModule<Child> = {
-  registerChildModule(child: Child);
-};
-
-export type IParentModule<Parent> = {
-  registerParentModule(parent: Parent);
-};
-
-export type IModule<Parent = any, Child = Parent> = Partial<
-  IChildModule<Child> & IParentModule<Parent>
->;
-
 export class ModuleRunner {
   protected cache = new Map<ModuleTarget, any>();
 
@@ -28,7 +16,7 @@ export class ModuleRunner {
 
   constructor() {}
 
-  *getLoadedModules(): IterableIterator<{
+  *getAllInstances(): IterableIterator<{
     target: ModuleTarget;
     instance: any;
     metadata: ModuleMetadata;
@@ -44,7 +32,7 @@ export class ModuleRunner {
     return this._mainModuleTarget;
   }
 
-  getModuleInstance<T>(target: Constructor<T>): T {
+  getInstance<T>(target: Constructor<T>): T {
     return touchMap(this.cache, target, () => {
       if (!this._mainModuleTarget) {
         this._mainModuleTarget = target;
@@ -54,9 +42,7 @@ export class ModuleRunner {
       const argsResolver = getInjectableResolver(target);
       const options = moduleMetadataMap.get(target)!;
       for (const dependencyModule of options.dependencies || []) {
-        const parent: IModule = this.getModuleInstance(dependencyModule);
-        // parent.registerChildModule?.(instance);
-        // instance.registerParentModule?.(parent);
+        this.getInstance(dependencyModule);
       }
 
       for (const provider of options.providers || []) {
@@ -71,7 +57,7 @@ export class ModuleRunner {
         this.context
       );
 
-      const instance: IModule = new target(...args);
+      const instance = new target(...args);
 
       return instance;
     });

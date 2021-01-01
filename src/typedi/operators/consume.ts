@@ -1,14 +1,21 @@
-import { checkResolver } from "@dabsi/typedi/operators/checkResolver";
-import { resolve } from "@dabsi/typedi/resolve";
-import { ArrayResolver } from "@dabsi/typedi/resolvers/ArrayResolver";
-import { ObjectResolver } from "@dabsi/typedi/resolvers/ObjectResolver";
 import {
   CustomResolver,
+  IResolver,
   ResolveMapType,
   Resolver,
   ResolverMap,
   ResolverType,
 } from "@dabsi/typedi/Resolver";
+
+const _operator = "consume";
+
+IResolver[_operator] = _method;
+
+declare module "../Resolver" {
+  interface IResolver {
+    [_operator]: typeof _method;
+  }
+}
 
 type A<U extends (Resolver | undefined)[], N extends number> = ResolverType<
   NonNullable<U[N]>
@@ -45,23 +52,22 @@ export type Consumer<T> = <U extends ConsumeDeps>(
   callback: ConsumeFactory<T, U>
 ) => Resolver<T>;
 
-export function Consumer<T, U extends ConsumeDeps>(
+export function _method<T, U extends ConsumeDeps>(
   deps: U,
   create: ConsumeFactory<T, U>
 ): CustomResolver<T>;
-export function Consumer(deps, create): any {
+export function _method(deps, create): any {
   if (Array.isArray(deps)) {
-    const depsResolver = ArrayResolver(deps);
-    return (context => create(...resolve(depsResolver, context))).toCheck(
-      context => {
-        checkResolver(depsResolver, context);
-      }
-    );
+    const depsResolver = Resolver.array(deps);
+    return (context =>
+      create(...Resolver.resolve(depsResolver, context))).toCheck(context => {
+      Resolver.check(depsResolver, context);
+    });
   }
-  const depsResolver = ObjectResolver(deps);
+  const depsResolver = Resolver.object(deps);
   return (context => {
-    return create(resolve(depsResolver, context));
+    return create(Resolver.resolve(depsResolver, context));
   }).toCheck(context => {
-    checkResolver(depsResolver, context);
+    Resolver.check(depsResolver, context);
   });
 }

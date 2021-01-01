@@ -1,13 +1,21 @@
-import { RpcError } from "@dabsi/typerpc/Rpc";
-import { resolve } from "@dabsi/typedi/resolve";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { CustomResolver, IResolver, Resolver } from "@dabsi/typedi/Resolver";
 
-export function catchResolveError<T>(
+const _operator = "catch";
+
+IResolver[_operator] = _method;
+
+declare module "../Resolver" {
+  interface IResolver {
+    [_operator]: typeof _method;
+  }
+}
+
+function _method<T>(
   resolver: Resolver<T>,
   callback: (error: ResolveError) => any
 ): CustomResolver<T> {
-  return (context => resolve(resolver, context)).toCheck(context => {
+  return (context => Resolver.resolve(resolver, context)).toCheck(context => {
     try {
       Resolver.check(resolver, context);
     } catch (error) {

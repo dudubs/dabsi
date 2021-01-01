@@ -1,13 +1,12 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
-import { Consumer } from "@dabsi/typedi/Consumer";
+
 import { Injectable } from "@dabsi/typedi/decorators/Injectable";
 import { Resolver } from "@dabsi/typedi/index";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { checkResolverSymbol } from "@dabsi/typedi/operators/checkResolver";
-import { resolveSymbol } from "@dabsi/typedi/resolve";
-import { ResolverType } from "@dabsi/typedi/Resolver";
-import { AnyResolverMap } from "@dabsi/typedi/resolvers/ObjectResolver";
+import { Consumer } from "@dabsi/typedi/operators/consume";
+
+import { AnyResolverMap, ResolverType } from "@dabsi/typedi/Resolver";
 
 let lastModule: Function | null = null;
 
@@ -17,7 +16,9 @@ export const getLastModule = () => lastModule;
 
 export type ModuleProvider = Resolver<AnyResolverMap>;
 
-export const ModuleProvider: Consumer<ResolverType<ModuleProvider>> = Consumer;
+export const ModuleProvider: Consumer<ResolverType<ModuleProvider>> =
+  Resolver.consume;
+
 export type ModuleMetadata = { callStackInfo: CallStackInfo } & ModuleOptions;
 
 export const moduleMetadataMap = new WeakMap<ModuleTarget, ModuleMetadata>();
@@ -36,14 +37,14 @@ export function Module(options: ModuleOptions = {}) {
 
     Injectable()(target);
 
-    Object.defineProperty(target, resolveSymbol, {
+    Object.defineProperty(target, Resolver.resolveSymbol, {
       configurable: false,
       value(context) {
-        return Resolver.resolve(ModuleRunner, context).getModuleInstance(this);
+        return Resolver.resolve(ModuleRunner, context).getInstance(this);
       },
     });
 
-    target[checkResolverSymbol] = function (context) {
+    target[Resolver.checkSymbol] = function (context) {
       Resolver.check(ModuleRunner, context);
     };
   };

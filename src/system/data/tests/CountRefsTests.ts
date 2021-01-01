@@ -7,7 +7,7 @@ import { DataRelation } from "@dabsi/typedata/DataRelation";
 import DataSources from "@dabsi/typedata/DataSources";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { Resolver, ResolverType } from "@dabsi/typedi/Resolver";
-import { ObjectResolver } from "@dabsi/typedi/resolvers/ObjectResolver";
+
 import {
   BeforeInsert,
   Column,
@@ -54,7 +54,7 @@ class TestDoc {
   manyResources: DataRelation<TestResource>[];
 }
 
-const testResolver = ObjectResolver({
+const testResolver = Resolver.object({
   sources: DataSources({
     docs: TestDoc,
     resources: TestResource,
@@ -65,9 +65,9 @@ let t: ResolverType<typeof testResolver>;
 
 beforeAll(async () => {
   const runner = new ModuleRunner();
-  const sdm = runner.getModuleInstance(DataSystemModule);
-  const dbm = runner.getModuleInstance(DbModule);
-  runner.getModuleInstance(TestDbModule);
+  const sdm = runner.getInstance(DataSystemModule);
+  const dbm = runner.getInstance(DbModule);
+  runner.getInstance(TestDbModule);
   buildCountRefs(sdm, TestResource, "countRefs");
 
   dbm.entityTypes.add(TestDoc);

@@ -84,7 +84,8 @@ export class DbModule {
     }
   }
 
-  protected async _load() {
+  @Once() async load() {
+    await this.projectManager.load();
     for (const projectModule of this.projectManager.allProjectModules) {
       const {
         entities: entitiesDir,
@@ -117,21 +118,12 @@ export class DbModule {
   protected hooks = {
     beforeInit: HooksInstaller.empty as () => Awaitable,
     afterInit: HooksInstaller.empty as () => Awaitable,
-
-    initRelation: HooksInstaller.empty as (props: {
-      entityType: Function;
-      entityPropertyName: string;
-      relationType: Function;
-      relation;
-    }) => Awaitable,
   };
 
   install = HooksInstaller(this.hooks);
 
   @Once()
   async init() {
-    await this.projectManager.init();
-    await this._load();
     await this.hooks.beforeInit();
     this.connection = await createConnection({
       logging: ["schema"],

@@ -1,7 +1,7 @@
 import { Connection } from "typeorm";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { Resolver } from "@dabsi/typedi";
-import { Consumer } from "@dabsi/typedi/Consumer";
+
 import { RpcError } from "@dabsi/typerpc/Rpc";
 import { RpcRequest } from "@dabsi/typerpc/RpcRequest";
 import { AclRequest } from "@dabsi/system-old/server/acl/AclRequest";
@@ -13,7 +13,7 @@ export const SystemRpcRequestResolvers = {
   ...RpcRequest.provide(Resolver.touch(() => new RpcRequest())),
   ...AclRequest.provide(
     Resolver.touch(
-      Consumer(
+      Resolver.consume(
         {
           connection: Connection,
           session: DataRow(SystemSession),

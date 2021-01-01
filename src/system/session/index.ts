@@ -4,7 +4,7 @@ import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import CookieParser from "cookie-parser";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import { Consumer } from "@dabsi/typedi/Consumer";
+
 import { SystemSession } from "@dabsi/system/session/SystemSession";
 
 @Module()
@@ -16,7 +16,7 @@ export default class SystemSessionModule {
       [
         "load session",
         Resolver.toCheck(
-          Consumer({ getDataSource: DataSourceResolver }, c => {
+          Resolver.consume({ getDataSource: DataSourceResolver }, c => {
             return async (req, res, next) => {
               const sessions = c.getDataSource(SystemSession);
               const session = await getSession({

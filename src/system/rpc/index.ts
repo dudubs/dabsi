@@ -7,7 +7,7 @@ import createConfigResolverFactory from "@dabsi/system/rpc/configResolverFactory
 import { SystemModule } from "@dabsi/system/core";
 import { SystemRpc, SystemRpcPath } from "@dabsi/system/rpc/SystemRpc";
 import SystemRpcRequest from "@dabsi/system/rpc/SystemRpcRequest";
-import { Inject, Module, Resolver } from "@dabsi/typedi";
+import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import {
@@ -199,5 +199,28 @@ export default class SystemRpcModule {
     } finally {
       this._isChecking = false;
     }
+  }
+
+  async processRequest(sysReq: SystemRpcRequest, context: AnyResolverMap) {
+    const { path, payload } = sysReq;
+    this.log.info(
+      () =>
+        `${(path as any[])
+          .toSeq()
+          .map(path => (typeof path === "object" ? JSON.stringify(path) : path))
+          .join("/")}`
+    );
+
+    this.log.trace(() => colors.gray(JSON.stringify(payload)));
+
+    Resolver.provide(
+      context,
+      SystemRpcRequest.provide(() => sysReq)
+    );
+
+    const configResolver = this.getRpcConfigResolver(SystemRpc);
+    const config = Resolver.resolve(configResolver, context);
+    const command = await SystemRpc.createRpcCommand(config);
+    return await command(path, payload);
   }
 }

@@ -1,6 +1,4 @@
-import { Consumer } from "@dabsi/typedi/Consumer";
-import { Provider } from "@dabsi/typedi/Provider";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { Provider, Resolver } from "@dabsi/typedi";
 
 const r1 = Resolver<string>();
 
@@ -63,7 +61,7 @@ it("expect to resolve type", () => {
 it("expect to consume resolver", () => {
   expect(
     Resolver.checkAndResolve(
-      Consumer([r1], name => `Hello ${name}!`),
+      Resolver.consume([r1], name => `Hello ${name}!`),
       r1.provide("World")
     )
   ).toEqual("Hello World!");

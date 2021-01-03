@@ -1,9 +1,9 @@
-import fs from "fs";
 import { touchObject } from "@dabsi/common/object/touchObject";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
+import LoaderModule from "@dabsi/modules/LoaderModule";
 import {
   getDesignParamTypes,
   Inject,
@@ -13,41 +13,46 @@ import {
 } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { MakeModule } from "@dabsi/typestack/MakeModule";
-import ProjectEntity from "@dabsi/typestack/ProjectEntity";
-import ProjectModuleEntity from "@dabsi/typestack/ProjectModuleEntity";
+import ProjectInfo from "@dabsi/typestack/ProjectInfo";
+import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
+import createTsConfigPaths, {
+  TsConfigPaths,
+} from "@dabsi/typestack/TsConfigPaths";
+import fs from "fs";
 import path from "path";
-import { chain } from "@dabsi/common/object/chain";
 
 @Module()
 export default class ProjectModule {
-  projectMap: Record<string, ProjectEntity>;
+  projectMapInfo: Record<string, ProjectInfo>;
 
-  mainProject: ProjectEntity;
+  mainProject: ProjectInfo;
 
   providers: { error: Error; fileName: string }[] = [];
 
-  allProjectModuleEntitys: ProjectModuleEntity[];
+  allProjectModuleInfos: ProjectModuleInfo[];
 
   constructor(
     @Inject() makeModule: MakeModule,
     @Inject() protected runner: ModuleRunner,
-    @Inject() cli: Cli
+    @Inject() cli: Cli,
+    @Inject() protected loaderModule: LoaderModule
   ) {
-    makeModule.cli.onRun(() => this.load());
+    makeModule.onMake(() => this.load());
     cli.command(
       "check",
       new Cli().onRun(() => this.load())
     );
   }
 
-  onFindCommonModules = Hookable<
-    (callback: (indexFileName: string) => Awaitable) => Awaitable
-  >();
-  onLoadPorjectModuleEntity = Hookable<
-    (projectModule: ProjectModuleEntity) => Awaitable
+  onBuildCommonFiles = Hookable<
+    (callback: (commonFileName: string) => Awaitable) => Awaitable
   >();
 
-  _loadedProjectModuleEntitys: ProjectModuleEntity[];
+  onLoadPorjectModuleEntity = Hookable<
+    (projectModuleInfo: ProjectModuleInfo) => Awaitable
+  >();
+
+  _loadedProjectModuleInfos: ProjectModuleInfo[];
 
   protected async _loadRootModules() {
     for (const m of this.runner.getAllInstances()) {
@@ -66,40 +71,42 @@ export default class ProjectModule {
       log.trace(() => `Load root module "${m.target.name}".`);
       const moduleDir = path.dirname(moduleFileName);
       const projectDir = moduleFileName.replace(/[\\\/]src[\\\/].*$/, "");
-      const project = touchObject(
-        this.projectMap,
+
+      const projectInfo = touchObject(
+        this.projectMapInfo,
         projectDir,
-        () => new ProjectEntity(projectDir)
+        () => new ProjectInfo(projectDir, this.loaderModule)
       );
 
       if (this.runner.mainModuleTarget === m.target) {
-        this.mainProject = project;
+        this.mainProject = projectInfo;
       }
 
-      const projectModule = (project.moduleDirMap[
+      const projectModuleInfo = (projectInfo.moduleInfoMap[
         moduleDir
-      ] = new ProjectModuleEntity(
-        project,
+      ] = new ProjectModuleInfo(
+        projectInfo,
         moduleDir,
         m.target,
         m.metadata,
         m.target
       ));
 
-      await this._loadProjectModuleEntity(projectModule);
+      await this._loadProjectModuleInfo(projectModuleInfo);
     }
   }
 
-  async _loadProjectModuleEntity(projectModule: ProjectModuleEntity) {
-    this.allProjectModuleEntitys.push(projectModule);
-    this._loadedProjectModuleEntitys.push(projectModule);
+  async _loadProjectModuleInfo(projectModuleInfo: ProjectModuleInfo) {
+    this.allProjectModuleInfos.push(projectModuleInfo);
+    this._loadedProjectModuleInfos.push(projectModuleInfo);
 
     const {
       fileMap: { plugins: pluginsFile },
-    } = projectModule;
+    } = projectModuleInfo;
     if (pluginsFile?.stat.isDirectory()) {
       log.trace(
-        () => `found plugins folder for module "${projectModule.target.name}".`
+        () =>
+          `found plugins folder for module "${projectModuleInfo.target.name}".`
       );
 
       for (const baseName of await fs.promises.readdir(pluginsFile.fileName)) {
@@ -136,25 +143,52 @@ export default class ProjectModule {
   async _loadModuleFile(fileName: string) {}
 
   protected async _loadPlugins() {
-    while (this._loadedProjectModuleEntitys.length) {
-      const projectModules = this._loadedProjectModuleEntitys;
-      this._loadedProjectModuleEntitys = [];
+    while (this._loadedProjectModuleInfos.length) {
+      const projectModuleInfos = this._loadedProjectModuleInfos;
+      this._loadedProjectModuleInfos = [];
 
-      for (const projectModule of projectModules) {
-        await this._loadProjectModuleEntity(projectModule);
+      for (const projectModuleInfo of projectModuleInfos) {
+        await this._loadProjectModuleInfo(projectModuleInfo);
       }
     }
   }
 
+  mainTsConfigPaths: TsConfigPaths;
+
+  protected async _getTsConfigPaths(tsConfigPath: string) {
+    const tsConfig = await this.loaderModule.readJsonFile(tsConfigPath);
+    const co = tsConfig?.compilerOptions;
+    const tsConfigDir = path.dirname(tsConfigPath);
+    if (co?.paths) {
+      return createTsConfigPaths(tsConfigDir, co.baseUrl, co.paths, path =>
+        this.loaderModule.isFile(path)
+      );
+    }
+    if (tsConfig?.extends) {
+      return this._getTsConfigPaths(
+        path.resolve(tsConfigDir, tsConfig.extends)
+      );
+    }
+    // default
+    return createTsConfigPaths(tsConfigDir, ".", {}, path =>
+      this.loaderModule.isFile(path)
+    );
+  }
   @Once() async load() {
-    this.projectMap = {};
-    this.allProjectModuleEntitys = [];
-    this._loadedProjectModuleEntitys = [];
+    this.projectMapInfo = {};
+    this.allProjectModuleInfos = [];
+    this._loadedProjectModuleInfos = [];
     await this._loadRootModules();
 
     //
-    for (const projectModule of this.allProjectModuleEntitys) {
-      await this.onLoadPorjectModuleEntity.invoke(projectModule);
+    this.mainTsConfigPaths = await this._getTsConfigPaths(
+      path.join(this.mainProject.dir, "tsconfig.json")
+    );
+    this.mainProject.dir;
+
+    //
+    for (const projectModuleInfo of this.allProjectModuleInfos) {
+      await this.onLoadPorjectModuleEntity.invoke(projectModuleInfo);
     }
   }
 }

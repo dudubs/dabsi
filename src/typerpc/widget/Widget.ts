@@ -2,7 +2,7 @@
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { entries } from "@dabsi/common/object/entries";
 import { keys } from "@dabsi/common/object/keys";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { Override } from "@dabsi/common/typings2/Override";

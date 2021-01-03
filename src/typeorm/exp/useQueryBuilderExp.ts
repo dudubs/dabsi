@@ -1,5 +1,5 @@
 import { SelectQueryBuilder } from "typeorm";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { DataSort } from "@dabsi/typedata/DataOrder";
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";

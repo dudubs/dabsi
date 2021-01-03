@@ -4,7 +4,7 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { assert } from "@dabsi/common/assert";
 import { defined } from "@dabsi/common/object/defined";
 import { definedAt } from "@dabsi/common/object/definedAt";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { ArrayTypeOrObject } from "@dabsi/common/typings2/ArrayTypeOrObject";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";

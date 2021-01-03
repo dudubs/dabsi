@@ -37,7 +37,7 @@ export default async function ({ write }) {
     );
 
     if (write && fileFixedSource !== fileSource) {
-      writeFileSync(fileName, fileFixedSource);
+      // writeFileSync(fileName, fileFixedSource);
     }
   }
 }

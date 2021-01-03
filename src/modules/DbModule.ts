@@ -43,7 +43,7 @@ export class DbModule {
     @Inject() protected projectManager: ProjectModule
   ) {
     cli.command("db", this.cli);
-    serverModule.cli.onRun(() => this.init());
+    serverModule.onStart(() => this.init());
 
     Resolver.provide(
       runner.context,
@@ -81,11 +81,11 @@ export class DbModule {
 
   @Once() async load() {
     await this.projectManager.load();
-    for (const projectModule of this.projectManager.allProjectModuleEntitys) {
+    for (const projectModuleInfo of this.projectManager.allProjectModuleInfos) {
       const {
         entities: entitiesDir,
         ["entities.ts"]: entitiesFile,
-      } = projectModule.fileMap;
+      } = projectModuleInfo.fileMap;
       if (entitiesDir?.stat.isDirectory()) {
         for (const baseName of readdirSync(entitiesDir.fileName)) {
           if (baseName.endsWith(".ts")) {

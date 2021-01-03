@@ -1,6 +1,6 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { entries } from "@dabsi/common/object/entries";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { SystemModule } from "@dabsi/system/core";

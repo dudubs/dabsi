@@ -1,7 +1,7 @@
 import { Component, ReactNode } from "react";
 import { assert } from "@dabsi/common/assert";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
 
 export abstract class View<P = {}> extends Component<P, object> {

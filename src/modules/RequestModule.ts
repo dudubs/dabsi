@@ -6,8 +6,10 @@ export default class RequestModule {
   log = log.get("REQUEST");
   readonly context: AnyResolverMap = {};
 
-  require(resolver) {
-    throw new Error("todo.");
+  protected requiredResolvers: Resolver[] = [];
+
+  require(...resolvers: Resolver[]) {
+    this.requiredResolvers.push(...resolvers);
   }
 
   constructor(@Inject() protected runner: ModuleRunner) {}

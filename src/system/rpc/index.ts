@@ -1,12 +1,11 @@
+import { Timeout } from "@dabsi/common/async/Timeout";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
-import ExpressModule from "@dabsi/modules/express";
 import createConfigResolverFactory from "@dabsi/system/rpc/configResolverFactory";
-import { SystemModule } from "@dabsi/system/core";
-import { SystemRpc, SystemRpcPath } from "@dabsi/system/rpc/SystemRpc";
 import RpcRequest from "@dabsi/system/rpc/RpcRequest";
+import { SystemRpc } from "@dabsi/system/rpc/SystemRpc";
 import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
@@ -14,14 +13,11 @@ import {
   isRpcConfigResolver,
   RpcConfigResolver,
 } from "@dabsi/typerpc/RpcConfigResolver";
-import BodyParser from "body-parser";
+import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
 import { Seq } from "immutable";
-import multer from "multer";
 import path from "path";
-import { WeakId } from "@dabsi/common/WeakId";
-import ProjectModule from "@dabsi/typestack/ProjectModule";
 
 @Module()
 export default class RpcModule {
@@ -44,10 +40,10 @@ export default class RpcModule {
 
   constructor(@Inject() projectModule: ProjectModule) {
     projectModule
-      .onLoadPorjectModuleEntity(async projectModule => {
-        await this._loadDir(projectModule.dir);
+      .onLoadPorjectModuleEntity(async projectModuleInfo => {
+        await this._loadDir(projectModuleInfo.dir);
       })
-      .onFindCommonModules(async callback => {
+      .onBuildCommonFiles(async addCommonFile => {
         for (const info of this._loadedConfigsInfo) {
           this.log.trace(
             () => `Find index file for ${inspect(info.resolver)}.`
@@ -66,7 +62,7 @@ export default class RpcModule {
             );
           } else if (rpcModule?.filename) {
             this.log.trace(() => `Include index file "${rpcModule.filename}".`);
-            await callback(rpcModule?.filename);
+            await addCommonFile(rpcModule?.filename);
           }
         }
       });

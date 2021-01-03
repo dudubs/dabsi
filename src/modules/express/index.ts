@@ -23,7 +23,7 @@ export default class ExpressModule {
     @Inject() protected serverModule: ServerModule,
     @Inject() protected requestModule: RequestModule
   ) {
-    serverModule.cli.onRun(async args => {
+    serverModule.onStart(async args => {
       this.log.info("starting ...");
       const app = express();
 

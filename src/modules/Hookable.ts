@@ -1,4 +1,5 @@
 import { isPromiseLike } from "@dabsi/common/async/isPromiseLike";
+import { Timeout } from "@dabsi/common/async/Timeout";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Fn } from "@dabsi/common/typings2/Fn";
 
@@ -8,18 +9,19 @@ function _concat(result, callback) {
   }
   return callback();
 }
+function _invokeInOrder(callbacks, args) {
+  return _invoke(callbacks, args, 1, 0);
+}
+function _invokeReveresed(callbacks, args) {
+  return _invoke(callbacks, args, -1, callbacks.length - 1);
+}
 
-function _invoke(
-  callbacks: (Fn | undefined)[],
-  index: number,
-  args,
-  direction: 1 | -1
-) {
+function _invoke(callbacks, args, direction, index) {
   const callback = callbacks[index];
   return (
     callback &&
     _concat(callback(...args), () =>
-      _invoke(callbacks, index + direction, args, direction)
+      _invoke(callbacks, args, direction, index + direction)
     )
   );
 }
@@ -46,17 +48,17 @@ export function Hookable<T extends Fn>(original?: T): Hookable<T> {
 
   hookable.invoke = (...args) => {
     let result;
-    _invoke(
-      [
-        () => _invoke(beforeCallbacks, 0, args, 1),
-        () => (result = original?.(...args)),
-        () => _invoke(afterCallbacks, afterCallbacks.length - 1, args, -1),
-      ],
-      0,
-      [],
-      1
+    return _concat(
+      _invokeInOrder(
+        [
+          () => _invokeInOrder(beforeCallbacks, args),
+          () => (result = original?.(...args)),
+          () => _invokeReveresed(afterCallbacks, args),
+        ],
+        []
+      ),
+      () => result
     );
-    return result;
   };
   return <any>hookable;
   function hookable(this: any, hook) {

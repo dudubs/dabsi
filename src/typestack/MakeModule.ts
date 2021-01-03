@@ -1,23 +1,27 @@
-import fs from "fs";
-import path from "path";
 import { touchSet } from "@dabsi/common/map/touchSet";
-import { DABSI_CURRENT_PATH, DABSI_PATH } from "@dabsi/index";
+import nested from "@dabsi/common/string/nested";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { DABSI_CURRENT_PATH, DABSI_PATH, DABSI_ROOT_DIR } from "@dabsi/index";
 import { Cli, CliError } from "@dabsi/modules/Cli";
+import { Hookable } from "@dabsi/modules/Hookable";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
-import { Inject } from "@dabsi/typedi";
-import { Module } from "@dabsi/typedi";
+import { Inject, Module } from "@dabsi/typedi";
+import fs from "fs";
 
 @Module()
 export class MakeModule {
-  cli = new Cli().onRun(() => {
-    if (DABSI_CURRENT_PATH === DABSI_PATH)
-      throw new CliError(`You can't run make on "${DABSI_PATH}".`);
-  });
-
   log = log.get("MAKE");
 
+  onMake = Hookable<() => Awaitable>();
+
   constructor(@Inject() cli: Cli) {
-    cli.command("make", this.cli);
+    cli.command("make", cli =>
+      cli.onRun(async () => {
+        if (DABSI_CURRENT_PATH === DABSI_PATH)
+          throw new CliError(`You can't run make on "${DABSI_PATH}".`);
+        await this.onMake.invoke();
+      })
+    );
   }
 
   protected makeDirCache = new Set();
@@ -26,14 +30,11 @@ export class MakeModule {
       await fs.promises.mkdir(dirName, { recursive: true });
     }
   }
-  async makeFile(outFileName, data: string) {
-    this.log(`make "${relativePosixPath(DABSI_CURRENT_PATH, outFileName)}".`);
-    if (process.env.MAKE_TO_STDOUT) {
-      console.log(("\n" + data).replace(/\n/g, "\n  ").replace(/\n/, ""));
-    } else {
-      await this.makeDir(path.dirname(outFileName));
-      await fs.promises.writeFile(outFileName, data);
-    }
+
+  async makeFile(outFileName, content: string) {
+    this.log(`make "${relativePosixPath(DABSI_ROOT_DIR, outFileName)}".`);
+    console.log(nested(content));
+    // await fs.promises.writeFile(outFileName, content);
   }
 
   async makeJsonFile(path, data: any) {

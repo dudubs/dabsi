@@ -1,5 +1,5 @@
 import { pick } from "@dabsi/common/object/pick";
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";

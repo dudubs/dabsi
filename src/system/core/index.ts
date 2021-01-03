@@ -1,4 +1,4 @@
-import { Lazy } from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import nested from "@dabsi/common/string/nested";
 import { LogLevel } from "@dabsi/logging/Logger";
@@ -106,8 +106,8 @@ export class SystemModule {
   @Once() async load() {
     this.log.trace("Load system .");
     await this.projectManager.load();
-    for (const projectModule of this.projectManager.allProjectModuleEntitys) {
-      // await this.hooks.loadProjectModuleEntity(projectModule);
+    for (const projectModuleInfo of this.projectManager.allProjectModuleInfos) {
+      // await this.hooks.loadProjectModuleInfo(projectModuleInfo);
     }
   }
 

@@ -8,7 +8,14 @@ import { touchSet } from "@dabsi/common/map/touchSet";
 export class Cli {
   protected commandNames = new Set();
 
-  command(name: string, cli: Cli): Cli {
+  command(name: string, callbackOrCli: Cli | ((cli: Cli) => void)): Cli {
+    let cli: Cli;
+    if (typeof callbackOrCli === "function") {
+      cli = new Cli();
+      callbackOrCli(cli);
+    } else {
+      cli = callbackOrCli;
+    }
     if (!touchSet(this.commandNames, name)) {
       throw new Error("Already in use");
     }

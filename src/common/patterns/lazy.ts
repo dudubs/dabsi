@@ -4,9 +4,9 @@ const markToDelete = Symbol("deleted");
 
 const map = new WeakMap();
 
-export function Lazy<T extends (...args) => any>(callback: T): T;
-export function Lazy(): MethodDecorator;
-export function Lazy(callback?): any {
+export default function Lazy<T extends (...args) => any>(callback: T): T;
+export default function Lazy(): MethodDecorator;
+export default function Lazy(callback?): any {
   if (callback) {
     return lazyCallback(callback);
   } else {

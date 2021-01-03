@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.browser.json",
+  "extends": "../../tsconfigs/tsconfig.browser.json",
   "compilerOptions": {
     "lib": ["DOM"]
   }

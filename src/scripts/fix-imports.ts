@@ -114,33 +114,13 @@ export default async function ({ write, args: [srcDir] }) {
         }
 
         return `${start}${type} "${importPath}"${end}`;
-        // const { type, path: originalImportPath } = args[args.length - 1] as {
-        //   path: string;
-        //   type: "import" | "from";
-        // };
-        // let importPath = originalImportPath;
-        // if (importPath.startsWith(".")) {
-        //   const importRelativePath = importPath;
-        //   const importAbsolutePath = path.resolve(fileDir, importRelativePath);
-        //   if (importAbsolutePath.startsWith(DABSI_SRC_PATH)) {
-        //     importPath =
-        //       "@dabsi/" +
-        //       importAbsolutePath
-        //         .slice(DABSI_SRC_PATH.length + 1)
-        //         .replace(/\\/g, "/");
-        //   }
-        //   if (importPath !== originalImportPath) {
-        //     console.log(`Fix "${originalImportPath}" to "${importPath}"`);
-        //   }
-        // }
-        // return `${type} "${importPath}"`;
       }
     );
 
-    // if (fileOutSource !== fileSource) {
-    //   console.log({ fileName, fileOutSource, fileSource });
-    //   return;
-    // }
+    if (fileOutSource === fileSource) continue;
+
+    if (write) await fs.promises.writeFile(fileName, fileOutSource);
+
     // for (const x of fileSource.matchAll(
     //   /(?<type>import|from|module) "(?<path>[^"\n]+)"/g
     // )) {

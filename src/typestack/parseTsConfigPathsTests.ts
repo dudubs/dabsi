@@ -13,7 +13,8 @@ fit("", async () => {
       "@sub-project/*": ["../sub/src/*"],
       "@my-project/*": ["src/*"],
     },
-    isFile
+    isFile,
+    async path => !(await isFile(path))
   );
 
   expect(parser.getTsPath(rootDir + "/my/src/hello.ts")).toEqual(

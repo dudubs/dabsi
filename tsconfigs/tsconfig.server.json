@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.base.server.json",
-  "include": ["src"],
-  "exclude": ["src/**/browser", "src/**/view"]
+  "include": ["../src"],
+  "exclude": ["../src/**/browser", "../src/**/view"]
 }

@@ -166,7 +166,8 @@ export default class ProjectModule {
     this.mainTsConfigPaths = await getTsConfigPaths(
       path.join(this.mainProject.dir, "tsconfig.json"),
       path => this.loaderModule.readJsonFile(path),
-      path => this.loaderModule.isFile(path)
+      path => this.loaderModule.isFile(path),
+      path => this.loaderModule.isDir(path)
     );
     this.mainProject.dir;
 

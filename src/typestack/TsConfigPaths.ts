@@ -1,4 +1,3 @@
-import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { touchObject } from "@dabsi/common/object/touchObject";
@@ -28,7 +27,8 @@ export default function createTsConfigPaths(
   configDir: string,
   baseUrl: string,
   paths: Record<string, string[]>,
-  isFile: (path: string) => Promise<boolean>
+  isFile: (path: string) => Promise<boolean>,
+  isDir: (path: string) => Promise<boolean>
 ) {
   configDir = path.resolve(configDir, baseUrl);
 
@@ -45,13 +45,32 @@ export default function createTsConfigPaths(
     add(fsPrefixMap, p.fs, p.ts);
   }
 
+  const getFsPathCache = {};
+
   return {
     async getFsPath(tsPath: string) {
-      for (const fsPath of findFsPath(tsPath)) {
-        if (await isFile(fsPath)) {
-          return fsPath;
+      return touchObject(getFsPathCache, tsPath, async () => {
+        for (const p of find(tsPrefixMap, tsPath)) {
+          const basePath = p.prefix + p.path + p.suffix;
+
+          if (await isDir(basePath)) {
+            for (const baseName of ["index.ts", "index.tsx"]) {
+              const indexFileName = path.join(basePath, baseName);
+              if (await isFile(indexFileName)) {
+                return indexFileName;
+              }
+            }
+            return basePath;
+          }
+          for (const suffix of [".ts", ".tsx", ""]) {
+            const fileName = basePath + suffix;
+
+            if (await isFile(fileName)) {
+              return fileName;
+            }
+          }
         }
-      }
+      });
     },
     getTsPath(fsPath: string, dir?: string) {
       fsPath = fsPath.replace(/([\\\/]index|)\.tsx?$/, "");
@@ -73,17 +92,6 @@ export default function createTsConfigPaths(
       };
     },
   };
-
-  function* findFsPath(tsPath: string) {
-    for (const p of find(tsPrefixMap, tsPath)) {
-      const fileName = p.prefix + p.path + p.suffix;
-      for (const suffix of [".ts", ".tsx"]) {
-        for (const baseName of ["", "index"]) {
-          yield path.join(fileName, baseName) + suffix;
-        }
-      }
-    }
-  }
 
   function* find(prefixMap: PrefixMap, path: string) {
     for (const [prefix, suffixMap] of entries(prefixMap)) {

@@ -12,6 +12,7 @@ import {
   moduleMetadataMap,
 } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { getTsConfigPaths } from "@dabsi/typestack/getTsConfigPaths";
 import { MakeModule } from "@dabsi/typestack/MakeModule";
 import ProjectInfo from "@dabsi/typestack/ProjectInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
@@ -155,25 +156,6 @@ export default class ProjectModule {
 
   mainTsConfigPaths: TsConfigPaths;
 
-  protected async _getTsConfigPaths(tsConfigPath: string) {
-    const tsConfig = await this.loaderModule.readJsonFile(tsConfigPath);
-    const co = tsConfig?.compilerOptions;
-    const tsConfigDir = path.dirname(tsConfigPath);
-    if (co?.paths) {
-      return createTsConfigPaths(tsConfigDir, co.baseUrl, co.paths, path =>
-        this.loaderModule.isFile(path)
-      );
-    }
-    if (tsConfig?.extends) {
-      return this._getTsConfigPaths(
-        path.resolve(tsConfigDir, tsConfig.extends)
-      );
-    }
-    // default
-    return createTsConfigPaths(tsConfigDir, ".", {}, path =>
-      this.loaderModule.isFile(path)
-    );
-  }
   @Once() async load() {
     this.projectMapInfo = {};
     this.allProjectModuleInfos = [];
@@ -181,8 +163,10 @@ export default class ProjectModule {
     await this._loadRootModules();
 
     //
-    this.mainTsConfigPaths = await this._getTsConfigPaths(
-      path.join(this.mainProject.dir, "tsconfig.json")
+    this.mainTsConfigPaths = await getTsConfigPaths(
+      path.join(this.mainProject.dir, "tsconfig.json"),
+      path => this.loaderModule.readJsonFile(path),
+      path => this.loaderModule.isFile(path)
     );
     this.mainProject.dir;
 

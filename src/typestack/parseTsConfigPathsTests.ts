@@ -1,4 +1,4 @@
-import createTsConfigPaths from "@dabsi/typestack/TsConfigPaths";
+import createTsConfigPaths from "./TsConfigPaths";
 
 fit("", async () => {
   const rootDir = "/worksacpe/projects";

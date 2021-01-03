@@ -1,4 +1,4 @@
-import { GetBaseType } from "@dabsi/typedata/BaseType";
+import { GetBaseType } from "./BaseType";
 import {
   DataRelationKeys,
   DataRelationToOneKeys,

@@ -1,4 +1,4 @@
-import { Field, AsField, AsFieldType } from "@dabsi/struct/Field";
+import { Field, AsField, AsFieldType } from "./Field";
 
 export interface SetField<V> extends Field<Set<V>> {
   value: Field<V>;

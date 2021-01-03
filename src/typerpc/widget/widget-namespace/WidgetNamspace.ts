@@ -1,4 +1,4 @@
-import { WidgetNamespaceHandler } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceHandler";
+import { WidgetNamespaceHandler } from "./WidgetNamespaceHandler";
 import { RpcConfig, RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { AnyWidget, Widget, WidgetElement } from "@dabsi/typerpc/widget/Widget";

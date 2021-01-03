@@ -1,4 +1,4 @@
-import LangComponent from "@dabsi/lang/LangComponent";
+import LangComponent from "./LangComponent";
 import { createElement, ReactElement, ReactNode } from "react";
 
 export interface LangTemplate<P extends string> {

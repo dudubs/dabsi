@@ -1,3 +1,3 @@
-import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { ExtractKeys } from "./ExtractKeys";
 
 export type OmitByValue<T, V> = Omit<T, ExtractKeys<T, V>>;

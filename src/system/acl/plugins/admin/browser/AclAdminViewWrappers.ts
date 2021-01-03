@@ -1,4 +1,4 @@
-import ViewWrapper from "@dabsi/system/acl/plugins/admin/browser/ViewWrapper";
+import ViewWrapper from "./ViewWrapper";
 
 export default {
   UserBasicInfo: ViewWrapper(),

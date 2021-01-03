@@ -1,4 +1,4 @@
-import { mapObject } from "@dabsi/common/object/mapObject";
+import { mapObject } from "./mapObject";
 
 export function bindObject<T extends object, U extends any[]>(
   ns: T,

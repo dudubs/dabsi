@@ -1,4 +1,4 @@
-import { Field } from "@dabsi/struct/Field";
+import { Field } from "./Field";
 
 export function EnumField(options: string[]) {
   const keyToIndex = {};

@@ -1,4 +1,4 @@
-import { getJasmineSpecReporterResult } from "@dabsi/jasmine/getJasmineSpecReporterResult";
+import { getJasmineSpecReporterResult } from "./getJasmineSpecReporterResult";
 
 export function catchSpecFailExpectations() {
   const result = getJasmineSpecReporterResult();

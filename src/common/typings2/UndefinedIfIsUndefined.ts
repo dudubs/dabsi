@@ -1,3 +1,3 @@
-import { If, IsUndefined } from "@dabsi/common/typings2/boolean";
+import { If, IsUndefined } from "./boolean";
 
 export type UndefinedIfIsUndefined<T> = If<IsUndefined<T>, undefined>;

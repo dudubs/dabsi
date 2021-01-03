@@ -1,1 +1,1 @@
-export { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
+export { EntityRelation } from "./EntityRelation";

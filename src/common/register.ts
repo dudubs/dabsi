@@ -1,2 +1,2 @@
-import "@dabsi/common/array/toSeq";
+import "./array/toSeq";
 import "@dabsi/common/object/let";

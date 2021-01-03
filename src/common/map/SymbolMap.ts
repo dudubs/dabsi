@@ -1,4 +1,4 @@
-import { BaseMap } from "@dabsi/common/map/BaseMap";
+import { BaseMap } from "./BaseMap";
 import { PropertyMap, PropertyMapOptions } from "@dabsi/common/map/PropertyMap";
 
 export function SymbolMap<K extends object, V>({

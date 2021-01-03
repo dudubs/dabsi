@@ -1,4 +1,4 @@
-import { Field } from "@dabsi/struct";
+import { Field } from ".";
 import { Struct } from "@dabsi/struct";
 
 describe("primitive in struct", () => {

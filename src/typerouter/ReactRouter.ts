@@ -1,4 +1,4 @@
-import { useHistory } from "@dabsi/typerouter/History";
+import { useHistory } from "./History";
 import { History } from "history";
 import {
   createElement,

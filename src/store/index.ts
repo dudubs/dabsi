@@ -1,4 +1,4 @@
-export { Store } from "@dabsi/store/Store";
+export { Store } from "./Store";
 
 import "@dabsi/store/operators/list/add";
 import "@dabsi/store/operators/list/remove";

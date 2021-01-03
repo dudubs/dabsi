@@ -1,4 +1,4 @@
-import { keys } from "@dabsi/common/object/keys";
+import { keys } from "./keys";
 
 export function* entries<V = any>(
   obj: Record<string, V> | undefined | null

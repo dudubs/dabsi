@@ -1,4 +1,4 @@
-import AclEditUser from "@dabsi/system/acl/plugins/admin/users/common/AclEditUser";
+import AclEditUser from "./AclEditUser";
 import { DataManager } from "@dabsi/typerpc/data-manager";
 import AclUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoInput";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";

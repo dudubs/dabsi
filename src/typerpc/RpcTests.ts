@@ -1,4 +1,4 @@
-import { RpcIsConfigCanBeUndefinedOption } from "@dabsi/typerpc/Rpc";
+import { RpcIsConfigCanBeUndefinedOption } from "./Rpc";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { Override } from "@dabsi/common/typings2/Override";
 import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";

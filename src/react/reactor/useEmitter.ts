@@ -1,4 +1,4 @@
-import { useReactor } from "@dabsi/react/reactor/hooks";
+import { useReactor } from "./hooks";
 import { Emittable, EmittableType } from "@dabsi/react/reactor/Reactor";
 
 export type Emitter = {

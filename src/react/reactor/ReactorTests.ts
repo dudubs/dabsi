@@ -1,4 +1,4 @@
-import { Emittable, Reactor } from "@dabsi/react/reactor/Reactor";
+import { Emittable, Reactor } from "./Reactor";
 
 it("expect to listen", () => {
   let isEmitted = false;

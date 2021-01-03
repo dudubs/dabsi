@@ -1,4 +1,4 @@
-import { useProvider } from "@dabsi/react/useProvider";
+import { useProvider } from "./useProvider";
 import { createElement, useContext, useMemo } from "react";
 import React from "react";
 

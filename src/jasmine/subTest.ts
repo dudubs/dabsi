@@ -1,4 +1,4 @@
-import { catchSpecFailExpectations } from "@dabsi/jasmine/catchSpecFailExpectations";
+import { catchSpecFailExpectations } from "./catchSpecFailExpectations";
 
 // TODO: subAsyncTest
 

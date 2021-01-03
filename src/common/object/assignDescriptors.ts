@@ -1,4 +1,4 @@
-import { entries } from "@dabsi/common/object/entries";
+import { entries } from "./entries";
 
 export function assignDescriptors<T extends object, U extends object>(
   source: T,

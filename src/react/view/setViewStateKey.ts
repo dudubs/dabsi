@@ -1,4 +1,4 @@
-import { View } from "@dabsi/react/view/View";
+import { View } from "./View";
 
 export function setViewStateKey(view: View, key: string, value) {
   if (view.currentState[key] === value) return false;

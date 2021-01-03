@@ -1,4 +1,4 @@
-import { InputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
+import { InputErrorHook } from "./InputErrorHook";
 import { InputErrorHookView } from "@dabsi/typerpc/input/InputErrorHookView";
 import { testInput } from "@dabsi/typerpc/input/InputTester";
 import { TestInput, TestInputView } from "@dabsi/typerpc/input/InputTests";

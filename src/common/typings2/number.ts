@@ -1,4 +1,4 @@
-import { Expect } from "@dabsi/common/typings2/Expect";
+import { Expect } from "./Expect";
 export type IndexList = [
   0,
   1,

@@ -1,4 +1,4 @@
-import { Union } from "@dabsi/common/typings2/Union";
+import { Union } from "./Union";
 
 export type OptionalKeys<T> = Union<
   {

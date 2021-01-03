@@ -1,4 +1,4 @@
-import { MuiSystemView } from "@dabsi/system/core/browser/MuiSystemView";
+import { MuiSystemView } from "./MuiSystemView";
 import {
   catchSystemCommand,
   commandSystemRpc,

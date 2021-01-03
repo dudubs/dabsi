@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import { defined } from "./defined";
 import { firstEntry } from "@dabsi/common/object/firstEntry";
 
 export function firstDefinedEntry<T = any>(

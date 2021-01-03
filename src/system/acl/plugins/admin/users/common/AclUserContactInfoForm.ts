@@ -1,4 +1,4 @@
-import AclEditUser from "@dabsi/system/acl/plugins/admin/users/common/AclEditUser";
+import AclEditUser from "./AclEditUser";
 import "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoForm";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";

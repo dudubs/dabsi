@@ -1,4 +1,4 @@
-import ExpressModule from "@dabsi/modules/express";
+import ExpressModule from "./express";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module()

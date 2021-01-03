@@ -1,4 +1,4 @@
-import { Session } from "@dabsi/system/session/entities/Session";
+import { Session } from "./entities/Session";
 
 import { DataSelector } from "@dabsi/typedata/DataSelector";
 

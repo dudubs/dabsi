@@ -1,4 +1,4 @@
-import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { IsNever } from "./boolean/IsNever";
 
 export type Pluck<
   T,

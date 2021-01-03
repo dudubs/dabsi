@@ -1,4 +1,4 @@
-import { Fn } from "@dabsi/common/typings2/Fn";
+import { Fn } from "./Fn";
 
 export type Call<T extends Fn> = (
   thisArg: any,

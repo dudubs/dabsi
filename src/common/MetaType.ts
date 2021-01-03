@@ -1,4 +1,4 @@
-import { NonNullableAt } from "@dabsi/common/typings2/NonNullableAt";
+import { NonNullableAt } from "./typings2/NonNullableAt";
 import { Override } from "@dabsi/common/typings2/Override";
 
 declare const TMetaType: unique symbol;

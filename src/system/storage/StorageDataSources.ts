@@ -1,4 +1,4 @@
-import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
+import { StorageFile } from "./entities/StorageFile";
 import DataSources from "@dabsi/typedata/DataSources";
 
 export default DataSources({

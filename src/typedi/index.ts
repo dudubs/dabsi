@@ -1,4 +1,4 @@
-export * from "@dabsi/typedi/Resolver";
+export * from "./Resolver";
 export * from "@dabsi/typedi/Provider";
 
 export * from "@dabsi/typedi/decorators/Module";

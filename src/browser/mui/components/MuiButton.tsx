@@ -1,4 +1,4 @@
-import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";
+import { MuiIcon } from "./MuiIcon";
 import { Override } from "@dabsi/common/typings2/Override";
 import { updateRef } from "@dabsi/react/HookRef";
 import { partialProps } from "@dabsi/react/utils/partialProps";

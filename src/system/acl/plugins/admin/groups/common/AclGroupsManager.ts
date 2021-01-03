@@ -1,4 +1,4 @@
-import AclEditGroup from "@dabsi/system/acl/plugins/admin/groups/common/AclEditGroup";
+import AclEditGroup from "./AclEditGroup";
 import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclGroupBasicInfoInput";
 import { DataManager } from "@dabsi/typerpc/data-manager";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";

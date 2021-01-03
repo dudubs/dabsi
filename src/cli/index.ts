@@ -1,4 +1,4 @@
-import { mainCli } from "@dabsi/cli/mainCli";
+import { mainCli } from "./mainCli";
 import { monCli } from "@dabsi/cli/monCli";
 import { typestackCli } from "@dabsi/cli/typestackCli";
 

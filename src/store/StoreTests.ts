@@ -1,4 +1,4 @@
-import { Store } from "@dabsi/store";
+import { Store } from ".";
 
 // getState, setState
 

@@ -1,4 +1,4 @@
-import fromConstantCase from "@dabsi/common/string/fromConstantCase";
+import fromConstantCase from "./fromConstantCase";
 import toTitleCase from "@dabsi/common/string/toTitleCase";
 
 it("fromConstantCase", () => {

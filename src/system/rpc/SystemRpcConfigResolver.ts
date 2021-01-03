@@ -1,4 +1,4 @@
-import RpcModule from "@dabsi/system/rpc";
+import RpcModule from ".";
 
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyResolverMap, CustomResolver, Resolver } from "@dabsi/typedi";

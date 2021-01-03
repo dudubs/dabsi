@@ -1,4 +1,4 @@
-import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
+import { getPasswordHash } from "./getPasswordHash";
 import { User } from "@dabsi/system/acl/entities/User";
 import { AclRpc } from "@dabsi/system/acl/common/AclRpc";
 import RequestSession from "@dabsi/system/session/RequestSession";

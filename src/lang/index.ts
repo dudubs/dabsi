@@ -1,4 +1,4 @@
-import LangFactory from "@dabsi/lang/LangFactory";
+import LangFactory from "./LangFactory";
 export * from "@dabsi/lang/LangFactory";
 
 declare global {

@@ -1,4 +1,4 @@
-import Cache from "@dabsi/common/patterns/Cache";
+import Cache from "./Cache";
 
 it("sanity", () => {
   let count = 0;

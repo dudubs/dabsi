@@ -1,3 +1,3 @@
-import { InputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
+import { InputErrorHook } from "./InputErrorHook";
 
 export default InputErrorHook<"ALREADY_EXISTS">();

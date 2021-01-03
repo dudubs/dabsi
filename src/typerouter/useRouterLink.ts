@@ -1,4 +1,4 @@
-import { RouterEvent } from "@dabsi/typerouter/RouterEvent";
+import { RouterEvent } from "./RouterEvent";
 import { useState } from "react";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
 import { useReactRouter } from "@dabsi/typerouter/ReactRouter";

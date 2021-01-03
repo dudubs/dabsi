@@ -1,4 +1,4 @@
-import { DataExp, DataExpType } from "@dabsi/typedata/data-exp/DataExp";
+import { DataExp, DataExpType } from "./data-exp/DataExp";
 
 export type DataFields<T> = Record<string, DataExp<T>>;
 

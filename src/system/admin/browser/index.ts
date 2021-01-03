@@ -1,1 +1,1 @@
-import "@dabsi/system/admin/browser/MuiAdminRouterView";
+import "./MuiAdminRouterView";

@@ -1,4 +1,4 @@
-import { BaseMap, MapKey, MapValue } from "@dabsi/common/map/BaseMap";
+import { BaseMap, MapKey, MapValue } from "./BaseMap";
 
 export function touchMap<T extends BaseMap<any, any>>(
   map: T,

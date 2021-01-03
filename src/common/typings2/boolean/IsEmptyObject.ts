@@ -1,3 +1,3 @@
-import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { Is } from "./Is";
 
 export type IsEmptyObject<T> = Is<{}, T>;

@@ -1,4 +1,4 @@
-import { If, IsUndefined } from "@dabsi/common/typings2/boolean";
+import { If, IsUndefined } from "./boolean";
 import { Union } from "@dabsi/common/typings2/Union";
 
 export type PartialKeys<T, K extends keyof T> = Omit<T, K> &

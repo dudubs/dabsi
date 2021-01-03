@@ -1,4 +1,4 @@
-import { ModuleMetadata } from "@dabsi/typedi/decorators/Module";
+import { ModuleMetadata } from "./decorators/Module";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver } from "@dabsi/typedi/index";

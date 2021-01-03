@@ -1,4 +1,4 @@
-import { getJasmineSpecReporterResult } from "@dabsi/jasmine/getJasmineSpecReporterResult";
+import { getJasmineSpecReporterResult } from "./getJasmineSpecReporterResult";
 
 export function testCase<T>(msg: string, callback: () => void): void {
   const result = getJasmineSpecReporterResult();

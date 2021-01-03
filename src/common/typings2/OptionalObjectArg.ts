@@ -1,4 +1,4 @@
-import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
+import { IsNever } from "./boolean/IsNever";
 import { NeverKeys } from "@dabsi/common/typings2/NeverKeys";
 import { Union } from "@dabsi/common/typings2/Union";
 

@@ -1,1 +1,1 @@
-export { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu/MuiNestedMenu";
+export { MuiNestedMenu } from "./MuiNestedMenu";

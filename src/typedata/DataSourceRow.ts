@@ -1,4 +1,4 @@
-import { GetBaseType, WithBaseType } from "@dabsi/typedata/BaseType";
+import { GetBaseType, WithBaseType } from "./BaseType";
 import { WithDataKey } from "@dabsi/typedata/DataKey";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource, DataSourceAt } from "@dabsi/typedata/DataSource";

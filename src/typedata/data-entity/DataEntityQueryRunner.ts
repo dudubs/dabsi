@@ -1,4 +1,4 @@
-import { DataEntityQueryExpTranslatorToSql } from "@dabsi/typedata/data-entity/DataEntityQueryExpTranslatorToSql";
+import { DataEntityQueryExpTranslatorToSql } from "./DataEntityQueryExpTranslatorToSql";
 import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
 import { QueryRunner } from "typeorm";
 

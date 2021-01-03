@@ -1,4 +1,4 @@
-import { Factory } from "@dabsi/common/patterns/Factory";
+import { Factory } from "./Factory";
 
 export type ValueOrFactory<T> = T | Factory<T>;
 

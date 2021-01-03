@@ -1,4 +1,4 @@
-import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
+import { StorageFile } from "./entities/StorageFile";
 import Storage from "@dabsi/system/storage/Storage";
 import StorageDataSources from "@dabsi/system/storage/StorageDataSources";
 import { DataRow } from "@dabsi/typedata/DataRow";

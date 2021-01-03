@@ -1,4 +1,4 @@
-import { Field, AsField, AsFieldType } from "@dabsi/struct/Field";
+import { Field, AsField, AsFieldType } from "./Field";
 
 export interface MapField<K, V> extends Field<Map<K, V>> {
   key: Field<K>;

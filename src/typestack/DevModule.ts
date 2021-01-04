@@ -10,7 +10,7 @@ import { spawn } from "child_process";
 export class DevModule {
   log = log.get("DEV");
 
-  watchOnly: boolean;
+  watchOnly!: boolean;
 
   constructor(@Inject() cli: Cli) {
     cli

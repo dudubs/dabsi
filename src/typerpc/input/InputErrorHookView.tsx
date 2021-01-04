@@ -22,7 +22,7 @@ export class InputErrorHookView<
     ): ReactElement;
   }
 > {
-  target: InputView<RpcConnection<Target>> | null;
+  target!: InputView<RpcConnection<Target>> | null;
 
   inputWillValidate(): Awaitable {
     return this.target?.validate();

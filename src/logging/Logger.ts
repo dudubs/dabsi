@@ -95,7 +95,7 @@ export function Logger(loggerName: string = "") {
   }
 
   function log() {
-    log.info.apply(null, arguments);
+    log.info.apply(null, <any>arguments);
   }
 }
 

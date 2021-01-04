@@ -6,10 +6,10 @@ import { Column, Entity, PrimaryColumn } from "typeorm";
 @Entity()
 class TestA {
   @PrimaryColumn()
-  id: string;
+  id!: string;
 
   @Column()
-  text: string;
+  text!: string;
 }
 
 export const DataInputTester = Tester.beforeAll({

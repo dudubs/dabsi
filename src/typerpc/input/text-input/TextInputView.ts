@@ -28,7 +28,7 @@ export class TextInputView<
     children(view: TextInputView<C>): ReactElement;
   }
 > {
-  @ViewState() protected _text: string;
+  @ViewState() protected _text!: string;
 
   protected updateValue(value: InputValueElement<C> | undefined) {
     this._text = value || "";
@@ -40,7 +40,7 @@ export class TextInputView<
 
   protected debounceId = 0;
 
-  protected _options: TextLoaderOptions;
+  protected _options!: TextLoaderOptions;
 
   protected updateElement(element: WidgetType<C>["Element"]) {
     super.updateElement(element);

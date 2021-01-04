@@ -4,8 +4,6 @@ import { Once } from "@dabsi/common/patterns/Once";
 import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { ServerModule } from "@dabsi/modules/ServerModule";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
-import DataSourceResolver from "@dabsi/typedata/data-entity/DataSourceResolver";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
@@ -27,7 +25,7 @@ export class DbModule {
     new Cli().onBuild(y => y.boolean("force")).onBuild(args => this.sync(args))
   );
 
-  protected connection: Connection;
+  protected connection!: Connection;
 
   entityTypes = new Set<Function>();
 
@@ -47,10 +45,7 @@ export class DbModule {
 
     Resolver.provide(
       runner.context,
-      Connection.provide(() => this.connection),
-      DataSourceResolver.provide(() => entityType =>
-        DataEntitySource.createFromConnection(entityType, () => this.connection)
-      )
+      Connection.provide(() => this.connection)
     );
   }
 
@@ -81,7 +76,7 @@ export class DbModule {
 
   @Once() async load() {
     await this.projectManager.load();
-    for (const projectModuleInfo of this.projectManager.allProjectModuleInfos) {
+    for (const projectModuleInfo of this.projectManager.allProjectModules) {
       const {
         entities: entitiesDir,
         ["entities.ts"]: entitiesFile,

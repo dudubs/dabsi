@@ -3,7 +3,7 @@ import {
   catchSystemCommand,
   commandSystemRpc,
   SystemRpcPath,
-} from "@dabsi/system/rpc/SystemRpc";
+} from "@dabsi/system/common/SystemRpc";
 import React from "react";
 import ReactDOM from "react-dom";
 

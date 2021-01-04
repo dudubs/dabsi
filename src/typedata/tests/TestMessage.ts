@@ -7,36 +7,36 @@ import {
   PrimaryGeneratedColumn,
   TableInheritance,
 } from "typeorm";
-import { Group } from "@dabsi/system/acl/entities/Group";
-import { User } from "@dabsi/system/acl/entities/User";
+import { Group } from "@dabsi/system/modules/acl/entities/Group";
+import { User } from "@dabsi/system/modules/acl/entities/User";
 
 @Entity()
 @TableInheritance({ column: "type" })
 export class TestMessage {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  type: string;
+  type!: string;
 
   @Column()
-  text: string;
+  text!: string;
 
   @OneToOne(() => User)
   @JoinColumn()
-  from: User;
+  from!: User;
 }
 
 @ChildEntity()
 export class TestPublicMessage extends TestMessage {
   @OneToOne(() => Group)
   @JoinColumn()
-  group: Group;
+  group!: Group;
 }
 
 @ChildEntity()
 export class TestPrivateMessage extends TestMessage {
   @OneToOne(() => User)
   @JoinColumn()
-  user: User;
+  user!: User;
 }

@@ -42,7 +42,7 @@ export class ArrayInputView<
     this.setValue(this.value?.filter((_, i) => i !== index) || []);
   }
 
-  newItemInput: InputView<RpcConnection<T["NewItem"]>>;
+  newItemInput!: InputView<RpcConnection<T["NewItem"]>>;
 
   async add(): Promise<boolean> {
     await this.newItemInput.validate();

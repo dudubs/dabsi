@@ -8,7 +8,7 @@ import {
   TEST_GOD_TOKEN,
 } from "@dabsi/system-old/server/acl/tests/TestForumAcl";
 import { TestPostAcl } from "@dabsi/system-old/server/acl/tests/TestPostAcl";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/modules/acl/entities/User";
 import { DataRow } from "@dabsi/typedata/DataRow";
 
 const t = AclTester.beforeAll(async t => {

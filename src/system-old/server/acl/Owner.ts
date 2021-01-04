@@ -1,18 +1,18 @@
 import { Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
-import { Group } from "@dabsi/system/acl/entities/Group";
-import { User } from "@dabsi/system/acl/entities/User";
+import { Group } from "@dabsi/system/modules/acl/entities/Group";
+import { User } from "@dabsi/system/modules/acl/entities/User";
 
 @Entity()
 export class Owner {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => User)
-  user: DataRelation<User>;
+  user!: DataRelation<User>;
 
   @ManyToOne(() => Group)
-  group: DataRelation<User>;
+  group!: DataRelation<User>;
 }
 
 export function OwnersColumn() {

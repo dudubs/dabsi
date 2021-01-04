@@ -17,7 +17,7 @@ import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/modules/acl/entities/User";
 import {
   TEST_FORUMS_ADMIN_TOKEN,
   TEST_GOD_TOKEN,
@@ -26,15 +26,15 @@ import {
 @Entity()
 export class TestForum {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @JoinTable()
   @ManyToMany(() => TestForumMember, m => m.forum)
-  members: DataRelation<TestForumMember>[];
+  members!: DataRelation<TestForumMember>[];
 
   @JoinTable()
   @ManyToMany(() => TestPost, post => post.forum)
-  posts: DataRelation<TestPost>[];
+  posts!: DataRelation<TestPost>[];
 }
 
 export enum TestForumMemberMode {
@@ -47,43 +47,43 @@ export enum TestForumMemberMode {
 @Index(["forum", "user"], { unique: true })
 export class TestForumMember {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => TestForum, forum => forum.members)
-  forum: DataRelation<TestForum>;
+  forum!: DataRelation<TestForum>;
 
   @ManyToOne(() => User)
-  user: DataRelation<User>;
+  user!: DataRelation<User>;
 
   @Column()
-  mode: TestForumMemberMode;
+  mode!: TestForumMemberMode;
 }
 
 @Entity()
 export class TestComment {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToOne(() => TestPost, post => post.comments)
-  post: DataRelation<TestPost>;
+  post!: DataRelation<TestPost>;
 
   @ManyToOne(() => User)
-  user: DataRelation<User>;
+  user!: DataRelation<User>;
 }
 
 @Entity()
 export class TestPost {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @ManyToMany(() => TestForum, forum => forum.posts)
-  forum: DataRelation<TestForum>;
+  forum!: DataRelation<TestForum>;
 
   @OneToMany(() => TestComment, comment => comment.post)
-  comments: DataRelation<TestComment>[];
+  comments!: DataRelation<TestComment>[];
 
   @ManyToOne(() => User)
-  user: DataRelation<User>;
+  user!: DataRelation<User>;
 }
 
 decorateDesignType(User, "blockedUsers", Object as Function, [
@@ -91,7 +91,7 @@ decorateDesignType(User, "blockedUsers", Object as Function, [
   ManyToMany(() => User),
 ]);
 
-declare module "@dabsi/system/acl/entities/User" {
+declare module "@dabsi/system/modules/acl/entities/User" {
   interface User {
     blockedUsers: DataRelation<User>[];
   }

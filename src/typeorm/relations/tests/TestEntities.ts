@@ -15,7 +15,7 @@ export class AEntity {
   }
 
   @PrimaryColumn()
-  aId: string;
+  aId!: string;
 
   @Column({ nullable: true })
   aText?: string;
@@ -31,16 +31,16 @@ export class AEntity {
   oneAToOneBOwner?: DataRelation<BEntity>;
 
   @TestRelation(() => BEntity)
-  oneAToManyB: DataRelation<BEntity>[];
+  oneAToManyB!: DataRelation<BEntity>[];
 
   @TestRelation(() => BEntity)
   manyAToOneB?: DataRelation<BEntity>;
 
   @TestRelation(() => BEntity)
-  manyAToManyB: DataRelation<BEntity>[];
+  manyAToManyB!: DataRelation<BEntity>[];
 
   @TestRelation(() => BEntity)
-  manyAToManyBOwner: DataRelation<BEntity>[];
+  manyAToManyBOwner!: DataRelation<BEntity>[];
 
   @TestRelation(() => CEntity)
   oneAToOneC?: DataRelation<CEntity>;
@@ -49,16 +49,16 @@ export class AEntity {
   oneAToOneCOwner?: DataRelation<CEntity>;
 
   @TestRelation(() => CEntity)
-  manyAToManyC: DataRelation<CEntity>[];
+  manyAToManyC!: DataRelation<CEntity>[];
 
   @TestRelation(() => CEntity)
-  manyAToManyCOwner: DataRelation<CEntity>[];
+  manyAToManyCOwner!: DataRelation<CEntity>[];
 
   @TestRelation(() => AEntity)
-  manyAToManyAOwner: DataRelation<AEntity>[];
+  manyAToManyAOwner!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyAToManyA: DataRelation<AEntity>[];
+  manyAToManyA!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
   oneAToOneA?: DataRelation<AEntity>;
@@ -67,7 +67,7 @@ export class AEntity {
   oneAToOneAOwner?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneAToManyA: DataRelation<AEntity>[];
+  oneAToManyA!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
   manyAToOneA?: DataRelation<AEntity>[];
@@ -81,7 +81,7 @@ export class BEntity {
   }
 
   @PrimaryColumn(String)
-  bId: string;
+  bId!: string;
 
   @Column({ nullable: true })
   bText?: string;
@@ -96,16 +96,16 @@ export class BEntity {
   oneBToOneAOwner?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  oneBToManyA: DataRelation<AEntity>[];
+  oneBToManyA!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
   manyBToOneA?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  manyBToManyAOwner: DataRelation<AEntity>[];
+  manyBToManyAOwner!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyBToManyA: DataRelation<AEntity>[];
+  manyBToManyA!: DataRelation<AEntity>[];
 
   @TestRelation(() => CEntity)
   oneBToOneC?: DataRelation<CEntity>;
@@ -114,10 +114,10 @@ export class BEntity {
   oneBToOneCOwner?: DataRelation<CEntity>;
 
   @TestRelation(() => CEntity)
-  manyBToManyCOwner: DataRelation<CEntity>[];
+  manyBToManyCOwner!: DataRelation<CEntity>[];
 
   @TestRelation(() => CEntity)
-  manyBToManyC: DataRelation<CEntity>[];
+  manyBToManyC!: DataRelation<CEntity>[];
 }
 
 @Entity("C")
@@ -128,7 +128,7 @@ export class CEntity {
   }
 
   @PrimaryColumn()
-  cId: string;
+  cId!: string;
 
   @Column({ nullable: true })
   cText?: string;
@@ -149,15 +149,15 @@ export class CEntity {
   oneCToOneAOwner?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
-  manyCToManyAOwner: DataRelation<AEntity>[];
+  manyCToManyAOwner!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
-  manyCToManyA: DataRelation<AEntity>[];
+  manyCToManyA!: DataRelation<AEntity>[];
 
   @TestRelation(() => BEntity)
-  manyCToManyBOwner: DataRelation<BEntity>[];
+  manyCToManyBOwner!: DataRelation<BEntity>[];
 
   @TestRelation(() => BEntity)
-  manyCToManyB: DataRelation<BEntity>[];
+  manyCToManyB!: DataRelation<BEntity>[];
 }
 export default [AEntity, BEntity, CEntity];

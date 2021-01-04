@@ -17,7 +17,7 @@ export abstract class AbstractWidgetView<
   >
   extends View<P>
   implements WidgetView<C> {
-  @ViewState("forceUpdateElement") _element: WidgetElement<C>;
+  @ViewState("forceUpdateElement") _element!: WidgetElement<C>;
 
   protected updateElement?(element: WidgetElement<C>): void;
 

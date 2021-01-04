@@ -1,11 +1,11 @@
-import DataSystemModule from "@dabsi/system/data";
-import buildCountRefs from "@dabsi/system/data/buildCountRefs";
+import DataModule from "@dabsi/modules/data";
+import buildCountRefs from "@dabsi/modules/data/buildCountRefs";
 import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module({})
 export default class StorageModule {
-  constructor(@Inject() dsm: DataSystemModule) {
+  constructor(@Inject() dsm: DataModule) {
     buildCountRefs(dsm, StorageFile, "countRefs");
   }
 }

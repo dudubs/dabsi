@@ -34,14 +34,14 @@ export abstract class AbstractInputView<
     | InputValueElement<C>
     | undefined;
 
-  @ViewState("forceUpdateError") protected _error: InputError<C>;
+  @ViewState("forceUpdateError") protected _error!: InputError<C>;
 
-  @ViewState() _errorElement: ReactElement | undefined;
+  @ViewState() _errorElement!: ReactElement | undefined;
 
-  @ViewState() isValidating: boolean;
+  @ViewState() isValidating!: boolean;
 
-  protected _data: InputValueData<C>;
-  protected _isValidValue: boolean;
+  protected _data!: InputValueData<C>;
+  protected _isValidValue!: boolean;
 
   children?: InputViewChildren;
 

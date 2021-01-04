@@ -1,6 +1,6 @@
 import fs from "fs";
 import { makeHtml } from "@dabsi/common/makeHtml";
-import BrowserModule from "@dabsi/modules/BrowserModule";
+import BrowserModule from "@dabsi/modules/browser-platform";
 import ExpressModule from "@dabsi/modules/express";
 import { Inject, Module } from "@dabsi/typedi";
 import express from "express";

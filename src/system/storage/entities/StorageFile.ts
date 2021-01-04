@@ -3,14 +3,14 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 @Entity()
 export class StorageFile {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  countRefs: number;
+  countRefs!: number;
 
   @Column()
-  url: string;
+  url!: string;
 
   @Column()
-  time: number;
+  time!: number;
 }

@@ -14,9 +14,12 @@ export class MakeModule {
 
   onMake = Hookable<() => Awaitable>();
 
+  write: boolean = false;
+
   constructor(@Inject() cli: Cli) {
     cli.command("make", cli =>
-      cli.onRun(async () => {
+      cli.onRun(async ({ write = false }) => {
+        this.write = write;
         if (DABSI_CURRENT_PATH === DABSI_PATH)
           throw new CliError(`You can't run make on "${DABSI_PATH}".`);
         await this.onMake.invoke();
@@ -33,8 +36,11 @@ export class MakeModule {
 
   async makeFile(outFileName, content: string) {
     this.log(`make "${relativePosixPath(DABSI_ROOT_DIR, outFileName)}".`);
-    console.log(nested(content));
-    // await fs.promises.writeFile(outFileName, content);
+    if (this.write) {
+      await fs.promises.writeFile(outFileName, content);
+    } else {
+      console.log(nested(content));
+    }
   }
 
   async makeJsonFile(path, data: any) {

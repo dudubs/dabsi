@@ -6,7 +6,7 @@ import { DABSI_CURRENT_PATH, DABSI_ROOT_DIR } from "@dabsi/index";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import { TYPESTACK_CLI_ARGS } from "@dabsi/typestack/cli";
 
-let config!: {
+let config: {
   current: string[];
 };
 

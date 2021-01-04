@@ -4,7 +4,7 @@ import { MuiDataInputView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputView
 import { MuiTextInputView } from "@dabsi/browser/mui/rpc/inputs/MuiTextInputView";
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
-import { MuiGridMapView } from "@dabsi/system/rpc/browser/MuiGridMapView";
+import { MuiGridMapView } from "@dabsi/modules/rpc/browser/MuiGridMapView";
 import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 import { DataInput } from "@dabsi/typerpc/input/data-input/DataInput";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
@@ -17,7 +17,7 @@ import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
 import {
   useSystemViewTheme,
   UseSystemViewThemeCallback,
-} from "@dabsi/system/rpc/view/useSystemViewTheme";
+} from "@dabsi/modules/rpc/view/useSystemViewTheme";
 import MuiCheckboxInputView from "@dabsi/browser/mui/rpc/inputs/MuiCheckboxInputView";
 
 export function useMuiSystemViewTheme(callback?: UseSystemViewThemeCallback) {

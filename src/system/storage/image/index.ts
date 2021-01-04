@@ -1,5 +1,5 @@
-import buildCountRefs from "@dabsi/system/data/buildCountRefs";
-import DataSystemModule from "@dabsi/system/data";
+import buildCountRefs from "@dabsi/modules/data/buildCountRefs";
+import DataModule from "@dabsi/modules/data";
 import StorageModule from "@dabsi/system/storage";
 import { Image } from "@dabsi/system/storage/image/entities/Image";
 import { Inject, Module } from "@dabsi/typedi";
@@ -8,7 +8,7 @@ import { Inject, Module } from "@dabsi/typedi";
   dependencies: [StorageModule],
 })
 export default class ImageStorageModule {
-  constructor(@Inject() dsm: DataSystemModule) {
+  constructor(@Inject() dsm: DataModule) {
     buildCountRefs(dsm, Image, "countRefs");
   }
 }

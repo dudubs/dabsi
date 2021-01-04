@@ -26,7 +26,7 @@ import {
 } from "@dabsi/system-old/server/acl/AclExp";
 import { AclTokenTree } from "@dabsi/system-old/server/acl/AclTokenTree";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/modules/acl/entities/User";
 
 export class AclQuery {
   constructor(protected connection: Connection) {}
@@ -39,13 +39,13 @@ export class AclQuery {
     return "`" + name + "`";
   }
 
-  criterionMap: {
+  criterionMap!: {
     [aliasName: string]: {
       escapedAliasName: string;
       exp: AclCriterionExp;
     };
   };
-  tokenTree: AclTokenTree;
+  tokenTree!: AclTokenTree;
 
   askFor(userKey: string): this {
     this.userKey = userKey;
@@ -195,8 +195,8 @@ export class AclQuery {
     return fields ? `(SELECT ${fields}) _criterions` : "";
   }
 
-  userFieldExpMap: Record<string, DataExp<User>>;
-  userEscapedFieldMap: Map<DataExp<User>, string>;
+  userFieldExpMap!: Record<string, DataExp<User>>;
+  userEscapedFieldMap!: Map<DataExp<User>, string>;
 
   protected createEntityQuery<T>(
     entityType: Type<T>,
@@ -254,8 +254,8 @@ export class AclQuery {
     }).getQueryWithFields(this.userFieldExpMap)}) _user`;
   }
 
-  parameters: any[];
-  userKey: string;
+  parameters!: any[];
+  userKey!: string;
 
   askAll(getQuery: () => string) {
     this.parameters = [];

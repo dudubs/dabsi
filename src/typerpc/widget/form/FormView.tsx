@@ -40,7 +40,7 @@ export class FormView<
     }) => ReactElement;
   }
 > {
-  input: InputView<C["input"]>;
+  input!: InputView<C["input"]>;
 
   reset() {
     this._element = { ...this.element };

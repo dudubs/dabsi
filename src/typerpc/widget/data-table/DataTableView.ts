@@ -30,11 +30,11 @@ export class DataTableView<
   protected reloadDebounce = Debounce(500);
 
   @ViewState() searchText: string = this.elementState?.query.text || "";
-  @ViewState() pageSize: number;
+  @ViewState() pageSize!: number;
   @ViewState() pageIndex = this.elementState?.query.pageIndex || 0;
 
-  @ViewState() totalRows: number;
-  @ViewState() rows: WidgetType<C>["Types"]["RowWithKey"][];
+  @ViewState() totalRows!: number;
+  @ViewState() rows!: WidgetType<C>["Types"]["RowWithKey"][];
   @ViewState() isLoading = false;
 
   // locationStateKey=""

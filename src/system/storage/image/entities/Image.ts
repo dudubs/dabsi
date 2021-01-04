@@ -5,17 +5,17 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 })
 export class Image {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  countRefs: number;
+  countRefs!: number;
 
   @Column()
-  url: string;
+  url!: string;
 
   @Column()
-  width: number;
+  width!: number;
 
   @Column()
-  height: number;
+  height!: number;
 }

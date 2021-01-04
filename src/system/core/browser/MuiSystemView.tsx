@@ -1,7 +1,7 @@
 import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
 import { useProvider } from "@dabsi/react/useProvider";
 import { useMuiSystemViewTheme } from "@dabsi/system/core/browser/useMuiSystemViewTheme";
-import SystemRouter from "@dabsi/system/core/common/SystemRouter";
+import SystemRouter from "@dabsi/system/common/SystemRouter";
 import { HistoryProvider } from "@dabsi/typerouter/History";
 import { ReactRouter } from "@dabsi/typerouter/ReactRouter";
 import { createBrowserHistory } from "history";

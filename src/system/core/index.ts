@@ -106,7 +106,7 @@ export class SystemModule {
   @Once() async load() {
     this.log.trace("Load system .");
     await this.projectManager.load();
-    for (const projectModuleInfo of this.projectManager.allProjectModuleInfos) {
+    for (const projectModuleInfo of this.projectManager.allProjectModules) {
       // await this.hooks.loadProjectModuleInfo(projectModuleInfo);
     }
   }

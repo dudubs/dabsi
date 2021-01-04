@@ -1,4 +1,3 @@
-import { Timeout } from "@dabsi/common/async/Timeout";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import Lazy from "@dabsi/common/patterns/lazy";
@@ -9,13 +8,15 @@ import { SystemRpc } from "@dabsi/system/common/SystemRpc";
 import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
-import { isRpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
 import { Seq } from "immutable";
 import path from "path";
-import { RpcConfigResolver } from "./RpcConfigResolver";
+import { DABSI_ROOT_DIR } from "../..";
+import LoaderModule from "../LoaderModule";
+import { relativePosixPath } from "../pathHelpers";
+import { isRpcConfigResolver, RpcConfigResolver } from "./RpcConfigResolver";
 
 @Module()
 export default class RpcModule {
@@ -36,10 +37,17 @@ export default class RpcModule {
     resolver: RpcConfigResolver<AnyRpc>;
   }[] = [];
 
-  constructor(@Inject() projectModule: ProjectModule) {
+  constructor(
+    @Inject() protected projectModule: ProjectModule,
+    @Inject() protected loaderModule: LoaderModule
+  ) {
     projectModule
       .onProjectModuleLoaded(async projectModuleInfo => {
-        await this._loadDir(projectModuleInfo.dir);
+        // const serverDir = path.join(projectModuleInfo.dir, "server");
+        // if (await this.loaderModule.isDir(serverDir)) {
+        //   await this._loadDir(serverDir, true);
+        // }
+        await this._loadDir(projectModuleInfo.dir, true);
       })
       .onBuildCommonFiles(async addCommonFile => {
         for (const info of this._loadedConfigsInfo) {
@@ -104,11 +112,22 @@ export default class RpcModule {
     }
   }
 
-  protected async _loadDir(dir: string) {
+  protected async _loadDir(dir: string, isRoot = false) {
     if (!touchSet(this._loadedDirs, dir)) return;
 
-    this.log.trace(() => `Scan dir ${dir}.`);
-    for (const baseName of await fs.promises.readdir(dir)) {
+    if (
+      !isRoot &&
+      (await this.loaderModule.isFile(path.join(dir, "index.ts")))
+    ) {
+      this.log.trace(() => `Skip directory ${dir}.`);
+      return;
+    }
+
+    this.log.trace(
+      () => `Scanning directroy "${relativePosixPath(DABSI_ROOT_DIR, dir)}".`
+    );
+
+    for (const baseName of await this.loaderModule.readDir(dir)) {
       const fileName = path.join(dir, baseName);
       const state = await fs.promises.stat(fileName);
       if (state.isDirectory()) {
@@ -145,7 +164,11 @@ export default class RpcModule {
     }
   }
 
-  async processRequest(rpcReq: RpcRequest, context: AnyResolverMap) {
+  async processRequest(
+    rpc: AnyRpc,
+    rpcReq: RpcRequest,
+    context: AnyResolverMap
+  ) {
     const { path, payload } = rpcReq;
 
     this.log.info(
@@ -156,16 +179,16 @@ export default class RpcModule {
           .join("/")}`
     );
 
-    this.log.trace(() => colors.gray(JSON.stringify(payload)));
+    this.log.trace(() => colors.gray(JSON.stringify(payload, null, 2)));
 
     Resolver.provide(
       context,
       RpcRequest.provide(() => rpcReq)
     );
 
-    const configResolver = this.getRpcConfigResolver(SystemRpc);
+    const configResolver = this.getRpcConfigResolver(rpc);
     const config = Resolver.resolve(configResolver, context);
-    const command = await SystemRpc.createRpcCommand(config);
+    const command = await rpc.createRpcCommand(config);
     return await command(path, payload);
   }
 }

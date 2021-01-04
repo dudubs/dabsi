@@ -13,8 +13,6 @@ declare global {
   }
 }
 
-export const requestContextSymbol = Symbol("requestContext");
-
 @Module()
 export default class ExpressModule {
   log = this.serverModule.log.get("EXPRESS");
@@ -29,6 +27,7 @@ export default class ExpressModule {
 
       app.use((req, res, next) => {
         req.requestContext = Object.create(requestModule.context);
+        log.info(() => `${req.method} ${req.path} HTTP/${req.httpVersion}`);
         next();
       });
 

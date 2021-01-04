@@ -2,10 +2,10 @@ import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
 import { AclBreadcrumbs } from "@dabsi/system/modules/acl/plugins/admin/browser/AclBreadcrumbs";
 import AclAdminRouter from "@dabsi/system/modules/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/modules/acl/plugins/admin/common/AclAdminRpc";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
-import { MuiGridMapView } from "@dabsi/modules/rpc/browser/MuiGridMapView";
-import { SystemView } from "@dabsi/modules/rpc/view/SystemView";
-import { useSystemView } from "@dabsi/modules/rpc/view/useSystemView";
+import MuiSystemPage from "@dabsi/system/browser/MuiSystemPage";
+import { MuiGridMapView } from "@dabsi/system/browser/MuiGridMapView";
+import { SystemView } from "@dabsi/system/view/SystemView";
+import { useSystemView } from "@dabsi/system/view/useSystemView";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 import React from "react";
 

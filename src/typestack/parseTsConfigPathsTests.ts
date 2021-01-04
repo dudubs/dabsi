@@ -1,6 +1,6 @@
 import createTsConfigPaths from "./TsConfigPaths";
 
-fit("", async () => {
+it("", async () => {
   const rootDir = "/worksacpe/projects";
 
   const isFile = async fileName => !/[\\\/]folder(|\.tsx?)$/.test(fileName);

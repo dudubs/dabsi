@@ -15,7 +15,7 @@ export default class DataForExpressModule {
       app.use(async (req, res, next) => {
         await dataModule.withQueryRunner(async queryRunner => {
           Resolver.provide(
-            req.systemContext,
+            req.requestContext,
             DataSourceFactoryResolver.provide(() => entityType =>
               new DataModuleSource(
                 dataModule,

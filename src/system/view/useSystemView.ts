@@ -3,7 +3,7 @@ import { useProviderContext } from "@dabsi/react/useProvider";
 import {
   SystemViewContext,
   SystemViewProps,
-} from "@dabsi/modules/rpc/view/SystemView";
+} from "@dabsi/system/view/SystemView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
 import React, { createElement } from "react";

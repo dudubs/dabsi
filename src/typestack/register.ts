@@ -15,5 +15,6 @@ setImmediate(async () => {
   cli.onRunAsParent(({ trace }) => {
     trace && log.setLevel(x => x | LogLevel.TRACE);
   });
+
   await cli.main(yargs.scriptName("ts"));
 });

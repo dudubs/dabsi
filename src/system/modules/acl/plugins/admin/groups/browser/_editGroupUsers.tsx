@@ -2,7 +2,7 @@ import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import throws from "@dabsi/common/patterns/throws";
 import { useStore } from "@dabsi/react/useStore";
-import { SystemView } from "@dabsi/modules/rpc/view/SystemView";
+import { SystemView } from "@dabsi/system/view/SystemView";
 import { DataTableView } from "@dabsi/typerpc/widget/data-table/DataTableView";
 import { useWidgetNamespaceConnection } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
 import Button from "@material-ui/core/Button";

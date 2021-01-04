@@ -1,5 +1,4 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { Type } from "@dabsi/common/typings2/Type";
 import {
   AnyDataSelection,
   DataSelection,

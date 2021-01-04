@@ -23,6 +23,7 @@ import createTsConfigPaths, {
 import fs from "fs";
 import path from "path";
 import { touchSet } from "../common/map/touchSet";
+import { inspect } from "../logging/inspect";
 
 @Module()
 export default class ProjectModule {
@@ -67,8 +68,10 @@ export default class ProjectModule {
             require(moduleFileName)?.["default"] === m.target
           )
         )
-      )
+      ) {
+        log.warn(() => `No default export for "${moduleFileName}".`);
         continue;
+      }
       log.trace(() => `Load root module "${m.target.name}".`);
       const moduleDir = path.dirname(moduleFileName);
       const projectDir = moduleFileName.replace(/[\\\/]src[\\\/].*$/, "");
@@ -101,46 +104,46 @@ export default class ProjectModule {
 
   async _loadModule(moduleInfo: ProjectModuleInfo) {
     if (!touchSet(this._loadedModules, moduleInfo.target)) return;
-    log.trace(() => `Load module plugins "${moduleInfo.dir}".`);
+
     this.allProjectModules.push(moduleInfo);
     this._loadedProjectModules.push(moduleInfo);
 
-    const {
-      fileMap: { plugins: pluginsFile },
-    } = moduleInfo;
-    if (pluginsFile?.stat.isDirectory()) {
-      log.trace(
-        () => `found plugins folder for module "${moduleInfo.target.name}".`
-      );
+    const pluginsDir = path.join(moduleInfo.dir, "plugins");
+    if (!(await this.loaderModule.isDir(pluginsDir))) return;
 
-      for (const baseName of await fs.promises.readdir(pluginsFile.fileName)) {
-        const fileName = path.join(pluginsFile.fileName, baseName);
-        log.trace(() => `Load ${fileName}`);
-        const moduleTarget = require(fileName)?.default;
-        if (!isModuleTarget(moduleTarget)) {
-          log.trace(() => `is not module target.`);
-          continue;
-        }
-        if (this.runner.moduleInstanceMap.has(moduleTarget)) continue;
+    log.trace(() => `Load module plugins "${pluginsDir}".`);
 
-        const moduleMetadata = moduleMetadataMap.get(moduleTarget);
-        const requiredModule =
-          getDesignParamTypes(moduleTarget).find(
-            paramType =>
-              isModuleTarget(paramType) &&
-              !this.runner.moduleInstanceMap.has(paramType)
-          ) ||
-          moduleMetadata?.dependencies?.find(
-            moduleTarget => !this.runner.moduleInstanceMap.has(moduleTarget)
-          );
+    log.trace(
+      () => `found plugins folder for module "${moduleInfo.target.name}".`
+    );
 
-        if (requiredModule) {
-          log.trace(() => `require module ${requiredModule.name}".`);
-          continue;
-        }
-
-        this.runner.getInstance(moduleTarget);
+    for (const baseName of await this.loaderModule.readDir(pluginsDir)) {
+      const fileName = path.join(pluginsDir, baseName);
+      log.trace(() => `Load ${fileName}`);
+      const moduleTarget = require(fileName)?.default;
+      if (!isModuleTarget(moduleTarget)) {
+        log.trace(() => `is not module target.`);
+        continue;
       }
+      if (this.runner.moduleInstanceMap.has(moduleTarget)) continue;
+
+      const moduleMetadata = moduleMetadataMap.get(moduleTarget);
+      const requiredModule =
+        getDesignParamTypes(moduleTarget).find(
+          paramType =>
+            isModuleTarget(paramType) &&
+            !this.runner.moduleInstanceMap.has(paramType)
+        ) ||
+        moduleMetadata?.dependencies?.find(
+          moduleTarget => !this.runner.moduleInstanceMap.has(moduleTarget)
+        );
+
+      if (requiredModule) {
+        log.trace(() => `require module ${requiredModule.name}".`);
+        continue;
+      }
+
+      this.runner.getInstance(moduleTarget);
     }
   }
 

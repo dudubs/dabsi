@@ -5,7 +5,7 @@ import {
   AnySystemMapConnection,
   SystemMapView,
   SystemMapViewProps,
-} from "@dabsi/modules/rpc/view/SystemMapView";
+} from "@dabsi/system/view/SystemMapView";
 import {
   AccordionDetails,
   AccordionSummary,

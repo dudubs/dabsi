@@ -20,11 +20,6 @@ import {
 export class DbModule {
   log = log.get("DB");
 
-  cli = new Cli().command(
-    "sync",
-    new Cli().onBuild(y => y.boolean("force")).onBuild(args => this.sync(args))
-  );
-
   protected connection!: Connection;
 
   entityTypes = new Set<Function>();
@@ -40,7 +35,13 @@ export class DbModule {
     @Inject() runner: ModuleRunner,
     @Inject() protected projectManager: ProjectModule
   ) {
-    cli.command("db", this.cli);
+    cli.command("db", cli =>
+      cli.command("sync", cli =>
+        cli //
+          .onBuild(y => y.boolean("force"))
+          .onBuild(args => this.sync(args))
+      )
+    );
     serverModule.onStart(() => this.init());
 
     Resolver.provide(

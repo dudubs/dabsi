@@ -5,7 +5,7 @@ import { AclConnection } from "@dabsi/system/modules/acl/common/AclRpc";
 import AclLoginInfoEvent from "@dabsi/system/modules/acl/common/AclLoginInfoEvent";
 import AclLoginRouter from "@dabsi/system/modules/acl/common/AclLoginRouter";
 import { PaperInCenter } from "@dabsi/system/modules/admin/browser/PaperInCenter";
-import { useSystemView } from "@dabsi/modules/rpc/view/useSystemView";
+import { useSystemView } from "@dabsi/system/view/useSystemView";
 import { useReactRouter } from "@dabsi/typerouter/ReactRouter";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 import Typography from "@material-ui/core/Typography";

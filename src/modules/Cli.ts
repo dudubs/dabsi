@@ -3,37 +3,33 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Module } from "@dabsi/typedi";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { touchSet } from "@dabsi/common/map/touchSet";
+import { touchObject } from "../common/object/touchObject";
 
 @Module()
 export class Cli {
-  protected commandNames = new Set();
+  protected _cliMap: Record<string, Cli> = {};
 
-  command(name: string, callbackOrCli: Cli | ((cli: Cli) => void)): Cli {
-    let cli: Cli;
-    if (typeof callbackOrCli === "function") {
-      cli = new Cli();
-      callbackOrCli(cli);
-    } else {
-      cli = callbackOrCli;
-    }
-    if (!touchSet(this.commandNames, name)) {
-      throw new Error("Already in use");
-    }
-
-    cli.onRunAsParent(args => {
-      return this.onRunAsParent.invoke(args);
+  command(name: string, buildCli: (cli: Cli) => void): Cli {
+    const cli: Cli = touchObject(this._cliMap, name, () => {
+      const cli = new Cli();
+      cli.onRunAsParent(args => {
+        return this.onRunAsParent.invoke(args);
+      });
+      this.onBuild(y =>
+        y.command(
+          name,
+          "",
+          y => cli.onBuild.invoke(y),
+          async args => {
+            await this.onRunAsParent.invoke(args);
+            await cli.run(args);
+          }
+        )
+      );
+      return cli;
     });
-    return this.onBuild(y =>
-      y.command(
-        name,
-        "",
-        y => cli.onBuild.invoke(y),
-        async args => {
-          await this.onRunAsParent.invoke(args);
-          await cli.run(args);
-        }
-      )
-    );
+    buildCli(cli);
+    return this;
   }
 
   onRunAsParent = Hookable<(args: any) => Awaitable>();
@@ -43,13 +39,21 @@ export class Cli {
   args?: any;
 
   async main(y: yargs.Argv) {
-    this.onBuild.invoke(y);
-    return this.run(y.help().argv);
+    await this.onBuild.invoke(y);
+    return await this.run(y.help().argv);
   }
 
   async run(args) {
-    this.args = args;
-    await this.onRun.invoke(args);
+    try {
+      this.args = args;
+      await this.onRun.invoke(args);
+    } catch (error) {
+      if (error instanceof CliError) {
+        log.error(error.message);
+        return;
+      }
+      throw error;
+    }
   }
 }
 

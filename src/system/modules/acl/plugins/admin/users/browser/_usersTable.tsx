@@ -9,12 +9,12 @@ import AclAdminRouter from "@dabsi/system/modules/acl/plugins/admin/common/AclAd
 import { AclAdminConnection } from "@dabsi/system/modules/acl/plugins/admin/common/AclAdminRpc";
 import AclUserBasicInfoInput from "@dabsi/system/modules/acl/plugins/admin/users/common/AclUserBasicInfoInput";
 import AclUserGroupsForm from "@dabsi/system/modules/acl/plugins/admin/users/common/AclUserGroupsForm";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
-import { MuiAccordionMapView } from "@dabsi/modules/rpc/browser/MuiAccordionMapView";
-import { MuiGridMapView } from "@dabsi/modules/rpc/browser/MuiGridMapView";
-import { SystemView } from "@dabsi/modules/rpc/view/SystemView";
-import { useSystemView } from "@dabsi/modules/rpc/view/useSystemView";
-import { useSystemViewTheme } from "@dabsi/modules/rpc/view/useSystemViewTheme";
+import MuiSystemPage from "@dabsi/system/browser/MuiSystemPage";
+import { MuiAccordionMapView } from "@dabsi/system/browser/MuiAccordionMapView";
+import { MuiGridMapView } from "@dabsi/system/browser/MuiGridMapView";
+import { SystemView } from "@dabsi/system/view/SystemView";
+import { useSystemView } from "@dabsi/system/view/useSystemView";
+import { useSystemViewTheme } from "@dabsi/system/view/useSystemViewTheme";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 import Button from "@material-ui/core/Button";

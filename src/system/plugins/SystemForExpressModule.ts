@@ -1,7 +1,7 @@
 import ExpressModule from "@dabsi/modules/express";
 import RpcModule from "@dabsi/modules/rpc";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { SystemRpcPath } from "@dabsi/system/common/SystemRpc";
+import { SystemRpc, SystemRpcPath } from "@dabsi/system/common/SystemRpc";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import BodyParser from "body-parser";
 import multer from "multer";
@@ -32,7 +32,7 @@ export default class RpcForExpressModule {
           const rpcReq = new RpcRequest(path, payload, req.body);
 
           res.json({
-            result: await rpcModule.processRequest(rpcReq, context),
+            result: await rpcModule.processRequest(SystemRpc, rpcReq, context),
           });
         }
       );

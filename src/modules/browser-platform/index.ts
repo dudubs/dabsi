@@ -3,7 +3,12 @@ import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { values } from "@dabsi/common/object/values";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
-import { DABSI_CURRENT_PATH, DABSI_PATH, DABSI_SRC_PATH } from "@dabsi/index";
+import {
+  DABSI_CURRENT_PATH,
+  DABSI_PATH,
+  DABSI_ROOT_DIR,
+  DABSI_SRC_PATH,
+} from "@dabsi/index";
 import { Cli } from "@dabsi/modules/Cli";
 import ExpressModule from "@dabsi/modules/express";
 import LoaderModule from "@dabsi/modules/LoaderModule";
@@ -64,9 +69,15 @@ export default class BrowserModule {
   protected async _makeProjectModules(
     projectPlatformInfo: ProjectPlatformInfo
   ) {
+    this.log.trace(
+      () => `Make project directory "${projectPlatformInfo.projectInfo.dir}".`
+    );
     for (const projectModuleInfo of values(
       projectPlatformInfo.projectInfo.moduleInfoMap
     )) {
+      this.log.trace(
+        () => `Make project module directory "${projectModuleInfo.dir}".`
+      );
       const platformModuleDir = path.join(
         projectModuleInfo.dir,
         projectPlatformInfo.name
@@ -288,12 +299,5 @@ export default class BrowserModule {
 }
 
 function relativePathToCurrent(path: string) {
-  return relativePosixPath(DABSI_CURRENT_PATH, path);
-}
-
-function hasIndexFile(dir: string) {
-  return (
-    fs.existsSync(path.join(dir, "index.ts")) ||
-    fs.existsSync(path.join(dir, "index.tsx"))
-  );
+  return relativePosixPath(DABSI_ROOT_DIR, path);
 }

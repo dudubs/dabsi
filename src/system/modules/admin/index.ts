@@ -1,6 +1,6 @@
 import AclModule from "@dabsi/system/modules/acl";
 
-import { SystemModule } from "@dabsi/system/core";
+import SystemModule from "@dabsi/system";
 import { Module } from "@dabsi/typedi";
 
 @Module({

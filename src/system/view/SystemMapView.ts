@@ -1,7 +1,7 @@
 import { Override } from "@dabsi/common/typings2/Override";
 import { Renderer } from "@dabsi/react/renderer";
 import { RendererOrProps } from "@dabsi/react/RendererOrProps";
-import { SystemView } from "@dabsi/modules/rpc/view/SystemView";
+import { SystemView } from "@dabsi/system/view/SystemView";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";

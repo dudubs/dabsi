@@ -17,6 +17,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
     "preserveWatchOutput": true,
     "jsx": "react-jsx",
     "baseUrl": "..",

@@ -3,8 +3,11 @@ import { DbModule } from "@dabsi/modules/DbModule";
 import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
 import AclDataSources from "@dabsi/system/modules/acl/AclDataSources";
 import { Inject, Module, ResolverType } from "@dabsi/typedi";
+import DataModule from "../../../modules/data";
 
-@Module()
+@Module({
+  dependencies: [DataModule],
+})
 export default class AclModule {
   log = log.get("ACL");
 

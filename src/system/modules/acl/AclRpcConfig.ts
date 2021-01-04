@@ -3,16 +3,18 @@ import RequestSession from "@dabsi/modules/session/RequestSession";
 import { AclRpc } from "@dabsi/system/modules/acl/common/AclRpc";
 import { User } from "@dabsi/system/modules/acl/entities/User";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import DataSourceResolver from "../../../modules/data/DataSourceResolver";
+import AclDataSources from "./AclDataSources";
 import { getPasswordHash } from "./getPasswordHash";
 
 export default RpcConfigResolver(
   AclRpc,
   {
     session: DataRow(RequestSession),
-    sources: DataSourceResolver({ users: User }),
+    sources: AclDataSources,
   },
-  c => $ => {
+  c => async $ => {
+    console.log(await c.sources.users.get(), { session: c.session });
+
     return $({
       async logout() {
         if (c.session.user) {

@@ -27,7 +27,9 @@ export default class ExpressModule {
 
       app.use((req, res, next) => {
         req.requestContext = Object.create(requestModule.context);
-        log.info(() => `${req.method} ${req.path} HTTP/${req.httpVersion}`);
+        this.log.info(
+          () => `${req.method} ${req.path} HTTP/${req.httpVersion}`
+        );
         next();
       });
 
@@ -42,9 +44,14 @@ export default class ExpressModule {
   }
 
   beforeBuildRoutes = Hookable<(app: express.Application) => Awaitable>();
+
   onBuildRoutes = Hookable<(app: express.Application) => Awaitable>();
+
   afterBuildRoutes = Hookable<(app: express.Application) => Awaitable>();
+
   onRun = Hookable<(app: express.Application) => Awaitable>();
+
+  context: AnyResolverMap = Object.create(this.requestModule.context);
 
   listen(port: number, addr = "0.0.0.0") {
     this.onRun(app => {

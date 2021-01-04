@@ -1,7 +1,6 @@
 import { touchObject } from "@dabsi/common/object/touchObject";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import {
@@ -14,16 +13,11 @@ import {
 } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { getTsConfigPaths } from "@dabsi/typestack/getTsConfigPaths";
-import { MakeModule } from "@dabsi/typestack/MakeModule";
 import ProjectInfo from "@dabsi/typestack/ProjectInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
-import createTsConfigPaths, {
-  TsConfigPaths,
-} from "@dabsi/typestack/TsConfigPaths";
-import fs from "fs";
+import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
 import path from "path";
 import { touchSet } from "../common/map/touchSet";
-import { inspect } from "../logging/inspect";
 
 @Module()
 export default class ProjectModule {

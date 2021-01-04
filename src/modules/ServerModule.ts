@@ -1,13 +1,14 @@
-import { Inject, Module } from "@dabsi/typedi";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
-import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Inject, Module } from "@dabsi/typedi";
 
 @Module()
 export class ServerModule {
   log = log.get("SERVER");
 
   onStart = Hookable<(args: any) => Awaitable>();
+
   onStop = Hookable<(args: any) => Awaitable>();
 
   constructor(@Inject() cli: Cli) {

@@ -44,5 +44,3 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.append(container);
   ReactDOM.render(React.createElement(MuiSystemView), container);
 });
-
-console.log("xxx??##");

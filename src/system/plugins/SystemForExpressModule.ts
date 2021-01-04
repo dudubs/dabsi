@@ -5,12 +5,14 @@ import { SystemRpc, SystemRpcPath } from "@dabsi/system/common/SystemRpc";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import BodyParser from "body-parser";
 import multer from "multer";
+import RequestModule from "../../modules/RequestModule";
 
 @Module({})
 export default class RpcForExpressModule {
   constructor(
     @Inject() rpcModule: RpcModule,
-    @Inject() expressModule: ExpressModule
+    @Inject() expressModule: ExpressModule,
+    @Inject() requestModule: RequestModule
   ) {
     expressModule.beforeBuildRoutes(app => {
       app.post(
@@ -19,11 +21,6 @@ export default class RpcForExpressModule {
         BodyParser.urlencoded({ extended: true }),
         multer().any(),
         async (req, res) => {
-          const context = Resolver.createContext(
-            req.requestContext,
-            RpcRequest.provide(() => rpcReq)
-          );
-
           const { path, payload } =
             typeof req.body.command === "string"
               ? JSON.parse(req.body.command)
@@ -31,9 +28,15 @@ export default class RpcForExpressModule {
 
           const rpcReq = new RpcRequest(path, payload, req.body);
 
-          res.json({
-            result: await rpcModule.processRequest(SystemRpc, rpcReq, context),
+          const result = await requestModule.processRequest(context => {
+            Resolver.provide(
+              context,
+              RpcRequest.provide(() => rpcReq)
+            );
+            return rpcModule.processRequest(SystemRpc, rpcReq, context);
           });
+
+          res.json({ result });
         }
       );
     });

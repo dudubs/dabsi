@@ -2,9 +2,12 @@ import { Cli } from "@dabsi/modules/Cli";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import RequestModule from "../modules/RequestModule";
 import RpcModule from "../modules/rpc";
+import SessionModule from "../modules/session";
 import { SystemRpc } from "./common/SystemRpc";
 
-@Module({})
+@Module({
+  dependencies: [SessionModule],
+})
 export default class SystemModule {
   log = log.get("SYSTEM");
 

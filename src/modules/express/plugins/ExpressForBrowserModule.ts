@@ -36,7 +36,7 @@ export default class ExpressForBorwserModule {
             if (req.path.endsWith(".js")) {
               return res
                 .contentType("text/javascript")
-                .send(`console.error("script not found ${req.path}")`);
+                .send(`console.error("No script like ${req.path}")`);
             }
             res.status(404).send(`file not found ${req.path}`);
           });

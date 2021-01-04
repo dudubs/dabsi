@@ -14,6 +14,8 @@ import fs from "fs";
 import { Seq } from "immutable";
 import path from "path";
 import { DABSI_ROOT_DIR } from "../..";
+import { Awaitable } from "../../common/typings2/Async";
+import { Hookable } from "../Hookable";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
 import { isRpcConfigResolver, RpcConfigResolver } from "./RpcConfigResolver";
@@ -113,14 +115,12 @@ export default class RpcModule {
   }
 
   protected async _loadDir(dir: string, isRoot = false) {
-    if (!touchSet(this._loadedDirs, dir)) return;
-
-    if (
-      !isRoot &&
-      (await this.loaderModule.isFile(path.join(dir, "index.ts")))
-    ) {
-      this.log.trace(() => `Skip directory ${dir}.`);
-      return;
+    if (!isRoot) {
+      if (!touchSet(this._loadedDirs, dir)) return;
+      if (await this.loaderModule.isFile(path.join(dir, "index.ts"))) {
+        this.log.trace(() => `Skip directory ${dir}.`);
+        return;
+      }
     }
 
     this.log.trace(
@@ -164,12 +164,16 @@ export default class RpcModule {
     }
   }
 
+  beforeRequest = Hookable<(context: AnyResolverMap) => Awaitable>();
+
   async processRequest(
     rpc: AnyRpc,
     rpcReq: RpcRequest,
     context: AnyResolverMap
   ) {
     const { path, payload } = rpcReq;
+
+    await this.beforeRequest.invoke(context);
 
     this.log.info(
       () =>

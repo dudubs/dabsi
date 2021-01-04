@@ -11,3 +11,5 @@ ReactRouterView(AdminRouter, {
 });
 
 export const AdminInfoEvent = Emittable<AdminInfo>();
+
+console.log("xasdaasdsdx");

@@ -15,6 +15,8 @@ import {
   createConnection,
   getMetadataArgsStorage,
 } from "typeorm";
+import ProjectModuleInfo from "../typestack/ProjectModuleInfo";
+import LoaderModule from "./LoaderModule";
 
 @Module({})
 export class DbModule {
@@ -33,7 +35,8 @@ export class DbModule {
     @Inject() cli: Cli,
     @Inject() serverModule: ServerModule,
     @Inject() runner: ModuleRunner,
-    @Inject() protected projectManager: ProjectModule
+    @Inject() protected projectModule: ProjectModule,
+    @Inject() protected loaderModule: LoaderModule
   ) {
     cli.command("db", cli =>
       cli.command("sync", cli =>
@@ -48,10 +51,15 @@ export class DbModule {
       runner.context,
       Connection.provide(() => this.connection)
     );
+
+    projectModule.onProjectModuleLoaded(async projectModuleInfo => {
+      await this._loadProjectModule(projectModuleInfo);
+    });
   }
 
   protected _loadEntityType(entityType: Function) {
     if (!touchSet(this.entityTypes, entityType)) return;
+
     this.log.trace(() => `Loading entity type "${entityType.name}".`);
 
     getMetadataArgsStorage().relations.forEach(r => {
@@ -64,9 +72,7 @@ export class DbModule {
 
   protected async _loadEntityModule(moduleFileName) {
     this.log.trace(() => `Load entities file ${moduleFileName}.`);
-
     const moduleExports = require(moduleFileName);
-
     for (const target of values<Function>(moduleExports)) {
       if (this.entityTypes.has(<any>target)) continue;
       if (isEntityType(target)) {
@@ -75,23 +81,13 @@ export class DbModule {
     }
   }
 
-  @Once() async load() {
-    await this.projectManager.load();
-    for (const projectModuleInfo of this.projectManager.allProjectModules) {
-      const {
-        entities: entitiesDir,
-        ["entities.ts"]: entitiesFile,
-      } = projectModuleInfo.fileMap;
-      if (entitiesDir?.stat.isDirectory()) {
-        for (const baseName of readdirSync(entitiesDir.fileName)) {
-          if (baseName.endsWith(".ts")) {
-            await this._loadEntityModule(
-              path.join(entitiesDir.fileName, baseName)
-            );
-          }
+  async _loadProjectModule(projectModuleInfo: ProjectModuleInfo) {
+    const entitiesDir = path.join(projectModuleInfo.dir, "entities");
+    if (await this.loaderModule.isDir(entitiesDir)) {
+      for (const baseName of await this.loaderModule.readDir(entitiesDir)) {
+        if (baseName.endsWith(".ts")) {
+          await this._loadEntityModule(path.join(entitiesDir, baseName));
         }
-      } else if (entitiesFile?.stat.isFile()) {
-        await this._loadEntityModule(entitiesFile.fileName);
       }
     }
   }

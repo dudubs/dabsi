@@ -60,7 +60,7 @@ Function.prototype.provide = function (resolver?) {
     this,
     resolver ??
       (() => {
-        throw new ResolveError(`No resolve for "${this.name}".`);
+        throw new ResolveError(`No resolve for "${this.name}"`);
       })
   );
 };

@@ -10,7 +10,7 @@ export * from "@dabsi/typedi/decorators/Injectable";
 import "./operators/toCheck";
 import "./operators/checkObject";
 import "./operators/consume";
-import "./operators/flatContext";
+
 import "./operators/checkContext";
 import "./operators/resolveType";
 import "./operators/try";

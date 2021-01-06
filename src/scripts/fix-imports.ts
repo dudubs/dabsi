@@ -21,12 +21,10 @@ function findTsConfigPath(startDir: string) {
   throw new Error(`No tsconfig.json for ${startDir}`);
 }
 
-export default async function ({ write, args: [srcDir] }) {
+export default async function ({ write, args: [srcDir], absolute }) {
   srcDir = realpathSync(srcDir);
 
   const tsConfigPath = findTsConfigPath(srcDir);
-  const tsConfigDir = path.dirname(tsConfigPath);
-
   const tsConfigPaths = await getTsConfigPaths(
     tsConfigPath,
     async path => JSON.parse(await fs.promises.readFile(path, "utf8")),
@@ -57,7 +55,7 @@ export default async function ({ write, args: [srcDir] }) {
       }
     }
     for (const suffix of [".ts", ".tsx", ""]) {
-      const fileName = path + suffix;
+      const fileName = fsPath + suffix;
       if (await isFile(fileName)) {
         return fileName;
       }
@@ -65,6 +63,7 @@ export default async function ({ write, args: [srcDir] }) {
   }
 
   let debug = 0;
+
   for (const fileName of readdirRecursiveSync(srcDir)) {
     const fileSource = readFileSync(fileName, "utf8");
     const fileDir = path.dirname(fileName);
@@ -73,7 +72,7 @@ export default async function ({ write, args: [srcDir] }) {
       /(?<start>^.*)(?<type>import|from|module) "(?<path>[^"\n]+)"(?<end>\;\r?\n|\s+\{})/g,
       fileSource,
       async ({ 0: text, groups: { type, path: importPath, end, start } }) => {
-        const fixedPath = importPath;
+        const pathToFix = importPath;
         if (text !== `${start}${type} "${importPath}"${end}`) {
           console.log(
             { type, importPath },
@@ -86,13 +85,12 @@ export default async function ({ write, args: [srcDir] }) {
         } else {
           fsPath = await tsConfigPaths.getFsPath(importPath);
         }
-
         if (!fsPath) {
           // TODO: check in node_modules
           return text;
         }
 
-        if (fsPath.startsWith(fileDir)) {
+        if (!absolute && fsPath.startsWith(fileDir)) {
           importPath =
             "." +
             fsPath.slice(fileDir.length).replace(/([\\\/]index|)\.tsx?$/, "");
@@ -101,12 +99,12 @@ export default async function ({ write, args: [srcDir] }) {
         }
 
         if (!importPath) {
-          importPath = fixedPath;
+          importPath = pathToFix;
         }
 
-        if (fixedPath !== importPath) {
+        if (pathToFix !== importPath) {
           console.log(
-            `Fix "${fixedPath}" to "${importPath}" at ${path.relative(
+            `Fix "${pathToFix}" to "${importPath}" at ${path.relative(
               srcDir,
               fileName
             )}.`
@@ -120,44 +118,5 @@ export default async function ({ write, args: [srcDir] }) {
     if (fileOutSource === fileSource) continue;
 
     if (write) await fs.promises.writeFile(fileName, fileOutSource);
-
-    // for (const x of fileSource.matchAll(
-    //   /(?<type>import|from|module) "(?<path>[^"\n]+)"/g
-    // )) {
-    //   console.log({ x });
-    // }
-
-    // const fileFixedSource = fileSource.replace(
-    //   /(?<type>import|from|module) "(?<path>[^"\n]+)"/g,
-    //   (...args) => {
-    //     const { type, path: originalImportPath } = args[args.length - 1] as {
-    //       path: string;
-    //       type: "import" | "from";
-    //     };
-
-    //     let importPath = originalImportPath;
-
-    //     if (importPath.startsWith(".")) {
-    //       const importRelativePath = importPath;
-    //       const importAbsolutePath = path.resolve(fileDir, importRelativePath);
-    //       if (importAbsolutePath.startsWith(DABSI_SRC_PATH)) {
-    //         importPath =
-    //           "@dabsi/" +
-    //           importAbsolutePath
-    //             .slice(DABSI_SRC_PATH.length + 1)
-    //             .replace(/\\/g, "/");
-    //       }
-
-    //       if (importPath !== originalImportPath) {
-    //         console.log(`Fix "${originalImportPath}" to "${importPath}"`);
-    //       }
-    //     }
-    //     return `${type} "${importPath}"`;
-    //   }
-    // );
-
-    // if (write && fileFixedSource !== fileSource) {
-    //   // writeFileSync(fileName, fileFixedSource);
-    // }
   }
 }

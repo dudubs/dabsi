@@ -29,6 +29,9 @@ export class DevModule {
               watchReloadFile("server", () => {
                 this.reload();
               });
+              watchReloadFile("common", () => {
+                this.reload();
+              });
               return;
             }
             return next();

@@ -1,7 +1,7 @@
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { Group } from "@dabsi/system/modules/acl/entities/Group";
-import { User } from "@dabsi/system/modules/acl/entities/User";
+import { Group } from "@dabsi/system/acl/entities/Group";
+import { User } from "@dabsi/system/acl/entities/User";
 
 const getConnection = TestConnection([User, Group]);
 

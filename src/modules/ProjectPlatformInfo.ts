@@ -9,6 +9,7 @@ export default class ProjectPlatformInfo {
   generatedDir = path.join(this.projectInfo.generatedDir, this.name);
 
   generatedIndexFileName = path.join(this.generatedDir, "index.ts");
+  generatedTestsFileName = path.join(this.generatedDir, "tests.ts");
 
   tsConfigBaseName = `tsconfig.${this.name}.json`;
 

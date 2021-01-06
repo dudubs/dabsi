@@ -17,7 +17,7 @@ import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
-import { User } from "@dabsi/system/modules/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/User";
 import {
   TEST_FORUMS_ADMIN_TOKEN,
   TEST_GOD_TOKEN,
@@ -91,7 +91,7 @@ decorateDesignType(User, "blockedUsers", Object as Function, [
   ManyToMany(() => User),
 ]);
 
-declare module "@dabsi/system/modules/acl/entities/User" {
+declare module "@dabsi/system/acl/entities/User" {
   interface User {
     blockedUsers: DataRelation<User>[];
   }

@@ -1,25 +1,28 @@
 import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import catchError from "../common/async/catchError";
+import { flatObject } from "../common/object/flatObject";
+import Lazy from "../common/patterns/lazy";
 import { Awaitable } from "../common/typings2/Async";
-import { ResolveError } from "../typedi/ResolveError";
-import { Cli, CliError } from "./Cli";
+import { Cli } from "./Cli";
 import { Hookable } from "./Hookable";
+
+export class Request {
+  onEnd = Hookable<() => Awaitable>();
+  onStart = Hookable<() => Awaitable>();
+  onError = Hookable<(error: any) => Awaitable>();
+}
 
 @Module()
 export default class RequestModule {
   log = log.get("REQUEST");
 
-  readonly context: AnyResolverMap = Object.setPrototypeOf(
-    {},
+  context: AnyResolverMap = Object.setPrototypeOf(
+    {
+      ...Request.provide(),
+    },
     this.runnerContext
   );
 
-  protected requiredResolvers: Resolver[] = [];
-
-  beforeRequest = Hookable<(context: AnyResolverMap) => Awaitable>();
-
-  afterRequest = Hookable<(context: AnyResolverMap) => Awaitable>();
+  contextResolvers: Resolver<Awaitable<AnyResolverMap>>[] = [];
 
   async processRequest<T>(
     callback: (context: AnyResolverMap) => Awaitable<T>
@@ -27,17 +30,23 @@ export default class RequestModule {
     // TODO: flat
     const context = Object.create(this.context);
 
-    await this.beforeRequest.invoke(context);
+    const req = new Request();
+    Resolver.provide(
+      context,
+      Request.provide(() => req)
+    );
+    for (const resolver of this.contextResolvers) {
+      Resolver.provide(context, await Resolver.resolve(resolver, context));
+    }
+    await req.onStart.invoke();
     try {
       return await callback(context);
+    } catch (error) {
+      await req.onError.invoke(error);
+      throw error;
     } finally {
-      await this.afterRequest.invoke(context);
+      await req.onEnd.invoke();
     }
-  }
-
-  require(...resolvers: Resolver[]): this {
-    this.requiredResolvers.push(...resolvers);
-    return this;
   }
 
   constructor(

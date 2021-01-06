@@ -6,8 +6,8 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
-import { Group } from "@dabsi/system/modules/acl/entities/Group";
-import { User } from "@dabsi/system/modules/acl/entities/User";
+import { Group } from "@dabsi/system/acl/entities/Group";
+import { User } from "@dabsi/system/acl/entities/User";
 
 @Entity({ name: "acl/permissions" })
 @Index(["user", "token"])

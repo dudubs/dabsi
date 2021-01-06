@@ -1,4 +1,5 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
+import { defined } from "@dabsi/common/object/defined";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   AnyRpc,
@@ -39,6 +40,7 @@ export type RpcNamespace = Rpc<{
     connections: Readonly<Record<string, any>>;
 
     getChildKey(child: AnyRpc): string | undefined;
+    definedChildKey(child: AnyRpc): string;
   };
 }>;
 
@@ -75,6 +77,9 @@ export function RpcNamespace(): RpcNamespace {
       connections,
       getChildKey(child) {
         return childKeyMap.get(child)!;
+      },
+      definedChildKey(child) {
+        return defined(childKeyMap.get(child)!, () => `No child key!`);
       },
       registerDefault(key, rpc) {
         return this.register(key, rpc)[0];

@@ -1,4 +1,4 @@
-import { mapObject } from "../../common/object/mapObject";
+import { mapObject } from "@dabsi/common/object/mapObject";
 import { Constructor } from "../../common/typings2/Constructor";
 import { DataSource } from "../../typedata/DataSource";
 import { Resolver } from "../../typedi";

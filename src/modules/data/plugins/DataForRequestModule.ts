@@ -3,8 +3,7 @@ import DataSourceFactoryResolver from "@dabsi/modules/data/DataSourceFactroyReso
 import { EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import DataModule from "..";
-import ExpressModule from "../../express";
-import RequestModule from "../../RequestModule";
+import RequestModule, { Request } from "../../RequestModule";
 
 @Module()
 export default class DataForRequestModule {
@@ -12,20 +11,25 @@ export default class DataForRequestModule {
     @Inject() dataModule: DataModule,
     @Inject() requestModule: RequestModule
   ) {
-    requestModule.beforeRequest(async context => {
-      await dataModule.withQueryRunner(async queryRunner => {
-        Resolver.provide(
-          context,
-          DataSourceFactoryResolver.provide(() => entityType =>
-            new DataModuleSource(
-              dataModule,
-              () => queryRunner,
-              entityType,
-              EmptyDataCursor
-            )
+    Resolver.provide(
+      requestModule.context,
+      DataSourceFactoryResolver.provide()
+    );
+    requestModule.contextResolvers.push(
+      Resolver.consume([Request], async req => {
+        const [queryRunner, release] = await dataModule.withQueryRunner();
+
+        req.onEnd(() => release());
+
+        return DataSourceFactoryResolver.provide(() => entityType =>
+          new DataModuleSource(
+            dataModule,
+            () => queryRunner,
+            entityType,
+            EmptyDataCursor
           )
         );
-      });
-    });
+      })
+    );
   }
 }

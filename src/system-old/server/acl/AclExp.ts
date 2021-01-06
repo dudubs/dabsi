@@ -7,7 +7,7 @@ import {
   AclRow,
   AclRowType,
 } from "@dabsi/system-old/server/acl/AclCriterion";
-import { User } from "@dabsi/system/modules/acl/entities/User";
+import { User } from "@dabsi/system/acl/entities/User";
 export type AclCriterionExp = (
   callback: <T extends AclRow<any>>(dataRow: T) => AclCriterion<AclRowType<T>>
 ) => AclCriterion<any>;

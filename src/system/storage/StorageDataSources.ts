@@ -1,4 +1,4 @@
-import DataSourceResolver from "../../modules/data/DataSourceResolver";
+import DataSourceResolver from "@dabsi/modules/data/DataSourceResolver";
 import { StorageFile } from "./entities/StorageFile";
 
 export default DataSourceResolver({

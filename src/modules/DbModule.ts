@@ -7,7 +7,6 @@ import { ServerModule } from "@dabsi/modules/ServerModule";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
-import { readdirSync } from "fs";
 import path from "path";
 import {
   Connection,
@@ -41,8 +40,8 @@ export class DbModule {
     cli.command("db", cli =>
       cli.command("sync", cli =>
         cli //
-          .onBuild(y => y.boolean("force"))
-          .onBuild(args => this.sync(args))
+          .onBuild(y => y.boolean(["f", "force"]))
+          .onRun(args => this.sync(args))
       )
     );
     serverModule.onStart(() => this.init());
@@ -83,6 +82,7 @@ export class DbModule {
 
   async _loadProjectModule(projectModuleInfo: ProjectModuleInfo) {
     const entitiesDir = path.join(projectModuleInfo.dir, "entities");
+
     if (await this.loaderModule.isDir(entitiesDir)) {
       for (const baseName of await this.loaderModule.readDir(entitiesDir)) {
         if (baseName.endsWith(".ts")) {
@@ -92,7 +92,7 @@ export class DbModule {
     }
   }
 
-  protected async sync({ force }) {
+  protected async sync({ f, force = f }) {
     await this.init();
     if (force) {
       await this.connection.query(`PRAGMA foreign_keys = OFF;`);

@@ -4,7 +4,6 @@ import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
 import createConfigResolverFactory from "@dabsi/modules/rpc/configResolverFactory";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { SystemRpc } from "@dabsi/system/common/SystemRpc";
 import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
@@ -14,8 +13,6 @@ import fs from "fs";
 import { Seq } from "immutable";
 import path from "path";
 import { DABSI_ROOT_DIR } from "../..";
-import { Awaitable } from "../../common/typings2/Async";
-import { Hookable } from "../Hookable";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
 import { isRpcConfigResolver, RpcConfigResolver } from "./RpcConfigResolver";
@@ -117,7 +114,7 @@ export default class RpcModule {
   protected async _loadDir(dir: string, isRoot = false) {
     if (!isRoot) {
       if (!touchSet(this._loadedDirs, dir)) return;
-      if (await this.loaderModule.isFile(path.join(dir, "index.ts"))) {
+      if (await this.loaderModule.getIndexFile(dir)) {
         this.log.trace(() => `Skip directory ${dir}.`);
         return;
       }
@@ -139,7 +136,7 @@ export default class RpcModule {
     }
   }
 
-  protected async check(context: AnyResolverMap) {
+  async check(rpc: AnyRpc, context: AnyResolverMap) {
     this._isChecking = true;
     this.log.trace(() => "checking");
 
@@ -151,7 +148,7 @@ export default class RpcModule {
     );
 
     try {
-      const configResolver = this.getRpcConfigResolver(SystemRpc);
+      const configResolver = this.getRpcConfigResolver(rpc);
       Resolver.check(configResolver, context);
     } catch (error) {
       if (error instanceof ResolveError) {
@@ -164,8 +161,6 @@ export default class RpcModule {
     }
   }
 
-  beforeRequest = Hookable<(context: AnyResolverMap) => Awaitable>();
-
   async processRequest(
     rpc: AnyRpc,
     rpcReq: RpcRequest,
@@ -173,7 +168,10 @@ export default class RpcModule {
   ) {
     const { path, payload } = rpcReq;
 
-    await this.beforeRequest.invoke(context);
+    Resolver.provide(
+      context,
+      RpcRequest.provide(() => rpcReq)
+    );
 
     this.log.info(
       () =>
@@ -184,11 +182,6 @@ export default class RpcModule {
     );
 
     this.log.trace(() => colors.gray(JSON.stringify(payload, null, 2)));
-
-    Resolver.provide(
-      context,
-      RpcRequest.provide(() => rpcReq)
-    );
 
     const configResolver = this.getRpcConfigResolver(rpc);
     const config = Resolver.resolve(configResolver, context);

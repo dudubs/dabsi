@@ -1,11 +1,10 @@
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { mergeValueTransformer } from "@dabsi/typeorm/mergeValueTransformer";
+import { EntityRelation } from "@dabsi/typeorm/relations";
 import { EntityMetadata, ValueTransformer } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { setDefinedValue } from "@dabsi/common/object/setDefinedValue";
-import { EntityRelation } from "@dabsi/typeorm/relations";
-import { mergeValueTransformer } from "@dabsi/typeorm/mergeValueTransformer";
 
 /*
     columns (data, relation)
@@ -35,13 +34,14 @@ export const getDataEntityInfo = WeakMapFactory((metadata: EntityMetadata) => {
         nonRelationColumnKeys.push(column.propertyName);
       }
     }
-    setDefinedValue(
-      propertyNameToTransformer,
-      column.propertyName,
-      Array.isArray(column.transformer)
-        ? mergeValueTransformer(column.transformer)
-        : column.transformer
-    );
+
+    const transformer = Array.isArray(column.transformer)
+      ? mergeValueTransformer(column.transformer)
+      : column.transformer;
+
+    if (transformer !== undefined) {
+      propertyNameToTransformer[column.propertyName] = transformer;
+    }
   }
 
   for (let relation of metadata.relations) {

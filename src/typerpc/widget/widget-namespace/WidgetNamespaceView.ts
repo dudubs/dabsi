@@ -22,35 +22,6 @@ import {
 
 const WidgetNamespaceViewContext = createContext([] as WidgetNamespaceView[]);
 
-export function useWidgetNamespaceConnection<T extends AnyRpc>(
-  rpc: T
-): RpcConnection<T> | undefined {
-  const context = useContext(WidgetNamespaceViewContext);
-  return useMemo(() => {
-    for (const view of context) {
-      const child = view.connection.ns.getChild(rpc);
-      if (child) {
-        return child;
-      }
-    }
-  }, [context, rpc]);
-}
-
-export function useWidgetNamespaceViewProps<T extends AnyWidget>(
-  widget: T
-): WidgetViewProps<RpcConnection<T>> | undefined {
-  const context = useContext(WidgetNamespaceViewContext);
-  const [view, childKey] = useMemo(() => {
-    for (const view of context) {
-      const childKey = view.connection.ns.rpc.getChildKey(widget);
-      if (childKey) {
-        return [view, childKey];
-      }
-    }
-  }, [context, widget]) || [null, null];
-  return view?.getChildProps(childKey!);
-}
-
 function Provider({ value, children }) {
   const context = useContext(WidgetNamespaceViewContext);
   return createElement(WidgetNamespaceViewContext.Provider, {
@@ -58,6 +29,7 @@ function Provider({ value, children }) {
     children,
   });
 }
+
 export class WidgetNamespaceView
   extends AbstractWidgetView<
     RpcConnection<WidgetNamespace>,
@@ -89,7 +61,7 @@ export class WidgetNamespaceView
     };
   }
 
-  _childKeys;
+  _childKeys!: Set<string>;
 
   _warnings = new Set();
 
@@ -124,6 +96,37 @@ export class WidgetNamespaceView
       value: this,
       children: this.props.children(this),
     });
+  }
+
+  static useConnection<T extends AnyRpc>(rpc: T): RpcConnection<T> {
+    const context = useContext(WidgetNamespaceViewContext);
+    return useMemo(() => {
+      for (const view of context) {
+        const child = view.connection.ns.getChild(rpc);
+        if (child) {
+          return child;
+        }
+      }
+      throw new Error("No widget namespace");
+    }, [context, rpc]);
+  }
+
+  static useViewProps<T extends AnyWidget>(
+    widget: T
+  ): WidgetViewProps<RpcConnection<T>> {
+    const context = useContext(WidgetNamespaceViewContext);
+    const [view, childKey] = useMemo(() => {
+      for (const view of context) {
+        const childKey = view.connection.ns.rpc.getChildKey(widget);
+        if (childKey) {
+          return [view, childKey];
+        }
+      }
+    }, [context, widget]) || [null, null];
+    if (!view) {
+      throw new Error(`No widget namespace`);
+    }
+    return view.getChildProps(childKey!);
   }
 }
 

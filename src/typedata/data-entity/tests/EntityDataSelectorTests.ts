@@ -1,7 +1,6 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
-import { isEmptyObject } from "@dabsi/common/object/isEmptyObject";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Type } from "@dabsi/common/typings2/Type";
 import { subTest } from "@dabsi/jasmine/subTest";
@@ -30,6 +29,7 @@ import {
   CEntity,
 } from "@dabsi/typeorm/relations/tests/TestEntities";
 import { Connection, DeepPartial, EntityMetadata, ObjectType } from "typeorm";
+import { hasKeys } from "../../../common/object/hasKeys";
 
 import objectContaining = jasmine.objectContaining;
 
@@ -359,7 +359,7 @@ function testUnion(
 
 function expectToRow(row, expectors) {
   expect(row).toBeTruthy();
-  if (isEmptyObject(expectors)) throw new Error(`expector can't be empty.`);
+  if (!hasKeys(expectors)) throw new Error(`expector can't be empty.`);
 
   for (const [key, expector] of entries(expectors)) {
     subTest(`At key "${key}", `, () => {

@@ -1,4 +1,5 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Type } from "@dabsi/common/typings2/Type";
 
 import { provideType } from "@dabsi/typedi/provideType";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
@@ -22,7 +23,9 @@ declare global {
     provide<T extends Constructor<any>>(
       this: T,
       resolver: Resolver<InstanceType<T>>
-    ): ResolverMap<T>;
+    ): ResolverMap<InstanceType<T>>;
+
+    provide<T>(this: Type<T>, resolver: Resolver<T>): ResolverMap<T>;
 
     provide<T extends Constructor<any>>(this: T): ResolverMap<InstanceType<T>>;
   }

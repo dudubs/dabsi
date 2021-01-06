@@ -155,24 +155,21 @@ export default class DataModule {
     }
   }
 
-  async withQueryRunner<T = void>(
-    callback: (queryRunner: QueryRunner) => Promise<T>
-  ): Promise<T> {
+  async withQueryRunner(): Promise<
+    [qr: QueryRunner, release: () => Promise<void>]
+  > {
     if (this.queryRunnerPool) {
       const queryRunner = await this.queryRunnerPool.acquire();
-      try {
-        return callback(queryRunner);
-      } finally {
-        await this.queryRunnerPool.release(queryRunner);
-      }
+      return [
+        queryRunner,
+        () => {
+          return this.queryRunnerPool!.release(queryRunner);
+        },
+      ];
     } else {
       const queryRunner = this.connection.createQueryRunner();
       await queryRunner.connect();
-      try {
-        return callback(queryRunner);
-      } finally {
-        await queryRunner.release();
-      }
+      return [queryRunner, () => queryRunner.release()];
     }
   }
 }

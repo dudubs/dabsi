@@ -91,6 +91,13 @@ export default class BrowserModule {
       if (!indexFileName) continue;
       this._indexFileNames!.add(indexFileName);
 
+      if (/[\\\/]index\.tsx?$/.test(indexFileName)) {
+        const testsFileName = await this.loaderModule.getIndexFile(
+          path.join(platformModuleDir, "tests")
+        );
+        testsFileName && this._testsFileNames!.add(testsFileName);
+      }
+
       const platformModuleTsConfigFileName = path.join(
         platformModuleDir,
         "tsconfig.json"
@@ -176,22 +183,53 @@ export default class BrowserModule {
     );
   }
   _indexFileNames: Set<string> | null = null;
+  _testsFileNames: Set<string> | null = null;
 
-  protected async _makeIndexFile() {
-    let indexFileCode = ``;
-
-    for (const indexFileName of this._indexFileNames!) {
-      indexFileCode += `import "${this.projectModule.mainTsConfigPaths.getTsPath(
-        indexFileName,
-        this.mainProjectPlatformInfo.generatedDir
-      )}";\n`;
+  protected *_getRelativeImportNames(fileNames: Iterable<string>) {
+    for (const fileName of fileNames) {
+      yield {
+        fileName,
+        importName: this.projectModule.mainTsConfigPaths.getTsPath(
+          fileName,
+          this.mainProjectPlatformInfo.generatedDir
+        ),
+      };
     }
-    await this.makeModule.makeFile(
+  }
+  protected _generatedImports() {
+    return (
       this.mainProjectPlatformInfo.generatedIndexFileName,
       `import "${this.projectModule.mainTsConfigPaths.getTsPath(
         path.join(DABSI_SRC_PATH, "browser/register"),
         this.mainProjectPlatformInfo.generatedDir
-      )}";\n${indexFileCode}`
+      )}";\n`
+    );
+  }
+  protected async _makeIndexFile() {
+    let code = ``;
+
+    for (const { importName } of this._getRelativeImportNames(
+      this._indexFileNames!
+    )) {
+      code += `import "${importName}";\n`;
+    }
+
+    await this.makeModule.makeFile(
+      this.mainProjectPlatformInfo.generatedIndexFileName,
+      this._generatedImports() + code
+    );
+  }
+
+  protected async _makeTestsFile() {
+    let code = ``;
+    for (const { importName } of this._getRelativeImportNames(
+      this._testsFileNames!
+    )) {
+      code += `describe("${importName}", ()=>{ require("${importName}") });\n`;
+    }
+    await this.makeModule.makeFile(
+      this.mainProjectPlatformInfo.generatedTestsFileName,
+      this._generatedImports() + code
     );
   }
 
@@ -200,6 +238,7 @@ export default class BrowserModule {
     await this.projectModule.loadTsConfigPaths();
 
     this._indexFileNames = new Set();
+    this._testsFileNames = new Set();
     // await this.hooks.make();
     await this._makeConfigs();
 
@@ -208,8 +247,10 @@ export default class BrowserModule {
     });
 
     await this._makeIndexFile();
+    await this._makeTestsFile();
 
     this._indexFileNames = null;
+    this._testsFileNames = null;
   }
 
   webpackCallback = (err, stats) => {
@@ -238,6 +279,7 @@ export default class BrowserModule {
       },
       entry: {
         index: this.mainProjectPlatformInfo.generatedIndexFileName,
+        tests: this.mainProjectPlatformInfo.generatedTestsFileName,
       },
       stats: {
         warnings: false,

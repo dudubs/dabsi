@@ -24,12 +24,14 @@ export const useStyles = makeStyles(theme =>
   })
 );
 
-export default function MuiUserAvatarInputView() {
+export default function MuiAvatarInput(props: {
+  url: string | undefined;
+  onChange?(canvas: HTMLCanvasElement);
+}) {
   const classes = useStyles();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { store, state } = useStore(() => ({
-    imageUrl: "",
-    // "https://www.denofgeek.com/wp-content/uploads/2016/11/avatar-sequel.jpg?resize=768%2C432",
+    imageUrl: props.url,
   }));
 
   return (
@@ -51,13 +53,13 @@ export default function MuiUserAvatarInputView() {
           <MuiAvatarEditor
             image={state.imageUrl}
             onLoadSuccess={() => {
-              URL.revokeObjectURL(state.imageUrl);
+              state.imageUrl && URL.revokeObjectURL(state.imageUrl);
             }}
             onCancel={() => {
               store.set("imageUrl", "");
             }}
             onApply={({ canvas }) => {
-              // console.log(canvas.toBlob());
+              props.onChange?.(canvas);
             }}
           />
         </>

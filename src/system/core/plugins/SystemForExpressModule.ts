@@ -34,6 +34,11 @@ export default class SystemForExpressModule {
               ? JSON.parse(req.body.command)
               : req.body;
 
+          if (Array.isArray(req.files)) {
+            for (const file of req.files) {
+              req.body[file.fieldname] = file.buffer;
+            }
+          }
           const rpcReq = new RpcRequest(path, payload, req.body);
 
           const result = await rpcModule.processRequest(

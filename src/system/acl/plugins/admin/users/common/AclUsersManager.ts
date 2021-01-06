@@ -1,4 +1,4 @@
-import AclEditUser from "./AclEditUser";
+import AclAdminEditUser from "./AclAdminEditUser";
 import { DataManager } from "@dabsi/typerpc/data-manager";
 import AclUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoInput";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
@@ -11,5 +11,5 @@ export default DataManager({
     lastName: String,
   }),
   addInput: AclUserBasicInfoInput,
-  edit: WidgetNamespace(AclEditUser),
+  edit: WidgetNamespace(AclAdminEditUser),
 });

@@ -11,5 +11,5 @@ const getMachineId = Lazy(() => {
     .slice(0, 6);
 });
 export default function FileId() {
-  return getMachineId() + crypto.randomBytes(16).toString("base64");
+  return getMachineId() + crypto.randomBytes(16).toString("hex");
 }

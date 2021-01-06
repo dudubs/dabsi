@@ -16,7 +16,7 @@ export default class LocalStorageModule {
     cli.command("start", cli =>
       cli.onRun({
         before: () => {
-          mkdirSync(this.localDir);
+          mkdirSync(this.localDir, { recursive: true });
         },
       })
     );

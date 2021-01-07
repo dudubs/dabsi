@@ -12,7 +12,6 @@ import {
   ModuleTarget,
 } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { getTsConfigPaths } from "@dabsi/typestack/getTsConfigPaths";
 import ProjectInfo from "@dabsi/typestack/ProjectInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
 import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
@@ -157,7 +156,7 @@ export default class ProjectModule {
   mainTsConfigPaths!: TsConfigPaths;
 
   @Once() async loadTsConfigPaths() {
-    this.mainTsConfigPaths = await getTsConfigPaths(
+    this.mainTsConfigPaths = await TsConfigPaths.fromFile(
       path.join(this.mainProject.dir, "tsconfig.json"),
       path => this.loaderModule.readJsonFile(path),
       path => this.loaderModule.isFile(path),

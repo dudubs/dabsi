@@ -54,7 +54,11 @@ export default class RpcModule {
             () => `Find index file for ${inspect(info.resolver)}.`
           );
           const rpcModule = info.nodeModule.children.find(child => {
-            return Seq.Keyed(child.exports).find(x => {
+            if (/[\\\/]node_modules[\\\/]/.test(child.filename)) return false;
+
+            return Seq.Keyed(
+              typeof child.exports === "object" ? child.exports : {}
+            ).find(x => {
               return (
                 x === info.resolver.rpc || (x as any)?.[0] === info.resolver.rpc
               );

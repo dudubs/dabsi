@@ -155,7 +155,7 @@ export function SystemMapView<
         orderedKeys.map((key, index) => {
           const isLast = orderedKeys.length === index + 1;
           const [render, options] = RendererOrProps(children?.[key], props =>
-            createElement(SystemView as () => ReactElement, props)
+            SystemView.render(props)
           );
           let element = render(view.getChildProps(key));
           if (renderItem) {

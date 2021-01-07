@@ -2,28 +2,11 @@ import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { touchObject } from "@dabsi/common/object/touchObject";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
-import { readFileSync } from "fs";
 import path from "path";
 
-function getConfigPaths(fileName: string) {
-  const text = readFileSync(fileName, "utf8");
-  const config = JSON.parse(text);
+export type TsConfigPaths = ReturnType<typeof TsConfigPaths>;
 
-  const co = config?.compilerOptions;
-  if (co?.paths) {
-    const baseUrl = path.resolve(path.dirname(fileName), co.baseUrl);
-    return mapObject(co.paths as Record<string, string[]>, tsPaths =>
-      tsPaths.map(tsPath => path.resolve(baseUrl, tsPath))
-    );
-  }
-  if (typeof config?.extends === "string") {
-    return getConfigPaths(path.resolve(path.dirname(fileName), config.extends));
-  }
-}
-
-export type TsConfigPaths = ReturnType<typeof createTsConfigPaths>;
-
-export default function createTsConfigPaths(
+export function TsConfigPaths(
   configDir: string,
   baseUrl: string,
   paths: Record<string, string[]>,
@@ -146,3 +129,27 @@ export default function createTsConfigPaths(
     }
   }
 }
+
+TsConfigPaths.fromFile = async function getTsConfigPaths(
+  tsConfigPath: string,
+  readJsonFile: (path: string) => Promise<any>,
+  isFile: (path: string) => Promise<boolean>,
+  isDir: (path: string) => Promise<boolean>
+): Promise<TsConfigPaths> {
+  const tsConfig = await readJsonFile(tsConfigPath);
+  const co = tsConfig?.compilerOptions;
+  const tsConfigDir = path.dirname(tsConfigPath);
+  if (co?.paths) {
+    return TsConfigPaths(tsConfigDir, co.baseUrl, co.paths, isFile, isDir);
+  }
+  if (tsConfig?.extends) {
+    return getTsConfigPaths(
+      path.resolve(tsConfigDir, tsConfig.extends),
+      readJsonFile,
+      isFile,
+      isDir
+    );
+  }
+  // default
+  return TsConfigPaths(tsConfigDir, ".", {}, isFile, isDir);
+};

@@ -1,5 +1,5 @@
-import AclEditGroup from "./AclEditGroup";
-import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclGroupBasicInfoInput";
+import AclEditGroup from "./AclAdminEditGroup";
+import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 
 export default AclEditGroup.registerDefault(

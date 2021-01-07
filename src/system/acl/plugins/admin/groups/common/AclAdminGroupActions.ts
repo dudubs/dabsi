@@ -1,4 +1,4 @@
-import AclEditGroup from "./AclEditGroup";
+import AclEditGroup from "./AclAdminEditGroup";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 

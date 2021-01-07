@@ -1,5 +1,5 @@
-import AclEditGroup from "./AclEditGroup";
-import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclGroupBasicInfoInput";
+import AclEditGroup from "./AclAdminEditGroup";
+import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
 import { DataManager } from "@dabsi/typerpc/data-manager";
 import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";

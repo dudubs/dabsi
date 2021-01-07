@@ -17,10 +17,8 @@ export default class DataForRequestModule {
     );
     requestModule.contextResolvers.push(
       Resolver.consume([Request], async req => {
-        const [queryRunner, release] = await dataModule.withQueryRunner();
-
+        const [queryRunner, release] = await dataModule.createQueryRunner();
         req.onEnd(() => release());
-
         return DataSourceFactoryResolver.provide(() => entityType =>
           new DataModuleSource(
             dataModule,

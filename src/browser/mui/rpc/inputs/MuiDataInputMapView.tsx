@@ -23,7 +23,7 @@ export type MuiDataInputMapViewProps<
 export function MuiDataInputMapView<C extends RpcConnection<AnyDataInputMap>>({
   GridProps,
   itemGridProps,
-  renderTarget = props => <SystemView {...props} />,
+  renderTarget = props => <SystemView.Component {...props} />,
   noKeysText = lang`NO_KEYS`,
   noKeysTypographyProps,
   ...props

@@ -39,7 +39,7 @@ WidgetRouterView(
         title={lang`CREATE_NEW_USER`}
         Breadcrumbs={AclBreadcrumbs.Users}
       >
-        <SystemView {...props} />
+        <SystemView.Component {...props} />
       </MuiSystemPage>
     );
   }

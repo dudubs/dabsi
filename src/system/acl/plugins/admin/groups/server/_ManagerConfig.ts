@@ -1,10 +1,11 @@
-import AclGroupsManager from "@dabsi/system/acl/plugins/admin/groups/common/AclGroupsManager";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { Group } from "@dabsi/system/acl/entities/Group";
-import OldSystemRpcConfigXResolver from "@dabsi/modules/rpc/OldSystemRpcConfigXResolver";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import AclGroupsManager from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupsManager";
+import { DataRow } from "@dabsi/typedata/DataRow";
 import RpcConfigFactory from "../../../../../../modules/rpc/RpcConfigFactory";
 
+// TODO: DataManagerConfigResolver(EntityType, ...)
 export default RpcConfigResolver(
   AclGroupsManager,
   {
@@ -32,7 +33,7 @@ export default RpcConfigResolver(
         },
       },
       editConfigFactory: ($, group) =>
-        $(c.createEditConfig(Group.provide(() => group))),
+        $(c.createEditConfig(DataRow(Group).provide(() => group))),
 
       addInputConfig: c.createAddInputConfig(),
       addSubmit({ groupName }) {

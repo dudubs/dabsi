@@ -1,4 +1,4 @@
-import AclGroupUsers from "@dabsi/system/acl/plugins/admin/groups/common/AclGroupActions";
+import AclGroupUsers from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupActions";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { DataRow } from "@dabsi/typedata/DataRow";

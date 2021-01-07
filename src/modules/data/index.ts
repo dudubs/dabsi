@@ -155,7 +155,7 @@ export default class DataModule {
     }
   }
 
-  async withQueryRunner(): Promise<
+  async createQueryRunner(): Promise<
     [qr: QueryRunner, release: () => Promise<void>]
   > {
     if (this.queryRunnerPool) {

@@ -1,11 +1,11 @@
-import createTsConfigPaths from "./TsConfigPaths";
+import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
 
 it("", async () => {
   const rootDir = "/worksacpe/projects";
 
   const isFile = async fileName => !/[\\\/]folder(|\.tsx?)$/.test(fileName);
 
-  const parser = createTsConfigPaths(
+  const parser = TsConfigPaths(
     rootDir + "/my",
     ".",
     {

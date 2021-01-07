@@ -8,8 +8,8 @@ import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
 import Typography from "@material-ui/core/Typography";
 import React, { useRef } from "react";
-import AclGroupActions from "../common/AclGroupActions";
-import AclGroupUsersTable from "../common/AclGroupUsersTable";
+import AclGroupActions from "../common/AclAdminGroupActions";
+import AclGroupUsersTable from "../common/AclAdminGroupUsersTable";
 
 SystemView(AclGroupUsersTable, props => {
   const {

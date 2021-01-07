@@ -1,10 +1,9 @@
-import Button, { ButtonProps } from "@material-ui/core/Button";
-import React from "react";
-import { ReactElement, ReactNode } from "react";
+import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
+import { MuiThemeProvider } from "@dabsi/browser/mui/MuiSystem";
+import { MuiFormViewTheme } from "@dabsi/browser/mui/rpc/MuiFormViewTheme";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { Hook } from "@dabsi/react/Hook";
 import { useEmitter } from "@dabsi/react/reactor/useEmitter";
-
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import SystemView from "@dabsi/system/core/view/SystemView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
@@ -14,10 +13,8 @@ import {
   FormViewEvent,
   FormViewProps,
 } from "@dabsi/typerpc/widget/form/FormView";
-import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { MuiThemeProvider } from "@dabsi/browser/mui/MuiSystem";
-import { MuiFormViewTheme } from "@dabsi/browser/mui/rpc/MuiFormViewTheme";
-import { Renderer } from "@dabsi/react/renderer";
+import Button, { ButtonProps } from "@material-ui/core/Button";
+import React, { ReactElement, ReactNode } from "react";
 
 export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = PartialKeys<
   FormViewProps<C>,
@@ -40,7 +37,7 @@ export const MuiFormView = <C extends RpcConnection<AnyForm>>(
     <MuiThemeProvider theme={MuiFormViewTheme}>
       <FormView
         {...props}
-        renderInput={props.renderInput || Renderer(SystemView)}
+        renderInput={props.renderInput || SystemView.render}
         children={({ input }) => (
           <MuiGrid direction={"column"} spacing={2}>
             {input}

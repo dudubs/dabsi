@@ -2,8 +2,8 @@ import { Timeout } from "@dabsi/common/async/Timeout";
 import replaceAsync from "@dabsi/common/string/replaceAsync";
 import { readdirRecursiveSync } from "@dabsi/filesystem/readdirRecursiveSync";
 import { inspect } from "@dabsi/logging/inspect";
-import { getTsConfigPaths } from "@dabsi/typestack/getTsConfigPaths";
-import TsConfigPaths from "@dabsi/typestack/TsConfigPaths";
+import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
+
 import fs, { existsSync, readFileSync, realpathSync } from "fs";
 import path from "path";
 
@@ -25,7 +25,7 @@ export default async function ({ write, args: [srcDir], absolute }) {
   srcDir = realpathSync(srcDir);
 
   const tsConfigPath = findTsConfigPath(srcDir);
-  const tsConfigPaths = await getTsConfigPaths(
+  const tsConfigPaths = await TsConfigPaths.fromFile(
     tsConfigPath,
     async path => JSON.parse(await fs.promises.readFile(path, "utf8")),
     isFile,

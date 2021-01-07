@@ -20,6 +20,16 @@ export function mainCli(): boolean {
         const scriptModule = require(`@dabsi/scripts/${scriptName}`);
         await scriptModule.default(args);
       }
-    ).argv;
+    )
+    .command(
+      "run [moduleName] [args...]",
+      "",
+      y => y,
+      async ({ _: args, moduleName }) => {
+        const scriptModule = require(`@dabsi/${moduleName}/cli`);
+        await scriptModule.default(process.argv.slice(2));
+      }
+    )
+    .help(false).argv;
   return true;
 }

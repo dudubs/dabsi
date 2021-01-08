@@ -5,9 +5,9 @@ import { BaseTypeKey, WithBaseType } from "@dabsi/typedata/BaseType";
 import { DataKey, WithDataKey } from "@dabsi/typedata/DataKey";
 import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
 import {
-  DataTypeKey,
-  DataUnionChildren,
-  DataUnionChildrenKey,
+  DataTypeMetaKey,
+  WithDataUnionMetaChildren,
+  DataUnionMetaChildrenKey,
 } from "@dabsi/typedata/DataUnion";
 import {
   IfRelationToOne,
@@ -18,12 +18,12 @@ import {
 
 type _Children<Children> = {
   [K in keyof Children]: Record<DataKey, string> &
-    Record<DataTypeKey, K> &
+    Record<DataTypeMetaKey, K> &
     DataRow<Children[K]>;
 };
 
 export type _NoChildren<T> = DataSourceRow &
-  Omit<T, DataUnionChildrenKey | DataRelationKeys<T> | BaseTypeKey> &
+  Omit<T, DataUnionMetaChildrenKey | DataRelationKeys<T> | BaseTypeKey> &
   WithBaseType<T> &
   WithDataKey &
   {
@@ -32,7 +32,7 @@ export type _NoChildren<T> = DataSourceRow &
       | IfRelationToOne<T[K], undefined>;
   };
 
-export type DataRow<T> = T extends DataUnionChildren<infer Children>
+export type DataRow<T> = T extends WithDataUnionMetaChildren<infer Children>
   ? HasKeys<Children> extends true
     ? Union<_Children<Children>>
     : _NoChildren<T>

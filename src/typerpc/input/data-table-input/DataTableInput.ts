@@ -99,7 +99,7 @@
 //   const { table, target } = options as TOptions;
 //   return <any>Input<AnyDataTableInput>({
 //     handler: DataTableInputHandler as any,
-//     getValueDataFromElement() {
+//     getValueDataFromValueElement() {
 //       return {};
 //     },
 //   });

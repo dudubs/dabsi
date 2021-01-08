@@ -2,10 +2,6 @@ import { mapObject } from "@dabsi/common/object/mapObject";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { Payload } from "@dabsi/common/typings2/Payload";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
-import { NoRpc } from "@dabsi/typerpc/NoRpc";
-import { RpcConfig } from "@dabsi/typerpc/Rpc";
-import { RpcConfigMap, RpcMap, RpcMap2 } from "@dabsi/typerpc/rpc-map/RpcMap";
-
 import {
   AnyInput,
   Input,
@@ -17,6 +13,8 @@ import {
   InputValueElement,
 } from "@dabsi/typerpc/input/Input";
 import { InputMapHandler } from "@dabsi/typerpc/input/input-map/InputMapHandler";
+import { RpcConfig } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 
 export type AnyInputRecord = Record<string, AnyInput>;
 export type AnyInputMap = InputMap<AnyInputRecord>;
@@ -57,9 +55,9 @@ export function InputMap<T extends AnyInputRecord>(children: T): InputMap<T> {
     children: {
       map: RpcMap(children as AnyInputRecord),
     },
-    getValueDataFromElement(valueElementMap) {
+    getValueDataFromValueElement(valueElementMap) {
       return mapObject(this.children.map.children, (child: AnyInput, key) => {
-        return child.getValueDataFromElement(valueElementMap[key]);
+        return child.getValueDataFromValueElement(valueElementMap[key]);
       });
     },
   });

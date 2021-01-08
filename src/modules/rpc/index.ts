@@ -10,7 +10,7 @@ import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
-import { Seq } from "immutable";
+import { Seq } from "immutable4";
 import path from "path";
 import { DABSI_ROOT_DIR } from "../..";
 import LoaderModule from "../LoaderModule";

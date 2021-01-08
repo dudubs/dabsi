@@ -7,8 +7,8 @@ import AclAdminViewWrappers from "@dabsi/system/acl/plugins/admin/browser/AclAdm
 import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import AclUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoInput";
-import AclUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclUserGroupsForm";
+import AclAdminUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoInput";
+import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";
 import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";

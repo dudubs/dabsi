@@ -20,7 +20,7 @@ export function BoolInput(): BoolInput {
     handler: BoolInputHandler,
     type: BoolInput,
     isConfigCanBeUndefined: true,
-    getValueDataFromElement(value) {
+    getValueDataFromValueElement(value) {
       return value;
     },
   });

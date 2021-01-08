@@ -1,13 +1,13 @@
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 import { User } from "@dabsi/system/acl/entities/User";
-import AclUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoInput";
+import AclAdminUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoInput";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { Resolver } from "@dabsi/typedi";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 
 export default RpcConfigResolver(
-  AclUserBasicInfoInput,
+  AclAdminUserBasicInfoInput,
   {
     sources: AclDataSources,
     user: Resolver.try(DataRow(User)),

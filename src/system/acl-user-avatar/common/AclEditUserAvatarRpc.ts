@@ -10,6 +10,6 @@ export default CustomWidget({
     minSize: number;
   }>(),
   controller: RpcMap({
-    update: RpcFn<({ field: string }) => string>(),
+    update: RpcFn<({ field: string }) => { url: string }>(),
   }),
 });

@@ -8,10 +8,10 @@ import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
 import Typography from "@material-ui/core/Typography";
 import React, { useRef } from "react";
-import AclGroupActions from "../common/AclAdminGroupActions";
-import AclGroupUsersTable from "../common/AclAdminGroupUsersTable";
+import AclAdminGroupActions from "../common/AclAdminGroupActions";
+import AclAdminGroupUsersTable from "../common/AclAdminGroupUsersTable";
 
-SystemView(AclGroupUsersTable, props => {
+SystemView(AclAdminGroupUsersTable, props => {
   const {
     store,
     state: { changes },
@@ -19,7 +19,7 @@ SystemView(AclGroupUsersTable, props => {
     changes: new Map<string, boolean>(),
   }));
 
-  const actions = WidgetNamespaceView.useConnection(AclGroupActions);
+  const actions = WidgetNamespaceView.useConnection(AclAdminGroupActions);
 
   const tableRef = useRef<DataTableView<typeof props.connection>>(null);
 

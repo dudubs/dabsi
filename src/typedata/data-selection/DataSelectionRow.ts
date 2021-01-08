@@ -5,11 +5,11 @@ import { BaseType, WithBaseType } from "@dabsi/typedata/BaseType";
 
 import { DataFieldsRow } from "@dabsi/typedata/DataFields";
 import {
-  DataTypeKey,
-  DataUnionChildren,
-  DataUnionChildrenKey,
-  DataUnionChildrenOf,
-  DataUnionWithChildren,
+  DataTypeMetaKey,
+  WithDataUnionMetaChildren,
+  DataUnionMetaChildrenKey,
+  GetDataUnionMetaChildren,
+  DefaultDataUnionMetaChildren,
 } from "@dabsi/typedata/DataUnion";
 import { MergeDataSelection } from "@dabsi/typedata/data-selection/DataSelectionMerger";
 import {
@@ -20,7 +20,7 @@ import {
 } from "@dabsi/typedata/DataRelation";
 
 type _PickRow<T, S> = S extends { pick: ReadonlyArray<infer K> }
-  ? Pick<T, Extract<K | DataTypeKey, NonRelationKeys<T>>>
+  ? Pick<T, Extract<K | DataTypeMetaKey, NonRelationKeys<T>>>
   : T;
 
 type _ChildrenRow<
@@ -31,7 +31,7 @@ type _ChildrenRow<
   UChildren
 > = HasKeys<UChildren> extends false
   ? {}
-  : DataUnionWithChildren<
+  : DefaultDataUnionMetaChildren<
       {
         [K in keyof UChildren]: _Row<
           UChildren[K], //
@@ -62,14 +62,14 @@ type _RelationsRow<T, S, SRelations> = {
   >;
 };
 
-type _NoChildrenRow<T> = T extends DataUnionChildren<any>
-  ? Pick<T, DataUnionChildrenKey>
+type _NoChildrenRow<T> = T extends WithDataUnionMetaChildren<any>
+  ? Pick<T, DataUnionMetaChildrenKey>
   : {};
 
 type __Row<T, S> = Omit<
   _PickRow<T, S>,
   // omit all relations or metaTypes
-  DataRelationKeys<T> | DataUnionChildrenKey
+  DataRelationKeys<T> | DataUnionMetaChildrenKey
 > &
   WithBaseType<T> &
   (S extends { fields: infer SFields } ? _Fields<T, SFields> : {}) &
@@ -77,7 +77,13 @@ type __Row<T, S> = Omit<
     ? _RelationsRow<T, S, SRelations>
     : Pick<T, DataRelationKeys<T>>) &
   (S extends { children: infer SChildren }
-    ? _ChildrenRow<T, S, SChildren, Omit<S, "children">, DataUnionChildrenOf<T>>
+    ? _ChildrenRow<
+        T,
+        S,
+        SChildren,
+        Omit<S, "children">,
+        GetDataUnionMetaChildren<T>
+      >
     : _NoChildrenRow<T>);
 
 type _Row<T, S> = HasKeys<S> extends false ? T : __Row<T, S>;

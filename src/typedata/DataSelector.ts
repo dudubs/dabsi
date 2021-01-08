@@ -7,28 +7,31 @@ import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRo
 import { DataSource } from "@dabsi/typedata/DataSource";
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 
+export interface DataSelector<T, S extends DataSelection<T>> {
+  new (): DataSelectionRow<T, S>;
+
+  select(selection: DataSelection<T>): void;
+}
+
 export function DataSelector<T, S extends DataSelection<T>>(
   type: Constructor<T>,
   selection: S
-): {
-  new (): DataSelectionRow<T, S>;
-
-  select(source: DataSource<T>): DataSource<DataSelectionRow<T, S>>;
-} {
+): DataSelector<T, S> {
   const typeInfo = DataTypeInfo.get(type);
 
-  Selector[DataTypeInfo.symbol] = {
+  const newTypeInfo = (Selector[DataTypeInfo.symbol] = {
     ...typeInfo,
     selection: DataSelection.merge(
       typeInfo.selection,
       selection as AnyDataSelection
     ),
-  };
+  });
 
-  Selector.select = function (source: DataSource<any>) {
-    return source.updateCursor({
-      selection: DataSelection.merge(source.cursor.selection, <any>selection),
-    });
+  Selector.select = function (selection) {
+    Selector[DataTypeInfo.symbol] = {
+      ...newTypeInfo,
+      selection: DataSelection.merge(newTypeInfo.selection, selection),
+    };
   };
 
   return <any>Selector;

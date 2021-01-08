@@ -5,7 +5,7 @@ import { useDefinedContext } from "@dabsi/react/utils/hooks/useDefinedContext";
 
 const context = createUndefinedContext<History>();
 
-export const useHistory = (): History => useDefinedContext(context);
+export const useHistory = (): History<any> => useDefinedContext(context);
 
 export function HistoryProvider({
   history,

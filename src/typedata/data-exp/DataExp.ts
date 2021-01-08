@@ -2,7 +2,7 @@ import { ExpMap } from "@dabsi/common/typings2/ExpMap";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Union } from "@dabsi/common/typings2/Union";
 import { GetBaseType } from "@dabsi/typedata/BaseType";
-import { DataUnionChildren } from "@dabsi/typedata/DataUnion";
+import { WithDataUnionMetaChildren } from "@dabsi/typedata/DataUnion";
 import {
   NonRelationKeys,
   DataRelationKeys,
@@ -154,7 +154,7 @@ export type AtExp<T> = Union<
   }
 >;
 
-export type AsExp<T> = T extends DataUnionChildren<infer Children> //
+export type AsExp<T> = T extends WithDataUnionMetaChildren<infer Children> //
   ? Union<
       {
         [K in keyof Children]: Record<K, DataExp<Children[K]>>;

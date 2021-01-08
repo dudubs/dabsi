@@ -1,14 +1,14 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import { User } from "@dabsi/system/acl/entities/User";
-import AclUserContactInfoForm from "@dabsi/system/acl/plugins/admin/users/common/AclUserContactInfoForm";
+import AclAdminUserContactInfoForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserContactInfoForm";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import RpcConfigFactory from "../../../../../../modules/rpc/RpcConfigFactory";
 
 export default RpcConfigResolver(
-  AclUserContactInfoForm,
+  AclAdminUserContactInfoForm,
   {
     user: DataRow(User),
-    getInputConfig: RpcConfigFactory(AclUserContactInfoForm.at("input")),
+    getInputConfig: RpcConfigFactory(AclAdminUserContactInfoForm.at("input")),
   },
   c => $ =>
     $({

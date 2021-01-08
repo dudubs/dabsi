@@ -6,7 +6,7 @@ import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
 import { useContextHook } from "@dabsi/react/useContextHook";
 
 export type UseSystemViewThemeCallback = (
-  define: <T extends AnyWidget>(
+  use: <T extends AnyWidget>(
     target: T | ((...args: any[]) => T),
     renderer: (
       props: SystemViewProps<RpcConnection<T>>,

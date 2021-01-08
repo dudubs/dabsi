@@ -1,17 +1,16 @@
-import { inspect } from "@dabsi/logging/inspect";
-import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { assert } from "@dabsi/common/assert";
 import { defined } from "@dabsi/common/object/defined";
-import { definedAt } from "@dabsi/common/object/definedAt";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { ArrayTypeOrObject } from "@dabsi/common/typings2/ArrayTypeOrObject";
+import { inspect } from "@dabsi/logging/inspect";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import {
   ByTableOrColumn,
   EntityRelationSide,
 } from "@dabsi/typeorm/relations/EntityRelationSide";
+import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 export class EntityRelation<T = any> {
   static of<T, K extends keyof T>(
@@ -60,7 +59,10 @@ export class EntityRelation<T = any> {
 
   ownerRelationMetadata = this.relationMetadata.isOwning
     ? this.relationMetadata
-    : definedAt(this.relationMetadata, "inverseRelation");
+    : defined(
+        this.relationMetadata.inverseRelation,
+        () => `No inverse relation ${inspect(this)}.`
+      );
 
   left = new EntityRelationSide(this, this.leftEntityType, true);
 

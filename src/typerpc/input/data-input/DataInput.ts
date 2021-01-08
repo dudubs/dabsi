@@ -159,7 +159,7 @@ export function DataInput<T extends TDataInputOptions = {}>(
       table: DataTable(tableRowType),
     },
     handler: DataInputHandler,
-    getValueDataFromElement(value) {
+    getValueDataFromValueElement(value) {
       return value?.$key;
     },
   });

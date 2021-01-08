@@ -150,9 +150,9 @@ export function ArrayInput<
         },
     },
     handler: ArrayInputHandler,
-    getValueDataFromElement(items) {
+    getValueDataFromValueElement(items) {
       return items.map(itemValue => {
-        return this.children.item.getValueDataFromElement(itemValue);
+        return this.children.item.getValueDataFromValueElement(itemValue);
       });
     },
   });

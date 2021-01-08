@@ -1,6 +1,6 @@
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 import { Group } from "@dabsi/system/acl/entities/Group";
-import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
+import AclAdminGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { Resolver } from "@dabsi/typedi";
@@ -8,7 +8,7 @@ import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 
 export default RpcConfigResolver(
   // ./BasicInfo
-  AclGroupBasicInfoInput,
+  AclAdminGroupBasicInfoInput,
   {
     sources: AclDataSources,
     group: Resolver.try(DataRow(Group)),

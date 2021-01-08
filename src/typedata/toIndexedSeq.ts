@@ -1,4 +1,4 @@
-import { Seq } from "immutable";
+import { Seq } from "immutable4";
 
 export function toIndexedSeq<T>(
   item: T | undefined,

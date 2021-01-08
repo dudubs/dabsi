@@ -42,7 +42,7 @@ export function EnumInput<K extends string, N extends boolean = false>(
       keys: new Set(keys),
     },
 
-    getValueDataFromElement(value) {
+    getValueDataFromValueElement(value) {
       return value;
     },
   });

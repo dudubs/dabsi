@@ -13,8 +13,8 @@ import { DataSource } from "@dabsi/typedata/DataSource";
 
 import {
   DataUnion,
-  DataUnionChildren,
-  DataUnionChildrenKey,
+  WithDataUnionMetaChildren,
+  DataUnionMetaChildrenKey,
 } from "@dabsi/typedata/DataUnion";
 import { MergeDataSelection } from "@dabsi/typedata/data-selection/DataSelectionMerger";
 import {
@@ -153,7 +153,7 @@ pass(() => {
       }) {}
     }
 
-    testType<DUnion[DataUnionChildrenKey]>(d => {
+    testType<DUnion[DataUnionMetaChildrenKey]>(d => {
       void d.dChild1.dChild1Text;
 
       // @ts-expect-error
@@ -165,7 +165,7 @@ pass(() => {
   {
     testType<DataRow<DUnion>>(d => {
       // @ts-expect-error
-      assertType<DataUnionChildren<any>>(d);
+      assertType<WithDataUnionMetaChildren<any>>(d);
 
       // @ts-expect-error
       void (d.$type === "x");
@@ -239,7 +239,7 @@ pass(() => {
       ? T
       : HasKeys<S> extends false
       ? T
-      : Omit<T, DataUnionChildrenKey | DataRelationKeys<T>> & {
+      : Omit<T, DataUnionMetaChildrenKey | DataRelationKeys<T>> & {
           x: Pluck<S, "x">;
         } & {
             [K in DataRelationKeys<T>]: MapRelation<

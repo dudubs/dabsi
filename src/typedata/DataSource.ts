@@ -23,7 +23,7 @@ import {
 } from "@dabsi/typedata/DataRelation";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSourceRow } from "@dabsi/typedata/DataSourceRow";
-import { DataUnionChildren } from "@dabsi/typedata/DataUnion";
+import { WithDataUnionMetaChildren } from "@dabsi/typedata/DataUnion";
 import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
 
 export type DataKeyOrKeysInput<T> = DataKeyInput<T>[] | DataKeyInput<T>;
@@ -257,7 +257,7 @@ export abstract class DataSource<T> {
   }
 
   as<K extends keyof Children, Children>(
-    this: DataSource<DataUnionChildren<Children>>,
+    this: DataSource<WithDataUnionMetaChildren<Children>>,
     type: string & K
   ): DataSource<Children[K]> {
     return this.updateCursor({

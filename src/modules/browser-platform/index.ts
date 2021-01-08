@@ -292,7 +292,7 @@ export default class BrowserModule {
           new tsConfigPathsWebpackPlugin(),
         ],
         alias: {
-          // TODO: @dabsi
+          // // TODO: @dabsi
         },
         extensions: [".ts", ".tsx", ".js"],
       },

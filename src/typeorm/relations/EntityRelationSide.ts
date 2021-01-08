@@ -1,4 +1,4 @@
-import { is } from "immutable";
+import { is } from "immutable4";
 import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";

@@ -3,8 +3,8 @@ import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import AclGroupBasicInfoForm from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoForm";
-import AclGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
+import AclAdminGroupBasicInfoForm from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoForm";
+import AclAdminGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
 import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
 import { useSystemView } from "@dabsi/system/core/view/useSystemView";
@@ -17,11 +17,11 @@ WidgetRouterView(
   props => {
     const [title, setTitle] = useState("");
 
-    useSystemView(AclGroupBasicInfoForm, props => (
+    useSystemView(AclAdminGroupBasicInfoForm, props => (
       <MuiEditFormView {...props} />
     ));
 
-    useSystemView(AclGroupBasicInfoInput.at(":groupName"), props =>
+    useSystemView(AclAdminGroupBasicInfoInput.at(":groupName"), props =>
       mergeProps(props, {
         inputRef: input => {
           setTimeout(() => {

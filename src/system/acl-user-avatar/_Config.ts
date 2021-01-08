@@ -1,7 +1,7 @@
 import shrap from "sharp";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import AclUserAvatarModule from "@dabsi/system/acl-user-avatar";
+import AclAdminUserAvatarModule from "@dabsi/system/acl-user-avatar";
 import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUserAvatarRpc";
 import User from "@dabsi/system/acl/entities/User";
 import StorageManager from "@dabsi/system/storage/StorageManager";
@@ -14,7 +14,7 @@ export default RpcConfigResolver(
     user: DataRow(User),
     rpcReq: RpcRequest,
     storageManager: StorageManager,
-    module: AclUserAvatarModule,
+    module: AclAdminUserAvatarModule,
   },
   c => $ =>
     $({
@@ -51,9 +51,7 @@ export default RpcConfigResolver(
 
           await c.user.update({ avatar: file });
 
-          console.log({ prevFile: await c.user.reload() });
-
-          return file.url;
+          return { url: file.url };
         },
       },
       getElement() {

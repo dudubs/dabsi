@@ -102,9 +102,9 @@ export function DataInputMap<T extends AnyInput>(
     children: {
       target: target as AnyInput,
     },
-    getValueDataFromElement(valueMap) {
+    getValueDataFromValueElement(valueMap) {
       return mapObject(valueMap, item =>
-        this.target.getValueDataFromElement(item.value)
+        this.target.getValueDataFromValueElement(item.value)
       );
     },
   });

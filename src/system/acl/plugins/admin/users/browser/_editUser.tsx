@@ -8,8 +8,8 @@ import AclAdminViewOptions from "@dabsi/system/acl/plugins/admin/browser/AclAdmi
 import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import AclUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoInput";
-import AclUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclUserGroupsForm";
+import AclAdminUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoInput";
+import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";
 import { useSystemViewTheme } from "@dabsi/system/core/view/useSystemViewTheme";
 import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
@@ -28,7 +28,7 @@ WidgetRouterView(
 
       use(Form, MuiEditFormView);
 
-      use(AclUserBasicInfoInput, props => (
+      use(AclAdminUserBasicInfoInput, props => (
         <MuiGridMapView
           for={mergeProps(props, {
             onChange: input => {
@@ -47,7 +47,7 @@ WidgetRouterView(
         />
       ));
 
-      use(AclUserGroupsForm.at("input"), props => (
+      use(AclAdminUserGroupsForm.at("input"), props => (
         <MuiDataInputMapView {...props} itemGridProps={{ xs: 4 }} />
       ));
     });

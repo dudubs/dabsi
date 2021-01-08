@@ -10,38 +10,44 @@ import {
   DataRelationTypeAt as _RelationTypeAt,
 } from "@dabsi/typedata/DataRelation";
 
-export type DataTypeKey = "$type";
-export const DataTypeKey: DataTypeKey = "$type";
+export type DataTypeMetaKey = "$type";
 
-export type DataUnionChildrenKey = "$unionChildren";
-export type DataUnionChildren<T> = Record<DataUnionChildrenKey, T>;
+export const DataTypeMetaKey: DataTypeMetaKey = "$type";
 
-export type DataUnionWithChildren<T> = IsNever<T> extends true
+export type DataUnionMetaChildrenKey = "$unionChildren";
+
+export type WithDataUnionMetaChildren<T> = Record<DataUnionMetaChildrenKey, T>;
+
+export type DefaultDataUnionMetaChildren<T> = IsNever<T> extends true
   ? {}
   : HasKeys<T> extends false
   ? {}
-  : Record<DataUnionChildrenKey, T>;
+  : Record<DataUnionMetaChildrenKey, T>;
 
-export type DataUnionChildrenOf<T> = T extends DataUnionChildren<infer U>
+export type GetDataUnionMetaChildren<T> = T extends WithDataUnionMetaChildren<
+  infer U
+>
   ? HasKeys<T> extends true
     ? U
     : never
   : never;
 
-type _BaseChild<T> = Constructor<T>;
+export type DataUnionChild<T> = Constructor<T>;
 
-type _BaseChildren<T> = Record<string, _BaseChild<T>>;
+export type DataUnionChildMap<T> = Record<string, DataUnionChild<T>>;
 
-type _BaseRelation<T> = Constructor<T> & { unionType: new () => any };
+export type DataUnionRelation<T> = Constructor<T> & {
+  unionType: new () => any;
+};
 
-type _BaseRelations<T> = {
-  [K in DataRelationKeys<T>]?: _BaseRelation<_RelationTypeAt<T, K>>;
+export type DataUnionRelationMap<T> = {
+  [K in DataRelationKeys<T>]?: DataUnionRelation<_RelationTypeAt<T, K>>;
 };
 
 export type DataUnionClass<
   Base,
-  Children extends _BaseChildren<Base>,
-  Relations extends _BaseRelations<Base>
+  Children extends DataUnionChildMap<Base>,
+  Relations extends DataUnionRelationMap<Base>
 > = Constructor<
   DataUnion<Base, _InstanceMapType<Children>, _InstanceMapType<Relations>>
 > & {
@@ -53,7 +59,7 @@ export type DataUnionClass<
 
 export type DataUnion<T, Children, Relations> = BaseType<T> &
   _AssignRelations<T, Relations> &
-  DataUnionChildren<
+  WithDataUnionMetaChildren<
     {
       [K in keyof Children]: BaseType<Children[K]> &
         _AssignRelations<Children[K], Relations>;
@@ -75,8 +81,8 @@ type _AssignRelations<T, Relations> =
 
 export function DataUnion<
   T,
-  R extends _BaseRelations<T> = {},
-  C extends _BaseChildren<T> = {}
+  R extends DataUnionRelationMap<T> = {},
+  C extends DataUnionChildMap<T> = {}
 >(
   type: Constructor<T>,
   union: {
@@ -95,7 +101,7 @@ export function DataUnion(type, { children = {}, relations = {} }) {
   }
 
   Class.unionType = type;
-  Class.unionChildren = mapObject(children, (child: _BaseChild<any>) => {
+  Class.unionChildren = mapObject(children, (child: DataUnionChild<any>) => {
     if (DataUnion.isDataUnion(child)) {
       return DataUnion(<any>child.unionType, {
         relations: {

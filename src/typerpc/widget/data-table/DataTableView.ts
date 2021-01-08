@@ -45,7 +45,6 @@ export class DataTableView<
     this.totalRows = element.totalRows ?? 0;
     this.pageSize =
       this.elementState?.query?.pageSize || element.pageSize || 10;
-    this.reload();
   }
 
   @ViewState() columns: Record<
@@ -82,9 +81,9 @@ export class DataTableView<
   clearSearch() {
     this.searchText = "";
   }
+
   componentDidMount() {
     super.componentDidMount();
-    console.log("int");
   }
 
   protected _toggleSortOrNulls<K extends "sort" | "nulls">(

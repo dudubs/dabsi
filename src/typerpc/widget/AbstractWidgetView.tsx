@@ -23,6 +23,7 @@ export abstract class AbstractWidgetView<
 
   protected _elementState: WidgetElementState<C> | undefined = this.props
     .elementState;
+
   setElementState(state: WidgetElementState<C>) {
     this.props.onElementStateChange?.((this._elementState = state));
   }

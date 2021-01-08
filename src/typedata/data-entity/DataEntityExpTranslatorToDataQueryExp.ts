@@ -57,7 +57,7 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
       [childMetadata.discriminatorColumn!.propertyName]: {
         $in: childMetadata.childEntityMetadatas
           .toSeq()
-          .map(child => child.discriminatorValue!)
+          .map(child => child!.discriminatorValue!)
           .concat([childMetadata.discriminatorValue!])
           .toArray(),
       },

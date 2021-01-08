@@ -50,7 +50,7 @@ export function TextInput<N extends boolean = false>({
       nullable: nullable || false,
       loaderOptions,
     },
-    getValueDataFromElement(value) {
+    getValueDataFromValueElement(value) {
       return value;
     },
   });

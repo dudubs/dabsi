@@ -4,6 +4,7 @@ import { MuiTextInputView } from "@dabsi/browser/mui/rpc/inputs/MuiTextInputView
 import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
 import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
+import MuiSystemViewComponents from "@dabsi/system/core/browser/MuiSystemViewComponents";
 import {
   useSystemViewTheme,
   UseSystemViewThemeCallback,
@@ -33,5 +34,9 @@ export function useMuiSystemViewTheme(callback?: UseSystemViewThemeCallback) {
       createElement(MuiGridMapView, { for: props })
     );
     callback?.(use);
+
+    for (const callback of MuiSystemViewComponents) {
+      callback(use);
+    }
   });
 }

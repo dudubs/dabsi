@@ -3,11 +3,11 @@ import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUs
 import AclEditUserAvatar from "@dabsi/system/acl-user-avatar/plugins/admin/common/AclAdminEditUserAvatarRpc";
 import AclAdminViewOptions from "@dabsi/system/acl/plugins/admin/browser/AclAdminViewOptions";
 import AclAdminEditUser from "@dabsi/system/acl/plugins/admin/users/common/AclAdminEditUser";
-import AclUserBasicInfoForm from "@dabsi/system/acl/plugins/admin/users/common/AclUserBasicInfoForm";
+import AclAdminUserBasicInfoForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoForm";
 import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFormData";
 import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
 import Grid from "@material-ui/core/Grid";
-import React from "react";
+import React, { useState } from "react";
 
 const childKey = AclAdminEditUser.getChildKey(AclEditUserAvatar)!;
 
@@ -16,11 +16,13 @@ AclAdminViewOptions.editUser.excludeChildKeys.push(
 );
 
 AclAdminViewOptions.editUser.childWrapperMap[
-  AclAdminEditUser.definedChildKey(AclUserBasicInfoForm)
+  AclAdminEditUser.definedChildKey(AclAdminUserBasicInfoForm)
 ] = children => <View>{children}</View>;
 
 function View({ children }) {
   const props = WidgetNamespaceView.useViewProps(AclEditUserAvatarRpc);
+
+  const [url, setUrl] = useState(() => props.element.currentUrl);
 
   return (
     <>
@@ -34,7 +36,7 @@ function View({ children }) {
       >
         <Grid sm={12} md={6} item>
           <MuiAvatarInput
-            url={props.element.currentUrl}
+            url={url}
             onChange={async canvas => {
               const blob = await new Promise<Blob>((resolve, reject) => {
                 canvas.toBlob(
@@ -51,11 +53,11 @@ function View({ children }) {
               });
               const result = await processRpcWithFormData(
                 df => {
-                  df.append("avatar", blob, "avatar.png");
+                  df.append("avatar", blob);
                 },
                 () => props.connection.controller.update({ field: "avatar" })
               );
-              console.log({ result });
+              setUrl(result.url);
             }}
           />
         </Grid>

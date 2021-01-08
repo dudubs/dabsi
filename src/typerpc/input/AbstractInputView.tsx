@@ -94,7 +94,9 @@ export abstract class AbstractInputView<
   forceUpdateValue() {
     this._error = undefined;
     this._isValidValue = false;
-    this._data = this.connection.$widget.getValueDataFromElement(this._value);
+    this._data = this.connection.$widget.getValueDataFromValueElement(
+      this._value
+    );
 
     this.updateValue?.(this._value);
   }

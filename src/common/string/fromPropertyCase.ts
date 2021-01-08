@@ -1,4 +1,4 @@
-import { Seq } from "immutable";
+import { Seq } from "immutable4";
 import { SourceCase } from "@dabsi/common/string/matchCase";
 
 export default <SourceCase>(

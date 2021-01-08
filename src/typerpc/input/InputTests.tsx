@@ -55,7 +55,7 @@ export const TestInput = Input<TestInput>({
       return Promise.resolve({ value: undefined });
     }
   },
-  getValueDataFromElement() {},
+  getValueDataFromValueElement() {},
 });
 
 export class TestInputView<

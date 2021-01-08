@@ -31,7 +31,8 @@ export default function MuiAvatarInput(props: {
   const classes = useStyles();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { store, state } = useStore(() => ({
-    imageUrl: props.url,
+    editUrl: props.url,
+    edit: false,
   }));
 
   return (
@@ -44,29 +45,30 @@ export default function MuiAvatarInput(props: {
         onChange={() => {
           const file = fileInputRef.current!.files?.[0];
           if (file) {
-            store.set("imageUrl", URL.createObjectURL(file));
+            store.set("editUrl", URL.createObjectURL(file)).set("edit", true);
           }
         }}
       />
-      {state.imageUrl ? (
+      {state.edit && state.editUrl ? (
         <>
           <MuiAvatarEditor
-            image={state.imageUrl}
+            image={state.editUrl}
             onLoadSuccess={() => {
-              state.imageUrl && URL.revokeObjectURL(state.imageUrl);
+              state.editUrl && URL.revokeObjectURL(state.editUrl);
             }}
             onCancel={() => {
-              store.set("imageUrl", "");
+              store.set("edit", false);
             }}
             onApply={({ canvas }) => {
               props.onChange?.(canvas);
+              store.set("edit", false);
             }}
           />
         </>
       ) : (
         <>
           <MuiGrid alignItems="center" spacing={1} direction="column">
-            <Avatar className={classes.avatar} />
+            <Avatar className={classes.avatar} src={props.url} />
             <Button
               endIcon={<CloudUploadIcon />}
               onClick={() => {

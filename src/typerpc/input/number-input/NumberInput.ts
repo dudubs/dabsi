@@ -33,7 +33,7 @@ export function NumberInput(): NumberInput {
 
     isConfigCanBeUndefined: true,
 
-    getValueDataFromElement(value) {
+    getValueDataFromValueElement(value) {
       return value;
     },
   });

@@ -5,8 +5,8 @@ import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataFieldsTranslator } from "@dabsi/typedata/DataFieldsTranslator";
 import { DataOrder } from "@dabsi/typedata/DataOrder";
 import {
-  DataUnionChildren,
-  DataUnionChildrenKey,
+  WithDataUnionMetaChildren,
+  DataUnionMetaChildrenKey,
 } from "@dabsi/typedata/DataUnion";
 import {
   IfRelationToMany,
@@ -18,7 +18,7 @@ import {
 
 export type DataPickableKeys<T> = Exclude<
   NonRelationKeys<T>,
-  DataUnionChildrenKey
+  DataUnionMetaChildrenKey
 >;
 
 type _RelationToOne<T> = DataSelection<T> & {
@@ -46,7 +46,7 @@ export type DataSelection<T> = {
       | IfRelationToMany<T[K], _RelationToMany<DataRelationTypeAt<T, K>>>;
   };
 
-  children?: T extends DataUnionChildren<infer Children>
+  children?: T extends WithDataUnionMetaChildren<infer Children>
     ? If<
         HasKeys<Children>,
         {
@@ -125,5 +125,18 @@ export namespace DataSelection {
       ...(relations && { relations }),
       ...(children && { children }),
     };
+  }
+
+  export function select<T>(
+    target: DataSelection<T>,
+    source: DataSelection<T>
+  ) {
+    Object.assign(
+      target,
+      DataSelection.merge(
+        target as AnyDataSelection,
+        source as AnyDataSelection
+      )
+    );
   }
 }

@@ -106,7 +106,7 @@ export class ArrayInputView<
       let key: string;
       if (uniqueItem) {
         key = uniqueItem.getItemDataKey(
-          this.connection.item.$widget.getValueDataFromElement(value)
+          this.connection.item.$widget.getValueDataFromValueElement(value)
         );
       } else {
         key = String(index);

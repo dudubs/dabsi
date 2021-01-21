@@ -1,37 +1,45 @@
-import { RichTextInputHandler } from "@dabsi/system/rich-text/common/RichTextInputHandler";
-import RichTextInputRpc from "@dabsi/system/rich-text/common/RichTextInputRpc";
+import RichTextPluginsRpc from "@dabsi/system/rich-text/common/RichTextPluginsRpc";
+import type { RichTextInputValue } from "@dabsi/system/rich-text/common/RichTextInputValue";
 import { Input } from "@dabsi/typerpc/input/Input";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { RawDraftContentState } from "draft-js";
+import requireRpcHandler from "../../../typerpc/requireRpcHandler";
 
 declare global {
-  interface RichTextInputConfig {}
-  interface RichTextInputElement {}
-  interface RichTextInputValue {}
+  namespace IRichText {
+    interface ConfigAndElement {
+      editable?: boolean;
+      allowAll?: boolean;
+    }
+
+    interface InputConfig extends Config {}
+
+    interface InputElement extends Element {}
+  }
 }
 
-export type RichTextInput = Input<{
-  ValueData: null | RawDraftContentState;
+export type RichTextInputElement = IRichText.InputElement;
 
-  Value: null | {
-    entities: {
-      $key: string;
-    }[];
-  };
+export type RichTextInputConfig = IRichText.InputConfig;
+
+export type RichTextInput = Input<{
+  ValueData: null | Draft.RawDraftContentState;
+
+  Value: RichTextInputValue;
 
   Controller: {
-    plugins: RpcNamespace;
+    plugins: typeof RichTextPluginsRpc;
   };
 
   Props: {};
 
   Config: RichTextInputConfig;
 
-  Element: RichTextInputElement;
+  Element: IRichText.InputElement;
 
-  ValueElement: null | RawDraftContentState;
+  ValueElement: null | Draft.RawDraftContentState;
 
-  ValueConfig: any;
+  ValueConfig: string | { $key: string };
 
   Error: never;
 }>;
@@ -39,8 +47,8 @@ export type RichTextInput = Input<{
 export function RichTextInput(): RichTextInput {
   return Input<RichTextInput>({
     type: RichTextInput,
-    handler: RichTextInputHandler as any,
-    children: { plugins: RichTextInputRpc },
+    handler: requireRpcHandler(__filename),
+    children: { plugins: RichTextPluginsRpc },
     getValueDataFromValueElement(valueElement) {
       return valueElement;
     },

@@ -3,6 +3,7 @@ import { hasKeys } from "@dabsi/common/object/hasKeys";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
+import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
@@ -81,6 +82,15 @@ export class DataEntitySource<T> extends DataSource<T> {
   hasRow(): Promise<boolean> {
     return this.createRunner().hasRow();
   }
+
+  // datamodule.emitRelationChange()
+
+  protected emitRelationChange?(changeInfo: {
+    relation: EntityRelation;
+    type: "remove" | "add" | "set" | "unset";
+    entityKey: DataEntityKey;
+    relationKey: DataEntityKey;
+  });
 
   protected _createEntityRow(
     valueMap: Record<string, any>,
@@ -235,11 +245,38 @@ export class DataEntitySource<T> extends DataSource<T> {
     this: DataEntitySource<T>,
     valueMap: DataInsert<T>[]
   ): Promise<string[]> {
+    const insertOneKey = async (valueMap: Record<string, any>) => {
+      const row = {};
+      const relationKeys: {
+        relation: EntityRelation;
+        key: DataEntityKey;
+      }[] = [];
+
+      const buildRelation = (relation: EntityRelation, key: DataEntityKey) => {
+        if (!key.object) {
+          // dont build relation on insert when the key is null.
+          return;
+        }
+        if (relation.left.isOwning && relation.isJoinColumn) {
+          row[relation.propertyName] = key.object;
+          return;
+        } else {
+          relationKeys.push({ relation, key });
+        }
+      };
+
+      //
+      const { parent } = this.entityCursor;
+      parent && buildRelation(parent.relation, parent.relationKey);
+    };
+
     return this.withTransaction(async () => {
       const entityMetadata = this.entityCursor.entityMetadata;
       const entityType = this.entityCursor.typeInfo.type;
       const keys: string[] = [];
+
       for (const value of valueMap) {
+        //
         const changeMap: Record<string, DataEntityInsertChange> = {};
         const { row, relationKeys } = this._createEntityRow(
           value,
@@ -391,7 +428,6 @@ export class DataEntitySource<T> extends DataSource<T> {
       this.entityCursor.entityMetadata,
       entityTextKey
     );
-
     if (this.entityCursor.parent) {
       const { relation, relationKey } = this.entityCursor.parent;
 
@@ -425,7 +461,6 @@ export class DataEntitySource<T> extends DataSource<T> {
         method,
         action,
         relation,
-
         entityKey,
         relationKey,
       });
@@ -444,6 +479,7 @@ export class DataEntitySource<T> extends DataSource<T> {
 
       const entityMap = await getEntityMap();
       for (const entityTextKey of textKeys) {
+        // before delete
         const entityKey = DataEntityKey.parse(
           this.entityCursor.entityMetadata,
           entityTextKey
@@ -454,10 +490,14 @@ export class DataEntitySource<T> extends DataSource<T> {
           entity: entityMap[entityTextKey],
           entityKey,
         });
+
+        // delete
         await this.entityCursor.entityManager.delete(
           this.entityCursor.typeInfo.type,
           entityKey.object
         );
+
+        // after delete
         await this.entityEmitter?.({
           manager: this.entityCursor.entityManager,
           type: "afterDeleteOne",
@@ -618,6 +658,8 @@ function createEventLoader(source: DataSource<any>) {
     },
     async getEntityMap() {
       if (selection) {
+        console.log(inspect({ selection }));
+
         return source
           .withCursor({
             ...source.cursor,

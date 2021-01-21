@@ -4,7 +4,7 @@ import { ResolveError } from "../../typedi/ResolveError";
 import { AnyRpc, RpcResolvedConfig } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "./RpcConfigResolver";
 
-export default function RpcConfigFactory<T extends AnyRpc>(
+export default function RpcConfigFactoryResolver<T extends AnyRpc>(
   rpc: T,
   {
     create = false,

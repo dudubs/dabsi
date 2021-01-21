@@ -18,7 +18,7 @@ export type RpcNamespace = Rpc<{
     path: any[];
     command: RpcCommand;
     rpc: RpcNamespace;
-    getChild<T extends AnyRpc>(rpc: T): RpcConnection<T> | undefined;
+    getChild<T extends AnyRpc>(rpc: T): RpcConnection<T>;
   };
   Children: {};
   Config: {

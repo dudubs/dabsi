@@ -1,7 +1,5 @@
 import { Seq } from "immutable4";
 
-console.log("hello to seq");
-
 type ToIndexedSeq = { toSeq<T>(this: Iterable<T>): Seq.Indexed<T> };
 
 declare global {

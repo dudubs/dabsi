@@ -115,6 +115,7 @@ export type InputErrorOrValue<T extends BasedInput> = ErrorOrValue<
 >;
 
 export type AnyInput = Input<TInput>;
+
 export type AnyInputConnection = RpcConnection<AnyInput>;
 
 export type InputOptions<T extends TInput> = PartialUndefinedKeys<

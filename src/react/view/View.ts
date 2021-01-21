@@ -4,6 +4,7 @@ import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
 
+const usedStateSymbol = "_usedState";
 export abstract class View<P = {}> extends Component<P, object> {
   abstract renderView(): ReactNode;
 

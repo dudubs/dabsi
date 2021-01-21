@@ -3,7 +3,7 @@ import { Override } from "@dabsi/common/typings2/Override";
 import { Renderer } from "@dabsi/react/renderer";
 import { ViewState } from "@dabsi/react/view/ViewState";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetView } from "@dabsi/typerpc/widget/WidgetView";
 import {
   AnyWidgetConnection,
   WidgetElement,
@@ -16,7 +16,7 @@ export type AnyTabsWidgetConnection = RpcConnection<AnyTabsWidget>;
 
 export class TabsWidgetView<
   C extends AnyTabsWidgetConnection
-> extends AbstractWidgetView<
+> extends WidgetView<
   C,
   WidgetViewProps<C> & {
     children: Renderer<TabsWidgetView<C>>;

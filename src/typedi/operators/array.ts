@@ -13,14 +13,28 @@ declare module "../Resolver" {
   }
 }
 
-function _method<T>(resolvers: Resolver<T>[]): Resolver<T[]> {
+function _method<T>(
+  resolvers: Resolver<T>[],
+  getArgName?: (index: number) => string | void
+): Resolver<T[]> {
+  function errorAt(index: number) {
+    const argName = getArgName?.(index);
+    if (argName) {
+      return `argument "${argName}"`;
+    } else {
+      return `index ${index}`;
+    }
+  }
+
   return (context => {
     return resolvers.map((item, index) => {
       catchError(
         ResolveError,
         () => Resolver.resolve(item, context),
         error => {
-          throw new ResolveError(`at index ${index}:${nested(error.message)}`);
+          throw new ResolveError(
+            `at ${errorAt(index)}:${nested(error.message)}`
+          );
         }
       );
       return Resolver.resolve(item, context);
@@ -32,7 +46,7 @@ function _method<T>(resolvers: Resolver<T>[]): Resolver<T[]> {
         Resolver.check(resolver, context);
       } catch (error) {
         if (error instanceof ResolveError) {
-          message += `${message ? "\nAlso at" : "At"} index ${index}${nested(
+          message += `${message ? "\nAlso at" : "At"} ${errorAt(index)}${nested(
             error.message
           )}`;
           continue;

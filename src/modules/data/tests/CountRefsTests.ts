@@ -7,29 +7,14 @@ import { DataRelation } from "@dabsi/typedata/DataRelation";
 import { Resolver, ResolverType } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import {
-  BeforeInsert,
   Column,
-  Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryColumn,
 } from "typeorm";
 import DataSourceResolver from "../DataSourceResolver";
-
-function TestEntity() {
-  let count = 0;
-  return (target: Function & { prototype: { id: string } }) => {
-    const desc: PropertyDescriptor = {
-      value(this: any) {
-        this.id = `${this.constructor.name}-${++count}`;
-      },
-    };
-    BeforeInsert()(target.prototype, "setTestEntityId");
-    Object.defineProperty(target.prototype, "setTestEntityId", desc);
-    Entity()(target);
-  };
-}
+import { TestEntity } from "./TestEntity";
 
 @TestEntity()
 class TestResource {
@@ -64,15 +49,15 @@ let t: ResolverType<typeof testResolver>;
 
 beforeAll(async () => {
   const runner = new ModuleRunner();
-  const sdm = runner.getInstance(DataModule);
-  const dbm = runner.getInstance(DbModule);
+  const dataModule = runner.getInstance(DataModule);
+  const dbModule = runner.getInstance(DbModule);
   runner.getInstance(TestDbModule);
-  buildCountRefs(sdm, TestResource, "countRefs");
+  buildCountRefs(dataModule, TestResource, "countRefs");
 
-  dbm.entityTypes.add(TestDoc);
-  dbm.entityTypes.add(TestResource);
+  dbModule.entityTypes.add(TestDoc);
+  dbModule.entityTypes.add(TestResource);
 
-  await dbm.init();
+  await dbModule.init();
   t = Resolver.checkAndResolve(testResolver, runner.context);
 });
 

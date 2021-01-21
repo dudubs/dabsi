@@ -19,6 +19,5 @@ export default class SystemModule {
   async check(context: AnyResolverMap) {
     this.log.trace(`Checking..`);
     this.rpcModule.check(SystemRpc, context);
-    // Resolver.check(this.rpcModule.getRpcConfigResolver(SystemRpc), context);
   }
 }

@@ -3,14 +3,16 @@ import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { User } from "@dabsi/system/acl/entities/User";
 import AclAdminUserBasicInfoForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoForm";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import RpcConfigFactory from "../../../../../../modules/rpc/RpcConfigFactory";
+import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 export default RpcConfigResolver(
   AclAdminUserBasicInfoForm,
   {
     user: DataRow(User),
     sources: AclDataSources,
-    getInputConfig: RpcConfigFactory(AclAdminUserBasicInfoForm.at("input")),
+    getInputConfig: RpcConfigFactoryResolver(
+      AclAdminUserBasicInfoForm.at("input")
+    ),
   },
   c => $ =>
     $({

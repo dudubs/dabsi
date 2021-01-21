@@ -3,19 +3,19 @@ import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupsManager from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupsManager";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import RpcConfigFactory from "../../../../../../modules/rpc/RpcConfigFactory";
+import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 // TODO: DataManagerConfigResolver(EntityType, ...)
 export default RpcConfigResolver(
   AclAdminGroupsManager,
   {
-    createEditConfig: RpcConfigFactory(
+    createEditConfig: RpcConfigFactoryResolver(
       AclAdminGroupsManager.at("edit").at("target"),
       {
         context: Group.provide(),
       }
     ),
-    createAddInputConfig: RpcConfigFactory(
+    createAddInputConfig: RpcConfigFactoryResolver(
       AclAdminGroupsManager.at("add").at("input")
     ),
     sources: AclDataSources,

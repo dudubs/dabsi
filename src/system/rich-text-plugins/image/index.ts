@@ -1,57 +1,59 @@
 import RichTextModule from "@dabsi/system/rich-text";
-import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImagRpc";
 import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entities/ImageEntity";
-import {
-  RichTextEntityChildren,
-  RichTextEntitySelection,
-} from "@dabsi/system/rich-text/getRichTextEntityUnion";
-import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
 import { Inject, Module } from "@dabsi/typedi";
-import { RpcError } from "@dabsi/typerpc/Rpc";
 
 declare global {
-  interface RichTextInputConfig {
-    image?:
-      | boolean
-      | {
-          min?: { width?: number; height?: number };
-          max?: { width?: number; height?: number };
-          preview?: { width?: number; height?: number };
-        };
-  }
-  interface RichTextInputElement {
-    image: {};
-  }
+  namespace IRichText {
+    interface Config {
+      image?:
+        | boolean
+        | {
+            min?: { width?: number; height?: number };
+            max?: { width?: number; height?: number };
+            preview?: { width?: number; height?: number };
+          };
+    }
+    interface EntityChildren {
+      image: RichTextImageEntity;
+    }
 
-  interface RichTextEntityChildren {
-    image: typeof RichTextImageEntity;
+    interface EntityDataTypes {
+      image: {
+        packed: null;
+
+        unpacked: { url: string; key: string };
+
+        readonly: { url: string };
+      };
+    }
   }
 }
 
 @Module()
 export default class RichTextImageModule {
   constructor(@Inject() richTextModule: RichTextModule) {
-    RichTextEntityChildren.image = RichTextImageEntity;
-
     richTextModule.install(plugins => {
-      plugins.configureInputRpc(RichTextImageRpc, () => {
-        return {
-          upload({ field }) {
-            return { url: "" };
-          },
-        };
-      });
-    });
+      plugins.defineEntity("image", {
+        entityType: RichTextImageEntity,
+        mutability: { IMMUTABLE: true },
 
-    DataSelection.select(RichTextEntitySelection, {
-      children: {
-        image: {
-          relations: {
-            file: { pick: ["url"] },
-            previewFile: { pick: ["url"] },
-          },
+        selection: {
+          relations: { file: { pick: ["url"] } },
         },
-      },
+
+        packEntityRowKey: unpackedData => unpackedData.key,
+
+        pack: (row, { url }) => {
+          return null;
+        },
+
+        unpack: row => ({
+          url: row.file!.url,
+          key: row.$key,
+        }),
+
+        readonlyUnpack: row => ({ url: row.file!.url }),
+      });
     });
   }
 }

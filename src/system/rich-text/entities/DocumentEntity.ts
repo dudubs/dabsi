@@ -23,7 +23,7 @@ export class RichTextEntity {
   session!: DataRelation<Session>;
 
   @ManyToMany(() => RichTextDocument, doc => doc.entities)
-  documents!: DataRelation<RichTextDocument>;
+  documents!: DataRelation<RichTextDocument>[];
 }
 
 // add image -> got entity id ->

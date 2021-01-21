@@ -1,5 +1,5 @@
 import Session from "@dabsi/modules/session/entities/Session";
-import { RichTextEntity } from "@dabsi/system/rich-text/entities/Entity";
+import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
 import {
   Column,
@@ -26,7 +26,7 @@ export class RichTextDocument {
   text!: string;
 
   @Column()
-  style!: string;
+  data!: string;
 
   @JoinTable()
   @ManyToMany(() => RichTextEntity, entity => entity.documents)

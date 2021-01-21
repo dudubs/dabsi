@@ -2,8 +2,10 @@ import RichTextModule from "@dabsi/system/rich-text";
 import { Inject, Module } from "@dabsi/typedi";
 
 declare global {
-  interface RichTextInputConfig {
-    allowLinks?: boolean;
+  namespace IRichText {
+    interface Config {
+      allowLinks?: boolean;
+    }
   }
 }
 

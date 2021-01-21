@@ -4,7 +4,7 @@ import { ReactElement, ReactNode } from "react";
 import { keys } from "@dabsi/common/object/keys";
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetView } from "@dabsi/typerpc/widget/WidgetView";
 import { AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
@@ -24,7 +24,7 @@ export type WidgetMapViewProps<
 export type AnyWidgetMapConnection = RpcConnection<AnyWidgetMap>;
 
 export class WidgetMapView<C extends AnyWidgetMapConnection>
-  extends AbstractWidgetView<C, WidgetMapViewProps<C>>
+  extends WidgetView<C, WidgetMapViewProps<C>>
   implements MapView<WidgetViewProps<AnyWidgetConnection>> {
   getChildProps<K extends keyof C["map"]>(
     key: string & K

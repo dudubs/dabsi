@@ -1,10 +1,12 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
+import { touchSet } from "@dabsi/common/map/touchSet";
 import { entries } from "@dabsi/common/object/entries";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import DataModuleSource from "@dabsi/modules/data/DataModuleSource";
 import DataSourceFactoryResolver from "@dabsi/modules/data/DataSourceFactroyResolver";
 import { DbModule } from "@dabsi/modules/DbModule";
+import { DataResolver } from "@dabsi/system/storage/DataResolver";
 import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
 import {
   DataEntityEmitter,
@@ -18,9 +20,6 @@ import SqlliteQueryRunnerPool from "@dabsi/typeorm/SqlliteQueryRunnerPool";
 import { Connection, QueryRunner } from "typeorm";
 
 type OnRelationCallback = (event: {
-  relationType: Function;
-  entityType: Function;
-  entityPropertyName: string;
   relation: EntityRelation;
   connection: Connection;
 }) => Awaitable;
@@ -45,28 +44,29 @@ export default class DataModule {
 
     // SystemRequest.start();
     dbModule.afterInit(async () => {
+      const cache = new Set();
       const connection = dbModule.getConnection();
+
       for (const entityMetadata of connection.entityMetadatas) {
         if (typeof entityMetadata.target !== "function") continue;
         for (const relationMetadata of entityMetadata.relations) {
           if (typeof relationMetadata.type !== "function") continue;
-
+          if (!touchSet(cache, relationMetadata)) continue;
           const relationType = relationMetadata.type;
+
           const relation = new EntityRelation(
             connection,
-            entityMetadata.target as Function,
+            relationMetadata.target as Function,
             relationMetadata.propertyName,
             false
           );
+
           getDataEntityInfo;
           for (const callback of this._buildRelationCallbacksMap.get(
             relationType
           ) || []) {
             await callback({
-              entityType: entityMetadata.target,
               relation,
-              relationType,
-              entityPropertyName: relationMetadata.propertyName,
               connection,
             });
           }
@@ -80,15 +80,16 @@ export default class DataModule {
     OnRelationCallback[]
   >();
 
-  buildRelation(relationType: Function, callback: OnRelationCallback) {
+  buildRelationsTo(relationType: Function, callback: OnRelationCallback) {
     // down to children.
     // getEntityChildren
     touchMap(this._buildRelationCallbacksMap, relationType, () => []).push(
       callback
     );
   }
-  // rela
 
+  // listenToRelation
+  // listenToColumn
   listen(
     entityType,
     callbackMap: {

@@ -90,6 +90,12 @@ export class DChild2 extends DBase {
 }
 
 @ChildEntity()
+export class DChild3 extends DBase {
+  @Column({ nullable: true })
+  dChild3Text?: string;
+}
+
+@ChildEntity()
 export class DChild1Child1 extends DChild1 {
   @Column({ nullable: true })
   dChild1Child1Text?: string;
@@ -193,15 +199,3 @@ export class DUnion extends DataUnion(DBase, {
     dChild1Child1: DChild1Child1,
   },
 }) {}
-
-/*
-
-    children:
-        dChild1
-            relations:
-                ma....
-
-    relations:
-        children: ...
-
- */

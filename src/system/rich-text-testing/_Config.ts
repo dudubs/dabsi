@@ -1,23 +1,25 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
-import RichTextModule from "@dabsi/system/rich-text";
-import TestRichTextForm from "@dabsi/system/rich-text-testing/common/TestRichTextForm";
+import RichTextTestingRpc from "@dabsi/system/rich-text-testing/common/RichTextTestingRpc";
+import { RichTextContext } from "@dabsi/system/rich-text/RichTextContext";
+import { ContentState, convertToRaw } from "draft-js";
 
 export default RpcConfigResolver(
-  TestRichTextForm,
+  RichTextTestingRpc,
   {
-    module: RichTextModule,
+    context: RichTextContext,
   },
   c => $ =>
     $({
-      inputConfig: {
-        module: c.module,
-        image: {
-          preview: { width: 500 },
+      form: {
+        inputConfig: {
+          text: { allowAll: true, context: c.context },
         },
-
-        // tagFriends: ... user
-        allowTables: true,
+        async submit({ text, textKey }) {
+          return { textKey };
+        },
       },
-      submit() {},
+      get(textKey) {
+        return convertToRaw(ContentState.createFromText("hello " + textKey));
+      },
     })
 );

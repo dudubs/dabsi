@@ -1,20 +1,20 @@
-import {
-  AEntity,
-  BEntity,
-  CEntity,
-} from "@dabsi/typeorm/relations/tests/TestEntities";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import { DataSelector } from "@dabsi/typedata/DataSelector";
 import {
-  DBase,
   DUnion,
-  EBase,
-  EUnion,
+
+  EUnion
 } from "@dabsi/typedata/tests/BaseEntities";
 import { DataSourceTests } from "@dabsi/typedata/tests/DataSourceTests";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import {
+  AEntity,
+  BEntity,
+  CEntity
+} from "@dabsi/typeorm/relations/tests/TestEntities";
 
 const getConnection = TestConnection([AEntity, BEntity, CEntity]);
+
 export const EDSTesters = {
   A: DataEntitySource.createFromConnection(AEntity, getConnection),
   B: DataEntitySource.createFromConnection(BEntity, getConnection),
@@ -22,6 +22,7 @@ export const EDSTesters = {
   D: DataEntitySource.createFromConnection(DUnion, getConnection),
   E: DataEntitySource.createFromConnection(EUnion, getConnection),
 };
+
 
 DataSourceTests(
   EDSTesters.A,
@@ -32,6 +33,7 @@ DataSourceTests(
 );
 
 const { B: BDS, A: ADS } = EDSTesters;
+
 describe("DataEntitySelector", () => {
   let key: string;
   class A extends DataSelector(AEntity, {

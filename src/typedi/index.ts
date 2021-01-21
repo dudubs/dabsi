@@ -16,6 +16,7 @@ import "./operators/resolveType";
 import "./operators/try";
 import "./operators/array";
 import "./operators/resolve";
+import "./operators/forward";
 import "./operators/provide";
 import "./operators/checkAndResolve";
 import "./operators/object";

@@ -32,21 +32,8 @@ type _RelationToMany<T> = DataSelection<T> & {
   order?: DataOrder<T>[];
 };
 
-export type DataSelection<T> = {
-  // rename to get
-  pick?: readonly DataPickableKeys<T>[];
-
-  fields?: Record<string, DataExp<T>>;
-
-  relations?: {
-    [K in DataRelationKeys<T>]?:
-      | true
-      | false
-      | IfRelationToOne<T[K], _RelationToOne<DataRelationTypeAt<T, K>>>
-      | IfRelationToMany<T[K], _RelationToMany<DataRelationTypeAt<T, K>>>;
-  };
-
-  children?: T extends WithDataUnionMetaChildren<infer Children>
+export namespace DataSelection {
+  export type Children<T> = T extends WithDataUnionMetaChildren<infer Children>
     ? If<
         HasKeys<Children>,
         {
@@ -55,6 +42,24 @@ export type DataSelection<T> = {
         undefined
       >
     : undefined;
+  export type Relations<T> = {
+    [K in DataRelationKeys<T>]?:
+      | true
+      | false
+      | IfRelationToOne<T[K], _RelationToOne<DataRelationTypeAt<T, K>>>
+      | IfRelationToMany<T[K], _RelationToMany<DataRelationTypeAt<T, K>>>;
+  };
+}
+
+export type DataSelection<T> = {
+  // rename to get
+  pick?: readonly DataPickableKeys<T>[];
+
+  fields?: Record<string, DataExp<T>>;
+
+  relations?: DataSelection.Relations<T>;
+
+  children?: DataSelection.Children<T>;
 };
 
 export type AnyDataSelection = {

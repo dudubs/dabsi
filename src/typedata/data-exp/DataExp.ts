@@ -135,7 +135,7 @@ export type HasExp<T> =
   | DataRelationToManyKeys<T>
   | Union<
       {
-        [K in DataRelationKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
+        [K in DataRelationToManyKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
       }
     >;
 

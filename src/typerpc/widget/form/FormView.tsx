@@ -3,9 +3,13 @@ import { Emittable } from "@dabsi/react/reactor/Reactor";
 import { ReactorListener } from "@dabsi/react/reactor/ReactorListener";
 import { Renderer } from "@dabsi/react/renderer";
 import { InputError } from "@dabsi/typerpc/input/Input";
-import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import {
+  InputViewInstance,
+  InputView,
+  InputViewProps,
+} from "@dabsi/typerpc/input/InputView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetView } from "@dabsi/typerpc/widget/WidgetView";
 
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
@@ -29,9 +33,7 @@ export type FormViewProps<
 
 export const FormViewEvent = Emittable<"submit" | "reset">();
 
-export class FormView<
-  C extends RpcConnection<AnyForm>
-> extends AbstractWidgetView<
+export class FormView<C extends RpcConnection<AnyForm>> extends WidgetView<
   C,
   FormViewProps<C> & {
     children: (props: {
@@ -40,7 +42,7 @@ export class FormView<
     }) => ReactElement;
   }
 > {
-  input!: InputView<C["input"]>;
+  input!: InputViewInstance<C["input"]>;
 
   reset() {
     this._element = { ...this.element };

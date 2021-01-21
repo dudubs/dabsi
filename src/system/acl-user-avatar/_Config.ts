@@ -1,4 +1,4 @@
-import shrap from "sharp";
+import sharp from "sharp";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import AclAdminUserAvatarModule from "@dabsi/system/acl-user-avatar";
@@ -27,7 +27,7 @@ export default RpcConfigResolver(
             throw new TypeError(`Expected to buffer`);
 
           // shrap(buffer).stats().then(x=>x.)
-          const metadata = await shrap(buffer).metadata();
+          const metadata = await sharp(buffer).metadata();
 
           if (metadata.width !== metadata.height) {
             throw new RpcError(`Expected width = height.`);
@@ -46,7 +46,7 @@ export default RpcConfigResolver(
           const file = await c.storageManager.upload(
             "user-avatar",
             "png",
-            await shrap(buffer).png().toBuffer()
+            await sharp(buffer).png().toBuffer()
           );
 
           await c.user.update({ avatar: file });

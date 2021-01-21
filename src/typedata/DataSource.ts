@@ -174,25 +174,34 @@ export abstract class DataSource<T> {
   protected async _each(
     keyOrKeys: DataKeyOrKeysInput<T> | undefined,
     callback: (keys: string[]) => Promise<void>
-  ) {
+  ): Promise<string[]> {
+    let keys: string[];
+
     if (keyOrKeys !== undefined) {
       if (Array.isArray(keyOrKeys)) {
-        return callback(keyOrKeys.map(DataKey));
+        keys = keyOrKeys.map(DataKey);
+      } else {
+        keys = [DataKey(keyOrKeys)];
       }
-      return callback([DataKey(keyOrKeys)]);
+      await callback(keys);
+      return keys;
+    } else {
+      keys = [];
+      for await (const rows of chunks(this.selectKeys().find(), 100)) {
+        const chunkKeys = rows.map(row => row.$key);
+        keys.push(...chunkKeys);
+        await callback(chunkKeys);
+      }
     }
-
-    for await (const rows of chunks(this.selectKeys().find(), 100)) {
-      await callback(rows.map(row => row.$key));
-    }
+    return keys;
   }
 
-  async update(value: DataUpdate<T>): Promise<number>;
+  async update(value: DataUpdate<T>): Promise<string[]>;
   async update(
     keyOrKeys: DataKeyOrKeysInput<T>,
     value: DataUpdate<T>
-  ): Promise<number>;
-  async update(...args): Promise<number> {
+  ): Promise<string[]>;
+  async update(...args): Promise<string[]> {
     let values;
     let keyOrKeys = undefined;
     if (args.length === 1) {
@@ -200,22 +209,20 @@ export abstract class DataSource<T> {
     } else {
       [keyOrKeys, values] = args;
     }
-    let affectedRows = 0;
-    await this._each(keyOrKeys, async keys => {
-      affectedRows += await this.updateKeys(keys, values);
+    return this._each(keyOrKeys, async keys => {
+      await this.updateKeys(keys, values);
     });
-    return affectedRows;
   }
 
-  async add(keyOrKeys?: DataKeyOrKeysInput<T>) {
+  async add(keyOrKeys?: DataKeyOrKeysInput<T>): Promise<string[]> {
     return this._each(keyOrKeys, keys => this.addKeys(keys));
   }
 
-  async remove(keyOrKeys?: DataKeyOrKeysInput<T>) {
+  async remove(keyOrKeys?: DataKeyOrKeysInput<T>): Promise<string[]> {
     return this._each(keyOrKeys, keys => this.removeKeys(keys));
   }
 
-  async delete(keyOrKeys?: DataKeyOrKeysInput<T>) {
+  async delete(keyOrKeys?: DataKeyOrKeysInput<T>): Promise<string[]> {
     return this._each(keyOrKeys, keys => this.deleteKeys(keys));
   }
 

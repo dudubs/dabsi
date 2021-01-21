@@ -1,9 +1,11 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { Renderer } from "@dabsi/react/renderer";
-import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
 import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import {
+  AbstractInputView,
+  InputViewProps,
+} from "@dabsi/typerpc/input/InputView";
 import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { ReactElement } from "react";

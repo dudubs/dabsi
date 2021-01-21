@@ -47,12 +47,15 @@ export abstract class AbstractRpcHandler<T extends AnyRpc>
   async getChildHandler<K extends keyof RpcChildren<T>>(
     key: string & K
   ): Promise<RpcResolvedHandler<RpcChildren<T>[K]>> {
-    if (this._childHandlerMapCache[key]) return this._childHandlerMapCache[key];
+    if (this._childHandlerMapCache[key]) {
+      return this._childHandlerMapCache[key];
+    }
     const child = this.rpc.children[key];
-    if (!child)
+    if (!child) {
       throw new RpcError(
         `No child "${key}". ${inspect(Object.keys(this.rpc.children))}`
       );
+    }
 
     const config = await this.getChildConfig!(key, child);
     try {

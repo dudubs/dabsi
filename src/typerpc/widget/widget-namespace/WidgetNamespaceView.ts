@@ -3,7 +3,7 @@ import { entries } from "@dabsi/common/object/entries";
 import { keys } from "@dabsi/common/object/keys";
 import { touchObject } from "@dabsi/common/object/touchObject";
 import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetView } from "@dabsi/typerpc/widget/WidgetView";
 import {
   AnyWidget,
   AnyWidgetConnection,
@@ -31,7 +31,7 @@ function Provider({ value, children }) {
 }
 
 export class WidgetNamespaceView
-  extends AbstractWidgetView<
+  extends WidgetView<
     RpcConnection<WidgetNamespace>,
     WidgetViewProps<RpcConnection<WidgetNamespace>> & {
       children: (view: WidgetNamespaceView) => ReactElement;

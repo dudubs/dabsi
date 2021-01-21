@@ -1,3 +1,4 @@
+import { canvasToBlob } from "@dabsi/browser/ImageUtils";
 import MuiAvatarInput from "@dabsi/system/acl-user-avatar/browser/MuiAvatarInput";
 import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUserAvatarRpc";
 import AclEditUserAvatar from "@dabsi/system/acl-user-avatar/plugins/admin/common/AclAdminEditUserAvatarRpc";
@@ -38,19 +39,7 @@ function View({ children }) {
           <MuiAvatarInput
             url={url}
             onChange={async canvas => {
-              const blob = await new Promise<Blob>((resolve, reject) => {
-                canvas.toBlob(
-                  blob => {
-                    if (blob) {
-                      resolve(blob);
-                      return;
-                    }
-                    throw new Error("No blob");
-                  },
-                  "image/png",
-                  1
-                );
-              });
+              const blob = await canvasToBlob(canvas);
               const result = await processRpcWithFormData(
                 df => {
                   df.append("avatar", blob);

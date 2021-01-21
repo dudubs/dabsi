@@ -1,16 +1,17 @@
+import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupBasicInfoForm from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoForm";
-import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import OldSystemRpcConfigXResolver from "@dabsi/modules/rpc/OldSystemRpcConfigXResolver";
 import { DataRow } from "@dabsi/typedata/DataRow";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
-import RpcConfigFactory from "../../../../../../modules/rpc/RpcConfigFactory";
+import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 export default RpcConfigResolver(
   AclAdminGroupBasicInfoForm,
   {
     sources: AclDataSources,
-    getInputConfig: RpcConfigFactory(AclAdminGroupBasicInfoForm.at("input")),
+    createInputConfig: RpcConfigFactoryResolver(
+      AclAdminGroupBasicInfoForm.at("input")
+    ),
     group: DataRow(Group),
   },
   c => $ =>
@@ -18,7 +19,7 @@ export default RpcConfigResolver(
       valueConfig: {
         groupName: c.group.name,
       },
-      inputConfig: c.getInputConfig(),
+      inputConfig: c.createInputConfig(),
       async submit({ groupName }) {
         await c.group.update({ name: groupName });
       },

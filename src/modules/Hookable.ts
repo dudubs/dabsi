@@ -1,3 +1,4 @@
+import { reversed } from "@dabsi/common/array/reversed";
 import { isPromiseLike } from "@dabsi/common/async/isPromiseLike";
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { Awaitable } from "@dabsi/common/typings2/Async";
@@ -9,9 +10,11 @@ function _concat(result, callback) {
   }
   return callback();
 }
+
 function _invokeInOrder(callbacks, args) {
   return _invoke(callbacks, args, 1, 0);
 }
+
 function _invokeReveresed(callbacks, args) {
   return _invoke(callbacks, args, -1, callbacks.length - 1);
 }
@@ -42,11 +45,27 @@ export type Hookable<
   <This>(this: This, hook: { after?: Callback; before?: Callback }): This;
 };
 
-export function Hookable<T extends Fn>(original?: T): Hookable<T> {
+Hookable.sync = <T extends Fn = () => void>(original?: T): Hookable<T> => {
+  return Hookable(original, false);
+};
+export function Hookable<T extends Fn>(
+  original?: T,
+  async = true
+): Hookable<T> {
   const beforeCallbacks = [] as Fn[];
   const afterCallbacks = [] as Fn[];
 
   hookable.invoke = (...args) => {
+    if (!async) {
+      for (const callback of beforeCallbacks) {
+        callback(...args);
+      }
+      const result = original?.(...args);
+      for (const callback of reversed(afterCallbacks)) {
+        callback(...args);
+      }
+      return result;
+    }
     let result;
     return _concat(
       _invokeInOrder(
@@ -60,6 +79,7 @@ export function Hookable<T extends Fn>(original?: T): Hookable<T> {
       () => result
     );
   };
+
   return <any>hookable;
   function hookable(this: any, hook) {
     if (typeof hook === "function") {

@@ -42,7 +42,6 @@ const getConnection = TestConnection([
   EChild1,
   EChild2,
   EChild1Child1,
-
   AEntity,
   BEntity,
   CEntity,

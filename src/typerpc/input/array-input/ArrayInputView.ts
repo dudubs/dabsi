@@ -1,15 +1,19 @@
-import { createElement, Fragment, ReactElement, ReactNode } from "react";
 import { RandomId } from "@dabsi/common/patterns/RandomId";
 import { RequiredOnly } from "@dabsi/common/typings2/RequiredOnly";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AbstractInputView } from "@dabsi/typerpc/input/AbstractInputView";
-import { InputType } from "@dabsi/typerpc/input/Input";
-import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
-import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
 import {
   AnyArrayInput,
   TArrayInput,
 } from "@dabsi/typerpc/input/array-input/ArrayInput";
+import { InputType } from "@dabsi/typerpc/input/Input";
+import {
+  AbstractInputView,
+  InputViewInstance,
+  InputView,
+  InputViewProps,
+} from "@dabsi/typerpc/input/InputView";
+import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
+import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { createElement, Fragment, ReactElement, ReactNode } from "react";
 
 export type AnyArrayInputConnection = RpcConnection<AnyArrayInput>;
 
@@ -42,7 +46,7 @@ export class ArrayInputView<
     this.setValue(this.value?.filter((_, i) => i !== index) || []);
   }
 
-  newItemInput!: InputView<RpcConnection<T["NewItem"]>>;
+  newItemInput!: InputViewInstance<RpcConnection<T["NewItem"]>>;
 
   async add(): Promise<boolean> {
     await this.newItemInput.validate();

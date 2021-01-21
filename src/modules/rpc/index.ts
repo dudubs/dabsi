@@ -84,14 +84,16 @@ export default class RpcModule {
   @Lazy() get createRpcConfigResolver() {
     return createConfigResolverFactory(rpc => this.getRpcConfigResolver(rpc));
   }
+
   getRpcConfigResolver<T extends AnyRpc>(rpc: T): RpcConfigResolver<T> {
     return <any>touchMap(
       this._rpcConfigResolverMap,
       rpc,
       (): RpcConfigResolver<T> => {
         const configResolver = this.createRpcConfigResolver(rpc);
-        if (configResolver) return configResolver as RpcConfigResolver<T>;
-
+        if (configResolver) {
+          return configResolver as RpcConfigResolver<T>;
+        }
         throw new ResolveError(
           `No config resolver ${rpc.rpcType?.name}, ${rpc.options.isConfigCanBeUndefined}`
         );

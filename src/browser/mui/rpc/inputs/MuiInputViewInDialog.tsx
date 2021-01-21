@@ -2,13 +2,17 @@ import React, { MutableRefObject, useRef, useState } from "react";
 import { Renderer } from "@dabsi/react/renderer";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
 import { AnyInputConnection, InputValue } from "@dabsi/typerpc/input/Input";
-import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import {
+  InputViewInstance,
+  InputView,
+  InputViewProps,
+} from "@dabsi/typerpc/input/InputView";
 import {
   MuiDialog,
   MuiDialogProps,
 } from "@dabsi/browser/mui/components/MuiDialog";
 
-export function MuiInputViewInDialog<C extends AnyInputConnection>({
+export function MuInputViewInstanceInDialog<C extends AnyInputConnection>({
   children,
   MuiDialogProps,
   target,
@@ -25,7 +29,7 @@ export function MuiInputViewInDialog<C extends AnyInputConnection>({
   }>;
 }) {
   const [showDialog, setShowDialog] = useState(show ?? false);
-  const input: MutableRefObject<InputView<C> | null> = useRef(null);
+  const input: MutableRefObject<InputViewInstance<C> | null> = useRef(null);
 
   return (
     <>

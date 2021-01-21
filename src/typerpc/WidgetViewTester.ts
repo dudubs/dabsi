@@ -3,7 +3,7 @@ import ReactTesterRenderer from "react-test-renderer";
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { buildTests } from "@dabsi/jasmine/buildTests";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { WidgetViewClass } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetViewClass } from "@dabsi/typerpc/widget/WidgetView";
 import {
   AnyWidget,
   AnyWidgetConnection,

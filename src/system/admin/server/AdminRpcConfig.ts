@@ -3,13 +3,13 @@ import RequestSession from "@dabsi/modules/session/RequestSession";
 import { AdminRpc } from "@dabsi/system/admin/common";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { RpcError } from "@dabsi/typerpc/Rpc";
-import RpcConfigFactory from "../../../modules/rpc/RpcConfigFactory";
+import RpcConfigFactoryResolver from "../../../modules/rpc/RpcConfigFactoryResolver";
 
 export default RpcConfigResolver(
   AdminRpc,
   {
     // TODO: Automatic by cycle
-    createConfig: RpcConfigFactory(AdminRpc, { create: true }),
+    createConfig: RpcConfigFactoryResolver(AdminRpc, { create: true }),
     session: DataRow(RequestSession),
   },
   c => async $ => {

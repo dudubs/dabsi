@@ -4,7 +4,7 @@ import { mapAndFilterObject } from "@dabsi/common/object/mapAndFilterObject";
 
 import { ViewState } from "@dabsi/react/view/ViewState";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AbstractWidgetView } from "@dabsi/typerpc/widget/AbstractWidgetView";
+import { WidgetView } from "@dabsi/typerpc/widget/WidgetView";
 import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
@@ -21,7 +21,7 @@ export type DataTableViewState = {
 
 export class DataTableView<
   C extends RpcConnection<AnyDataTable>
-> extends AbstractWidgetView<
+> extends WidgetView<
   C,
   DataTableViewProps<C> & {
     children(view: DataTableView<C>): ReactElement;

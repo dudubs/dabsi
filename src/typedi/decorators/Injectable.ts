@@ -36,7 +36,13 @@ export const getInjectableResolver = WeakMapFactory(
               Forward.getParameterType(target, index) || designType)
           );
         }
-      })
+      }),
+      index => {
+        return target
+          .toString()
+          .match(/constructor\s*\((?<args>[^)]+)\)/)
+          ?.groups?.args.split(",")[0];
+      }
     );
   }
 );

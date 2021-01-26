@@ -13,10 +13,9 @@ import { DataUnion } from "@dabsi/typedata/DataUnion";
 
 let randomId = 0;
 
-// TODO: rename to DBase -> DEntity, EBase -> EEntity
 @Entity()
 @TableInheritance({ column: "dType" })
-export class DBase {
+export class DEntity {
   @BeforeInsert()
   setNewId() {
     this.dId = `${this.constructor.name}_${++randomId}`;
@@ -37,60 +36,60 @@ export class DBase {
   @Column({ nullable: true })
   dBoolean?: boolean;
 
-  @TestRelation(() => EBase)
-  oneDToOneE?: DataRelation<EBase>;
+  @TestRelation(() => EEntity)
+  oneDToOneE?: DataRelation<EEntity>;
 
-  @TestRelation(() => EBase)
-  oneDToOneEOwner?: DataRelation<EBase>;
+  @TestRelation(() => EEntity)
+  oneDToOneEOwner?: DataRelation<EEntity>;
 
-  @TestRelation(() => EBase)
-  oneDToManyE!: DataRelation<EBase>[];
+  @TestRelation(() => EEntity)
+  oneDToManyE!: DataRelation<EEntity>[];
 
-  @TestRelation(() => EBase)
-  manyDToOneE?: DataRelation<EBase>;
+  @TestRelation(() => EEntity)
+  manyDToOneE?: DataRelation<EEntity>;
 
-  @TestRelation(() => EBase)
-  manyDToManyE!: DataRelation<EBase>[];
+  @TestRelation(() => EEntity)
+  manyDToManyE!: DataRelation<EEntity>[];
 
-  @TestRelation(() => EBase)
-  manyDToManyEOwner!: DataRelation<EBase>[];
+  @TestRelation(() => EEntity)
+  manyDToManyEOwner!: DataRelation<EEntity>[];
 }
 
 @ChildEntity()
-export class DChild1 extends DBase {
+export class DChild1 extends DEntity {
   @Column({ nullable: true })
   dChild1Text?: string;
 
   @Column({ nullable: true })
   dChild1Text2?: string;
 
-  @TestRelation(() => EBase)
-  manyDChild1ToOneE?: DataRelation<EBase>;
+  @TestRelation(() => EEntity)
+  manyDChild1ToOneE?: DataRelation<EEntity>;
 
-  @TestRelation(() => EBase)
-  manyDChild1ToManyEOwner!: DataRelation<EBase>[];
+  @TestRelation(() => EEntity)
+  manyDChild1ToManyEOwner!: DataRelation<EEntity>[];
 
-  @TestRelation(() => EBase)
-  manyDChild1ToManyE!: DataRelation<EBase>[];
+  @TestRelation(() => EEntity)
+  manyDChild1ToManyE!: DataRelation<EEntity>[];
 
-  @TestRelation(() => EBase)
-  oneDChild1ToOneEOwner?: DataRelation<EBase>;
+  @TestRelation(() => EEntity)
+  oneDChild1ToOneEOwner?: DataRelation<EEntity>;
 
-  @TestRelation(() => EBase)
-  oneDChild1ToOneE?: DataRelation<EBase>;
+  @TestRelation(() => EEntity)
+  oneDChild1ToOneE?: DataRelation<EEntity>;
 
-  @TestRelation(() => EBase)
-  oneDChild1ToManyE!: DataRelation<EBase>[];
+  @TestRelation(() => EEntity)
+  oneDChild1ToManyE!: DataRelation<EEntity>[];
 }
 
 @ChildEntity()
-export class DChild2 extends DBase {
+export class DChild2 extends DEntity {
   @Column({ nullable: true })
   dChild2Text?: string;
 }
 
 @ChildEntity()
-export class DChild3 extends DBase {
+export class DChild3 extends DEntity {
   @Column({ nullable: true })
   dChild3Text?: string;
 }
@@ -101,9 +100,15 @@ export class DChild1Child1 extends DChild1 {
   dChild1Child1Text?: string;
 }
 
+@ChildEntity()
+export class DChild1Child2 extends DChild1 {
+  @Column({ nullable: true })
+  dChild1Child2Text?: string;
+}
+
 @Entity()
 @TableInheritance({ column: "eType" })
-export class EBase {
+export class EEntity {
   @PrimaryGeneratedColumn()
   eId!: number;
 
@@ -116,23 +121,23 @@ export class EBase {
   @Column({ nullable: true })
   eText2?: string;
 
-  @TestRelation(() => DBase)
-  oneEToOneDOwner?: DataRelation<DBase>;
+  @TestRelation(() => DEntity)
+  oneEToOneDOwner?: DataRelation<DEntity>;
 
-  @TestRelation(() => DBase)
-  oneEToOneD?: DataRelation<DBase>;
+  @TestRelation(() => DEntity)
+  oneEToOneD?: DataRelation<DEntity>;
 
-  @TestRelation(() => DBase)
-  manyEToOneD?: DataRelation<DBase>;
+  @TestRelation(() => DEntity)
+  manyEToOneD?: DataRelation<DEntity>;
 
-  @TestRelation(() => DBase)
-  oneEToManyD!: DataRelation<DBase>[];
+  @TestRelation(() => DEntity)
+  oneEToManyD!: DataRelation<DEntity>[];
 
-  @TestRelation(() => DBase)
-  manyEToManyDOwner!: DataRelation<DBase>[];
+  @TestRelation(() => DEntity)
+  manyEToManyDOwner!: DataRelation<DEntity>[];
 
-  @TestRelation(() => DBase)
-  manyEToManyD!: DataRelation<DBase>[];
+  @TestRelation(() => DEntity)
+  manyEToManyD!: DataRelation<DEntity>[];
 
   @TestRelation(() => DChild1)
   manyEToOneDChild1?: DataRelation<DChild1>;
@@ -154,13 +159,13 @@ export class EBase {
 }
 
 @ChildEntity()
-export class EChild1 extends EBase {
+export class EChild1 extends EEntity {
   @Column({ nullable: true })
   eChild1Text!: string;
 }
 
 @ChildEntity()
-export class EChild2 extends EBase {
+export class EChild2 extends EEntity {
   @Column({ nullable: true })
   eChild2Text!: string;
 }
@@ -171,7 +176,7 @@ export class EChild1Child1 extends EChild1 {
   eChild1Child1Text!: string;
 }
 
-export class EUnion extends DataUnion(EBase, {
+export class EUnion extends DataUnion(EEntity, {
   children: {
     eChild1: EChild1,
     eChild2: EChild2,
@@ -179,7 +184,7 @@ export class EUnion extends DataUnion(EBase, {
   },
 }) {}
 
-export class DUnion extends DataUnion(DBase, {
+export class DUnion extends DataUnion(DEntity, {
   relations: {
     oneDToOneE: EUnion,
     manyDToManyE: EUnion,

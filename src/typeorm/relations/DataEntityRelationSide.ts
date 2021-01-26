@@ -4,14 +4,14 @@ import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
-import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
+import { DataEntityRelation } from "@dabsi/typeorm/relations/DataEntityRelation";
 import { isSubClass } from "@dabsi/typeorm/relations/isSubClass";
 
 export type ByTableOrColumn = "table" | "column";
 
-export class EntityRelationSide<T> {
+export class DataEntityRelationSide<T> {
   constructor(
-    public relation: EntityRelation,
+    public relation: DataEntityRelation,
     public entityType: ObjectType<T>,
     public isLeft: boolean
   ) {}
@@ -41,7 +41,7 @@ export class EntityRelationSide<T> {
     return invert ? !isOwning : isOwning;
   }
 
-  joinColumns = this.isOwning
+  joinColumns: ColumnMetadata[] = this.isOwning
     ? this.relation.ownerRelationMetadata.joinColumns
     : this.relation.ownerRelationMetadata.inverseJoinColumns;
 

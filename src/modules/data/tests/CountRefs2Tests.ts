@@ -1,6 +1,4 @@
-import { touchMap } from "@dabsi/common/map/touchMap";
-import { touchSet } from "@dabsi/common/map/touchSet";
-import { WeakId } from "@dabsi/common/WeakId";
+import addAll from "@dabsi/common/map/addAll";
 import DataModule from "@dabsi/modules/data";
 import buildCountRefs from "@dabsi/modules/data/buildCountRefs";
 import DataSourceResolver from "@dabsi/modules/data/DataSourceResolver";
@@ -8,13 +6,16 @@ import { TestEntity } from "@dabsi/modules/data/tests/TestEntity";
 import { DbModule } from "@dabsi/modules/DbModule";
 import TestDbModule from "@dabsi/modules/tests/TestDbModule";
 import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSource } from "@dabsi/typedata/DataSource";
 import { DataUnion } from "@dabsi/typedata/DataUnion";
 import { Resolver, ResolverType } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { EntityRelation } from "@dabsi/typeorm/relations";
 import {
   ChildEntity,
   Column,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
   TableInheritance,
@@ -30,6 +31,15 @@ class TestResource {
 }
 
 @TestEntity()
+class TestFolder {
+  @PrimaryColumn()
+  id!: string;
+
+  @ManyToOne(() => TestDoc)
+  docs!: DataRelation<TestDoc>;
+}
+
+@TestEntity()
 @TableInheritance({ column: "type" })
 class TestDoc {
   @PrimaryColumn()
@@ -37,6 +47,10 @@ class TestDoc {
 
   @ManyToOne(() => TestResource)
   res!: DataRelation<TestResource>;
+
+  @JoinTable()
+  @ManyToMany(() => TestResource)
+  manyRes!: DataRelation<TestResource>[];
 
   @Column()
   type!: string;
@@ -46,6 +60,12 @@ class TestDoc {
 class TestDocChild1 extends TestDoc {
   @ManyToOne(() => TestResource)
   child1Res!: DataRelation<TestResource>;
+}
+
+@ChildEntity("child1Child1")
+class TestDocChild1Child1 extends TestDocChild1 {
+  @ManyToOne(() => TestResource)
+  child1Child1Res!: DataRelation<TestResource>;
 }
 
 @ChildEntity("child2")
@@ -63,6 +83,7 @@ class TestDocUnion extends DataUnion(TestDoc, {
 
 const tResolver = Resolver.object({
   docs: DataSourceResolver(TestDoc),
+  folders: DataSourceResolver(TestFolder),
   unionDocs: DataSourceResolver(TestDocUnion),
   child1Docs: DataSourceResolver(TestDocChild1),
   child2Docs: DataSourceResolver(TestDocChild2),
@@ -78,49 +99,83 @@ beforeAll(async () => {
   dbModule = runner.getInstance(DbModule);
   runner.getInstance(TestDbModule);
   buildCountRefs(dataModule, TestResource, "countRefs");
-  dbModule.entityTypes.add(TestDoc);
-  dbModule.entityTypes.add(TestDocChild1);
-  dbModule.entityTypes.add(TestDocChild2);
-  dbModule.entityTypes.add(TestResource);
+
+  addAll(dbModule.entityTypes, [
+    TestDoc,
+    TestDocChild1,
+    TestDocChild2,
+    TestDocChild1Child1,
+    TestResource,
+    TestFolder,
+  ]);
   await dbModule.init();
   t = Resolver.checkAndResolve(tResolver, runner.context);
 });
 
-xit("", async () => {
-  const cache = new Set();
+let res1: DataRow<TestResource>;
+let res2: DataRow<TestResource>;
 
-  for (const entityMetadata of dbModule.getConnection().entityMetadatas) {
-    if (typeof entityMetadata.target !== "function") continue;
-    for (const relationMetadata of entityMetadata.relations) {
-      if (typeof relationMetadata.target !== "function") continue;
-
-      // if (!touchSet(cache, relationMetadata)) continue;
-
-      console.log({
-        entityTargetName: entityMetadata.target.name,
-        relationTargetName: relationMetadata.target.name,
-        relationPropertyName: relationMetadata.propertyName,
-        x: WeakId(relationMetadata),
-        // x: relationMetadata,
-      });
-    }
-  }
+beforeEach(async () => {
+  res1 = await t.resources.insert({});
+  res2 = await t.resources.insert({});
 });
 
-fit("", async () => {
-  const res = await t.resources.insert({});
-  const child1ResKey = await t.child1Docs.insertKey({
-    res: res,
-    child1Res: res,
+let docs: DataSource<TestDoc>;
+
+const test = () => {
+  xit("*-to-many", async () => {
+    const doc = await docs.insert({});
+    await doc.at("manyRes").add([res1, res2]);
+    await (await docs.insert({})).at("manyRes").add(res2);
+
+    expect((await res1.reload()).countRefs).toEqual(1);
+    expect((await res2.reload()).countRefs).toEqual(2);
+
+    await doc.delete();
+    expect((await res1.reload()).countRefs).toEqual(0);
+    expect((await res2.reload()).countRefs).toEqual(1);
   });
-  expect((await res.reload()).countRefs).toEqual(2);
 
-  // await t.child2Docs.insertKey({
-  //   res: res,
-  //   child2Res: res,
-  // });
-  // expect((await res.reload()).countRefs).toEqual(4);
+  fdescribe("*-to-one relation", () => {
+    const test = async ({ insertRes, insertCount, updateRes, updateCount }) => {
+      const doc = await docs.insert({ res: insertRes });
+      expect((await res1.reload()).countRefs).toEqual(insertCount);
+      await doc.update({ res: updateRes });
+      expect((await res1.reload()).countRefs).toEqual(updateCount);
+      await doc.delete();
+      expect((await res1.reload()).countRefs).toEqual(0);
+    };
 
-  // await t.unionDocs.filter({ $is: "x" }).delete();
-  // expect((await res.reload()).countRefs).toEqual(2);
+    // TODO: test insert at/of *relation* one/many
+    it("from null to res1", () =>
+      test({
+        insertRes: null,
+        insertCount: 0,
+        updateRes: res1,
+        updateCount: 1,
+      }));
+
+    it("from res1 to res2", () =>
+      test({
+        insertRes: res1,
+        insertCount: 1,
+        updateRes: res2,
+        updateCount: 0,
+      }));
+
+    it("from res1 to null", () =>
+      test({
+        insertRes: res1,
+        insertCount: 1,
+        updateRes: null,
+        updateCount: 0,
+      }));
+  });
+};
+
+xdescribe("from root", () => {
+  beforeAll(() => {
+    docs = t.docs;
+  });
+  test();
 });

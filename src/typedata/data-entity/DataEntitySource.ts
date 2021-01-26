@@ -1,30 +1,39 @@
-import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
-import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataEntityLoader } from "@dabsi/typedata/data-entity/DataEntityLoader";
 import DataEntityQueryRunner from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
+import getDataConnection from "@dabsi/typedata/data-entity/getDataConnection";
+import getDeletePlan from "@dabsi/typedata/data-entity/getDeletePlan";
+import getInsertPlan from "@dabsi/typedata/data-entity/getInsertPlan";
+import getUpdatePlan from "@dabsi/typedata/data-entity/getUpdatePlan";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import {
   AnyDataSelection,
   DataSelection,
 } from "@dabsi/typedata/data-selection/DataSelection";
 import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
-import { DataKey } from "@dabsi/typedata/DataKey";
 import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataSource } from "@dabsi/typedata/DataSource";
 import { DataInsert, DataUpdate } from "@dabsi/typedata/DataValue";
-import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
-import { Connection, EntityManager, getConnection, QueryRunner } from "typeorm";
+import { DataEntityRelation } from "@dabsi/typeorm/relations/DataEntityRelation";
+import { Connection, EntityManager, QueryRunner } from "typeorm";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import {
+  DataChangeReason,
+  DataEntityListener,
+  DataRelationChange,
+} from "./DataEntityListener";
 
 type GetConnection = () => Connection;
 type GetQueryRunner = () => QueryRunner;
 
-export class DataEntitySource<T> extends DataSource<T> {
+export class DataEntitySource<T>
+  extends DataSource<T>
+  implements DataEntityListener {
   static getConnection: undefined | (() => Connection);
 
   static createFromConnection<T>(
@@ -33,14 +42,14 @@ export class DataEntitySource<T> extends DataSource<T> {
   ): DataEntitySource<T> {
     return new DataEntitySource(
       entityType,
-      () => (connection || getConnection)().createQueryRunner(),
+      () => (connection || getDataConnection)().createQueryRunner(),
       EmptyDataCursor
     );
   }
 
   constructor(
     public entityType: Type<T>,
-    protected getQueryRunner: GetQueryRunner,
+    public getQueryRunner: GetQueryRunner,
     public cursor: DataCursor
   ) {
     super();
@@ -83,144 +92,15 @@ export class DataEntitySource<T> extends DataSource<T> {
     return this.createRunner().hasRow();
   }
 
-  // datamodule.emitRelationChange()
+  emitRelationChange?(change: DataRelationChange): Awaitable;
 
-  protected emitRelationChange?(changeInfo: {
-    relation: EntityRelation;
-    type: "remove" | "add" | "set" | "unset";
-    entityKey: DataEntityKey;
-    relationKey: DataEntityKey;
-  });
-
-  protected _createEntityRow(
-    valueMap: Record<string, any>,
-    isInsert: boolean,
-    changeMap: DataEntityChangeMap
-  ) {
-    const row = {};
-    const relationKeys: {
-      relation: EntityRelation;
-      key: DataEntityKey;
-    }[] = [];
-
-    // on insert it's take build  relation to parent-cursor
-    if (isInsert) {
-      const { parent } = this.entityCursor;
-      parent && buildRelation(parent.relation, parent.relationKey);
-    }
-
-    // checking if cursor-relations-keys is override by cursor
-    for (const { relation, key: relationKey } of this.entityCursor
-      .relationKeys) {
-      if (relation.propertyName in valueMap) {
-        throw new Error(`Can't override relation ${relation.propertyName}.`);
-      }
-      // build relation on insert.
-      isInsert && buildRelation(relation, relationKey);
-    }
-
-    for (const {
-      metadata: { propertyName },
-      key,
-    } of this.entityCursor.columnKeys) {
-      if (propertyName in valueMap) {
-        throw new Error(`Can't override field ${propertyName}.`);
-      }
-      if (isInsert) {
-        row[propertyName] = key;
-        emit?.({
-          type: "set",
-          isRelation: false,
-          propertyName,
-          value: key,
-        });
-      }
-    }
-
-    for (let [propertyName, value] of entries(valueMap)) {
-      if (isInsert && value == null) continue;
-      const relation = this.entityCursor.entityInfo.propertyNameToRelation[
-        propertyName
-      ];
-      if (value === undefined) {
-        // skip on property if is undefined - no if is null.
-        continue;
-      }
-      if (relation) {
-        // TODO: by data-source.
-        if (value && typeof value === "object") {
-          if (typeof value.$key === "string") {
-            value = value.$key;
-          }
-        }
-
-        const key = DataEntityKey.parse(relation.right.entityMetadata, value);
-        buildRelation(relation, key);
-        continue;
-      }
-      const column = this.entityCursor.entityInfo.propertyNameToColumnMetadata[
-        propertyName
-      ];
-      if (column) {
-        row[propertyName] = value;
-        emit?.({
-          type: isInsert ? "set" : value == null ? "unset" : "set",
-          propertyName,
-          isRelation: false,
-          value,
-        });
-        continue;
-      }
-      throw new Error(`Invalid property ${propertyName}`);
-    }
-
-    return { row, relationKeys };
-
-    function emit(change: DataEntityChange) {
-      changeMap[change.propertyName] = change;
-    }
-    function buildRelation(
-      relation: EntityRelation,
-
-      key: DataEntityKey
-      // key: DataEntityKey
-    ) {
-      if (isInsert) {
-        if (!key.object) {
-          // dont build relation on insert when the key is null.
-          return;
-        }
-      }
-      if (key.object) {
-        emit?.({
-          type: "set",
-          propertyName: relation.propertyName,
-          isRelation: true,
-          relation,
-          relationKey: key,
-        });
-      } else {
-        emit?.({
-          type: "unset",
-          isRelation: true,
-          propertyName: relation.propertyName,
-          relation,
-        });
-      }
-      if (relation.left.isOwning && relation.isJoinColumn) {
-        row[relation.propertyName] = key.object;
-        return;
-      }
-      relationKeys.push({ relation, key });
-    }
+  createEntitySource(entityType): DataSource<any> {
+    return new DataEntitySource(
+      entityType,
+      this.getQueryRunner,
+      EmptyDataCursor
+    );
   }
-
-  @Lazy() get entityEmitter(): DataEntityEmitter | undefined {
-    return this.getEntityEmitter?.(this.entityCursor.typeInfo.type);
-  }
-  protected getEntityEmitter?(
-    entityType: Function
-  ): DataEntityEmitter | undefined;
 
   async withTransaction<T = void>(callback: () => Promise<T>): Promise<T> {
     const {
@@ -243,166 +123,32 @@ export class DataEntitySource<T> extends DataSource<T> {
 
   async insertKeys<T>(
     this: DataEntitySource<T>,
-    valueMap: DataInsert<T>[]
+    values: DataInsert<T>[]
   ): Promise<string[]> {
-    const insertOneKey = async (valueMap: Record<string, any>) => {
-      const row = {};
-      const relationKeys: {
-        relation: EntityRelation;
-        key: DataEntityKey;
-      }[] = [];
-
-      const buildRelation = (relation: EntityRelation, key: DataEntityKey) => {
-        if (!key.object) {
-          // dont build relation on insert when the key is null.
-          return;
-        }
-        if (relation.left.isOwning && relation.isJoinColumn) {
-          row[relation.propertyName] = key.object;
-          return;
-        } else {
-          relationKeys.push({ relation, key });
-        }
-      };
-
-      //
-      const { parent } = this.entityCursor;
-      parent && buildRelation(parent.relation, parent.relationKey);
-    };
-
     return this.withTransaction(async () => {
-      const entityMetadata = this.entityCursor.entityMetadata;
-      const entityType = this.entityCursor.typeInfo.type;
       const keys: string[] = [];
 
-      for (const value of valueMap) {
-        //
-        const changeMap: Record<string, DataEntityInsertChange> = {};
-        const { row, relationKeys } = this._createEntityRow(
-          value,
-          true,
-          changeMap
-        );
-
-        const entity = await this.entityCursor.entityManager.save(
-          this.entityCursor.entityManager.create(
-            this.entityCursor.typeInfo.type,
-            <any>row
-          )
-        );
-
-        const entityObjectKey = DataEntityKey.pick(entityMetadata, entity);
-        const entityKey: DataEntityKey = {
-          object: entityObjectKey,
-          text: DataEntityKey.stringify(entityMetadata, entityObjectKey),
-        };
-
-        for (const { relation, key } of relationKeys) {
-          await relation.update("set", entityObjectKey, key.object);
-        }
-
+      for (const value of values) {
+        const plan = getInsertPlan(this, value);
+        const entityKey = await plan.insert();
         keys.push(entityKey.text);
-
-        await this.entityEmitter?.({
-          manager: this.entityCursor.entityManager,
-          type: "insert",
-          entityKey,
-          entityType,
-          changeMap,
-        });
       }
       return keys;
     });
   }
 
+  hasRelationListener(relationMetadata: RelationMetadata): boolean {
+    return false;
+  }
+
   updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
     return this.withTransaction(async () => {
       if (!hasKeys(value)) return 0;
-      let affectedRows = 0;
 
-      const {
-        entityCursor: {
-          typeInfo: { type: entityType },
-          entityMetadata,
-        },
-      } = this;
+      const plan = getUpdatePlan(this, value);
+      await plan.updateMany(keys);
 
-      const changeMap: DataEntityChangeMap = {};
-
-      const { row, relationKeys } = await this._createEntityRow(
-        value,
-        false,
-        changeMap
-      );
-
-      const { loader, getEntityMap } = createEventLoader(this);
-
-      await this.entityEmitter?.({
-        manager: this.entityCursor.entityManager,
-        type: "beforeUpdateAll",
-        entityType,
-        changeMap,
-        ...loader,
-      });
-
-      const entityMap = await getEntityMap();
-      for (const entityTextKey of keys) {
-        const entity = entityMap[entityTextKey] || {};
-        const entityKey = DataEntityKey.parse(
-          entityMetadata,
-          DataKey(entityTextKey)
-        );
-
-        await this.entityEmitter?.({
-          manager: this.entityCursor.entityManager,
-          type: "beforeUpdateOne",
-          entity,
-          entityKey,
-          entityType,
-          changeMap,
-          row,
-        });
-
-        // beforeUpdateOne
-
-        const result = await this.entityCursor.entityManager.update(
-          this.entityCursor.typeInfo.type,
-          entityKey.object,
-          row
-        );
-        for (const { relation, key: relationKey } of relationKeys) {
-          if (relationKey.object == null) {
-            await relation.update(
-              "unset",
-              entityKey.object,
-              relationKey.object
-            );
-          } else {
-            await relation.update("set", entityKey.object, relationKey.object);
-          }
-        }
-
-        if (typeof result.affected == "number") {
-          affectedRows += result.affected;
-        } else {
-          affectedRows++;
-        }
-        // afterUpdateOne
-        await this.entityEmitter?.({
-          manager: this.entityCursor.entityManager,
-          type: "afterUpdateOne",
-          changeMap,
-          entityKey,
-          entity,
-        });
-      }
-      await this.entityEmitter?.({
-        manager: this.entityCursor.entityManager,
-        type: "afterUpdateAll",
-        changeMap,
-        entityMap,
-      });
-      return affectedRows;
+      return 0;
     });
   }
 
@@ -424,92 +170,70 @@ export class DataEntitySource<T> extends DataSource<T> {
     entityTextKey: string,
     method: "removeOrUnset" | "addOrSet"
   ) {
+    const isRmoeveOrUnset = method === "removeOrUnset";
+
+    const emit = async (
+      relationKey: string,
+      { invert, relationMetadata }: DataEntityRelation
+    ) => {
+      const oldRelationKey = isRmoeveOrUnset ? relationKey : null;
+      const newRelationKey = !isRmoeveOrUnset ? relationKey : null;
+      const emit = async (invert, relationMetadata) => {
+        if (invert) {
+          oldRelationKey &&
+            (await this.emitRelationChange?.({
+              relationMetadata,
+              reason: DataChangeReason.UPDATE,
+              oldRelationKey: entityTextKey,
+              newRelationKey: null,
+              entityKey: oldRelationKey,
+            }));
+
+          newRelationKey &&
+            (await this.emitRelationChange?.({
+              relationMetadata,
+              reason: DataChangeReason.UPDATE,
+              oldRelationKey: null,
+              newRelationKey: entityTextKey,
+              entityKey: newRelationKey,
+            }));
+        } else {
+          await this.emitRelationChange?.({
+            relationMetadata,
+            reason: DataChangeReason.UPDATE,
+            oldRelationKey,
+            newRelationKey,
+            entityKey: entityTextKey,
+          });
+        }
+      };
+      await emit(invert, relationMetadata);
+      relationMetadata.inverseRelation &&
+        (await emit(!invert, relationMetadata.inverseRelation));
+    };
+
     const entityKey = DataEntityKey.parse(
       this.entityCursor.entityMetadata,
       entityTextKey
     );
+
     if (this.entityCursor.parent) {
       const { relation, relationKey } = this.entityCursor.parent;
-
-      const action = await relation.update(
-        method,
-        entityKey.object,
-        relationKey.object!
-      );
-      await this.getEntityEmitter?.(relation.entityType)?.({
-        manager: this.entityCursor.entityManager,
-        type: "relation",
-        method,
-        action,
-        relation,
-        entityKey: relationKey,
-        relationKey: entityKey,
-      });
+      await relation.update(method, entityKey.object, relationKey.object!);
+      await emit(relationKey.text, relation);
     }
 
     for (const { relation, key: relationKey } of this.entityCursor
       .relationKeys) {
-      const action = await relation.update(
-        method,
-        entityKey.object,
-        relationKey.object
-      );
-
-      await this.getEntityEmitter?.(relation.entityType)?.({
-        manager: this.entityCursor.entityManager,
-        type: "relation",
-        method,
-        action,
-        relation,
-        entityKey,
-        relationKey,
-      });
+      await relation.update(method, entityKey.object, relationKey.object);
+      await emit(relationKey.text, relation);
     }
   }
 
   deleteKeys(textKeys: string[]): Promise<void> {
     return this.withTransaction(async () => {
-      const { loader, getEntityMap } = createEventLoader(this);
-
-      await this.entityEmitter?.({
-        manager: this.entityCursor.entityManager,
-        type: "beforeDeleteAll",
-        ...loader,
-      });
-
-      const entityMap = await getEntityMap();
-      for (const entityTextKey of textKeys) {
-        // before delete
-        const entityKey = DataEntityKey.parse(
-          this.entityCursor.entityMetadata,
-          entityTextKey
-        );
-        await this.entityEmitter?.({
-          manager: this.entityCursor.entityManager,
-          type: "beforeDeleteOne",
-          entity: entityMap[entityTextKey],
-          entityKey,
-        });
-
-        // delete
-        await this.entityCursor.entityManager.delete(
-          this.entityCursor.typeInfo.type,
-          entityKey.object
-        );
-
-        // after delete
-        await this.entityEmitter?.({
-          manager: this.entityCursor.entityManager,
-          type: "afterDeleteOne",
-          entity: entityMap[entityTextKey],
-          entityKey,
-        });
-      }
-      await this.entityEmitter?.({
-        manager: this.entityCursor.entityManager,
-        type: "afterDeleteAll",
-        entityMap,
-      });
+      const plan = getDeletePlan(this);
+      await plan.deleteMany(textKeys);
     });
   }
 
@@ -535,7 +259,7 @@ export type DataEntityChange<
   | (T & {
       type: "set";
       isRelation: true;
-      relation: EntityRelation;
+      relation: DataEntityRelation;
       relationKey: DataEntityKey;
     })
   | (T & {
@@ -545,13 +269,13 @@ export type DataEntityChange<
   | (T & {
       type: "unset";
       isRelation: true;
-      relation: EntityRelation;
+      relation: DataEntityRelation;
     });
 
 export type DataEntityRelationEvent = {
   type: "addOrSet" | "removeOrUnset";
   entityKey: DataEntityKey;
-  relation: EntityRelation;
+  relation: DataEntityRelation;
   relationKey: DataEntityKey;
   action: "add" | "set" | "remove" | "unset";
 };
@@ -615,7 +339,7 @@ export type DataEntityEvent<
       type: "relation";
       method: "addOrSet" | "removeOrUnset";
       action: "add" | "set" | "unset" | "remove";
-      relation: EntityRelation;
+      relation: DataEntityRelation;
       relationKey: DataEntityKey;
     }
 > =
@@ -658,8 +382,6 @@ function createEventLoader(source: DataSource<any>) {
     },
     async getEntityMap() {
       if (selection) {
-        console.log(inspect({ selection }));
-
         return source
           .withCursor({
             ...source.cursor,

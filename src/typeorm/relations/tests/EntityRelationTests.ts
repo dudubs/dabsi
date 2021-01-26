@@ -1,18 +1,18 @@
-// TODO: rename to EntityRelationTests.
+// TODO: rename to DataEntityRelationTests.
 import { Connection, Repository } from "typeorm";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import {
-  DBase,
+  DEntity,
   DChild1,
   DChild1Child1,
   DChild2,
-  EBase,
+  EEntity,
   EChild1,
   EChild1Child1,
   EChild2,
 } from "@dabsi/typedata/tests/BaseEntities";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { EntityRelation } from "@dabsi/typeorm/relations/EntityRelation";
+import { DataEntityRelation } from "@dabsi/typeorm/relations/DataEntityRelation";
 import {
   AEntity,
   BEntity,
@@ -23,11 +23,11 @@ const getConnection = TestConnection([
   AEntity,
   BEntity,
   CEntity,
-  DBase,
+  DEntity,
   DChild1,
   DChild2,
   DChild1Child1,
-  EBase,
+  EEntity,
   EChild1,
   EChild2,
   EChild1Child1,
@@ -100,7 +100,7 @@ describe("sanity", () => {
 
         describe("relation:" + relationType, () => {
           it(`expect ${ownerSide} is owning`, () => {
-            const r = new EntityRelation(
+            const r = new DataEntityRelation(
               connection,
               AEntity,
               propertyName,
@@ -116,24 +116,24 @@ describe("sanity", () => {
 });
 it("sanity", async () => {
   await test(
-    EntityRelation.of(connection, AEntity, "oneAToOneBOwner"),
-    EntityRelation.of(connection, AEntity, "oneAToOneB"),
-    EntityRelation.at(connection, AEntity, "oneAToOneBOwner"),
-    EntityRelation.at(connection, AEntity, "oneAToOneB")
+    DataEntityRelation.of(connection, AEntity, "oneAToOneBOwner"),
+    DataEntityRelation.of(connection, AEntity, "oneAToOneB"),
+    DataEntityRelation.at(connection, AEntity, "oneAToOneBOwner"),
+    DataEntityRelation.at(connection, AEntity, "oneAToOneB")
   );
 
   await test(
-    EntityRelation.of(connection, AEntity, "manyAToManyBOwner"),
-    EntityRelation.of(connection, AEntity, "manyAToManyB"),
-    EntityRelation.at(connection, AEntity, "manyAToManyBOwner"),
-    EntityRelation.at(connection, AEntity, "manyAToManyB")
+    DataEntityRelation.of(connection, AEntity, "manyAToManyBOwner"),
+    DataEntityRelation.of(connection, AEntity, "manyAToManyB"),
+    DataEntityRelation.at(connection, AEntity, "manyAToManyBOwner"),
+    DataEntityRelation.at(connection, AEntity, "manyAToManyB")
   );
 
   await test(
-    EntityRelation.of(connection, AEntity, "manyAToOneB"),
-    EntityRelation.of(connection, AEntity, "oneAToManyB"),
-    EntityRelation.at(connection, AEntity, "manyAToOneB"),
-    EntityRelation.at(connection, AEntity, "oneAToManyB")
+    DataEntityRelation.of(connection, AEntity, "manyAToOneB"),
+    DataEntityRelation.of(connection, AEntity, "oneAToManyB"),
+    DataEntityRelation.at(connection, AEntity, "manyAToOneB"),
+    DataEntityRelation.at(connection, AEntity, "oneAToManyB")
   );
 
   async function test(aOfBOwner, aOfB, bOwnerAtA, bAtA) {
@@ -195,7 +195,7 @@ it("sanity", async () => {
     await assertRelation(bOwnerAtA);
   }
 
-  async function assertRelation(relation: EntityRelation) {
+  async function assertRelation(relation: DataEntityRelation) {
     let [left] = await relation.left.repository.save([
       relation.left.repository.create(),
     ]);
@@ -223,10 +223,18 @@ it("sanity", async () => {
 });
 
 it("tree", () => {
-  const aOfA = EntityRelation.of(connection, AEntity, "manyAToManyA");
-  const aAtA = EntityRelation.at(connection, AEntity, "manyAToManyA");
-  const aOfAOwner = EntityRelation.of(connection, AEntity, "manyAToManyAOwner");
-  const aAtAOwner = EntityRelation.at(connection, AEntity, "manyAToManyAOwner");
+  const aOfA = DataEntityRelation.of(connection, AEntity, "manyAToManyA");
+  const aAtA = DataEntityRelation.at(connection, AEntity, "manyAToManyA");
+  const aOfAOwner = DataEntityRelation.of(
+    connection,
+    AEntity,
+    "manyAToManyAOwner"
+  );
+  const aAtAOwner = DataEntityRelation.at(
+    connection,
+    AEntity,
+    "manyAToManyAOwner"
+  );
 
   expect(aOfA.left.isOwning).toBeFalsy();
   expect(aOfA.right.isOwning).toBeTruthy();
@@ -244,10 +252,14 @@ it("tree", () => {
 });
 
 it("union", () => {
-  const eOfD = EntityRelation.of(connection, DBase, "oneDToOneE");
-  const eOfDChild1 = EntityRelation.of(connection, DChild1, "oneDToOneE");
-  const eOwnerOfD = EntityRelation.of(connection, DBase, "oneDToOneEOwner");
-  const eOwnerOfDChild1 = EntityRelation.of(
+  const eOfD = DataEntityRelation.of(connection, DEntity, "oneDToOneE");
+  const eOfDChild1 = DataEntityRelation.of(connection, DChild1, "oneDToOneE");
+  const eOwnerOfD = DataEntityRelation.of(
+    connection,
+    DEntity,
+    "oneDToOneEOwner"
+  );
+  const eOwnerOfDChild1 = DataEntityRelation.of(
     connection,
     DChild1,
     "oneDToOneEOwner"

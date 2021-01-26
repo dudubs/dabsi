@@ -9,14 +9,15 @@ import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import { buildTestRelations } from "@dabsi/typedata/data-entity/tests/buildTestRelations";
 import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
+import { DataRow } from "@dabsi/typedata/DataRow";
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import {
-  DBase,
+  DEntity,
   DChild1,
   DChild1Child1,
   DChild2,
   DUnion,
-  EBase,
+  EEntity,
   EChild1,
   EChild1Child1,
   EChild2,
@@ -34,11 +35,11 @@ import { hasKeys } from "../../../common/object/hasKeys";
 import objectContaining = jasmine.objectContaining;
 
 const getConnection = TestConnection([
-  DBase,
+  DEntity,
   DChild1,
   DChild2,
   DChild1Child1,
-  EBase,
+  EEntity,
   EChild1,
   EChild2,
   EChild1Child1,
@@ -51,7 +52,6 @@ let connection: Connection;
 
 let dChild1: DChild1;
 let dChild2: DChild2;
-
 beforeAll(async () => {
   connection = getConnection();
 
@@ -81,6 +81,8 @@ beforeAll(async () => {
     },
   ]);
 
+  await save(EChild1Child1, [{}]);
+
   // dChild1 relations
   for (const [d, e] of [
     [dChild1, eChild1OfDChild1],
@@ -108,74 +110,111 @@ beforeAll(async () => {
     return repo.save(entities.map(entity => repo.create(entity)));
   }
 });
+let discriminatorValueMap: Record<string, Record<string, boolean>>;
 
-it("DataEntityInfo.nonRelationColumnKeys", () => {
-  const aBaseInfo = getDataEntityInfo(connection.getMetadata(DBase));
-  const dChild1Info = getDataEntityInfo(connection.getMetadata(DChild1));
-  const dChild1Child1Info = getDataEntityInfo(
-    connection.getMetadata(DChild1Child1)
-  );
-  const dChild2Info = getDataEntityInfo(connection.getMetadata(DChild2));
+describe("entity children", () => {
+  const getDisriminatorValues = entityType => [
+    connection.getMetadata(entityType).discriminatorValue,
+    ...connection
+      .getMetadata(entityType)
+      .childEntityMetadatas.map(c => c.discriminatorValue),
+  ];
 
-  expect(aBaseInfo.nonRelationColumnKeys).toContain("dText");
-  expect(dChild1Info.nonRelationColumnKeys).toContain("dText");
-  expect(dChild1Child1Info.nonRelationColumnKeys).toContain("dText");
-  expect(dChild2Info.nonRelationColumnKeys).toContain("dText");
+  const test = async (entityType, callback?) => {
+    const md = connection.getMetadata(entityType);
+    const disValues = [
+      md.discriminatorValue,
+      ...md.childEntityMetadatas.map(c => c.discriminatorValue),
+    ];
+    for (const row of await DataEntitySource.createFromConnection(
+      entityType,
+      getConnection
+    ).getRows()) {
+      expect(disValues).toContain(row[md.discriminatorColumn!.propertyName]);
+      await callback?.(row);
+    }
+  };
 
-  expect(aBaseInfo.nonRelationColumnKeys).not.toContain("dChild1Text");
-  expect(dChild1Info.nonRelationColumnKeys).toContain("dChild1Text");
-  expect(dChild1Child1Info.nonRelationColumnKeys).toContain("dChild1Text");
-
-  expect(aBaseInfo.nonRelationColumnKeys).not.toContain("dChild1Child1Text");
-  expect(dChild1Info.nonRelationColumnKeys).not.toContain("dChild1Child1Text");
-  expect(dChild1Child1Info.nonRelationColumnKeys).toContain(
-    "dChild1Child1Text"
-  );
-
-  expect(dChild2Info.nonRelationColumnKeys).toContain("dText");
-  expect(dChild2Info.nonRelationColumnKeys).toContain("dChild2Text");
-  expect(dChild2Info.nonRelationColumnKeys).not.toContain("dChild1Text");
-  expect(dChild2Info.nonRelationColumnKeys).not.toContain("dChild1Child1Text");
+  it("expect to EChild1Child1 entities", () => test(EChild1Child1));
+  it("expect to EChild1 entities", () => test(EChild1));
 });
 
-describe("pick-all and pick-all", () => {
-  testUnion({}, tester => {
-    tester.testDChild1({
-      dId: true,
-      dText: true,
-      dChild1Text: true,
-      dChild1Text2: true,
-    });
+describe("DataEntityInfo", () => {
+  it("nonRelationColumnKeys", () => {
+    const aBaseInfo = getDataEntityInfo(connection.getMetadata(DEntity));
+    const dChild1Info = getDataEntityInfo(connection.getMetadata(DChild1));
+    const dChild1Child1Info = getDataEntityInfo(
+      connection.getMetadata(DChild1Child1)
+    );
+    const dChild2Info = getDataEntityInfo(connection.getMetadata(DChild2));
+
+    expect(aBaseInfo.nonRelationColumnKeys).toContain("dText");
+    expect(dChild1Info.nonRelationColumnKeys).toContain("dText");
+    expect(dChild1Child1Info.nonRelationColumnKeys).toContain("dText");
+    expect(dChild2Info.nonRelationColumnKeys).toContain("dText");
+
+    expect(aBaseInfo.nonRelationColumnKeys).not.toContain("dChild1Text");
+    expect(dChild1Info.nonRelationColumnKeys).toContain("dChild1Text");
+    expect(dChild1Child1Info.nonRelationColumnKeys).toContain("dChild1Text");
+
+    expect(aBaseInfo.nonRelationColumnKeys).not.toContain("dChild1Child1Text");
+    expect(dChild1Info.nonRelationColumnKeys).not.toContain(
+      "dChild1Child1Text"
+    );
+    expect(dChild1Child1Info.nonRelationColumnKeys).toContain(
+      "dChild1Child1Text"
+    );
+
+    expect(dChild2Info.nonRelationColumnKeys).toContain("dText");
+    expect(dChild2Info.nonRelationColumnKeys).toContain("dChild2Text");
+    expect(dChild2Info.nonRelationColumnKeys).not.toContain("dChild1Text");
+    expect(dChild2Info.nonRelationColumnKeys).not.toContain(
+      "dChild1Child1Text"
+    );
   });
 });
 
-describe("pick-keys and pick-all", () => {
-  testUnion({ pick: ["dText"] }, tester => {
-    tester.testDChild1({
-      dId: false,
-      dText: true,
-      dChild1Text: false,
-      dChild1Text2: false,
+describe("pick", () => {
+  describe("all and pick all", () => {
+    testUnion({}, tester => {
+      tester.testDChild1({
+        dId: true,
+        dText: true,
+        dChild1Text: true,
+        dChild1Text2: true,
+      });
     });
   });
-});
-describe("pick-keys and pick-keys", () => {
-  testUnion(
-    {
-      pick: ["dText"],
-      children: {
-        dChild1: { pick: ["dChild1Text"] },
-      },
-    },
-    tester => {
+
+  describe("keys and pick all", () => {
+    testUnion({ pick: ["dText"] }, tester => {
       tester.testDChild1({
         dId: false,
         dText: true,
-        dChild1Text: true,
+        dChild1Text: false,
         dChild1Text2: false,
       });
-    }
-  );
+    });
+  });
+
+  describe("keys and pick keys", () => {
+    testUnion(
+      {
+        pick: ["dText"],
+        children: {
+          dChild1: { pick: ["dChild1Text"] },
+        },
+      },
+      tester => {
+        tester.testDChild1({
+          dId: false,
+          dText: true,
+          dChild1Text: true,
+          dChild1Text2: false,
+        });
+      }
+    );
+  });
 });
 
 describe("relations", () => {
@@ -293,7 +332,7 @@ it("DataTypeInfo", () => {
   const aInfo = DataTypeInfo.get(DUnion);
   const bInfo = DataTypeInfo.get(EUnion);
 
-  expect(aInfo.type).toBe(DBase);
+  expect(aInfo.type).toBe(DEntity);
   expect(aInfo.children!.dChild1!).toEqual(
     objectContaining({
       relations: objectContaining({

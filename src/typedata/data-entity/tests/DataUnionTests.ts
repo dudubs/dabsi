@@ -3,13 +3,13 @@
 // import { DataRow } from "@dabsi/typedata/DataRow";
 // import { DataUnion } from "@dabsi/typedata/DataUnion";
 // import {
-//   DBase,
+//   DEntity,
 //   DChild1,
 //   DChild1Child1,
 //   DChild2,
 //   DChild3,
 //   DUnion,
-//   EBase,
+//   EEntity,
 //   EChild1,
 //   EChild1Child1,
 //   EChild2,
@@ -22,12 +22,12 @@
 // } from "@dabsi/typeorm/relations/tests/TestEntities";
 
 // const getConnection = TestConnection([
-//   DBase,
+//   DEntity,
 //   DChild1,
 //   DChild2,
 //   DChild3,
 //   DChild1Child1,
-//   EBase,
+//   EEntity,
 //   EChild1,
 //   EChild2,
 //   EChild1Child1,
@@ -63,7 +63,7 @@
 // });
 
 // it("", async () => {
-//   const DUnion = DataUnion(DBase, {
+//   const DUnion = DataUnion(DEntity, {
 //     children: {
 //       DChild1,
 //       DChild2,

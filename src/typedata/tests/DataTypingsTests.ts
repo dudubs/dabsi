@@ -24,7 +24,7 @@ import {
 } from "@dabsi/typedata/DataRelation";
 import { DataInsert } from "@dabsi/typedata/DataValue";
 import {
-  DBase,
+  DEntity,
   DChild1,
   DUnion,
   EUnion,
@@ -148,7 +148,7 @@ pass(() => {
 
     // no children
     {
-      class _DUnion extends DataUnion(DBase, {
+      class _DUnion extends DataUnion(DEntity, {
         relations: { oneDToManyE: EUnion },
       }) {}
     }
@@ -362,7 +362,7 @@ pass(() => {
     testSelection(DUnion, { children: { dChild1: {} } });
 
     testSelection(
-      DBase,
+      DEntity,
       {
         fields: {
           x_d: 1,
@@ -398,7 +398,7 @@ pass(() => {
       }
     );
     testSelection(
-      DataUnion(DBase, {
+      DataUnion(DEntity, {
         relations: {
           oneDToOneE: EUnion,
         },
@@ -765,7 +765,7 @@ pass(() => {
   // DataUnion
   {
     testType(
-      DataUnion(DBase, {
+      DataUnion(DEntity, {
         relations: {
           oneDToOneE: EUnion,
         },
@@ -861,12 +861,12 @@ pass(() => {
       test({ $as: { dChild1: { x: "" } } });
 
       // @ts-expect-error
-      testTypeExp(DataUnion(DBase, {}), { $as: { dChild1: true } });
+      testTypeExp(DataUnion(DEntity, {}), { $as: { dChild1: true } });
 
       {
         // $as dChild1
         testTypeExp(
-          DataUnion(DBase, {
+          DataUnion(DEntity, {
             children: {
               dChild1: DChild1,
             },
@@ -878,7 +878,7 @@ pass(() => {
 
         // $as dChild1 at oneDToOneE
         testTypeExp(
-          DataUnion(DBase, {
+          DataUnion(DEntity, {
             children: {
               dChild1: DChild1,
             },
@@ -894,7 +894,7 @@ pass(() => {
 
         // $as dChild1 at oneDToOneE with relation
         testTypeExp(
-          DataUnion(DBase, {
+          DataUnion(DEntity, {
             relations: { oneDToOneE: EUnion },
             children: { dChild1: DChild1 },
           }),
@@ -909,7 +909,7 @@ pass(() => {
 
         // $as dChild1 at oneDToOneE with child-relation
         testTypeExp(
-          DataUnion(DBase, {
+          DataUnion(DEntity, {
             relations: { oneDToOneE: EUnion },
             children: {
               dChild1: DataUnion(DChild1, {
@@ -1194,7 +1194,7 @@ function assertKey(...args) {}
 
 testType<
   new () => DataUnion<
-    DBase,
+    DEntity,
     {
       dChild1: DChild1;
     },

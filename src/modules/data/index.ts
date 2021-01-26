@@ -8,6 +8,7 @@ import DataSourceFactoryResolver from "@dabsi/modules/data/DataSourceFactroyReso
 import { DbModule } from "@dabsi/modules/DbModule";
 import { DataResolver } from "@dabsi/system/storage/DataResolver";
 import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
+import { DataRelationChange } from "@dabsi/typedata/data-entity/DataEntityListener";
 import {
   DataEntityEmitter,
   DataEntityEvent,
@@ -15,15 +16,17 @@ import {
 import { EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataEntityRelation } from "@dabsi/typeorm/relations";
 import SqlliteQueryRunnerPool from "@dabsi/typeorm/SqlliteQueryRunnerPool";
 import { Connection, QueryRunner } from "typeorm";
+import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-type OnRelationCallback = (event: {
-  relation: EntityRelation;
-  connection: Connection;
-}) => Awaitable;
+type OnRelationCallback = (relationMetadata: RelationMetadata) => Awaitable;
 
+export type DataRelationEvent = {
+  change: DataRelationChange;
+  queryRunner: QueryRunner;
+};
 @Module()
 export default class DataModule {
   constructor(
@@ -54,30 +57,51 @@ export default class DataModule {
           if (!touchSet(cache, relationMetadata)) continue;
           const relationType = relationMetadata.type;
 
-          const relation = new EntityRelation(
+          const relation = new DataEntityRelation(
             connection,
             relationMetadata.target as Function,
             relationMetadata.propertyName,
             false
           );
 
-          getDataEntityInfo;
           for (const callback of this._buildRelationCallbacksMap.get(
             relationType
           ) || []) {
-            await callback({
-              relation,
-              connection,
-            });
+            await callback(relationMetadata);
           }
         }
       }
     });
   }
 
+  relationListenerMap = new Map<
+    RelationMetadata,
+    Set<(event: DataRelationEvent) => Awaitable>
+  >();
+
+  onRelationChange(
+    relationMetadata: RelationMetadata,
+    callback: (event: DataRelationEvent) => Awaitable
+  ) {
+    const callbacks = touchMap(
+      this.relationListenerMap,
+      relationMetadata,
+      () => new Set()
+    );
+    callbacks.add(callback);
+    return () => {
+      callbacks.delete(callback);
+    };
+  }
+
   protected _buildRelationCallbacksMap = new Map<
     Function /* RelationType */,
     OnRelationCallback[]
+  >();
+
+  protected relationBuildersMap = new Map<
+    Function /* RelationType */,
+    (relationMetadata: RelationMetadata) => void
   >();
 
   buildRelationsTo(relationType: Function, callback: OnRelationCallback) {
@@ -88,7 +112,7 @@ export default class DataModule {
     );
   }
 
-  // listenToRelation
+  // listenToRelationChanges
   // listenToColumn
   listen(
     entityType,
@@ -104,19 +128,7 @@ export default class DataModule {
     } & {
       "*"?: (event: DataEntityEvent) => Awaitable;
     }
-  ) {
-    const eventTypeListenerMap = touchMap(
-      this._entityTypeListenerMap,
-      entityType,
-      () => new Map()
-    );
-
-    for (const [eventType, callback] of entries(callbackMap)) {
-      if (typeof callback !== "function")
-        throw new TypeError(`expected to function`);
-      touchMap(eventTypeListenerMap, eventType as any, () => []).push(callback);
-    }
-  }
+  ) {}
 
   protected _entityTypeListenerMap = new Map<
     /*EntityType*/ Function,

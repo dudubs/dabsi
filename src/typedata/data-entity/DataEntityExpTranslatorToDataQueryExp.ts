@@ -14,7 +14,7 @@ import {
   DataQueryExp,
 } from "@dabsi/typedata/data-query/DataQueryExp";
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
-import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataEntityRelation } from "@dabsi/typeorm/relations";
 import { Connection } from "typeorm";
 
 const mapper = Object.seal(new DataExpMapper());
@@ -74,7 +74,7 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
   }
 
   translateAt(propertyName: string, exp: DataExp<any>): DataQueryExp {
-    const relation = new EntityRelation(
+    const relation = new DataEntityRelation(
       this.connection,
       this.typeInfo.type,
       propertyName,
@@ -99,7 +99,7 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
   counter = 0;
 
   translateRelation(relationName: string, whereExp: DataExp<any>) {
-    const relation = new EntityRelation(
+    const relation = new DataEntityRelation(
       this.connection,
       this.typeInfo.type,
       relationName,

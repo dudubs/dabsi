@@ -1,12 +1,12 @@
 import { buildTestEntities } from "@dabsi/typedata/data-entity/tests/buildTestEntities";
 import { buildTestRelations } from "@dabsi/typedata/data-entity/tests/buildTestRelations";
 import {
-  DBase,
+  DEntity,
   DChild1,
   DChild1Child1,
   DChild2,
   DUnion,
-  EBase,
+  EEntity,
   EChild1,
   EChild1Child1,
   EChild2,
@@ -27,11 +27,11 @@ const getConnection = TestConnection([
   AEntity,
   BEntity,
   CEntity,
-  DBase,
+  DEntity,
   DChild1,
   DChild2,
   DChild1Child1,
-  EBase,
+  EEntity,
   EChild1,
   EChild2,
   EChild1Child1,

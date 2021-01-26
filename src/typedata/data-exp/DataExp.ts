@@ -130,6 +130,8 @@ export type DataExpTypes<T> = {
   $notHas: HasExp<T>;
 
   $as: AsExp<T>;
+
+  // TODO: $key: "relation-to-one-property"
 };
 export type HasExp<T> =
   | DataRelationToManyKeys<T>

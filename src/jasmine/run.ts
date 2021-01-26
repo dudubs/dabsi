@@ -5,6 +5,7 @@ import { readdirSync, statSync } from "fs";
 import "jasmine";
 import path from "path";
 import "@dabsi/jasmine/register";
+import globalTester from "@dabsi/jasmine/globalTester";
 
 const searchedDirs = new Set<string>();
 const where = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
@@ -15,6 +16,9 @@ if (!where.length) {
   where.forEach(dir => {
     searchTests(path.resolve(DABSI_CURRENT_PATH, dir));
   });
+}
+for (const callback of globalTester.callbacks) {
+  callback();
 }
 
 function loadTests(fileName) {

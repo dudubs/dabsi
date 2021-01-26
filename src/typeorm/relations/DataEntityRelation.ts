@@ -3,22 +3,24 @@ import { defined } from "@dabsi/common/object/defined";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { ArrayTypeOrObject } from "@dabsi/common/typings2/ArrayTypeOrObject";
 import { inspect } from "@dabsi/logging/inspect";
+import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import {
   ByTableOrColumn,
-  EntityRelationSide,
-} from "@dabsi/typeorm/relations/EntityRelationSide";
+  DataEntityRelationSide,
+} from "@dabsi/typeorm/relations/DataEntityRelationSide";
+
 import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
-export class EntityRelation<T = any> {
+export class DataEntityRelation<T = any> {
   static of<T, K extends keyof T>(
     connection: Connection,
     entityType: ObjectType<T>,
     propertyName: string & K
-  ): EntityRelation<T> {
-    return new EntityRelation(connection, entityType, propertyName, false);
+  ): DataEntityRelation<T> {
+    return new DataEntityRelation(connection, entityType, propertyName, false);
   }
 
   static at<T, K extends keyof T>(
@@ -26,14 +28,16 @@ export class EntityRelation<T = any> {
     entityType: ObjectType<T>,
     propertyName: string & K,
     key?: string
-  ): EntityRelation<ArrayTypeOrObject<T[K]>> {
-    return new EntityRelation(connection, entityType, propertyName, true);
+  ): DataEntityRelation<ArrayTypeOrObject<T[K]>> {
+    return new DataEntityRelation(connection, entityType, propertyName, true);
   }
 
   constructor(
     public connection: Connection,
     public entityType: ObjectType<any>, // TODO: Function|string
     public propertyName: string,
+
+    // TODO: rename to inverse
     public invert: boolean
   ) {}
 
@@ -64,9 +68,9 @@ export class EntityRelation<T = any> {
         () => `No inverse relation ${inspect(this)}.`
       );
 
-  left = new EntityRelationSide(this, this.leftEntityType, true);
+  left = new DataEntityRelationSide(this, this.leftEntityType, true);
 
-  right = new EntityRelationSide(this, this.rightEntityType, false);
+  right = new DataEntityRelationSide(this, this.rightEntityType, false);
 
   get relationType(): Function {
     assert(typeof this.relationMetadata?.type === "function");
@@ -301,6 +305,31 @@ export class EntityRelation<T = any> {
 
   [inspect.custom]() {
     return `<${this.constructor.name} ${this.entityType.name}.${this.propertyName}: ${this.relationType.name}>`;
+  }
+
+  setOwnerByColumn(row, relationKey: DataEntityKey | null) {
+    const { relationMetadata, invert } = this;
+
+    const isOwnerByColumnLeft =
+      !invert &&
+      (relationMetadata.isOneToOneOwner || relationMetadata.isManyToOne);
+
+    const isOwnerByColumnRight =
+      invert &&
+      (relationMetadata.isOneToOneNotOwner || relationMetadata.isManyToOne);
+
+    const isOwnerByColumn = isOwnerByColumnLeft || isOwnerByColumnRight;
+
+    if (isOwnerByColumn) {
+      (invert
+        ? relationMetadata.inverseRelation!
+        : relationMetadata
+      ).joinColumns.forEach(column => {
+        row[column.databaseName] =
+          relationKey?.object[column.referencedColumn!.propertyName!] ?? null;
+      });
+    }
+    return isOwnerByColumn;
   }
 }
 

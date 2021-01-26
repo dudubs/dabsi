@@ -15,7 +15,13 @@ export namespace DataEntityKey {
       return pick(metadata, KeyObject.parse(text));
     }
   }
-  export function parse(metadata: EntityMetadata, text: string): DataEntityKey {
+  export function parse(metadata: EntityMetadata, text: string): DataEntityKey;
+  export function parse(
+    metadata: EntityMetadata,
+    text: string | null
+  ): DataEntityKey | null;
+  export function parse(metadata: EntityMetadata, text) {
+    if (!text) return null;
     return { text, object: parseObject(metadata, text) };
   }
 

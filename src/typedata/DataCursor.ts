@@ -38,17 +38,21 @@ export const EmptyDataCursor: DataCursor = {
 // TODO: change to type, EmptyDataCursor const.
 export type DataCursor<T = any> = {
   root: string[];
+
   location: DataCursorPath[];
 
   type: string;
 
   filter: DataExp<any>;
+
+  // TODO: rename to keyMap
   keys: Record<string, string | number>;
 
   selection: AnyDataSelection;
 
   // range
   skip: number;
+
   take: number;
 
   order: DataOrder<T>[];

@@ -8,7 +8,7 @@ import {
 } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { entries } from "@dabsi/common/object/entries";
-import { EntityRelation } from "@dabsi/typeorm/relations";
+import { DataEntityRelation } from "@dabsi/typeorm/relations";
 import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import { DataCursor } from "@dabsi/typedata/DataCursor";
@@ -29,7 +29,7 @@ export type BaseDataEntityCursor = {
   parent: DataEntityCursorParent | undefined;
 
   relationKeys: {
-    relation: EntityRelation;
+    relation: DataEntityRelation;
     key: DataEntityKey;
   }[];
 
@@ -37,7 +37,7 @@ export type BaseDataEntityCursor = {
 };
 
 export type DataEntityCursorParent = BaseDataEntityCursor & {
-  relation: EntityRelation;
+  relation: DataEntityRelation;
   relationKey: DataEntityKey;
 };
 
@@ -80,7 +80,7 @@ export namespace DataEntityCursor {
     for (const path of cursor.location) {
       updateTypeInfo(path.type);
 
-      const relation = new EntityRelation(
+      const relation = new DataEntityRelation(
         connection,
         typeInfo.type,
         path.propertyName,
@@ -161,7 +161,7 @@ export namespace DataEntityCursor {
       );
 
       for (const [propertyName, value] of entries(dataChildKeys)) {
-        const relation = DataEntityInfo.propertyNameToRelation[propertyName];
+        const relation = DataEntityInfo.propertyRelationMap[propertyName];
         if (relation) {
           const key = DataEntityKey.parse(relation.right.entityMetadata, value);
           relationKeys.push({

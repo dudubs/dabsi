@@ -11,6 +11,7 @@ export type DataTypeInfo = {
   relations?: Record<string, DataTypeInfo>;
   selection?: AnyDataSelection;
 };
+
 export namespace DataTypeInfo {
   export const map = new WeakMap();
   export const symbol = Symbol();

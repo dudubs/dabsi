@@ -1,5 +1,8 @@
+import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
 import { formatSql } from "@dabsi/system-old/server/acl/formatSql";
-import getTestDataConnection from "@dabsi/typedata/data-entity/tests/getTestDataConnection";
+import getTestDataConnection, {
+  XEntity,
+} from "@dabsi/typedata/data-entity/tests/getTestDataConnection";
 import {
   ASource,
   BSource,
@@ -9,7 +12,14 @@ import { DEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 import { EntityMetadata } from "typeorm";
 
-fit("", async () => {
+xit("", async () => {
+  const row = await ASource.insert({});
+  console.log("----");
+
+  await row.update({ aText: "foo" });
+});
+
+xit("", async () => {
   const joins: string[] = [];
 
   const a1 = await ASource.insert({

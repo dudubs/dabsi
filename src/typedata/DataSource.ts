@@ -45,7 +45,7 @@ export abstract class DataSource<T> {
 
   async getCountAndRows(): Promise<[number, DataRow<T>[]]> {
     // TODO: Optimizing
-    return [await this.getCount(), await this.getRows()];
+    return [await this.getCountRows(), await this.getRows()];
   }
 
   // TODO: rename to getRows()
@@ -91,9 +91,9 @@ export abstract class DataSource<T> {
     }
   }
 
-  abstract getCount(): Promise<number>;
+  abstract getCountRows(): Promise<number>;
 
-  abstract hasRow(): Promise<boolean>;
+  abstract hasRows(): Promise<boolean>;
 
   //
   async touch<T>(

@@ -217,9 +217,9 @@ export function DataSourceTests(
   it("of relation key", async () => {
     const aKey = await ADS.insertKey({});
     const bOfA = BDS.of("oneBToOneA", aKey);
-    expect(await bOfA.hasRow()).toBeFalsy();
+    expect(await bOfA.hasRows()).toBeFalsy();
     await bOfA.insertKey({});
-    expect(await bOfA.hasRow()).toBeTruthy();
+    expect(await bOfA.hasRows()).toBeTruthy();
   });
 
   it("of data key", async () => {
@@ -228,45 +228,45 @@ export function DataSourceTests(
     const bOfA = BDS.of("oneBToOneA", aKey);
 
     const bOfAOfHello = bOfA.of("bText", "bHello");
-    expect(await bOfAOfHello.hasRow()).toBeFalsy();
+    expect(await bOfAOfHello.hasRows()).toBeFalsy();
 
     const bOfAOfHelloKey = await bOfAOfHello.insertKey({});
-    expect(await bOfAOfHello.hasRow()).toBeTruthy();
+    expect(await bOfAOfHello.hasRows()).toBeTruthy();
 
     const bOfAOfWorld = bOfA.of("bText", "bWorld");
-    expect(await bOfAOfWorld.hasRow()).toBeFalsy();
+    expect(await bOfAOfWorld.hasRows()).toBeFalsy();
 
     const cOfbOfA = CDS.of("oneCToOneB", bOfAOfHelloKey);
 
     const cOfbOfAOfHello = cOfbOfA.of("cText", "cHello");
-    expect(await cOfbOfAOfHello.hasRow()).toBeFalsy();
+    expect(await cOfbOfAOfHello.hasRows()).toBeFalsy();
 
     const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insertKey({});
 
-    expect(await cOfbOfAOfHello.hasRow()).toBeTruthy();
+    expect(await cOfbOfAOfHello.hasRows()).toBeTruthy();
 
     expect(
       await BDS.of("bText", "bHello")
         .at("oneBToOneCOwner", bOfAOfHelloKey)
-        .hasRow()
+        .hasRows()
     ).toBeTruthy();
 
     expect(
       await BDS.of("bText", "bWorld")
         .at("oneBToOneCOwner", bOfAOfHelloKey)
-        .hasRow()
+        .hasRows()
     ).toBeFalsy();
   });
 
   it("children", async () => {
     const rootKey = await ADS.insertKey({});
     const aChildAtA = ADS.at("manyAToManyA", rootKey);
-    expect(await aChildAtA.getCount()).toEqual(0);
+    expect(await aChildAtA.getCountRows()).toEqual(0);
 
     const childKeys = [await ADS.insertKey({}), await ADS.insertKey({})];
     await aChildAtA.add(childKeys);
 
-    expect(await aChildAtA.getCount()).toEqual(2);
+    expect(await aChildAtA.getCountRows()).toEqual(2);
     expect((await aChildAtA.getRows()).map(child => child.$key)).toEqual(
       arrayContaining(childKeys)
     );
@@ -276,9 +276,9 @@ export function DataSourceTests(
     const a = await ADS.insert({});
     const b = await BDS.insert({});
 
-    expect(await a.at("oneAToOneBOwner").getCount()).toEqual(0);
+    expect(await a.at("oneAToOneBOwner").getCountRows()).toEqual(0);
     await a.at("oneAToOneBOwner").add(b);
-    expect(await a.at("oneAToOneBOwner").getCount()).toEqual(1);
+    expect(await a.at("oneAToOneBOwner").getCountRows()).toEqual(1);
   });
 
   describe("expect to get row after insert", () => {
@@ -351,19 +351,19 @@ export function DataSourceTests(
       const bKey = await ADS.rootAt("oneAToOneB").insertKey({
         bText: "hello",
       });
-      expect(await BDS.filter({ $is: bKey }).hasRow()).toBeTrue();
+      expect(await BDS.filter({ $is: bKey }).hasRows()).toBeTrue();
     });
     it("to many b", async () => {
       const bKey = await ADS.rootAt("oneAToManyB").insertKey({
         bText: "hello",
       });
-      expect(await BDS.filter({ $is: bKey }).hasRow()).toBeTrue();
+      expect(await BDS.filter({ $is: bKey }).hasRows()).toBeTrue();
     });
     it("to one b to one c", async () => {
       const cKey = await ADS.rootAt("oneAToOneB")
         .rootAt("oneBToOneC")
         .insertKey({});
-      expect(await CDS.filter({ $is: cKey }).hasRow()).toBeTrue();
+      expect(await CDS.filter({ $is: cKey }).hasRows()).toBeTrue();
     });
   });
 

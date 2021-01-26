@@ -20,6 +20,7 @@ import {
   getDataEntityInfo,
 } from "@dabsi/typedata/data-entity/DataEntityInfo";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
+import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
 
 export type BaseDataEntityCursor = {
   typeInfo: DataTypeInfo;
@@ -193,6 +194,10 @@ export namespace DataEntityCursor {
     entityType: ObjectType<any>
   ): DataEntityCursor {
     return create(connection.createQueryRunner(), cursor, entityType);
+  }
+
+  export function buildQuery(cursor: DataEntityCursor): DataQuery {
+    return createQueryBuilder(cursor).query;
   }
 
   export function createQueryBuilder(

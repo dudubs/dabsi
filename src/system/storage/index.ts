@@ -1,6 +1,5 @@
 import { Cli } from "@dabsi/modules/Cli";
 import DataModule from "@dabsi/modules/data";
-import buildCountRefs from "@dabsi/modules/data/buildCountRefs";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
 import Storage from "@dabsi/system/storage/Storage";
@@ -16,7 +15,6 @@ export default class StorageModule {
     @Inject() dbModule: DbModule,
     @Inject() storage: Storage
   ) {
-    buildCountRefs(dsm, StorageFile, "countRefs");
     cli.command("storage", cli => {
       cli.command("clean", cli =>
         cli.onRun(async () => {

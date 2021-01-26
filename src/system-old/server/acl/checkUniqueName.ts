@@ -13,7 +13,7 @@ export async function checkUniqueName<T>(
   if (
     await source
       .filter({ $base: { [field]: name } } as DataExp<BasedType<T>>)
-      .hasRow()
+      .hasRows()
   ) {
     return "ALREADY_EXISTS" as const;
   }

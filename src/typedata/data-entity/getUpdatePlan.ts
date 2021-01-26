@@ -1,10 +1,9 @@
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
-import { updateEntityRow } from "@dabsi/typedata/data-entity/sql/updateEntityRow";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
-import { DataChangeReason } from "@dabsi/typedata/data-entity/DataEntityListener";
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { updateEntityRow } from "@dabsi/typedata/data-entity/sql/updateEntityRow";
 import { DataKey } from "@dabsi/typedata/DataKey";
 import { DataUpdate } from "@dabsi/typedata/DataValue";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
@@ -14,34 +13,14 @@ export default function (
   value: DataUpdate<any>,
   entityCursor: DataEntityCursor = source.entityCursor
 ) {
-  const row = {};
+  const entity = {};
 
-  const selectionRelations: any = {};
-
-  const relationKeys: {
+  const relations: {
     relation: DataEntityRelation;
     relationKey: DataEntityKey | null;
-    isOwnerByColumn: boolean;
   }[] = [];
 
   // checking if cursor-relations-keys is override by cursor
-
-  const buildRelation = (
-    relation: DataEntityRelation,
-    relationKey: DataEntityKey | null
-  ) => {
-    if (source.hasRelationListener(relation.relationMetadata)) {
-      selectionRelations[relation.propertyName] = { pick: [] };
-    }
-
-    const isOwnerByColumn = relation.setOwnerByColumn(row, relationKey);
-
-    relationKeys.push({
-      relation,
-      relationKey,
-      isOwnerByColumn,
-    });
-  };
 
   for (const { relation } of entityCursor.relationKeys) {
     if (relation.propertyName in value) {
@@ -83,90 +62,56 @@ export default function (
     const column =
       entityCursor.entityInfo.propertyNameToColumnMetadata[propertyName];
     if (column) {
-      row[propertyName] = propertyValue;
+      entity[propertyName] = propertyValue;
       continue;
     }
     throw new Error(`Invalid property ${propertyName}`);
   }
 
-  let entityRowMap: Record<string, any>;
-
-  const selection: any = {};
-
-  if (hasKeys(selectionRelations)) {
-    selection.relations = selectionRelations;
-  }
-
   const update = async (entityKey: DataEntityKey) => {
-    const entityRow = entityRowMap[entityKey.text];
-
-    if (hasKeys(row)) {
+    if (hasKeys(entity)) {
+      await entityCursor.entityManager.update(
+        entityCursor.typeInfo.type,
+        entityKey.object,
+        entity
+      );
       await updateEntityRow(
         source.getQueryRunner(),
         entityCursor.typeInfo.type,
         entityKey,
-        row
+        entity
       );
     }
 
-    for (const {
-      relation,
-      relationKey: newRelationKey,
-      isOwnerByColumn,
-    } of relationKeys) {
-      const oldRelationTextKey = entityRow?.[relation.propertyName]?.$key;
-      const newRelationTextKey = newRelationKey?.text ?? null;
-      if (oldRelationTextKey == newRelationTextKey) continue;
-
-      if (!isOwnerByColumn) {
-        await relation.update(
-          newRelationKey ? "addOrSet" : "removeOrUnset",
-          entityKey.object!,
-          newRelationKey?.object!
-        );
-      }
-
-      const { relationMetadata } = relation;
-
-      await source.emitRelationChange?.({
-        relationMetadata,
-        reason: DataChangeReason.UPDATE,
-        newRelationKey: newRelationKey?.text ?? null,
-        oldRelationKey: oldRelationTextKey,
-        entityKey: entityKey.text,
-      });
-
-      if (relationMetadata.inverseRelation) {
-        oldRelationTextKey &&
-          (await source.emitRelationChange?.({
-            relationMetadata: relationMetadata.inverseRelation,
-            reason: DataChangeReason.UPDATE,
-            entityKey: oldRelationTextKey,
-            newRelationKey: null,
-            oldRelationKey: entityKey.text,
-          }));
-      }
+    for (const { relation, relationKey } of relations) {
+      await relation.update(
+        relationKey ? "addOrSet" : "removeOrUnset",
+        entityKey.object!,
+        relationKey?.object!
+      );
     }
   };
 
   return {
     updateMany: async (keys: string[]) => {
-      entityRowMap = !hasKeys(selection)
-        ? {}
-        : await source
-            .createEntitySource(entityCursor.typeInfo.type)
-            .select(selection)
-            .filter({ $is: keys })
-            .getRowMap();
-
       for (const entityTextKey of keys) {
         const entityKey = DataEntityKey.parse(
           entityCursor.entityMetadata,
           DataKey(entityTextKey)
         );
-
         await update(entityKey);
       }
     },
   };
+  function buildRelation(
+    relation: DataEntityRelation,
+    relationKey: DataEntityKey | null
+  ) {
+    if (!relation.setEntity(entity, relationKey)) {
+      relations.push({
+        relation,
+        relationKey,
+      });
+    }
+  }
 }

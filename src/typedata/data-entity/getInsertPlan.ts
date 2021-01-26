@@ -1,35 +1,29 @@
 import { entries } from "@dabsi/common/object/entries";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
-import {
-  DataChangeReason,
-  DataRelationChange,
-} from "@dabsi/typedata/data-entity/DataEntityListener";
 import { DataInsert } from "@dabsi/typedata/DataValue";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
 
-import { inspect } from "@dabsi/logging/inspect";
-import { insertEntityRow } from "@dabsi/typedata/data-entity/sql/insertEntityRow";
-
-export default (source: DataEntitySource<any>, value: DataInsert<any>) => {
-  const row = {};
+export default (source: DataEntitySource<any>, data: DataInsert<any>) => {
   const {
     entityCursor,
-    entityCursor: { parent: parentEntityCursor },
+    entityCursor: { parent: parentEntityCursor, entityMetadata },
   } = source;
-  const relationKeys: {
+
+  const relations: {
     relation: DataEntityRelation;
     relationKey: DataEntityKey;
-    isOwnerByColumn: boolean;
   }[] = [];
 
-  //
+  const entity: any = entityCursor.entityManager.create(
+    entityCursor.typeInfo.type
+  );
 
   parentEntityCursor &&
     buildRelation(parentEntityCursor.relation, parentEntityCursor.relationKey);
 
   for (const { relation, key: relationKey } of entityCursor.relationKeys) {
-    if (relation.propertyName in value) {
+    if (relation.propertyName in data) {
       throw new Error(`Can't override relation ${relation.propertyName}.`);
     }
     // build relation on insert.
@@ -40,17 +34,15 @@ export default (source: DataEntitySource<any>, value: DataInsert<any>) => {
     metadata: { propertyName },
     key,
   } of entityCursor.columnKeys) {
-    if (propertyName in value) {
+    if (propertyName in data) {
       throw new Error(`Can't override field ${propertyName}.`);
     }
-    row[propertyName] = key;
+    entity[propertyName] = key;
   }
 
-  for (let [propertyName, propertyValue] of entries(value)) {
+  for (let [propertyName, propertyValue] of entries(data)) {
     if (propertyValue == null) continue;
-
     const relation = entityCursor.entityInfo.propertyRelationMap[propertyName];
-
     if (propertyValue === undefined) {
       // skip on property if is undefined - no if is null.
       continue;
@@ -62,7 +54,6 @@ export default (source: DataEntitySource<any>, value: DataInsert<any>) => {
           propertyValue = propertyValue.$key;
         }
       }
-
       const relationKey = DataEntityKey.parse(
         relation.right.entityMetadata,
         propertyValue
@@ -74,63 +65,30 @@ export default (source: DataEntitySource<any>, value: DataInsert<any>) => {
     const column =
       entityCursor.entityInfo.propertyNameToColumnMetadata[propertyName];
     if (!column) throw new Error(`Invalid property ${propertyName}`);
-    row[propertyName] = propertyValue;
+    entity[propertyName] = propertyValue;
   }
 
   return {
     insert: async () => {
-      // before
-      // insert
+      await entityCursor.entityManager.save(entity, {
+        reload: false,
+      });
 
-      const entityKey = await insertEntityRow(
-        source.getQueryRunner(),
-        entityCursor.typeInfo.type,
-        row
-      );
+      const entityKeyObject = DataEntityKey.pick(entityMetadata, entity);
 
-      const baseRelationChange = {
-        reason: DataChangeReason.INSERT,
-        oldRelationKey: null,
+      const entityKey: DataEntityKey = {
+        text: DataEntityKey.stringify(
+          entityCursor.entityMetadata,
+          entityKeyObject
+        ),
+        object: entityKeyObject,
       };
 
-      for (const { relation, relationKey, isOwnerByColumn } of relationKeys) {
-        if (!isOwnerByColumn) {
-          await relation.update(
-            "addOrSet",
-            entityKey.object,
-            relationKey.object
-          );
-        }
-        await emit(relation, relationKey.text);
+      for (const { relation, relationKey } of relations) {
+        await relation.update("addOrSet", entityKey.object, relationKey.object);
       }
 
       return entityKey;
-
-      async function emit(
-        { relationMetadata, invert }: DataEntityRelation,
-        newRelationKey: string
-      ) {
-        let entityTextKey = entityKey.text;
-
-        if (invert) {
-          [entityTextKey, newRelationKey] = [newRelationKey, entityTextKey];
-        }
-
-        await source.emitRelationChange?.({
-          ...baseRelationChange,
-          relationMetadata,
-          newRelationKey,
-          entityKey: entityTextKey,
-        });
-
-        relationMetadata.inverseRelation &&
-          source.emitRelationChange?.({
-            ...baseRelationChange,
-            relationMetadata: relationMetadata.inverseRelation,
-            entityKey: newRelationKey,
-            newRelationKey: entityTextKey,
-          });
-      }
     },
   };
   function buildRelation(
@@ -142,10 +100,9 @@ export default (source: DataEntitySource<any>, value: DataInsert<any>) => {
       return;
     }
 
-    relationKeys.push({
+    relations.push({
       relation,
       relationKey,
-      isOwnerByColumn: relation.setOwnerByColumn(row, relationKey),
     });
   }
 };

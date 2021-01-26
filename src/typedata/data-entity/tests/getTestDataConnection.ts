@@ -3,8 +3,27 @@ import globalTester from "@dabsi/jasmine/globalTester";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { AEntity, CEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
-import { Connection } from "typeorm";
+import {
+  BeforeUpdate,
+  Column,
+  Connection,
+  Entity,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
+@Entity()
+export class XEntity {
+  @PrimaryGeneratedColumn()
+  id!: number;
+
+  @Column({ name: "myText" })
+  text!: string;
+
+  @BeforeUpdate()
+  foo() {
+    console.log("xx");
+  }
+}
 export const getConnection = () =>
   defined(connection, `No data test connection`);
 
@@ -18,6 +37,7 @@ globalTester(() => {
       CEntity,
       DEntity,
       EEntity,
+      XEntity,
     ]);
   });
 });

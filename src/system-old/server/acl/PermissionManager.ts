@@ -15,7 +15,7 @@ export class PermissionManager {
       .of(to, key)
       .of("ownerToken", token);
 
-    if (await source.hasRow()) {
+    if (await source.hasRows()) {
       return "ALREADY_EXISTS" as const;
     }
 

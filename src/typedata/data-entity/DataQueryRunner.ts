@@ -2,7 +2,7 @@ import { DataEntityQueryExpTranslatorToSql } from "./DataEntityQueryExpTranslato
 import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
 import { QueryRunner } from "typeorm";
 
-export default class DataEntityQueryRunner {
+export default class DataQueryRunner {
   constructor(public query: DataQuery, public queryRunner: QueryRunner) {}
 
   getQueryAndParameters(): [string, any[]] {
@@ -17,7 +17,7 @@ export default class DataEntityQueryRunner {
     return this.queryRunner.query(query, parameters);
   }
 
-  hasRow(): Promise<boolean> {
+  hasRows(): Promise<boolean> {
     const [sql, params] = this.getQueryAndParameters();
     const query = `SELECT COUNT(*) value FROM (SELECT * FROM (${sql}) x LIMIT 1) _rec`;
     return this.queryRunner.query(query, params).then(rows => {
@@ -25,7 +25,7 @@ export default class DataEntityQueryRunner {
     });
   }
 
-  async getCount(): Promise<number> {
+  async getCountRows(): Promise<number> {
     const [sql, params] = this.getQueryAndParameters();
     return this.queryRunner
       .query(`SELECT COUNT(*) value FROM (${sql}) _rec`, params)

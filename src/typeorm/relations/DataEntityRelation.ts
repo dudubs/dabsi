@@ -10,7 +10,6 @@ import {
   ByTableOrColumn,
   DataEntityRelationSide,
 } from "@dabsi/typeorm/relations/DataEntityRelationSide";
-
 import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
@@ -34,10 +33,9 @@ export class DataEntityRelation<T = any> {
 
   constructor(
     public connection: Connection,
-    public entityType: ObjectType<any>, // TODO: Function|string
+    public entityType: Function,
     public propertyName: string,
 
-    // TODO: rename to inverse
     public invert: boolean
   ) {}
 
@@ -256,7 +254,7 @@ export class DataEntityRelation<T = any> {
   }
 
   async update(
-    action: "addOrSet" | "removeOrUnset" | "set" | "add" | "remove" | "unset",
+    action: "addOrSet" | "removeOrUnset",
     leftKey: object,
     rightKey: object
   ): Promise<"add" | "set" | "unset" | "remove"> {
@@ -273,8 +271,6 @@ export class DataEntityRelation<T = any> {
 
     switch (action) {
       case "addOrSet":
-      case "add":
-      case "set":
         if (this.isToOne) {
           await qb.set(rightKey);
           return "set";
@@ -282,8 +278,6 @@ export class DataEntityRelation<T = any> {
           await qb.add(rightKey);
           return "add";
         }
-      case "remove":
-      case "unset":
       case "removeOrUnset":
         if (this.isToOne) {
           await qb.set(null);
@@ -307,7 +301,7 @@ export class DataEntityRelation<T = any> {
     return `<${this.constructor.name} ${this.entityType.name}.${this.propertyName}: ${this.relationType.name}>`;
   }
 
-  setOwnerByColumn(row, relationKey: DataEntityKey | null) {
+  setEntity(entity, relationKey: DataEntityKey | null) {
     const { relationMetadata, invert } = this;
 
     const isOwnerByColumnLeft =
@@ -325,7 +319,7 @@ export class DataEntityRelation<T = any> {
         ? relationMetadata.inverseRelation!
         : relationMetadata
       ).joinColumns.forEach(column => {
-        row[column.databaseName] =
+        entity[column.propertyName] =
           relationKey?.object[column.referencedColumn!.propertyName!] ?? null;
       });
     }

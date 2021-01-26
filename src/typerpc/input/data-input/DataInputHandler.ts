@@ -84,7 +84,7 @@ export class DataInputHandler
       }
       return { value: row };
     }
-    if (!(await this.config.source.filter({ $is: key }).hasRow())) {
+    if (!(await this.config.source.filter({ $is: key }).hasRows())) {
       return { error: "INVALID_DATA_KEY", value: undefined };
     }
     return { value: key };

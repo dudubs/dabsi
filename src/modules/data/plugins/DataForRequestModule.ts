@@ -1,5 +1,5 @@
-import DataModuleSource from "@dabsi/modules/data/DataModuleSource";
 import DataSourceFactoryResolver from "@dabsi/modules/data/DataSourceFactroyResolver";
+import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
 import { EmptyDataCursor } from "@dabsi/typedata/DataCursor";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import DataModule from "..";
@@ -20,12 +20,7 @@ export default class DataForRequestModule {
         const [queryRunner, release] = await dataModule.createQueryRunner();
         req.onEnd(() => release());
         return DataSourceFactoryResolver.provide(() => entityType =>
-          new DataModuleSource(
-            dataModule,
-            () => queryRunner,
-            entityType,
-            EmptyDataCursor
-          )
+          new DataEntitySource(entityType, () => queryRunner, EmptyDataCursor)
         );
       })
     );

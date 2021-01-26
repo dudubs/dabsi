@@ -23,7 +23,7 @@ import { KeyObject } from "@dabsi/typedata/KeyObject";
 import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
 import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
 import { getDataEntityInfo } from "@dabsi/typedata/data-entity/DataEntityInfo";
-import DataEntityQueryRunner from "@dabsi/typedata/data-entity/DataEntityQueryRunner";
+import DataQueryRunner from "@dabsi/typedata/data-entity/DataQueryRunner";
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 type RowContext = {
   row: any;
@@ -211,7 +211,7 @@ export namespace DataEntityLoader {
     async function loadRows(baseRow?: object): Promise<any[]> {
       const rows: any[] = [];
 
-      const runner = new DataEntityQueryRunner(qb.query, qureyRunner);
+      const runner = new DataQueryRunner(qb.query, qureyRunner);
 
       for (const raw of await runner.getRows()) {
         const context = await loadOneRaw(raw, baseRow);

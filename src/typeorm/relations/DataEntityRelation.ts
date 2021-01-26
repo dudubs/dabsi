@@ -13,12 +13,12 @@ import {
 import { Connection, ObjectType, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
-export class DataEntityRelation<T = any> {
+export class DataEntityRelation {
   static of<T, K extends keyof T>(
     connection: Connection,
     entityType: ObjectType<T>,
     propertyName: string & K
-  ): DataEntityRelation<T> {
+  ): DataEntityRelation {
     return new DataEntityRelation(connection, entityType, propertyName, false);
   }
 
@@ -27,7 +27,7 @@ export class DataEntityRelation<T = any> {
     entityType: ObjectType<T>,
     propertyName: string & K,
     key?: string
-  ): DataEntityRelation<ArrayTypeOrObject<T[K]>> {
+  ): DataEntityRelation {
     return new DataEntityRelation(connection, entityType, propertyName, true);
   }
 
@@ -38,16 +38,6 @@ export class DataEntityRelation<T = any> {
 
     public invert: boolean
   ) {}
-
-  get propertyNameAtType() {
-    return `${this.entityType.name}.${this.propertyName}`;
-  }
-
-  get isJoinColumn() {
-    return (
-      this.relationMetadata.isOneToOneOwner || this.relationMetadata.isManyToOne
-    );
-  }
 
   entityMetadata = this.connection.getMetadata(this.entityType);
 
@@ -66,9 +56,23 @@ export class DataEntityRelation<T = any> {
         () => `No inverse relation ${inspect(this)}.`
       );
 
-  left = new DataEntityRelationSide(this, this.leftEntityType, true);
+  leftEntityType = this.invert ? this.relationType : this.entityType;
+  rightEntityType = !this.invert ? this.relationType : this.entityType;
 
+  left = new DataEntityRelationSide(this, this.leftEntityType, true);
   right = new DataEntityRelationSide(this, this.rightEntityType, false);
+
+  get isToOne(): boolean {
+    return (
+      this.relationMetadata.isOneToOne || this.relationMetadata.isManyToOne
+    );
+  }
+
+  get isToMany(): boolean {
+    return (
+      this.relationMetadata.isManyToMany || this.relationMetadata.isOneToMany
+    );
+  }
 
   get relationType(): Function {
     assert(typeof this.relationMetadata?.type === "function");
@@ -232,25 +236,11 @@ export class DataEntityRelation<T = any> {
         c =>
           `${this.escape(leftSchema)}.${this.escape(
             this.left.getJoinColumn(by, c).databaseName
-          )}=${this.escape(rightSchema)}.${
+          )}=${this.escape(rightSchema)}.${this.escape(
             this.right.getJoinColumn(by, c).databaseName
-          }`
+          )}`
       )
       .join(" AND ");
-  }
-
-  isToOne =
-    this.relationMetadata.isOneToOne || this.relationMetadata.isManyToOne;
-
-  isToMany =
-    this.relationMetadata.isManyToMany || this.relationMetadata.isOneToMany;
-
-  get addOrSetAction(): "add" | "set" {
-    return this.isToMany ? "add" : "set";
-  }
-
-  get removeOrUnsetAction(): "remove" | "unset" {
-    return this.isToMany ? "remove" : "unset";
   }
 
   async update(
@@ -289,19 +279,7 @@ export class DataEntityRelation<T = any> {
     }
   }
 
-  @Lazy() get leftEntityType(): ObjectType<T> {
-    return this.invert ? this.relationType : this.entityType;
-  }
-
-  @Lazy() get rightEntityType(): ObjectType<any> {
-    return !this.invert ? this.relationType : this.entityType;
-  }
-
-  [inspect.custom]() {
-    return `<${this.constructor.name} ${this.entityType.name}.${this.propertyName}: ${this.relationType.name}>`;
-  }
-
-  setEntity(entity, relationKey: DataEntityKey | null) {
+  setEntityRow(entity, relationKey: DataEntityKey | null) {
     const { relationMetadata, invert } = this;
 
     const isOwnerByColumnLeft =
@@ -324,6 +302,9 @@ export class DataEntityRelation<T = any> {
       });
     }
     return isOwnerByColumn;
+  }
+  [inspect.custom]() {
+    return `<${this.constructor.name} ${this.entityType.name}.${this.propertyName}: ${this.relationType.name}>`;
   }
 }
 

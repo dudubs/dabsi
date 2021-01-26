@@ -107,7 +107,7 @@ export default function (
     relation: DataEntityRelation,
     relationKey: DataEntityKey | null
   ) {
-    if (!relation.setEntity(entity, relationKey)) {
+    if (!relation.setEntityRow(entity, relationKey)) {
       relations.push({
         relation,
         relationKey,

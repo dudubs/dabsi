@@ -1,30 +1,14 @@
 import { firstDefinedEntry } from "@dabsi/common/object/firstDefinedEntry";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { DataCompareOperatorExp } from "@dabsi/typedata/data-exp/DataCompareOperatorExp";
+
 import {
   DataCompareExp,
-  DataCompareOperator,
   DataExp,
   DataExpTypes,
-  DataCompareOperators,
   DataParameterExp,
-  DataSymbolicCompareOperator,
 } from "@dabsi/typedata/data-exp/DataExp";
 import { IExpTranslator } from "@dabsi/typedata/data-exp/ExpTranslator";
-
-const SymbolicToNamedOperator: Record<
-  DataSymbolicCompareOperator,
-  DataCompareOperators
-> = {
-  "^=": "$startsWith",
-  "$=": "$endsWith",
-  "*=": "$contains",
-  "=": "$equals",
-  "!=": "$notEquals",
-  "<": "$lessThan",
-  "<=": "$lessThanOrEqual",
-  ">": "$greaterThan",
-  ">=": "$greaterThanOrEqual",
-};
 
 type T = any;
 type O = DataExpTypes<T>;
@@ -36,7 +20,12 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
 
   abstract Null: U;
 
-  abstract translateCompare(op: DataCompareOperators, left: U, right: U): U;
+  abstract translateCompare(
+    op: DataCompareOperatorExp.Base,
+    inverse: boolean,
+    left: U,
+    right: U
+  ): U;
 
   abstract translateParameter(value: DataParameterExp): U;
 
@@ -76,12 +65,17 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
 
   abstract translateIf(condition: U, then: U, _else: U): U;
 
-  translateInExp(inverse: boolean, where: DataExp<T>, values: DataExp<T>[]): U {
+  protected _translateIn(
+    inverse: boolean,
+    where: DataExp<T>,
+    values: DataExp<T>[]
+  ): U {
     if (values.length === 0) return this.True;
 
     if (values.length === 1)
       return this.translateCompare(
-        inverse ? "$notEquals" : "$equals",
+        "$equals",
+        inverse,
         this.translate(where),
         this.translate(values[0])
       );
@@ -93,32 +87,40 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
     );
   }
 
-  translateCompareExp(
-    op: DataCompareOperators,
+  protected _translateCompare(
+    op: DataCompareOperatorExp.Base,
+    inverse: boolean,
     left: DataExp<T>,
     right: DataExp<T>
   ): U {
     return this.translateCompare(
       op,
+      inverse,
       this.translate(left),
       this.translate(right)
     );
   }
 
   translateArray(exp: any[]): U {
-    if (exp.length === 1) return this.translateParameter(exp[0]);
+    if (exp.length === 1) {
+      return this.translateParameter(exp[0]);
+    }
 
     if (exp.length === 3) {
       // [exp, op, exp]
       const [left, op, right] = exp;
+
       switch (op) {
         case "$in":
-          return this.translateInExp(false, left, <DataExp<T>[]>right);
+          return this._translateIn(false, left, <DataExp<T>[]>right);
         case "$notIn":
-          return this.translateInExp(true, left, <DataExp<T>[]>right);
+          return this._translateIn(true, left, <DataExp<T>[]>right);
       }
-      return this.translateCompareExp(
-        SymbolicToNamedOperator[<DataCompareOperator>op] ?? op,
+      const [inverse, base] = DataCompareOperatorExp.map[op];
+
+      return this._translateCompare(
+        <any>base,
+        inverse,
         left,
         <DataExp<T>>right
       );
@@ -128,23 +130,19 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
       const [op, value] = firstDefinedEntry(opToValue);
       switch (op) {
         case "$in":
-          return this.translateInExp(
+          return this._translateIn(
             false,
             left,
             value.map(value => [value])
           );
         case "$notIn":
-          return this.translateInExp(
+          return this._translateIn(
             true,
             left,
             value.map(value => [value])
           );
       }
-      return this.translate([
-        left,
-        <DataCompareOperator>op,
-        { $parameter: value },
-      ]);
+      return this.translate([left, op, { $parameter: value }]);
     }
     throw new TypeError(`Invalid JSONArrayExp ${exp}`);
   }
@@ -198,7 +196,7 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
       case "object":
         if (Array.isArray(compareExp)) {
           const [op, exp] = compareExp;
-          return this.translate([key, <DataCompareOperator>op, exp]);
+          return this.translate([key, op, exp]);
         } else {
           const [op, value] = firstDefinedEntry(
             <Record<string, any>>compareExp
@@ -206,29 +204,25 @@ export abstract class DataExpTranslator<U> implements IExpTranslator<O, U> {
 
           switch (op) {
             case "$in":
-              return this.translateInExp(
+              return this._translateIn(
                 false,
                 key,
                 value.map(value => [value])
               );
             case "$notIn":
-              return this.translateInExp(
+              return this._translateIn(
                 true,
                 key,
                 value.map(value => [value])
               );
           }
 
-          return this.translate([
-            key,
-            <DataCompareOperator>op,
-            { $parameter: value },
-          ]);
+          return this.translate([key, op, { $parameter: value }]);
         }
       case "boolean":
       case "string":
       case "number":
-        return this.translateCompareExp("$equals", key, {
+        return this._translateCompare("$equals", false, key, {
           $parameter: compareExp,
         });
     }

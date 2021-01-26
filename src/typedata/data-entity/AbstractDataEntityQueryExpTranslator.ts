@@ -1,19 +1,13 @@
-import { Connection, SelectQueryBuilder } from "typeorm";
-import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
-import {
-  DataCompareOperator,
-  DataExp,
-  DataCompareOperators,
-  DataStringExp,
-} from "@dabsi/typedata/data-exp/DataExp";
+import { DataCompareOperatorExp } from "@dabsi/typedata/data-exp/DataCompareOperatorExp";
+import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
 import { DataQuery } from "@dabsi/typedata/data-query/DataQueryExp";
 import { DataQueryExpTranslator } from "@dabsi/typedata/data-query/DataQueryExpTranslator";
+import { Connection, SelectQueryBuilder } from "typeorm";
 
-const SqlOperators: Record<DataCompareOperators, string> = {
+const sqlOperatorMap: Record<DataCompareOperatorExp.Base, string> = {
   $equals: "=",
-  $notEquals: "!=",
   $lessThan: "<",
   $lessThanOrEqual: "<=",
   $greaterThan: ">",
@@ -22,11 +16,19 @@ const SqlOperators: Record<DataCompareOperators, string> = {
   $startsWith: " LIKE ",
   $endsWith: " LIKE ",
   $contains: " LIKE ",
+} as const;
 
-  $notStartsWith: " NOT LIKE ",
-  $notEndsWith: " NOT LIKE ",
-  $notContains: " NOT LIKE ",
-};
+const sqlInverseOperatorMap: Record<DataCompareOperatorExp.Base, string> = {
+  $equals: "!=",
+  $lessThan: ">=",
+  $lessThanOrEqual: ">",
+  $greaterThan: "<=",
+  $greaterThanOrEqual: "<",
+
+  $startsWith: " NOT LIKE ",
+  $endsWith: " NOT LIKE ",
+  $contains: " NOT LIKE ",
+} as const;
 
 export default abstract class AbstractDataEntityQueryExpTranslator
   extends DataExpTranslator<string>
@@ -69,30 +71,27 @@ export default abstract class AbstractDataEntityQueryExpTranslator
   }
 
   translateCompare(
-    op: DataCompareOperator,
+    op: DataCompareOperatorExp.Base,
+    inverse: boolean,
     left: string,
     right: string
   ): string {
+    let sqlOp = inverse ? sqlInverseOperatorMap[op] : sqlOperatorMap[op];
+
     switch (op) {
       case "$startsWith":
-      case "$notStartsWith":
         right = this.translateConcat([right, "'%'"]);
         break;
 
       case "$endsWith":
-      case "$notEndsWith":
         right = this.translateConcat(["'%'", right]);
         break;
 
       case "$contains":
-      case "$notContains":
         right = this.translateConcat(["'%'", right, "'%'"]);
-        break;
     }
-    return `${left}${defined(
-      SqlOperators[op],
-      () => `Can't translate "${op}".`
-    )}${right}`;
+
+    return `${left}${sqlOp}${right}`;
   }
 
   counter = 0;
@@ -180,6 +179,7 @@ export default abstract class AbstractDataEntityQueryExpTranslator
   translateQueryHas(inverse: boolean, query: DataQuery): string {
     return this.translateCompare(
       inverse ? "$equals" : "$greaterThan",
+      false,
       this.translateQueryCount({
         ...query,
         take: 1,

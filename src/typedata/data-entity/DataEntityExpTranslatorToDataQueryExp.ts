@@ -2,7 +2,7 @@ import { inspect } from "@dabsi/logging/inspect";
 import { defined } from "@dabsi/common/object/defined";
 import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
 import {
-  DataCompareOperators,
+  DataNamedOperatorExp,
   DataExp,
   DataParameterExp,
 } from "@dabsi/typedata/data-exp/DataExp";
@@ -16,6 +16,7 @@ import {
 import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
 import { Connection } from "typeorm";
+import { DataCompareOperatorExp } from "@dabsi/typedata/data-exp/DataCompareOperatorExp";
 
 const mapper = Object.seal(new DataExpMapper());
 
@@ -258,7 +259,8 @@ export class DataEntityExpTranslatorToDataQueryExp extends DataExpTranslator<Dat
 
   @UseDataExpMapper
   translateCompare(
-    op: DataCompareOperators,
+    op: DataCompareOperatorExp.Base,
+    inverse: boolean,
     left: DataExp<any>,
     right: DataExp<any>
   ): DataQueryExp {

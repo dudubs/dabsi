@@ -1,10 +1,5 @@
-import {
-  DataExp,
-  DataExpTypes,
-  DataCompareOperators,
-  DataParameterExp,
-  DataStringExp,
-} from "@dabsi/typedata/data-exp/DataExp";
+import { DataCompareOperatorExp } from "@dabsi/typedata/data-exp/DataCompareOperatorExp";
+import { DataExp, DataParameterExp } from "@dabsi/typedata/data-exp/DataExp";
 import { DataExpTranslator } from "@dabsi/typedata/data-exp/DataExpTranslator";
 
 export class DataExpMapper extends DataExpTranslator<DataExp<any>> {
@@ -70,11 +65,12 @@ export class DataExpMapper extends DataExpTranslator<DataExp<any>> {
   }
 
   translateCompare(
-    op: DataCompareOperators,
+    op: DataCompareOperatorExp.Base,
+    inverse: boolean,
     left: DataExp<any>,
     right: DataExp<any>
   ): DataExp<any> {
-    return [left, op, right];
+    return [left, inverse ? DataCompareOperatorExp.inverseMap[op] : op, right];
   }
 
   translateConcat(exps: DataExp<any>[]): DataExp<any> {

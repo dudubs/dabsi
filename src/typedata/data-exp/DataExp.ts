@@ -2,56 +2,31 @@ import { ExpMap } from "@dabsi/common/typings2/ExpMap";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Union } from "@dabsi/common/typings2/Union";
 import { GetBaseType } from "@dabsi/typedata/BaseType";
-import { WithDataUnionMetaChildren } from "@dabsi/typedata/DataUnion";
+import { DataCompareOperatorExp } from "@dabsi/typedata/data-exp/DataCompareOperatorExp";
+
+import { Exp } from "@dabsi/typedata/data-exp/ExpTranslator";
 import {
-  NonRelationKeys,
   DataRelationKeys,
   DataRelationToManyKeys,
   DataRelationToOneKeys,
   DataRelationTypeAt,
+  NonRelationKeys,
 } from "@dabsi/typedata/DataRelation";
-import { Exp } from "@dabsi/typedata/data-exp/ExpTranslator";
-
-export type DataSymbolicCompareOperator = keyof {
-  "^=";
-  "$=";
-  "*=";
-  "=";
-  "!=";
-  "<";
-  "<=";
-  ">";
-  ">=";
-};
-
-export type DataCompareOperators = keyof {
-  $startsWith;
-  $endsWith;
-  $contains;
-  $notStartsWith;
-  $notEndsWith;
-  $notContains;
-  $equals;
-  $notEquals;
-  $lessThan;
-  $lessThanOrEqual;
-  $greaterThan;
-  $greaterThanOrEqual;
-};
-
-export type DataCompareOperator =
-  | DataCompareOperators
-  | DataSymbolicCompareOperator;
+import { WithDataUnionMetaChildren } from "@dabsi/typedata/DataUnion";
 
 export type DataParameterExp = string | number | boolean;
+DataCompareOperatorExp;
 
 export type DataCompareToParameterExp<P> =
-  | ExpMap<Record<DataCompareOperator, P>>
+  | ExpMap<Record<DataCompareOperatorExp.NamedOrSymbolic, P>>
   // equal to many parameters
   | Record<"$in", P[]>
   | Record<"$notIn", P[]>;
 
-export type DataCompareToExpExp<T> = [DataCompareOperator, DataExp<T>];
+export type DataCompareToExpExp<T> = [
+  DataCompareOperatorExp.NamedOrSymbolic,
+  DataExp<T>
+];
 
 export type DataCompareExp<
   T,
@@ -74,14 +49,13 @@ export type DataCaseExp<T> = (
   | [DataExp<T>, DataExp<T>]
 )[];
 
-export type DataExpTypes<T> = {
+export interface DataExpTypes<T> {
   $if: DataIfExp<DataExp<T>, DataExp<T>, DataExp<T>>;
 
   $case: DataCaseExp<T>;
 
   $base: DataExp<GetBaseType<T>>;
 
-  // TODO: $is: string | number | { $key: str... }
   $is: string[] | string;
 
   $isNot: string[] | string;
@@ -130,9 +104,7 @@ export type DataExpTypes<T> = {
   $notHas: HasExp<T>;
 
   $as: AsExp<T>;
-
-  // TODO: $key: "relation-to-one-property"
-};
+}
 export type HasExp<T> =
   | DataRelationToManyKeys<T>
   | Union<
@@ -187,7 +159,7 @@ export type DataArrayExp<T> =
   | readonly [DataExp<T>, DataCompareToParameterExp<DataParameterExp>]
 
   // compare between two expressions
-  | readonly [DataExp<T>, DataCompareOperator, DataExp<T>]
+  | readonly [DataExp<T>, DataCompareOperatorExp.NamedOrSymbolic, DataExp<T>]
 
   // compare one expression to many expressions
   | readonly [DataExp<T>, "$in" | "$notIn", DataExp<T>[]];

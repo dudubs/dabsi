@@ -1,11 +1,8 @@
-import { is } from "immutable4";
-import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
-import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
 import { DataEntityRelation } from "@dabsi/typeorm/relations/DataEntityRelation";
-import { isSubClass } from "@dabsi/typeorm/relations/isSubClass";
+import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 
 export type ByTableOrColumn = "table" | "column";
 

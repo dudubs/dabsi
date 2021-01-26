@@ -1,5 +1,5 @@
 import { Connection } from "typeorm";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { Inject } from "@dabsi/typedi";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
 import { splitToken } from "@dabsi/system-old/server/acl/splitToken";

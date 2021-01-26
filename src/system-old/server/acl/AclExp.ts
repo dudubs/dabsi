@@ -1,7 +1,7 @@
 import { Union } from "@dabsi/common/typings2/Union";
 import { GetBaseType } from "@dabsi/typedata/BaseType";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { BasedDataRow } from "@dabsi/typedata/DataSourceRow";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { BasedDataRow } from "@dabsi/typedata/sourceRow";
 import {
   AclCriterion,
   AclRow,

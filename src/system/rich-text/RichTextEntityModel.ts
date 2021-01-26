@@ -1,7 +1,7 @@
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { Union } from "@dabsi/common/typings2/Union";
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
-import { DataUnion } from "@dabsi/typedata/DataUnion";
+import { DataUnion } from "@dabsi/typedata/union";
 
 declare global {
   namespace IRichText {

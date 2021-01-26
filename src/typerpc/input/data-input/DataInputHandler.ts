@@ -1,4 +1,4 @@
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
 import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
 import {

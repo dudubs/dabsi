@@ -1,14 +1,12 @@
 import { Type } from "@dabsi/common/typings2/Type";
-import DataSourceFactroyResolver, {
-  DataSourceFactory,
-} from "@dabsi/modules/data/DataSourceFactroyResolver";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import DataSourceFactroyResolver from "@dabsi/modules/data/DataSourceFactroyResolver";
+import { DataRow } from "@dabsi/typedata/row";
 import {
   AnyResolverMap,
   Inject,
   Injectable,
   Resolver,
-  ResolverType,
+  ResolverType
 } from "@dabsi/typedi";
 import { getTypeToken } from "@dabsi/typedi/getTypeToken";
 
@@ -16,7 +14,7 @@ import { getTypeToken } from "@dabsi/typedi/getTypeToken";
 export class DataResolver {
   constructor(
     @Inject(DataSourceFactroyResolver)
-    public getSource: DataSourceFactory,
+    public getSource: ResolverType<typeof DataSourceFactroyResolver>,
     @Inject(c => c)
     protected context: AnyResolverMap
   ) {}

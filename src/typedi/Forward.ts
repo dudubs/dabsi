@@ -11,7 +11,9 @@ export function Forward<T>(
 ): ParameterDecorator & MethodDecorator & PropertyDecorator {
   return (target, propertyName, indexOrDescriptor?) => {
     if (typeof indexOrDescriptor === "number") {
-      getTargetParameterTypes(target)[indexOrDescriptor] = getType;
+      getTargetParameterTypes(propertyName ? target[propertyName] : target)[
+        indexOrDescriptor
+      ] = getType;
     } else {
       getTargetPropertyTypes(target)[propertyName] = getType;
     }
@@ -20,10 +22,13 @@ export function Forward<T>(
 
 export namespace Forward {
   export function getParameterType(
-    target: Function,
-    index: number
+    target,
+    index: number,
+    propertyName?: PropertyKey
   ): Function | undefined {
-    return getTargetParameterTypes(target)?.[index]?.();
+    return getTargetParameterTypes(
+      propertyName ? target[propertyName] : target
+    )?.[index]?.();
   }
 
   export function getPropertyType(target, propertyName) {

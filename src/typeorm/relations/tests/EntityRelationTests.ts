@@ -1,6 +1,6 @@
 // TODO: rename to DataEntityRelationTests.
 import { Connection, Repository } from "typeorm";
-import { DataEntityKey } from "@dabsi/typedata/data-entity/DataEntityKey";
+import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import {
   DEntity,
   DChild1,
@@ -12,7 +12,7 @@ import {
   EChild2,
 } from "@dabsi/typedata/tests/BaseEntities";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { DataEntityRelation } from "@dabsi/typeorm/relations/DataEntityRelation";
+import { DataEntityRelation } from "@dabsi/typedata/entity/relation";
 import {
   AEntity,
   BEntity,
@@ -44,13 +44,7 @@ beforeAll(() => {
 });
 
 describe("sanity", () => {
-  // To AEntity
-
-  // test3("manyAToManyA");
-  // test2({ ownerProperty: "manyAToOneA", notOwnerProperty: "oneAToManyA" });
-
   test4("A");
-
   test4("B");
 
   function test4(target: "A" | "B") {
@@ -63,10 +57,6 @@ describe("sanity", () => {
       });
     });
   }
-
-  // beforeEach(() => {
-  //   console.log(`--- ${getJasmineSpecReporterResult().fullName}`);
-  // });
 
   function test3(propertyName) {
     test2({
@@ -188,37 +178,6 @@ it("sanity", async () => {
         }),
       })
     );
-
-    await assertRelation(aOfBOwner);
-    await assertRelation(aOfB);
-    await assertRelation(bAtA);
-    await assertRelation(bOwnerAtA);
-  }
-
-  async function assertRelation(relation: DataEntityRelation) {
-    let [left] = await relation.left.repository.save([
-      relation.left.repository.create(),
-    ]);
-    let [right] = await relation.right.repository.save([
-      relation.right.repository.create(),
-    ]);
-
-    const rightKey = DataEntityKey.pick(relation.right.entityMetadata, right);
-    const qb = relation.left.repository.createQueryBuilder();
-    relation.joinSqb(
-      "INNER",
-      qb,
-      qb.alias,
-      DataEntityKey.pick(relation.right.entityMetadata, right)
-    );
-
-    expect(await qb.getRawOne()).toBeFalsy();
-    await relation.update("addOrSet", left, rightKey);
-    expect(await qb.getRawOne()).toBeTruthy();
-    await relation.update("removeOrUnset", left, rightKey);
-    expect(await qb.getRawOne()).toBeFalsy();
-    await relation.update("addOrSet", left, rightKey);
-    expect(await qb.getRawOne()).toBeTruthy();
   }
 });
 
@@ -245,15 +204,12 @@ it("tree", () => {
   expect(aAtA.right.isOwning).toBeFalsy();
   expect(aAtAOwner.left.isOwning).toBeFalsy();
   expect(aAtAOwner.right.isOwning).toBeTruthy();
-
-  expect(aOfA.left.getJoinConditionSqlByTable("lx", "jx")).not.toEqual(
-    aOfAOwner.left.getJoinConditionSqlByTable("lx", "jx")
-  );
 });
 
 it("union", () => {
   const eOfD = DataEntityRelation.of(connection, DEntity, "oneDToOneE");
   const eOfDChild1 = DataEntityRelation.of(connection, DChild1, "oneDToOneE");
+
   const eOwnerOfD = DataEntityRelation.of(
     connection,
     DEntity,

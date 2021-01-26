@@ -2,7 +2,7 @@ import { ModuleMetadata } from "./decorators/Module";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver } from "@dabsi/typedi/index";
-import { getInjectableResolver } from "@dabsi/typedi/decorators/Injectable";
+import { getConstructorParamsResolver } from "@dabsi/typedi/decorators/Injectable";
 import {
   moduleMetadataMap,
   ModuleTarget,
@@ -14,7 +14,7 @@ export class ModuleRunner {
 
   context = { ...ModuleRunner.provide(() => this) };
 
-  constructor() {}
+  constructor(protected initModule?: (moduleInstance: any) => void) {}
 
   *getAllInstances(): IterableIterator<{
     target: ModuleTarget;
@@ -39,7 +39,7 @@ export class ModuleRunner {
       }
 
       log.trace(() => `init module ${target.name}`);
-      const argsResolver = getInjectableResolver(target);
+      const argsResolver = getConstructorParamsResolver(target);
       const options = moduleMetadataMap.get(target)!;
       for (const dependencyModule of options.dependencies || []) {
         this.getInstance(dependencyModule);
@@ -58,6 +58,8 @@ export class ModuleRunner {
       );
 
       const instance = new target(...args);
+
+      this.initModule?.(instance);
 
       return instance;
     });

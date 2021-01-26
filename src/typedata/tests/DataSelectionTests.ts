@@ -1,7 +1,7 @@
 import {
   AnyDataSelection,
   DataSelection,
-} from "@dabsi/typedata/data-selection/DataSelection";
+} from "@dabsi/typedata/selection/selection";
 
 describe("childAt sanity:", () => {
   describe("picking:", () => {

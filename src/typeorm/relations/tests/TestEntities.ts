@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 import { TestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
 
 let randomId = 0;

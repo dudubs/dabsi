@@ -6,7 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
 import { User } from "@dabsi/system/acl/entities/User";
 

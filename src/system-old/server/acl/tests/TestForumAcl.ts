@@ -1,8 +1,12 @@
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataRow } from "@dabsi/typedata/row";
 import { AclRow } from "@dabsi/system-old/server/acl/AclCriterion";
 import { AclExp } from "@dabsi/system-old/server/acl/AclExp";
-import { TestForum, TestForumMember, TestForumMemberMode } from "@dabsi/system-old/server/acl/tests/AclTester";
+import {
+  TestForum,
+  TestForumMember,
+  TestForumMemberMode,
+} from "@dabsi/system-old/server/acl/tests/AclTester";
 
 export const TEST_FORUMS_ADMIN_TOKEN = "FORUMS/ADMIN";
 export const TEST_GOD_TOKEN = "GOD";

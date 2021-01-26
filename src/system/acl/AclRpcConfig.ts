@@ -2,7 +2,7 @@ import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import { AclRpc } from "@dabsi/system/acl/common/AclRpc";
 import { User } from "@dabsi/system/acl/entities/User";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import AclDataSources from "./AclDataSources";
 import { getPasswordHash } from "./getPasswordHash";
 

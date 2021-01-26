@@ -3,8 +3,8 @@ import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { User } from "@dabsi/system/acl/entities/User";
 import AclAdminUsersManager from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUsersManager";
-import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSelection } from "@dabsi/typedata/selection/selection";
+import { DataRow } from "@dabsi/typedata/row";
 import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 export const AclAdminUserSelection: DataSelection<User> = {};

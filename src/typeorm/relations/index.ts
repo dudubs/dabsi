@@ -1,1 +1,1 @@
-export { DataEntityRelation } from "./DataEntityRelation";
+export { DataEntityRelation } from "../../typedata/entity/relation";

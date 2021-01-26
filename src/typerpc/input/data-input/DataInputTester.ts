@@ -1,5 +1,5 @@
 import { Tester } from "@dabsi/jasmine/Tester";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { Column, Entity, PrimaryColumn } from "typeorm";
 

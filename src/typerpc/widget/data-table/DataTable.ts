@@ -6,10 +6,10 @@ import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
 import { Struct, TStruct } from "@dabsi/struct";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { NonRelationKeys } from "@dabsi/typedata/DataRelation";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataNonRelationKeys } from "@dabsi/typedata/relation";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataSource } from "@dabsi/typedata/source";
 import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
 import { DataTableHandler } from "@dabsi/typerpc/widget/data-table/DataTableHandler";
 import { ToAsync, Widget } from "@dabsi/typerpc/widget/Widget";
@@ -28,7 +28,7 @@ type _ColumnTypes<
 > = {
   ColumnLoader:
     | ((row: DataRow<T["Data"]>) => any)
-    | NonRelationKeys<T["Data"]>
+    | DataNonRelationKeys<T["Data"]>
     | DataExp<T["Data"]>;
 
   ColumnConfig:

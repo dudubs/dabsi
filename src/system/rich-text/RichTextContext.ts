@@ -16,8 +16,8 @@ import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity"
 import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
 import { RichTextEntityHandler } from "@dabsi/system/rich-text/RichTextEntityHandler";
 import { DataResolver } from "@dabsi/system/storage/DataResolver";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataUnion } from "@dabsi/typedata/DataUnion";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataUnion } from "@dabsi/typedata/union";
 import { Inject, Injectable, ResolverType } from "@dabsi/typedi";
 
 declare global {

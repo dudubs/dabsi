@@ -1,6 +1,6 @@
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Constructor } from "../../common/typings2/Constructor";
-import { DataSource } from "../../typedata/DataSource";
+import { DataSource } from "../../typedata/source";
 import { Resolver } from "../../typedi";
 import DataSourceFactroyResolver from "./DataSourceFactroyResolver";
 

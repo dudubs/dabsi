@@ -8,8 +8,8 @@ import {
   TableInheritance,
 } from "typeorm";
 import { TestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
-import { DataUnion } from "@dabsi/typedata/DataUnion";
+import { DataRelation } from "@dabsi/typedata/relation";
+import { DataUnion } from "@dabsi/typedata/union";
 
 let randomId = 0;
 

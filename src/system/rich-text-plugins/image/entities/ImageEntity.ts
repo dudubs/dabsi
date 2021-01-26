@@ -1,6 +1,6 @@
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
 import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 import { ChildEntity, Column, ManyToOne } from "typeorm";
 
 @ChildEntity("image")

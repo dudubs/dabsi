@@ -1,6 +1,6 @@
 import React from "react";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { focusNextTest } from "@dabsi/typeorm/exp/tests/focusNextTest";
+import { focusNextTest } from "@dabsi/jasmine/focusNextTest";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { testRpc } from "@dabsi/typerpc/RpcTester";
 import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";

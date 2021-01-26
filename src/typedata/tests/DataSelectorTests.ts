@@ -1,4 +1,4 @@
-import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
+import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 import { DEntity, DUnion } from "@dabsi/typedata/tests/BaseEntities";
 
 it("DataSelector", () => {

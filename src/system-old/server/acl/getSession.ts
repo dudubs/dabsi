@@ -1,6 +1,6 @@
 import { BasedType } from "@dabsi/typedata/BaseType";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { BasedDataSource, DataSource } from "@dabsi/typedata/DataSource";
+import { DataRow } from "@dabsi/typedata/row";
+import { BasedDataSource, DataSource } from "@dabsi/typedata/source";
 import { generateSessionToken } from "@dabsi/system-old/server/acl/generateSessionToken";
 import { Session } from "@dabsi/modules/session/entities/Session";
 

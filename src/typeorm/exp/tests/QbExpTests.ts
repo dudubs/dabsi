@@ -1,5 +1,5 @@
-import { buildTestEntities } from "@dabsi/typedata/data-entity/tests/buildTestEntities";
-import { buildTestRelations } from "@dabsi/typedata/data-entity/tests/buildTestRelations";
+import { buildTestEntities } from "@dabsi/typedata/entity/tests/buildTestEntities";
+import { buildTestRelations } from "@dabsi/typedata/entity/tests/buildTestRelations";
 import {
   DEntity,
   DChild1,
@@ -12,7 +12,7 @@ import {
   EChild2,
 } from "@dabsi/typedata/tests/BaseEntities";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataExp } from "@dabsi/typedata/exp/exp";
 import {
   AEntity,
   BEntity,

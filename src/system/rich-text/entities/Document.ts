@@ -1,6 +1,6 @@
 import Session from "@dabsi/modules/session/entities/Session";
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 import {
   Column,
   Entity,
@@ -15,9 +15,6 @@ import {
 export class RichTextDocument {
   @PrimaryGeneratedColumn()
   id!: number;
-
-  @Column()
-  countRefs!: number;
 
   @ManyToOne(() => Session)
   session!: DataRelation<Session>;

@@ -1,7 +1,7 @@
 import { subTest } from "@dabsi/jasmine/subTest";
-import { DataRelationKeys } from "@dabsi/typedata/DataRelation";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataRelationKeys } from "@dabsi/typedata/relation";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataSource } from "@dabsi/typedata/source";
 import { DUnion, EUnion } from "@dabsi/typedata/tests/BaseEntities";
 import {
   AEntity,

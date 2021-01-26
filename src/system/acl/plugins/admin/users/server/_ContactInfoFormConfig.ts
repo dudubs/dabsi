@@ -1,7 +1,7 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import { User } from "@dabsi/system/acl/entities/User";
 import AclAdminUserContactInfoForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserContactInfoForm";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 export default RpcConfigResolver(

@@ -1,7 +1,7 @@
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { BasedType } from "@dabsi/typedata/BaseType";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataSource } from "@dabsi/typedata/source";
 
 export async function checkUniqueName<T>(
   source: DataSource<BasedType<T>>,

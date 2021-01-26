@@ -5,9 +5,9 @@ import {
   RichTextEntityData,
   RichTextEntityType,
 } from "@dabsi/system/rich-text/common/RichText";
-import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
-import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataSelection } from "@dabsi/typedata/selection/selection";
+import { DataSelectionRow } from "@dabsi/typedata/selection/row";
+import { DataRow } from "@dabsi/typedata/row";
 
 export type RichTextEntitySelection<
   K extends RichTextEntityType

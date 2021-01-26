@@ -2,7 +2,7 @@ import ExpressModule, { ExpressResolver } from "@dabsi/modules/express";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import CookieParser from "cookie-parser";
 import { getSession } from "../../../system-old/server/acl/getSession";
-import { DataRow } from "../../../typedata/DataRow";
+import { DataRow } from "../../../typedata/row";
 import DataSourceResolver from "../../data/DataSourceResolver";
 import SessionModule from "../../session";
 import RequestSession from "../../session/RequestSession";

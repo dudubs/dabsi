@@ -4,25 +4,25 @@ import { Expect } from "@dabsi/common/typings2/Expect";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Pluck } from "@dabsi/common/typings2/Pluck";
 
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataExp } from "@dabsi/typedata/exp/exp";
 import { AEntity, BEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSelection } from "@dabsi/typedata/data-selection/DataSelection";
-import { DataSelectionRow } from "@dabsi/typedata/data-selection/DataSelectionRow";
-import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataSelection } from "@dabsi/typedata/selection/selection";
+import { DataSelectionRow } from "@dabsi/typedata/selection/row";
+import { DataSource } from "@dabsi/typedata/source";
 
 import {
   DataUnion,
   WithDataUnionMetaChildren,
   DataUnionMetaChildrenKey,
-} from "@dabsi/typedata/DataUnion";
-import { MergeDataSelection } from "@dabsi/typedata/data-selection/DataSelectionMerger";
+} from "@dabsi/typedata/union";
+import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
 import {
   MapRelation,
   DataRelationKeys,
   DataRelationTypeAt,
-} from "@dabsi/typedata/DataRelation";
-import { DataInsert } from "@dabsi/typedata/DataValue";
+} from "@dabsi/typedata/relation";
+import { DataInsert } from "@dabsi/typedata/value";
 import {
   DEntity,
   DChild1,

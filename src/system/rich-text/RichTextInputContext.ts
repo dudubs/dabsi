@@ -4,7 +4,7 @@ import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/RichText";
 import RichTextPluginsRpc from "@dabsi/system/rich-text/common/RichTextPluginsRpc";
 import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import { Resolver, ResolverType } from "@dabsi/typedi";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 

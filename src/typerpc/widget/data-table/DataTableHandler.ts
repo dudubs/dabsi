@@ -3,9 +3,9 @@ import { entries } from "@dabsi/common/object/entries";
 import { mapObject, mapObjectAsync } from "@dabsi/common/object/mapObject";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataOrder } from "@dabsi/typedata/DataOrder";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataOrder } from "@dabsi/typedata/order";
+import { DataRow } from "@dabsi/typedata/row";
 import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
 import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
 import {

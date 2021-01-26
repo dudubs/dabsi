@@ -1,5 +1,5 @@
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
+import { DataExp } from "@dabsi/typedata/exp/exp";
 import { isPermissionOfUserExp } from "@dabsi/system/admin/server/isPermissionOfUserExp";
 
 export function hasPermissionForUserExp(

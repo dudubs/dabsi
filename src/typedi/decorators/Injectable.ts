@@ -1,47 +1,32 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { Resolver } from "@dabsi/typedi";
+import {
+  getParamResolverMap,
+  getParamsResolvers,
+  Resolver,
+} from "@dabsi/typedi";
+import getParameterName from "@dabsi/typedi/decorators/getParameterName";
 import { Forward } from "@dabsi/typedi/Forward";
-
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   return {
     target,
     isInjectable: false,
-    resolvers: [] as Resolver[],
   };
 });
+
 export function getDesignParamTypes(target: Function): Function[] {
   return Reflect.getMetadata("design:paramtypes", target) || [];
 }
-export const getInjectableResolver = WeakMapFactory(
+
+export const getConstructorParamsResolver = WeakMapFactory(
   (target: Function): Resolver<any[]> => {
-    const designParamTypes = getDesignParamTypes(target);
-
-    const metadata = getInjectableMetadata(target);
     return Resolver.array(
-      designParamTypes.map((designType, index) => {
-        let resolverCache;
-        return (
-          metadata.resolvers[index] ??
-          (context => {
-            return Resolver.resolve(getResolver(), context);
-          }).toCheck(context => {
-            Resolver.check(getResolver(), context);
-          })
-        );
-
-        function getResolver(): Resolver {
-          return (
-            resolverCache ||
-            (resolverCache =
-              Forward.getParameterType(target, index) || designType)
-          );
-        }
-      }),
+      getParamsResolvers(
+        Reflect.getMetadata("design:paramtypes", target) || [],
+        getParamResolverMap.map.get(target),
+        index => Forward.getParameterType(target, index)
+      ),
       index => {
-        return target
-          .toString()
-          .match(/constructor\s*\((?<args>[^)]+)\)/)
-          ?.groups?.args.split(",")[0];
+        return getParameterName(target, index, true);
       }
     );
   }
@@ -51,7 +36,7 @@ export function Injectable() {
   return target => {
     const metadata = getInjectableMetadata(target);
     metadata.isInjectable = true;
-    const paramsResolver = getInjectableResolver(target);
+    const paramsResolver = getConstructorParamsResolver(target);
 
     target[Resolver.resolveSymbol] = function (context) {
       if (metadata.target !== this) {

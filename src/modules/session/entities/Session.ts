@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 import { User } from "@dabsi/system/acl/entities/User";
 
 // TODO: Resource

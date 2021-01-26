@@ -2,7 +2,7 @@ import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import { Resolver } from "@dabsi/typedi";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 

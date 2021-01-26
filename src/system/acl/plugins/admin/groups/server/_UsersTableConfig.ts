@@ -1,7 +1,7 @@
 import AclAdminGroupUsersTable from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupUsersTable";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { Group } from "@dabsi/system/acl/entities/Group";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 
 export default RpcConfigResolver(

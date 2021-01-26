@@ -7,7 +7,7 @@ import {
 } from "typeorm";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 
 @Entity({ name: "admin/permissions" })
 @Index(["user", "token"], { unique: true })

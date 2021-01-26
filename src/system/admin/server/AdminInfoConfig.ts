@@ -2,7 +2,7 @@ import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import AclModule from "@dabsi/system/acl";
 import { AdminInfoRpc } from "@dabsi/system/admin/common";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 
 export default RpcConfigResolver(
   AdminInfoRpc,

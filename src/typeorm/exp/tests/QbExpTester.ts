@@ -1,10 +1,10 @@
 import { Connection, ObjectType, Repository } from "typeorm";
 import Lazy from "@dabsi/common/patterns/lazy";
-import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataQueryBuilder } from "@dabsi/typedata/data-query/DataQueryBuilder";
-import { DataQueryExpToSqbTranslator } from "@dabsi/typedata/data-query/DataQueryExpToSqbTranslator";
-import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
+import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
+import { DataQueryTranslatorToSqb } from "@dabsi/typedata/query/sqbTranslator";
+import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
 
 export class QbExpTester<T> {
   constructor(
@@ -26,17 +26,17 @@ export class QbExpTester<T> {
       alias: qb.alias,
     };
 
-    const qebTranslator = new DataEntityExpTranslatorToDataQueryExp(
+    const qebTranslator = new DataEntityTranslator(
       this.getConnection(),
       this.typeInfo,
       new DataQueryBuilder(query),
       qb.alias
     );
 
-    const sqbTranslator = new DataQueryExpToSqbTranslator(qb, qb.alias);
+    const sqbTranslator = new DataQueryTranslatorToSqb(qb, qb.alias);
     const qebExp = qebTranslator.translate(exp);
     qb.andWhere(sqbTranslator.translate(qebExp));
-    DataQueryExpToSqbTranslator.build(qb, query);
+    DataQueryTranslatorToSqb.build(qb, query);
     qb.select("1");
     return qb.getRawOne();
   }

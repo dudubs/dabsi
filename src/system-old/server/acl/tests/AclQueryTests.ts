@@ -9,7 +9,7 @@ import {
 } from "@dabsi/system-old/server/acl/tests/TestForumAcl";
 import { TestPostAcl } from "@dabsi/system-old/server/acl/tests/TestPostAcl";
 import { User } from "@dabsi/system/acl/entities/User";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 
 const t = AclTester.beforeAll(async t => {
   const forumAcl = new TestForumAcl(t.forum);

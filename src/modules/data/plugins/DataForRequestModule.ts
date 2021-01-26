@@ -1,6 +1,6 @@
 import DataSourceFactoryResolver from "@dabsi/modules/data/DataSourceFactroyResolver";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
-import { EmptyDataCursor } from "@dabsi/typedata/DataCursor";
+import { DataEntitySource } from "@dabsi/typedata/entity/source";
+import { EmptyDataCursor } from "@dabsi/typedata/cursor";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import DataModule from "..";
 import RequestModule, { Request } from "../../RequestModule";

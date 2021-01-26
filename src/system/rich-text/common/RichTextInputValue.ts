@@ -7,8 +7,8 @@ import { RichTextConfig } from "@dabsi/system/rich-text/common/RichText";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
 import { RichTextEntityHandler } from "@dabsi/system/rich-text/RichTextEntityHandler";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataUnion } from "@dabsi/typedata/DataUnion";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataUnion } from "@dabsi/typedata/union";
 
 export interface RichTextInputValue {
   config: RichTextConfig;

@@ -6,7 +6,7 @@ import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entit
 import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
 import { DataResolver } from "@dabsi/system/storage/DataResolver";
 import StorageManager from "@dabsi/system/storage/StorageManager";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import { RpcError } from "@dabsi/typerpc/Rpc";
 import sharp from "sharp";
 

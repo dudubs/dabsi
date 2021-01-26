@@ -3,8 +3,8 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { Payload } from "@dabsi/common/typings2/Payload";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { DataSource } from "@dabsi/typedata/DataSource";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataSource } from "@dabsi/typedata/source";
 import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
 import { DataInputMapHandler } from "@dabsi/typerpc/input/data-input-map/DataInputMapHandler";
 import {

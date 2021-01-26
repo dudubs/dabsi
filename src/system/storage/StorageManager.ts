@@ -1,16 +1,15 @@
-import { StorageFile } from "./entities/StorageFile";
-import Storage from "@dabsi/system/storage/Storage";
-import StorageDataSources from "@dabsi/system/storage/StorageDataSources";
-import { DataRow } from "@dabsi/typedata/DataRow";
-import { Inject, Injectable, Resolver, ResolverType } from "@dabsi/typedi";
 import RequestSession from "@dabsi/modules/session/RequestSession";
+import { DataResolver } from "@dabsi/system/storage/DataResolver";
+import Storage from "@dabsi/system/storage/Storage";
+import { DataRow } from "@dabsi/typedata/row";
+import { Inject, Injectable } from "@dabsi/typedi";
+import { StorageFile } from "./entities/StorageFile";
 
 @Injectable()
 export default class StorageManager {
   constructor(
     @Inject() protected storage: Storage,
-    @Inject(StorageDataSources)
-    protected sources: ResolverType<typeof StorageDataSources>,
+    @Inject() protected dataResolver: DataResolver,
     @Inject(RequestSession) protected session: DataRow<RequestSession>
   ) {}
 
@@ -19,12 +18,16 @@ export default class StorageManager {
     type: string,
     buffer: Buffer
   ): Promise<DataRow<StorageFile>> {
+    const files = this.dataResolver.getSource(StorageFile);
     const { url } = await this.storage.upload(tag, type, buffer);
-    return this.sources.files.insert({
+    return files.insert({
       url,
-      countRefs: 0,
-      time: new Date().getTime(),
       session: this.session,
     });
+
+    // n-sessions timeout: 0
+    // n-unused resouces: 2
+
+    // resouces
   }
 }

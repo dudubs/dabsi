@@ -2,7 +2,7 @@ import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupBasicInfoForm from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoForm";
-import { DataRow } from "@dabsi/typedata/DataRow";
+import { DataRow } from "@dabsi/typedata/row";
 import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 export default RpcConfigResolver(

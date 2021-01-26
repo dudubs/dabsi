@@ -1,5 +1,5 @@
 import Session from "@dabsi/modules/session/entities/Session";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "storage/files" })
@@ -8,14 +8,7 @@ export class StorageFile {
   id!: number;
 
   @Column()
-  countRefs!: number;
-
-  @Column()
   url!: string;
-
-  // TODO: Session?
-  @Column()
-  time!: number;
 
   @ManyToOne(() => Session, { nullable: true })
   session!: DataRelation<Session>;

@@ -20,10 +20,7 @@ export default class StorageModule {
         cli.onRun(async () => {
           await dbModule.init();
 
-          for await (const file of data
-            .getSource(StorageFile)
-            .filter({ countRefs: 0 })
-            .find()) {
+          for await (const file of data.getSource(StorageFile).find()) {
             log.info(() => `deleting ${file.url}.`);
 
             const result = await storage.delete(file.url);

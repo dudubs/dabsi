@@ -12,7 +12,7 @@ import { JoinTableMultipleColumnsOptions } from "typeorm/decorator/options/JoinT
 import { MapFactory } from "@dabsi/common/map/mapFactory";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { Type } from "@dabsi/common/typings2/Type";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataRelation } from "@dabsi/typedata/relation";
 
 const targetToRelationKeys = MapFactory(
   (target: Function) => new Set<string>()

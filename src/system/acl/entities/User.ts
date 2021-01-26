@@ -5,8 +5,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataRelation } from "@dabsi/typedata/DataRelation";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataRelation } from "@dabsi/typedata/relation";
 import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";

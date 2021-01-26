@@ -8,13 +8,13 @@ import { touchObject } from "@dabsi/common/object/touchObject";
 import { values } from "@dabsi/common/object/values";
 import { Type } from "@dabsi/common/typings2/Type";
 import { WeakId } from "@dabsi/common/WeakId";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { getExpNode } from "@dabsi/typedata/data-exp/getExpNode";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
-import { DataTypeInfo } from "@dabsi/typedata/DataTypeInfo";
-import { DataEntityCursor } from "@dabsi/typedata/data-entity/DataEntityCursor";
-import { DataEntityExpTranslatorToDataQueryExp } from "@dabsi/typedata/data-entity/DataEntityExpTranslatorToDataQueryExp";
-import { DataEntityQueryExpTranslatorToSql } from "@dabsi/typedata/data-entity/DataEntityQueryExpTranslatorToSql";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { getExpNode } from "@dabsi/typedata/exp/getExpNode";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
+import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
+import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
+import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
+import { DataQueryTranslatorToSql } from "@dabsi/typedata/query/sqlTranslator";
 import {
   AclCriterion,
   AclCriterionExps,
@@ -217,14 +217,14 @@ export class AclQuery {
     const qb = DataEntityCursor.createQueryBuilder(entityCursor);
     qb.query.take = 1;
 
-    const translatorToQueryExp = new DataEntityExpTranslatorToDataQueryExp(
+    const translatorToQueryExp = new DataEntityTranslator(
       this.connection,
       DataTypeInfo.get(User),
       qb,
       qb.query.alias
     );
 
-    const translatorToSql = new DataEntityQueryExpTranslatorToSql(
+    const translatorToSql = new DataQueryTranslatorToSql(
       this.connection,
       qb.query.alias,
       this.parameters

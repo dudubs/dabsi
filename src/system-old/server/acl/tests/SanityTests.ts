@@ -1,4 +1,4 @@
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";

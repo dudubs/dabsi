@@ -2,16 +2,16 @@ import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Type } from "@dabsi/common/typings2/Type";
 import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
 import { BasedType, GetBaseType } from "@dabsi/typedata/BaseType";
-import { DataExp } from "@dabsi/typedata/data-exp/DataExp";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/DataCursor";
-import { BasedDataRow } from "@dabsi/typedata/DataSourceRow";
-import { DataEntitySource } from "@dabsi/typedata/data-entity/DataEntitySource";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
+import { BasedDataRow } from "@dabsi/typedata/sourceRow";
+import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import {
   DataRelation,
   DataRelationToManyKeys,
   DataRelationToOneKeys,
   DataRelationType,
-} from "@dabsi/typedata/DataRelation";
+} from "@dabsi/typedata/relation";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
 

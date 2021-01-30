@@ -15,12 +15,13 @@ declare global {
   }
 }
 
-Object.defineProperty(Array.prototype, "toSeq", {
-  enumerable: false,
-  value() {
-    return Seq.Indexed(this);
-  },
-});
+Array.prototype.toSeq = Set.prototype.toSeq = function () {
+  return Seq.Indexed(this);
+};
+
+Map.prototype.toSeq = function () {
+  return Seq.Keyed(this.entries());
+};
 
 Object.defineProperty(Set.prototype, "toSeq", {
   enumerable: false,

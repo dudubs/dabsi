@@ -1,4 +1,4 @@
-import Session from "@dabsi/modules/session/entities/Session";
+import { Session } from "@dabsi/modules/session/entities/Session";
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
 import { DataRelation } from "@dabsi/typedata/relation";
 import {

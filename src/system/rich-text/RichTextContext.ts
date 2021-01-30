@@ -5,7 +5,8 @@
  */
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { entries } from "@dabsi/common/object/entries";
-import { mapObject, mapObjectAsync } from "@dabsi/common/object/mapObject";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import { DataContext } from "@dabsi/modules/data/context";
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextModule from "@dabsi/system/rich-text";
@@ -15,7 +16,6 @@ import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
 import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
 import { RichTextEntityHandler } from "@dabsi/system/rich-text/RichTextEntityHandler";
-import { DataResolver } from "@dabsi/system/storage/DataResolver";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataUnion } from "@dabsi/typedata/union";
 import { Inject, Injectable, ResolverType } from "@dabsi/typedi";
@@ -42,7 +42,7 @@ export class RichTextContext {
   constructor(
     @Inject() public module: RichTextModule,
     @Inject(RequestSession) public session: DataRow<RequestSession>,
-    @Inject() public data: DataResolver,
+    @Inject() public data: DataContext,
     @Inject(_createPluginsConfigResolver)
     protected _createPluginsConfig: ResolverType<
       typeof _createPluginsConfigResolver

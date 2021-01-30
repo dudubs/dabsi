@@ -8,6 +8,7 @@ export type DataQueryJoin = {
   from: string;
   type?: DataQueryJoinType;
   condition?: DataExp<any>;
+  fields?: Record<string, DataExp<any>>;
 };
 
 export type DataQueryExpTypes = {

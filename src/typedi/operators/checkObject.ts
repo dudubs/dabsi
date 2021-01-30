@@ -1,7 +1,7 @@
 import { entries } from "@dabsi/common/object/entries";
 import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { AnyResolverMap, IResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { ResolverContext, IResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 const _operator = "checkObject";
 
@@ -13,7 +13,7 @@ declare module "../Resolver" {
   }
 }
 
-function _method(resolverMap: AnyResolverMap, context: AnyResolverMap) {
+function _method(resolverMap: ResolverContext, context: ResolverContext) {
   const errors: [key: string, message: string][] = [];
   let message = "";
   for (const [key, resolver] of entries(resolverMap)) {

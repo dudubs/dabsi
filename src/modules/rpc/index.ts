@@ -4,7 +4,7 @@ import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
 import createConfigResolverFactory from "@dabsi/modules/rpc/configResolverFactory";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
+import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
@@ -142,16 +142,13 @@ export default class RpcModule {
     }
   }
 
-  async check(rpc: AnyRpc, context: AnyResolverMap) {
+  async check(rpc: AnyRpc, context: ResolverContext) {
     this._isChecking = true;
     this.log.trace(() => "checking");
 
-    context = Resolver.createContext(
-      {
-        ...RpcRequest.provide(),
-      },
-      context
-    );
+    context = Resolver.createContext(context, {
+      ...RpcRequest.provide(),
+    });
 
     try {
       const configResolver = this.getRpcConfigResolver(rpc);
@@ -170,7 +167,7 @@ export default class RpcModule {
   async processRequest(
     rpc: AnyRpc,
     rpcReq: RpcRequest,
-    context: AnyResolverMap
+    context: ResolverContext
   ) {
     const { path, payload } = rpcReq;
 

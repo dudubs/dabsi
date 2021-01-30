@@ -33,6 +33,7 @@ import { Connection, DeepPartial, EntityMetadata, ObjectType } from "typeorm";
 import { hasKeys } from "../../../common/object/hasKeys";
 
 import objectContaining = jasmine.objectContaining;
+import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 
 const getConnection = TestConnection([
   DEntity,
@@ -114,14 +115,14 @@ let discriminatorValueMap: Record<string, Record<string, boolean>>;
 
 describe("entity children", () => {
   const getDisriminatorValues = entityType => [
-    connection.getMetadata(entityType).discriminatorValue,
+    getEntityMetadata(connection, entityType).discriminatorValue,
     ...connection
       .getMetadata(entityType)
       .childEntityMetadatas.map(c => c.discriminatorValue),
   ];
 
   const test = async (entityType, callback?) => {
-    const md = connection.getMetadata(entityType);
+    const md = getEntityMetadata(connection, entityType);
     const disValues = [
       md.discriminatorValue,
       ...md.childEntityMetadatas.map(c => c.discriminatorValue),
@@ -141,12 +142,16 @@ describe("entity children", () => {
 
 describe("DataEntityInfo", () => {
   it("nonRelationColumnKeys", () => {
-    const aBaseInfo = getDataEntityInfo(connection.getMetadata(DEntity));
-    const dChild1Info = getDataEntityInfo(connection.getMetadata(DChild1));
-    const dChild1Child1Info = getDataEntityInfo(
-      connection.getMetadata(DChild1Child1)
+    const aBaseInfo = getDataEntityInfo(getEntityMetadata(connection, DEntity));
+    const dChild1Info = getDataEntityInfo(
+      getEntityMetadata(connection, DChild1)
     );
-    const dChild2Info = getDataEntityInfo(connection.getMetadata(DChild2));
+    const dChild1Child1Info = getDataEntityInfo(
+      getEntityMetadata(connection, DChild1Child1)
+    );
+    const dChild2Info = getDataEntityInfo(
+      getEntityMetadata(connection, DChild2)
+    );
 
     expect(aBaseInfo.nonRelationColumnKeys).toContain("dText");
     expect(dChild1Info.nonRelationColumnKeys).toContain("dText");
@@ -353,7 +358,7 @@ function testEntity<T>(
 
   beforeAll(async () => {
     const typeInfo = DataTypeInfo.get(type);
-    metadata = connection.getMetadata(typeInfo.type);
+    metadata = getEntityMetadata(connection, typeInfo.type);
 
     entityKeyToRow = mapArrayToObject(
       await DataEntitySource.createFromConnection(type, () => connection)

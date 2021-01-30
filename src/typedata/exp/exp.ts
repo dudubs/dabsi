@@ -83,6 +83,8 @@ export interface DataExpTypes<T> {
   // to-one relations
   $at: AtExp<T>;
 
+  $add: DataExp<T>[];
+
   // to-many relations
   $count:
     | DataRelationToManyKeys<T>
@@ -100,12 +102,14 @@ export interface DataExpTypes<T> {
   $notHas: HasExp<T>;
 
   $as: AsExp<T>;
+
+  $countRefs: "all" | "any";
 }
 export type HasExp<T> =
-  | DataRelationToManyKeys<T>
+  | DataRelationKeys<T>
   | Union<
       {
-        [K in DataRelationToManyKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
+        [K in DataRelationKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
       }
     >;
 

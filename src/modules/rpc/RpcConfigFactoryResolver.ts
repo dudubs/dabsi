@@ -1,5 +1,5 @@
 import RpcModule from ".";
-import { AnyResolverMap, CustomResolver, Resolver } from "../../typedi";
+import { ResolverContext, CustomResolver, Resolver } from "../../typedi";
 import { ResolveError } from "../../typedi/ResolveError";
 import { AnyRpc, RpcResolvedConfig } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "./RpcConfigResolver";
@@ -11,9 +11,9 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
     context: rpcContext = {},
   }: {
     create?: boolean;
-    context?: AnyResolverMap;
+    context?: ResolverContext;
   } = {}
-): CustomResolver<(context?: AnyResolverMap) => RpcResolvedConfig<T>> {
+): CustomResolver<(context?: ResolverContext) => RpcResolvedConfig<T>> {
   return Resolver.toCheck(
     Resolver.consume([RpcModule, c => c], (rpcModule, context) => {
       const rpcConfigResolver = getRpcConfigResolver(rpcModule);
@@ -22,7 +22,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
           rpc.resolveRpcConfig(
             Resolver.resolve(
               rpcConfigResolver,
-              Resolver.createContext(rpcContext, context)
+              Resolver.createContext(context, rpcContext || {})
             )
           )
         );
@@ -35,7 +35,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
       Resolver.checkObject(rpcContext, context);
       Resolver.check(
         rpcConfigResolver,
-        Resolver.createContext(rpcContext, context)
+        Resolver.createContext(context, rpcContext)
       );
     }
   );

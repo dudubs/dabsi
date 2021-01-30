@@ -1,4 +1,4 @@
-import Session from "@dabsi/modules/session/entities/Session";
+import { Session } from "@dabsi/modules/session/entities/Session";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 

@@ -18,6 +18,7 @@ import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
 import { DataEntityInfo, getDataEntityInfo } from "@dabsi/typedata/entity/info";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { DataQuery } from "@dabsi/typedata/query/exp";
+import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 
 export type BaseDataEntityCursor = {
   typeInfo: DataTypeInfo;
@@ -65,7 +66,7 @@ export namespace DataEntityCursor {
   ): DataEntityCursor {
     const connection = queryRunner.connection;
     for (const propertyName of cursor.root) {
-      const entityMetadata = connection.getMetadata(entityType);
+      const entityMetadata = getEntityMetadata(connection, entityType);
       const relationMetadata = entityMetadata.relations.find(
         r => r.propertyName === propertyName
       );
@@ -117,7 +118,7 @@ export namespace DataEntityCursor {
 
     updateTypeInfo(cursor.type);
 
-    const entityMetadata = connection.getMetadata(typeInfo.type);
+    const entityMetadata = getEntityMetadata(connection, typeInfo.type);
 
     return {
       connection,
@@ -155,7 +156,7 @@ export namespace DataEntityCursor {
       const relationKeys: DataEntityCursor["relationKeys"] = [];
 
       const DataEntityInfo = getDataEntityInfo(
-        connection.getMetadata(entityType)
+        getEntityMetadata(connection, entityType)
       );
 
       for (const [propertyName, value] of entries(dataChildKeys)) {

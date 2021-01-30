@@ -1,6 +1,11 @@
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { defined } from "@dabsi/common/object/defined";
 import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
+import {
+  getEntityMetadata,
+  getRelationMetadatasTo,
+} from "@dabsi/typedata/entity/metadata";
 import { DataExp, DataParameterExp } from "@dabsi/typedata/exp/exp";
 import { DataExpMapper } from "@dabsi/typedata/exp/mapper";
 import { DataOperatorExp } from "@dabsi/typedata/exp/operator";
@@ -9,7 +14,7 @@ import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
 import { DataQuery, DataQueryExp } from "@dabsi/typedata/query/exp";
 import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
-import { Connection } from "typeorm";
+import { Connection, EntityMetadata } from "typeorm";
 
 const mapper = Object.seal(new DataExpMapper());
 
@@ -38,6 +43,10 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
     super();
   }
 
+  get entityMetadata(): EntityMetadata {
+    return getEntityMetadata(this.connection, this.typeInfo.type);
+  }
+
   translateAs(childKey: string, exp: DataExp<any>): DataQueryExp {
     const childTypeInfo = defined(
       this.typeInfo.children?.[childKey],
@@ -48,7 +57,10 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
         )}`
     );
 
-    const childMetadata = this.connection.getMetadata(childTypeInfo.type);
+    const childMetadata = getEntityMetadata(
+      this.connection,
+      childTypeInfo.type
+    );
 
     const childExp = <DataExp<any>>{
       [childMetadata.discriminatorColumn!.propertyName]: {
@@ -102,9 +114,6 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
       relationName,
       false
     );
-
-    if (!relation.isToMany)
-      throw new TypeError(`$find can translate only for *-to-many relation.`);
 
     const rightSchema = `${relation.left.entityMetadata.tableName}_${
       relation.propertyName
@@ -196,12 +205,32 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
   translateHas(
     inverse: boolean,
     propertyName: string,
-    exp: DataExp<any>
+    condition: DataExp<any>
   ): DataQueryExp {
+    // optimizing *-to-one & owner & without condition.
+    if (condition === undefined || condition == true) {
+      const rm = defined(
+        this.entityMetadata.relations.find(
+          rm => rm.propertyName === propertyName
+        ),
+        () => `No relation at ${this.typeInfo.type.name}.${propertyName}`
+      );
+      if (rm.isOwning && !rm.joinTableName) {
+        return {
+          [inverse ? "$or" : "$and"]: rm.joinColumns.map(jc => ({
+            [inverse ? "$isNull" : "$isNotNull"]: {
+              $at: { [this.schema]: jc.databaseName },
+            },
+          })),
+        };
+      }
+    }
+
+    // TODO: if is *-to-one & owner so check by column
     return {
       [inverse ? "$queryNotHas" : "$queryHas"]: this.translateRelation(
         propertyName,
-        exp
+        condition
       ).query,
     };
   }
@@ -212,7 +241,10 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
     if (!keys.length) {
       return this.translate(false);
     }
-    const entityMetadata = this.connection.getMetadata(this.typeInfo.type);
+    const entityMetadata = getEntityMetadata(
+      this.connection,
+      this.typeInfo.type
+    );
     if (entityMetadata.primaryColumns.length === 1) {
       const column = entityMetadata.primaryColumns[0];
       return [column.databaseName, { [inverse ? "$notIn" : "$in"]: keys }];
@@ -234,13 +266,75 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
     return inverse ? { $not: exp } : exp;
   }
 
-  translateField(propertyName: string): DataQueryExp {
-    return { $at: { [this.schema]: propertyName } };
+  translateField(field: string): DataQueryExp {
+    return { $at: { [this.schema]: field } };
   }
 
   @UseDataExpMapper
   translateParameter(value: DataParameterExp): DataQueryExp {
     throw new Error();
+  }
+
+  protected get metaFields(): Record<string, DataQueryExp> {
+    if (!this.qb.joins.metaFields) {
+      this.qb.joins.metaFields = {
+        type: "INNER",
+        from: this.qb.query.from,
+        fields: mapArrayToObject(this.entityMetadata.primaryColumns, jc => {
+          return [jc.databaseName, { $at: { metaFields: jc.databaseName } }];
+        }),
+        condition: {
+          $and: this.entityMetadata.primaryColumns.map(jc => {
+            return [
+              { $at: { metaFields: jc.databaseName } },
+              "=",
+              { $at: { [this.schema]: jc.databaseName } },
+            ];
+          }),
+        },
+      };
+    }
+    return this.qb.joins.metaFields.fields!;
+  }
+
+  translateCountRefs(type: "all" | "any"): DataExp<any> {
+    const countAll = type === "all";
+    let changeToCountAll = false;
+    if (type === "all" && !this.metaFields.countRefs?.["$add"]) {
+      changeToCountAll = true;
+    }
+    if (changeToCountAll || !this.metaFields.countRefs) {
+      const counts = getRelationMetadatasTo(this.connection, this.typeInfo.type)
+        .toSeq()
+        .map(rm => {
+          const [tableName, joinColumns] = rm.joinTableName
+            ? [rm.joinTableName, rm.inverseJoinColumns]
+            : [rm.entityMetadata.tableName, rm.joinColumns];
+          return {
+            $queryCount: {
+              from: tableName,
+              alias: "rel",
+              where: {
+                $and: joinColumns.map(jc => [
+                  { $at: { rel: jc.databaseName } },
+                  "=",
+                  {
+                    $at: { metaFields: jc.referencedColumn!.databaseName },
+                  },
+                ]),
+              },
+            },
+          };
+        })
+        .toArray();
+
+      this.metaFields.countRefs = !counts.length
+        ? 0
+        : {
+            [countAll ? "$add" : "$or"]: counts,
+          };
+    }
+    return { $at: { metaFields: "countRefs" } };
   }
 
   @UseDataExpMapper
@@ -274,6 +368,11 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
     then: DataExp<any>,
     _else: DataExp<any>
   ): DataQueryExp {
+    throw new Error();
+  }
+
+  @UseDataExpMapper
+  translateAdd(exps): any {
     throw new Error();
   }
 

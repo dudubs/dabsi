@@ -1,5 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Cli } from "@dabsi/modules/Cli";
+import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { Hookable } from "@dabsi/modules/Hookable";
 import applyBuiltin from "@dabsi/system/rich-text/applyBuiltin";
@@ -22,7 +23,6 @@ import {
   RichTextEntityHandlerOptions,
   RichTextEntitySelection,
 } from "@dabsi/system/rich-text/RichTextEntityHandler";
-import { DataResolver } from "@dabsi/system/storage/DataResolver";
 import { Inject, Module } from "@dabsi/typedi";
 
 export type RichTextModuleInstaller = {
@@ -77,7 +77,7 @@ export default class RichTextModule {
     (config: RichTextInputConfig, element: RichTextInputElement) => Awaitable
   >();
 
-  constructor(@Inject() cli: Cli, @Inject() public data: DataResolver) {
+  constructor(@Inject() cli: Cli, @Inject() public data: DataContext) {
     cli.command("start", cli => {
       cli.onRun(() => {
         this.install(applyBuiltin);

@@ -1,6 +1,6 @@
-import { Provider, Resolver } from "@dabsi/typedi";
+import { Resolver } from "@dabsi/typedi";
 
-const r1 = Resolver<string>();
+const r1 = Resolver.token<string>();
 
 it("expect to throw resolve for empty context", () => {
   expect(() => Resolver.check(r1, {})).toThrowError();
@@ -11,30 +11,6 @@ it("expect to resolve for context", () => {
       ...r1.provide("hello"),
     })
   ).toEqual("hello");
-});
-it("expect to resolve by parent context", () => {
-  expect(
-    Resolver.checkAndResolve(
-      Provider({
-        ...r1.provide("hello"),
-      })(r1),
-      {}
-    )
-  ).toEqual("hello");
-});
-it("expect to resolve by nearest context", () => {
-  expect(
-    Resolver.checkAndResolve(
-      Provider({
-        ...r1.provide("hello"),
-      })(
-        Provider({
-          ...r1.provide("world"),
-        })(r1)
-      ),
-      {}
-    )
-  ).toEqual("world");
 });
 
 abstract class MyAbstractType {

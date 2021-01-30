@@ -4,7 +4,7 @@ import {
   getParamsResolvers,
   Resolver,
 } from "@dabsi/typedi";
-import getParameterName from "@dabsi/typedi/decorators/getParameterName";
+import getParameterByIndex from "@dabsi/typedi/decorators/getParameterByIndex";
 import { Forward } from "@dabsi/typedi/Forward";
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   return {
@@ -26,7 +26,7 @@ export const getConstructorParamsResolver = WeakMapFactory(
         index => Forward.getParameterType(target, index)
       ),
       index => {
-        return getParameterName(target, index, true);
+        return getParameterByIndex(target, index, true);
       }
     );
   }

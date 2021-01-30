@@ -7,20 +7,19 @@ export type ResolveMapType<T extends ResolverMap<any>> = {
   [K in keyof T]: ResolverType<T[K]>;
 };
 
-export const checkResolveSymbol = Symbol("checkResolve");
+export const checkSymbol = Symbol("checkResolve");
 
 export const resolveSymbol = Symbol("resolve");
 
 export type CustomResolver<T> = {
   [resolveSymbol](context: ResolverMap<any>): T;
-  [checkResolveSymbol]?(context: ResolverMap<any>): void;
+  [checkSymbol]?(context: ResolverMap<any>): void;
 };
 
 export type FnResolver<T> = (context: ResolverMap<any>) => T;
 
 export type TypeResolver<T> = Constructor<T>;
 
-// TODO: Function implements CustromResolver()
 export type Resolver<T = any> =
   | CustomResolver<T>
   | FnResolver<T>
@@ -30,27 +29,19 @@ export type ResolverType<T extends Resolver> = T extends Resolver<infer U>
   ? U
   : never;
 
-export function _Resolver(...args) {
-  const callStackInfo = new CallStackInfo(new Error(), __filename);
-  return Resolver.createResolver(callStackInfo, args);
-}
 export interface IResolver {
-  checkSymbol: typeof checkResolveSymbol;
+  checkSymbol: typeof checkSymbol;
   resolveSymbol: typeof resolveSymbol;
-  createResolver(csi: CallStackInfo, args: any[]): any;
 }
 
 export const IResolver: IResolver = <any>{
   createResolver: (csi: CallStackInfo, args: any[]): any => {
     throw new TypeError();
   },
-  checkSymbol: checkResolveSymbol,
-  resolveSymbol: resolveSymbol,
+  checkSymbol,
+  resolveSymbol,
 };
 
-Object.setPrototypeOf(IResolver, Function.prototype);
-Object.setPrototypeOf(_Resolver, IResolver);
+export const Resolver: IResolver = IResolver;
 
-export const Resolver: IResolver = <any>_Resolver;
-
-export type AnyResolverMap<T = any> = Record<string, Resolver<T>>;
+export type ResolverContext<T = any> = Record<string, Resolver<T>>;

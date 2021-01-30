@@ -162,11 +162,15 @@ export abstract class DataSource<T> {
     value: DataUpdate<T>
   ): Promise<number>;
 
-  insertKey(value: DataInsert<T>): Promise<string> {
-    return this.insertKeys([value]).then(keys => keys[0]);
+  insertKey(value: DataInsert<T>): Promise<string>;
+  insertKey(values: DataInsert<T>[]): Promise<string[]>;
+  insertKey(values) {
+    return Array.isArray(values)
+      ? this.insertKeys(values)
+      : this.insertKeys([values]).then(rows => rows[0]);
   }
 
-  abstract insertKeys<T>(value: DataInsert<T>[]): Promise<string[]>;
+  protected abstract insertKeys<T>(datas: DataInsert<T>[]): Promise<string[]>;
 
   protected async _each(
     keyOrKeys: DataKeyOrKeysInput<T> | undefined,
@@ -401,6 +405,3 @@ export type DataCursorPath = {
   propertyName: string;
   key: string;
 };
-
-export type GetDataSource = <T>(type: Type<T>) => DataSource<T>;
-export type DataContext = { getDataSource: GetDataSource };

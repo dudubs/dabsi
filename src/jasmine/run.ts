@@ -6,6 +6,9 @@ import "jasmine";
 import path from "path";
 import "@dabsi/jasmine/register";
 import globalTester from "@dabsi/jasmine/globalTester";
+import { LogLevel } from "@dabsi/logging/Logger";
+
+log.setLevel(l => l ^ LogLevel.INFO);
 
 const searchedDirs = new Set<string>();
 const where = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);

@@ -1,10 +1,10 @@
+import { DataContext } from "@dabsi/modules/data/context";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
 import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entities/ImageEntity";
 import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
-import { DataResolver } from "@dabsi/system/storage/DataResolver";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { DataRow } from "@dabsi/typedata/row";
 import { RpcError } from "@dabsi/typerpc/Rpc";
@@ -17,7 +17,7 @@ export default RpcConfigResolver(
     storageManager: StorageManager,
     rpcReq: RpcRequest,
     // xxx: Resolver(),
-    data: DataResolver,
+    data: DataContext,
     session: DataRow(RequestSession),
   },
   c => $ =>

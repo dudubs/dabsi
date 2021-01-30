@@ -1,5 +1,5 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
-import AclDataSources from "@dabsi/system/acl/AclDataSources";
+import { AclContext } from "@dabsi/system/acl/context";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupBasicInfoForm from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoForm";
 import { DataRow } from "@dabsi/typedata/row";
@@ -8,7 +8,7 @@ import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFac
 export default RpcConfigResolver(
   AclAdminGroupBasicInfoForm,
   {
-    sources: AclDataSources,
+    sources: AclContext,
     createInputConfig: RpcConfigFactoryResolver(
       AclAdminGroupBasicInfoForm.at("input")
     ),

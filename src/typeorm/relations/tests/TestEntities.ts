@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { TestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
+import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
 
 let randomId = 0;
 
@@ -9,12 +10,7 @@ let randomId = 0;
 
 @Entity("A")
 export class AEntity {
-  @BeforeInsert()
-  setNewId() {
-    this.aId = `a${++randomId}`;
-  }
-
-  @PrimaryColumn()
+  @TestIdColumn()
   aId!: string;
 
   @Column({ nullable: true })
@@ -75,12 +71,7 @@ export class AEntity {
 
 @Entity("B")
 export class BEntity {
-  @BeforeInsert()
-  setNewId() {
-    this.bId = `b${++randomId}`;
-  }
-
-  @PrimaryColumn(String)
+  @TestIdColumn()
   bId!: string;
 
   @Column({ nullable: true })
@@ -122,12 +113,7 @@ export class BEntity {
 
 @Entity("C")
 export class CEntity {
-  @BeforeInsert()
-  setNewId() {
-    this.cId = `c${++randomId}`;
-  }
-
-  @PrimaryColumn()
+  @TestIdColumn()
   cId!: string;
 
   @Column({ nullable: true })

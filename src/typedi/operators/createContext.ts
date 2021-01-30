@@ -1,6 +1,13 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 
-import { AnyResolverMap, IResolver } from "@dabsi/typedi/Resolver";
+import {
+  ResolverContext,
+  IResolver,
+  TypeResolver,
+  Resolver,
+  ResolverType,
+} from "@dabsi/typedi/Resolver";
+import { TokenResolver } from "@dabsi/typedi/TokenResolver";
 
 const _operator = "createContext";
 
@@ -13,11 +20,10 @@ declare module "../Resolver" {
 }
 
 function _method(
-  nextContext: AnyResolverMap | undefined,
-  context: AnyResolverMap
-): AnyResolverMap {
-  if (hasKeys(nextContext)) {
-    return Object.setPrototypeOf({ ...nextContext }, context);
-  }
+  context: ResolverContext,
+  ...args: ResolverContext[]
+): ResolverContext {
+  context = Object.create(context);
+  Resolver.provide.apply(Resolver, args);
   return context;
 }

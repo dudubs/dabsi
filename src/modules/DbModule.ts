@@ -13,6 +13,7 @@ import {
   ConnectionOptions,
   createConnection,
   getMetadataArgsStorage,
+  QueryRunner,
 } from "typeorm";
 import ProjectModuleInfo from "../typestack/ProjectModuleInfo";
 import LoaderModule from "./LoaderModule";
@@ -92,6 +93,8 @@ export class DbModule {
     }
   }
 
+  queryRunner: QueryRunner | null = null;
+
   protected async sync({ f, force = f }) {
     await this.init();
     if (force) {
@@ -122,6 +125,7 @@ export class DbModule {
         ]),
       ],
     });
+    this.queryRunner = this.connection.createQueryRunner();
     await this.afterInit.invoke();
   }
 }

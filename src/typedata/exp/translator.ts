@@ -30,9 +30,13 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
     right: U
   ): U;
 
+  abstract translateAdd(exps: U[]): U;
+
   abstract translateParameter(value: DataParameterExp): U;
 
-  abstract translateField(propertyName: string): U;
+  abstract translateField(field: string): U;
+
+  abstract translateCountRefs(type: "all" | "any"): U;
 
   abstract translateIn(inverse: boolean, where: U, values: U[]): U;
 
@@ -63,7 +67,7 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
   abstract translateHas(
     inverse: boolean,
     propertyName: string,
-    exp: DataExp<any>
+    condition: DataExp<any>
   ): U;
 
   abstract translateIf(condition: U, then: U, _else: U): U;
@@ -395,5 +399,13 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
       );
     };
     return translate(0);
+  }
+
+  $add(exp: O["$add"]): U {
+    return this.translateAdd(exp.map(exp => this.translate(exp)));
+  }
+
+  $countRefs(type) {
+    return this.translateCountRefs(type);
   }
 }

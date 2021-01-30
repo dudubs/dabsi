@@ -14,7 +14,11 @@ export class ModuleRunner {
 
   context = { ...ModuleRunner.provide(() => this) };
 
-  constructor(protected initModule?: (moduleInstance: any) => void) {}
+  constructor() {}
+
+  resolve<T>(resolver: Resolver<T>): T {
+    return Resolver.resolve(resolver, this.context);
+  }
 
   *getAllInstances(): IterableIterator<{
     target: ModuleTarget;
@@ -58,8 +62,6 @@ export class ModuleRunner {
       );
 
       const instance = new target(...args);
-
-      this.initModule?.(instance);
 
       return instance;
     });

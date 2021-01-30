@@ -12,12 +12,20 @@ export class DataExpMapper extends DataTranslator<DataExp<any>> {
   translateHas(
     inverse: boolean,
     propertyName: string,
-    exp: DataExp<any>
+    condition: DataExp<any>
   ): DataExp<any> {
     return <DataExp<any>>{
       [inverse ? "$notHas" : "$has"]:
-        exp !== undefined ? { [propertyName]: exp } : propertyName,
+        condition !== undefined ? { [propertyName]: condition } : propertyName,
     };
+  }
+
+  translateAdd(exps) {
+    return { $add: exps };
+  }
+
+  translateCountRefs(type) {
+    return { $countRefs: type };
   }
 
   translateFind(relationName, exp) {
@@ -83,8 +91,8 @@ export class DataExpMapper extends DataTranslator<DataExp<any>> {
     };
   }
 
-  translateField(propertyName: string): DataExp<any> {
-    return propertyName;
+  translateField(field: string): DataExp<any> {
+    return field;
   }
 
   translateIn(

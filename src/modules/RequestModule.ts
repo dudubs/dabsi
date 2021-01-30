@@ -1,4 +1,4 @@
-import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
+import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
 import { flatObject } from "../common/object/flatObject";
 import Lazy from "../common/patterns/lazy";
 import { Awaitable } from "../common/typings2/Async";
@@ -15,17 +15,17 @@ export class Request {
 export default class RequestModule {
   log = log.get("REQUEST");
 
-  context: AnyResolverMap = Object.setPrototypeOf(
+  context: ResolverContext = Object.setPrototypeOf(
     {
       ...Request.provide(),
     },
     this.runnerContext
   );
 
-  contextResolvers: Resolver<Awaitable<AnyResolverMap>>[] = [];
+  contextResolvers: Resolver<Awaitable<ResolverContext>>[] = [];
 
   async processRequest<T>(
-    callback: (context: AnyResolverMap) => Awaitable<T>
+    callback: (context: ResolverContext) => Awaitable<T>
   ): Promise<T> {
     // TODO: flat
     const context = Object.create(this.context);
@@ -51,7 +51,7 @@ export default class RequestModule {
 
   constructor(
     @Inject() cli: Cli,
-    @Inject(c => c) protected runnerContext: AnyResolverMap
+    @Inject(c => c) protected runnerContext: ResolverContext
   ) {
     cli.command("check", cli =>
       cli.onRun(() => {

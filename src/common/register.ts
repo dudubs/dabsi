@@ -1,1 +1,3 @@
-import "./array/toSeq";
+import "./iterator/toSeq";
+import "./map/set";
+import "./map/operators";

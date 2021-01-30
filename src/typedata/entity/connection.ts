@@ -1,7 +1,7 @@
 import { Connection, getConnection } from "typeorm";
 
-export default function getDataConnection(): Connection {
-  return getDataConnection.connection || getConnection();
+export default function getDataContext(): Connection {
+  return getDataContext.connection || getConnection();
 }
 
-getDataConnection.connection = null as null | Connection;
+getDataContext.connection = null as null | Connection;

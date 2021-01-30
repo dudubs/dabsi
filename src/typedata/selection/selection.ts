@@ -2,19 +2,18 @@ import { mergeObject } from "@dabsi/common/object/mergeObject";
 import { omit } from "@dabsi/common/object/omit";
 import { HasKeys, If } from "@dabsi/common/typings2/boolean";
 import { DataExp } from "@dabsi/typedata/exp/exp";
-import { DataFieldsTranslator } from "@dabsi/typedata/fieldsTranslator";
 import { DataOrder } from "@dabsi/typedata/order";
 import {
-  WithDataUnionMetaChildren,
-  DataUnionMetaChildrenKey,
-} from "@dabsi/typedata/union";
-import {
-  IfRelationToMany,
-  IfRelationToOne,
   DataNonRelationKeys,
   DataRelationKeys,
   DataRelationTypeAt,
+  IfRelationToMany,
+  IfRelationToOne,
 } from "@dabsi/typedata/relation";
+import {
+  DataUnionMetaChildrenKey,
+  WithDataUnionMetaChildren,
+} from "@dabsi/typedata/union";
 
 export type DataPickableKeys<T> = Exclude<
   DataNonRelationKeys<T>,

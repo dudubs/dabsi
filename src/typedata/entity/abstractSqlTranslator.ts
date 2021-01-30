@@ -5,6 +5,9 @@ import { DataTranslator } from "@dabsi/typedata/exp/translator";
 import { DataQuery } from "@dabsi/typedata/query/exp";
 import { DataQueryTranslator } from "@dabsi/typedata/query/translator";
 import { Connection, SelectQueryBuilder } from "typeorm";
+import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import { inspect } from "@dabsi/logging/inspect";
 
 const sqlOperatorMap: Record<DataOperatorExp.Base, string> = {
   $equals: "=",
@@ -49,6 +52,10 @@ export default abstract class AbstractDataQueryTranslatorToSql
 
   translateIsNull(inverse: boolean, exp: string): string {
     return `${exp} IS${inverse ? " NOT" : ""} NULL`;
+  }
+
+  translateAdd(exps: string[]): string {
+    return `(${exps.join("+")})`;
   }
 
   translateAnd(exps: string[]): string {
@@ -100,8 +107,8 @@ export default abstract class AbstractDataQueryTranslatorToSql
     return this.translate(exp);
   }
 
-  translateField(propertyName: string): string {
-    return `${this.escape(this.schema)}.${this.escape(propertyName)}`;
+  translateField(field: string): string {
+    return `${this.escape(this.schema)}.${this.escape(field)}`;
   }
 
   translateLength(exp: string): string {
@@ -154,7 +161,7 @@ export default abstract class AbstractDataQueryTranslatorToSql
   translateHas(
     inverse: boolean,
     propertyName: string,
-    exp: DataExp<any>
+    condition: DataExp<any>
   ): string {
     throw new Error("Not support.");
   }
@@ -213,7 +220,17 @@ export default abstract class AbstractDataQueryTranslatorToSql
         default:
           throw new Error(`Invalid join type: ${join.type}`);
       }
-      sql += " " + this.escape(join.from) + " AS " + this.escape(aliasName);
+
+      if (hasKeys(join.fields)) {
+        sql += `(SELECT ${mapObjectToArray(
+          join.fields!,
+          (exp, field) => `${this.translate(exp)} AS ${this.escape(field)}`
+        )} FROM ${this.escape(join.from)} AS ${aliasName})`;
+      } else {
+        sql += " " + this.escape(join.from);
+      }
+
+      sql += " AS " + this.escape(aliasName);
 
       if (join.condition !== undefined) {
         sql += " ON " + this.translate(join.condition);

@@ -51,7 +51,7 @@ export class RichTextInputHandler
             : null;
 
         if (docKey) {
-          return this.config.context.unpack(docKey);
+          return this.config.context.unpack(docKey, false);
         }
         return null;
       },

@@ -8,8 +8,8 @@ export function TestEntity() {
         this.id = `${this.constructor.name}-${++count}`;
       },
     };
-    BeforeInsert()(target.prototype, "setTestEntityId");
-    Object.defineProperty(target.prototype, "setTestEntityId", desc);
+    BeforeInsert()(target.prototype, "setTestIdColumn");
+    Object.defineProperty(target.prototype, "setTestIdColumn", desc);
     Entity()(target);
   };
 }

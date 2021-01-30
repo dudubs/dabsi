@@ -2,18 +2,21 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Hookable } from "@dabsi/modules/Hookable";
 import RequestModule from "@dabsi/modules/RequestModule";
 import { ServerModule } from "@dabsi/modules/ServerModule";
-import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
+import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
 import express from "express";
 
 declare global {
   namespace Express {
     interface Request {
-      requestContext: AnyResolverMap;
+      requestContext: ResolverContext;
     }
   }
 }
 
-export const ExpressResolver = Resolver<[express.Request, express.Response]>();
+export const ExpressResolver = Resolver.token<
+  [express.Request, express.Response]
+>();
+
 @Module()
 export default class ExpressModule {
   log = this.serverModule.log.get("EXPRESS");
@@ -52,14 +55,14 @@ export default class ExpressModule {
 
   onRun = Hookable<(app: express.Application) => Awaitable>();
 
-  context: AnyResolverMap = Object.setPrototypeOf(
+  context: ResolverContext = Object.setPrototypeOf(
     {
       ...ExpressResolver.provide(),
     },
     this.requestModule.context
   );
 
-  contextResolvers: Resolver<Awaitable<AnyResolverMap>>[] = [];
+  contextResolvers: Resolver<Awaitable<ResolverContext>>[] = [];
 
   listen(port: number, addr = "0.0.0.0") {
     this.onRun(app => {
@@ -75,7 +78,7 @@ export default class ExpressModule {
     callback: (
       req: express.Request,
       res: express.Response,
-      context: AnyResolverMap
+      context: ResolverContext
     ) => Awaitable
   ): express.Handler {
     return (req, res) =>

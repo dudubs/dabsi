@@ -22,6 +22,7 @@ import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
 import { getDataEntityInfo } from "@dabsi/typedata/entity/info";
 import DataQueryRunner from "@dabsi/typedata/query/runner";
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 type RowContext = {
   row: any;
   raw: any;
@@ -101,7 +102,7 @@ export namespace DataEntityLoader {
 
     const rootBaseRow = new DataSourceRow(source);
 
-    const entityMetadata = connection.getMetadata(typeInfo.type);
+    const entityMetadata = getEntityMetadata(connection, typeInfo.type);
 
     const entityInfo = getDataEntityInfo(entityMetadata);
 
@@ -164,7 +165,7 @@ export namespace DataEntityLoader {
       for (const [childKey, rowTypeInfo] of entries<DataTypeInfo>(
         typeInfo.children
       )) {
-        const childMetadata = connection.getMetadata(rowTypeInfo.type);
+        const childMetadata = getEntityMetadata(connection, rowTypeInfo.type);
         const childSelection = DataSelection.atChild(selection, childKey);
         const childEntityInfo = getDataEntityInfo(childMetadata);
         discriminatorKeyMap[childMetadata.discriminatorValue!] = childKey;

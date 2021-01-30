@@ -4,6 +4,7 @@ import { DataEntityRelation } from "@dabsi/typedata/entity/relation";
 import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { DataExp } from "@dabsi/typedata/exp/exp";
+import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 
 export type ByTableOrColumn = "table" | "column";
 
@@ -14,7 +15,7 @@ export class DataEntityRelationSide<T> {
     public isLeft: boolean
   ) {}
 
-  entityMetadata = this.relation.connection.getMetadata(this.entityType);
+  entityMetadata = getEntityMetadata(this.relation.connection, this.entityType);
 
   getKey(leftKey: object, rightKey: object) {
     return (this.relation.invert ? !this.isLeft : this.isLeft)

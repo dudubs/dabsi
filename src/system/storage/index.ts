@@ -1,17 +1,17 @@
 import { Cli } from "@dabsi/modules/Cli";
 import DataModule from "@dabsi/modules/data";
+import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
 import Storage from "@dabsi/system/storage/Storage";
 import { Inject, Module } from "@dabsi/typedi";
-import { DataResolver } from "./DataResolver";
 
 @Module({})
 export default class StorageModule {
   constructor(
     @Inject() dsm: DataModule,
     @Inject() cli: Cli,
-    @Inject() data: DataResolver,
+    @Inject() data: DataContext,
     @Inject() dbModule: DbModule,
     @Inject() storage: Storage
   ) {
@@ -43,5 +43,5 @@ export default class StorageModule {
   }
 }
 
-// DataResolver.getSource
-// DataResolver.getRow()
+// DataContext.getSource
+// DataContext.getRow()

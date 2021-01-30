@@ -3,7 +3,7 @@ import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import {
-  AnyResolverMap,
+  ResolverContext,
   CustomResolver,
   IResolver,
   Resolver,

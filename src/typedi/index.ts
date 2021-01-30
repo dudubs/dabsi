@@ -1,5 +1,4 @@
 export * from "./Resolver";
-export * from "@dabsi/typedi/Provider";
 
 export * from "@dabsi/typedi/decorators/Module";
 export * from "@dabsi/typedi/decorators/Module";
@@ -11,7 +10,6 @@ import "./operators/toCheck";
 import "./operators/checkObject";
 import "./operators/consume";
 
-import "./operators/checkContext";
 import "./operators/resolveType";
 import "./operators/try";
 import "./operators/array";

@@ -1,8 +1,8 @@
 import { Cli } from "@dabsi/modules/Cli";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { PermissionManager } from "@dabsi/system-old/server/acl/PermissionManager";
-import AclDataSources from "@dabsi/system/acl/AclDataSources";
-import { Inject, Module, ResolverType } from "@dabsi/typedi";
+import { AclContext } from "@dabsi/system/acl/context";
+import { Module } from "@dabsi/typedi";
 import DataModule from "../../modules/data";
 
 @Module({
@@ -12,16 +12,16 @@ export default class AclModule {
   log = log.get("ACL");
 
   constructor(
-    @Inject() cli: Cli, //
-    @Inject() dbModule: DbModule,
-    @Inject(AclDataSources) public sources: ResolverType<typeof AclDataSources>
+    cli: Cli, //
+    dbModule: DbModule,
+    context: AclContext
   ) {
     cli.command("acl", cli =>
       cli
         .onRunAsParent(() => dbModule.init())
         .command("make-admin", cli =>
           cli.onRun(async () => {
-            const admin = await this.sources.users.touch({
+            const admin = await context.users.touch({
               firstName: "admin",
               lastName: "admin",
             });

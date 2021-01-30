@@ -1,5 +1,5 @@
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
-import getTestDataConnection from "@dabsi/typedata/entity/tests/getTestDataConnection";
+import getTestConnection from "@dabsi/typedata/entity/tests/getTestConnection";
 import {
   AEntity,
   BEntity,
@@ -8,14 +8,14 @@ import {
 
 export const ASource = DataEntitySource.createFromConnection(
   AEntity,
-  getTestDataConnection
+  getTestConnection
 );
 
 export const BSource = DataEntitySource.createFromConnection(
   BEntity,
-  getTestDataConnection
+  getTestConnection
 );
 export const CSource = DataEntitySource.createFromConnection(
   CEntity,
-  getTestDataConnection
+  getTestConnection
 );

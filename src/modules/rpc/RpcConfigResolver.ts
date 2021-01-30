@@ -11,7 +11,7 @@ export type RpcConfigResolver<T extends AnyRpc> = Resolver<
   rpc: T;
 };
 
-export const RpcConfigResolverMap = Resolver<
+export const RpcConfigResolverMap = Resolver.token<
   Record<any, Resolver<RpcUnresolvedConfig<AnyRpc>>>
 >();
 

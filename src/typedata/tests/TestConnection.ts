@@ -5,7 +5,8 @@ import { Connection, createConnection, ObjectType } from "typeorm";
 let counter = 0;
 
 export function createTestConnection(
-  entities: ObjectType<any>[]
+  entities: ObjectType<any>[],
+  options?
 ): Promise<Connection> {
   return createConnection({
     name: "testConnection" + ++counter,
@@ -13,15 +14,16 @@ export function createTestConnection(
     database: ":memory:",
     synchronize: true,
     // logging: "all",
+    ...options,
     entities: findEntities(entities),
   });
 }
 
-export function TestConnection(entities): () => Connection {
+export function TestConnection(entities, options?): () => Connection {
   let connection: Connection;
 
   beforeAll(async () => {
-    connection = await createTestConnection(entities);
+    connection = await createTestConnection(entities, options);
   });
 
   afterAll(async () => {

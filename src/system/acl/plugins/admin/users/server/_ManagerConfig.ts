@@ -1,10 +1,10 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
-import AclDataSources from "@dabsi/system/acl/AclDataSources";
+import { AclContext } from "@dabsi/system/acl/context";
 import { User } from "@dabsi/system/acl/entities/User";
 import AclAdminUsersManager from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUsersManager";
-import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataRow } from "@dabsi/typedata/row";
+import { DataSelection } from "@dabsi/typedata/selection/selection";
 import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
 
 export const AclAdminUserSelection: DataSelection<User> = {};
@@ -12,7 +12,7 @@ export const AclAdminUserSelection: DataSelection<User> = {};
 export default RpcConfigResolver(
   AclAdminUsersManager,
   {
-    sources: AclDataSources,
+    acl: AclContext,
 
     getEditConfig: RpcConfigFactoryResolver(
       AclAdminUsersManager.at("edit").at("target"),
@@ -23,7 +23,7 @@ export default RpcConfigResolver(
   },
   c => $ =>
     $({
-      source: c.sources.users.select(AclAdminUserSelection),
+      source: c.acl.users.select(AclAdminUserSelection),
       editConfigFactory: ($, user) =>
         $(c.getEditConfig(DataRow(User).provide(() => user))),
 
@@ -32,11 +32,11 @@ export default RpcConfigResolver(
       addInputConfig: {
         loginName: {
           $check: loginName =>
-            checkUniqueName(c.sources.users, "loginName", loginName),
+            checkUniqueName(c.acl.users, "loginName", loginName),
         },
       },
       addSubmit(value) {
-        return c.sources.users.insertKey(value);
+        return c.acl.users.insertKey(value);
       },
     })
 );

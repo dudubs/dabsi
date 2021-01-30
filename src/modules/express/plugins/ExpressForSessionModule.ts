@@ -1,9 +1,9 @@
+import { DataContext } from "@dabsi/modules/data/context";
 import ExpressModule, { ExpressResolver } from "@dabsi/modules/express";
 import { Inject, Module, Resolver } from "@dabsi/typedi";
 import CookieParser from "cookie-parser";
 import { getSession } from "../../../system-old/server/acl/getSession";
 import { DataRow } from "../../../typedata/row";
-import DataSourceResolver from "../../data/DataSourceResolver";
 import SessionModule from "../../session";
 import RequestSession from "../../session/RequestSession";
 
@@ -18,11 +18,11 @@ export default class SessionForExpressModule {
 
     expressModule.contextResolvers.push(
       Resolver.consume(
-        [DataSourceResolver(RequestSession), ExpressResolver],
-        async (sessions, [req, res]) => {
+        [DataContext, ExpressResolver],
+        async (conn, [req, res]) => {
           await new Promise(next => cookieParser(req, res, next));
           const session = await getSession({
-            source: sessions,
+            source: conn.getSource(RequestSession),
             cookie: req.cookies["session"],
             setCookie(value) {
               res.cookie("session", value);

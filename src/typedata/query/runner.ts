@@ -1,6 +1,6 @@
-import { DataQueryTranslatorToSql } from "./sqlTranslator";
 import { DataQuery } from "@dabsi/typedata/query/exp";
 import { QueryRunner } from "typeorm";
+import { DataQueryTranslatorToSql } from "./sqlTranslator";
 
 export default class DataQueryRunner {
   constructor(public query: DataQuery, public queryRunner: QueryRunner) {}
@@ -14,6 +14,7 @@ export default class DataQueryRunner {
 
   getRows(): Promise<any> {
     const [query, parameters] = this.getQueryAndParameters();
+    // console.log(formatSql(query));
     return this.queryRunner.query(query, parameters);
   }
 

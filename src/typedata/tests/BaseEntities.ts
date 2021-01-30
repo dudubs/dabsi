@@ -10,18 +10,14 @@ import {
 import { TestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { DataUnion } from "@dabsi/typedata/union";
+import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
 
 let randomId = 0;
 
 @Entity()
 @TableInheritance({ column: "dType" })
 export class DEntity {
-  @BeforeInsert()
-  setNewId() {
-    this.dId = `${this.constructor.name}_${++randomId}`;
-  }
-
-  @PrimaryColumn()
+  @TestIdColumn()
   dId!: string;
 
   @Column()

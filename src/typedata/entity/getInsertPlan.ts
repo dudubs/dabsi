@@ -70,9 +70,7 @@ export default (source: DataEntitySource<any>, data: DataInsert<any>) => {
 
   return {
     insert: async () => {
-      await entityCursor.entityManager.save(entity, {
-        reload: false,
-      });
+      await entityCursor.entityManager.save(entity);
 
       const entityKeyObject = DataEntityKey.pick(entityMetadata, entity);
 

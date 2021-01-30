@@ -1,5 +1,5 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
-import AclDataSources from "@dabsi/system/acl/AclDataSources";
+import { AclContext } from "@dabsi/system/acl/context";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupsManager from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupsManager";
 import { DataRow } from "@dabsi/typedata/row";
@@ -18,11 +18,11 @@ export default RpcConfigResolver(
     createAddInputConfig: RpcConfigFactoryResolver(
       AclAdminGroupsManager.at("add").at("input")
     ),
-    sources: AclDataSources,
+    acl: AclContext,
   },
   c => $ =>
     $({
-      source: c.sources.groups,
+      source: c.acl.groups,
 
       tableConfig: {
         columns: {
@@ -37,7 +37,7 @@ export default RpcConfigResolver(
 
       addInputConfig: c.createAddInputConfig(),
       addSubmit({ groupName }) {
-        return c.sources.groups.insertKey({ name: groupName });
+        return c.acl.groups.insertKey({ name: groupName });
       },
     })
 );

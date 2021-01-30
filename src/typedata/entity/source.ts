@@ -5,7 +5,7 @@ import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { DataEntityLoader } from "@dabsi/typedata/entity/loader";
 import DataQueryRunner from "@dabsi/typedata/query/runner";
-import getDataConnection from "@dabsi/typedata/entity/connection";
+import getDataContext from "@dabsi/typedata/entity/connection";
 import getDeletePlan from "@dabsi/typedata/entity/getDeletePlan";
 import getInsertPlan from "@dabsi/typedata/entity/getInsertPlan";
 import getUpdatePlan from "@dabsi/typedata/entity/getUpdatePlan";
@@ -23,11 +23,17 @@ export class DataEntitySource<T> extends DataSource<T> {
   ): DataEntitySource<T> {
     return new DataEntitySource(
       entityType,
-      () => (connection || getDataConnection)().createQueryRunner(),
+      () => (connection || getDataContext)().createQueryRunner(),
       EmptyDataCursor
     );
   }
 
+  static fromQueryRunner<T>(
+    entityType: Type<T>,
+    queryRunner: QueryRunner
+  ): DataEntitySource<T> {
+    return new DataEntitySource(entityType, () => queryRunner, EmptyDataCursor);
+  }
   constructor(
     public entityType: Type<T>,
     public getQueryRunner: () => QueryRunner,

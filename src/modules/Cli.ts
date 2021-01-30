@@ -2,14 +2,13 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { Hookable } from "@dabsi/modules/Hookable";
 import {
-  AnyResolverMap,
   getParamResolverMap,
   getParamsResolvers,
   Resolver,
+  ResolverContext,
 } from "@dabsi/typedi";
-import getParameterName from "@dabsi/typedi/decorators/getParameterName";
+import getParameterByIndex from "@dabsi/typedi/decorators/getParameterByIndex";
 import { Forward } from "@dabsi/typedi/Forward";
-import yargs from "yargs";
 import { touchObject } from "../common/object/touchObject";
 
 const buildCliMethod = MetaMethod<(cli: Cli, context) => void>(
@@ -38,11 +37,6 @@ export function CliCommand(name: string): MethodDecorator {
         cli = cli.get(subName);
       }
       cli.onRun(async () => {
-        console.log(
-          Reflect.getMetadata("design:paramtypes", target, propertyName),
-          getParamResolverMap.map.get(target[propertyName])
-        );
-
         const paramsResolver = Resolver.array(
           getParamsResolvers(
             Reflect.getMetadata("design:paramtypes", target, propertyName) ||
@@ -50,7 +44,7 @@ export function CliCommand(name: string): MethodDecorator {
             getParamResolverMap.map.get(target[propertyName]),
             index => Forward.getParameterType(target, index, propertyName)
           ),
-          index => getParameterName(target[propertyName], index)
+          index => getParameterByIndex(target[propertyName], index)
         );
 
         await this[propertyName](...Resolver.resolve(paramsResolver, context));
@@ -59,7 +53,7 @@ export function CliCommand(name: string): MethodDecorator {
   };
 }
 
-CliCommand.build = (cli: Cli, moduleInstance, context: AnyResolverMap) => {
+CliCommand.build = (cli: Cli, moduleInstance, context: ResolverContext) => {
   buildCliMethod.invoke(moduleInstance, cli, context);
 };
 
@@ -86,6 +80,7 @@ export class Cli {
       return cli;
     });
   }
+
   command(name: string, buildCli: (cli: Cli) => void): Cli {
     const cli: Cli = this.get(name);
     buildCli(cli);
@@ -93,17 +88,14 @@ export class Cli {
   }
 
   onRunAsParent = Hookable<(args: any) => Awaitable>();
+
   onRun = Hookable<(args: any) => Awaitable>();
+
   onBuild = Hookable<(args: any) => Awaitable>();
 
-  args?: any;
+  args!: any;
 
-  async main(y: yargs.Argv) {
-    await this.onBuild.invoke(y);
-    return await this.run(y.help().argv);
-  }
-
-  protected async run(args) {
+  async run(args) {
     try {
       this.args = args;
       await this.onRun.invoke(args);

@@ -16,7 +16,6 @@ export interface Logger extends LogFn {
 
   get(name: string): Logger;
   setLevel(level: number | ((currentLevel: number) => number));
-
   enable(level: string & keyof typeof LogLevel): Logger;
 }
 

@@ -1,5 +1,5 @@
 import {
-  AnyResolverMap,
+  ResolverContext,
   CustomResolver,
   IResolver,
   ResolveMapType,

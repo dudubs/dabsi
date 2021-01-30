@@ -13,20 +13,36 @@ export async function getSession<T extends BasedType<Session>>({
   cookie: string | undefined;
   setCookie(value: string);
 }): Promise<DataRow<T>> {
-  let token = cookie && String(cookie);
+  let sessionKey: string | null = null;
+  let sessionToken: string | null = null;
+  try {
+    [sessionKey, sessionToken] = cookie && JSON.parse(cookie);
+  } catch (error) {}
+
   const source: BasedDataSource<Session> = <any>_source;
 
-  let session = !token
-    ? undefined
-    : await source.filter({ $base: ["token", { $equals: token }] }).get();
+  let session =
+    typeof sessionToken === "string" &&
+    typeof sessionKey === "string" &&
+    sessionKey &&
+    sessionToken
+      ? await source
+          .filter({
+            $and: [
+              { $is: sessionKey },
+              { $base: ["token", { $equals: sessionToken }] },
+            ],
+          })
+          .get()
+      : undefined;
 
   if (!session) {
-    token = generateSessionToken();
+    sessionToken = generateSessionToken();
     session = await source.insert({
-      token,
+      token: sessionToken,
       timeout: new Date().getTime(),
     });
-    setCookie(token);
+    setCookie(JSON.stringify([session.$key, sessionToken]));
   } else {
     await session.update({ timeout: new Date().getTime() });
   }

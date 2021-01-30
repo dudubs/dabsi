@@ -1,4 +1,13 @@
-import { AnyResolverMap, IResolver } from "@dabsi/typedi/Resolver";
+import { getTypeToken } from "@dabsi/typedi/getTypeToken";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import {
+  IResolver,
+  Resolver,
+  ResolverContext,
+  ResolverType,
+  TypeResolver,
+} from "@dabsi/typedi/Resolver";
+import { TokenResolver } from "@dabsi/typedi/TokenResolver";
 
 const _operator = "provide";
 
@@ -10,6 +19,6 @@ declare module "../Resolver" {
   }
 }
 
-function _method(context: AnyResolverMap, ...args: AnyResolverMap[]) {
+function _method(context: ResolverContext, ...args: ResolverContext[]) {
   Object.assign(context, ...args);
 }

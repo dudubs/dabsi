@@ -15,14 +15,14 @@ export class DataFieldsTranslator extends DataExpMapper {
     return new DataFieldsTranslator(this.fields, true).translate(exp);
   }
 
-  translateField(propertyName: string): DataExp<any> {
-    if (this.isBase) return super.translateField(propertyName);
-    if (propertyName in this.fields) {
-      if (typeof this.fields[propertyName] !== "string") {
-        return this.translate(this.fields[propertyName]);
+  translateField(field: string): DataExp<any> {
+    if (this.isBase) return super.translateField(field);
+    if (field in this.fields) {
+      if (typeof this.fields[field] !== "string") {
+        return this.translate(this.fields[field]);
       }
     }
-    return super.translateField(propertyName);
+    return super.translateField(field);
   }
 
   static translate(

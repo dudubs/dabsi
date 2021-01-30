@@ -2,7 +2,7 @@ import catchError from "@dabsi/common/async/catchError";
 import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import {
-  AnyResolverMap,
+  ResolverContext,
   CustomResolver,
   IResolver,
   Resolver,
@@ -19,7 +19,7 @@ declare module "../Resolver" {
   }
 }
 
-function _method<T extends AnyResolverMap>(
+function _method<T extends ResolverContext>(
   resolverMap: T
 ): CustomResolver<
   {

@@ -1,10 +1,10 @@
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
-import DataSourceFactroyResolver from "@dabsi/modules/data/DataSourceFactroyResolver";
+import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { EmptyDataCursor } from "@dabsi/typedata/cursor";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
-import { AnyResolverMap, Inject, Module, Resolver } from "@dabsi/typedi";
+import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
 import SqlliteQueryRunnerPool from "@dabsi/typeorm/SqlliteQueryRunnerPool";
 import { QueryRunner } from "typeorm";
 
@@ -12,25 +12,26 @@ import { QueryRunner } from "typeorm";
 export default class DataModule {
   constructor(
     @Inject() protected dbModule: DbModule,
-    @Inject(c => c) protected context: AnyResolverMap
+    @Inject(c => c) protected context: ResolverContext
   ) {
     Resolver.provide(
       context,
-      DataSourceFactroyResolver.provide(() => entityType =>
-        new DataEntitySource(
-          entityType,
-          () => this.mainQueryRunner,
-          EmptyDataCursor
-        )
+      DataContext.provide(
+        () =>
+          new DataContext(
+            entityType =>
+              new DataEntitySource(
+                entityType,
+                () => dbModule.queryRunner!,
+                EmptyDataCursor
+              )
+          )
       )
     );
   }
 
   @Once() async init() {
     await this.dbModule.init();
-  }
-  @Lazy() protected get mainQueryRunner(): QueryRunner {
-    return this.connection.createQueryRunner();
   }
 
   protected get connection() {

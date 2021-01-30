@@ -2,6 +2,7 @@ import { assert } from "@dabsi/common/assert";
 import { defined } from "@dabsi/common/object/defined";
 import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
+import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 import {
   ByTableOrColumn,
   DataEntityRelationSide,
@@ -35,7 +36,7 @@ export class DataEntityRelation {
     public invert: boolean
   ) {}
 
-  entityMetadata = this.connection.getMetadata(this.entityType);
+  entityMetadata = getEntityMetadata(this.connection, this.entityType);
 
   relationMetadata = defined(
     this.entityMetadata.relations.find(

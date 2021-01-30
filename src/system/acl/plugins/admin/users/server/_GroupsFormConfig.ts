@@ -1,21 +1,20 @@
-import { User } from "@dabsi/system/acl/entities/User";
-import { DataRow } from "@dabsi/typedata/row";
-import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";
-import AclDataSources from "@dabsi/system/acl/AclDataSources";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
-import { Resolver } from "@dabsi/typedi";
+import { AclContext } from "@dabsi/system/acl/context";
+import { User } from "@dabsi/system/acl/entities/User";
+import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";
+import { DataRow } from "@dabsi/typedata/row";
 
 export default RpcConfigResolver(
   AclAdminUserGroupsForm,
   {
-    sources: AclDataSources,
+    acl: AclContext,
     user: DataRow(User),
   },
   c => $ => {
     return $({
       inputConfig: $ =>
         $({
-          source: c.sources.groups.pick(["name"], {
+          source: c.acl.groups.pick(["name"], {
             isChecked: {
               $has: { users: { $is: c.user.$key } },
             },

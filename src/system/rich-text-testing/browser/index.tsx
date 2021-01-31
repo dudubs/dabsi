@@ -8,7 +8,7 @@ import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 import React from "react";
 const router = SystemRouter.register("rich-text-testing", Router());
 
-WidgetRouterView(router, RichTextTestingConnection.save, props => {
+WidgetRouterView(router, RichTextTestingConnection.form, props => {
   return <MuiFormView {...props} />;
 });
 

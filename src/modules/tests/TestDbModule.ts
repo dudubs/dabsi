@@ -4,7 +4,7 @@ import { Inject, Module } from "@dabsi/typedi";
 
 @Module()
 export default class TestDbModule {
-  constructor(@Inject() public dbm: DbModule) {
+  constructor(public dbm: DbModule) {
     dbm.connectionOptions = {
       type: "sqlite",
       database: ":memory:",

@@ -8,9 +8,11 @@ import ProjectModule from "./ProjectModule";
 
 setImmediate(async () => {
   const moduleRunner = new ModuleRunner();
+  const mainModuleTarget = getLastModule()! as any;
+  moduleRunner.mainModuleTarget = mainModuleTarget;
   const cliModule = moduleRunner.getInstance(CliModule);
 
-  const module = moduleRunner.getInstance(getLastModule()! as any);
+  const module = moduleRunner.getInstance(mainModuleTarget);
   const projectModule = await moduleRunner.getInstance(ProjectModule);
   await projectModule.load();
 

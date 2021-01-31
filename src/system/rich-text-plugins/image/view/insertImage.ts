@@ -1,8 +1,18 @@
-import { RichTextEditor } from "@dabsi/system/rich-text/view/RichTextEditor";
-import RichTextEditorCommands from "@dabsi/system/rich-text/view/RichTextEditorCommands";
+import { RichTextCommands } from "@dabsi/system/rich-text/common/commands";
+import { RichTextStore } from "@dabsi/system/rich-text/common/store";
 
-export function insertImage(editor: RichTextEditor, url: string, key: string) {
-  RichTextEditorCommands.insertAtomicBlock(editor, "", "IMMUTABLE", {
+declare global {
+  namespace IRichText {
+    interface Commands {
+      insertImage: typeof command;
+    }
+  }
+}
+
+RichTextCommands.insertImage = command;
+
+function command(store: RichTextStore, url: string, key: string) {
+  store.command("insertAtomicBlock", "", "IMMUTABLE", {
     url,
     key,
   });

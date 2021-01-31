@@ -1,5 +1,5 @@
-import RichTextPluginsRpc from "@dabsi/system/rich-text/common/RichTextPluginsRpc";
-import type { RichTextInputValue } from "@dabsi/system/rich-text/common/RichTextInputValue";
+import RichTextPluginsRpc from "@dabsi/system/rich-text/common/pluginsRpc";
+import type { RichTextInputValue } from "@dabsi/system/rich-text/common/value";
 import { Input } from "@dabsi/typerpc/input/Input";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { RawDraftContentState } from "draft-js";

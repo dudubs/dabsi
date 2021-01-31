@@ -37,8 +37,8 @@ export default class RpcModule {
   }[] = [];
 
   constructor(
-    @Inject() protected projectModule: ProjectModule,
-    @Inject() protected loaderModule: LoaderModule
+    protected projectModule: ProjectModule,
+    protected loaderModule: LoaderModule
   ) {
     projectModule
       .onProjectModuleLoaded(async projectModuleInfo => {

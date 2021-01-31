@@ -1,9 +1,9 @@
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextModule from "@dabsi/system/rich-text";
-import { RichTextConfig } from "@dabsi/system/rich-text/common/RichText";
-import RichTextPluginsRpc from "@dabsi/system/rich-text/common/RichTextPluginsRpc";
-import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
+import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
+import RichTextPluginsRpc from "@dabsi/system/rich-text/common/pluginsRpc";
+import RichTextConfigResolver from "@dabsi/system/rich-text/configResolver";
 import { DataRow } from "@dabsi/typedata/row";
 import { Resolver, ResolverType } from "@dabsi/typedi";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";

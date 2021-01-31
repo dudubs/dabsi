@@ -145,7 +145,7 @@ export namespace DataEntityLoader {
         DataTypeInfo.get(typeInfo.type),
         entityMetadata,
         defaultChildKey,
-        new Set(selection.pick || entityInfo.nonRelationColumnKeys),
+        new Set(selection.pick || entityInfo.notRelationColumnKeys),
         selection.fields || {},
         <any>selection.relations || {}
       );
@@ -173,7 +173,7 @@ export namespace DataEntityLoader {
           rowTypeInfo,
           childMetadata,
           childKey,
-          new Set(childSelection.pick ?? childEntityInfo.nonRelationColumnKeys),
+          new Set(childSelection.pick ?? childEntityInfo.notRelationColumnKeys),
           childSelection.fields || {},
           childSelection.relations || {}
         );
@@ -268,7 +268,7 @@ export namespace DataEntityLoader {
       for (const columnPropertyName of columns) {
         if (columnPropertyName in fields) continue;
         const column = definedAt(
-          childEntityInfo.propertyNameToColumnMetadata,
+          childEntityInfo.propertyColumnMetadataMap,
           columnPropertyName
         );
 
@@ -292,7 +292,7 @@ export namespace DataEntityLoader {
       const fieldsTranslator = new DataFieldsTranslator(fields);
 
       for (const [propertyName, exp] of entries(fields)) {
-        if (propertyName in childEntityInfo.propertyRelationMapMetadata) {
+        if (propertyName in childEntityInfo.propertyRelationMetadataMap) {
           throw new Error(
             `Can't override relation by field "${propertyName}".`
           );
@@ -320,7 +320,7 @@ export namespace DataEntityLoader {
         if (!relationSelectionOrBoolean) continue;
 
         const relationMetadata = definedAt(
-          childEntityInfo.propertyRelationMapMetadata,
+          childEntityInfo.propertyRelationMetadataMap,
           propertyName
         );
 

@@ -4,55 +4,36 @@ import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Type } from "@dabsi/common/typings2/Type";
 import { subTest } from "@dabsi/jasmine/subTest";
-import { getDataEntityInfo } from "@dabsi/typedata/entity/info";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
+import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { buildTestRelations } from "@dabsi/typedata/entity/tests/buildTestRelations";
+import getTestConnection from "@dabsi/typedata/entity/tests/getTestConnection";
+import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
-import { DataRow } from "@dabsi/typedata/row";
-import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
+import { DataSelector } from "@dabsi/typedata/selector";
 import {
-  DEntity,
   DChild1,
-  DChild1Child1,
   DChild2,
+  DEntity,
   DUnion,
-  EEntity,
   EChild1,
   EChild1Child1,
-  EChild2,
   EUnion,
 } from "@dabsi/typedata/tests/BaseEntities";
-import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import {
-  AEntity,
-  BEntity,
-  CEntity,
-} from "@dabsi/typeorm/relations/tests/TestEntities";
+import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
+import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 import { Connection, DeepPartial, EntityMetadata, ObjectType } from "typeorm";
 import { hasKeys } from "../../../common/object/hasKeys";
 
 import objectContaining = jasmine.objectContaining;
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
 
-const getConnection = TestConnection([
-  DEntity,
-  DChild1,
-  DChild2,
-  DChild1Child1,
-  EEntity,
-  EChild1,
-  EChild2,
-  EChild1Child1,
-  AEntity,
-  BEntity,
-  CEntity,
-]);
+const getConnection = getTestConnection;
 
 let connection: Connection;
-
 let dChild1: DChild1;
 let dChild2: DChild2;
+
 beforeAll(async () => {
   connection = getConnection();
 
@@ -111,16 +92,8 @@ beforeAll(async () => {
     return repo.save(entities.map(entity => repo.create(entity)));
   }
 });
-let discriminatorValueMap: Record<string, Record<string, boolean>>;
 
 describe("entity children", () => {
-  const getDisriminatorValues = entityType => [
-    getEntityMetadata(connection, entityType).discriminatorValue,
-    ...connection
-      .getMetadata(entityType)
-      .childEntityMetadatas.map(c => c.discriminatorValue),
-  ];
-
   const test = async (entityType, callback?) => {
     const md = getEntityMetadata(connection, entityType);
     const disValues = [
@@ -138,45 +111,6 @@ describe("entity children", () => {
 
   it("expect to EChild1Child1 entities", () => test(EChild1Child1));
   it("expect to EChild1 entities", () => test(EChild1));
-});
-
-describe("DataEntityInfo", () => {
-  it("nonRelationColumnKeys", () => {
-    const aBaseInfo = getDataEntityInfo(getEntityMetadata(connection, DEntity));
-    const dChild1Info = getDataEntityInfo(
-      getEntityMetadata(connection, DChild1)
-    );
-    const dChild1Child1Info = getDataEntityInfo(
-      getEntityMetadata(connection, DChild1Child1)
-    );
-    const dChild2Info = getDataEntityInfo(
-      getEntityMetadata(connection, DChild2)
-    );
-
-    expect(aBaseInfo.nonRelationColumnKeys).toContain("dText");
-    expect(dChild1Info.nonRelationColumnKeys).toContain("dText");
-    expect(dChild1Child1Info.nonRelationColumnKeys).toContain("dText");
-    expect(dChild2Info.nonRelationColumnKeys).toContain("dText");
-
-    expect(aBaseInfo.nonRelationColumnKeys).not.toContain("dChild1Text");
-    expect(dChild1Info.nonRelationColumnKeys).toContain("dChild1Text");
-    expect(dChild1Child1Info.nonRelationColumnKeys).toContain("dChild1Text");
-
-    expect(aBaseInfo.nonRelationColumnKeys).not.toContain("dChild1Child1Text");
-    expect(dChild1Info.nonRelationColumnKeys).not.toContain(
-      "dChild1Child1Text"
-    );
-    expect(dChild1Child1Info.nonRelationColumnKeys).toContain(
-      "dChild1Child1Text"
-    );
-
-    expect(dChild2Info.nonRelationColumnKeys).toContain("dText");
-    expect(dChild2Info.nonRelationColumnKeys).toContain("dChild2Text");
-    expect(dChild2Info.nonRelationColumnKeys).not.toContain("dChild1Text");
-    expect(dChild2Info.nonRelationColumnKeys).not.toContain(
-      "dChild1Child1Text"
-    );
-  });
 });
 
 describe("pick", () => {
@@ -316,11 +250,6 @@ describe("relations", () => {
       },
       tester => {
         tester.testDChild1(ABAToManyRelations);
-        // tester.testRow(DChild2, row => {
-        //     assertRow(row,
-        //         mapObject(ABToManyRelations, () => false)
-        //     )
-        // })
       }
     );
   });
@@ -445,3 +374,37 @@ function expectToRow(row, expectors) {
     });
   }
 }
+
+describe("DataSelector", () => {
+  let key: string;
+
+  class ASelector extends DataSelector(AEntity, {
+    relations: { oneAToOneB: true },
+  } as const) {}
+
+  const ASelectorSource = DataEntitySource.createFromConnection(
+    ASelector,
+    getTestConnection
+  );
+
+  beforeAll(async () => {
+    key = await ASource.insertKey({
+      oneAToOneB: await BSource.insertKey({}),
+    });
+  });
+
+  it("expect to not load relation.", async () => {
+    expect((await ASource.get(key))?.oneAToOneB).toBeFalsy();
+  });
+
+  it("expect to load relation because source selection.", async () => {
+    expect(
+      (await ASource.select({ relations: { oneAToOneB: true } }).get(key))
+        ?.oneAToOneB
+    ).toBeTruthy();
+  });
+
+  it("expect to load relation", async () => {
+    expect((await ASelectorSource.get(key))?.oneAToOneB).toBeTruthy();
+  });
+});

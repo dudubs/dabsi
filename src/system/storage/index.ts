@@ -9,11 +9,11 @@ import { Inject, Module } from "@dabsi/typedi";
 @Module({})
 export default class StorageModule {
   constructor(
-    @Inject() dsm: DataModule,
-    @Inject() cli: Cli,
-    @Inject() data: DataContext,
-    @Inject() dbModule: DbModule,
-    @Inject() storage: Storage
+    dsm: DataModule,
+    cli: Cli,
+    data: DataContext,
+    dbModule: DbModule,
+    storage: Storage
   ) {
     cli.command("storage", cli => {
       cli.command("clean", cli =>

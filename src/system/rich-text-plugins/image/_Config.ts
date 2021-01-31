@@ -4,7 +4,7 @@ import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
 import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entities/ImageEntity";
-import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
+import RichTextConfigResolver from "@dabsi/system/rich-text/configResolver";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { DataRow } from "@dabsi/typedata/row";
 import { RpcError } from "@dabsi/typerpc/Rpc";
@@ -16,7 +16,6 @@ export default RpcConfigResolver(
     config: RichTextConfigResolver,
     storageManager: StorageManager,
     rpcReq: RpcRequest,
-    // xxx: Resolver(),
     data: DataContext,
     session: DataRow(RequestSession),
   },
@@ -24,10 +23,11 @@ export default RpcConfigResolver(
     $({
       async upload({ field }) {
         if (!c.config.editable) throw new RpcError("Not editable.");
-        if (!c.config.image) throw new RpcError("Not allowed.");
+        if (!c.config.allowAll && !c.config.image)
+          throw new RpcError("Not allowed.");
         const buffer = c.rpcReq.body[field];
         const file = await c.storageManager.upload(
-          "rti", // rich-text-image
+          "rt-image", // rich-text-image
           "png",
           await sharp(buffer).png().toBuffer()
         );

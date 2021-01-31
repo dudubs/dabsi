@@ -24,6 +24,6 @@ function _method(
   ...args: ResolverContext[]
 ): ResolverContext {
   context = Object.create(context);
-  Resolver.provide.apply(Resolver, args);
+  Object.assign(context, ...args);
   return context;
 }

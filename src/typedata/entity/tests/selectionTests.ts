@@ -3,11 +3,7 @@ import { ASource, BSource, CSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import {
-  AEntity,
-  BEntity,
-  CEntity,
-} from "@dabsi/typeorm/relations/tests/TestEntities";
+import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 import { forEachTestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;

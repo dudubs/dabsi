@@ -8,8 +8,8 @@ import { StorageFile } from "./entities/StorageFile";
 @Injectable()
 export default class StorageManager {
   constructor(
-    @Inject() protected storage: Storage,
-    @Inject() protected data: DataContext,
+    protected storage: Storage,
+    protected data: DataContext,
     @Inject(RequestSession) protected session: DataRow<RequestSession>
   ) {}
 

@@ -14,6 +14,7 @@ import ExpressModule from "@dabsi/modules/express";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import ProjectPlatformInfo from "@dabsi/modules/ProjectPlatformInfo";
+import ViewModule from "@dabsi/modules/ViewModule";
 import { Inject, Module } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { DevModule } from "@dabsi/typestack/DevModule";
@@ -25,7 +26,7 @@ import tsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
 
 @Module({
-  dependencies: [DevModule, ExpressModule],
+  dependencies: [DevModule, ExpressModule, ViewModule],
 })
 export default class BrowserModule {
   scripts: string[] = [];
@@ -33,11 +34,11 @@ export default class BrowserModule {
   log = log.get("BROWSER");
 
   constructor(
-    @Inject() protected projectModule: ProjectModule,
-    @Inject() protected makeModule: MakeModule,
-    @Inject() protected runner: ModuleRunner,
-    @Inject() cli: Cli,
-    @Inject() protected loaderModule: LoaderModule
+    protected projectModule: ProjectModule,
+    protected makeModule: MakeModule,
+    protected runner: ModuleRunner,
+    cli: Cli,
+    protected loaderModule: LoaderModule
   ) {
     cli.command("browser", cli =>
       cli.command("pack", cli => cli.onRun({ after: () => this.pack() }))
@@ -89,6 +90,7 @@ export default class BrowserModule {
         platformModuleDir
       );
       if (!indexFileName) continue;
+
       this._indexFileNames!.add(indexFileName);
 
       if (/[\\\/]index\.tsx?$/.test(indexFileName)) {
@@ -197,14 +199,12 @@ export default class BrowserModule {
     }
   }
   protected _generatedImports() {
-    return (
-      this.mainProjectPlatformInfo.generatedIndexFileName,
-      `import "${this.projectModule.mainTsConfigPaths.getTsPath(
-        path.join(DABSI_SRC_PATH, "browser/register"),
-        this.mainProjectPlatformInfo.generatedDir
-      )}";\n`
-    );
+    return `import "${this.projectModule.mainTsConfigPaths.getTsPath(
+      path.join(DABSI_SRC_PATH, "browser/register"),
+      this.mainProjectPlatformInfo.generatedDir
+    )}";\n`;
   }
+
   protected async _makeIndexFile() {
     let code = ``;
 
@@ -239,11 +239,10 @@ export default class BrowserModule {
 
     this._indexFileNames = new Set();
     this._testsFileNames = new Set();
-    // await this.hooks.make();
     await this._makeConfigs();
 
     await this.projectModule.onBuildCommonFiles.invoke(commonFileName => {
-      this._indexFileNames?.add(commonFileName);
+      this._indexFileNames!.add(commonFileName);
     });
 
     await this._makeIndexFile();

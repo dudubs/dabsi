@@ -1,10 +1,11 @@
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { values } from "@dabsi/common/object/values";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { ServerModule } from "@dabsi/modules/ServerModule";
-import { Inject, Module, Resolver } from "@dabsi/typedi";
+import { Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import path from "path";
@@ -32,11 +33,11 @@ export class DbModule {
   };
 
   constructor(
-    @Inject() cli: Cli,
-    @Inject() serverModule: ServerModule,
-    @Inject() runner: ModuleRunner,
-    @Inject() protected projectModule: ProjectModule,
-    @Inject() protected loaderModule: LoaderModule
+    cli: Cli,
+    serverModule: ServerModule,
+    runner: ModuleRunner,
+    protected projectModule: ProjectModule,
+    protected loaderModule: LoaderModule
   ) {
     cli.command("db", cli =>
       cli.command("sync", cli =>
@@ -65,17 +66,24 @@ export class DbModule {
     getMetadataArgsStorage().relations.forEach(r => {
       if (typeof r.type !== "function") return;
       const entityType = !r.type.prototype ? r.type() : r.type;
-      if (!isEntityType(entityType)) return;
+      if (!this._allEntityTypes.has(entityType)) return;
       this._loadEntityType(entityType);
     });
   }
 
+  @Lazy() protected get _allEntityTypes() {
+    return getMetadataArgsStorage()
+      .tables.toSeq()
+      .map(t => t.target)
+      .filter(t => typeof t === "function")
+      .toSet();
+  }
   protected async _loadEntityModule(moduleFileName) {
     this.log.trace(() => `Load entities file ${moduleFileName}.`);
     const moduleExports = require(moduleFileName);
     for (const target of values<Function>(moduleExports)) {
       if (this.entityTypes.has(<any>target)) continue;
-      if (isEntityType(target)) {
+      if (this._allEntityTypes.has(target)) {
         this._loadEntityType(target);
       }
     }
@@ -128,18 +136,4 @@ export class DbModule {
     this.queryRunner = this.connection.createQueryRunner();
     await this.afterInit.invoke();
   }
-}
-
-/*
-
-TypeMap();
-@DbProvider({})
-
- */
-
-function isEntityType(target) {
-  return (
-    typeof target === "function" &&
-    getMetadataArgsStorage().tables.find(x => x.target === target)
-  );
 }

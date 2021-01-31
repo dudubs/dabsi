@@ -17,9 +17,9 @@ export default class ExpressForBrowserAndDevModule {
   log = this.devModule.log.get("BROWSER");
 
   constructor(
-    @Inject() protected devModule: DevModule,
-    @Inject() expressModule: ExpressModule,
-    @Inject() browserModule: BrowserModule
+    protected devModule: DevModule,
+    expressModule: ExpressModule,
+    browserModule: BrowserModule
   ) {
     browserModule.scripts.push("/reload/reload.js");
 

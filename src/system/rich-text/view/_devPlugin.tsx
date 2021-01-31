@@ -23,14 +23,16 @@ RichTextEditorPlugins.push(editor => {
     <>
       <Button
         onClick={() => {
-          console.log(JSON.stringify(convertToRaw(editor.content), null, 2));
+          console.log(
+            JSON.stringify(convertToRaw(editor.store.content), null, 2)
+          );
         }}
       >
         log state
       </Button>
       <Button
         onClick={() => {
-          editor.command("insertAtomicBlock", "test", "MUTABLE", {});
+          editor.store.command("insertAtomicBlock", "test", "MUTABLE", {});
         }}
       >
         add test atomic block

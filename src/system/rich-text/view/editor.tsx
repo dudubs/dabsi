@@ -1,31 +1,24 @@
-import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { Fn } from "@dabsi/common/typings2/Fn";
+import { touchObject } from "@dabsi/common/object/touchObject";
 import { WeakId } from "@dabsi/common/WeakId";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { ReactWrapper } from "@dabsi/react/ReactWrapper";
 import { View } from "@dabsi/react/view/View";
 import { ViewState } from "@dabsi/react/view/ViewState";
+import { RichTextStore } from "@dabsi/system/rich-text/common/store";
 import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
-import RichTextEditorCommands from "@dabsi/system/rich-text/view/RichTextEditorCommands";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import {
   CompositeDecorator,
-  ContentState,
   Editor,
   EditorState,
   getDefaultKeyBinding,
-  Modifier,
-  SelectionState,
 } from "draft-js";
 import { List } from "immutable";
-import React, { ComponentType, createContext, useEffect } from "react";
-import { createElement } from "react";
-import "./_devPlugin";
+import React, { ComponentType, createElement, useEffect } from "react";
+import "./commands/insertAtomicBlock";
 import "./hooks/_atomicBlock";
-import "./commands/_insertAtomicBlock";
-import { touchObject } from "@dabsi/common/object/touchObject";
-import { RichTextStore } from "@dabsi/system/rich-text/common/RichTextState";
+import "./_devPlugin";
 
 declare global {
   namespace Draft {
@@ -73,8 +66,6 @@ export type RichTextAtomicBlockDataComponentProps<
   draftProps: Draft.BlockComponentProps;
   data: IRichText.AtomicBlockData[K];
 };
-
-export const EditorCommands: IRichText.EditorCommands = {} as any;
 
 declare global {
   namespace IRichText {

@@ -1,6 +1,6 @@
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { OmitParameter } from "@dabsi/common/typings2/Fn";
-import RichTextCommands from "@dabsi/system/rich-text/common/RichTextCommands";
+import { RichTextCommands } from "@dabsi/system/rich-text/common/commands";
 import { ContentState, EditorState, Modifier, SelectionState } from "draft-js";
 
 export class RichTextStore {
@@ -32,10 +32,14 @@ export class RichTextStore {
     >
   >(
     method: K,
-    ...args: OmitParameter<IRichText.EditorCommands[K]>
-  ): ReturnType<IRichText.EditorCommands[K]> {
+    ...args: OmitParameter<IRichText.Commands[K]>
+  ): ReturnType<IRichText.Commands[K]> {
+    if (!RichTextCommands[method]) {
+      throw new Error(`No rich-text command like "${method}".`);
+    }
     return (RichTextCommands[method] as any)(this, ...args);
   }
+
   call<
     K extends ExtractKeys<
       typeof EditorState,

@@ -3,4 +3,4 @@ declare global {
     interface Commands {}
   }
 }
-export default {} as IRichText.Commands;
+export const RichTextCommands = {} as IRichText.Commands;

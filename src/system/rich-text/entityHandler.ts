@@ -2,12 +2,15 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
 import { Type } from "@dabsi/common/typings2/Type";
 import {
+  RichTextConfig,
   RichTextEntityData,
   RichTextEntityType,
-} from "@dabsi/system/rich-text/common/RichText";
+} from "@dabsi/system/rich-text/common/types";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataRow } from "@dabsi/typedata/row";
+import { pick } from "@dabsi/common/object/pick";
+import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 
 export type RichTextEntitySelection<
   K extends RichTextEntityType
@@ -32,14 +35,19 @@ export type RichTextEntityHandler<
   readonlySelection: RichTextEntitySelection<K>;
 
   pack(
+    config: RichTextConfig,
     row,
     unpackedData: RichTextEntityData<K>["unpacked"]
   ): RichTextEntityData<K>["packed"];
+
   unpack(
+    config: RichTextConfig,
     row,
     packedData: RichTextEntityData<K>["packed"]
   ): RichTextEntityData<K>["unpacked"];
-  readonlyUnpack(
+
+  unpackForReadonly(
+    config: RichTextConfig,
     row,
     packedData: RichTextEntityData<K>["unpacked"]
   ): RichTextEntityData<K>["readonly"];
@@ -50,7 +58,9 @@ export type _OptionsAndHandler<K extends RichTextEntityType> = {
 
   mutability: { [K in Draft.DraftEntityMutability]?: boolean };
 
-  packEntityRowKey(unpackedData: RichTextEntityData<K>["unpacked"]): string;
+  packEntityKey(unpackedData: RichTextEntityData<K>["unpacked"]): string;
+
+  readonlyKeys?: (keyof RichTextEntityData<K>["unpacked"])[];
 };
 
 export type RichTextEntityHandlerOptions<
@@ -75,16 +85,19 @@ export type RichTextEntityHandlerOptions<
   readonlySelection?: ReadonlySelection;
 
   pack?: (
+    config: RichTextConfig,
     row: RichTextEntityRow<K, PackSelection>,
     unpackedData: RichTextEntityData<K>["unpacked"]
   ) => Awaitable<RichTextEntityData<K>["packed"]>;
 
   unpack?: (
+    config: RichTextConfig,
     row: RichTextEntityRow<K, UnpackSelection>,
     packedData: RichTextEntityData<K>["packed"]
   ) => RichTextEntityData<K>["unpacked"];
 
-  readonlyUnpack?: (
+  unpackForReadonly?: (
+    config: RichTextConfig,
     row: RichTextEntityRow<K, ReadonlySelection>,
     packedData: RichTextEntityData<K>["packed"]
   ) => RichTextEntityData<K>["readonly"];
@@ -96,9 +109,12 @@ export function RichTextEntityHandler({
   unpackSelection = selection,
   readonlySelection = unpackSelection,
   removeSelection = unpackSelection,
+  readonlyKeys,
   pack = () => null,
   unpack = () => null,
-  readonlyUnpack = unpack,
+  unpackForReadonly = !readonlyKeys
+    ? unpack
+    : (...args) => pick(unpack(...args), readonlyKeys),
   ...options
 }: RichTextEntityHandlerOptions<
   any,
@@ -114,6 +130,6 @@ export function RichTextEntityHandler({
     removeSelection: { pick: [], ...removeSelection },
     pack,
     unpack,
-    readonlyUnpack,
+    unpackForReadonly,
   };
 }

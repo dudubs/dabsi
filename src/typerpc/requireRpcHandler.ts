@@ -19,7 +19,7 @@ export default function requireRpcHandler(fileName: string): any {
     path.dirname(fileName),
     handlerName + ".ts"
   ));
-  const handler = module[handlerName];
+  const handler = module["default"];
   if (typeof handler !== "function") {
     throw new Error(`No rpc handler for "${fileName}".`);
   }

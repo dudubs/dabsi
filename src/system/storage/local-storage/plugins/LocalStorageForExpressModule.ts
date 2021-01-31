@@ -9,9 +9,8 @@ import path from "path";
 @Module()
 export default class LocalStorageForExpressModule {
   constructor(
-    @Inject()
     expressModule: ExpressModule,
-    @Inject()
+
     localStorageModule: LocalStorageModule
   ) {
     expressModule.beforeBuildRoutes(app => {

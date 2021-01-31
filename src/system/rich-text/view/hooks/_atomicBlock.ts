@@ -1,4 +1,4 @@
-import { createSelectionState } from "@dabsi/system/rich-text/common/DraftUtils";
+import { createSelectionState } from "@dabsi/system/rich-text/common/draftUtils";
 import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
 
 RichTextEditorPlugins.push(editor => {

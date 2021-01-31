@@ -7,10 +7,7 @@ import express from "express";
 
 @Module()
 export default class ExpressForBorwserModule {
-  constructor(
-    @Inject() expressModule: ExpressModule,
-    @Inject() browserModule: BrowserModule
-  ) {
+  constructor(expressModule: ExpressModule, browserModule: BrowserModule) {
     expressModule
       .afterBuildRoutes(app => {
         app.get("/*", (req, res) => {

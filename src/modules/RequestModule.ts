@@ -50,7 +50,7 @@ export default class RequestModule {
   }
 
   constructor(
-    @Inject() cli: Cli,
+    cli: Cli,
     @Inject(c => c) protected runnerContext: ResolverContext
   ) {
     cli.command("check", cli =>

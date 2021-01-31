@@ -1,4 +1,4 @@
-import RichTextPluginsRpc from "@dabsi/system/rich-text/common/RichTextPluginsRpc";
+import RichTextPluginsRpc from "@dabsi/system/rich-text/common/pluginsRpc";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 

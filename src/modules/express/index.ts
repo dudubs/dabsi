@@ -22,8 +22,8 @@ export default class ExpressModule {
   log = this.serverModule.log.get("EXPRESS");
 
   constructor(
-    @Inject() protected serverModule: ServerModule,
-    @Inject() protected requestModule: RequestModule
+    protected serverModule: ServerModule,
+    protected requestModule: RequestModule
   ) {
     serverModule.onStart(async args => {
       this.log.info("starting ...");

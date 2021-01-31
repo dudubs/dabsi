@@ -50,6 +50,10 @@ export default abstract class AbstractDataQueryTranslatorToSql
     return this.connection.driver.escape(name);
   }
 
+  translateCountRefs(): any {
+    throw new Error("Not support.");
+  }
+
   translateIsNull(inverse: boolean, exp: string): string {
     return `${exp} IS${inverse ? " NOT" : ""} NULL`;
   }

@@ -171,7 +171,7 @@ export namespace DataEntityCursor {
         }
 
         const columnMetadata =
-          DataEntityInfo.propertyNameToColumnMetadata[propertyName];
+          DataEntityInfo.propertyColumnMetadataMap[propertyName];
         if (columnMetadata) {
           columnKeys.push({ metadata: columnMetadata, key: value });
           continue;

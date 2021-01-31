@@ -12,10 +12,10 @@ import RequestModule from "../../../modules/RequestModule";
 @Module({})
 export default class SystemForExpressModule {
   constructor(
-    @Inject() rpcModule: RpcModule,
-    @Inject() expressModule: ExpressModule,
-    @Inject() systemModule: SystemModule,
-    @Inject() cli: Cli
+    rpcModule: RpcModule,
+    expressModule: ExpressModule,
+    systemModule: SystemModule,
+    cli: Cli
   ) {
     cli.command("check", cli =>
       cli.onRun(() => {

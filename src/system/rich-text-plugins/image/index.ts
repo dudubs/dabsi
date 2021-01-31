@@ -41,18 +41,18 @@ export default class RichTextImageModule {
           relations: { file: { pick: ["url"] } },
         },
 
-        packEntityRowKey: unpackedData => unpackedData.key,
+        packEntityKey: unpackedData => unpackedData.key,
 
-        pack: (row, { url }) => {
+        pack: (_, row, { url }) => {
           return null;
         },
 
-        unpack: row => ({
+        unpack: (_, row) => ({
           url: row.file!.url,
           key: row.$key,
         }),
 
-        readonlyUnpack: row => ({ url: row.file!.url }),
+        readonlyKeys: ["url"],
       });
     });
   }

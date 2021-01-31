@@ -1,3 +1,4 @@
+import { WeakId } from "@dabsi/common/WeakId";
 import { DataContext } from "@dabsi/modules/data/context";
 import { EmptyDataCursor } from "@dabsi/typedata/cursor";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
@@ -7,10 +8,7 @@ import RequestModule, { Request } from "../../RequestModule";
 
 @Module()
 export default class DataForRequestModule {
-  constructor(
-    @Inject() dataModule: DataModule,
-    @Inject() requestModule: RequestModule
-  ) {
+  constructor(dataModule: DataModule, requestModule: RequestModule) {
     Resolver.provide(requestModule.context);
     requestModule.contextResolvers.push(
       Resolver.consume([Request], async req => {
@@ -18,13 +16,8 @@ export default class DataForRequestModule {
         req.onEnd(() => release());
         return DataContext.provide(
           () =>
-            new DataContext(
-              entityType =>
-                new DataEntitySource(
-                  entityType,
-                  () => queryRunner,
-                  EmptyDataCursor
-                )
+            new DataContext(entityType =>
+              DataEntitySource.fromQueryRunner(entityType, queryRunner)
             )
         );
       })

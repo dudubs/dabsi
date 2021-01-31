@@ -11,7 +11,7 @@ import { QueryRunner } from "typeorm";
 @Module()
 export default class DataModule {
   constructor(
-    @Inject() protected dbModule: DbModule,
+    protected dbModule: DbModule,
     @Inject(c => c) protected context: ResolverContext
   ) {
     Resolver.provide(
@@ -38,28 +38,11 @@ export default class DataModule {
     return this.dbModule.getConnection();
   }
 
-  @Lazy() get queryRunnerPool() {
-    if (this.connection.options.type === "sqlite") {
-      if (this.connection.options.database === ":memory:") return;
-      return new SqlliteQueryRunnerPool(this.connection);
-    }
-  }
-
   async createQueryRunner(): Promise<
     [qr: QueryRunner, release: () => Promise<void>]
   > {
-    if (this.queryRunnerPool) {
-      const queryRunner = await this.queryRunnerPool.acquire();
-      return [
-        queryRunner,
-        () => {
-          return this.queryRunnerPool!.release(queryRunner);
-        },
-      ];
-    } else {
-      const queryRunner = this.connection.createQueryRunner();
-      await queryRunner.connect();
-      return [queryRunner, () => queryRunner.release()];
-    }
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    return [queryRunner, () => queryRunner.release()];
   }
 }

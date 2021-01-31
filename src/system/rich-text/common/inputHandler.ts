@@ -1,8 +1,8 @@
 import {
   RichTextInput,
   RichTextInputElement,
-} from "@dabsi/system/rich-text/common/RichTextInput";
-import { RichTextInputValue } from "@dabsi/system/rich-text/common/RichTextInputValue";
+} from "@dabsi/system/rich-text/common/input";
+import { RichTextInputValue } from "@dabsi/system/rich-text/common/value";
 import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   ErrorOrValue,
@@ -15,7 +15,7 @@ import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
 
 type T = RichTextInput;
 
-export class RichTextInputHandler
+export default class RichTextInputHandler
   extends AbstractInputHandler<T>
   implements IWidgetHandler<T> {
   $pluginsConfig: RpcChildConfig<
@@ -51,7 +51,7 @@ export class RichTextInputHandler
             : null;
 
         if (docKey) {
-          return this.config.context.unpack(docKey, false);
+          return this.config.context.unpack(this.config, docKey, false);
         }
         return null;
       },

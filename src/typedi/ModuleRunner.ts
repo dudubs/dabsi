@@ -14,6 +14,8 @@ export class ModuleRunner {
 
   context = { ...ModuleRunner.provide(() => this) };
 
+  mainModuleTarget: ModuleTarget | null = null;
+
   constructor() {}
 
   resolve<T>(resolver: Resolver<T>): T {
@@ -30,18 +32,8 @@ export class ModuleRunner {
     }
   }
 
-  protected _mainModuleTarget: ModuleTarget | null = null;
-
-  get mainModuleTarget(): ModuleTarget | null {
-    return this._mainModuleTarget;
-  }
-
   getInstance<T>(target: Constructor<T>): T {
     return touchMap(this.moduleInstanceMap, target, () => {
-      if (!this._mainModuleTarget) {
-        this._mainModuleTarget = target;
-      }
-
       log.trace(() => `init module ${target.name}`);
       const argsResolver = getConstructorParamsResolver(target);
       const options = moduleMetadataMap.get(target)!;

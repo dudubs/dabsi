@@ -5,8 +5,8 @@ import {
 } from "@dabsi/browser/ImageUtils";
 import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFormData";
 import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
-import { insertImage } from "@dabsi/system/rich-text-plugins/image/view/insertImage";
-import { RichTextEditor } from "@dabsi/system/rich-text/view/RichTextEditor";
+
+import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import ImageIcon from "@material-ui/icons/Image";
@@ -17,7 +17,11 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ({ editor }: { editor: RichTextEditor }): ReactElement {
+export function MuiRichTextImageButton({
+  editor,
+}: {
+  editor: RichTextEditor;
+}): ReactElement {
   const classes = useStyles();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +65,7 @@ export default function ({ editor }: { editor: RichTextEditor }): ReactElement {
             () => connection.upload({ field: "image" })
           );
 
-          insertImage(editor, url, key);
+          editor.store.command("insertImage", url, key);
         }}
       />
     </>

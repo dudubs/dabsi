@@ -59,7 +59,7 @@ export default function (
     }
 
     const column =
-      entityCursor.entityInfo.propertyNameToColumnMetadata[propertyName];
+      entityCursor.entityInfo.propertyColumnMetadataMap[propertyName];
     if (column) {
       entity[propertyName] = propertyValue;
       continue;

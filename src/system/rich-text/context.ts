@@ -10,12 +10,12 @@ import { DataContext } from "@dabsi/modules/data/context";
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextModule from "@dabsi/system/rich-text";
-import { RichTextConfig } from "@dabsi/system/rich-text/common/RichText";
-import RichTextPluginsRpc from "@dabsi/system/rich-text/common/RichTextPluginsRpc";
+import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
+import RichTextPluginsRpc from "@dabsi/system/rich-text/common/pluginsRpc";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
-import RichTextConfigResolver from "@dabsi/system/rich-text/RichTextConfigResolver";
-import { RichTextEntityHandler } from "@dabsi/system/rich-text/RichTextEntityHandler";
+import RichTextConfigResolver from "@dabsi/system/rich-text/configResolver";
+import { RichTextEntityHandler } from "@dabsi/system/rich-text/entityHandler";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataUnion } from "@dabsi/typedata/union";
 import { Inject, Injectable, ResolverType } from "@dabsi/typedi";
@@ -40,9 +40,9 @@ export class RichTextContext {
   entites = this.data.getSource(RichTextEntity);
 
   constructor(
-    @Inject() public module: RichTextModule,
+    public module: RichTextModule,
     @Inject(RequestSession) public session: DataRow<RequestSession>,
-    @Inject() public data: DataContext,
+    public data: DataContext,
     @Inject(_createPluginsConfigResolver)
     protected _createPluginsConfig: ResolverType<
       typeof _createPluginsConfigResolver
@@ -58,15 +58,16 @@ export class RichTextContext {
   }
 
   async pack(
+    config: RichTextConfig,
     content: Draft.RawDraftContentState
   ): Promise<RichTextPackedContent> {
     const entityTypes = new Set();
-    const entityChildren = {};
-    const entityChildrenSelection: any = {};
+    const entityChildMap = {};
+    const entityChildSelectionMap: any = {};
     const entityKeys: string[] = [];
 
     const unpackedEntities: {
-      entityRowKey: string;
+      entityKey: string;
       key: string;
       handler: RichTextEntityHandler<any>;
       type: string;
@@ -74,17 +75,26 @@ export class RichTextContext {
       data: any;
     }[] = [];
 
-    for (const [key, { type, data: unpackedData, mutability }] of entries(
+    const invalidKeys = new Set<string>();
+
+    for (const [nKey, { type, data: unpackedData, mutability }] of entries(
       content.entityMap
     )) {
+      const key = String(nKey);
       const handler = this.module.getEntityHandler(type);
-      if (touchSet(entityTypes, type)) {
-        entityChildren[type] = handler.entityType;
-        entityChildrenSelection[type] = handler.packSelection;
-      }
-      const entityRowKey = handler.packEntityRowKey(unpackedData);
 
-      entityKeys.push(entityRowKey);
+      const entityKey = handler.packEntityKey(unpackedData);
+
+      if (!entityKey) {
+        invalidKeys.add(key);
+        continue;
+      }
+
+      if (touchSet(entityTypes, type)) {
+        entityChildMap[type] = handler.entityType;
+        entityChildSelectionMap[type] = handler.packSelection;
+      }
+      entityKeys.push(entityKey);
 
       if (!handler.mutability?.[mutability])
         throw new Error(
@@ -93,7 +103,7 @@ export class RichTextContext {
 
       unpackedEntities.push({
         key,
-        entityRowKey,
+        entityKey,
         handler,
         type,
         mutability,
@@ -102,44 +112,42 @@ export class RichTextContext {
     }
 
     const entityUnion = DataUnion(RichTextEntity, {
-      children: entityChildren,
+      children: entityChildMap,
     });
 
     const entityRowMap = await this.module.data
       .getSource(entityUnion)
       .select({
         pick: [],
-        children: entityChildrenSelection,
+        children: entityChildSelectionMap,
       })
       .filter({ $is: entityKeys })
       .getRowMap();
 
-    const invalidKeys = new Set<string>();
-
     const packed: RichTextPackedContent = {
       text: "",
-
-      entityRowKeys: Object.keys(entityRowMap),
+      entityKeys: Object.keys(entityRowMap),
       entityMap: {},
       blocks: [],
     };
 
     for (const {
       handler,
-      entityRowKey,
+      entityKey,
       key,
       mutability: unpackedMutability,
       data: unpackedData,
     } of unpackedEntities) {
-      const entityRow = entityRowMap[entityRowKey];
+      const entityRow = entityRowMap[entityKey];
+
       if (!entityRow) {
         invalidKeys.add(key);
         continue;
       }
-      const packedData = await handler.pack(entityRow, unpackedData);
+      const packedData = await handler.pack(config, entityRow, unpackedData);
       const packedMutability = RichTextEntityMutablility[unpackedMutability];
 
-      packed.entityMap[key] = [entityRowKey, packedMutability, packedData];
+      packed.entityMap[key] = [entityKey, packedMutability, packedData];
     }
 
     for (const [
@@ -154,7 +162,7 @@ export class RichTextContext {
       },
     ] of content.blocks.entries()) {
       const handler = this.module.getBlockHandler(type);
-      const packedData = await handler.pack(unpackedData);
+      const packedData = await handler.pack(config, unpackedData);
 
       packed.text += (blockIndex ? "\n" : "") + text.replace(/\n/g, " ");
 
@@ -171,20 +179,24 @@ export class RichTextContext {
       ][] = [];
 
       for (const { style: type, offset, length } of unpackedStyleRanges) {
-        if (!this.module.styleTypes.has(type)) continue;
+        if (!this.module.styleTypes.has(type)) {
+          throw new Error(`not-allowed style "${type}".`);
+        }
         packedStyleRanges.push([type, offset, length]);
       }
       for (const { key, offset, length } of unpackedEntityRanges) {
-        if (invalidKeys.has(<any>key)) continue;
+        if (invalidKeys.has(String(key))) continue;
         packedEntityRanges.push([key, offset, length]);
       }
 
       packed.blocks.push({
         type,
-        depth,
-        styleRanges: packedStyleRanges,
-        entityRanges: packedEntityRanges,
-        data: packedData,
+        depth: depth || undefined,
+        styleRanges: packedStyleRanges.length ? packedStyleRanges : undefined,
+        entityRanges: packedEntityRanges.length
+          ? packedEntityRanges
+          : undefined,
+        data: packedData ?? undefined,
       });
     }
 
@@ -192,24 +204,27 @@ export class RichTextContext {
   }
 
   async unpack(
+    config: RichTextConfig,
     docKey: string,
     readonly: boolean
   ): Promise<Draft.RawDraftContentState | null> {
     const doc = await this.docs.get(docKey);
     if (!doc) return null;
 
-    const entityChildrenSelection = {};
+    const entityChildSelectionMap = {};
 
     const entityUnion = DataUnion(RichTextEntity, {
       children: mapObject(this.module.entityTypeHandlerMap, (handler, type) => {
-        entityChildrenSelection[type] = handler?.unpackSelection;
+        entityChildSelectionMap[type] = readonly
+          ? handler!.readonlySelection
+          : handler!.unpackSelection;
         return <any>handler!.entityType;
       }),
     });
 
     const entityRowMap = await this.data
       .getSource(entityUnion)
-      .select({ pick: [], children: <any>entityChildrenSelection })
+      .select({ pick: [], children: <any>entityChildSelectionMap })
       .getRowMap();
 
     const blockTextMap = doc.text.split("\n");
@@ -230,8 +245,8 @@ export class RichTextContext {
       const entityRow = entityRowMap[entityRowKey];
       const handler = this.module.getEntityHandler(entityRow.$type);
       const unpackedData = await (readonly
-        ? handler.readonlyUnpack
-        : handler.unpack)(entityRow, packedData);
+        ? handler.unpackForReadonly
+        : handler.unpack)(config, entityRow, packedData);
       const unpackedMutability = <any>(
         RichTextEntityMutablility[packedMutability]
       );
@@ -250,15 +265,20 @@ export class RichTextContext {
       unpackedBlocks.push({
         type,
         key: "b" + index,
-        depth,
-        data: await (readonly ? handler.readonlyUnpack : handler.unpack)(data),
+        depth: depth || 0,
+        data: await (readonly ? handler.unpackForReadonly : handler.unpack)(
+          config,
+          data
+        ),
         text: blockTextMap[index],
-        inlineStyleRanges: styleRanges.map(([style, offset, length]) => ({
-          style: style as any,
-          offset,
-          length,
-        })),
-        entityRanges: entityRanges.map(([key, offset, length]) => ({
+        inlineStyleRanges: (styleRanges || []).map(
+          ([style, offset, length]) => ({
+            style: style as any,
+            offset,
+            length,
+          })
+        ),
+        entityRanges: (entityRanges || []).map(([key, offset, length]) => ({
           key,
           offset,
           length,
@@ -268,8 +288,12 @@ export class RichTextContext {
 
     return { blocks: unpackedBlocks, entityMap: unpackedEntityMap };
   }
-  async insert(content: Draft.RawDraftContentState): Promise<string> {
-    const packed = await this.pack(content);
+
+  async insertDocument(
+    config: RichTextConfig,
+    content: Draft.RawDraftContentState
+  ): Promise<string> {
+    const packed = await this.pack(config, content);
 
     const docKey = await this.docs.insertKey({
       text: packed.text,
@@ -282,13 +306,17 @@ export class RichTextContext {
 
     await this.docs //
       .at("entities", docKey)
-      .add(packed.entityRowKeys);
+      .add(packed.entityKeys);
 
     return docKey;
   }
 
-  async update(content: Draft.RawDraftContentState, docKey: string) {
-    const packed = await this.pack(content);
+  async updateDocument(
+    config: RichTextConfig,
+    docKey: string,
+    content: Draft.RawDraftContentState
+  ) {
+    const packed = await this.pack(config, content);
 
     await this.docs.update(docKey, {
       text: packed.text,
@@ -298,22 +326,41 @@ export class RichTextContext {
       }),
     });
 
-    await this.docs //
-      .at("entities", docKey)
-      .add(packed.entityRowKeys);
+    const oldEntityKeys: string[] = [];
+    const newEntityKeys: string[] = [];
 
+    const currentEntityKeys = new Set(
+      await this.docs.at("entities", docKey).getKeys()
+    );
+    const packedEntityKeys = new Set(packed.entityKeys);
+
+    for (const entityKey of packed.entityKeys) {
+      if (!currentEntityKeys.has(entityKey)) {
+        newEntityKeys.push(entityKey);
+      }
+    }
+    for (const entityKey of currentEntityKeys) {
+      if (!packedEntityKeys.has(entityKey)) {
+        oldEntityKeys.push(entityKey);
+      }
+    }
+
+    const docEntities = this.docs.at("entities", docKey);
     // remove old entities
-    const removedKeys = await this.entites
-      .filter({
-        $and: [
-          { $has: { documents: { $is: docKey } } },
-          { $isNot: packed.entityRowKeys },
-        ],
-      })
-      .remove();
+    await docEntities.add(newEntityKeys);
+    await docEntities.remove(oldEntityKeys);
 
+    // TODO: register RichTextEntity as resource without handler.
     await this.entites
-      .filter({ $and: [{ $is: removedKeys }, { $notHas: "documents" }] })
+      .filter({ $and: [{ $is: oldEntityKeys }, { $notHas: "documents" }] })
+      .delete();
+  }
+
+  async deleteDocument(config: RichTextConfig, docKey: string) {
+    const entityKeys = await this.docs.at("entities", docKey).getKeys();
+    await this.docs.delete(docKey);
+    await this.entites
+      .filter({ $and: [{ $is: entityKeys }, { $notHas: "documents" }] })
       .delete();
   }
 }
@@ -329,10 +376,10 @@ export type RichTextEntityRange = [key: number, offset: number, length: number];
 
 export type RichTextPackedBlock = {
   type: string;
-  depth: number;
-  data: any;
-  styleRanges: RichTextStyleRange[];
-  entityRanges: RichTextEntityRange[];
+  depth: number | undefined;
+  data: Record<string, any> | undefined;
+  styleRanges: RichTextStyleRange[] | undefined;
+  entityRanges: RichTextEntityRange[] | undefined;
 };
 
 export type RichTextPackedEntity = [
@@ -340,9 +387,10 @@ export type RichTextPackedEntity = [
   mutability: RichTextEntityMutablility,
   packedData: any
 ];
+
 export type RichTextPackedContent = {
   text: string;
   blocks: RichTextPackedBlock[];
   entityMap: Record<string, RichTextPackedEntity>;
-  entityRowKeys: string[];
+  entityKeys: string[];
 };

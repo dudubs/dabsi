@@ -63,7 +63,7 @@ export default (source: DataEntitySource<any>, data: DataInsert<any>) => {
     }
 
     const column =
-      entityCursor.entityInfo.propertyNameToColumnMetadata[propertyName];
+      entityCursor.entityInfo.propertyColumnMetadataMap[propertyName];
     if (!column) throw new Error(`Invalid property ${propertyName}`);
     entity[propertyName] = propertyValue;
   }

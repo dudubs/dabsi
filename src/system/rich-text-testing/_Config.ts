@@ -1,6 +1,6 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RichTextTestingRpc from "@dabsi/system/rich-text-testing/common/RichTextTestingRpc";
-import { RichTextContext } from "@dabsi/system/rich-text/RichTextContext";
+import { RichTextContext } from "@dabsi/system/rich-text/context";
 import { ContentState, convertToRaw } from "draft-js";
 
 export default RpcConfigResolver(

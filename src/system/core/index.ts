@@ -12,8 +12,8 @@ export default class SystemModule {
   log = log.get("SYSTEM");
 
   constructor(
-    @Inject() protected requestModule: RequestModule,
-    @Inject() protected rpcModule: RpcModule
+    protected requestModule: RequestModule,
+    protected rpcModule: RpcModule
   ) {}
 
   async check(context: ResolverContext) {

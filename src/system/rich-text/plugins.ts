@@ -6,20 +6,20 @@ import {
   RichTextConfig,
   RichTextElement,
   RichTextEntityType,
-} from "@dabsi/system/rich-text/common/RichText";
+} from "@dabsi/system/rich-text/common/types";
 import {
   RichTextInputConfig,
   RichTextInputElement,
-} from "@dabsi/system/rich-text/common/RichTextInput";
+} from "@dabsi/system/rich-text/common/input";
 import {
   RichTextBlockHandler,
   RichTextBlockHandlerOptions,
-} from "@dabsi/system/rich-text/RichTextBlockHandler";
+} from "@dabsi/system/rich-text/blockHandler";
 import {
   RichTextEntityHandler,
   RichTextEntityHandlerOptions,
   RichTextEntitySelection,
-} from "@dabsi/system/rich-text/RichTextEntityHandler";
+} from "@dabsi/system/rich-text/entityHandler";
 
 export class RichTextPlugins {
   buildInputElement = Hookable<

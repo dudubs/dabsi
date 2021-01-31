@@ -5,7 +5,6 @@ import { Hookable } from "@dabsi/modules/Hookable";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import {
   getDesignParamTypes,
-  Inject,
   isModuleTarget,
   Module,
   moduleMetadataMap,
@@ -18,26 +17,20 @@ import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
 import path from "path";
 import { touchSet } from "../common/map/touchSet";
 
-@Module()
+@Module({
+  dependencies: [],
+})
 export default class ProjectModule {
   projectMapInfo!: Record<string, ProjectInfo>;
 
   mainProject!: ProjectInfo;
 
-  providers: { error: Error; fileName: string }[] = [];
-
   allProjectModules!: ProjectModuleInfo[];
 
   constructor(
-    @Inject() protected runner: ModuleRunner,
-    @Inject() protected loaderModule: LoaderModule
-  ) {
-    // makeModule.onMake(() => this.load());
-    // cli.command(
-    //   "check",
-    //   new Cli().onRun(() => this.load())
-    // );
-  }
+    protected runner: ModuleRunner,
+    protected loaderModule: LoaderModule
+  ) {}
 
   onBuildCommonFiles = Hookable<
     (callback: (commonFileName: string) => Awaitable) => Awaitable
@@ -174,6 +167,12 @@ export default class ProjectModule {
 
     for (const projectModuleInfo of this.allProjectModules) {
       await this.onProjectModuleLoaded.invoke(projectModuleInfo);
+    }
+
+    if (!this.mainProject) {
+      console.log(this.runner.mainModuleTarget);
+
+      throw new Error("No loaded main proejct.");
     }
   }
 }

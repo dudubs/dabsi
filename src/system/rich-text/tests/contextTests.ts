@@ -52,10 +52,10 @@ declare global {
 const ModuleTester = ({ entityTypes = [] as Function[] }) =>
   Tester.beforeAll(async () => {
     const moduleRunner = new ModuleRunner();
-    moduleRunner.getInstance(CliModule);
-    moduleRunner.getInstance(TestDbModule);
-    moduleRunner.getInstance(DataModule);
-    const dbModule = moduleRunner.getInstance(DbModule);
+    moduleRunner.resolveInstance(CliModule);
+    moduleRunner.resolveInstance(TestDbModule);
+    moduleRunner.resolveInstance(DataModule);
+    const dbModule = moduleRunner.resolveInstance(DbModule);
     dbModule.entityTypes.addAll(findEntities(entityTypes));
     await dbModule.init();
     const data = moduleRunner.resolve(DataContext);
@@ -69,7 +69,7 @@ const ModuleTester = ({ entityTypes = [] as Function[] }) =>
 
 const t = ModuleTester({ entityTypes: [RichTextDocument] }).beforeAll(
   async t => {
-    const richTextModule = await t.moduleRunner.getInstance(RichTextModule);
+    const richTextModule = await t.moduleRunner.resolveInstance(RichTextModule);
 
     richTextModule.install(i => {
       i.defineEntity("test", {

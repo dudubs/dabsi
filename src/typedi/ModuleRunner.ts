@@ -10,11 +10,11 @@ import {
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export class ModuleRunner {
-  moduleInstanceMap = new Map<ModuleTarget, any>();
+  instanceMap = new Map<ModuleTarget, any>();
 
   context = { ...ModuleRunner.provide(() => this) };
 
-  mainModuleTarget: ModuleTarget | null = null;
+  mainTarget: ModuleTarget | null = null;
 
   constructor() {}
 
@@ -22,23 +22,23 @@ export class ModuleRunner {
     return Resolver.resolve(resolver, this.context);
   }
 
-  *getAllInstances(): IterableIterator<{
+  *getInstances(): IterableIterator<{
     target: ModuleTarget;
     instance: any;
     metadata: ModuleMetadata;
   }> {
-    for (const [target, instance] of this.moduleInstanceMap.entries()) {
+    for (const [target, instance] of this.instanceMap.entries()) {
       yield { target, instance, metadata: moduleMetadataMap.get(target)! };
     }
   }
 
-  getInstance<T>(target: Constructor<T>): T {
-    return touchMap(this.moduleInstanceMap, target, () => {
+  resolveInstance<T>(target: Constructor<T>): T {
+    return touchMap(this.instanceMap, target, () => {
       log.trace(() => `init module ${target.name}`);
       const argsResolver = getConstructorParamsResolver(target);
       const options = moduleMetadataMap.get(target)!;
       for (const dependencyModule of options.dependencies || []) {
-        this.getInstance(dependencyModule);
+        this.resolveInstance(dependencyModule);
       }
 
       for (const provider of options.providers || []) {
@@ -54,7 +54,6 @@ export class ModuleRunner {
       );
 
       const instance = new target(...args);
-
       return instance;
     });
   }

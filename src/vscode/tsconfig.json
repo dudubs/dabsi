@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfigs/tsconfig.server.json",
+  "extends": "../../configs/tsconfig.server.json",
   "compilerOptions": {
     "outDir": "../../packages/vscode/dist",
     "module": "commonjs",

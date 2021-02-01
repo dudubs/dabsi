@@ -77,10 +77,10 @@ class TestDoc {
 
 const t = Tester.beforeAll(async () => {
   const moduleRunner = new ModuleRunner();
-  moduleRunner.getInstance(CliModule);
-  await moduleRunner.getInstance(TestDbModule);
-  const sessionModule = moduleRunner.getInstance(SessionModule);
-  const dbModule = moduleRunner.getInstance(DbModule);
+  moduleRunner.resolveInstance(CliModule);
+  await moduleRunner.resolveInstance(TestDbModule);
+  const sessionModule = moduleRunner.resolveInstance(SessionModule);
+  const dbModule = moduleRunner.resolveInstance(DbModule);
   dbModule.entityTypes.addAll(
     findEntities([TestRes1, TestRes2, TestDoc, TestRes3])
   );

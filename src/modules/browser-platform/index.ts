@@ -1,34 +1,27 @@
-import { mapObject } from "@dabsi/common/object/mapObject";
-import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { values } from "@dabsi/common/object/values";
 import Lazy from "@dabsi/common/patterns/lazy";
-import { Once } from "@dabsi/common/patterns/Once";
-import {
-  DABSI_CURRENT_PATH,
-  DABSI_PATH,
-  DABSI_ROOT_DIR,
-  DABSI_SRC_PATH,
-} from "@dabsi/index";
+import { DABSI_ROOT_DIR, DABSI_SRC_PATH } from "@dabsi/index";
 import { Cli } from "@dabsi/modules/Cli";
+import { CommonPlatformModule } from "@dabsi/modules/CommonPlatformModule";
 import ExpressModule from "@dabsi/modules/express";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import ProjectPlatformInfo from "@dabsi/modules/ProjectPlatformInfo";
-import ViewModule from "@dabsi/modules/ViewModule";
-import { Inject, Module } from "@dabsi/typedi";
+import { Module } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { DevModule } from "@dabsi/typestack/DevModule";
 import { MakeModule } from "@dabsi/typestack/MakeModule";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
-import fs from "fs";
 import * as path from "path";
 import tsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
+import { PlatformModule, PlatformModuleContext } from "../PlatformModule";
+import { ViewPlatformModule } from "../ViewPlatformModule";
 
 @Module({
-  dependencies: [DevModule, ExpressModule, ViewModule],
+  dependencies: [DevModule, ExpressModule],
 })
-export default class BrowserModule {
+export default class BrowserPlatformModule extends PlatformModule {
   scripts: string[] = [];
 
   log = log.get("BROWSER");
@@ -37,68 +30,36 @@ export default class BrowserModule {
     protected projectModule: ProjectModule,
     protected makeModule: MakeModule,
     protected runner: ModuleRunner,
-    cli: Cli,
-    protected loaderModule: LoaderModule
+    protected loaderModule: LoaderModule,
+    protected commonPlatformModule: CommonPlatformModule,
+    protected viewPlatformModule: ViewPlatformModule,
+    context: PlatformModuleContext,
+    cli: Cli
   ) {
+    super(context, "browser", [commonPlatformModule, viewPlatformModule]);
     cli.command("browser", cli =>
       cli.command("pack", cli => cli.onRun({ after: () => this.pack() }))
     );
-
-    makeModule.onMake(() => this.make());
-  }
-
-  // borwser platform info for each project
-  projectPlatformInfoMap!: Record<string, ProjectPlatformInfo>;
-
-  mainProjectPlatformInfo!: ProjectPlatformInfo;
-
-  @Once() async init() {
-    await this.projectModule.load();
-    this.projectPlatformInfoMap = mapObject(
-      this.projectModule.projectMapInfo,
-      p => new ProjectPlatformInfo(p, "browser")
-    );
-    this.mainProjectPlatformInfo = this.projectPlatformInfoMap[
-      this.projectModule.mainProject.dir
-    ];
-  }
-
-  get rootProjectPlatformInfo(): ProjectPlatformInfo {
-    return this.projectPlatformInfoMap[DABSI_PATH];
   }
 
   protected async _makeProjectModules(
-    projectPlatformInfo: ProjectPlatformInfo
+    projectPlatformModule: ProjectPlatformInfo
   ) {
     this.log.trace(
-      () => `Make project directory "${projectPlatformInfo.projectInfo.dir}".`
+      () => `Make project directory "${projectPlatformModule.project.dir}".`
     );
     for (const projectModuleInfo of values(
-      projectPlatformInfo.projectInfo.moduleInfoMap
+      projectPlatformModule.project.moduleMap
     )) {
       this.log.trace(
         () => `Make project module directory "${projectModuleInfo.dir}".`
       );
       const platformModuleDir = path.join(
         projectModuleInfo.dir,
-        projectPlatformInfo.name
+        projectPlatformModule.name
       );
 
       if (!(await this.loaderModule.isDir(platformModuleDir))) continue;
-
-      const indexFileName = await this.loaderModule.getIndexFile(
-        platformModuleDir
-      );
-      if (!indexFileName) continue;
-
-      this._indexFileNames!.add(indexFileName);
-
-      if (/[\\\/]index\.tsx?$/.test(indexFileName)) {
-        const testsFileName = await this.loaderModule.getIndexFile(
-          path.join(platformModuleDir, "tests")
-        );
-        testsFileName && this._testsFileNames!.add(testsFileName);
-      }
 
       const platformModuleTsConfigFileName = path.join(
         platformModuleDir,
@@ -115,65 +76,61 @@ export default class BrowserModule {
       await this.makeModule.makeJsonFile(platformModuleTsConfigFileName, {
         extends: relativePosixPath(
           platformModuleDir,
-          projectPlatformInfo.tsConfigFileName
+          projectPlatformModule.configFileName
         ),
       });
     }
   }
 
   protected async _makeConfigs() {
-    for (const projectPlatformInfo of values(this.projectPlatformInfoMap)) {
+    for (const project of this.projectModule.projects) {
       this.log.trace(
-        () =>
-          `Make platform ${relativePathToCurrent(
-            projectPlatformInfo.projectInfo.dir
-          )}`
+        () => `Make platform ${relativePathToCurrent(project.dir)}`
       );
 
-      await this._makeProjectModules(projectPlatformInfo);
+      await this._makeProjectModules(project.getPlatformInfo("browser"));
     }
 
     const baseConfig = {
       extends: relativePosixPath(
-        this.mainProjectPlatformInfo.projectInfo.tsConfigsDir,
+        this.projectModule.mainProject.configsDir,
         path.join(
-          this.rootProjectPlatformInfo.projectInfo.tsConfigsDir,
+          this.projectModule.mainProject.configsDir,
           "tsconfig.base.browser.json"
         )
       ),
       compilerOptions: {
-        ...this.projectModule.mainTsConfigPaths.getConfigForDir(
-          this.mainProjectPlatformInfo.projectInfo.tsConfigsDir
+        ...this.mainProjectPlatform.project.configPaths.getConfigForDir(
+          this.projectModule.mainProject.configsDir
         ),
       },
     };
 
-    const getIncludes = (xs: string[]) =>
-      mapObjectToArray(
-        this.projectPlatformInfoMap,
-        value => value.projectInfo.srcDir
-      )
+    const getPlatformFiles = (platformName: string[]) =>
+      this.projectModule.projects
         .toSeq()
-        .flatMap(dir => xs.toSeq().map(x => path.join(dir, "**", x)))
+        .map(p => p.srcDir)
+        .flatMap(dir =>
+          platformName //
+            .toSeq()
+            .map(x => path.join(dir, "**", x))
+        )
         .map(x =>
-          relativePosixPath(
-            this.mainProjectPlatformInfo.projectInfo.tsConfigsDir,
-            x
-          )
+          relativePosixPath(this.mainProjectPlatform.project.configsDir, x)
         )
         .toArray();
 
     await this.makeModule.makeJsonFile(
-      this.mainProjectPlatformInfo.tsConfigFileName,
+      this.mainProjectPlatform.configFileName,
       {
         ...baseConfig,
-        include: getIncludes(["common", "view", "browser"]),
+        include: getPlatformFiles(["common", "view", "browser"]),
       }
     );
 
     await this.makeModule.makeJsonFile(
       path.join(
-        this.mainProjectPlatformInfo.tsConfigFileName.replace(
+        this.mainProjectPlatform.configFileName.replace(
           "tsconfig.",
           "tsconfig.prod."
         )
@@ -184,79 +141,16 @@ export default class BrowserModule {
       }
     );
   }
-  _indexFileNames: Set<string> | null = null;
-  _testsFileNames: Set<string> | null = null;
-
-  protected *_getRelativeImportNames(fileNames: Iterable<string>) {
-    for (const fileName of fileNames) {
-      yield {
-        fileName,
-        importName: this.projectModule.mainTsConfigPaths.getTsPath(
-          fileName,
-          this.mainProjectPlatformInfo.generatedDir
-        ),
-      };
-    }
-  }
-  protected _generatedImports() {
-    return `import "${this.projectModule.mainTsConfigPaths.getTsPath(
-      path.join(DABSI_SRC_PATH, "browser/register"),
-      this.mainProjectPlatformInfo.generatedDir
-    )}";\n`;
-  }
-
-  protected async _makeIndexFile() {
-    let code = ``;
-
-    for (const { importName } of this._getRelativeImportNames(
-      this._indexFileNames!
-    )) {
-      code += `import "${importName}";\n`;
-    }
-
-    await this.makeModule.makeFile(
-      this.mainProjectPlatformInfo.generatedIndexFileName,
-      this._generatedImports() + code
-    );
-  }
-
-  protected async _makeTestsFile() {
-    let code = ``;
-    for (const { importName } of this._getRelativeImportNames(
-      this._testsFileNames!
-    )) {
-      code += `describe("${importName}", ()=>{ require("${importName}") });\n`;
-    }
-    await this.makeModule.makeFile(
-      this.mainProjectPlatformInfo.generatedTestsFileName,
-      this._generatedImports() + code
-    );
-  }
-
-  async make() {
-    await this.init();
-    await this.projectModule.loadTsConfigPaths();
-
-    this._indexFileNames = new Set();
-    this._testsFileNames = new Set();
-    await this._makeConfigs();
-
-    await this.projectModule.onBuildCommonFiles.invoke(commonFileName => {
-      this._indexFileNames!.add(commonFileName);
-    });
-
-    await this._makeIndexFile();
-    await this._makeTestsFile();
-
-    this._indexFileNames = null;
-    this._testsFileNames = null;
-  }
 
   webpackCallback = (err, stats) => {
     if (stats) {
       this.log.info(stats.toString(this.webpackConfig.stats));
     }
   };
+
+  @Lazy() get makeInfo() {
+    return {};
+  }
 
   @Lazy() get webpackConfig(): webpack.Configuration {
     return {
@@ -274,11 +168,11 @@ export default class BrowserModule {
         },
       },
       output: {
-        path: this.mainProjectPlatformInfo.bundleDir,
+        path: this.mainProjectPlatform.bundleDir,
       },
       entry: {
-        index: this.mainProjectPlatformInfo.generatedIndexFileName,
-        tests: this.mainProjectPlatformInfo.generatedTestsFileName,
+        index: this.mainProjectPlatform.generatedIndexFileName,
+        tests: this.mainProjectPlatform.generatedTestsFileName,
       },
       stats: {
         warnings: false,
@@ -301,7 +195,7 @@ export default class BrowserModule {
             test: /\.tsx?$/,
             loader: "ts-loader",
             options: {
-              configFile: this.mainProjectPlatformInfo.tsConfigFileName,
+              configFile: this.mainProjectPlatform.configFileName,
               transpileOnly: true,
               compilerOptions: {
                 noEmit: false,
@@ -338,7 +232,6 @@ export default class BrowserModule {
   }
 
   protected async pack() {
-    await this.init();
     this.runWebpackCompiler();
   }
 }

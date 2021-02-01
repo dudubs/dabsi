@@ -2,7 +2,7 @@ import { NODE_MODULES_PATH } from "@dabsi/index";
 import { Debounce } from "@dabsi/common/async/Debounce";
 import watch from "@dabsi/filesystem/watch";
 import watchReloadFile from "@dabsi/filesystem/watchReloadFile";
-import BrowserModule from "@dabsi/modules/browser-platform";
+import BrowserPlatformModule from "@dabsi/modules/browser-platform";
 import ExpressModule from "@dabsi/modules/express";
 import { Inject, Module } from "@dabsi/typedi";
 import { DevModule } from "@dabsi/typestack/DevModule";
@@ -10,16 +10,15 @@ import express from "express";
 import reload from "reload";
 import { makeHtml } from "@dabsi/common/makeHtml";
 import path from "path";
-//sxx
 
 @Module()
-export default class ExpressForBrowserAndDevModule {
+export default class BrowserForExpressAndDevModule {
   log = this.devModule.log.get("BROWSER");
 
   constructor(
     protected devModule: DevModule,
     expressModule: ExpressModule,
-    browserModule: BrowserModule
+    browserModule: BrowserPlatformModule
   ) {
     browserModule.scripts.push("/reload/reload.js");
 
@@ -50,8 +49,6 @@ export default class ExpressForBrowserAndDevModule {
     });
 
     devModule.onRunAsParent(async () => {
-      await browserModule.init();
-
       browserModule.runWebpackCompiler();
       watchReloadFile("browser", () => {
         browserModule.runWebpackCompiler();

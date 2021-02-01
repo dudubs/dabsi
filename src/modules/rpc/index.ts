@@ -2,15 +2,15 @@ import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
+import { ViewPlatformModule } from "@dabsi/modules/ViewPlatformModule";
 import createConfigResolverFactory from "@dabsi/modules/rpc/configResolverFactory";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
+import { Module, Resolver, ResolverContext } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
-import { Seq } from "immutable4";
 import path from "path";
 import { DABSI_ROOT_DIR } from "../..";
 import LoaderModule from "../LoaderModule";
@@ -28,53 +28,20 @@ export default class RpcModule {
 
   protected _rpcCreatedConfigResolverMap = new Map();
 
-  log = log.get("RPC");
-
   protected _loadedDirs = new Set<string>();
-  protected _loadedConfigsInfo: {
+
+  loadedConfigs: {
     nodeModule: NodeModule;
     resolver: RpcConfigResolver<AnyRpc>;
   }[] = [];
+
+  log = log.get("RPC");
 
   constructor(
     protected projectModule: ProjectModule,
     protected loaderModule: LoaderModule
   ) {
-    projectModule
-      .onProjectModuleLoaded(async projectModuleInfo => {
-        // const serverDir = path.join(projectModuleInfo.dir, "server");
-        // if (await this.loaderModule.isDir(serverDir)) {
-        //   await this._loadDir(serverDir, true);
-        // }
-        await this._loadDir(projectModuleInfo.dir, true);
-      })
-      .onBuildCommonFiles(async addCommonFile => {
-        for (const info of this._loadedConfigsInfo) {
-          this.log.trace(
-            () => `Find index file for ${inspect(info.resolver)}.`
-          );
-          const rpcModule = info.nodeModule.children.find(child => {
-            if (/[\\\/]node_modules[\\\/]/.test(child.filename)) return false;
-
-            return Seq.Keyed(
-              typeof child.exports === "object" ? child.exports : {}
-            ).find(x => {
-              return (
-                x === info.resolver.rpc || (x as any)?.[0] === info.resolver.rpc
-              );
-            });
-          });
-          if (!rpcModule?.filename) {
-            this.log.trace(
-              () =>
-                `No found rpc file for ${info.resolver} at "${info.nodeModule.filename}".`
-            );
-          } else if (rpcModule?.filename) {
-            this.log.trace(() => `Include index file "${rpcModule.filename}".`);
-            await addCommonFile(rpcModule?.filename);
-          }
-        }
-      });
+    loaderModule.onLoadDir(dir => this._loadDir(dir, true));
   }
 
   configureRpcResolver(configResolver: RpcConfigResolver<AnyRpc>) {
@@ -107,7 +74,7 @@ export default class RpcModule {
     const configResolver = configModule?.default;
     if (isRpcConfigResolver(configResolver)) {
       this.log.trace(() => `Found config resolver ${inspect(configResolver)}}`);
-      this._loadedConfigsInfo.push({
+      this.loadedConfigs.push({
         nodeModule: require.cache[require.resolve(configFileName)]!,
         resolver: configResolver,
       });
@@ -131,9 +98,10 @@ export default class RpcModule {
     );
 
     for (const baseName of await this.loaderModule.readDir(dir)) {
+      // if (baseName.startsWith(".")) continue;
       const fileName = path.join(dir, baseName);
-      const state = await fs.promises.stat(fileName);
-      if (state.isDirectory()) {
+      const stat = await fs.promises.stat(fileName);
+      if (stat.isDirectory()) {
         await this._loadDir(fileName);
         continue;
       } else if (/Config\.ts$/.test(fileName)) {

@@ -53,7 +53,7 @@ export class DbModule {
       Connection.provide(() => this.connection)
     );
 
-    projectModule.onProjectModuleLoaded(async projectModuleInfo => {
+    projectModule.onLoadModule(async projectModuleInfo => {
       await this._loadProjectModule(projectModuleInfo);
     });
   }

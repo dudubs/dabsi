@@ -1,4 +1,4 @@
-import { touchObject } from "@dabsi/common/object/touchObject";
+import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Hookable } from "@dabsi/modules/Hookable";
@@ -21,29 +21,43 @@ import { touchSet } from "../common/map/touchSet";
   dependencies: [],
 })
 export default class ProjectModule {
-  projectMapInfo!: Record<string, ProjectInfo>;
+  projectMap!: Record<string, ProjectInfo>;
 
   mainProject!: ProjectInfo;
 
-  allProjectModules!: ProjectModuleInfo[];
+  projects: ProjectInfo[] = [];
+
+  modules: ProjectModuleInfo[] = [];
+
+  onLoadModule = Hookable<
+    (projectModuleInfo: ProjectModuleInfo) => Awaitable
+  >();
+
+  protected _loadedModules!: Set<ModuleTarget>;
 
   constructor(
     protected runner: ModuleRunner,
     protected loaderModule: LoaderModule
-  ) {}
+  ) {
+    loaderModule.loaders.push(() => this._load());
+  }
 
-  onBuildCommonFiles = Hookable<
-    (callback: (commonFileName: string) => Awaitable) => Awaitable
-  >();
+  protected _newLoadedModules!: ProjectModuleInfo[];
 
-  onProjectModuleLoaded = Hookable<
-    (projectModuleInfo: ProjectModuleInfo) => Awaitable
-  >();
+  protected async _loadProject(path: string): Promise<ProjectInfo> {
+    const projectDir = path.replace(/[\\\/]src[\\\/].*$/, "");
+    let project = this.projectMap[projectDir];
+    if (!project) {
+      project = new ProjectInfo(projectDir, this.loaderModule);
+      this.projects.push(project);
+      this.projectMap[projectDir] = project;
+      await this.loaderModule.loadDir(project.srcDir);
+    }
+    return project;
+  }
 
-  _loadedProjectModules!: ProjectModuleInfo[];
-
-  protected async _loadRootModules() {
-    for (const m of this.runner.getAllInstances()) {
+  protected async _loadModules() {
+    for (const m of this.runner.getInstances()) {
       const moduleFileName = m.metadata.callStackInfo.lineInfo.fileName;
 
       if (!(/*is index file*/ /[\\\/]index\.ts/.test(moduleFileName))) continue;
@@ -59,40 +73,30 @@ export default class ProjectModule {
         continue;
       }
       log.trace(() => `Load root module "${m.target.name}".`);
-      const moduleDir = path.dirname(moduleFileName);
-      const projectDir = moduleFileName.replace(/[\\\/]src[\\\/].*$/, "");
 
-      const projectInfo = touchObject(
-        this.projectMapInfo,
-        projectDir,
-        () => new ProjectInfo(projectDir, this.loaderModule)
-      );
+      const project = await this._loadProject(moduleFileName);
 
-      if (this.runner.mainModuleTarget === m.target) {
-        this.mainProject = projectInfo;
+      if (this.runner.mainTarget === m.target) {
+        this.mainProject = project;
       }
-
-      const projectModuleInfo = (projectInfo.moduleInfoMap[
-        moduleDir
-      ] = new ProjectModuleInfo(
-        projectInfo,
+      const moduleDir = path.dirname(moduleFileName);
+      const module = (project.moduleMap[moduleDir] = new ProjectModuleInfo(
+        project,
         moduleDir,
         m.target,
         m.metadata,
         m.target
       ));
-
-      await this._loadModule(projectModuleInfo);
+      this.modules.push(module);
+      await this.loaderModule.loadDir(moduleDir);
+      await this._loadModulePlugins(module);
     }
   }
 
-  protected _loadedModules!: Set<ModuleTarget>;
-
-  async _loadModule(moduleInfo: ProjectModuleInfo) {
+  protected async _loadModulePlugins(moduleInfo: ProjectModuleInfo) {
     if (!touchSet(this._loadedModules, moduleInfo.target)) return;
 
-    this.allProjectModules.push(moduleInfo);
-    this._loadedProjectModules.push(moduleInfo);
+    this._newLoadedModules.push(moduleInfo);
 
     const pluginsDir = path.join(moduleInfo.dir, "plugins");
     if (!(await this.loaderModule.isDir(pluginsDir))) return;
@@ -111,17 +115,17 @@ export default class ProjectModule {
         log.trace(() => `is not module target.`);
         continue;
       }
-      if (this.runner.moduleInstanceMap.has(moduleTarget)) continue;
+      if (this.runner.instanceMap.has(moduleTarget)) continue;
 
       const moduleMetadata = moduleMetadataMap.get(moduleTarget);
+
       const requiredModule =
         getDesignParamTypes(moduleTarget).find(
           paramType =>
-            isModuleTarget(paramType) &&
-            !this.runner.moduleInstanceMap.has(paramType)
+            isModuleTarget(paramType) && !this.runner.instanceMap.has(paramType)
         ) ||
         moduleMetadata?.dependencies?.find(
-          moduleTarget => !this.runner.moduleInstanceMap.has(moduleTarget)
+          moduleTarget => !this.runner.instanceMap.has(moduleTarget)
         );
 
       if (requiredModule) {
@@ -129,49 +133,34 @@ export default class ProjectModule {
         continue;
       }
 
-      this.runner.getInstance(moduleTarget);
+      this.runner.resolveInstance(moduleTarget);
     }
   }
 
-  async _loadModuleFile(fileName: string) {}
-
   protected async _loadPlugins() {
-    while (this._loadedProjectModules.length) {
-      const projectModuleInfos = this._loadedProjectModules;
-      this._loadedProjectModules = [];
+    while (this._newLoadedModules.length) {
+      const newLoadedModules = this._newLoadedModules;
+      this._newLoadedModules = [];
 
-      for (const projectModuleInfo of projectModuleInfos) {
-        await this._loadModule(projectModuleInfo);
+      for (const projectModuleInfo of newLoadedModules) {
+        await this._loadModulePlugins(projectModuleInfo);
       }
     }
   }
 
-  mainTsConfigPaths!: TsConfigPaths;
-
-  @Once() async loadTsConfigPaths() {
-    this.mainTsConfigPaths = await TsConfigPaths.fromFile(
-      path.join(this.mainProject.dir, "tsconfig.json"),
-      path => this.loaderModule.readJsonFile(path),
-      path => this.loaderModule.isFile(path),
-      path => this.loaderModule.isDir(path)
-    );
-  }
-
-  @Once() async load() {
-    this.projectMapInfo = {};
-    this.allProjectModules = [];
-    this._loadedProjectModules = [];
+  @Once() protected async _load() {
+    this.projectMap = {};
+    this._newLoadedModules = [];
     this._loadedModules = new Set();
-    await this._loadRootModules();
+    await this._loadModules();
     await this._loadPlugins();
 
-    for (const projectModuleInfo of this.allProjectModules) {
-      await this.onProjectModuleLoaded.invoke(projectModuleInfo);
+    for (const module of this.modules) {
+      await this.onLoadModule.invoke(module);
     }
 
     if (!this.mainProject) {
-      console.log(this.runner.mainModuleTarget);
-
+      console.log(this.runner.mainTarget);
       throw new Error("No loaded main proejct.");
     }
   }

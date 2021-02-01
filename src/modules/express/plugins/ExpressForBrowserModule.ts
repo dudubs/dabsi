@@ -1,13 +1,16 @@
 import fs from "fs";
 import { makeHtml } from "@dabsi/common/makeHtml";
-import BrowserModule from "@dabsi/modules/browser-platform";
+import BrowserPlatformModule from "@dabsi/modules/browser-platform";
 import ExpressModule from "@dabsi/modules/express";
 import { Inject, Module } from "@dabsi/typedi";
 import express from "express";
 
 @Module()
 export default class ExpressForBorwserModule {
-  constructor(expressModule: ExpressModule, browserModule: BrowserModule) {
+  constructor(
+    expressModule: ExpressModule,
+    browserModule: BrowserPlatformModule
+  ) {
     expressModule
       .afterBuildRoutes(app => {
         app.get("/*", (req, res) => {

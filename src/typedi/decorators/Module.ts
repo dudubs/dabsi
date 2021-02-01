@@ -40,7 +40,7 @@ export function Module(options: ModuleOptions = {}) {
     Object.defineProperty(target, Resolver.resolveSymbol, {
       configurable: false,
       value(context) {
-        return Resolver.resolve(ModuleRunner, context).getInstance(this);
+        return Resolver.resolve(ModuleRunner, context).resolveInstance(this);
       },
     });
 

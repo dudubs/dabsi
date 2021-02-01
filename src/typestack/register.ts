@@ -1,20 +1,18 @@
 import { LogLevel } from "@dabsi/logging/Logger";
-import { Cli, CliCommand } from "@dabsi/modules/Cli";
 import CliModule from "@dabsi/modules/CliModule";
-import { getLastModule, Resolver } from "@dabsi/typedi";
+import LoaderModule from "@dabsi/modules/LoaderModule";
+import { getLastModule } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import yargs from "yargs";
-import ProjectModule from "./ProjectModule";
 
 setImmediate(async () => {
   const moduleRunner = new ModuleRunner();
-  const mainModuleTarget = getLastModule()! as any;
-  moduleRunner.mainModuleTarget = mainModuleTarget;
-  const cliModule = moduleRunner.getInstance(CliModule);
+  const mainTarget = getLastModule()! as any;
+  moduleRunner.mainTarget = mainTarget;
+  const cliModule = moduleRunner.resolveInstance(CliModule);
 
-  const module = moduleRunner.getInstance(mainModuleTarget);
-  const projectModule = await moduleRunner.getInstance(ProjectModule);
-  await projectModule.load();
+  const module = moduleRunner.resolveInstance(mainTarget);
+
+  await moduleRunner.resolveInstance(LoaderModule).load();
 
   await cliModule.main("ts");
 

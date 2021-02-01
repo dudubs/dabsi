@@ -6,6 +6,7 @@ import { Cli, CliError } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import { Inject, Module } from "@dabsi/typedi";
+import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
 import fs from "fs";
 
 @Module()
@@ -22,6 +23,7 @@ export class MakeModule {
         this.write = write;
         if (DABSI_CURRENT_PATH === DABSI_PATH)
           throw new CliError(`You can't run make on "${DABSI_PATH}".`);
+
         await this.onMake.invoke();
       })
     );

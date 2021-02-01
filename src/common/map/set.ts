@@ -1,7 +1,7 @@
 declare global {
   interface Set<T> {
-    addAll(values: T[]): Set<T>;
-    deleteAll(values: T[]): Set<T>;
+    addAll(values: Iterable<T>): Set<T>;
+    deleteAll(values: Iterable<T>): Set<T>;
     touch(value: T): boolean;
   }
 }

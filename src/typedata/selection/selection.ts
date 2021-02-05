@@ -1,5 +1,7 @@
+import { entries } from "@dabsi/common/object/entries";
 import { mergeObject } from "@dabsi/common/object/mergeObject";
 import { omit } from "@dabsi/common/object/omit";
+import { values } from "@dabsi/common/object/values";
 import { HasKeys, If } from "@dabsi/common/typings2/boolean";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataOrder } from "@dabsi/typedata/order";
@@ -96,7 +98,6 @@ export namespace DataSelection {
     if (!childSelection) {
       return omit(selection, "children");
     }
-
     return merge(omit(selection, "children"), childSelection);
   }
 

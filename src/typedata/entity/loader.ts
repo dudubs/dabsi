@@ -23,6 +23,7 @@ import { getDataEntityInfo } from "@dabsi/typedata/entity/info";
 import DataQueryRunner from "@dabsi/typedata/query/runner";
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { mapObject } from "@dabsi/common/object/mapObject";
 type RowContext = {
   row: any;
   raw: any;
@@ -156,6 +157,12 @@ export namespace DataEntityLoader {
         }
       };
     } else {
+      for (const childKey of Object.keys(selection.children || {})) {
+        if (!(childKey in typeInfo.children!)) {
+          throw new Error(`No child in ${typeInfo.name} like "${childKey}".`);
+        }
+      }
+
       const childKeyLoadersMap: Record<string, RowLoader[]> = {};
       const discriminatorLoader = qb.selectColumn(
         schema,
@@ -167,6 +174,7 @@ export namespace DataEntityLoader {
       )) {
         const childMetadata = getEntityMetadata(connection, rowTypeInfo.type);
         const childSelection = DataSelection.atChild(selection, childKey);
+
         const childEntityInfo = getDataEntityInfo(childMetadata);
         discriminatorKeyMap[childMetadata.discriminatorValue!] = childKey;
         childKeyLoadersMap[childKey] = getRowTypeLoaders(

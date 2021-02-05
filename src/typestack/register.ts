@@ -8,11 +8,11 @@ setImmediate(async () => {
   const moduleRunner = new ModuleRunner();
   const mainTarget = getLastModule()! as any;
   moduleRunner.mainTarget = mainTarget;
-  const cliModule = moduleRunner.resolveInstance(CliModule);
+  const cliModule = moduleRunner.getInstance(CliModule);
 
-  const module = moduleRunner.resolveInstance(mainTarget);
+  const module = moduleRunner.getInstance(mainTarget);
 
-  await moduleRunner.resolveInstance(LoaderModule).load();
+  await moduleRunner.getInstance(LoaderModule).load();
 
   await cliModule.main("ts");
 

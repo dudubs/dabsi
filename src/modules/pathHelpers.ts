@@ -5,5 +5,7 @@ export function posixPath(path: string) {
 }
 
 export function relativePosixPath(from: string, to: string) {
-  return posixPath(relative(from, to));
+  const rel = posixPath(relative(from, to));
+  if (!rel.startsWith(".")) return "./" + rel;
+  return rel;
 }

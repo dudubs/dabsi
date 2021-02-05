@@ -1,5 +1,5 @@
 import { touchSet } from "@dabsi/common/map/touchSet";
-import { DABSI_CURRENT_PATH, DABSI_SRC_PATH } from "@dabsi/index";
+import { DABSI_CURRENT_DIR, DABSI_SRC_DIR } from "@dabsi/env";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
 import { readdirSync, statSync } from "fs";
 import "jasmine";
@@ -14,10 +14,10 @@ const searchedDirs = new Set<string>();
 const where = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
 
 if (!where.length) {
-  searchTests(DABSI_SRC_PATH);
+  searchTests(DABSI_SRC_DIR);
 } else {
   where.forEach(dir => {
-    searchTests(path.resolve(DABSI_CURRENT_PATH, dir));
+    searchTests(path.resolve(DABSI_CURRENT_DIR, dir));
   });
 }
 for (const callback of globalTester.callbacks) {
@@ -25,9 +25,9 @@ for (const callback of globalTester.callbacks) {
 }
 
 function loadTests(fileName) {
-  const moduleName = "@dabsi/" + relativePosixPath(DABSI_SRC_PATH, fileName);
+  const moduleName = "@dabsi/" + relativePosixPath(DABSI_SRC_DIR, fileName);
   describe(moduleName.replace(/\.tsx?$/, ""), () => {
-    require("@dabsi/" + relativePosixPath(DABSI_SRC_PATH, fileName));
+    require("@dabsi/" + relativePosixPath(DABSI_SRC_DIR, fileName));
   });
 }
 

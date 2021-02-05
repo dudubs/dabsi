@@ -22,7 +22,7 @@ function createTokenResolver<T>(
   name?: string /* or __filename */
 ): TokenResolver<T> {
   return new TokenResolver(
-    new CallStackInfo(new Error()),
+    new CallStackInfo(new Error(), __filename),
     `token:${count++}_${name || "unknown"}`
   );
 }

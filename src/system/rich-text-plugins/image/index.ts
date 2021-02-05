@@ -2,6 +2,8 @@ import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entities/ImageEntity";
 import { Inject, Module } from "@dabsi/typedi";
 
+const RichTextImageEntityType = "image";
+
 declare global {
   namespace IRichText {
     interface Config {
@@ -21,7 +23,7 @@ declare global {
       image: {
         packed: null;
 
-        unpacked: { url: string; key: string };
+        unpacked: { url: string; entityKey: string };
 
         readonly: { url: string };
       };
@@ -31,6 +33,8 @@ declare global {
 
 @Module()
 export default class RichTextImageModule {
+  // @Configure
+
   constructor(@Inject() richTextModule: RichTextModule) {
     richTextModule.install(plugins => {
       plugins.defineEntity("image", {
@@ -38,19 +42,25 @@ export default class RichTextImageModule {
         mutability: { IMMUTABLE: true },
 
         selection: {
-          relations: { file: { pick: ["url"] } },
+          relations: { imageFile: { pick: ["url"] } },
         },
 
-        packEntityKey: unpackedData => unpackedData.key,
+        packEntityKey: unpackedData => {
+          return unpackedData.entityKey;
+        },
 
         pack: (_, row, { url }) => {
           return null;
         },
 
-        unpack: (_, row) => ({
-          url: row.file!.url,
-          key: row.$key,
-        }),
+        unpack: (_, image) => {
+          console.log({ image });
+
+          return {
+            url: image.imageFile!.url,
+            entityKey: image.$key,
+          };
+        },
 
         readonlyKeys: ["url"],
       });

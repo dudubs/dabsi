@@ -107,4 +107,8 @@ export default class RichTextModule {
       () => `No block handler for "${type}".`
     );
   }
+
+  defineBlockHandler(type, handler: {}) {}
+
+  defineEntityHandler() {}
 }

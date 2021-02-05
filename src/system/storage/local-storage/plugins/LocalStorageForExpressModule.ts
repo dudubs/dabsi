@@ -1,4 +1,4 @@
-import { DABSI_CURRENT_PATH } from "@dabsi/index";
+import { DABSI_CURRENT_DIR } from "@dabsi/env";
 import ExpressModule from "@dabsi/modules/express";
 import LocalStorageModule from "@dabsi/system/storage/local-storage";
 import { Inject, Module } from "@dabsi/typedi";

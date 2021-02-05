@@ -1,5 +1,5 @@
 import { makeStyles } from "@material-ui/core/styles";
-import "draft-js/dist/Draft.css";
+// import "draft-js/dist/Draft.css";
 import React, { ReactElement } from "react";
 
 const useStyles = makeStyles({

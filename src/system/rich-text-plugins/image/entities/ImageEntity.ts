@@ -6,14 +6,14 @@ import { ChildEntity, Column, ManyToOne } from "typeorm";
 @ChildEntity("image")
 export class RichTextImageEntity extends RichTextEntity {
   @ManyToOne(() => StorageFile)
-  file!: DataRelation<StorageFile>;
+  imageFile!: DataRelation<StorageFile>;
 
   @ManyToOne(() => StorageFile)
-  previewFile!: DataRelation<StorageFile>;
+  imagePreviewFile!: DataRelation<StorageFile>;
 
   @Column()
-  width!: number;
+  imageWidth!: number;
 
   @Column()
-  height!: number;
+  imageHeight!: number;
 }

@@ -1,4 +1,4 @@
-import { MuiAdminMenu } from "@dabsi/system/admin/browser/MuiAdminMenu";
+import { MuiAdminMenu } from "@dabsi/system/admin/browser/menu";
 
 import "@dabsi/system/acl/plugins/admin/users/browser";
 import "@dabsi/system/acl/plugins/admin/groups/browser";

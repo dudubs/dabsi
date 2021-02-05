@@ -2,7 +2,7 @@ import {
   RichTextInput,
   RichTextInputElement,
 } from "@dabsi/system/rich-text/common/input";
-import { RichTextInputValue } from "@dabsi/system/rich-text/common/value";
+import { RichTextInputValue } from "@dabsi/system/rich-text/common/inputValue";
 import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   ErrorOrValue,

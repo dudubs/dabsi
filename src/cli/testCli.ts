@@ -1,9 +1,9 @@
 import {
-  DABSI_CURRENT_PATH,
+  DABSI_CURRENT_DIR,
   DABSI_NODE_OPTIONS,
-  DABSI_SRC_PATH,
-  NODE_MODULES_PATH,
-} from "@dabsi/index";
+  DABSI_SRC_DIR,
+  NODE_MODULES_DIR,
+} from "@dabsi/env";
 import { spawnSync } from "child_process";
 import fs from "fs";
 import path, { relative, resolve } from "path";
@@ -12,8 +12,8 @@ export default function testCli(args) {
   const tests: string[] = [];
 
   const paths = args.length
-    ? args.map(arg => resolve(DABSI_CURRENT_PATH, arg))
-    : [DABSI_SRC_PATH];
+    ? args.map(arg => resolve(DABSI_CURRENT_DIR, arg))
+    : [DABSI_SRC_DIR];
 
   for (const path of paths) {
     if (!fs.existsSync(path)) {
@@ -32,11 +32,11 @@ export default function testCli(args) {
       ...DABSI_NODE_OPTIONS,
       "--",
       relative(
-        DABSI_CURRENT_PATH,
-        path.join(NODE_MODULES_PATH, "jasmine/bin/jasmine.js")
+        DABSI_CURRENT_DIR,
+        path.join(NODE_MODULES_DIR, "jasmine/bin/jasmine.js")
       ),
       "--stop-on-failure=true",
-      path.join(DABSI_SRC_PATH, "jasmine/run.ts"),
+      path.join(DABSI_SRC_DIR, "jasmine/run.ts"),
       "--",
       ...args,
     ],

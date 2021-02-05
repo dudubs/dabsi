@@ -1,5 +1,19 @@
 {
   "extends": "./tsconfig.base.server.json",
-  "include": ["../src"],
-  "exclude": ["../src/**/browser", "../src/**/view"]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": [
+        "../src/*"
+      ]
+    }
+  },
+  "include": [
+    "../src",
+    "../src"
+  ],
+  "exclude": [
+    "../src/**/view",
+    "../src/**/browser"
+  ]
 }

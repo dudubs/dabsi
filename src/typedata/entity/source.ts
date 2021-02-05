@@ -113,40 +113,32 @@ export class DataEntitySource<T> extends DataSource<T> {
     this: DataEntitySource<T>,
     values: DataInsert<T>[]
   ): Promise<string[]> {
-    return this.withTransaction(async () => {
-      const keys: string[] = [];
-      for (const value of values) {
-        const plan = getInsertPlan(this, value);
-        const entityKey = await plan.insert();
-        keys.push(entityKey.text);
-      }
-      return keys;
-    });
+    const keys: string[] = [];
+    for (const value of values) {
+      const plan = getInsertPlan(this, value);
+      const entityKey = await plan.insert();
+      keys.push(entityKey.text);
+    }
+    return keys;
   }
 
-  updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
-    return this.withTransaction(async () => {
-      if (!hasKeys(value)) return 0;
-
-      const plan = getUpdatePlan(this, value);
-      await plan.updateMany(keys);
-
-      return 0;
-    });
+  async updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
+    if (!hasKeys(value)) return 0;
+    const plan = getUpdatePlan(this, value);
+    await plan.updateMany(keys);
+    return 0;
   }
 
-  protected updateRelationKeys(
+  protected async updateRelationKeys(
     keysToAdd: string[],
     keysToRemove: string[]
   ): Promise<void> {
-    return this.withTransaction(async () => {
-      for (let key of keysToAdd) {
-        await this._updateRelationKeys(key, "addOrSet");
-      }
-      for (let key of keysToRemove) {
-        await this._updateRelationKeys(key, "removeOrUnset");
-      }
-    });
+    for (let key of keysToAdd) {
+      await this._updateRelationKeys(key, "addOrSet");
+    }
+    for (let key of keysToRemove) {
+      await this._updateRelationKeys(key, "removeOrUnset");
+    }
   }
 
   protected async _updateRelationKeys(
@@ -169,10 +161,8 @@ export class DataEntitySource<T> extends DataSource<T> {
     }
   }
 
-  deleteKeys(textKeys: string[]): Promise<void> {
-    return this.withTransaction(async () => {
-      const plan = getDeletePlan(this);
-      await plan.deleteMany(textKeys);
-    });
+  async deleteKeys(textKeys: string[]): Promise<void> {
+    const plan = getDeletePlan(this);
+    await plan.deleteMany(textKeys);
   }
 }

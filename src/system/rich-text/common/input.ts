@@ -1,5 +1,5 @@
-import RichTextPluginsRpc from "@dabsi/system/rich-text/common/pluginsRpc";
-import type { RichTextInputValue } from "@dabsi/system/rich-text/common/value";
+import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
+import type { RichTextInputValue } from "@dabsi/system/rich-text/common/inputValue";
 import { Input } from "@dabsi/typerpc/input/Input";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { RawDraftContentState } from "draft-js";
@@ -28,7 +28,7 @@ export type RichTextInput = Input<{
   Value: RichTextInputValue;
 
   Controller: {
-    plugins: typeof RichTextPluginsRpc;
+    plugins: typeof RichTextRpc;
   };
 
   Props: {};
@@ -48,7 +48,7 @@ export function RichTextInput(): RichTextInput {
   return Input<RichTextInput>({
     type: RichTextInput,
     handler: requireRpcHandler(__filename),
-    children: { plugins: RichTextPluginsRpc },
+    children: { plugins: { RichTextRpc } },
     getValueDataFromValueElement(valueElement) {
       return valueElement;
     },

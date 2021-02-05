@@ -1,4 +1,4 @@
-import { DABSI_ROOT_DIR } from "@dabsi/index";
+import { DABSI_ROOT_DIR } from "@dabsi/env";
 import fs, { existsSync, writeFileSync } from "fs";
 import * as path from "path";
 import { Debounce } from "@dabsi/common/async/Debounce";

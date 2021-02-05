@@ -1,4 +1,8 @@
-export type StorageDeleteResult = "DELETED" | "INVALID_URL" | "RESOURCE_BUSY";
+export enum StorageDeleteResult {
+  DELETED,
+  INVALID_URL,
+  RESOURCE_BUSY,
+}
 export type StorageUploadResult = { url: string };
 
 export default abstract class Storage {

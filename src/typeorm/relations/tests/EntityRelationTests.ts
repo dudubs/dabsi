@@ -1,23 +1,22 @@
 // TODO: rename to DataEntityRelationTests.
-import { Connection, Repository } from "typeorm";
-import { DataEntityKey } from "@dabsi/typedata/entity/key";
+import { DataEntityRelation } from "@dabsi/typedata/entity/relation";
 import {
-  DEntity,
   DChild1,
   DChild1Child1,
   DChild2,
-  EEntity,
+  DEntity,
   EChild1,
   EChild1Child1,
   EChild2,
+  EEntity,
 } from "@dabsi/typedata/tests/BaseEntities";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { DataEntityRelation } from "@dabsi/typedata/entity/relation";
 import {
   AEntity,
   BEntity,
   CEntity,
 } from "@dabsi/typeorm/relations/tests/TestEntities";
+import { Connection, Repository } from "typeorm";
 
 const getConnection = TestConnection([
   AEntity,

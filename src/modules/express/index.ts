@@ -1,7 +1,7 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Hookable } from "@dabsi/modules/Hookable";
 import RequestModule from "@dabsi/modules/RequestModule";
-import { ServerModule } from "@dabsi/modules/ServerModule";
+import ServerModule from "@dabsi/modules/server";
 import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
 import express from "express";
 

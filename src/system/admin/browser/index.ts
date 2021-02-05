@@ -1,1 +1,1 @@
-import "./MuiAdminRouterView";
+import "./router";

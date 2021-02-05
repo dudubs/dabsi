@@ -1,4 +1,5 @@
 import { Cli } from "@dabsi/modules/Cli";
+import { Hookable } from "@dabsi/modules/Hookable";
 import {
   ResolverContext,
   Inject,

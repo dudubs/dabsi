@@ -17,10 +17,10 @@ export class DataEntityRelationSide<T> {
 
   entityMetadata = getEntityMetadata(this.relation.connection, this.entityType);
 
-  getKey(leftKey: object, rightKey: object) {
+  getKey(entityKey: object, relationKey: object) {
     return (this.relation.invert ? !this.isLeft : this.isLeft)
-      ? leftKey
-      : rightKey;
+      ? entityKey
+      : relationKey;
   }
 
   get repository(): Repository<T> {

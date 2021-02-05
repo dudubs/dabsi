@@ -26,8 +26,13 @@ export const moduleMetadataMap = new WeakMap<ModuleTarget, ModuleMetadata>();
 export type ModuleOptions = {
   dependencies?: ModuleTarget[];
   providers?: ModuleProvider[];
+  plugins?: ModuleTarget[];
 };
 
+// TODO: @Configure() x(module, ...arsg)
+// TODO: @Plugin()
+
+// ModuleRunner.configureSync(MyModule, ...)
 export function Module(options: ModuleOptions = {}) {
   const callStackInfo = new CallStackInfo(new Error(), __filename);
   return (target: ModuleTarget) => {
@@ -40,7 +45,7 @@ export function Module(options: ModuleOptions = {}) {
     Object.defineProperty(target, Resolver.resolveSymbol, {
       configurable: false,
       value(context) {
-        return Resolver.resolve(ModuleRunner, context).resolveInstance(this);
+        return Resolver.resolve(ModuleRunner, context).getInstance(this);
       },
     });
 

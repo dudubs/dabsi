@@ -275,14 +275,17 @@ export abstract class DataSource<T> {
 
   T?: T;
 
+  of<T>(this: DataSource<T>, keyMap: Record<string, any>): DataSource<T>;
   of<T, K extends string & keyof Required<T>>(
     this: DataSource<T>,
     propertyName: string & K,
     value: DataKeyInput<T[K]>
-  ): DataSource<T> {
-    return this.withCursor(
-      DataCursor.of(this.cursor, propertyName, DataKey(value))
-    );
+  ): DataSource<T>;
+  of(keyMap, value?) {
+    if (typeof keyMap === "string") {
+      keyMap = { [keyMap]: value };
+    }
+    return this.withCursor(DataCursor.of(this.cursor, keyMap));
   }
 
   at<T, K extends DataRelationKeys<T>>(

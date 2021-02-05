@@ -8,22 +8,25 @@ import Popper, { PopperProps } from "@material-ui/core/Popper";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { ReactElement, useRef, useState } from "react";
 
-const useStyles = makeStyles(theme => ({
-  move: {},
-  focus: {},
-  selection: {
-    // border: "3px solid rgba(0.2,0.2,0.2,0.1)",
-    // borderRadius: "5px",  backgroundColor: "rgba(0.2,0.2,0.2,0.2)",
-    backgroundColor: theme.palette.grey[100],
-    left: -5,
-    top: -5,
-    right: -5,
-    bottom: -5,
-  },
-  toolbarPaper: {
-    // padding: theme.spacing(1),
-  },
-}));
+const useStyles = makeStyles(
+  theme => ({
+    selectionOnMove: {},
+    selectionOnFocus: {},
+    selection: {
+      // border: "3px solid rgba(0.2,0.2,0.2,0.1)",
+      // borderRadius: "5px",  backgroundColor: "rgba(0.2,0.2,0.2,0.2)",
+      backgroundColor: theme.palette.grey[100],
+      left: -5,
+      top: -5,
+      right: -5,
+      bottom: -5,
+    },
+    toolbarPaper: {
+      // padding: theme.spacing(1),
+    },
+  }),
+  { name: "mui-focusable-area" }
+);
 
 export default function ({
   toolbar,

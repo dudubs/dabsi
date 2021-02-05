@@ -4,7 +4,7 @@ import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
-import { ServerModule } from "@dabsi/modules/ServerModule";
+import ServerModule from "@dabsi/modules/server";
 import { Module, Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";

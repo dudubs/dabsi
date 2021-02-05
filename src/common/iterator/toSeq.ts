@@ -1,14 +1,12 @@
 import { Seq } from "immutable4";
 
-type ToIndexedSeq = { toSeq<T>(this: Iterable<T>): Seq.Indexed<T> };
+type ToIndexedSeq<T> = { toSeq(): Seq.Indexed<T> };
 
 declare global {
-  interface Array<T> extends ToIndexedSeq {}
-  interface Set<T> extends ToIndexedSeq {}
+  interface Array<T> extends ToIndexedSeq<T> {}
+  interface Set<T> extends ToIndexedSeq<T> {}
 
-  interface ReadonlyArray<T> extends ToIndexedSeq {
-    toSeq<T>(this: Iterable<T>): Seq.Indexed<T>;
-  }
+  interface ReadonlyArray<T> extends ToIndexedSeq<T> {}
 
   interface Map<K, V> {
     toSeq(): Seq.Keyed<K, V>;

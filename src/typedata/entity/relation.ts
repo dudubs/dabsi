@@ -159,37 +159,167 @@ export class DataEntityRelation {
     return this.connection.driver.escape(name);
   }
 
+  protected async _set(leftKey: object, rightKey: object) {
+    const inverse = this.relationMetadata.isOwning;
+
+    const params: any[] = [];
+
+    const param = value => {
+      params.push(value ?? null);
+      return "?";
+    };
+
+    const ownerKey = inverse ? leftKey : rightKey;
+    const notOwnerKey = inverse ? rightKey : leftKey;
+
+    let sql = `UPDATE ${this.escape(
+      this.ownerRelationMetadata.entityMetadata.tableName
+    )} AS X SET ${this.ownerRelationMetadata.joinColumns
+      .map(
+        jc =>
+          `${escape(jc.databaseName)}=${param(
+            notOwnerKey[jc.referencedColumn!.propertyName]
+          )}`
+      )
+      .join(
+        ", "
+      )} WHERE ${this.ownerRelationMetadata.entityMetadata.primaryColumns
+      .map(
+        pc =>
+          `X.${this.escape(pc.databaseName)}=${param(
+            ownerKey[pc.propertyName]
+          )}`
+      )
+      .join(" AND ")};`;
+
+    await this.connection.query(sql, params);
+  }
+
+  protected async _add(leftKey: object, rightKey: object) {
+    if (!this.ownerRelationMetadata.joinTableName) {
+      return this._set(leftKey, rightKey);
+    }
+
+    const inverse = this.relationMetadata.isOwning;
+
+    const params: any[] = [];
+
+    const param = value => {
+      params.push(value ?? null);
+      return "?";
+    };
+
+    const ownerKey = inverse ? leftKey : rightKey;
+    const notOwnerKey = inverse ? rightKey : leftKey;
+
+    const row: any = {};
+
+    for (const jc of this.ownerRelationMetadata.joinColumns) {
+      row[jc.databaseName] = ownerKey[jc.referencedColumn!.propertyName];
+    }
+
+    for (const jc of this.ownerRelationMetadata.inverseJoinColumns) {
+      row[jc.databaseName] = notOwnerKey[jc.referencedColumn!.propertyName];
+    }
+
+    const columns = Object.keys(row);
+    let sql = `INSERT INTO ${this.escape(
+      this.ownerRelationMetadata.joinTableName
+    )} (${columns
+      .map(x => this.escape(x))
+      .join(" ,")}) VALUES (${columns
+      .map(name => param(row[name]))
+      .join(",")}) ON CONFLICT DO NOTHING;`;
+
+    await this.connection.query(sql, params);
+  }
+
+  protected async _unset(leftKey: object) {
+    const params: any[] = [];
+    const param = value => {
+      params.push(value ?? null);
+      return "?";
+    };
+
+    const whereByJoinColumns = this.left.isOwning ? this.invert : !this.invert;
+    const whereColumns = whereByJoinColumns
+      ? this.ownerRelationMetadata.joinColumns
+      : (this.invert ? this.right : this.left).entityMetadata.primaryColumns;
+
+    const sql = `UPDATE ${this.escape(
+      this.ownerRelationMetadata.entityMetadata.tableName
+    )} AS owner SET ${this.ownerRelationMetadata.joinColumns
+      .map(jc => `${escape(jc.databaseName)}=${param(null)}`)
+      .join(", ")} WHERE ${
+      //
+      whereColumns
+        .map(
+          pc =>
+            `owner.${this.escape(pc.databaseName)}=${param(
+              leftKey[
+                whereByJoinColumns
+                  ? pc.referencedColumn!.propertyName
+                  : pc.propertyName
+              ]
+            )}`
+        )
+        .join(" AND ")
+    };`;
+
+    await this.connection.query(sql, params);
+  }
+
+  protected async _remove(leftKey: object, rightKey: object) {
+    if (!this.ownerRelationMetadata.joinTableName) {
+      return this._unset(leftKey);
+    }
+    const params: any[] = [];
+    const param = value => {
+      params.push(value ?? null);
+      return "?";
+    };
+
+    if (this.invert) {
+      await this.connection
+        .getRepository(this.entityType)
+        .createQueryBuilder()
+        .relation(this.propertyName)
+        .of(leftKey)
+        .remove(rightKey);
+    } else {
+      await this.connection
+        .getRepository(this.entityType)
+        .createQueryBuilder()
+        .relation(this.propertyName)
+        .of(leftKey)
+        .remove(rightKey);
+    }
+  }
+
   async update(
     action: "addOrSet" | "removeOrUnset",
-    leftKey: object,
-    rightKey: object
+    entitKey: object,
+    relationKey: object
   ): Promise<"add" | "set" | "unset" | "remove"> {
-    [leftKey, rightKey] = [
-      this.left.getKey(leftKey, rightKey),
-      this.right.getKey(leftKey, rightKey),
+    const [leftKey, rightKey] = [
+      this.left.getKey(entitKey, relationKey),
+      this.right.getKey(entitKey, relationKey),
     ];
-
-    const qb = this.connection
-      .getRepository(this.entityType)
-      .createQueryBuilder()
-      .relation(this.propertyName)
-      .of(leftKey);
 
     switch (action) {
       case "addOrSet":
+        await this._add(leftKey, rightKey);
         if (this.isToOne) {
-          await qb.set(rightKey);
           return "set";
         } else {
-          await qb.add(rightKey);
           return "add";
         }
       case "removeOrUnset":
+        await this._remove(leftKey, rightKey);
         if (this.isToOne) {
-          await qb.set(null);
           return "unset";
         } else {
-          await qb.remove(rightKey);
+          // await qb.remove(rightKey);
           return "remove";
         }
     }

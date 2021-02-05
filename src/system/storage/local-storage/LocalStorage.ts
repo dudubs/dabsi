@@ -28,7 +28,7 @@ export class LocalStorage extends Storage {
     return { url: joinUrl(this.url, dateDir, baseName) };
   }
   async delete(url: string): Promise<StorageDeleteResult> {
-    if (!url.startsWith(this.url)) return "INVALID_URL";
+    if (!url.startsWith(this.url)) return StorageDeleteResult.INVALID_URL;
     const fileName = path.join(
       this.dir,
       url.slice(this.url.length).replace(/^[\\\/]/, "")
@@ -36,13 +36,13 @@ export class LocalStorage extends Storage {
     try {
       await fs.promises.access(fileName);
     } catch {
-      return "INVALID_URL";
+      return StorageDeleteResult.INVALID_URL;
     }
     try {
       await fs.promises.unlink(fileName);
     } catch {
-      return "RESOURCE_BUSY";
+      return StorageDeleteResult.RESOURCE_BUSY;
     }
-    return "DELETED";
+    return StorageDeleteResult.DELETED;
   }
 }

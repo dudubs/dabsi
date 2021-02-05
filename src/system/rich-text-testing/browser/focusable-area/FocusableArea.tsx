@@ -1,19 +1,10 @@
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { Listener } from "@dabsi/common/patterns/Listener";
+import { WeakId } from "@dabsi/common/WeakId";
 import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import { View } from "@dabsi/react/view/View";
-import { ViewState } from "@dabsi/react/view/ViewState";
 import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
-import React, {
-  Component,
-  ComponentProps,
-  ComponentType,
-  createElement,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 let counter = 0;
 
@@ -29,9 +20,10 @@ const useStyles = makeStyles({
   inline: {
     display: "inline-block",
   },
-  container: {
+  containerWithSelection: {
     position: "relative",
   },
+
   selection: {
     position: "absolute",
     zIndex: -99,
@@ -48,14 +40,6 @@ class FocusableArea2Context {
 }
 const Context = React.createContext(new FocusableArea2Context());
 
-function useDomEvent(element: HTMLElement, key: string, callback, deps: any[]) {
-  useEffect(() => {
-    element.addEventListener(key, callback);
-    return () => {
-      element.removeEventListener(key, callback);
-    };
-  }, deps);
-}
 export type FocusableAreaProps = {
   children: React.ReactNode;
   inline?: boolean;
@@ -64,16 +48,20 @@ export type FocusableAreaProps = {
   onMoveEnd?(event: React.SyntheticEvent);
   onFocus?(event: React.SyntheticEvent);
   onBlur?(event: React.SyntheticEvent);
+  disableSelection?: boolean;
   classes?: {
-    move?: string;
+    selectionOnMove?: string;
     selection?: string;
+    selectionOnFocus?: string;
+
+    move?: string;
     focus?: string;
   };
   divProps?: React.ComponentPropsWithRef<"div">;
 };
 
 function FocusableArea(props: FocusableAreaProps) {
-  const { divProps, inline: isInline, root: isRoot } = props;
+  const { divProps, inline: isInline, root: isRoot, disableSelection } = props;
   const context = React.useContext(Context);
   const classes = useStyles();
   const [isMove, setIsMove] = useState(false);
@@ -96,7 +84,7 @@ function FocusableArea(props: FocusableAreaProps) {
 
   return (
     <>
-      {isRoot && (
+      {!disableSelection && isRoot && (
         <div
           className={classes.background}
           onMouseDown={event => {
@@ -108,8 +96,9 @@ function FocusableArea(props: FocusableAreaProps) {
         {...mergeProps(divProps, {
           className: clsx(
             divProps?.className,
-            classes.container,
-            isInline && classes.inline
+            !disableSelection && classes.containerWithSelection,
+            isInline && classes.inline,
+            isFocus ? props.classes?.focus : isMove && props.classes?.move
           ),
           onMouseMove: event => {
             if (touchSet(context.catchedFocus, event)) {
@@ -132,15 +121,18 @@ function FocusableArea(props: FocusableAreaProps) {
           },
           onMouseDown: event => {
             isMove && context.onFocus.invoke(event, focusId);
+            console.log("div focus", WeakId(event));
           },
         })}
       >
-        {(isFocus || isMove) && (
+        {!disableSelection && (isFocus || isMove) && (
           <div
             className={clsx(
               classes.selection,
               props.classes?.selection,
-              isFocus ? props.classes?.focus : props.classes?.move
+              isFocus
+                ? props.classes?.selectionOnFocus
+                : props.classes?.selectionOnMove
             )}
           />
         )}

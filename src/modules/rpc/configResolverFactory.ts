@@ -8,8 +8,9 @@ import { AnyRpcMap, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
+import { WeakId } from "@dabsi/common/WeakId";
 
-export default function createConfigResolverFactory(
+export default function (
   getConfigResolver: <T>(rpc: AnyRpc) => RpcConfigResolver<AnyRpc>
 ): {
   (rpc: AnyRpc): undefined | RpcConfigResolver<AnyRpc>;

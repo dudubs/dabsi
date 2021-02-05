@@ -1,6 +1,6 @@
-import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import { DABSI_DIR } from "@dabsi/env";
 import { Hookable } from "@dabsi/modules/Hookable";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import {
@@ -13,7 +13,6 @@ import {
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectInfo from "@dabsi/typestack/ProjectInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
-import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
 import path from "path";
 import { touchSet } from "../common/map/touchSet";
 
@@ -24,6 +23,10 @@ export default class ProjectModule {
   projectMap!: Record<string, ProjectInfo>;
 
   mainProject!: ProjectInfo;
+
+  get rootPorject(): ProjectInfo {
+    return this.projectMap[DABSI_DIR];
+  }
 
   projects: ProjectInfo[] = [];
 
@@ -133,7 +136,7 @@ export default class ProjectModule {
         continue;
       }
 
-      this.runner.resolveInstance(moduleTarget);
+      this.runner.getInstance(moduleTarget);
     }
   }
 
@@ -158,10 +161,9 @@ export default class ProjectModule {
     for (const module of this.modules) {
       await this.onLoadModule.invoke(module);
     }
-
-    if (!this.mainProject) {
-      console.log(this.runner.mainTarget);
-      throw new Error("No loaded main proejct.");
-    }
   }
+}
+
+export function getProjectDir(path: string) {
+  return path.replace(/[\\\/]src[\\\/].*$/, "");
 }

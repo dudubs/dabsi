@@ -1,4 +1,4 @@
-import { DABSI_CURRENT_PATH } from "@dabsi/index";
+import { DABSI_CURRENT_DIR } from "@dabsi/env";
 import { Cli } from "@dabsi/modules/Cli";
 import { LocalStorage } from "@dabsi/system/storage/local-storage/LocalStorage";
 import Storage from "@dabsi/system/storage/Storage";
@@ -10,7 +10,7 @@ import path from "path";
 export default class LocalStorageModule {
   url = "/storage";
 
-  localDir = path.resolve(DABSI_CURRENT_PATH, "./bundle/local-storage");
+  localDir = path.resolve(DABSI_CURRENT_DIR, "./bundle/local-storage");
 
   constructor(@Inject(c => c) context, @Inject() cli: Cli) {
     cli.command("start", cli =>

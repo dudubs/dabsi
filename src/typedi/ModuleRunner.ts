@@ -32,13 +32,13 @@ export class ModuleRunner {
     }
   }
 
-  resolveInstance<T>(target: Constructor<T>): T {
+  getInstance<T>(target: Constructor<T>): T {
     return touchMap(this.instanceMap, target, () => {
       log.trace(() => `init module ${target.name}`);
       const argsResolver = getConstructorParamsResolver(target);
       const options = moduleMetadataMap.get(target)!;
       for (const dependencyModule of options.dependencies || []) {
-        this.resolveInstance(dependencyModule);
+        this.getInstance(dependencyModule);
       }
 
       for (const provider of options.providers || []) {

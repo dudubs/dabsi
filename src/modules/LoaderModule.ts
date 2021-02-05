@@ -1,8 +1,7 @@
 import Cache from "@dabsi/common/patterns/Cache";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { Hookable } from "@dabsi/modules/Hookable";
 import { Module } from "@dabsi/typedi";
-import fs from "fs";
+import fs, { readdirSync, readFileSync, statSync } from "fs";
 import path from "path";
 
 const cachedProperties = [] as any[];
@@ -11,7 +10,9 @@ const cachedProperties = [] as any[];
 export default class LoaderModule {
   loaders: (() => Awaitable)[] = [];
 
-  onLoadDir = Hookable<(dir: string) => Awaitable>();
+  directoryLoaders: ((dir: string) => Awaitable)[] = [];
+
+  loadedDirs = new Set();
 
   async load() {
     while (this.loaders.length) {
@@ -27,30 +28,34 @@ export default class LoaderModule {
     }
   }
 
-  async isFile(fileName: string): Promise<boolean> {
-    return this.stat(fileName)
-      .then(stat => stat.isFile())
-      .catch(() => false);
+  isFile(fileName: string): boolean {
+    try {
+      return this.stat(fileName).isFile();
+    } catch {
+      return false;
+    }
   }
 
-  isDir(path: string): Promise<boolean> {
-    return this.stat(path)
-      .then(stat => stat.isDirectory())
-      .catch(() => false);
+  isDir(fileName: string): boolean {
+    try {
+      return this.stat(fileName).isDirectory();
+    } catch {
+      return false;
+    }
   }
 
-  @Cache(cachedProperties) async readFile(path: string): Promise<string> {
-    return fs.promises.readFile(path, "utf8");
+  @Cache(cachedProperties) readFile(path: string): string {
+    return readFileSync(path, "utf8");
   }
-  @Cache(cachedProperties) async readJsonFile(path: string) {
-    return JSON.parse(await this.readFile(path));
+  @Cache(cachedProperties) readJsonFile(path: string) {
+    return JSON.parse(this.readFile(path));
   }
 
   @Cache(cachedProperties)
-  async getIndexFile(dir: string): Promise<string | undefined> {
+  getIndexFile(dir: string): string | undefined {
     for (const baseName of ["index.ts", "index.tsx"]) {
       const indexFileName = path.join(dir, baseName);
-      if (await this.isFile(indexFileName)) {
+      if (this.isFile(indexFileName)) {
         return indexFileName;
       }
     }
@@ -58,22 +63,23 @@ export default class LoaderModule {
 
   @Cache(cachedProperties)
   async loadDir(dir: string) {
-    this.onLoadDir.invoke(dir);
+    if (!this.loadedDirs.touch(dir)) return;
+    await Promise.all(this.directoryLoaders.map(loader => loader(dir)));
   }
 
-  @Cache(cachedProperties) readDir(dir: string): Promise<string[]> {
-    return fs.promises.readdir(dir);
+  @Cache(cachedProperties) readDir(dir: string): string[] {
+    return readdirSync(dir);
   }
 
-  @Cache(cachedProperties) async stat(path: string): Promise<fs.Stats> {
-    return fs.promises.stat(path);
+  @Cache(cachedProperties) stat(path: string): fs.Stats {
+    return statSync(path);
   }
 
   @Cache(cachedProperties)
-  async *readDirDeep(dir: string): AsyncIterableIterator<string> {
-    for (const baseName of await this.readDir(dir)) {
+  *readDirDeep(dir: string): IterableIterator<string> {
+    for (const baseName of this.readDir(dir)) {
       const fileName = path.join(dir, baseName);
-      const stat = await this.stat(fileName);
+      const stat = this.stat(fileName);
       if (stat.isDirectory()) {
         yield* this.readDirDeep(fileName);
       } else {

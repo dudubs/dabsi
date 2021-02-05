@@ -1,3 +1,5 @@
+import { useStore } from "@dabsi/react/useStore";
+import { Struct } from "@dabsi/struct";
 import AppBar from "@material-ui/core/AppBar";
 import Divider from "@material-ui/core/Divider";
 import Drawer from "@material-ui/core/Drawer";
@@ -10,9 +12,6 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import MenuIcon from "@material-ui/icons/Menu";
 import clsx from "clsx";
 import React from "react";
-import { useStore } from "@dabsi/react/useStore";
-import { Struct } from "@dabsi/struct";
-import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
 
 const drawerWidth = 260;
 export const useStyles = makeStyles(theme => ({

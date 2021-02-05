@@ -86,14 +86,13 @@ export namespace DataCursor {
     return <any>cursorAt;
   }
 
-  export function of<T, K extends keyof T>(
-    cursor: DataCursor<T>,
-    propertyName: string & K,
-    key: string
-  ): DataCursor<T> {
+  export function of(
+    cursor: DataCursor<any>,
+    keyMap: Record<string, any>
+  ): DataCursor<any> {
     return {
       ...cursor,
-      keys: { ...cursor.keys, [propertyName]: key },
+      keys: { ...cursor.keys, ...keyMap },
     };
   }
 }

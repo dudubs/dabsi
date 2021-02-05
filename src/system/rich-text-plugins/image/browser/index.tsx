@@ -11,13 +11,13 @@ const useStyles = makeStyles({
 });
 
 RichTextEditorPlugins.push(editor => {
-  editor.atomicBlockRendererFnMap.image = ({ entity }) => {
+  editor.atomicBlockRendererMap.image = ({ entity }) => {
     return {
       editable: false,
       component: MuiRichTextImageComponent,
     };
   };
-  editor.toolbar.push(() =>
+  editor.toolbars.push(() =>
     createElement(MuiRichTextImageButton, {
       editor,
     })

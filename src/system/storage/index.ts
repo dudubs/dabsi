@@ -3,7 +3,7 @@ import DataModule from "@dabsi/modules/data";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
-import Storage from "@dabsi/system/storage/Storage";
+import Storage, { StorageDeleteResult } from "@dabsi/system/storage/Storage";
 import { Inject, Module } from "@dabsi/typedi";
 
 @Module({})
@@ -25,10 +25,10 @@ export default class StorageModule {
 
             const result = await storage.delete(file.url);
             switch (result) {
-              case "DELETED":
+              case StorageDeleteResult.DELETED:
                 await file.delete();
                 break;
-              case "INVALID_URL":
+              case StorageDeleteResult.INVALID_URL:
                 // skipping
                 break;
               default:

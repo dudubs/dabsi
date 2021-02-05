@@ -5,6 +5,7 @@ import {
 } from "@dabsi/browser/ImageUtils";
 import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFormData";
 import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
+import insertImage from "@dabsi/system/rich-text-plugins/image/view/insertImage";
 
 import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
 import IconButton from "@material-ui/core/IconButton";
@@ -65,7 +66,7 @@ export function MuiRichTextImageButton({
             () => connection.upload({ field: "image" })
           );
 
-          editor.store.command("insertImage", url, key);
+          insertImage(editor.store, url, key);
         }}
       />
     </>

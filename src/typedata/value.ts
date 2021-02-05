@@ -29,7 +29,7 @@ TODO:
 
 type NotRelationKeys<T> = Exclude<keyof T, DataRelationKeys<T>>;
 
-type _Base<T> = {
+export type DataValue<T> = {
   [K in DataRelationToOneKeys<T>]?:
     | string
     | number
@@ -41,6 +41,6 @@ type _Base<T> = {
     [K in NotRelationKeys<T>]?: T[K] | null | undefined;
   };
 
-export type DataUpdate<T> = _Base<GetBaseType<T>>;
+export type DataUpdate<T> = DataValue<GetBaseType<T>>;
 // TODO: relations can me also {$key}
-export type DataInsert<T> = _Base<GetBaseType<T>>;
+export type DataInsert<T> = DataValue<GetBaseType<T>>;

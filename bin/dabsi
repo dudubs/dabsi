@@ -11,7 +11,7 @@ O="$O -r @dabsi/register"
 export DABSI_NODE_OPTIONS="$DABSI_NODE_OPTIONS $O"
 
 
-export TS_NODE_PROJECT="$DABSI_PATH/tsconfig.json"
+export TS_NODE_PROJECT="$DABSI_DIR/tsconfig.json"
 export TS_NODE_TRANSPILE_ONLY=true
 
 
@@ -19,7 +19,7 @@ if [ ! "$DABSI_MAIN" ]; then
     DABSI_MAIN="src/cli/index.ts"
 fi
 
-node $O $DABSI_PATH/$DABSI_MAIN $*
+node $O $DABSI_DIR/$DABSI_MAIN $*
 
 
 

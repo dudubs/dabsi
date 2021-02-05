@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.common.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": [
+        "../src/*"
+      ]
+    }
+  },
+  "include": [
+    "../**/common"
+  ]
+}

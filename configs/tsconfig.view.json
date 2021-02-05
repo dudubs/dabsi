@@ -1,3 +1,14 @@
 {
-  "extends": "./tsconfig.base.view.json"
+  "extends": "./tsconfig.base.view.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": [
+        "../src/*"
+      ]
+    }
+  },
+  "include": [
+    "../**/view"
+  ]
 }

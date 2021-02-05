@@ -1,3 +1,4 @@
+import { focusNextTest } from "@dabsi/jasmine/focusNextTest";
 import { subTest } from "@dabsi/jasmine/subTest";
 import { ASource, BSource, CSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
@@ -74,53 +75,6 @@ describe("Selection", () => {
       await selectionSource.filter({ $base: { aText: "sourceText" } }).get(key)
     ).toBeDefined();
   });
-});
-
-it("relations sanity", async () => {
-  const debug = false;
-
-  const aKey = await ASource.insertKey({});
-  const bKey = await BSource.insertKey({});
-
-  expect(await ASource.get(aKey)).toBeTruthy();
-  expect(await ASource.get(bKey)).toBeFalsy();
-  expect(await BSource.get(bKey)).toBeTruthy();
-  await assert("oneAToOneB");
-  await assert("oneAToOneBOwner");
-
-  await assert("manyAToManyB");
-  await assert("manyAToManyBOwner");
-
-  await assert("oneAToManyB");
-  await assert("manyAToOneB");
-
-  function assert(p: DataRelationKeys<AEntity>) {
-    return subTest(`(${p})`, async () => {
-      debug && console.log({ p, aKey, bKey });
-      const aOfBOwner = ASource.of(p, bKey);
-      const bOwnerAtA = ASource.at(p, aKey);
-
-      await assert(aOfBOwner, aKey, bOwnerAtA);
-      await assert(bOwnerAtA, bKey, aOfBOwner);
-
-      async function assert<T, U>(
-        ds: DataSource<T>,
-        key: string,
-        inverseDs: DataSource<U>
-      ) {
-        expect(await ds.get()).toBeFalsy();
-        expect(await inverseDs.get()).toBeFalsy();
-
-        await ds.add(key);
-        expect(await ds.get()).toBeTruthy();
-        expect(await inverseDs.get()).toBeTruthy();
-
-        await ds.remove(key);
-        expect(await ds.get()).toBeFalsy();
-        expect(await inverseDs.get()).toBeFalsy();
-      }
-    });
-  }
 });
 
 it("expect to invalid insert", async () => {

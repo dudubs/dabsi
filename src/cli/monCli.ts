@@ -1,20 +1,20 @@
 import { Debounce } from "@dabsi/common/async/Debounce";
 import watch from "@dabsi/filesystem/watch";
-import { DABSI_SRC_PATH } from "@dabsi/index";
+import { DABSI_SRC_DIR } from "@dabsi/env";
 import { spawn } from "child_process";
 
-export function monCli(): boolean {
+export default function (): boolean {
   const argsWithoutMon = process.argv.filter(x => x !== "--mon");
   if (process.argv.length === argsWithoutMon.length) {
     return false;
   }
   const debounce = Debounce(100);
-  console.log("watching", DABSI_SRC_PATH);
+  console.log("watching", DABSI_SRC_DIR);
   let p: { kill() } | null = null;
   reload();
 
   const watcher = watch(
-    DABSI_SRC_PATH,
+    DABSI_SRC_DIR,
     { recursive: true },
     async (e, filename) => {
       if (await debounce()) {

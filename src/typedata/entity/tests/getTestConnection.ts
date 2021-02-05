@@ -41,4 +41,5 @@ globalTester(() => {
     ]);
   });
 });
+
 export default getConnection;

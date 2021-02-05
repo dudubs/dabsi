@@ -2,27 +2,23 @@ import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
-import { ViewPlatformModule } from "@dabsi/modules/ViewPlatformModule";
 import createConfigResolverFactory from "@dabsi/modules/rpc/configResolverFactory";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { Module, Resolver, ResolverContext } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
 import path from "path";
-import { DABSI_ROOT_DIR } from "../..";
+import { DABSI_ROOT_DIR } from "../../env";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
 import { isRpcConfigResolver, RpcConfigResolver } from "./RpcConfigResolver";
 
 @Module()
 export default class RpcModule {
-  protected _rpcConfigResolverMap = new Map<
-    AnyRpc,
-    RpcConfigResolver<AnyRpc>
-  >();
+  _rpcConfigResolverMap = new Map<AnyRpc, RpcConfigResolver<AnyRpc>>();
 
   protected _isChecking = false;
 
@@ -41,7 +37,7 @@ export default class RpcModule {
     protected projectModule: ProjectModule,
     protected loaderModule: LoaderModule
   ) {
-    loaderModule.onLoadDir(dir => this._loadDir(dir, true));
+    loaderModule.directoryLoaders.push(dir => this._loadDir(dir, true));
   }
 
   configureRpcResolver(configResolver: RpcConfigResolver<AnyRpc>) {
@@ -132,6 +128,13 @@ export default class RpcModule {
     }
   }
 
+  createRpcConnection<T extends AnyRpc>(rpc: T, context): RpcConnection<T> {
+    const configResolver = this.getRpcConfigResolver(rpc);
+    const config = Resolver.resolve(configResolver, context);
+
+    const command = rpc.createRpcCommand(config);
+    return rpc.createRpcConnection([], command);
+  }
   async processRequest(
     rpc: AnyRpc,
     rpcReq: RpcRequest,

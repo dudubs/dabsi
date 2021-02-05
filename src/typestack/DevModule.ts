@@ -45,6 +45,7 @@ export class DevModule {
   onRunAsParent = Hookable<() => Awaitable>();
 
   protected reloadDebounce = Debounce(200);
+
   protected async reload() {
     // if (this.isReloading) return;
     if (this.process) {

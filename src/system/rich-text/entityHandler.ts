@@ -3,6 +3,7 @@ import { Override } from "@dabsi/common/typings2/Override";
 import { Type } from "@dabsi/common/typings2/Type";
 import {
   RichTextConfig,
+  RichTextEntityChild,
   RichTextEntityData,
   RichTextEntityType,
 } from "@dabsi/system/rich-text/common/types";
@@ -11,6 +12,8 @@ import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataRow } from "@dabsi/typedata/row";
 import { pick } from "@dabsi/common/object/pick";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
+import { DataInsert } from "@dabsi/typedata/value";
+import { DataSource } from "@dabsi/typedata/source";
 
 export type RichTextEntitySelection<
   K extends RichTextEntityType
@@ -58,7 +61,10 @@ export type _OptionsAndHandler<K extends RichTextEntityType> = {
 
   mutability: { [K in Draft.DraftEntityMutability]?: boolean };
 
-  packEntityKey(unpackedData: RichTextEntityData<K>["unpacked"]): string;
+  packEntityKey(
+    unpackedData: RichTextEntityData<K>["unpacked"],
+    source: DataSource<RichTextEntityChild<K>>
+  ): Awaitable<string>;
 
   readonlyKeys?: (keyof RichTextEntityData<K>["unpacked"])[];
 };

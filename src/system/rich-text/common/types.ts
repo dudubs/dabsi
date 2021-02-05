@@ -23,7 +23,9 @@ declare global {
     }
   }
 }
-
+export type RichTextEntityChild<
+  K extends RichTextEntityType
+> = IRichText.EntityChildren[K];
 export type RichTextConfig = IRichText.Config;
 
 export type RichTextElement = IRichText.Element;

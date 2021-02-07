@@ -9,7 +9,11 @@ declare global {
 }
 
 [WeakMap, Map].forEach(mapType => {
-  mapType.prototype.touch = Map.prototype.touch = function (key, callback) {
+  mapType.prototype.touch = Map.prototype.touch = function (
+    keyOrFactory,
+    callback?
+  ) {
+    const key = keyOrFactory;
     if (this.has(key)) return this.get(key);
     const value = callback(key);
     this.set(key, value);

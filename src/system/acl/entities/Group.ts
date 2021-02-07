@@ -25,5 +25,3 @@ export class Group {
   @ManyToOne(() => Permission, p => p.group)
   permissions!: DataRelation<Permission>[];
 }
-
-export default User;

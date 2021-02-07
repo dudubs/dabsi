@@ -1,8 +1,7 @@
 import RichTextModule from "@dabsi/system/rich-text";
-import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entities/ImageEntity";
-import { Inject, Module } from "@dabsi/typedi";
-
-const RichTextImageEntityType = "image";
+import StorageModule from "@dabsi/system/storage";
+import { ImageFile } from "@dabsi/system/storage/entities/image";
+import { Module } from "@dabsi/typedi";
 
 declare global {
   namespace IRichText {
@@ -15,55 +14,38 @@ declare global {
             preview?: { width?: number; height?: number };
           };
     }
-    interface EntityChildren {
-      image: RichTextImageEntity;
+    interface RelationTypes {
+      image: ImageFile;
     }
 
     interface EntityDataTypes {
-      image: {
-        packed: null;
-
-        unpacked: { url: string; entityKey: string };
-
-        readonly: { url: string };
-      };
+      image: EntityDataType<{}, { url: string }, { imageKey: string }>;
     }
   }
 }
 
-@Module()
+@Module({ dependencies: [StorageModule] })
 export default class RichTextImageModule {
   // @Configure
 
-  constructor(@Inject() richTextModule: RichTextModule) {
-    richTextModule.install(plugins => {
-      plugins.defineEntity("image", {
-        entityType: RichTextImageEntity,
-        mutability: { IMMUTABLE: true },
-
-        selection: {
-          relations: { imageFile: { pick: ["url"] } },
+  constructor(rtModule: RichTextModule) {
+    rtModule //
+      .defineRelation("image", ImageFile, {
+        selection: { pick: ["url"] },
+      })
+      .defineEntity("image", {
+        readonlyKeys: ["imageKey"],
+        pack: (c, { imageKey }) => {
+          c.packRelation("image", imageKey);
+          return { imageKey };
         },
-
-        packEntityKey: unpackedData => {
-          return unpackedData.entityKey;
-        },
-
-        pack: (_, row, { url }) => {
-          return null;
-        },
-
-        unpack: (_, image) => {
-          console.log({ image });
-
+        unpack: (c, { imageKey }) => {
+          const image = c.unpackRelation("image", imageKey);
           return {
-            url: image.imageFile!.url,
-            entityKey: image.$key,
+            url: image!.url,
+            imageKey,
           };
         },
-
-        readonlyKeys: ["url"],
       });
-    });
   }
 }

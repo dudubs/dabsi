@@ -11,5 +11,5 @@ declare global {
 
 @Module()
 export default class RichTextLinkModule {
-  constructor(@Inject() richTextModule: RichTextModule) {}
+  constructor(@Inject() rtModule: RichTextModule) {}
 }

@@ -1,58 +1,58 @@
+import LoaderModule from "@dabsi/modules/LoaderModule";
+import { RpcTester } from "@dabsi/modules/rpc/tests/tester";
 import { SESSION_TIMEOUT } from "@dabsi/modules/session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import RequestSession from "@dabsi/modules/session/RequestSession";
+import DbTester from "@dabsi/modules/tests/DbTester";
 import RichTextModule from "@dabsi/system/rich-text";
+import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
+import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
 import { RichTextContext } from "@dabsi/system/rich-text/context";
-import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
-import {
-  RTTestEntity1,
-  RTTestEntity1Type,
-} from "@dabsi/system/rich-text/tests/RTTestEntity1";
+import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
+import Storage from "@dabsi/system/storage/Storage";
 import { DataRow } from "@dabsi/typedata/row";
-import { Resolver } from "@dabsi/typedi";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { ModuleTarget } from "@dabsi/typedi";
 
-export default (
-  callback: (_: {
-    richTextModule: RichTextModule;
-    moduleRunner: ModuleRunner;
-  }) => void
-) =>
-  ModuleTester({ entityTypes: [RichTextDocument] }).beforeAll(async t => {
-    const richTextModule = await t.moduleRunner.getInstance(RichTextModule);
+export default function RichTextTester({
+  modules = [] as ModuleTarget[],
+} = {}) {
+  const t = ModuleTester();
+  const db = DbTester(t);
+  const rpc = RpcTester(t);
+  return t.beforeAll(async t => {
+    const rtModule = await t.moduleRunner.getInstance(RichTextModule);
 
-    richTextModule.install(i => {
-      i.defineEntity(RTTestEntity1Type, {
-        entityType: RTTestEntity1,
-        mutability: {
-          MUTABLE: true,
-        },
-        unpackSelection: { pick: ["testText"] },
-        packEntityKey: data => data.testKey,
-        unpack: (_, row, data) => ({
-          testKey: row.$key,
-          entityText: row.testText,
-          dataText: data,
-        }),
-        pack: (_, row, data) => data.dataText,
-        unpackForReadonly: (_, row, data) => ({
-          entityText: row.testText,
-          dataText: data,
-        }),
-      });
-    });
-    callback({ richTextModule, moduleRunner: t.moduleRunner });
+    t.provide(Storage.provide(() => new TestStorage()));
 
-    await richTextModule.init();
+    for (const module of modules) {
+      t.moduleRunner.getInstance(module);
+    }
 
-    const session = await t.data.getSource(RequestSession).insert({
+    const loaderModule = t.moduleRunner.getInstance(LoaderModule);
+
+    await loaderModule.load();
+    await db.dbModule.init();
+
+    const session = await db.data.getSource(RequestSession).insert({
       token: "test",
       timeout: getCurrentTime() + SESSION_TIMEOUT,
     });
-    Resolver.provide(
-      t.moduleRunner.context,
-      DataRow(RequestSession).provide(() => session)
-    );
-    return { richTextModule };
+
+    t.provide(DataRow(RequestSession).provide(() => session));
+
+    return {
+      rtModule,
+      db,
+      rpc,
+      loaderModule,
+
+      configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
+        const context = t.resolve(RichTextContext);
+        const configWithContext = { ...config, context };
+        t.provide(RichTextConfigResolver.provide(() => configWithContext));
+        return configWithContext;
+      },
+    };
   });
+}

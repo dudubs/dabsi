@@ -15,10 +15,11 @@ import { DataSource } from "@dabsi/typedata/source";
 import { DataInsert, DataUpdate } from "@dabsi/typedata/value";
 import { Connection, QueryRunner } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
 
 export class DataEntitySource<T> extends DataSource<T> {
   static createFromConnection<T>(
-    entityType: Type<T>,
+    entityType: Constructor<T>,
     connection?: () => Connection
   ): DataEntitySource<T> {
     return new DataEntitySource(
@@ -29,13 +30,13 @@ export class DataEntitySource<T> extends DataSource<T> {
   }
 
   static fromQueryRunner<T>(
-    entityType: Type<T>,
+    entityType: Constructor<T>,
     queryRunner: QueryRunner
   ): DataEntitySource<T> {
     return new DataEntitySource(entityType, () => queryRunner, EmptyDataCursor);
   }
   constructor(
-    public entityType: Type<T>,
+    public entityType: Constructor<T>,
     public getQueryRunner: () => QueryRunner,
     public cursor: DataCursor
   ) {
@@ -44,7 +45,7 @@ export class DataEntitySource<T> extends DataSource<T> {
 
   withCursor<U = T>(cursor: DataCursor): DataEntitySource<U> {
     return new DataEntitySource<U>(
-      this.entityType,
+      <any>this.entityType,
       this.getQueryRunner,
       cursor
     );

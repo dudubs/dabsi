@@ -1,11 +1,9 @@
 import { Session } from "@dabsi/modules/session/entities/Session";
-import { RichTextEntity } from "@dabsi/system/rich-text/entities/DocumentEntity";
+import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { DataRelation } from "@dabsi/typedata/relation";
 import {
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -20,12 +18,8 @@ export class RichTextDocument {
   session!: DataRelation<Session>;
 
   @Column()
-  text!: string;
+  content!: string;
 
-  @Column()
-  data!: string;
-
-  @JoinTable()
-  @ManyToMany(() => RichTextEntity, entity => entity.documents)
-  entities!: DataRelation<RichTextEntity>[];
+  @OneToMany(() => RichTextRelation, rel => rel.document)
+  relations!: DataRelation<RichTextRelation[]>;
 }

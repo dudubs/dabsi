@@ -1,23 +1,26 @@
+import { Session } from "@dabsi/modules/session/entities/Session";
 import { Resource } from "@dabsi/modules/session/resource";
-import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { DataRelation } from "@dabsi/typedata/relation";
 import {
   Column,
   Entity,
-  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   TableInheritance,
 } from "typeorm";
 
-@Entity({ name: "rich-text/entites" })
+@Entity({ name: "storage/files" })
 @TableInheritance({ column: "type" })
-export class RichTextEntity extends Resource {
+export class StorageFile extends Resource {
   @PrimaryGeneratedColumn()
   id!: number;
 
   @Column()
   type!: string;
 
-  @ManyToMany(() => RichTextDocument, doc => doc.entities)
-  documents!: DataRelation<RichTextDocument>[];
+  @Column()
+  url!: string;
+
+  @ManyToOne(() => Session, { nullable: true })
+  session!: DataRelation<Session>;
 }

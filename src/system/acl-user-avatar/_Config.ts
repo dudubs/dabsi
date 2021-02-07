@@ -49,7 +49,7 @@ export default RpcConfigResolver(
             await sharp(buffer).png().toBuffer()
           );
 
-          await c.user.update({ avatar: file });
+          await c.user.update({ avatar: file.key });
 
           return { url: file.url };
         },

@@ -1,7 +1,7 @@
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { DABSI_CURRENT_DIR, DABSI_SRC_DIR } from "@dabsi/env";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
-import { readdirSync, statSync } from "fs";
+import { existsSync, readdirSync, statSync } from "fs";
 import "jasmine";
 import path from "path";
 import "@dabsi/jasmine/register";
@@ -9,6 +9,9 @@ import globalTester from "@dabsi/jasmine/globalTester";
 import { LogLevel } from "@dabsi/logging/Logger";
 
 log.setLevel(l => l ^ LogLevel.INFO);
+
+const requireBeforeTests: string[] = [];
+const tests: string[] = [];
 
 const searchedDirs = new Set<string>();
 const where = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
@@ -20,29 +23,45 @@ if (!where.length) {
     searchTests(path.resolve(DABSI_CURRENT_DIR, dir));
   });
 }
+
+console.log({ requireBeforeTests, tests });
+
+requireBeforeTests.forEach(moduleName => {
+  require(moduleName);
+});
+tests.forEach(moduleName => {
+  describe(moduleName, () => {
+    require(moduleName);
+  });
+});
+
 for (const callback of globalTester.callbacks) {
   callback();
 }
 
-function loadTests(fileName) {
-  const moduleName = "@dabsi/" + relativePosixPath(DABSI_SRC_DIR, fileName);
-  describe(moduleName.replace(/\.tsx?$/, ""), () => {
-    require("@dabsi/" + relativePosixPath(DABSI_SRC_DIR, fileName));
-  });
+function getModuleName(fileName) {
+  return "@dabsi/" + path.posix.relative(DABSI_SRC_DIR, fileName);
 }
 
 function searchTests(dir: string) {
   if (!touchSet(searchedDirs, dir)) return;
 
   if (!statSync(dir).isDirectory()) {
-    loadTests(dir);
+    tests.push(getModuleName(dir));
     return;
   }
 
   readdirSync(dir).forEach(baseName => {
     const fileName = path.join(dir, baseName);
-    if (/Tests.tsx?$/.test(baseName)) {
-      loadTests(fileName);
+
+    if (/^(browser|native)$/.test(baseName)) return;
+
+    if (/tester.tsx?$/.test(baseName)) {
+      requireBeforeTests.push(getModuleName(fileName));
+      return;
+    }
+    if (/tests.tsx?$/i.test(baseName)) {
+      tests.push(getModuleName(fileName));
     } else if (statSync(fileName).isDirectory()) {
       searchTests(fileName);
     }

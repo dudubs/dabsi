@@ -100,7 +100,7 @@ export default class RpcModule {
       if (stat.isDirectory()) {
         await this._loadDir(fileName);
         continue;
-      } else if (/Config\.ts$/.test(fileName)) {
+      } else if (/config\.ts$/i.test(fileName)) {
         await this._loadConfig(fileName);
       }
     }
@@ -128,13 +128,6 @@ export default class RpcModule {
     }
   }
 
-  createRpcConnection<T extends AnyRpc>(rpc: T, context): RpcConnection<T> {
-    const configResolver = this.getRpcConfigResolver(rpc);
-    const config = Resolver.resolve(configResolver, context);
-
-    const command = rpc.createRpcCommand(config);
-    return rpc.createRpcConnection([], command);
-  }
   async processRequest(
     rpc: AnyRpc,
     rpcReq: RpcRequest,

@@ -1,8 +1,8 @@
 import { User } from "@dabsi/system/acl/entities/User";
 import RichTextModule from "@dabsi/system/rich-text";
-import { RichTextMontionEntity } from "@dabsi/system/rich-text-plugins/mention/entities/MentionEntity";
+import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataSource } from "@dabsi/typedata/source";
-import { Inject, Module } from "@dabsi/typedi";
+import { Module } from "@dabsi/typedi";
 
 declare global {
   namespace IRichText {
@@ -11,48 +11,47 @@ declare global {
         | boolean
         | {
             source?: DataSource<User>;
+            field?: DataExp<User>;
+            minCharsForSuggestions?: number;
           };
     }
-    interface EntityChildren {
-      montion: RichTextMontionEntity;
+    interface RelationTypes {
+      mention: User;
     }
 
     interface EntityDataTypes {
-      montion: {
-        packed: null;
-
-        unpacked: { name: string; userKey: string; entityKey?: string };
-
-        readonly: { name: string; userKey: string };
-      };
+      mention: EntityDataType<
+        { userKey: string },
+        { userKey: string; name: string }
+      >;
     }
   }
 }
 
 @Module()
 export default class RichTextLinkModule {
-  constructor(@Inject() richTextModule: RichTextModule) {
-    richTextModule.install(plugins => {
-      return plugins.defineEntity("montion", {
-        entityType: RichTextMontionEntity,
-        mutability: { IMMUTABLE: true },
-        selection: {
-          relations: { user: { pick: ["loginName"] } },
-        },
-        packEntityKey: async ({ entityKey, userKey }) => {
-          if (entityKey) {
-            return entityKey;
-          }
-          return { user: userKey };
-        },
-        pack: () => null,
-        unpack: (_, entity) => ({
-          name: entity.user!.loginName || "",
-          entityKey: entity.$key,
-          userKey: entity.user!.$key,
+  constructor(rtModule: RichTextModule) {
+    rtModule //
+      .defineRelation("mention", User, {
+        selection: config => ({
+          pick: [],
+          fields: {
+            mentionName:
+              typeof config.mention === "object"
+                ? config.mention.field
+                : undefined ?? "loginName",
+          },
         }),
-        readonlyKeys: ["name", "userKey"],
+      })
+      .defineEntity("mention", {
+        pack(c, { userKey }) {
+          c.packRelation("mention", userKey);
+          return { userKey };
+        },
+        unpack(c, { userKey }) {
+          const user = c.unpackRelation("mention", userKey);
+          return { name: user!.loginName!, userKey };
+        },
       });
-    });
   }
 }

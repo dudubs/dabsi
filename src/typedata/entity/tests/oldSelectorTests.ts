@@ -290,8 +290,8 @@ function testEntity<T>(
     metadata = getEntityMetadata(connection, typeInfo.type);
 
     entityKeyToRow = mapArrayToObject(
-      await DataEntitySource.createFromConnection(type, () => connection)
-        .select(selection)
+      await DataEntitySource.createFromConnection(<any>type, () => connection)
+        .select(<any>selection)
         .getRows(),
       row => [row.$key, row]
     );

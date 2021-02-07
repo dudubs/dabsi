@@ -36,18 +36,21 @@ export function DataKeyOrKeys<T>(keyOrKeys: DataKeyOrKeysInput<T>): string[] {
 export type BasedDataSource<T> = DataSource<BaseType<T> & { _ }>;
 
 export abstract class DataSource<T> {
-  // TODO: rename to getCountAndRows
-
   TData?: T;
 
+  // countAndFetch
   async getCountAndRows(): Promise<[number, DataRow<T>[]]> {
     // TODO: Optimizing
     return [await this.getCountRows(), await this.getRows()];
   }
 
   // TODO: rename to getRows()
+
+  // fetchAll
+
   abstract getRows(): Promise<DataRow<T>[]>;
 
+  // fetchMap
   async getRowMap(): Promise<Record<string, DataRow<T>>> {
     return mapArrayToObject(await this.getRows(), row => [row.$key, row]);
   }
@@ -57,13 +60,14 @@ export abstract class DataSource<T> {
     });
   }
 
+  // fetchKeys
   getKeys(): Promise<string[]> {
     return this.selectKeys()
       .getRows()
       .then(rows => rows.map(row => row.$key));
   }
 
-  selectKeys(): DataSource<{}> {
+  protected selectKeys(): DataSource<T> {
     return this.updateCursor({
       selection: {
         pick: [],
@@ -88,8 +92,10 @@ export abstract class DataSource<T> {
     }
   }
 
+  // count()
   abstract getCountRows(): Promise<number>;
 
+  // hasRows()
   abstract hasRows(): Promise<boolean>;
 
   //
@@ -101,6 +107,7 @@ export abstract class DataSource<T> {
     return (await this.get()) || (await this.insert(insert || ({} as any)));
   }
 
+  // fetchOrFail
   async getOrFail(key?: string | number): Promise<DataRow<T>> {
     return defined(await this.get(key?.toString()), () =>
       key ? `No row "${key}"` : "No row"
@@ -162,6 +169,7 @@ export abstract class DataSource<T> {
     value: DataUpdate<T>
   ): Promise<number>;
 
+  // TODO: insertManyKeys, insertKey
   insertKey(value: DataInsert<T>): Promise<string>;
   insertKey(values: DataInsert<T>[]): Promise<string[]>;
   insertKey(values) {
@@ -170,6 +178,7 @@ export abstract class DataSource<T> {
       : this.insertKeys([values]).then(rows => rows[0]);
   }
 
+  // TODO: doInsertManyKeys
   protected abstract insertKeys<T>(datas: DataInsert<T>[]): Promise<string[]>;
 
   protected async _each(

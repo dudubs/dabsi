@@ -1,4 +1,5 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resource } from "@dabsi/modules/session/resource";
 import { Connection } from "typeorm";
 

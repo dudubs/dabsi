@@ -3,8 +3,8 @@ import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
-import { RichTextImageEntity } from "@dabsi/system/rich-text-plugins/image/entities/ImageEntity";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
+import { ImageFile } from "@dabsi/system/storage/entities/image";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { DataRow } from "@dabsi/typedata/row";
 import { RpcError } from "@dabsi/typerpc/Rpc";
@@ -22,22 +22,20 @@ export default RpcConfigResolver(
   c => $ =>
     $({
       async upload({ field }) {
-        if (!c.config.editable) throw new RpcError("Not editable.");
         if (!c.config.allowAll && !c.config.image)
           throw new RpcError("Not allowed.");
         const buffer = c.rpcReq.body[field];
-        const imageFile = await c.storageManager.upload(
+        const { key, url } = await c.storageManager.upload(
           "rt-image", // rich-text-image
           "png",
-          await sharp(buffer).png().toBuffer()
+          await sharp(buffer).png().toBuffer(),
+          ImageFile,
+          {
+            imageWidth: 100,
+            imageHeight: 100,
+          }
         );
-        const key = await c.data.getSource(RichTextImageEntity).insertKey({
-          session: c.session,
-          imageFile,
-          imageWidth: 100,
-          imageHeight: 100,
-        });
-        return { url: imageFile.url, key };
+        return { key, url };
       },
     })
 );

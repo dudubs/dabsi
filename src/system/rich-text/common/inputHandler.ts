@@ -2,7 +2,8 @@ import {
   RichTextInput,
   RichTextInputElement,
 } from "@dabsi/system/rich-text/common/input";
-import { RichTextInputValue } from "@dabsi/system/rich-text/common/inputValue";
+import { RichTextContent } from "@dabsi/system/rich-text/content";
+
 import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   ErrorOrValue,
@@ -21,46 +22,27 @@ export default class RichTextInputHandler
   $pluginsConfig: RpcChildConfig<
     T,
     "plugins"
-  > = this.config.context.createPluginsConfig({
+  > = this.config.context.createRpcConfig({
     ...this.config,
     editable: true,
   });
 
   async loadAndCheck(
-    data: Draft.RawDraftContentState
-  ): Promise<ErrorOrValue<never, RichTextInputValue>> {
-    return {
-      value: {
-        config: this.config,
-        getContent: () => data,
-      },
-    };
+    data: RichTextContent.Unpacked
+  ): Promise<ErrorOrValue<never, InputValue<T>>> {
+    return { value: () => data };
   }
 
   async getValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Promise<InputValue<T>> {
-    return {
-      config: this.config,
-      getContent: async () => {
-        const docKey: string | null =
-          typeof valueConfig === "string"
-            ? valueConfig
-            : typeof valueConfig === "object"
-            ? valueConfig.$key
-            : null;
-
-        if (docKey) {
-          return this.config.context.unpack(this.config, docKey, false);
-        }
-        return null;
-      },
-    };
+    return valueConfig;
   }
 
   async getValueElement(value: InputValue<T>): Promise<InputValueElement<T>> {
     return null;
   }
+
   async getInputElement(): Promise<RichTextInputElement> {
     const element: RichTextInputElement = <any>{};
     await this.config.context.module.buildInputElement.invoke(

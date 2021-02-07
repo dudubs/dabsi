@@ -1,5 +1,4 @@
 import { Tester } from "@dabsi/jasmine/Tester";
-import { inspect } from "@dabsi/logging/inspect";
 import CliModule from "@dabsi/modules/CliModule";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
@@ -8,7 +7,6 @@ import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { Resource } from "@dabsi/modules/session/resource";
 import TestDbModule from "@dabsi/modules/tests/TestDbModule";
-import { getRelationMetadatasTo } from "@dabsi/typedata/entity/metadata";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { findEntities } from "@dabsi/typeorm/findEntities";

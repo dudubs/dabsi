@@ -1,6 +1,7 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
 import { Cli } from "@dabsi/modules/Cli";
 import DataModule from "@dabsi/modules/data";
@@ -131,6 +132,7 @@ export default class SessionModule {
       })
       .delete();
   }
+
   async cleanUnusedResources() {
     for (const resourceType of getResourceTypes(
       this.dbModule.getConnection()
@@ -150,7 +152,7 @@ export default class SessionModule {
       }
 
       for await (const resource of this.data
-        .getSource(handler.type)
+        .getSource(handler.type as any)
         .select(handler.selection)
         .filter({
           $and: [

@@ -18,13 +18,8 @@ export default class DataModule {
       context,
       DataContext.provide(
         () =>
-          new DataContext(
-            entityType =>
-              new DataEntitySource(
-                entityType,
-                () => dbModule.queryRunner!,
-                EmptyDataCursor
-              )
+          new DataContext(entityType =>
+            DataEntitySource.fromQueryRunner(entityType, dbModule.queryRunner!)
           )
       )
     );

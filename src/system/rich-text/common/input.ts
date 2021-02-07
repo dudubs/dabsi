@@ -1,8 +1,8 @@
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
-import type { RichTextInputValue } from "@dabsi/system/rich-text/common/inputValue";
+import { RichTextContent } from "@dabsi/system/rich-text/content";
+
 import { Input } from "@dabsi/typerpc/input/Input";
-import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
-import { RawDraftContentState } from "draft-js";
 import requireRpcHandler from "../../../typerpc/requireRpcHandler";
 
 declare global {
@@ -23,9 +23,9 @@ export type RichTextInputElement = IRichText.InputElement;
 export type RichTextInputConfig = IRichText.InputConfig;
 
 export type RichTextInput = Input<{
-  ValueData: null | Draft.RawDraftContentState;
+  ValueData: null | RichTextContent.Unpacked;
 
-  Value: RichTextInputValue;
+  Value: () => Awaitable<null | RichTextContent.Unpacked>;
 
   Controller: {
     plugins: typeof RichTextRpc;
@@ -37,9 +37,9 @@ export type RichTextInput = Input<{
 
   Element: IRichText.InputElement;
 
-  ValueElement: null | Draft.RawDraftContentState;
+  ValueElement: null | RichTextContent.Unpacked;
 
-  ValueConfig: string | { $key: string };
+  ValueConfig: () => Awaitable<null | RichTextContent.Unpacked>;
 
   Error: never;
 }>;
@@ -48,7 +48,7 @@ export function RichTextInput(): RichTextInput {
   return Input<RichTextInput>({
     type: RichTextInput,
     handler: requireRpcHandler(__filename),
-    children: { plugins: { RichTextRpc } },
+    children: { plugins: RichTextRpc },
     getValueDataFromValueElement(valueElement) {
       return valueElement;
     },

@@ -1,5 +1,5 @@
 import { createSelectionState } from "@dabsi/system/rich-text/common/draftUtils";
-import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
+import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 
 RichTextEditorPlugins.push(editor => {
   editor.bindKey("Backspace", event => {

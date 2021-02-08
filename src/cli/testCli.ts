@@ -36,6 +36,10 @@ export default function testCli(args) {
         path.join(NODE_MODULES_DIR, "jasmine/bin/jasmine.js")
       ),
       "--stop-on-failure=true",
+      // "--random=false",
+      ...[
+        process.env.JASMINE_SEED ? "--seed=" + process.env.JASMINE_SEED : "",
+      ].filter(x => !!x),
       path.join(DABSI_SRC_DIR, "jasmine/run.ts"),
       "--",
       ...args,

@@ -1,6 +1,6 @@
 // list (numberic, dot)
 // header
-import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
+import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 import { makeStyles } from "@material-ui/core/styles";
 import clsx from "clsx";
 import { EditorBlock, Modifier, SelectionState } from "draft-js";

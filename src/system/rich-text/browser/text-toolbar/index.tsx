@@ -1,10 +1,8 @@
-import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
-import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
+import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/muiPlugins";
 // list (numberic, dot)
 // header
-import Separator from "@dabsi/system/rich-text/browser/text-toolbar/Separator";
+import ToolbarSeparator from "@dabsi/system/rich-text/browser/ToolbarSeparator";
 import TextHeaderButton from "@dabsi/system/rich-text/browser/text-toolbar/TextHeaderButton";
-import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
 import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
@@ -13,6 +11,8 @@ import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatIndentDecreaseIcon from "@material-ui/icons/FormatIndentDecrease";
 import FormatIndentIncreaseIcon from "@material-ui/icons/FormatIndentIncrease";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
+import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
+import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import FormatTextdirectionLToRIcon from "@material-ui/icons/FormatTextdirectionLToR";
 import FormatTextdirectionRToLIcon from "@material-ui/icons/FormatTextdirectionRToL";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
@@ -22,9 +22,8 @@ import React from "react";
 import "./styles";
 import ToolbarButton from "./ToolbarButton";
 const maxDepth = 10;
-import draftjs from "draft-js";
 
-RichTextEditorPlugins.push(editor => {
+MuiRichTextEditorPlugins.push(editor => {
   const {
     store,
     editorProps: { blockStyleFn },
@@ -53,7 +52,7 @@ RichTextEditorPlugins.push(editor => {
     ["RTL", <FormatTextdirectionRToLIcon />],
   ];
 
-  editor.toolbars.push(({ isLast }) => {
+  editor.toolbars.push(() => {
     const block = store.content.getBlockForKey(store.selection.getStartKey());
 
     const inlineStyles = block.getInlineStyleAt(
@@ -75,14 +74,14 @@ RichTextEditorPlugins.push(editor => {
             {icon}
           </ToolbarButton>
         ))}
-        <Separator />
+        <ToolbarSeparator />
         <ToolbarButton onClick={() => store.adjustDepth(1, maxDepth)}>
           <FormatIndentIncreaseIcon />
         </ToolbarButton>
         <ToolbarButton onClick={() => store.adjustDepth(-1, maxDepth)}>
           <FormatIndentDecreaseIcon />
         </ToolbarButton>
-        <Separator />
+        <ToolbarSeparator />
         {alignTypes.map(([align, icon]) => (
           <ToolbarButton
             key={align}
@@ -92,7 +91,7 @@ RichTextEditorPlugins.push(editor => {
             {icon}
           </ToolbarButton>
         ))}
-        <Separator />
+        <ToolbarSeparator />
         {directionTypes.map(([direction, icon]) => (
           <ToolbarButton
             key={direction}
@@ -102,7 +101,7 @@ RichTextEditorPlugins.push(editor => {
             {icon}
           </ToolbarButton>
         ))}
-        <Separator />
+        <ToolbarSeparator />
         <TextHeaderButton store={store} />
         <ToolbarButton
           onClick={() => store.setBlockType("unordered-list-item")}
@@ -112,7 +111,6 @@ RichTextEditorPlugins.push(editor => {
         <ToolbarButton onClick={() => store.setBlockType("ordered-list-item")}>
           <FormatListNumberedIcon />
         </ToolbarButton>
-        {!isLast && <Separator />}
         <ToolbarButton
           onClick={() => {
             console.log(convertToRaw(store.content), null, 2);

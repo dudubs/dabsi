@@ -1,5 +1,5 @@
 import { Debounce } from "@dabsi/common/async/Debounce";
-import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
+import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 import { convertFromRaw, convertToRaw, EditorState } from "draft-js";
 import React from "react";
 import { useHistoryStateKey } from "../browser/useHistoryStateKey";

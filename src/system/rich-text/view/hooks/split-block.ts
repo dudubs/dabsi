@@ -1,16 +1,10 @@
 // list (numberic, dot)
 // header
-import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
-import { makeStyles } from "@material-ui/core/styles";
+import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 import { Modifier, SelectionState } from "draft-js";
 
-const maxDepth = 10;
-
 RichTextEditorPlugins.push(editor => {
-  const {
-    store,
-    editorProps: { blockStyleFn, handleKeyCommand },
-  } = editor;
+  const { store } = editor;
   editor.handleKeyCommandMap["split-block"] = () => {
     const { startBlock } = store;
     let content = store.modifierCall("splitBlock", store.selection);

@@ -1,18 +1,13 @@
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RichTextImageModule from "@dabsi/system/rich-text-plugins/image";
 import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
-import {
-  rtTester as t,
-  rtTestModules,
-} from "@dabsi/system/rich-text/tests/tester";
-import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/utils";
+import { rtTester, rtTestModules } from "@dabsi/system/rich-text/tests/tester";
 import sharp from "sharp";
 
 rtTestModules.push(RichTextImageModule);
 
-fit("", async () => {
-  const rtConfig = t.configure({ allowAll: true });
-
+const t = rtTester.beforeAll(async t => {
+  t.configure({ allowAll: true });
   const rpcConn = t.rpc.createConnection(RichTextImageRpc);
 
   t.rpc.request.current = new RpcRequest(
@@ -27,25 +22,32 @@ fit("", async () => {
     }
   );
 
-  const data = await rpcConn.upload({ field: "testField" });
+  const image = await rpcConn.upload({ field: "testField" });
 
-  const docKey = await rtConfig.context.pack(
-    rtConfig,
-    makeContentWithEntity({
+  return {
+    entity: await t.testEntity({
       type: "image",
       mutability: "IMMUTABLE",
       data: {
-        key: data.key,
-        url: data.url,
+        imageKey: image.key,
+        url: image.url,
       },
-    })
-  );
+    }),
+  };
+});
 
-  console.log(
-    JSON.stringify(
-      await rtConfig.context.unpack(rtConfig, docKey, false),
-      null,
-      2
-    )
+it("expect to packed data", () => {
+  expect(t.entity.packedData).toEqual(
+    jasmine.objectContaining({ imageKey: jasmine.any(String) })
   );
+});
+
+it("expect to unpacked data", () => {
+  expect(t.entity.unpackedData).toEqual({
+    url: jasmine.any(String),
+    imageKey: jasmine.any(String),
+  });
+});
+it("expect to readonly data", () => {
+  expect(t.entity.readonlyData).toEqual(<any>{ url: jasmine.any(String) });
 });

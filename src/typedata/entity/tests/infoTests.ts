@@ -1,6 +1,6 @@
 import { getDataEntityInfo } from "@dabsi/typedata/entity/info";
 import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
-import getTestConnection from "@dabsi/typedata/entity/tests/getTestConnection";
+import getTestConnection from "@dabsi/typedata/entity/tests/tester";
 import {
   DChild1,
   DChild1Child1,

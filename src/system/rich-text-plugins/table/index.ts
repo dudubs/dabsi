@@ -1,13 +1,13 @@
 import mapArrayAsync from "@dabsi/common/array/mapArrayAsync";
 import RichTextModule from "@dabsi/system/rich-text";
 
-import { RichTextContent } from "@dabsi/system/rich-text/content";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { Module } from "@dabsi/typedi";
 
 declare global {
   namespace IRichText {
     interface BlockDataTypes {
-      table: BlockDataType<
+      table: DataType<
         { rows: RichTextContent.Packed[] },
         {
           rows: RichTextContent.Unpacked[];
@@ -21,13 +21,13 @@ declare global {
 export default class RichTextTableModule {
   constructor(public rtModule: RichTextModule) {
     rtModule.defineBlock("table", {
-      async pack(c, { columns, rows }) {
+      async pack({ columns, rows }, c) {
         return {
           columns,
           rows: await mapArrayAsync(rows, content => c.packContent(content)),
         };
       },
-      async unpack(c, { columns, rows }) {
+      async unpack({ columns, rows }, c) {
         return {
           columns,
           rows: await mapArrayAsync(rows, content => c.unpackContent(content)),

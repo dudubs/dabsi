@@ -12,7 +12,7 @@ declare global {
         | {
             source?: DataSource<User>;
             field?: DataExp<User>;
-            minCharsForSuggestions?: number;
+            minChars?: number;
           };
     }
     interface RelationTypes {
@@ -20,10 +20,7 @@ declare global {
     }
 
     interface EntityDataTypes {
-      mention: EntityDataType<
-        { userKey: string },
-        { userKey: string; name: string }
-      >;
+      mention: DataType<{ userKey: string }, { userKey: string; name: string }>;
     }
   }
 }
@@ -44,11 +41,11 @@ export default class RichTextLinkModule {
         }),
       })
       .defineEntity("mention", {
-        pack(c, { userKey }) {
+        pack({ userKey }, c) {
           c.packRelation("mention", userKey);
           return { userKey };
         },
-        unpack(c, { userKey }) {
+        unpack({ userKey }, c) {
           const user = c.unpackRelation("mention", userKey);
           return { name: user!.loginName!, userKey };
         },

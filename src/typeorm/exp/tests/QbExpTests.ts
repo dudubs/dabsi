@@ -101,9 +101,6 @@ describe("relations", () => {
     // @ts-ignore
     t.expectToNotExists({ $has: { [key]: { bText: "world" } } });
   }
-  // @ts-ignore
-  t.expectToError({ $has: "manyAToOneB" });
-  t.expectToError({ $has: { manyAToOneB: true } });
 
   // $at
 

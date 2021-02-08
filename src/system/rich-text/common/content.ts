@@ -1,5 +1,5 @@
-import { RichTextBlock } from "@dabsi/system/rich-text/contentBlock";
-import { RichTextEntity } from "@dabsi/system/rich-text/contentEntity";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 
 export namespace RichTextContent {
   export type Packed = {

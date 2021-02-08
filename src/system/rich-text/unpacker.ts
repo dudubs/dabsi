@@ -1,15 +1,15 @@
 import mapArrayAsync from "@dabsi/common/array/mapArrayAsync";
 import { mapObjectAsync } from "@dabsi/common/object/mapObject";
 import { pick } from "@dabsi/common/object/pick";
-import { RichTextBlock } from "@dabsi/system/rich-text/contentBlock";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
 import {
   RichTextConfig,
   RichTextRelationType,
   RichTextRelationTypeKey,
 } from "@dabsi/system/rich-text/common/types";
 import { DataRow } from "@dabsi/typedata/row";
-import { RichTextContent } from "@dabsi/system/rich-text/content";
-import { RichTextEntity } from "@dabsi/system/rich-text/contentEntity";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 
 export class RichTextUnpacker {
   context = this.config.context;
@@ -33,14 +33,22 @@ export class RichTextUnpacker {
   ): Promise<RichTextBlock.Unpacked> {
     const handler = this.module.getBlockHandler(block.type);
 
-    let data: any = await handler.unpack(this, block.data);
+    let data: any = await handler.unpack(block.data, this);
+
     if (this.forReadonly && handler.readonlyKeys?.length) {
       data = pick(data, handler.readonlyKeys);
     }
+    const styles = await mapObjectAsync(block.styles, (style, type) => {
+      const handler = this.module.getBlockStyleHandler(<any>type);
+      if (handler.unpack) {
+        return handler.unpack(style, this);
+      }
+      return style;
+    });
 
     return {
       type: block.type,
-      data: { ...data, styles: block.styles || {} },
+      data: { ...data, styles },
       text: block.text,
       key: block.key,
       depth: block.depth || 0,
@@ -63,8 +71,7 @@ export class RichTextUnpacker {
     entity: RichTextEntity.Packed
   ): Promise<RichTextEntity.Unpacked> {
     const handler = this.module.getEntityHandler(entity.type);
-    let data: any = await handler.unpack(this, entity.data);
-
+    let data: any = await handler.unpack(entity.data, this);
     if (this.forReadonly && handler.readonlyKeys?.length) {
       data = pick(data, handler.readonlyKeys);
     }

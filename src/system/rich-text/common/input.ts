@@ -1,6 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
-import { RichTextContent } from "@dabsi/system/rich-text/content";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 
 import { Input } from "@dabsi/typerpc/input/Input";
 import requireRpcHandler from "../../../typerpc/requireRpcHandler";

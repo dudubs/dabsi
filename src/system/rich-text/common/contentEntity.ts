@@ -5,15 +5,6 @@ import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 
 declare global {
   namespace IRichText {
-    type EntityDataType<
-      Packed extends object = {},
-      Unpacked extends object = Packed,
-      Common extends object = {}
-    > = {
-      packed: Packed & Common;
-      unpacked: Unpacked & Common;
-    };
-
     interface EntityDataTypes {}
   }
 }
@@ -23,20 +14,21 @@ export namespace RichTextEntity {
   export interface HandlerAndOptions<T extends Type = Type> {
     readonlyKeys?: (string & keyof RichTextEntity.UnpackedData<T>)[];
     pack(
-      packer: RichTextPacker,
-      unpackedData: RichTextEntity.UnpackedData<T>
+      data: RichTextEntity.UnpackedData<T>,
+      packer: RichTextPacker
     ): Awaitable<RichTextEntity.PackedData<T>>;
 
     unpack(
-      unpacker: RichTextUnpacker,
-      packedData: RichTextEntity.PackedData<T>
+      data: RichTextEntity.PackedData<T>,
+      unpacker: RichTextUnpacker
     ): Awaitable<RichTextEntity.UnpackedData<T>>;
   }
 
   export type PackedMutablility = Draft.DraftEntityMutability;
 
-  export interface Handler<T extends Type = Type>
-    extends HandlerAndOptions<T> {}
+  export interface Handler<T extends Type = Type> extends HandlerAndOptions<T> {
+    type: T;
+  }
 
   export interface Options<T extends Type = Type>
     extends HandlerAndOptions<T> {}

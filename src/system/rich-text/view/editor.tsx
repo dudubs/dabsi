@@ -4,8 +4,8 @@ import { Hookable } from "@dabsi/modules/Hookable";
 import { View } from "@dabsi/react/view/View";
 import { ViewState } from "@dabsi/react/view/ViewState";
 import { RichTextStore } from "@dabsi/system/rich-text/common/store";
-import RichTextEditorBlock from "@dabsi/system/rich-text/view/RichTextEditorBlock";
-import RichTextEditorPlugins from "@dabsi/system/rich-text/view/RichTextEditorPlugins";
+import RichTextEditorBlock from "@dabsi/system/rich-text/view/editorBlock";
+import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import {
@@ -75,12 +75,9 @@ declare global {
     };
   }
 }
-
-export class RichTextEditor<P = {}> extends View<
-  {
-    connection: RpcConnection<RpcNamespace>;
-  } & P
-> {
+export class RichTextEditor extends View<{
+  connection: RpcConnection<RpcNamespace>;
+}> {
   @ViewState("updateEditorState")
   editorState: EditorState = EditorState.createEmpty();
 
@@ -94,8 +91,6 @@ export class RichTextEditor<P = {}> extends View<
 
   decorators: Draft.DraftDecorator[] = [];
 
-  toolbars: ComponentType<{ isLast: boolean }>[] = [];
-
   hooks: (() => void)[] = [];
 
   instance: Editor | null = null;
@@ -107,13 +102,6 @@ export class RichTextEditor<P = {}> extends View<
     }
   );
 
-  useHook<T extends object>(callback: () => T): T {
-    const o: any = {};
-    this.hooks.push(() => {
-      Object.setPrototypeOf(o, callback());
-    });
-    return o;
-  }
   protected _bindingKeyMap: Record<
     string,
     Set<(event: React.KeyboardEvent) => void | null | Draft.DraftEditorCommand>
@@ -122,10 +110,22 @@ export class RichTextEditor<P = {}> extends View<
   constructor(props) {
     super(props);
 
+    this.initPlugins();
+    this.onInit.invoke();
+  }
+
+  protected initPlugins() {
     for (const plugin of RichTextEditorPlugins) {
       plugin(this);
     }
-    this.onInit.invoke();
+  }
+
+  useHook<T extends object>(callback: () => T): T {
+    const o: any = {};
+    this.hooks.push(() => {
+      Object.setPrototypeOf(o, callback());
+    });
+    return o;
   }
 
   updateEditorState() {
@@ -236,28 +236,10 @@ export class RichTextEditor<P = {}> extends View<
       hook();
     });
 
-    return this.renderContainer(
-      <>
-        {this.renderToolbar()}
-        {this.renderEditor()}
-      </>
-    );
+    return this.renderEditor();
   };
 
-  renderContainer(content: React.ReactElement): React.ReactElement {
-    return content;
-  }
-
-  renderToolbar(): React.ReactNode {
-    return this.toolbars.map((Toolbar, index) => (
-      <Toolbar
-        key={WeakId(Toolbar)}
-        isLast={this.toolbars.length - index === 1}
-      />
-    ));
-  }
-
-  renderEditor(): React.ReactNode {
+  renderEditor(): React.ReactElement {
     return (
       <Editor
         {...this.editorProps}

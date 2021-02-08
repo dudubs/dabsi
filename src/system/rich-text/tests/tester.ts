@@ -5,12 +5,14 @@ import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import DbTester from "@dabsi/modules/tests/DbTester";
 import RichTextModule from "@dabsi/system/rich-text";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
-import { RichTextContent } from "@dabsi/system/rich-text/content";
 import { RichTextContext } from "@dabsi/system/rich-text/context";
 import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
 import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
+import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/utils";
 import Storage from "@dabsi/system/storage/Storage";
 import { DataRow } from "@dabsi/typedata/row";
 import { ModuleTarget } from "@dabsi/typedi";
@@ -63,6 +65,35 @@ export const rtTester = t.beforeAll(async t => {
       rtConfig = { ...config, context };
       t.provide(RichTextConfigResolver.provide(() => rtConfig));
       return rtConfig;
+    },
+
+    async testEntity(entity: RichTextEntity.Unpacked) {
+      const docKey = await rtConfig.context.pack(
+        rtConfig,
+        makeContentWithEntity(entity)
+      );
+      const {
+        entityMap: {
+          0: { data: packedData, type },
+        },
+      } = <RichTextContent.Packed>(
+        JSON.parse(
+          await rtConfig.context.docs.getOrFail(docKey).then(doc => doc.content)
+        )
+      );
+
+      const {
+        entityMap: {
+          0: { data: unpackedData },
+        },
+      } = await rtConfig.context.unpack(rtConfig, docKey, false);
+
+      const {
+        entityMap: {
+          0: { data: readonlyData },
+        },
+      } = await rtConfig.context.unpack(rtConfig, docKey, true);
+      return { unpackedData, packedData, readonlyData, docKey };
     },
   };
 });

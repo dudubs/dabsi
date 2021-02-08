@@ -5,26 +5,22 @@
  */
 import { DataContext } from "@dabsi/modules/data/context";
 import RpcModule from "@dabsi/modules/rpc";
-import RpcConfigFactoryResolver from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
-import { RichTextContent } from "@dabsi/system/rich-text/content";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 import { DataRow } from "@dabsi/typedata/row";
-import {
-  Inject,
-  Injectable,
-  Resolver,
-  ResolverContext,
-  ResolverType,
-} from "@dabsi/typedi";
+import { Inject, Injectable, Resolver, ResolverContext } from "@dabsi/typedi";
 import { RpcConfig } from "@dabsi/typerpc/Rpc";
+import RpcConfigFactoryResolver, {
+  RpcConfigFactory,
+} from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
 
 declare global {
   namespace IRichText {
@@ -44,7 +40,12 @@ export class RichTextContext {
     @Inject(RequestSession) public session: DataRow<RequestSession>,
     public data: DataContext,
     protected rpcModule: RpcModule,
-    @Inject(c => c) protected context: ResolverContext
+    @Inject(
+      RpcConfigFactoryResolver(RichTextRpc, {
+        context: RichTextConfigResolver.provide(),
+      })
+    )
+    protected _createRpcConfig: RpcConfigFactory<typeof RichTextRpc>
   ) {}
 
   async pack(
@@ -53,15 +54,17 @@ export class RichTextContext {
     docKey?: string
   ): Promise<string> {
     const packer = new RichTextPacker(config);
-    const packedContent = JSON.stringify(await packer.packContent(content));
+    const packedContent = await packer.packContent(content);
+    const packedContentText = JSON.stringify(packedContent);
+
     if (!docKey) {
       docKey = await this.docs.insertKey({
         session: this.session.$key,
-        content: packedContent,
+        content: packedContentText,
       });
     } else {
       await packer.deleteUnusedRelations(docKey);
-      await this.docs.update(docKey, { content: packedContent });
+      await this.docs.update(docKey, { content: packedContentText });
     }
     await packer.insertNewRelations(docKey);
     return docKey;
@@ -86,8 +89,12 @@ export class RichTextContext {
         .touch(rel.type, () => new Map())
         .set(rel.$key, rel[rel.type]);
     }
-    const doc = await this.docs.pick(["content"]).getOrFail();
+    const doc = await this.docs
+      .filter({ $is: docKey })
+      .pick(["content"])
+      .getOrFail();
     const content = JSON.parse(doc.content);
+
     return await new RichTextUnpacker(
       config,
       forReadonly,
@@ -98,22 +105,16 @@ export class RichTextContext {
   //
 
   createRpcConfig(config: RichTextConfig): RpcConfig<typeof RichTextRpc> {
+    const rpcConfig = this._createRpcConfig(
+      RichTextConfigResolver.provide(() => config)
+    );
     return {
-      getNamespaceConfig: (rpc, key) => {
-        if (key.endsWith("-editable")) {
-          if (!config.editable) {
-            throw new Error(`Not editable.`);
-          }
+      ...rpcConfig,
+      getNamespaceConfig: (rpc, key, handler) => {
+        if (!config.editable) {
+          config.context.module.assertReadonlyRpc(rpc);
         }
-        const rpcConfigResolver = this.rpcModule.getRpcConfigResolver(rpc);
-        const rpcConfig = Resolver.resolve(
-          rpcConfigResolver,
-          Resolver.createContext(
-            this.context,
-            RichTextConfigResolver.provide(() => config)
-          )
-        );
-        return rpcConfig;
+        return rpcConfig.getNamespaceConfig(rpc, key, handler);
       },
     };
   }

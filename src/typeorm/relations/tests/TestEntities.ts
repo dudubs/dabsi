@@ -1,8 +1,8 @@
-import "reflect-metadata";
-import { BeforeInsert, Column, Entity, PrimaryColumn } from "typeorm";
+import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { TestRelation } from "@dabsi/typeorm/relations/tests/TestRelation";
-import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
+import "reflect-metadata";
+import { Column, Entity } from "typeorm";
 
 let randomId = 0;
 

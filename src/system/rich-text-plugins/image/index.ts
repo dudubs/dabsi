@@ -19,7 +19,7 @@ declare global {
     }
 
     interface EntityDataTypes {
-      image: EntityDataType<{}, { url: string }, { imageKey: string }>;
+      image: DataType<{}, { url: string }, { imageKey: string }>;
     }
   }
 }
@@ -34,12 +34,12 @@ export default class RichTextImageModule {
         selection: { pick: ["url"] },
       })
       .defineEntity("image", {
-        readonlyKeys: ["imageKey"],
-        pack: (c, { imageKey }) => {
+        readonlyKeys: ["url"],
+        pack: ({ imageKey }, c) => {
           c.packRelation("image", imageKey);
           return { imageKey };
         },
-        unpack: (c, { imageKey }) => {
+        unpack: ({ imageKey }, c) => {
           const image = c.unpackRelation("image", imageKey);
           return {
             url: image!.url,

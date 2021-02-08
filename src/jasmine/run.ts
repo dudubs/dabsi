@@ -1,12 +1,11 @@
 import { touchSet } from "@dabsi/common/map/touchSet";
 import { DABSI_CURRENT_DIR, DABSI_SRC_DIR } from "@dabsi/env";
-import { relativePosixPath } from "@dabsi/modules/pathHelpers";
-import { existsSync, readdirSync, statSync } from "fs";
+import globalTester from "@dabsi/jasmine/globalTester";
+import "@dabsi/jasmine/register";
+import { LogLevel } from "@dabsi/logging/Logger";
+import { readdirSync, statSync } from "fs";
 import "jasmine";
 import path from "path";
-import "@dabsi/jasmine/register";
-import globalTester from "@dabsi/jasmine/globalTester";
-import { LogLevel } from "@dabsi/logging/Logger";
 
 log.setLevel(l => l ^ LogLevel.INFO);
 
@@ -24,20 +23,22 @@ if (!where.length) {
   });
 }
 
-console.log({ requireBeforeTests, tests });
+for (const callback of globalTester.callbacks) {
+  callback();
+}
+
+console.log({ requireBeforeTests });
 
 requireBeforeTests.forEach(moduleName => {
   require(moduleName);
 });
+console.log({ tests });
+
 tests.forEach(moduleName => {
   describe(moduleName, () => {
     require(moduleName);
   });
 });
-
-for (const callback of globalTester.callbacks) {
-  callback();
-}
 
 function getModuleName(fileName) {
   return "@dabsi/" + path.posix.relative(DABSI_SRC_DIR, fileName);

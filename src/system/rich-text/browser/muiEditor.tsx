@@ -1,7 +1,9 @@
+import { WeakId } from "@dabsi/common/WeakId";
 import { MuiFocusableBox } from "@dabsi/system/rich-text/browser/MuiFocusableBox";
+import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/muiPlugins";
 import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
 import Grid from "@material-ui/core/Grid";
-import React from "react";
+import React, { ComponentType } from "react";
 import styled from "styled-components";
 
 const Container = styled.div<{ over }>`
@@ -11,15 +13,16 @@ const Container = styled.div<{ over }>`
 `;
 
 export class MuiRichTextEditor extends RichTextEditor {
+  toolbars: ComponentType<{}>[] = [];
+
+  protected initPlugins() {
+    super.initPlugins();
+    for (const plugin of MuiRichTextEditorPlugins) {
+      plugin(this);
+    }
+  }
+
   renderEditor() {
-    return <Grid item>{super.renderEditor()}</Grid>;
-  }
-
-  renderToolbar() {
-    return <Grid item>{super.renderToolbar()}</Grid>;
-  }
-
-  renderContainer(content) {
     return (
       <MuiFocusableBox
         onFocus={() => {
@@ -27,9 +30,16 @@ export class MuiRichTextEditor extends RichTextEditor {
         }}
       >
         <Grid container direction="column" spacing={1}>
-          {content}
+          <Grid item>{this.renderToolbar()}</Grid>
+          <Grid item>{super.renderEditor()}</Grid>
         </Grid>
       </MuiFocusableBox>
     );
+  }
+
+  renderToolbar() {
+    return this.toolbars.map((Toolbar, index) => (
+      <Toolbar key={WeakId(Toolbar)} />
+    ));
   }
 }

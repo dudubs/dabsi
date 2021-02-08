@@ -1,7 +1,8 @@
 import { defined } from "@dabsi/common/object/defined";
-import globalTester from "@dabsi/jasmine/globalTester";
+import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
+import { findEntities } from "@dabsi/typeorm/findEntities";
 import { AEntity, CEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 import {
   BeforeUpdate,
@@ -29,17 +30,15 @@ export const getConnection = () =>
 
 let connection: Connection;
 
-globalTester(() => {
-  beforeAll(async () => {
-    connection = await createTestConnection([
-      AEntity,
-      AEntity,
-      CEntity,
-      DEntity,
-      EEntity,
-      XEntity,
-    ]);
-  });
+beforeAll(async () => {
+  connection = await createTestConnection([
+    AEntity,
+    AEntity,
+    CEntity,
+    DEntity,
+    EEntity,
+    XEntity,
+  ]);
 });
 
 export default getConnection;

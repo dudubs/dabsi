@@ -4,9 +4,9 @@ import {
   RichTextConfig,
   RichTextRelationTypeKey,
 } from "@dabsi/system/rich-text/common/types";
-import { RichTextContent } from "@dabsi/system/rich-text/content";
-import { RichTextBlock } from "@dabsi/system/rich-text/contentBlock";
-import { RichTextEntity } from "@dabsi/system/rich-text/contentEntity";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { DataInsert } from "@dabsi/typedata/value";
 
@@ -66,15 +66,11 @@ export class RichTextPacker {
   ): Promise<RichTextBlock.Packed> {
     const handler = this.module.getBlockHandler(block.type);
 
-    const styles = mapObject(
-      <any>block.data.styles || {},
-      (style, styleKey) => {
-        this.module.getBlockStyleHandler(styleKey).validate?.(style);
-        return style;
-      }
-    );
+    const styles = await mapObjectAsync(block.data.styles, (style, type) => {
+      return this.module.getBlockStyleHandler(<any>type).pack(style, this);
+    });
 
-    const data: any = await handler.pack(this, <any>block.data);
+    const data: any = await handler.pack(block.data, this);
 
     const styleRanges = block.inlineStyleRanges.map(
       ({ style, offset, length }) =>
@@ -93,8 +89,8 @@ export class RichTextPacker {
       styles,
       key: block.key,
       data,
-      styleRanges: styleRanges.length ? styleRanges : undefined,
-      entityRanges: entityRanges.length ? entityRanges : undefined,
+      styleRanges,
+      entityRanges,
     };
   }
 
@@ -102,10 +98,11 @@ export class RichTextPacker {
     entity: RichTextEntity.Unpacked
   ): Promise<RichTextEntity.Packed> {
     const handler = this.module.getEntityHandler(entity.type);
+
     return {
       type: entity.type,
       mutability: entity.mutability,
-      data: <any>await handler.pack(this, entity.data!),
+      data: <any>await handler.pack(entity.data!, this),
     };
   }
   async packContent(

@@ -14,13 +14,15 @@ import {
   RichTextRelationType,
   RichTextRelationTypeKey,
 } from "@dabsi/system/rich-text/common/types";
-import { RichTextBlock } from "@dabsi/system/rich-text/contentBlock";
-import { RichTextEntity } from "@dabsi/system/rich-text/contentEntity";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { Module } from "@dabsi/typedi";
 import "reflect-metadata";
 import { ManyToOne, RelationOptions } from "typeorm";
+import { initRichTextModule } from "@dabsi/system/rich-text/init";
+import { AnyRpc, RpcError } from "@dabsi/typerpc/Rpc";
 
 @Module({
   dependencies: [DbModule],
@@ -38,31 +40,32 @@ export default class RichTextModule {
 
   protected _blockHandlerMap: Record<string, RichTextBlock.Handler<any>> = {};
   protected _entityHandlerMap: Record<string, RichTextEntity.Handler<any>> = {};
+  protected _allowedRpcForReadonly = new Set<AnyRpc>();
+  protected _blockStyleHandlerMap: Record<
+    string,
+    RichTextBlock.StyleHandler<any>
+  > = {};
 
   constructor(public data: DataContext) {
-    this.defineBlock("unstyled", {
-      pack: (_, data) => data,
-      unpack: (_, data) => data,
-    });
-    this.defineBlockStyle("align", {
-      pack(_, value) {
-        switch (value) {
-          case "CENTER":
-          case "LEFT":
-          case "RIGHT":
-            return value;
-        }
-      },
-    });
+    initRichTextModule(this);
   }
 
-  getEntityHandler<T extends RichTextEntity.Type>(
-    type: T
-  ): RichTextEntity.Handler<T> {
-    return defined(
-      this._entityHandlerMap[type],
-      () => `No entity handler for "${type}".`
-    );
+  assertReadonlyRpc(rpc: AnyRpc) {
+    if (!this._allowedRpcForReadonly.has(rpc)) {
+      throw new RpcError("Not allowed rpc.");
+    }
+  }
+
+  defineReadonlyRpc(rpc: AnyRpc) {
+    this._allowedRpcForReadonly.add(rpc);
+  }
+
+  defineBlock<T extends RichTextBlock.Type>(
+    type: T,
+    { unpack = data => data, ...handler }: RichTextBlock.Options<T>
+  ): this {
+    this._blockHandlerMap[type] = { ...handler, unpack };
+    return this;
   }
 
   getBlockHandler<T extends RichTextBlock.Type>(
@@ -74,32 +77,21 @@ export default class RichTextModule {
     );
   }
 
-  defineBlock<T extends RichTextBlock.Type>(
+  defineBlockStyle<T extends RichTextBlock.StyleType>(
     type: T,
-    handler: RichTextBlock.Options<T>
+    { ...handler }: RichTextBlock.StyleHandler<T>
   ): this {
-    this._blockHandlerMap[type] = handler;
+    this._blockStyleHandlerMap[type] = { ...handler };
     return this;
   }
 
-  _blockStyleHandlerMap: Record<string, any> = {};
-
-  getBlockStyleHandler(style: string) {
-    return this._blockStyleHandlerMap[style];
-  }
-
-  defineBlockStyle<T extends keyof RichTextBlock.Styles>(
-    type: T,
-    {
-      ...handler
-    }: {
-      pack?(
-        config: RichTextConfig,
-        value: RichTextBlock.Styles[T]
-      ): RichTextBlock.Styles[T];
-    } = {}
-  ) {
-    this._blockStyleHandlerMap[type] = { ...handler };
+  getBlockStyleHandler<T extends RichTextBlock.StyleType>(
+    type: T
+  ): RichTextBlock.StyleHandler<T> {
+    return defined(
+      this._blockStyleHandlerMap[type],
+      () => `No style handle for "${type}".`
+    );
   }
 
   defineEntity<T extends RichTextEntity.Type>(
@@ -107,9 +99,19 @@ export default class RichTextModule {
     { ...handler }: RichTextEntity.Options<T>
   ): this {
     this._entityHandlerMap[type] = {
+      type,
       ...handler,
     };
     return this;
+  }
+
+  getEntityHandler<T extends RichTextEntity.Type>(
+    type: T
+  ): RichTextEntity.Handler<T> {
+    return defined(
+      this._entityHandlerMap[type],
+      () => `No entity handler for "${type}".`
+    );
   }
 
   selectionBuilders = {

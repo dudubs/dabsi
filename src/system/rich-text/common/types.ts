@@ -9,6 +9,15 @@ declare global {
     interface Element extends ConfigAndElement {}
 
     interface RelationTypes {}
+
+    type DataType<
+      Packed extends object = {},
+      Unpacked extends object = Packed,
+      Common extends object = {}
+    > = {
+      packed: Packed & Common;
+      unpacked: Unpacked & Common;
+    };
   }
 }
 export type RichTextRelationType<

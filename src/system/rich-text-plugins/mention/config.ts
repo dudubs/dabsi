@@ -21,8 +21,8 @@ export default RpcConfigResolver(
         const config =
           typeof c.config.mention === "object" ? c.config.mention : {};
 
-        if (config.minCharsForSuggestions) {
-          if (config.minCharsForSuggestions > text.length) return [];
+        if (config.minChars) {
+          if (config.minChars > text.length) return [];
         }
         const rows = await (config.source || c.data.getSource(User))
           .pick({

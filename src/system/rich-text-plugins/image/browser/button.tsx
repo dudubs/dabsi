@@ -3,34 +3,48 @@ import {
   fitImageToCanvas,
   loadImageFromFile,
 } from "@dabsi/browser/ImageUtils";
+import withStyles from "@dabsi/browser/mui/withStyles";
 import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFormData";
-import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
+import { uploadImage } from "@dabsi/system/rich-text-plugins/image/browser/upload";
+import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import insertImage from "@dabsi/system/rich-text-plugins/image/view/insertImage";
-
 import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import ImageIcon from "@material-ui/icons/Image";
 import React, { ReactElement, useMemo, useRef } from "react";
+
 const useStyles = makeStyles({
   hiddenFile: {
     display: "none",
   },
 });
 
+const HiddenFileInput = withStyles({
+  root: { display: "none" },
+})<React.ComponentProps<"input"> & { inputRef; onFile(file: File) }>(
+  ({ inputRef, onFile, ...props }) => (
+    <input
+      {...props}
+      type="file"
+      ref={inputRef}
+      onChange={({ target }) => {
+        if (target?.files?.[0]) {
+          onFile(target.files[0]);
+        }
+      }}
+    />
+  )
+);
+
 export function MuiRichTextImageButton({
   editor,
 }: {
   editor: RichTextEditor;
 }): ReactElement {
-  const classes = useStyles();
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const connection = useMemo(
-    () => editor.props.connection.getChild(RichTextImageRpc),
-    []
-  );
+  const connection = editor.useConnection(RichTextImageRpc);
 
   return (
     <>
@@ -42,31 +56,11 @@ export function MuiRichTextImageButton({
       >
         <ImageIcon />
       </IconButton>
-      <input
-        className={classes.hiddenFile}
-        ref={fileInputRef}
+      <HiddenFileInput
+        inputRef={fileInputRef}
         type="file"
-        onChange={async ({ target }) => {
-          const file = fileInputRef.current!.files?.[0];
-          if (!file) return;
-
-          const img = await loadImageFromFile(file);
-
-          const canvas = fitImageToCanvas(img, {
-            maxWidth: 500,
-            maxHeight: 500,
-          });
-
-          const blob = await canvasToBlob(canvas);
-
-          const { url, key } = await processRpcWithFormData(
-            df => {
-              df.append("image", blob);
-            },
-            () => connection.upload({ field: "image" })
-          );
-
-          insertImage(editor.store, url, key);
+        onFile={file => {
+          return uploadImage(editor, connection, file);
         }}
       />
     </>

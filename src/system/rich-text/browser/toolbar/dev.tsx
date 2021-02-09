@@ -1,6 +1,6 @@
 import { Debounce } from "@dabsi/common/async/Debounce";
-import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/muiPlugins";
-import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbars/button";
+import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/globals";
+import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbar/button";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import InfoIcon from "@material-ui/icons/Info";

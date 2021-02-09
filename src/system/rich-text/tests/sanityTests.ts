@@ -56,7 +56,6 @@ const t = Tester.beforeAll(async () => {
 
   let content = makeContentWithEntity({
     type: "test-entity",
-    mutability: "IMMUTABLE",
     data: { unpackedString: "hello-entity", commonString: "hello-entity" },
   });
 
@@ -72,9 +71,9 @@ const t = Tester.beforeAll(async () => {
         data: {
           unpackedString: "hello-block",
           commonString: "hello-block",
-          styles: {},
         },
-        inlineStyleRanges: [],
+        styleMap: {},
+        styleRanges: [],
         entityRanges: [],
       },
       ...content.blocks,
@@ -117,17 +116,15 @@ it("expect to fix invalid align", async () => {
       text: " ",
       depth: 0,
       key: "xb1",
-      inlineStyleRanges: [],
+      styleMap: { align: <any>"INVALID" },
+      styleRanges: [],
       entityRanges: [],
-      data: {
-        styles: {
-          align: <any>"INVALID",
-        },
-      },
+
+      data: {},
     })
   ).toEqual(
     jasmine.objectContaining({
-      styles: { align: undefined },
+      styleMap: {},
     })
   );
 });
@@ -166,14 +163,12 @@ describe("expect to", () => {
       expect(t.unpackedBlock.data).toEqual({
         unpackedString: "hello-block",
         commonString: "hello-block",
-        styles: {},
       });
     });
 
     it("readonly data", () => {
       expect(<any>t.readonlyBlock.data).toEqual({
         commonString: "hello-block",
-        styles: {},
       });
     });
   });

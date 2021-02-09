@@ -11,9 +11,10 @@ export function makeContentWithEntity(
         text: " ",
         type: "regular",
         depth: 0,
-        inlineStyleRanges: [],
-        entityRanges: [{ key: 0, offset: 0, length: 1 }],
-        data: { styles: {} },
+        styleRanges: [],
+        entityRanges: [[0, 0, 1]],
+        data: {},
+        styleMap: {},
       },
     ],
     entityMap: {

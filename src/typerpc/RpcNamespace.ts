@@ -26,7 +26,7 @@ export type RpcNamespace = Rpc<{
       rpc: AnyRpc,
       key: string,
       handler: RpcNamespaceHandler
-    ): RpcUnresolvedConfig<AnyRpc>;
+    ): Awaitable<RpcUnresolvedConfig<AnyRpc>>;
 
     checkNamespace?(
       nsHandler: RpcNamespaceHandler,

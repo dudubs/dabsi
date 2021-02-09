@@ -24,8 +24,6 @@ export namespace RichTextEntity {
     ): Awaitable<RichTextEntity.UnpackedData<T>>;
   }
 
-  export type PackedMutablility = Draft.DraftEntityMutability;
-
   export interface Handler<T extends Type = Type> extends HandlerAndOptions<T> {
     type: T;
   }
@@ -45,26 +43,15 @@ export namespace RichTextEntity {
     {
       [K in Type]: {
         type: K;
-        mutability: PackedMutablility;
         data: RichTextEntity.PackedData<K>;
       };
     }
   >;
 
-  export type Raw<T extends Type = Type> = Union<
+  export type Unpacked<T extends Type = Type> = Union<
     {
       [K in T]: {
         type: K;
-        data: RichTextEntity.UnpackedData<K>;
-      };
-    }
-  >;
-
-  export type Unpacked = Union<
-    {
-      [K in Type]: {
-        type: K;
-        mutability: Draft.DraftEntityMutability;
         data: RichTextEntity.UnpackedData<K>;
       };
     }

@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { AclContext } from "@dabsi/system/acl/context";
 import { User } from "@dabsi/system/acl/entities/User";
 import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";

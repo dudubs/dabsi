@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import { AclRpc } from "@dabsi/system/acl/common/AclRpc";
 import { AclContext } from "@dabsi/system/acl/context";

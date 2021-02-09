@@ -1,3 +1,4 @@
+import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
@@ -11,10 +12,16 @@ export namespace RichTextRaw {
   } = {};
 
   export function toDraft(
-    content: RichTextContent.Raw
+    content: RichTextContent.Unpacked
   ): Draft.RawDraftContentState {
     return {
       blocks: content.blocks.map(block => {
+        const data = { ["block-" + block.type]: block.data };
+
+        for (const [key, value] of entries(block.styleMap)) {
+          data["style-" + key] = value;
+        }
+
         return {
           type: block.type,
           text: block.text,
@@ -32,7 +39,7 @@ export namespace RichTextRaw {
             offset,
             length,
           })),
-          data: {},
+          data,
         };
       }),
       entityMap: mapObject(content.entityMap, entity => {
@@ -47,9 +54,19 @@ export namespace RichTextRaw {
 
   export function fromDraft(
     content: Draft.RawDraftContentState
-  ): RichTextContent.Raw {
+  ): RichTextContent.Unpacked {
     return {
       blocks: content.blocks.map(block => {
+        const styleMap = {};
+        {
+          const p = "style-";
+          for (const [key, value] of entries(block.data)) {
+            if (key.startsWith(p)) {
+              styleMap[key.substr(p.length)] = value;
+            }
+          }
+        }
+
         return {
           type: block.type,
           key: block.key,
@@ -61,7 +78,7 @@ export namespace RichTextRaw {
           entityRanges: block.entityRanges.map(
             r => [r.key, r.offset, r.length] as RichTextBlock.PackedEntityRange
           ),
-          style: block.data?.style || {},
+          styleMap,
           data: block.data?.["block-" + block.type] || {},
         };
       }),

@@ -82,9 +82,19 @@ export class RichTextStore {
     return this.getCurrentBlockData("list")?.type;
   }
 
+  applyHeader(level: number) {
+    this.updateBlocks("change-block-type", block => {
+      block
+        .set("type", level ? "header" : "regular")
+        .update("data", data =>
+          !level
+            ? data
+            : data.update("block-header", data => ({ ...data, level }))
+        );
+    });
+  }
   applyList(listType) {
     const toggle = this.currentListType === listType;
-
     this.updateBlocks("change-block-type", block => {
       block
         .set("type", toggle ? "regular" : "list")
@@ -108,39 +118,51 @@ export class RichTextStore {
     return this.content.getBlockForKey(this.selection.getStartKey());
   }
 
-  applyAlignment(align) {
-    const { currentBlock } = this;
-    const remove = align === "JUSTIFY";
+  get currentHeaderLevel(): number | undefined {
+    return this.currentBlock.getData().get("block-header")?.level;
+  }
+
+  get currentAlign() {
+    return this.currentBlock.getData().get("style-align");
+  }
+
+  applyAlignment(align: "LEFT" | "RIGHT" | "CENTER" | "JUSTIFY") {
+    const toggle = this.currentAlign === align;
     this.updateBlocks("change-block-data", block =>
       block.update("data", data =>
-        remove ? data.delete("align") : data.set("align", align)
+        toggle ? data.delete("style-align") : data.set("style-align", align)
       )
     );
+  }
+
+  get currentDirection() {
+    return this.currentBlock.getData().get("style-direction");
   }
 
   applyDirection(direction) {
-    const { currentBlock } = this;
-    const remove = currentBlock.getData().get("direction") == direction;
+    const remove = this.currentDirection == direction;
     this.updateBlocks("change-block-data", block =>
       block.update("data", data =>
-        remove ? data.delete("direction") : data.set("direction", direction)
+        remove
+          ? data.delete("style-direction")
+          : data.set("style-direction", direction)
       )
     );
   }
 
-  applyHeader(level: number) {
-    this.updateBlocks("change-block-type", block => {
-      block
-        .set("type", level ? "header" : "regular")
-        .update("data", data =>
-          level ? data.set("level", level) : data.delete("level")
-        );
-    });
+  selectAll() {
+    this.update(
+      "forceSelection",
+      <any>(
+        SelectionState.createEmpty(this.content.getFirstBlock().getKey())
+          .set("focusKey", this.content.getLastBlock().getKey())
+          .set("focusOffset", this.content.getLastBlock().getText().length)
+      )
+    );
   }
-
   updateBlocks(
     changeType: Draft.EditorChangeType,
-    callback: (block: Draft.ContentBlock) => any
+    callback: (block: Draft.ContentBlock) => void
   ) {
     const { selection } = this;
     this.update("push", this.mapBlocks(callback), changeType);
@@ -148,7 +170,7 @@ export class RichTextStore {
   }
 
   mapBlocks(
-    getNextBlock: (block: Draft.ContentBlock) => any
+    updateBlock: (block: Draft.ContentBlock) => void
   ): Draft.ContentState {
     const { selection, content } = this;
 
@@ -157,33 +179,37 @@ export class RichTextStore {
     let isStarted = false;
     let isEnded = false;
 
-    const getNextBlockWrapped = (block: Draft.ContentBlock) => {
-      const nextBlock = getNextBlock(block.asMutable() as any);
-      const nextBlockType = nextBlock.getType();
+    const getNextBlock = (block: Draft.ContentBlock) => {
+      const newBlock = block.asMutable();
 
-      const isSomeBlockType = nextBlockType === block.getType();
+      updateBlock(newBlock as any);
+      const isNewBlockType = newBlock.get("type") !== block.getType();
+      const isAtomicBlock = block.getType() === "atomic";
       // can't change block type & data of atomic block.
-      if (block.getType() === "atomic" && !isSomeBlockType) {
+      if (isNewBlockType && isAtomicBlock) {
         return block;
       }
 
-      nextBlock.update("data", data => data.delete("block-" + block.getType()));
+      isNewBlockType &&
+        newBlock.update("data", data =>
+          data.delete("block-" + block.getType())
+        );
 
-      return nextBlock.asImuutable();
+      return newBlock.asImmutable();
     };
 
     return content.update("blockMap", bm => {
       if (startKey === endKey) {
-        return bm.update(startKey, getNextBlockWrapped);
+        return bm.update(startKey, getNextBlock);
       }
       return bm.map(b => {
         if (isEnded) return b;
         if (isStarted) {
           isEnded = b.getKey() === endKey;
-          return getNextBlockWrapped(b);
+          return getNextBlock(b);
         } else {
           if ((isStarted = b.getKey() === startKey)) {
-            return getNextBlockWrapped(b);
+            return getNextBlock(b);
           }
         }
         return b;

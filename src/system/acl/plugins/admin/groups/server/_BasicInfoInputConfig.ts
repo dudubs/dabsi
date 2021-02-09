@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 import { AclContext } from "@dabsi/system/acl/context";
 import { Group } from "@dabsi/system/acl/entities/Group";

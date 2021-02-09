@@ -1,9 +1,7 @@
-import { MuiRichTextImageButton } from "@dabsi/system/rich-text-plugins/image/browser/toolbarButton";
-import MuiRichTextImageComponent from "@dabsi/system/rich-text-plugins/image/browser/blockComponent";
-import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
+import { MuiRichTextImageButton } from "@dabsi/system/rich-text-plugins/image/browser/button";
+import MuiRichTextImageComponent from "@dabsi/system/rich-text-plugins/image/browser/component";
+import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/globals";
 import { makeStyles } from "@material-ui/core/styles";
-import { createElement } from "react";
-import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/muiPlugins";
 
 const useStyles = makeStyles({
   hiddenFile: {
@@ -18,9 +16,8 @@ MuiRichTextEditorPlugins.push(editor => {
       component: MuiRichTextImageComponent,
     };
   };
-  editor.toolbars.push(() =>
-    createElement(MuiRichTextImageButton, {
-      editor,
-    })
-  );
+
+  editor.toolbars.push(() => {
+    return <MuiRichTextImageButton editor={editor} />;
+  });
 });

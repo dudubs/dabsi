@@ -9,6 +9,7 @@ import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
 import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { DataInsert } from "@dabsi/typedata/value";
+import { entries } from "@dabsi/common/object/entries";
 
 export class RichTextPacker {
   context = this.config.context;
@@ -66,31 +67,34 @@ export class RichTextPacker {
   ): Promise<RichTextBlock.Packed> {
     const handler = this.module.getBlockHandler(block.type);
 
-    const styles = await mapObjectAsync(block.data.styles, (style, type) => {
-      return this.module.getBlockStyleHandler(<any>type).pack(style, this);
-    });
+    const styleMap = {};
+    for (const [type, value] of entries(block.styleMap)) {
+      const handler = this.module.getBlockStyleHandler(<any>type);
+      const packedValue = await handler.pack(value, this);
+      if (packedValue !== undefined) {
+        styleMap[type] = packedValue;
+      }
+    }
 
     const data: any = await handler.pack(block.data, this);
 
-    const styleRanges = block.inlineStyleRanges.map(
-      ({ style, offset, length }) =>
-        [style, offset, length] as RichTextBlock.PackedStyleRange
-    );
+    for (const [style, offset, length] of block.styleRanges) {
+      // TOOD: validate
+    }
 
-    const entityRanges = block.entityRanges.map(
-      ({ key, offset, length }) =>
-        [key, offset, length] as RichTextBlock.PackedEntityRange
-    );
+    for (const [key, offset, length] of block.entityRanges) {
+      // TOOD: validate
+    }
 
     return {
       type: block.type,
       text: block.text,
       depth: block.depth,
-      styles,
+      styleMap,
       key: block.key,
       data,
-      styleRanges,
-      entityRanges,
+      styleRanges: block.styleRanges,
+      entityRanges: block.entityRanges,
     };
   }
 
@@ -101,7 +105,6 @@ export class RichTextPacker {
 
     return {
       type: entity.type,
-      mutability: entity.mutability,
       data: <any>await handler.pack(entity.data!, this),
     };
   }

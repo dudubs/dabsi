@@ -1,11 +1,11 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 import { AclContext } from "@dabsi/system/acl/context";
 import { User } from "@dabsi/system/acl/entities/User";
 import AclAdminUsersManager from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUsersManager";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
-import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
+import RpcConfigFactoryResolver from "../../../../../../modules/rpc/configFactoryResolver";
 
 export const AclAdminUserSelection: DataSelection<User> = {};
 

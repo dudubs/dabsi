@@ -1,10 +1,9 @@
+import { maxDepth } from "@dabsi/system/rich-text/browser/plugins/depth/globals";
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import FormatIndentDecreaseIcon from "@material-ui/icons/FormatIndentDecrease";
 import FormatIndentIncreaseIcon from "@material-ui/icons/FormatIndentIncrease";
 import React from "react";
-import "../muiStyles";
-import { maxDepth } from "../muiStyles";
-import { MuiToolbarButton } from "./button";
+import { MuiToolbarButton } from "../../toolbar/button";
 
 export const MuiDepthButton = ({
   store,

@@ -1,3 +1,4 @@
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { RpcTester } from "@dabsi/modules/rpc/tests/tester";
 import { SESSION_TIMEOUT } from "@dabsi/modules/session";
@@ -22,78 +23,85 @@ const db = DbTester(t);
 const rpc = RpcTester(t);
 
 export const rtTestModules = [] as ModuleTarget[];
+export const rtTestBeforeInit = [] as (() => Awaitable)[];
 
-export const rtTester = t.beforeAll(async t => {
-  const rtModule = await t.moduleRunner.getInstance(RichTextModule);
-
-  t.provide(Storage.provide(() => new TestStorage()));
-
-  for (const module of rtTestModules) {
-    t.moduleRunner.getInstance(module);
-  }
-
-  const loaderModule = t.moduleRunner.getInstance(LoaderModule);
-
-  await loaderModule.load();
-  await db.dbModule.init();
-
-  const session = await db.data.getSource(RequestSession).insert({
-    token: "test",
-    timeout: getCurrentTime() + SESSION_TIMEOUT,
-  });
-
-  t.provide(DataRow(RequestSession).provide(() => session));
-
-  let rtConfig: RichTextConfig;
-
-  return {
-    rtModule,
-    db,
+export const rtTester = t
+  .beforeAll(t => ({
     rpc,
-    loaderModule,
+    db,
+    loaderModule: t.moduleRunner.getInstance(LoaderModule),
+  }))
+  .beforeAll(async t => {
+    const rtModule = await t.moduleRunner.getInstance(RichTextModule);
 
-    pack(content: RichTextContent.Unpacked, docKey?: string) {
-      return rtConfig.context.pack(rtConfig, content, docKey);
-    },
+    t.provide(Storage.provide(() => new TestStorage()));
 
-    unpack(docKey: string, forReadonly: boolean) {
-      return rtConfig.context.unpack(rtConfig, docKey, forReadonly);
-    },
+    for (const module of rtTestModules) {
+      t.moduleRunner.getInstance(module);
+    }
 
-    configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
-      const context = t.resolve(RichTextContext);
-      rtConfig = { ...config, context };
-      t.provide(RichTextConfigResolver.provide(() => rtConfig));
-      return rtConfig;
-    },
+    for (const callback of rtTestBeforeInit) {
+      await callback();
+    }
+    await t.loaderModule.load();
+    await db.dbModule.init();
 
-    async testEntity(entity: RichTextEntity.Unpacked) {
-      const docKey = await rtConfig.context.pack(
-        rtConfig,
-        makeContentWithEntity(entity)
-      );
-      const {
-        entityMap: {
-          0: { data: packedData, type },
-        },
-      } = <RichTextContent.Packed>(
-        JSON.parse(
-          await rtConfig.context.docs.getOrFail(docKey).then(doc => doc.content)
-        )
-      );
+    const session = await db.data.getSource(RequestSession).insert({
+      token: "test",
+      timeout: getCurrentTime() + SESSION_TIMEOUT,
+    });
 
-      const {
-        entityMap: {
-          0: { data: unpackedData },
-        },
-      } = await rtConfig.context.unpack(rtConfig, docKey, false);
+    t.provide(DataRow(RequestSession).provide(() => session));
 
-      const {
-        entityMap: {
-          0: { data: readonlyData },
-        },
-      } = await rtConfig.context.unpack(rtConfig, docKey, true);
-      return { unpackedData, packedData, readonlyData, docKey };
-    },
-  };
-});
+    let rtConfig: RichTextConfig;
+
+    return {
+      rtModule,
+
+      pack(content: RichTextContent.Unpacked, docKey?: string) {
+        return rtConfig.context.pack(rtConfig, content, docKey);
+      },
+
+      unpack(docKey: string, forReadonly: boolean) {
+        return rtConfig.context.unpack(rtConfig, docKey, forReadonly);
+      },
+
+      configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
+        const context = t.resolve(RichTextContext);
+        rtConfig = { ...config, context };
+        t.provide(RichTextConfigResolver.provide(() => rtConfig));
+        return rtConfig;
+      },
+
+      async testEntity(entity: RichTextEntity.Unpacked) {
+        const docKey = await rtConfig.context.pack(
+          rtConfig,
+          makeContentWithEntity(entity)
+        );
+        const {
+          entityMap: {
+            0: { data: packedData, type },
+          },
+        } = <RichTextContent.Packed>(
+          JSON.parse(
+            await rtConfig.context.docs
+              .getOrFail(docKey)
+              .then(doc => doc.content)
+          )
+        );
+
+        const {
+          entityMap: {
+            0: { data: unpackedData },
+          },
+        } = await rtConfig.context.unpack(rtConfig, docKey, false);
+
+        const {
+          entityMap: {
+            0: { data: readonlyData },
+          },
+        } = await rtConfig.context.unpack(rtConfig, docKey, true);
+        return { unpackedData, packedData, readonlyData, docKey };
+      },
+    };
+  });

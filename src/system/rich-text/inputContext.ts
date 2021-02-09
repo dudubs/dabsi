@@ -1,4 +1,4 @@
-import RpcConfigFactoryResolver from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
+import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";

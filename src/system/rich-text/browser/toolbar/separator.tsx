@@ -1,4 +1,4 @@
-import withStyles from "@dabsi/system/rich-text/browser/toolbars/withStyles";
+import withStyles from "@dabsi/browser/mui/withStyles";
 
 export const MuiSeparator = withStyles(theme => ({
   root: {

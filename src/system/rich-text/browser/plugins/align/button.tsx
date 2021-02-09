@@ -1,10 +1,13 @@
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import React from "react";
-import { MuiToolbarButton, MuiToolbarButtonProps } from "./button";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignJustifyIcon from "@material-ui/icons/FormatAlignJustify";
 import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
+import {
+  MuiToolbarButton,
+  MuiToolbarButtonProps,
+} from "@dabsi/system/rich-text/browser/toolbar/button";
 
 const iconMap = {
   LEFT: <FormatAlignLeftIcon />,
@@ -25,7 +28,7 @@ export function MuiAlignButton({
     <MuiToolbarButton
       icon={iconMap[align]}
       {...props}
-      selected={store.currentBlock.getData().get("align") === align}
+      selected={store.currentAlign === align}
       onClick={() => store.applyAlignment(align)}
     />
   );

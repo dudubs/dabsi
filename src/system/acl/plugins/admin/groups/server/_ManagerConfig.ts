@@ -1,9 +1,9 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { AclContext } from "@dabsi/system/acl/context";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import AclAdminGroupsManager from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupsManager";
 import { DataRow } from "@dabsi/typedata/row";
-import RpcConfigFactoryResolver from "../../../../../../modules/rpc/RpcConfigFactoryResolver";
+import RpcConfigFactoryResolver from "../../../../../../modules/rpc/configFactoryResolver";
 
 // TODO: DataManagerConfigResolver(EntityType, ...)
 export default RpcConfigResolver(

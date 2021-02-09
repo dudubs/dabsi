@@ -1,5 +1,5 @@
 import sharp from "sharp";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import AclAdminUserAvatarModule from "@dabsi/system/acl-user-avatar";
 import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUserAvatarRpc";

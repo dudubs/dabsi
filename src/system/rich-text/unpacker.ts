@@ -38,7 +38,7 @@ export class RichTextUnpacker {
     if (this.forReadonly && handler.readonlyKeys?.length) {
       data = pick(data, handler.readonlyKeys);
     }
-    const styles = await mapObjectAsync(block.styles, (style, type) => {
+    const styleMap = await mapObjectAsync(block.styleMap, (style, type) => {
       const handler = this.module.getBlockStyleHandler(<any>type);
       if (handler.unpack) {
         return handler.unpack(style, this);
@@ -48,22 +48,13 @@ export class RichTextUnpacker {
 
     return {
       type: block.type,
-      data: { ...data, styles },
+      styleMap,
+      data,
       text: block.text,
       key: block.key,
       depth: block.depth || 0,
-      inlineStyleRanges: (block.styleRanges || []).map(
-        ([style, offset, length]) => ({
-          style: style as any,
-          offset,
-          length,
-        })
-      ),
-      entityRanges: (block.entityRanges || []).map(([key, offset, length]) => ({
-        key,
-        offset,
-        length,
-      })),
+      styleRanges: block.styleRanges,
+      entityRanges: block.entityRanges,
     };
   }
 
@@ -78,7 +69,6 @@ export class RichTextUnpacker {
 
     return {
       type: entity.type,
-      mutability: entity.mutability,
       data,
     };
   }

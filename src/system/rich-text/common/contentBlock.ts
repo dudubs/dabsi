@@ -52,7 +52,7 @@ export namespace RichTextBlock {
     K extends Type
   > = IRichText.BlockDataTypes[K]["unpacked"];
 
-  export type Styles = Partial<IRichText.BlockStyleTypes>;
+  export type StyleMap = Partial<IRichText.BlockStyleTypes>;
 
   export type StyleType = keyof IRichText.BlockStyleTypes;
 
@@ -94,7 +94,7 @@ export namespace RichTextBlock {
         depth: number;
         key: string;
         /* packedData */
-        styles: Styles;
+        styleMap: StyleMap;
         data: PackedData<K>;
         styleRanges: PackedStyleRange[];
         entityRanges: PackedEntityRange[];
@@ -102,33 +102,17 @@ export namespace RichTextBlock {
     }
   >;
 
-  export type Raw<T extends Type = Type> = Union<
+  export type Unpacked<T extends Type = Type> = Union<
     {
       [K in T]: {
         type: K;
         text: string;
         key: string;
+        depth: number;
         styleRanges: PackedStyleRange[];
         entityRanges: PackedEntityRange[];
-        depth: number;
-        style: Styles;
+        styleMap: StyleMap;
         data: UnpackedData<K>;
-      };
-    }
-  >;
-
-  export type Unpacked = Union<
-    {
-      [K in Type]: {
-        type: K;
-        text: string;
-        key: string;
-        inlineStyleRanges: Draft.RawDraftInlineStyleRange[];
-        entityRanges: Draft.RawDraftEntityRange[];
-        depth: number;
-        data: UnpackedData<K> & {
-          styles: Styles;
-        };
       };
     }
   >;

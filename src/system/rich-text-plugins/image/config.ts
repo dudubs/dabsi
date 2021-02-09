@@ -1,8 +1,8 @@
 import { DataContext } from "@dabsi/modules/data/context";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RequestSession from "@dabsi/modules/session/RequestSession";
-import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
+import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
 import { ImageFile } from "@dabsi/system/storage/entities/image";
 import StorageManager from "@dabsi/system/storage/StorageManager";

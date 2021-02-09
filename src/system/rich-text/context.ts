@@ -17,10 +17,10 @@ import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 import { DataRow } from "@dabsi/typedata/row";
 import { Inject, Injectable, Resolver, ResolverContext } from "@dabsi/typedi";
-import { RpcConfig } from "@dabsi/typerpc/Rpc";
+import { RpcConfig, RpcError, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import RpcConfigFactoryResolver, {
   RpcConfigFactory,
-} from "@dabsi/modules/rpc/RpcConfigFactoryResolver";
+} from "@dabsi/modules/rpc/configFactoryResolver";
 
 declare global {
   namespace IRichText {
@@ -104,18 +104,24 @@ export class RichTextContext {
 
   //
 
-  createRpcConfig(config: RichTextConfig): RpcConfig<typeof RichTextRpc> {
-    const rpcConfig = this._createRpcConfig(
-      RichTextConfigResolver.provide(() => config)
-    );
-    return {
-      ...rpcConfig,
-      getNamespaceConfig: (rpc, key, handler) => {
-        if (!config.editable) {
-          config.context.module.assertReadonlyRpc(rpc);
-        }
-        return rpcConfig.getNamespaceConfig(rpc, key, handler);
-      },
+  createRpcConfig(
+    config: RichTextConfig
+  ): RpcUnresolvedConfig<typeof RichTextRpc> {
+    return async $ => {
+      const rpcConfig = await this._createRpcConfig(
+        RichTextConfigResolver.provide(() => config)
+      );
+      return $({
+        ...rpcConfig,
+        getNamespaceConfig(rpc, key, handler) {
+          if (!config.editable) {
+            if (key.endsWith("-editable")) {
+              throw new RpcError(`Rpc "${key}" is only for editable mode.`);
+            }
+          }
+          return rpcConfig.getNamespaceConfig(rpc, key, handler);
+        },
+      });
     };
   }
 }

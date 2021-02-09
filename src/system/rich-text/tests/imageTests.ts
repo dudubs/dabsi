@@ -1,6 +1,6 @@
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RichTextImageModule from "@dabsi/system/rich-text-plugins/image";
-import RichTextImageRpc from "@dabsi/system/rich-text-plugins/image/common/RichTextImageRpc";
+import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import { rtTester, rtTestModules } from "@dabsi/system/rich-text/tests/tester";
 import sharp from "sharp";
 
@@ -8,6 +8,7 @@ rtTestModules.push(RichTextImageModule);
 
 const t = rtTester.beforeAll(async t => {
   t.configure({ allowAll: true });
+
   const rpcConn = t.rpc.createConnection(RichTextImageRpc);
 
   t.rpc.request.current = new RpcRequest(
@@ -27,7 +28,6 @@ const t = rtTester.beforeAll(async t => {
   return {
     entity: await t.testEntity({
       type: "image",
-      mutability: "IMMUTABLE",
       data: {
         imageKey: image.key,
         url: image.url,

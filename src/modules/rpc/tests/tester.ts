@@ -16,7 +16,6 @@ export const RpcTester = (t: ReturnType<typeof ModuleTester>) => {
       createConnection: <T extends AnyRpc>(rpc: T): RpcConnection<T> => {
         const configResolver = module.getRpcConfigResolver(rpc);
         const config = Resolver.resolve(configResolver, t.moduleRunner.context);
-
         const command = rpc.createRpcCommand(config);
         return rpc.createRpcConnection([], command);
       },

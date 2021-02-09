@@ -6,7 +6,7 @@ import { ViewState } from "@dabsi/react/view/ViewState";
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import RichTextEditorBlock from "@dabsi/system/rich-text/view/editorBlock";
 import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import {
   CompositeDecorator,
@@ -17,7 +17,7 @@ import {
   getDefaultKeyBinding,
 } from "draft-js";
 import { List } from "immutable";
-import React, { ComponentType, createElement, useEffect } from "react";
+import React, { ComponentType, createElement, useEffect, useMemo } from "react";
 import "./hooks/delete-atomic-block";
 import "./hooks/split-block";
 import clsx from "clsx";
@@ -120,9 +120,14 @@ export class RichTextEditor extends View<{
     }
   );
 
+  useConnection<T extends AnyRpc>(rpc: T): RpcConnection<T> {
+    return useMemo(() => this.props.connection.getChild(rpc), [
+      this.props.connection,
+    ]);
+  }
   protected _bindingKeyMap: Record<
     string,
-    Set<(event: React.KeyboardEvent) => void | null | Draft.DraftEditorCommand>
+    Set<(event: React.KeyboardEvent) => any>
   > = {};
 
   constructor(props) {
@@ -168,7 +173,7 @@ export class RichTextEditor extends View<{
     key: string,
     callback: (
       event: React.KeyboardEvent
-    ) => null | void | Draft.DraftEditorCommand
+    ) => null | void | Draft.DraftEditorCommand | string
   ) {
     const callbacks = touchObject(this._bindingKeyMap, key, () => new Set());
     callbacks.add(callback);
@@ -227,6 +232,7 @@ export class RichTextEditor extends View<{
     onChange: (editorState: EditorState) => {
       this.editorState = editorState;
     },
+
     blockRendererFn: block => {
       const renderer = this.blockRendererFnMap[block.getType()];
       return (
@@ -244,16 +250,17 @@ export class RichTextEditor extends View<{
       return clsx(
         `rt-block`,
         `rt-block-${type}`,
-        data.align && `rt-align-${data.align}`,
+        data["style-align"] && `rt-align-${data["style-align"]}`,
         `rt-depth-${depth || 0}`,
-        `rt-direction-${data.direction || "LTR"}`,
-        this.blockStyleMap[type]?.(data, block)
+        `rt-direction-${data["style-direction"] || "LTR"}`,
+        this.blockStyleMap[type]?.(data["block-" + type] || {}, block)
       );
     },
     keyBindingFn: event => {
       const callbacks = this._bindingKeyMap[event.key];
       for (const callback of callbacks || []) {
         const result = callback(event);
+        if (result === null) return null;
         if (result !== undefined) return result;
       }
       return getDefaultKeyBinding(event);

@@ -9,7 +9,7 @@ const useStyles = makeStyles({
   image: { display: "block", padding: 0, margin: 0 },
 });
 
-export default function ({
+export default function RichTextImageComponent({
   entityData,
 }: IRichText.AtomicBlockComponentProps): ReactElement {
   const classes = useStyles();

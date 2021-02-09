@@ -10,8 +10,8 @@ RichTextEditorPlugins.push(editor => {
     let content = store.modifierCall("splitBlock", store.selection);
     content = Modifier.setBlockData(
       content,
-      SelectionState.createEmpty(content.getKeyAfter(startBlock.getKey())),
-      startBlock.getData()
+      SelectionState.createEmpty(content.getKeyAfter(currentBlock.getKey())),
+      currentBlock.getData()
     );
     store.update("push", content, "split-block");
     store.update("forceSelection", store.selection);

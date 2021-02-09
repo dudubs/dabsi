@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { SystemTestingRpc } from "@dabsi/system/testing/common/SystemTestingRpc";
 

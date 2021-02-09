@@ -1,5 +1,5 @@
 import { DataContext } from "@dabsi/modules/data/context";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { User } from "@dabsi/system/acl/entities/User";
 import { RichTextMentionRpc } from "@dabsi/system/rich-text-plugins/mention/common/rpc";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";

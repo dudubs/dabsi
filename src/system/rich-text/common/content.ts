@@ -8,13 +8,8 @@ export namespace RichTextContent {
     entityMap: Record<string, RichTextEntity.Packed>;
   };
 
-  export type Raw = {
-    blocks: RichTextBlock.Raw<any>[];
-    entityMap: Record<string, RichTextEntity.Raw<any>>;
-  };
-
   export type Unpacked = {
-    blocks: RichTextBlock.Unpacked[];
-    entityMap: Record<string, RichTextEntity.Unpacked>;
+    blocks: RichTextBlock.Unpacked<any>[];
+    entityMap: Record<string, RichTextEntity.Unpacked<any>>;
   };
 }

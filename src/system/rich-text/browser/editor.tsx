@@ -1,10 +1,9 @@
 import { WeakId } from "@dabsi/common/WeakId";
+import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/globals";
 import { MuiFocusableBox } from "@dabsi/system/rich-text/browser/MuiFocusableBox";
-import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/muiPlugins";
 import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
 import Grid from "@material-ui/core/Grid";
 import React, { ComponentType } from "react";
-import styled from "styled-components";
 
 export class MuiRichTextEditor extends RichTextEditor {
   toolbars: ComponentType<{}>[] = [];

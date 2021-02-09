@@ -57,7 +57,7 @@ function searchTests(dir: string) {
 
     if (/^(browser|native)$/.test(baseName)) return;
 
-    if (/tester.tsx?$/.test(baseName)) {
+    if (/tester.tsx?$/i.test(baseName)) {
       requireBeforeTests.push(getModuleName(fileName));
       return;
     }

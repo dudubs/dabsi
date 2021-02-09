@@ -1,7 +1,7 @@
 import {
   MuiToolbarButton,
   MuiToolbarButtonProps,
-} from "@dabsi/system/rich-text/browser/toolbars/button";
+} from "@dabsi/system/rich-text/browser/toolbar/button";
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
@@ -15,21 +15,21 @@ const iconMap = {
 
 export const MuiInlineStyleButton = ({
   store,
-  inlineStyle,
+  styleType,
   ...props
 }: MuiToolbarButtonProps & {
-  inlineStyle: string;
+  styleType: string;
   store: RichTextStore;
 }) => {
   return (
     <MuiToolbarButton
       selected={store.currentBlock
         .getInlineStyleAt(store.selection.getStartOffset())
-        .has(inlineStyle)}
-      icon={iconMap[inlineStyle]}
+        .has(styleType)}
+      icon={iconMap[styleType]}
       {...props}
       onClick={() => {
-        store.state = RichUtils.toggleInlineStyle(store.state, inlineStyle);
+        store.state = RichUtils.toggleInlineStyle(store.state, styleType);
         store.update("forceSelection", store.selection);
       }}
     />

@@ -2,11 +2,12 @@ import RpcModule from ".";
 import { ResolverContext, CustomResolver, Resolver } from "../../typedi";
 import { ResolveError } from "../../typedi/ResolveError";
 import { AnyRpc, RpcResolvedConfig } from "../../typerpc/Rpc";
-import { RpcConfigResolver } from "./RpcConfigResolver";
+import { RpcConfigResolver } from "./configResolver";
 
 export type RpcConfigFactory<T extends AnyRpc> = (
   context?: ResolverContext
-) => RpcResolvedConfig<T>;
+) => Promise<RpcResolvedConfig<T>>;
+
 export default function RpcConfigFactoryResolver<T extends AnyRpc>(
   rpc: T,
   {
@@ -20,25 +21,24 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
   return Resolver.toCheck(
     Resolver.consume([RpcModule, c => c], (rpcModule, context) => {
       const rpcConfigResolver = getRpcConfigResolver(rpcModule);
-      return rpcContext => {
-        return <RpcResolvedConfig<T>>(
-          rpc.resolveRpcConfig(
-            Resolver.resolve(
-              rpcConfigResolver,
-              Resolver.createContext(context, rpcContext || {})
-            )
-          )
+
+      return childContext => {
+        const rpcConfig = Resolver.resolve(
+          rpcConfigResolver,
+          Resolver.createContext(context, childContext || {})
         );
+
+        return <Promise<RpcResolvedConfig<T>>>rpc.resolveRpcConfig(rpcConfig);
       };
     }),
-    context => {
+    childContext => {
       const rpcConfigResolver = getRpcConfigResolver(
-        Resolver.resolve(RpcModule, context)
+        Resolver.resolve(RpcModule, childContext)
       );
-      Resolver.checkObject(rpcContext, context);
+      Resolver.checkObject(rpcContext, childContext);
       Resolver.check(
         rpcConfigResolver,
-        Resolver.createContext(context, rpcContext)
+        Resolver.createContext(childContext, rpcContext)
       );
     }
   );
@@ -47,7 +47,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
     rpcModule: RpcModule
   ): RpcConfigResolver<AnyRpc> {
     const rpcConfigResolver = create
-      ? rpcModule.createRpcConfigResolver(rpc)
+      ? rpcModule.generateRpcConfigResolver(rpc)
       : rpcModule.getRpcConfigResolver(rpc);
 
     if (!rpcConfigResolver) {

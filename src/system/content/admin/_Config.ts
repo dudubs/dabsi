@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/RpcConfigResolver";
+import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { ContentAdminRpc } from "@dabsi/system/content/admin/common/rpc";
 import { RichTextContext } from "@dabsi/system/rich-text/context";
 

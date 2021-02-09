@@ -2,11 +2,11 @@ import { touchMap } from "@dabsi/common/map/touchMap";
 import { touchSet } from "@dabsi/common/map/touchSet";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
-import createConfigResolverFactory from "@dabsi/modules/rpc/configResolverFactory";
+import { createRpcConfigResolverGenerator } from "@dabsi/modules/rpc/configResolverGenerator";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { Module, Resolver, ResolverContext } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, RpcConnection, RpcError } from "@dabsi/typerpc/Rpc";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
@@ -14,7 +14,7 @@ import path from "path";
 import { DABSI_ROOT_DIR } from "../../env";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
-import { isRpcConfigResolver, RpcConfigResolver } from "./RpcConfigResolver";
+import { isRpcConfigResolver, RpcConfigResolver } from "./configResolver";
 
 @Module()
 export default class RpcModule {
@@ -41,11 +41,16 @@ export default class RpcModule {
   }
 
   configureRpcResolver(configResolver: RpcConfigResolver<AnyRpc>) {
+    if (this._rpcConfigResolverMap.has(configResolver.rpc)) {
+      throw new RpcError(`Can't override config resolver.`);
+    }
     this._rpcConfigResolverMap.set(configResolver.rpc, configResolver);
   }
 
-  @Lazy() get createRpcConfigResolver() {
-    return createConfigResolverFactory(rpc => this.getRpcConfigResolver(rpc));
+  @Lazy() get generateRpcConfigResolver() {
+    return createRpcConfigResolverGenerator(rpc =>
+      this.getRpcConfigResolver(rpc)
+    );
   }
 
   getRpcConfigResolver<T extends AnyRpc>(rpc: T): RpcConfigResolver<T> {
@@ -53,7 +58,7 @@ export default class RpcModule {
       this._rpcConfigResolverMap,
       rpc,
       (): RpcConfigResolver<T> => {
-        const configResolver = this.createRpcConfigResolver(rpc);
+        const configResolver = this.generateRpcConfigResolver(rpc);
         if (configResolver) {
           return configResolver as RpcConfigResolver<T>;
         }

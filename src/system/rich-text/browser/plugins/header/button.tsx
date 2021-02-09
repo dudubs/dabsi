@@ -1,4 +1,4 @@
-import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbars/button";
+import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbar/button";
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -17,6 +17,7 @@ export const MuiHeaderButton = ({ store }: { store: RichTextStore }) => {
   return (
     <>
       <MuiToolbarButton
+        selected={store.currentBlock.getType() === "header"}
         onMouseDown={event => {
           event.preventDefault();
           ref.current = {

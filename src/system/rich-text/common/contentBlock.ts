@@ -102,6 +102,21 @@ export namespace RichTextBlock {
     }
   >;
 
+  export type Raw<T extends Type = Type> = Union<
+    {
+      [K in T]: {
+        type: K;
+        text: string;
+        key: string;
+        styleRanges: PackedStyleRange[];
+        entityRanges: PackedEntityRange[];
+        depth: number;
+        style: Styles;
+        data: UnpackedData<K>;
+      };
+    }
+  >;
+
   export type Unpacked = Union<
     {
       [K in Type]: {

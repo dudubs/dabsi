@@ -6,16 +6,17 @@ import Grid from "@material-ui/core/Grid";
 import React, { ComponentType } from "react";
 import styled from "styled-components";
 
-const Container = styled.div<{ over }>`
-  border: 1px solid ${x => x.theme.palette.grey[400]};
-  border-radius: ${x => x.theme.shape.borderRadius}px;
-  padding: ${x => x.theme.spacing(1)}px;
-`;
-
 export class MuiRichTextEditor extends RichTextEditor {
   toolbars: ComponentType<{}>[] = [];
 
-  protected initPlugins() {
+  constructor(props) {
+    super(props);
+    if (this.constructor === MuiRichTextEditor) {
+      this.init();
+    }
+  }
+
+  initPlugins() {
     super.initPlugins();
     for (const plugin of MuiRichTextEditorPlugins) {
       plugin(this);

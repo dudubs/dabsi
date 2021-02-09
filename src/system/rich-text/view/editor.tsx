@@ -3,21 +3,24 @@ import { WeakId } from "@dabsi/common/WeakId";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { View } from "@dabsi/react/view/View";
 import { ViewState } from "@dabsi/react/view/ViewState";
-import { RichTextStore } from "@dabsi/system/rich-text/common/store";
+import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import RichTextEditorBlock from "@dabsi/system/rich-text/view/editorBlock";
 import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 import {
   CompositeDecorator,
+  convertFromRaw,
   Editor,
   EditorState,
+  genKey,
   getDefaultKeyBinding,
 } from "draft-js";
 import { List } from "immutable";
 import React, { ComponentType, createElement, useEffect } from "react";
 import "./hooks/delete-atomic-block";
 import "./hooks/split-block";
+import clsx from "clsx";
 
 declare global {
   namespace Draft {
@@ -79,7 +82,22 @@ export class RichTextEditor extends View<{
   connection: RpcConnection<RpcNamespace>;
 }> {
   @ViewState("updateEditorState")
-  editorState: EditorState = EditorState.createEmpty();
+  editorState: EditorState = EditorState.createWithContent(
+    convertFromRaw({
+      blocks: [
+        {
+          type: "regular",
+          key: genKey(),
+          text: " ",
+          depth: 0,
+          inlineStyleRanges: [],
+          entityRanges: [],
+          data: {},
+        },
+      ],
+      entityMap: {},
+    })
+  );
 
   onChange = Hookable.sync();
 
@@ -110,14 +128,19 @@ export class RichTextEditor extends View<{
   constructor(props) {
     super(props);
 
-    this.initPlugins();
-    this.onInit.invoke();
+    if (this.constructor === RichTextEditor) {
+      this.init();
+    }
   }
 
-  protected initPlugins() {
+  initPlugins() {
     for (const plugin of RichTextEditorPlugins) {
       plugin(this);
     }
+  }
+  init() {
+    this.initPlugins();
+    this.onInit.invoke();
   }
 
   useHook<T extends object>(callback: () => T): T {
@@ -198,6 +221,8 @@ export class RichTextEditor extends View<{
     }) => IRichText.AtomicBlockOptions | void;
   } = {};
 
+  blockStyleMap: Record<string, (data, block) => string> = {};
+
   editorProps: Omit<Draft.EditorProps, "editorState"> = {
     onChange: (editorState: EditorState) => {
       this.editorState = editorState;
@@ -209,6 +234,20 @@ export class RichTextEditor extends View<{
           component: RichTextEditorBlock,
           editable: true,
         }
+      );
+    },
+    blockStyleFn: block => {
+      const type = block.getType();
+      const depth = block.get("depth");
+      const data = block.get("data").toJS();
+
+      return clsx(
+        `rt-block`,
+        `rt-block-${type}`,
+        data.align && `rt-align-${data.align}`,
+        `rt-depth-${depth || 0}`,
+        `rt-direction-${data.direction || "LTR"}`,
+        this.blockStyleMap[type]?.(data, block)
       );
     },
     keyBindingFn: event => {

@@ -1,25 +1,25 @@
-import ToolbarButton from "@dabsi/system/rich-text/browser/text-toolbar/ToolbarButton";
-import { RichTextStore } from "@dabsi/system/rich-text/common/store";
-import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
+import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbars/button";
+import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
 import TitleIcon from "@material-ui/icons/Title";
 import React, { useRef, useState } from "react";
 
-const variantTypes = ["h6", "h5", "h4", "h3", "h2", "h1"];
+const levels = [6, 5, 4, 3, 2, 1];
 
-export default ({ store }: { store: RichTextStore }) => {
+export const MuiHeaderButton = ({ store }: { store: RichTextStore }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const ref = useRef({ type: null as any, clicked: false, state: store.state });
+  const ref = useRef({
+    clicked: false,
+    state: store.state,
+  });
   return (
     <>
-      <ToolbarButton
+      <MuiToolbarButton
         onMouseDown={event => {
           event.preventDefault();
-
           ref.current = {
-            type: store.startBlock.getType(),
             clicked: false,
             state: store.state,
           };
@@ -28,13 +28,16 @@ export default ({ store }: { store: RichTextStore }) => {
         }}
       >
         <TitleIcon />
-      </ToolbarButton>
+      </MuiToolbarButton>
       <Menu
         role="menu"
         anchorEl={() => anchorEl!}
         open={Boolean(anchorEl)}
         onMouseLeave={() => {
-          store.setBlockType(ref.current.type);
+          store.state = ref.current.state;
+        }}
+        onClick={() => {
+          setAnchorEl(null);
         }}
         onClose={() => {
           setAnchorEl(null);
@@ -45,25 +48,30 @@ export default ({ store }: { store: RichTextStore }) => {
       >
         <MenuItem
           onClick={() => {
+            ref.current.clicked = true;
+          }}
+          onMouseEnter={() => {
+            if (ref.current.clicked) return;
             store.state = ref.current.state;
-            store.setBlockType("unstyled");
+            store.applyHeader(0);
+            console.log("reset");
           }}
         >
           <Typography>{lang`NORMAL`}</Typography>
         </MenuItem>
-        {variantTypes.map(i => (
+        {levels.map(i => (
           <MenuItem
             key={i}
             onMouseEnter={() => {
+              if (ref.current.clicked) return;
               store.state = ref.current.state;
-              store.setBlockType(i);
+              store.applyHeader(i);
             }}
             onClick={() => {
-              setAnchorEl(null);
               ref.current.clicked = true;
             }}
           >
-            <Typography variant={i as "h1"}>{lang`HEADER`}</Typography>
+            <Typography variant={("h" + i) as "h1"}>{lang`HEADER`}</Typography>
           </MenuItem>
         ))}
       </Menu>

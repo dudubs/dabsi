@@ -50,6 +50,16 @@ export namespace RichTextEntity {
       };
     }
   >;
+
+  export type Raw<T extends Type = Type> = Union<
+    {
+      [K in T]: {
+        type: K;
+        data: RichTextEntity.UnpackedData<K>;
+      };
+    }
+  >;
+
   export type Unpacked = Union<
     {
       [K in Type]: {

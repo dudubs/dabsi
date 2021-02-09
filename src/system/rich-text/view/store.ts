@@ -66,8 +66,6 @@ export class RichTextStore {
 
   setBlockType(blockType: string) {
     const { selection } = this;
-    // console.log(selection.toJS());
-
     this.update(
       "push",
       this.modifierCall("setBlockType", selection, blockType),
@@ -76,22 +74,44 @@ export class RichTextStore {
     this.update("forceSelection", selection);
   }
 
+  getCurrentBlockData(blockType = this.currentBlock.getType()) {
+    return this.currentBlock.get("data").get("block-" + blockType);
+  }
+
+  get currentListType() {
+    return this.getCurrentBlockData("list")?.type;
+  }
+
+  applyList(listType) {
+    const toggle = this.currentListType === listType;
+
+    this.updateBlocks("change-block-type", block => {
+      block
+        .set("type", toggle ? "regular" : "list")
+        .update("data", data =>
+          toggle
+            ? data
+            : data.update("block-list", data => ({ ...data, type: listType }))
+        );
+    });
+  }
+
   adjustDepth(add: number, maxDepth: number) {
-    this.updateSelectionBlocks("adjust-depth", block =>
+    this.updateBlocks("adjust-depth", block =>
       block.update("depth", depth =>
         Math.max(0, Math.min(maxDepth, depth + add))
       )
     );
   }
 
-  get startBlock(): Draft.ContentBlock {
+  get currentBlock(): Draft.ContentBlock {
     return this.content.getBlockForKey(this.selection.getStartKey());
   }
 
   applyAlignment(align) {
-    const { startBlock } = this;
+    const { currentBlock } = this;
     const remove = align === "JUSTIFY";
-    this.updateSelectionBlocks("change-block-data", block =>
+    this.updateBlocks("change-block-data", block =>
       block.update("data", data =>
         remove ? data.delete("align") : data.set("align", align)
       )
@@ -99,26 +119,36 @@ export class RichTextStore {
   }
 
   applyDirection(direction) {
-    const { startBlock } = this;
-    const remove = startBlock.getData().get("direction") == direction;
-    this.updateSelectionBlocks("change-block-data", block =>
+    const { currentBlock } = this;
+    const remove = currentBlock.getData().get("direction") == direction;
+    this.updateBlocks("change-block-data", block =>
       block.update("data", data =>
         remove ? data.delete("direction") : data.set("direction", direction)
       )
     );
   }
 
-  updateSelectionBlocks(
+  applyHeader(level: number) {
+    this.updateBlocks("change-block-type", block => {
+      block
+        .set("type", level ? "header" : "regular")
+        .update("data", data =>
+          level ? data.set("level", level) : data.delete("level")
+        );
+    });
+  }
+
+  updateBlocks(
     changeType: Draft.EditorChangeType,
     callback: (block: Draft.ContentBlock) => any
   ) {
     const { selection } = this;
-    this.update("push", this.mapSelectionBlocks(callback), changeType);
+    this.update("push", this.mapBlocks(callback), changeType);
     this.update("forceSelection", selection);
   }
 
-  mapSelectionBlocks(
-    callback: (block: Draft.ContentBlock) => any
+  mapBlocks(
+    getNextBlock: (block: Draft.ContentBlock) => any
   ): Draft.ContentState {
     const { selection, content } = this;
 
@@ -127,20 +157,33 @@ export class RichTextStore {
     let isStarted = false;
     let isEnded = false;
 
-    return content.update("blockMap", bm => {
-      if (startKey === endKey) {
-        return bm.update(startKey, callback);
+    const getNextBlockWrapped = (block: Draft.ContentBlock) => {
+      const nextBlock = getNextBlock(block.asMutable() as any);
+      const nextBlockType = nextBlock.getType();
+
+      const isSomeBlockType = nextBlockType === block.getType();
+      // can't change block type & data of atomic block.
+      if (block.getType() === "atomic" && !isSomeBlockType) {
+        return block;
       }
 
+      nextBlock.update("data", data => data.delete("block-" + block.getType()));
+
+      return nextBlock.asImuutable();
+    };
+
+    return content.update("blockMap", bm => {
+      if (startKey === endKey) {
+        return bm.update(startKey, getNextBlockWrapped);
+      }
       return bm.map(b => {
         if (isEnded) return b;
-
         if (isStarted) {
           isEnded = b.getKey() === endKey;
-          return callback(b);
+          return getNextBlockWrapped(b);
         } else {
           if ((isStarted = b.getKey() === startKey)) {
-            return callback(b);
+            return getNextBlockWrapped(b);
           }
         }
         return b;

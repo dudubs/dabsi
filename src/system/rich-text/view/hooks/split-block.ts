@@ -6,7 +6,7 @@ import { Modifier, SelectionState } from "draft-js";
 RichTextEditorPlugins.push(editor => {
   const { store } = editor;
   editor.handleKeyCommandMap["split-block"] = () => {
-    const { startBlock } = store;
+    const { currentBlock } = store;
     let content = store.modifierCall("splitBlock", store.selection);
     content = Modifier.setBlockData(
       content,

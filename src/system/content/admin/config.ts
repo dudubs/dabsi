@@ -12,6 +12,7 @@ export default RpcConfigResolver(
       createPage: {
         inputConfig: {
           content: {
+            allowAll: true,
             context: c.richTextContext,
           },
         },

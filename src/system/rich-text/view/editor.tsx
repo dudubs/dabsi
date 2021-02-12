@@ -1,26 +1,33 @@
 import { touchObject } from "@dabsi/common/object/touchObject";
-import { WeakId } from "@dabsi/common/WeakId";
 import { Hookable } from "@dabsi/modules/Hookable";
 import { View } from "@dabsi/react/view/View";
 import { ViewState } from "@dabsi/react/view/ViewState";
-import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import RichTextEditorBlock from "@dabsi/system/rich-text/view/editorBlock";
 import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
+import { RichTextStore } from "@dabsi/system/rich-text/view/store";
+import { RichTextEditorKeyCommand } from "@dabsi/system/rich-text/view/types";
 import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
+import clsx from "clsx";
 import {
   CompositeDecorator,
   convertFromRaw,
+  DefaultDraftBlockRenderMap,
   Editor,
   EditorState,
   genKey,
   getDefaultKeyBinding,
 } from "draft-js";
 import { List } from "immutable";
-import React, { ComponentType, createElement, useEffect, useMemo } from "react";
+import React, {
+  ComponentType,
+  createElement,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import "./hooks/delete-atomic-block";
 import "./hooks/split-block";
-import clsx from "clsx";
 
 declare global {
   namespace Draft {
@@ -69,11 +76,14 @@ declare global {
       entityData: any;
       entityKey: string;
       editor: RichTextEditor;
+      block: Draft.ContentBlock;
+      contentState: Draft.ContentState;
+      selection: Draft.SelectionState;
     };
     export type AtomicBlockComponent = ComponentType<AtomicBlockComponentProps>;
 
     export type AtomicBlockOptions = {
-      component: AtomicBlockComponent;
+      component?: AtomicBlockComponent;
       editable?: boolean;
     };
   }
@@ -101,6 +111,8 @@ export class RichTextEditor extends View<{
 
   onChange = Hookable.sync();
 
+  changeCallbacks = new Set<(store: RichTextStore) => void>();
+
   onInit = Hookable.sync();
 
   onDestroy = Hookable.sync();
@@ -120,6 +132,20 @@ export class RichTextEditor extends View<{
     }
   );
 
+  useChange<T>(callback: (store: RichTextStore) => T): T {
+    const [state, setState] = useState(() => callback(this.store));
+    useEffect(() => {
+      const onChange = () => {
+        setState(callback(this.store));
+      };
+      this.changeCallbacks.add(onChange);
+      return () => {
+        this.changeCallbacks.delete(onChange);
+      };
+    }, [this]);
+    return state;
+  }
+
   useConnection<T extends AnyRpc>(rpc: T): RpcConnection<T> {
     return useMemo(() => this.props.connection.getChild(rpc), [
       this.props.connection,
@@ -127,7 +153,7 @@ export class RichTextEditor extends View<{
   }
   protected _bindingKeyMap: Record<
     string,
-    Set<(event: React.KeyboardEvent) => any>
+    Set<(event: React.KeyboardEvent, store: RichTextStore) => any>
   > = {};
 
   constructor(props) {
@@ -156,8 +182,18 @@ export class RichTextEditor extends View<{
     return o;
   }
 
+  protected _changeImmediateId: ReturnType<typeof setImmediate> | null = null;
+
   updateEditorState() {
-    this.isDidMount && this.onChange.invoke();
+    if (!this._changeImmediateId) {
+      this._changeImmediateId = setImmediate(() => {
+        this.isDidMount && this.onChange.invoke();
+        this._changeImmediateId = null;
+        this.changeCallbacks?.forEach(callback => {
+          callback(this.store);
+        });
+      });
+    }
   }
 
   componentWillUnmount() {
@@ -165,15 +201,21 @@ export class RichTextEditor extends View<{
     this.onDestroy.invoke();
   }
 
-  AtomicBlockComponent = ({ blockProps: { options, ...blockProps } }) => {
-    return createElement(options.component, blockProps);
+  AtomicBlockComponent = props => {
+    const {
+      blockProps: {
+        options: { component },
+      },
+    } = props;
+    return this.wrapAtomicBlock(createElement(component, props), props);
   };
 
   bindKey(
     key: string,
     callback: (
-      event: React.KeyboardEvent
-    ) => null | void | Draft.DraftEditorCommand | string
+      event: React.KeyboardEvent,
+      store: RichTextStore
+    ) => null | void | RichTextEditorKeyCommand
   ) {
     const callbacks = touchObject(this._bindingKeyMap, key, () => new Set());
     callbacks.add(callback);
@@ -182,10 +224,32 @@ export class RichTextEditor extends View<{
     };
   }
 
-  handleKeyCommandMap: Record<
-    string,
-    (key: string) => "handled" | "not-handled"
-  > = {};
+  protected _handleKeyCommandMap: Record<
+    RichTextEditorKeyCommand,
+    (store: RichTextStore, key: string) => "handled" | "not-handled"
+  > = {} as any;
+
+  defineKeyCommand(
+    k: RichTextEditorKeyCommand,
+    callback: (store: RichTextStore, key: string) => "handled" | "not-handled"
+  ): this {
+    this._handleKeyCommandMap[k] = callback;
+    return this;
+  }
+
+  handleKeyCommand(
+    k: RichTextEditorKeyCommand,
+    callback: (store: RichTextStore, key: string) => void
+  ): this {
+    return this.defineKeyCommand(k, (store, key) => {
+      callback(store, key);
+      return "handled";
+    });
+  }
+
+  wrapAtomicBlock(element: React.ReactElement, props: any): React.ReactElement {
+    return element;
+  }
 
   blockRendererFnMap: {
     [K in string]: (
@@ -196,15 +260,24 @@ export class RichTextEditor extends View<{
       const entityKey = block.getEntityAt(0);
       if (!entityKey) return;
       const entity = this.store.content.getEntity(entityKey);
-      const renderer = this.atomicBlockRendererMap[entity?.getType()];
+      if (!entity) return;
+      const entityType = entity.getType();
+
+      const renderer = this.atomicBlockRendererMap[entityType];
+      if (!renderer) {
+        log.warn(`no render for entity type "${entityType}".`);
+      }
 
       const options = renderer?.({
         entity,
         entityKey,
         block,
       });
+      if (!options) return;
+
       if (options) {
         return {
+          edtiable: false,
           ...options,
           component: this.AtomicBlockComponent as any,
           props: {
@@ -226,15 +299,19 @@ export class RichTextEditor extends View<{
     }) => IRichText.AtomicBlockOptions | void;
   } = {};
 
-  blockStyleMap: Record<string, (data, block) => string> = {};
-
   editorProps: Omit<Draft.EditorProps, "editorState"> = {
     onChange: (editorState: EditorState) => {
       this.editorState = editorState;
     },
 
+    blockRenderMap: DefaultDraftBlockRenderMap.merge({
+      regular: { element: "div" },
+      atomic: { element: "div" },
+    }),
+
     blockRendererFn: block => {
       const renderer = this.blockRendererFnMap[block.getType()];
+
       return (
         renderer?.(block) || {
           component: RichTextEditorBlock,
@@ -245,28 +322,69 @@ export class RichTextEditor extends View<{
     blockStyleFn: block => {
       const type = block.getType();
       const depth = block.get("depth");
-      const data = block.get("data").toJS();
+      const data = block.getData();
+      const align = data.get("style-align");
+      const direction = data.get("style-direction") || "LTR";
+      const typeData = data.get("block-" + type);
 
       return clsx(
         `rt-block`,
         `rt-block-${type}`,
-        data["style-align"] && `rt-align-${data["style-align"]}`,
+        align && `rt-align-${align}`,
         `rt-depth-${depth || 0}`,
-        `rt-direction-${data["style-direction"] || "LTR"}`,
-        this.blockStyleMap[type]?.(data["block-" + type] || {}, block)
+        `rt-direction-${direction}`,
+        this.blockStyleFnMap[type]?.(typeData, block, this.store.content)
       );
     },
     keyBindingFn: event => {
       const callbacks = this._bindingKeyMap[event.key];
       for (const callback of callbacks || []) {
-        const result = callback(event);
+        const result = callback(event, this.store);
         if (result === null) return null;
         if (result !== undefined) return result;
       }
       return getDefaultKeyBinding(event);
     },
     handleKeyCommand: key => {
-      return this.handleKeyCommandMap[key]?.(key) || "not-handled";
+      console.log({ keyCommand: key });
+
+      return this._handleKeyCommandMap[key]?.(this.store, key) || "not-handled";
+    },
+  };
+
+  atomicBlockStyleFnMap: Record<
+    string,
+    (
+      entity: Draft.Entity,
+      block: Draft.ContentBlock,
+      content: Draft.ContentState
+    ) => string | undefined
+  > = {};
+
+  blockStyleFnMap: Record<
+    string,
+    (
+      data: any,
+      block: Draft.ContentBlock,
+      content: Draft.ContentState
+    ) => string | undefined
+  > = {
+    atomic: (data, block, content) => {
+      const entityKey = block.getEntityAt(0);
+      if (!entityKey) return;
+      const entity = content.getEntity(entityKey);
+      if (!entity) return;
+      // const entityData = entity.getData();
+      return clsx(
+        `rt-atomic-${entity.getType()}`,
+        (entity &&
+          this.atomicBlockStyleFnMap[entity.getType()]?.(
+            entity,
+            block,
+            content
+          )) ||
+          undefined
+      );
     },
   };
 

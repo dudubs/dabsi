@@ -9,6 +9,8 @@ import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 
+// getRichTextPluginConfig('image')
+
 export async function uploadImage(
   editor: RichTextEditor,
   connection: RpcConnection<typeof RichTextImageRpc>,

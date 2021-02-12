@@ -3,6 +3,7 @@ import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
+import { RichTextPlugin } from "@dabsi/system/rich-text/common/plugin";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
 import { ImageFile } from "@dabsi/system/storage/entities/image";
 import StorageManager from "@dabsi/system/storage/StorageManager";
@@ -14,6 +15,7 @@ export default RpcConfigResolver(
   RichTextImageRpc,
   {
     config: RichTextConfigResolver,
+
     storageManager: StorageManager,
     rpcReq: RpcRequest,
     data: DataContext,
@@ -22,9 +24,23 @@ export default RpcConfigResolver(
   c => $ =>
     $({
       async upload({ field }) {
-        if (!c.config.allowAll && !c.config.image)
-          throw new RpcError("Not allowed.");
+        const { min, max } = RichTextPlugin.assertConfig(c.config, "image");
         const buffer = c.rpcReq.body[field];
+        const metadata = await sharp(buffer).metadata();
+        if (!metadata.width || !metadata.height)
+          throw new RpcError("Invalid image metadata");
+
+        if (max) {
+        }
+
+        if (min) {
+          for (const dim of ["width", "height"] as const) {
+            if (min[dim] && min[dim]! > metadata[dim]!) {
+              throw new RpcError(`Expect to minimum ${dim} of ${min[dim]}px.`);
+            }
+          }
+        }
+
         const { key, url } = await c.storageManager.upload(
           "rt-image", // rich-text-image
           "png",

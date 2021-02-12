@@ -3,8 +3,8 @@ import { Styles } from "@material-ui/core/styles/withStyles";
 import clsx from "clsx";
 import React from "react";
 
-export default (styles => {
-  const useStyles = makeStyles(styles);
+export default ((styles, options?) => {
+  const useStyles = makeStyles(styles, options);
   return renderer => {
     return props => {
       const classes = useStyles();
@@ -17,7 +17,7 @@ export default (styles => {
     };
   };
 }) as {
-  <K extends string>(styles: Styles<DefaultTheme, {}, K>): {
+  <K extends string>(styles: Styles<DefaultTheme, {}, K>, options?): {
     <P extends object = {}>(
       renderer: (props: P, classes: Record<K, string>) => React.ReactElement
     ): {

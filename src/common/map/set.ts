@@ -4,9 +4,17 @@ declare global {
     deleteAll(values: Iterable<T>): Set<T>;
     touch(value: T): boolean;
   }
+  interface WeakSet<T> {
+    touch(value: T): boolean;
+  }
 }
 
 Set.prototype.touch = function (value) {
+  if (this.has(value)) return false;
+  this.add(value);
+  return true;
+};
+WeakSet.prototype.touch = function (value) {
   if (this.has(value)) return false;
   this.add(value);
   return true;

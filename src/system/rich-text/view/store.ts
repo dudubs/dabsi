@@ -1,12 +1,17 @@
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { OmitParameter } from "@dabsi/common/typings2/Fn";
 import {
-  AtomicBlockUtils,
+  CharacterMetadata,
+  ContentBlock,
   ContentState,
+  convertToRaw,
   EditorState,
+  genKey,
   Modifier,
   SelectionState,
 } from "draft-js";
+import Immutable from "immutable";
+import "./extra";
 
 export class RichTextStore {
   constructor(
@@ -27,7 +32,15 @@ export class RichTextStore {
   }
 
   get selection(): SelectionState {
-    return this.state.getSelection();
+    const selection = this.state.getSelection();
+    // if (!selection) {
+    //   return SelectionState.createEmpty(this.content.getFirstBlock().getKey());
+    // }
+    return selection;
+  }
+
+  get isSomeBlockSelection() {
+    return this.selection.getAnchorKey() === this.selection.getFocusKey();
   }
 
   call<
@@ -50,28 +63,6 @@ export class RichTextStore {
   >(method: K, ...args: OmitParameter<typeof EditorState[K]>): this {
     this.state = (EditorState[method] as any)(this.state, ...args);
     return this;
-  }
-
-  modifierCall<
-    K extends ExtractKeys<
-      typeof Modifier,
-      (content: ContentState, ...args: any[]) => void
-    >
-  >(
-    method: K,
-    ...args: OmitParameter<typeof Modifier[K]>
-  ): ReturnType<typeof Modifier[K]> {
-    return (Modifier[method] as any)(this.content, ...args);
-  }
-
-  setBlockType(blockType: string) {
-    const { selection } = this;
-    this.update(
-      "push",
-      this.modifierCall("setBlockType", selection, blockType),
-      "change-block-type"
-    );
-    this.update("forceSelection", selection);
   }
 
   getCurrentBlockData(blockType = this.currentBlock.getType()) {
@@ -116,6 +107,21 @@ export class RichTextStore {
 
   get currentBlock(): Draft.ContentBlock {
     return this.content.getBlockForKey(this.selection.getStartKey());
+  }
+
+  get store(): RichTextStore {
+    return this;
+  }
+  get blockBefore(): Draft.ContentBlock | undefined {
+    return this.content.getBlockBefore(this.selection.getStartKey());
+  }
+
+  get blockAfter(): Draft.ContentBlock | undefined {
+    return this.content.getBlockAfter(this.selection.getEndKey());
+  }
+
+  get blockBeforeOrAfter(): Draft.ContentBlock | undefined {
+    return this.blockBefore || this.blockAfter;
   }
 
   get currentHeaderLevel(): number | undefined {
@@ -217,14 +223,171 @@ export class RichTextStore {
     }) as any;
   }
 
+  insertBlocks(
+    newRawBlocks: {
+      type?: string;
+      text?: string;
+      key?: string;
+      entity?: string;
+      style?: string[];
+    }[],
+    content = this.content
+  ): this {
+    if (!newRawBlocks.length) return this;
+
+    const newBlocks: ContentBlock[] = newRawBlocks.map(
+      ({ type = "regular", text = "", key = genKey(), entity, style }) => {
+        return new ContentBlock({
+          type,
+          text,
+          key,
+          characterList: Immutable.List(
+            Immutable.Repeat(
+              CharacterMetadata.create({
+                ...(entity ? { entity } : null),
+                ...(style ? { style: Immutable.Set(style) } : null),
+              }),
+              text.length
+            )
+          ),
+        });
+      }
+    );
+    const newBlocksEntries: [string, ContentBlock][] = newBlocks.map(block => [
+      block.getKey(),
+      block,
+    ]);
+
+    let afterBlockKey: string | null = null;
+    let beforeBlockKey: string | null = null;
+
+    const splitAndInsertAfter = () => {
+      content = Modifier.splitBlock(content, this.selection);
+      afterBlockKey = this.selection.getAnchorKey();
+    };
+
+    if (this.selection.isSomeBlock) {
+      if (this.selection.isSomeOffset) {
+        if (
+          // is start of line
+          this.selection.getAnchorOffset() === 0
+        ) {
+          beforeBlockKey = this.selection.getAnchorKey();
+        } else if (
+          // is end of line
+          this.selection.getEndOffset() === this.currentBlock.getText().length
+        ) {
+          afterBlockKey = this.selection.getAnchorKey();
+        } else {
+          // in middle
+          splitAndInsertAfter();
+        }
+      } else {
+        // between characters
+        splitAndInsertAfter();
+      }
+    } else {
+      // between blocks
+      splitAndInsertAfter();
+    }
+
+    content = <any>content.update("blockMap", blockMap =>
+      blockMap.flatMap((block, key) => {
+        if (afterBlockKey && key === afterBlockKey) {
+          return [[key, block], ...newBlocksEntries];
+        }
+        if (beforeBlockKey && key === beforeBlockKey) {
+          return [...newBlocksEntries, [key, block]];
+        }
+        return [[key, block]];
+      })
+    );
+
+    this.update("push", content, "insert-fragment");
+    const lastBlock = newBlocks[newBlocksEntries.length - 1];
+
+    this.select({
+      anchorKey: lastBlock.getKey(),
+      endOfAnchor: true,
+    });
+
+    return this;
+  }
+
   insertAtomicBlock(
     type: string,
     mutability: Draft.DraftEntityMutability,
     data
-  ) {
-    const contentState = this.content.createEntity(type, mutability, data);
-    const entityKey = contentState.getLastCreatedEntityKey();
-    this.state = AtomicBlockUtils.insertAtomicBlock(this.state, entityKey, " ");
-    this.update("forceSelection", this.content.getSelectionAfter());
+  ): this {
+    let content = this.content.createEntity(type, mutability, data);
+    const entityKey = content.getLastCreatedEntityKey();
+
+    this.insertBlocks(
+      [{ type: "atomic", text: " ", entity: entityKey }],
+      content
+    );
+
+    return this;
+  }
+
+  getRawContent(): Draft.RawDraftContentState {
+    return convertToRaw(this.content);
+  }
+
+  deleteCurrentBlock(): this {
+    const { currentBlock } = this;
+    this.selectBeforeOrAfter();
+
+    const {
+      selection: { endKey },
+    } = this;
+
+    this.update(
+      "push",
+      this.content.flatMapBlocks(block =>
+        block.getKey() === currentBlock.getKey() ? [] : [block]
+      ),
+      "remove-range"
+    );
+
+    this.select({ anchorKey: endKey, endOfAnchor: true });
+    return this;
+  }
+
+  select({
+    anchorKey = this.currentBlock.getKey(),
+    endOfAnchor = false,
+    endOfFocus = false,
+    anchorOffset = endOfAnchor
+      ? this.content.getBlockForKey(anchorKey).getLength()
+      : 0,
+    focusKey = anchorKey,
+    focusOffset = endOfFocus
+      ? this.content.getBlockForKey(focusKey).getLength()
+      : anchorOffset,
+  }): this {
+    return this.update(
+      "forceSelection",
+      new SelectionState({
+        anchorKey,
+        anchorOffset,
+        focusKey,
+        focusOffset,
+      })
+    );
+  }
+
+  selectBeforeOrAfter(): this {
+    const { blockBeforeOrAfter } = this;
+    if (!blockBeforeOrAfter) {
+      const key = genKey();
+      return this.select({ anchorOffset: 0 }).insertBlocks([{ key }]);
+    } else {
+      return this.select({
+        anchorKey: blockBeforeOrAfter.getKey(),
+        endOfAnchor: true,
+      });
+    }
+    return this;
   }
 }

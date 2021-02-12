@@ -6,7 +6,7 @@ import {
 } from "@dabsi/system/rich-text/browser/globals";
 
 MuiRichTextEditorPlugins.push(editor => {
-  editor.blockStyleMap.header = data => {
+  editor.blockStyleFnMap.header = data => {
     return `rt-header-${data.level}`;
   };
 });

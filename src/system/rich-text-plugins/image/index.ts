@@ -11,7 +11,7 @@ declare global {
         | {
             min?: { width?: number; height?: number };
             max?: { width?: number; height?: number };
-            preview?: { width?: number; height?: number };
+            // preview?: { width?: number; height?: number };
           };
     }
     interface RelationTypes {

@@ -4,10 +4,8 @@ import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugin
 import { Modifier, SelectionState } from "draft-js";
 
 RichTextEditorPlugins.push(editor => {
-  const { store } = editor;
-  editor.handleKeyCommandMap["split-block"] = () => {
-    const { currentBlock } = store;
-    let content = store.modifierCall("splitBlock", store.selection);
+  editor.handleKeyCommand("split-block", ({ store, currentBlock, content }) => {
+    content = Modifier.splitBlock(content, store.selection);
     content = Modifier.setBlockData(
       content,
       SelectionState.createEmpty(content.getKeyAfter(currentBlock.getKey())),
@@ -15,7 +13,5 @@ RichTextEditorPlugins.push(editor => {
     );
     store.update("push", content, "split-block");
     store.update("forceSelection", store.selection);
-
-    return "handled";
-  };
+  });
 });

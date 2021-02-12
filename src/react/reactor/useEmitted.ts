@@ -1,10 +1,6 @@
-import { useEffect, useState } from "react";
 import { useReactor } from "@dabsi/react/reactor/hooks";
-import {
-  Emittable,
-  EmittableType,
-  ReactorEvent,
-} from "@dabsi/react/reactor/Reactor";
+import { Emittable, EmittableType } from "@dabsi/react/reactor/Reactor";
+import { useEffect, useState } from "react";
 
 export function useEmitted<T extends Emittable<any>>(
   emittable: T,

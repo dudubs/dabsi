@@ -9,7 +9,6 @@ declare global {
   namespace IRichText {
     interface ConfigAndElement {
       editable?: boolean;
-      allowAll?: boolean;
     }
 
     interface InputConfig extends Config {}

@@ -1,62 +1,171 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { Tester } from "@dabsi/jasmine/Tester";
+import { inspect } from "@dabsi/logging/inspect";
 import { RichTextStore } from "@dabsi/system/rich-text/view/store";
-import { convertFromRaw, convertToRaw, EditorState } from "draft-js";
+import { convertFromRaw, EditorState } from "draft-js";
+
+const regularBlock = {
+  type: "regular",
+  text: " ",
+  depth: 0,
+  data: {},
+  inlineStyleRanges: [],
+  entityRanges: [],
+};
+
+const TestContentState = ({
+  blocks = [] as Draft.RawDraftContentBlock[],
+  entityMap = {} as Record<string, Draft.RawDraftEntity>,
+}) => ({ blocks, entityMap });
+
+let blockKeyCounter = 0;
+beforeEach(() => {
+  blockKeyCounter = 0;
+});
+
+const TestContentBlock = ({
+  type = "regular",
+  text = "",
+  key = `k-${++blockKeyCounter}`,
+  depth = 0,
+  inlineStyleRanges = [] as Draft.RawDraftInlineStyleRange[],
+  entityRanges = [] as Draft.RawDraftEntityRange[],
+  data = {},
+} = {}): Draft.RawDraftContentBlock => ({
+  type,
+  text,
+  key,
+  depth,
+  inlineStyleRanges,
+  entityRanges,
+  data,
+});
+
+fdescribe("insertBlocks", () => {
+  const text = "01234567890";
+
+  let store: RichTextStore;
+
+  const getBlockTexts = () =>
+    store
+      .getRawContent()
+      .blocks.map(b => b.text)
+      .join("\n");
+  beforeEach(() => {
+    store = createTestStore(
+      TestContentState({
+        blocks: [
+          TestContentBlock({ text, key: "sk0" }),
+          TestContentBlock({ text, key: "sk1" }),
+          TestContentBlock({ text, key: "sk2" }),
+        ],
+      })
+    );
+  });
+
+  it("expect to insert block before", () => {
+    store.select({ anchorKey: "sk1" });
+    store.insertBlocks([{ text: "new1" }]);
+    expect(getBlockTexts()).toEqual([text, "new1", text, text].join("\n"));
+
+    store.insertBlocks([{ text: "new2" }]);
+    expect(getBlockTexts()).toEqual(
+      [text, "new1", "new2", text, text].join("\n")
+    );
+  });
+  it("expect to insert block after", () => {
+    store.select({ anchorKey: "sk1", anchorOffset: text.length });
+    store.insertBlocks([{ text: "new1" }]);
+    expect(getBlockTexts()).toEqual([text, text, "new1", text].join("\n"));
+
+    store.insertBlocks([{ text: "new2" }]);
+    expect(getBlockTexts()).toEqual(
+      [text, text, "new1", "new2", text].join("\n")
+    );
+  });
+  it("expect to insert to split", () => {
+    store.select({
+      anchorKey: "sk1",
+      anchorOffset: 5,
+    });
+    store.insertBlocks([{ text: "new1" }]);
+    expect(getBlockTexts()).toEqual(
+      [text, text.substr(0, 5), "new1", text.substr(5), text].join("\n")
+    );
+    store.insertBlocks([{ text: "new2" }]);
+    expect(getBlockTexts()).toEqual(
+      [text, text.substr(0, 5), "new1", "new2", text.substr(5), text].join("\n")
+    );
+  });
+
+  it("expect to split middle of line", () => {
+    store.select({
+      anchorKey: "sk1",
+      anchorOffset: 4,
+      focusOffset: 6,
+    });
+    store.insertBlocks([{ text: "new1" }]);
+    expect(getBlockTexts()).toEqual(
+      [text, text.substr(0, 4), "new1", text.substr(6), text].join("\n")
+    );
+    store.insertBlocks([{ text: "new2" }]);
+    expect(getBlockTexts()).toEqual(
+      [text, text.substr(0, 4), "new1", "new2", text.substr(6), text].join("\n")
+    );
+  });
+  it("expect to split between blocks", () => {
+    store.select({
+      anchorKey: "sk0",
+      anchorOffset: 4,
+      focusKey: "sk2",
+      focusOffset: 6,
+    });
+    store.insertBlocks([{ text: "new1" }]);
+    expect(getBlockTexts()).toEqual(
+      [text.substr(0, 4), "new1", text.substr(6)].join("\n")
+    );
+    store.insertBlocks([{ text: "new2" }]);
+    expect(getBlockTexts()).toEqual(
+      [text.substr(0, 4), "new1", "new2", text.substr(6)].join("\n")
+    );
+  });
+});
 
 describe("change block type:", () => {
   const t = Tester.beforeAll(() => {
-    const regularBlock = {
-      type: "regular",
-      text: " ",
-      depth: 0,
-      data: {},
-      inlineStyleRanges: [],
-      entityRanges: [],
-    };
-
-    let state = EditorState.createWithContent(
-      convertFromRaw({
-        blocks: [
-          {
-            ...regularBlock,
-            key: "regular-k",
-            data: {
-              "block-regular": "hello",
-              "style-align": "LEFT",
-            },
+    const store = createTestStore({
+      blocks: [
+        {
+          ...regularBlock,
+          key: "regular-k",
+          data: {
+            "block-regular": "hello",
+            "style-align": "LEFT",
           },
-          {
-            ...regularBlock,
-            key: "atomic-k",
-            type: "atomic",
-            data: {
-              "block-atomic": "hello",
-            },
+        },
+        {
+          ...regularBlock,
+          key: "atomic-k",
+          type: "atomic",
+          data: {
+            "block-atomic": "hello",
           },
-        ],
-        entityMap: {},
-      })
-    );
-    const store = new RichTextStore(
-      () => state,
-      nextState => {
-        state = nextState;
-      }
-    );
+        },
+      ],
+      entityMap: {},
+    });
 
     store.selectAll();
 
     store.applyList("ordered");
 
-    const content = convertToRaw(state.getCurrentContent());
-    const blockMap = mapArrayToObject(content.blocks, block => [
+    const rawContent = store.getRawContent();
+    const blockMap = mapArrayToObject(rawContent.blocks, block => [
       block.key,
       block,
     ]);
 
     return {
-      content,
-      blockMap,
       regularBlock: blockMap["regular-k"],
       atomicBlock: blockMap["atomic-k"],
     };
@@ -86,3 +195,14 @@ describe("change block type:", () => {
     );
   });
 });
+function createTestStore(
+  contentState: Draft.RawDraftContentState
+): RichTextStore {
+  let state = EditorState.createWithContent(convertFromRaw(contentState));
+  return new RichTextStore(
+    () => state,
+    nextState => {
+      state = nextState;
+    }
+  );
+}

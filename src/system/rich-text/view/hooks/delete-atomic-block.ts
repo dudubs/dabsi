@@ -1,49 +1,43 @@
-import { createSelectionState } from "@dabsi/system/rich-text/common/draftUtils";
 import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 
-RichTextEditorPlugins.push(editor => {
-  editor.bindKey("Backspace", event => {
-    const {
-      store: { selection, content },
-      store,
-    } = editor;
-    if (
-      event.type !== "keydown" ||
-      selection.getAnchorKey() !== selection.getFocusKey() ||
-      selection.getAnchorOffset() !== 0 ||
-      selection.getFocusOffset() !== 0
-    ) {
-      return;
+declare global {
+  namespace IRichText {
+    interface EditorKeyCommands {
+      "delete-current-block";
+      "select-block-before";
     }
+  }
+}
 
-    event.preventDefault();
-
-    const atomicBlock = content.getBlockBefore(selection.getAnchorKey());
-    if (atomicBlock?.getType() !== "atomic") return;
-
-    const blockBeforeAtomicBlock = content.getBlockBefore(atomicBlock.getKey());
-    const startOffset = blockBeforeAtomicBlock.getText().length;
-
-    store.update(
-      "push",
-      store.modifierCall(
-        "removeRange",
-        createSelectionState(blockBeforeAtomicBlock.getKey(), {
-          startOffset,
-          endKey: selection.getAnchorKey(),
-          endOffset: 0,
-        }),
-        "backward"
-      ),
-      "remove-range"
-    );
-
-    store.update(
-      "forceSelection",
-      createSelectionState(blockBeforeAtomicBlock.getKey(), {
-        startOffset,
-      })
-    );
-    return null;
-  });
+RichTextEditorPlugins.push(editor => {
+  editor
+    .handleKeyCommand("delete-current-block", store => {
+      store.deleteCurrentBlock();
+    })
+    .handleKeyCommand("select-block-before", ({ store, blockBefore }) => {
+      blockBefore &&
+        store.select({
+          anchorKey: blockBefore.getKey(),
+          endOfAnchor: true,
+        });
+    });
+  editor.bindKey(
+    "Backspace",
+    (event, { blockBefore, selection, currentBlock }) => {
+      if (currentBlock.getType() === "atomic") {
+        return "delete-current-block";
+      }
+      if (
+        blockBefore &&
+        selection.anchorOffset === 0 &&
+        selection.isSomeBlockAndOffset &&
+        blockBefore.getType() === "atomic"
+      ) {
+        if (!currentBlock.getLength()) {
+          return "delete-current-block";
+        }
+        return "select-block-before";
+      }
+    }
+  );
 });

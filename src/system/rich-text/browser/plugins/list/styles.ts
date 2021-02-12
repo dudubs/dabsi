@@ -29,7 +29,7 @@ MuiRichTextDepthPlugins.push((depth, root) => {
 });
 
 MuiRichTextEditorPlugins.push(editor => {
-  editor.blockStyleMap.list = (data, block) => {
+  editor.blockStyleFnMap.list = (data, block) => {
     const blockKey = block.getKey();
     const prevBlock = editor.store.content.getBlockBefore(blockKey);
 

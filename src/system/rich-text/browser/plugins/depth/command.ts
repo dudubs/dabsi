@@ -1,6 +1,14 @@
 import { maxDepth } from "@dabsi/system/rich-text/browser/plugins/depth/globals";
 import { RichTextEditorPlugins } from "@dabsi/system/rich-text/view/editorPlugins";
 
+declare global {
+  namespace IRichText {
+    interface EditorKeyCommands {
+      "more-depth";
+      "less-depth";
+    }
+  }
+}
 RichTextEditorPlugins.push(editor => {
   const { store } = editor;
 
@@ -9,15 +17,13 @@ RichTextEditorPlugins.push(editor => {
     return event.shiftKey ? "less-depth" : "more-depth";
   });
 
-  editor.handleKeyCommandMap["more-depth"] = () => {
-    store.adjustDepth(1, maxDepth);
-    return "handled";
-  };
-
-  editor.handleKeyCommandMap["less-depth"] = () => {
-    store.adjustDepth(-1, maxDepth);
-    return "handled";
-  };
+  editor
+    .handleKeyCommand("less-depth", store => {
+      store.adjustDepth(-1, maxDepth);
+    })
+    .handleKeyCommand("more-depth", store => {
+      store.adjustDepth(1, maxDepth);
+    });
 
   editor.bindKey("Backspace", event => {
     const { selection } = store;

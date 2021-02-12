@@ -4,7 +4,13 @@ import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbar/button
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import InfoIcon from "@material-ui/icons/Info";
-import { convertFromRaw, convertToRaw, EditorState } from "draft-js";
+import {
+  ContentState,
+  convertFromRaw,
+  convertToRaw,
+  EditorState,
+  genKey,
+} from "draft-js";
 import React, { useState } from "react";
 import { useHistoryStateKey } from "../useHistoryStateKey";
 
@@ -12,7 +18,7 @@ MuiRichTextEditorPlugins.push(editor => {
   const { store } = editor;
   const debounce = Debounce(500);
 
-  const TestComponent = () => <span>hello</span>;
+  const TestComponent = ({ block }) => <span>hello {block.getKey()}</span>;
 
   editor.atomicBlockRendererMap.test = () => ({
     component: TestComponent,
@@ -39,6 +45,7 @@ MuiRichTextEditorPlugins.push(editor => {
     }
   });
 
+  window["devEditor"] = editor;
   editor.toolbars.push(() => {
     const [anchorEl, setAnchorEl] = useState<any>();
     return (
@@ -57,7 +64,47 @@ MuiRichTextEditorPlugins.push(editor => {
               console.log(JSON.stringify(convertToRaw(store.content), null, 2));
             }}
           >
-            Log state
+            Log content state
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              store.state = EditorState.createWithContent(
+                convertFromRaw({
+                  blocks: [
+                    {
+                      key: genKey(),
+                      type: "regular",
+                      depth: 0,
+                      text: "test",
+                      inlineStyleRanges: [],
+                      entityRanges: [],
+                      data: {},
+                    },
+                  ],
+                  entityMap: {},
+                })
+              );
+            }}
+          >
+            reset
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              console.log(
+                JSON.stringify(convertToRaw(store.selection.toJS()), null, 2)
+              );
+            }}
+          >
+            Log selection state
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              store.insertAtomicBlock("test", "MUTABLE", {});
+              store.insertAtomicBlock("test", "MUTABLE", {});
+              store.insertAtomicBlock("test", "MUTABLE", {});
+            }}
+          >
+            insert test atomic block
           </MenuItem>
         </Menu>
       </>

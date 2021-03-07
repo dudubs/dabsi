@@ -3,14 +3,14 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@dabsi/*": [
-        "../src/*"
-      ]
+      "@dabsi/*": ["../src/*"]
     }
   },
   "include": [
     "../**/common",
     "../**/view",
+    "../**/*view.ts",
+    "../**/*view.tsx",
     "../**/browser"
   ]
 }

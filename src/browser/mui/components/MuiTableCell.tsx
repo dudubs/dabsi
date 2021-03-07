@@ -3,7 +3,7 @@ import TableCell from "@material-ui/core/TableCell";
 import { makeStyles } from "@material-ui/core/styles";
 import { createElement } from "react";
 import { Override } from "@dabsi/common/typings2/Override";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import clsx from "clsx";
 
 const useStyles = makeStyles({

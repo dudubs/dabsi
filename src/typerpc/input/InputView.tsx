@@ -1,6 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { Renderer } from "@dabsi/react/renderer";
-import { ViewState } from "@dabsi/react/view/ViewState";
+import { Renderer } from "@dabsi/view/react/renderer";
+import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import {
   AnyInput,
   AnyInputConnection,

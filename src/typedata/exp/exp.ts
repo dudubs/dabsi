@@ -1,7 +1,7 @@
 import { ExpMap } from "@dabsi/common/typings2/ExpMap";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Union } from "@dabsi/common/typings2/Union";
-import { GetBaseType } from "@dabsi/typedata/BaseType";
+import { RebaseType } from "@dabsi/typedata/BaseType";
 import { DataOperatorExp } from "@dabsi/typedata/exp/operator";
 
 import {
@@ -50,7 +50,7 @@ export interface DataExpTypes<T> {
 
   $case: DataCaseExp<T>;
 
-  $base: DataExp<GetBaseType<T>>;
+  $base: DataExp<RebaseType<T>>;
 
   $is: string[] | string;
 
@@ -60,7 +60,7 @@ export interface DataExpTypes<T> {
 
   $or: DataExp<T>[];
 
-  $parameter: DataParameterExp;
+  $param: DataParameterExp;
 
   $length: DataExp<T>;
 
@@ -124,7 +124,9 @@ type DataRelationAtExp<T, K extends DataRelationKeys<T>> = DataExp<
 
 export type AtExp<T> = Union<
   {
-    [K in DataRelationToOneKeys<T>]: Record<K, DataRelationAtExp<T, K>>;
+    [K in DataRelationToOneKeys<T>]:
+      | Record<K, DataRelationAtExp<T, K>>
+      | [K, DataRelationAtExp<T, K>];
   }
 >;
 

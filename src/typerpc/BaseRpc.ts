@@ -16,6 +16,7 @@ import {
   _RpcResolvedHandler,
   _RpcUnresolvedConfig,
 } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 
 type T = TRpc;
 
@@ -48,6 +49,7 @@ export class BaseRpc implements IRpc<T> {
     if (typeof arg === "function") {
       return arg(getRpcLocator(this)).__rpc;
     }
+
     if (typeof arg === "string") {
       const key = arg;
       if (key.startsWith(":")) {
@@ -75,7 +77,7 @@ export class BaseRpc implements IRpc<T> {
 
   async resolveRpcConfig(config: any): Promise<_RpcResolvedConfig<T>> {
     if (config && typeof config === "object" && "$context" in config) {
-      config = await ConfigFactory(config.$context, this);
+      config = await ConfigFactory(config.$context, [this]);
     }
 
     if (
@@ -84,13 +86,14 @@ export class BaseRpc implements IRpc<T> {
       config.length === 1 &&
       typeof config[0] === "function"
     ) {
-      config = await ConfigFactory(config[0], this);
+      config = await ConfigFactory(config[0], [this]);
     }
 
     if (this.options.isGenericConfig) {
       if (typeof config !== "function")
-        throw new TypeError(
-          `expected to generic config, got: ${inspect(config)}`
+        throw new RpcError(
+          `expected to generic config, got: ${inspect(config)}`,
+          this
         );
       config = await GenericConfig(config as GenericConfig);
     } else if (typeof config === "function" && !this.options.isConfigFn) {
@@ -135,5 +138,9 @@ export class BaseRpc implements IRpc<T> {
       );
       return handler.routeAndHandle(path, payload);
     };
+  }
+
+  [inspect.custom]() {
+    return `${this.rpcType?.name || "UnknownRpc"}`;
   }
 }

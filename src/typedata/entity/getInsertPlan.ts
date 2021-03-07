@@ -1,10 +1,10 @@
 import { entries } from "@dabsi/common/object/entries";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
-import { DataInsert } from "@dabsi/typedata/value";
+import { DataInsertRow } from "@dabsi/typedata/value";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
 
-export default (source: DataEntitySource<any>, data: DataInsert<any>) => {
+export default (source: DataEntitySource<any>, data: DataInsertRow<any>) => {
   const {
     entityCursor,
     entityCursor: { parent: parentEntityCursor, entityMetadata },
@@ -97,10 +97,11 @@ export default (source: DataEntitySource<any>, data: DataInsert<any>) => {
       // dont build relation on insert when the key is null.
       return;
     }
-
-    relations.push({
-      relation,
-      relationKey,
-    });
+    if (!relation.setEntityRow(entity, relationKey)) {
+      relations.push({
+        relation,
+        relationKey,
+      });
+    }
   }
 };

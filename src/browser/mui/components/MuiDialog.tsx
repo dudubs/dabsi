@@ -15,7 +15,7 @@ import {
   MuiSubmitButton,
 } from "@dabsi/browser/mui/components/MuiButton";
 
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 
 export type MuiDialogProps = Omit<DialogProps, "title"> & {
   content?: ReactNode;

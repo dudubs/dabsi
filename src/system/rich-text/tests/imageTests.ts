@@ -26,12 +26,9 @@ const t = rtTester.beforeAll(async t => {
   const image = await rpcConn.upload({ field: "testField" });
 
   return {
-    entity: await t.testEntity({
-      type: "image",
-      data: {
-        imageKey: image.key,
-        url: image.url,
-      },
+    entity: await t.testBlock("image", {
+      imageKey: image.key,
+      url: image.url,
     }),
   };
 });

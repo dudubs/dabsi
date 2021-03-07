@@ -7,9 +7,9 @@ import {
   Rpc,
   RpcCommand,
   RpcConnection,
-  RpcError,
   RpcUnresolvedConfig,
 } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import { RpcNamespaceHandler } from "@dabsi/typerpc/RpcNamespaceHandler";
 
 export type RpcNamespace = Rpc<{

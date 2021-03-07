@@ -11,4 +11,11 @@ export class Store<T> {
   get store(): Store<T> {
     return this;
   }
+
+  static const<T>(value: T): Store<T> {
+    return new Store(
+      () => value,
+      () => void 0
+    );
+  }
 }

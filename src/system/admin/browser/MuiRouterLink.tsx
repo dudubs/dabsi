@@ -1,17 +1,15 @@
-import { Link } from "@material-ui/core";
-import React from "react";
-import { ReactElement } from "react";
-import { MuiLinkProps } from "@dabsi/browser/mui/components/MuiLink";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import { AnyRouter } from "@dabsi/typerouter/Router";
+import { AnyRouter } from "@dabsi/typerouter/router";
 import useRouterLink from "@dabsi/typerouter/useRouterLink";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
+import Link, { LinkProps } from "@material-ui/core/Link";
+import React, { ReactElement } from "react";
 
 export default function ({
   router,
   ...LinkProps
 }: {
   router: () => AnyRouter;
-} & MuiLinkProps): ReactElement {
+} & LinkProps): ReactElement {
   const link = useRouterLink(router);
 
   return (

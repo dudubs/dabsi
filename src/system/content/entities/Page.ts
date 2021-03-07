@@ -3,8 +3,8 @@ import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity("content-m/page")
-export class Page {
+@Entity("content/pages")
+export class ContentPage {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -14,6 +14,6 @@ export class Page {
   @ManyToOne(() => User)
   owner!: DataRelation<User>;
 
-  @ManyToOne(() => RichTextDocument)
+  @ManyToOne(() => RichTextDocument, { nullable: false })
   content!: DataRelation<RichTextDocument>;
 }

@@ -2,13 +2,13 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Hookable } from "@dabsi/modules/Hookable";
 import RequestModule from "@dabsi/modules/RequestModule";
 import ServerModule from "@dabsi/modules/server";
-import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
+import { Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import express from "express";
 
 declare global {
   namespace Express {
     interface Request {
-      requestContext: ResolverContext;
+      requestContext: ResolverMap;
     }
   }
 }
@@ -55,14 +55,14 @@ export default class ExpressModule {
 
   onRun = Hookable<(app: express.Application) => Awaitable>();
 
-  context: ResolverContext = Object.setPrototypeOf(
+  context: ResolverMap = Object.setPrototypeOf(
     {
       ...ExpressResolver.provide(),
     },
     this.requestModule.context
   );
 
-  contextResolvers: Resolver<Awaitable<ResolverContext>>[] = [];
+  contextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
 
   listen(port: number, addr = "0.0.0.0") {
     this.onRun(app => {
@@ -78,7 +78,7 @@ export default class ExpressModule {
     callback: (
       req: express.Request,
       res: express.Response,
-      context: ResolverContext
+      context: ResolverMap
     ) => Awaitable
   ): express.Handler {
     return (req, res) =>

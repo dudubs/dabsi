@@ -6,10 +6,11 @@ import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import DbTester from "@dabsi/modules/tests/DbTester";
 import RichTextModule from "@dabsi/system/rich-text";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
-import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
-import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
+import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 import { RichTextContext } from "@dabsi/system/rich-text/context";
 import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
 import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
@@ -55,9 +56,20 @@ export const rtTester = t
 
     let rtConfig: RichTextConfig;
 
+    const testContent = async (content: RichTextContent.Unpacked) => {
+      const docKey = await rtConfig.context.pack(rtConfig, content);
+      const doc = await rtConfig.context.docs.getOrFail(docKey);
+      const packedContent = JSON.parse(doc.content) as RichTextContent.Packed;
+      return {
+        packedContent,
+        unpackedContent: await rtConfig.context.unpack(rtConfig, docKey, false),
+        readonlyContent: await rtConfig.context.unpack(rtConfig, docKey, true),
+      };
+    };
+
     return {
       rtModule,
-
+      testContent,
       pack(content: RichTextContent.Unpacked, docKey?: string) {
         return rtConfig.context.pack(rtConfig, content, docKey);
       },
@@ -69,39 +81,69 @@ export const rtTester = t
       configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
         const context = t.resolve(RichTextContext);
         rtConfig = { ...config, context };
-        t.provide(RichTextConfigResolver.provide(() => rtConfig));
+        t.provide(RichTextConfigContext.provide(() => rtConfig));
         return rtConfig;
       },
 
+      async testBlock<T extends RichTextBlock.Type>(
+        type: T,
+        data: RichTextBlock.UnpackedData<T>,
+        {
+          entityRanges = [],
+          styleRanges = [],
+          styleMap = {},
+          depth = 0,
+        }: Partial<
+          Omit<RichTextBlock.Unpacked<T>, "type" | "data" | "key">
+        > = {}
+      ) {
+        const {
+          packedContent: {
+            blocks: [{ data: packedData }],
+          },
+          unpackedContent: {
+            blocks: [{ data: unpackedData }],
+          },
+          readonlyContent: {
+            blocks: [{ data: readonlyData }],
+          },
+        } = await testContent({
+          blocks: [
+            {
+              type,
+              text: " ",
+              data,
+              key: "b1",
+              entityRanges,
+              styleRanges,
+              depth: 0,
+              styleMap,
+            },
+          ],
+          entityMap: {},
+        });
+        return { unpackedData, packedData, readonlyData };
+      },
       async testEntity(entity: RichTextEntity.Unpacked) {
-        const docKey = await rtConfig.context.pack(
-          rtConfig,
-          makeContentWithEntity(entity)
-        );
         const {
-          entityMap: {
-            0: { data: packedData, type },
+          packedContent: {
+            entityMap: {
+              0: { data: packedData, type },
+            },
           },
-        } = <RichTextContent.Packed>(
-          JSON.parse(
-            await rtConfig.context.docs
-              .getOrFail(docKey)
-              .then(doc => doc.content)
-          )
-        );
+          unpackedContent: {
+            entityMap: {
+              0: { data: unpackedData },
+            },
+          },
+          readonlyContent: {
+            entityMap: {
+              0: { data: readonlyData },
+            },
+          },
+        } = await testContent(makeContentWithEntity(entity));
 
-        const {
-          entityMap: {
-            0: { data: unpackedData },
-          },
-        } = await rtConfig.context.unpack(rtConfig, docKey, false);
-
-        const {
-          entityMap: {
-            0: { data: readonlyData },
-          },
-        } = await rtConfig.context.unpack(rtConfig, docKey, true);
-        return { unpackedData, packedData, readonlyData, docKey };
+        return { unpackedData, packedData, readonlyData };
       },
     };
   });

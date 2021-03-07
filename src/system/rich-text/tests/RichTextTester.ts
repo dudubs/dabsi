@@ -6,7 +6,7 @@ import RequestSession from "@dabsi/modules/session/RequestSession";
 import DbTester from "@dabsi/modules/tests/DbTester";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
-import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
+import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 import { RichTextContext } from "@dabsi/system/rich-text/context";
 import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
 import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
@@ -50,7 +50,7 @@ export default function RichTextTester({
       configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
         const context = t.resolve(RichTextContext);
         const configWithContext = { ...config, context };
-        t.provide(RichTextConfigResolver.provide(() => configWithContext));
+        t.provide(RichTextConfigContext.provide(() => configWithContext));
         return configWithContext;
       },
     };

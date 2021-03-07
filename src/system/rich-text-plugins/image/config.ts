@@ -4,17 +4,17 @@ import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import { RichTextPlugin } from "@dabsi/system/rich-text/common/plugin";
-import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
+import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 import { ImageFile } from "@dabsi/system/storage/entities/image";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { DataRow } from "@dabsi/typedata/row";
-import { RpcError } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import sharp from "sharp";
 
 export default RpcConfigResolver(
   RichTextImageRpc,
   {
-    config: RichTextConfigResolver,
+    config: RichTextConfigContext,
 
     storageManager: StorageManager,
     rpcReq: RpcRequest,

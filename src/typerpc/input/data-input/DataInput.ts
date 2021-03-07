@@ -14,7 +14,7 @@ import { Input } from "@dabsi/typerpc/input/Input";
 import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
 import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
-import { DataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
+import { DataTable } from "@dabsi/typerpc/widget/data-table/rpc";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { IfUndefined } from "@dabsi/common/typings2/boolean/index";
 import { TStruct } from "@dabsi/struct/Struct";

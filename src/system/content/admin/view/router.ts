@@ -1,10 +1,20 @@
 import { AdminRouter } from "@dabsi/system/admin/common";
-import Router from "@dabsi/typerouter/Router";
+import Router from "@dabsi/typerouter/router";
 
 export const ContentAdminRouter = AdminRouter.register(
   "content",
   Router({
-    pages: Router(),
-    createPage: Router(),
+    pages: Router({
+      create: Router(),
+      edit: Router(["id"]),
+    }),
+
+    categories: Router({
+      add: Router(),
+      item: Router(["id"], {
+        edit: Router(),
+        add: Router({}),
+      }),
+    }),
   })
 );

@@ -4,7 +4,7 @@ import { DataContext } from "@dabsi/modules/data/context";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import Storage from "@dabsi/system/storage/Storage";
 import { DataRow } from "@dabsi/typedata/row";
-import { DataInsert } from "@dabsi/typedata/value";
+import { DataInsertRow } from "@dabsi/typedata/value";
 import { Inject, Injectable } from "@dabsi/typedi";
 import { StorageFile } from "./entities/file";
 
@@ -21,7 +21,7 @@ export default class StorageManager {
     type: string,
     buffer: Buffer,
     entityType?: Type<T>,
-    entityData?: DataInsert<T>
+    entityData?: DataInsertRow<T>
   ): Promise<{ url: string; key: string }> {
     const files = this.data.getSource(
       (entityType || StorageFile) as typeof StorageFile

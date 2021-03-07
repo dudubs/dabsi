@@ -1,7 +1,7 @@
 import { Override } from "@dabsi/common/typings2/Override";
-import { Renderer } from "@dabsi/react/renderer";
-import { RendererOrProps } from "@dabsi/react/RendererOrProps";
-import SystemView from "@dabsi/system/core/view/SystemView";
+import { Renderer } from "@dabsi/view/react/renderer";
+import { ReactRendererOrProps } from "@dabsi/view/react/patterns/ReactRendererOrProps";
+import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
@@ -10,11 +10,8 @@ import { TWidget, Widget } from "@dabsi/typerpc/widget/Widget";
 import {
   AnyWidgetRecord,
   WidgetMap,
-} from "@dabsi/typerpc/widget/widget-map/WidgetMap";
-import {
-  MapView,
-  WidgetMapView,
-} from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+} from "@dabsi/typerpc/widget/widget-map/rpc";
+import { MapView, WidgetMapView } from "@dabsi/typerpc/widget/widget-map/view";
 import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
@@ -26,8 +23,9 @@ import {
   ReactNode,
   useRef,
 } from "react";
+import { getOrdredKeys } from "./getOrdredKeys";
 
-const componentViewSymbol = Symbol("mapView");
+const componentViewSymbol = Symbol("system-map-view");
 
 InputMap[componentViewSymbol] = InputMapView;
 WidgetMap[componentViewSymbol] = WidgetMapView;
@@ -57,7 +55,10 @@ export type SystemMapViewProps<
   exclude?: SystemMapChildKey<C>[];
   wrappers?: Record<SystemMapChildKey<C>, Renderer<ReactElement>>;
   between?: ReactNode;
-  children?: Record<string, RendererOrProps<WidgetViewProps<any>, ItemOptions>>;
+  children?: Record<
+    string,
+    ReactRendererOrProps<WidgetViewProps<any>, ItemOptions>
+  >;
 };
 
 export type AnyWidgetConnectionWithWidgetMap = RpcConnection<
@@ -72,40 +73,6 @@ export type AnyWidgetConnectionWithWidgetMap = RpcConnection<
     >
   >
 >;
-
-function getOrdredKeys({
-  firstKeys,
-  lastKeys,
-  excludeKeys,
-  keys,
-}: {
-  keys: Set<string>;
-  firstKeys?: string[];
-  lastKeys?: string[];
-  excludeKeys?: string[];
-}) {
-  const orderedKeys = new Set<string>();
-  firstKeys?.forEach(key => isKey(key) && orderedKeys.add(key));
-  keys.forEach(key => orderedKeys.add(key));
-  lastKeys?.forEach(key => {
-    if (isKey(key)) {
-      orderedKeys.delete(key);
-      orderedKeys.add(key);
-    }
-  });
-  excludeKeys?.forEach(key => {
-    orderedKeys.delete(key);
-  });
-  return [...orderedKeys];
-
-  function isKey(key) {
-    if (!keys.has(key)) {
-      console.warn(`invalid key ${key}`);
-      return false;
-    }
-    return true;
-  }
-}
 
 export function SystemMapView<
   C extends AnySystemMapConnection,
@@ -154,8 +121,9 @@ export function SystemMapView<
         null,
         orderedKeys.map((key, index) => {
           const isLast = orderedKeys.length === index + 1;
-          const [render, options] = RendererOrProps(children?.[key], props =>
-            SystemView.render(props)
+          const [render, options] = ReactRendererOrProps(
+            children?.[key],
+            props => SystemView.render(props)
           );
           let element = render(view.getChildProps(key));
           if (renderItem) {

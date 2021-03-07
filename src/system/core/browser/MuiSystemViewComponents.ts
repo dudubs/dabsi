@@ -1,3 +1,3 @@
-import { UseSystemViewThemeCallback } from "@dabsi/system/core/view/useSystemViewTheme";
+import { SystemViewDefiner } from "@dabsi/system/core/view/use";
 
-export default [] as UseSystemViewThemeCallback[];
+export default [] as ((definer: SystemViewDefiner) => void)[];

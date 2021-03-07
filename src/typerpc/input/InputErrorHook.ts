@@ -24,6 +24,7 @@ export type InputErrorHook<
     TInputErrorHook: T;
     Error: TTarget["Error"] | T["Error"];
 
+    // TODO: config & customErrorCheck...
     Config:
       | TTarget["Config"]
       | PartialUndefinedKeys<

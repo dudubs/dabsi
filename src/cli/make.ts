@@ -12,6 +12,8 @@ import fs, {
 import path from "path";
 
 export default async function ({ projectDir = ".", force = false }) {
+  throw new Error("TODO: add view* files to client");
+  throw new Error("TODO: add common* files to view/client");
   projectDir = realpathSync(projectDir);
   const promises: any[] = [];
   const makedProjectDirs = new Set();

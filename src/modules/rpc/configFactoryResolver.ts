@@ -1,11 +1,11 @@
 import RpcModule from ".";
-import { ResolverContext, CustomResolver, Resolver } from "../../typedi";
+import { CustomResolver, Resolver, ResolverMap } from "../../typedi";
 import { ResolveError } from "../../typedi/ResolveError";
 import { AnyRpc, RpcResolvedConfig } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "./configResolver";
 
 export type RpcConfigFactory<T extends AnyRpc> = (
-  context?: ResolverContext
+  context?: ResolverMap
 ) => Promise<RpcResolvedConfig<T>>;
 
 export default function RpcConfigFactoryResolver<T extends AnyRpc>(
@@ -15,7 +15,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
     context: rpcContext = {},
   }: {
     create?: boolean;
-    context?: ResolverContext;
+    context?: ResolverMap;
   } = {}
 ): CustomResolver<RpcConfigFactory<T>> {
   return Resolver.toCheck(

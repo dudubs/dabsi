@@ -1,34 +1,34 @@
-import { MuiDataInputMapView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputMapView";
-import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
-import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
+import { MuiDataInputMapView } from "@dabsi/browser/mui/widget/input/MuiDataInputMapView";
+import { MuiEditFormView } from "@dabsi/browser/mui/widget/MuiEditFormView";
 import AclAdminViewOptions from "@dabsi/system/acl/plugins/admin/browser/AclAdminViewOptions";
 import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import AclAdminUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoInput";
-import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";
-import { useSystemViewTheme } from "@dabsi/system/core/view/useSystemViewTheme";
-import { Form } from "@dabsi/typerpc/widget/form/Form";
+import { AclAdminUserBasicInfoInput } from "@dabsi/system/acl/plugins/admin/users/common/basicInfoInput";
+import { AclAdminUserGroupsForm } from "@dabsi/system/acl/plugins/admin/users/common/groupsForm";
+import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
+import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
+import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
+import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { Form } from "@dabsi/typerpc/widget/form/rpc";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { useState } from "react";
 
-WidgetRouterView(
+WidgetRouterView.define(
   AclAdminRouter.at("editUser"),
   params => AclAdminConnection.usersManager.edit(params.userId),
   props => {
     const [title, setTitle] = useState("");
 
-    useSystemViewTheme(use => {
+    SystemView.use(define => {
       function updateTitle({ firstName = "", lastName = "" } = {}) {
         setTitle(`${firstName} ${lastName}`);
       }
 
-      use(Form, MuiEditFormView);
+      define(Form, MuiEditFormView);
 
-      use(AclAdminUserBasicInfoInput, props => (
+      define(AclAdminUserBasicInfoInput, props => (
         <MuiGridMapView
           for={mergeProps(props, {
             onChange: input => {
@@ -47,7 +47,7 @@ WidgetRouterView(
         />
       ));
 
-      use(AclAdminUserGroupsForm.at("input"), props => (
+      define(AclAdminUserGroupsForm.at("input"), props => (
         <MuiDataInputMapView {...props} itemGridProps={{ xs: 4 }} />
       ));
     });

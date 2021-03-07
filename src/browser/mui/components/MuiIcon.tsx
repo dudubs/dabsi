@@ -1,13 +1,17 @@
 import React from "react";
 import { ComponentClass, createElement, ReactElement } from "react";
-import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
+import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 
 const MuiIconMap: Record<string, string> = {
   submit: "send",
   reset: "clear",
 };
 
-export type MuiIcon = string | { default: ComponentClass } | undefined;
+export type MuiIcon =
+  | string
+  | { default: ComponentClass }
+  | undefined
+  | React.ReactElement;
 
 export function MuiIcon(arg: MuiIcon): ReactElement {
   if (typeof arg === "string")
@@ -16,7 +20,9 @@ export function MuiIcon(arg: MuiIcon): ReactElement {
     ) : (
       <></>
     );
-  if (arg?.default) return createElement(arg.default);
+  if (arg?.["default"]) return createElement(arg["default"]);
+
+  if (React.isValidElement(arg)) return arg;
 
   return EmptyFragment;
 }

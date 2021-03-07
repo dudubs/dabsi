@@ -1,14 +1,5 @@
-import catchError from "@dabsi/common/async/catchError";
-import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import Lazy from "@dabsi/common/patterns/lazy";
-import { ResolveError } from "@dabsi/typedi/ResolveError";
-import {
-  ResolverContext,
-  CustomResolver,
-  IResolver,
-  Resolver,
-  ResolverType,
-} from "@dabsi/typedi/Resolver";
+import { CustomResolver, IResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 const _operator = "forward";
 

@@ -1,11 +1,10 @@
 import {
-  ResolverContext,
   CustomResolver,
   IResolver,
-  ResolveMapType,
+  Resolved,
+  ResolvedMap,
   Resolver,
   ResolverMap,
-  ResolverType,
 } from "@dabsi/typedi/Resolver";
 
 const _operator = "consume";
@@ -18,7 +17,7 @@ declare module "../Resolver" {
   }
 }
 
-type A<U extends (Resolver | undefined)[], N extends number> = ResolverType<
+type A<U extends (Resolver | undefined)[], N extends number> = Resolved<
   NonNullable<U[N]>
 >;
 
@@ -46,7 +45,7 @@ type ArrayDeps<U extends ResolverArray> = [
 
 export type ConsumeFactory<T, U extends ConsumeDeps> = U extends ResolverArray
   ? (...args: ArrayDeps<U>) => T
-  : (context: ResolveMapType<Extract<U, ResolverMap<any>>>) => T;
+  : (context: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
 
 export type Consumer<T> = <U extends ConsumeDeps>(
   deps: U,

@@ -5,10 +5,10 @@ import {
   RichTextRelationTypeKey,
 } from "@dabsi/system/rich-text/common/types";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
-import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
-import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
-import { DataInsert } from "@dabsi/typedata/value";
+import { DataInsertRow } from "@dabsi/typedata/value";
 import { entries } from "@dabsi/common/object/entries";
 
 export class RichTextPacker {
@@ -45,11 +45,13 @@ export class RichTextPacker {
         continue;
       }
     }
-    await this.context.rels.delete(unsuedRelationKeys);
+    if (unsuedRelationKeys.length) {
+      await this.context.rels.delete(unsuedRelationKeys);
+    }
   }
 
   async insertNewRelations(docKey: string) {
-    const rows: DataInsert<RichTextRelation>[] = [];
+    const rows: DataInsertRow<RichTextRelation>[] = [];
     for (const [typeKey, entityKeys] of this.relationTypeKeyMap.entries()) {
       for (const entityKey of entityKeys) {
         rows.push({
@@ -70,13 +72,17 @@ export class RichTextPacker {
     const styleMap = {};
     for (const [type, value] of entries(block.styleMap)) {
       const handler = this.module.getBlockStyleHandler(<any>type);
-      const packedValue = await handler.pack(value, this);
+      const packedValue = handler.pack
+        ? await handler.pack(value, this)
+        : value;
       if (packedValue !== undefined) {
         styleMap[type] = packedValue;
       }
     }
 
-    const data: any = await handler.pack(block.data, this);
+    const data: any = handler.pack
+      ? await handler.pack(block.data, this)
+      : undefined;
 
     for (const [style, offset, length] of block.styleRanges) {
       // TOOD: validate

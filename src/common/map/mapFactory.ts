@@ -39,10 +39,3 @@ export function MapFactory<K, V>(
 ): MapFactory<Map<K, V>> {
   return <any>mapFactory(new Map(), factory);
 }
-
-export function BaseMapFactory<K, V>(
-  map: BaseMap<K, V>,
-  factory: (key: K) => V
-): MapFactory<BaseMap<K, V>> {
-  return <any>mapFactory(map, factory);
-}

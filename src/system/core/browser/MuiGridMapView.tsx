@@ -1,14 +1,13 @@
 // <MuiGridMapView for={props} />}
 
-import { Divider } from "@material-ui/core";
-import Grid, { GridProps } from "@material-ui/core/Grid";
-import React, { ReactElement, ReactNode } from "react";
 import {
   AnySystemMapConnection,
-  AnyWidgetConnectionWithWidgetMap,
   SystemMapView,
   SystemMapViewProps,
 } from "@dabsi/system/core/view/SystemMapView";
+import { Divider } from "@material-ui/core";
+import Grid, { GridProps } from "@material-ui/core/Grid";
+import React, { ReactElement, ReactNode } from "react";
 
 export function MuiGridMapView<C extends AnySystemMapConnection>({
   GridProps,

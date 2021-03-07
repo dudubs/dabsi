@@ -1,7 +1,8 @@
 import withStyles from "@dabsi/browser/mui/withStyles";
 import { uploadImage } from "@dabsi/system/rich-text-plugins/image/browser/upload";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
-import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
+import { MuiEditorButton } from "@dabsi/system/rich-text/browser/editor/mui/button";
+import { RichTextEditor } from "@dabsi/system/rich-text/browser/editor/editor";
 import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from "@material-ui/core/styles";
 import ImageIcon from "@material-ui/icons/Image";
@@ -37,18 +38,16 @@ export function MuiRichTextImageButton({
 }): ReactElement {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const connection = editor.useConnection(RichTextImageRpc);
+  const connection = editor.getConnection(RichTextImageRpc);
 
   return (
     <>
-      <IconButton
-        size="small"
+      <MuiEditorButton
+        icon={<ImageIcon />}
         onClick={() => {
           fileInputRef.current!.click();
         }}
-      >
-        <ImageIcon />
-      </IconButton>
+      />
       <HiddenFileInput
         inputRef={fileInputRef}
         type="file"

@@ -1,3 +1,3 @@
 import "./iterator/toSeq";
-import "./map/set";
-import "./map/operators";
+import "./set/touch";
+import "./map/touch";

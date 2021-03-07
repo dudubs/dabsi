@@ -13,13 +13,13 @@ import { NumberInputLoader } from "@dabsi/typerpc/input/number-input/NumberInput
 export type T = NumberInput;
 
 export class NumberInputHandler extends AbstractInputHandler<T> {
-  getValueFromConfig(
+  getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig ?? this.config.minValue ?? this.config.maxValue ?? 0;
   }
 
-  async getValueElement(
+  async getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     return value ?? this.config.minValue ?? 0;

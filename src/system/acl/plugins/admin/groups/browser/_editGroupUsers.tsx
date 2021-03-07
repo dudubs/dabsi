@@ -1,17 +1,17 @@
 import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
-import { useStore } from "@dabsi/react/useStore";
-import SystemView from "@dabsi/system/core/view/SystemView";
-import { DataTableView } from "@dabsi/typerpc/widget/data-table/DataTableView";
+import { MuiDataTableView } from "@dabsi/browser/mui/widget/MuiDataTableView";
+import { useStore } from "@dabsi/view/react/useStore";
+import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { DataTableView } from "@dabsi/typerpc/widget/data-table/view";
 import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
 import Button from "@material-ui/core/Button";
 import Checkbox from "@material-ui/core/Checkbox";
 import Typography from "@material-ui/core/Typography";
 import React, { useRef } from "react";
-import AclAdminGroupActions from "../common/AclAdminGroupActions";
-import AclAdminGroupUsersTable from "../common/AclAdminGroupUsersTable";
+import { AclAdminGroupActions } from "../common/actionsRpc";
+import { AclAdminGroupUsersTable } from "../common/usersTable";
 
-SystemView(AclAdminGroupUsersTable, props => {
+SystemView.define(AclAdminGroupUsersTable, props => {
   const {
     store,
     state: { changes },

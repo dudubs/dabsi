@@ -1,5 +1,5 @@
 import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { useStore } from "@dabsi/react/useStore";
+import { useStore } from "@dabsi/view/react/useStore";
 import MuiPopoverSlider from "@dabsi/system/acl-user-avatar/browser/MuiPopoverSlider";
 import IconButton from "@material-ui/core/IconButton";
 import CancelIcon from "@material-ui/icons/Cancel";

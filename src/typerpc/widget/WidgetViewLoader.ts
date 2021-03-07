@@ -1,13 +1,11 @@
 import { ReactNode } from "react";
-import { View } from "@dabsi/react/view/View";
-import { ViewState } from "@dabsi/react/view/ViewState";
+import { View } from "@dabsi/view/react/component/View";
+import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import {
   AnyWidgetConnection,
   WidgetElement,
 } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
-
-// TODO: Make service for WidgetViewLoader
 
 export class WidgetViewLoader<C extends AnyWidgetConnection> extends View<
   {

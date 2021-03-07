@@ -1,11 +1,13 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { defined } from "@dabsi/common/object/defined";
+import { touchObject } from "@dabsi/common/object/touchObject";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import {
   getEntityMetadata,
   getRelationMetadatasTo,
-} from "@dabsi/typedata/entity/metadata";
+} from "@dabsi/typedata/entity/typeormMetadata";
 import { DataExp, DataParameterExp } from "@dabsi/typedata/exp/exp";
 import { DataExpMapper } from "@dabsi/typedata/exp/mapper";
 import { DataOperatorExp } from "@dabsi/typedata/exp/operator";
@@ -90,7 +92,7 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
       false
     );
     if (!relation.isToOne)
-      throw new Error(`$at support in relation to-one only.`);
+      throw new Error(`$at support in relation *-to-one only.`);
     const rightSchema = relation.join("LEFT", this.qb, this.schema, null);
     return {
       $at: {
@@ -180,7 +182,7 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
 
   translateCount(relationName: string, whereExp: DataExp<any>): DataQueryExp {
     return {
-      $queryCount: this.translateRelation(relationName, whereExp).query,
+      $countQuery: this.translateRelation(relationName, whereExp).query,
     };
   }
 
@@ -228,7 +230,7 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
 
     // TODO: if is *-to-one & owner so check by column
     return {
-      [inverse ? "$queryNotHas" : "$queryHas"]: this.translateRelation(
+      [inverse ? "$notHasQuery" : "$queryHas"]: this.translateRelation(
         propertyName,
         condition
       ).query,
@@ -280,18 +282,14 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
       this.qb.joins.metaFields = {
         type: "INNER",
         from: this.qb.query.from,
-        fields: mapArrayToObject(this.entityMetadata.primaryColumns, jc => {
-          return [jc.databaseName, { $at: { metaFields: jc.databaseName } }];
-        }),
-        condition: {
-          $and: this.entityMetadata.primaryColumns.map(jc => {
-            return [
-              { $at: { metaFields: jc.databaseName } },
-              "=",
-              { $at: { [this.schema]: jc.databaseName } },
-            ];
-          }),
+        fields: {
+          ROWID: { $at: { metaFields: "ROWID" } },
         },
+        condition: [
+          { $at: { metaFields: "ROWID" } },
+          "=",
+          { $at: { [this.schema]: "ROWID" } },
+        ],
       };
     }
     return this.qb.joins.metaFields.fields!;
@@ -311,7 +309,7 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
             ? [rm.joinTableName, rm.inverseJoinColumns]
             : [rm.entityMetadata.tableName, rm.joinColumns];
           return {
-            $queryCount: {
+            $countQuery: {
               from: tableName,
               alias: "rel",
               where: {
@@ -336,6 +334,27 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
     }
     return { $at: { metaFields: "countRefs" } };
   }
+
+  touchMetaField(
+    id: string,
+    callback: (id: string) => DataQueryExp
+  ): DataQueryExp {
+    if (!(id in this.metaFields)) {
+      this.metaFields[id] = callback(id);
+    }
+    return { $at: { metaFields: id } };
+  }
+
+  // @Lazy() get schameQuery(): Omit<DataQuery, "alias"> {
+  //   if (this.qb.query.alias === this.schema) {
+  //     return this.qb.query;
+  //   }
+  //   const join = this.qb.joins[this.schema];
+  //   if (join) {
+  //     return join;
+  //   }
+  //   throw new Error("No table for schema");
+  // }
 
   @UseDataExpMapper
   translateBase(exp: DataExp<any>): DataQueryExp {

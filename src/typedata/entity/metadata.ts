@@ -1,50 +1,51 @@
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { touchMap } from "@dabsi/common/map/touchMap";
-import { defined } from "@dabsi/common/object/defined";
-import { Connection, EntityMetadata } from "typeorm";
+import { DataEntityRelation } from "@dabsi/typeorm/relations";
+import { EntityMetadata } from "typeorm";
+import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
-export const getEntityMetadataMaps = WeakMapFactory(
-  (entityMetadatas: EntityMetadata[]) => {
-    const entityMetadataMap = new Map<Function, EntityMetadata>();
-    const relationMetadataMap = new Map<Function, RelationMetadata[]>();
+export type DataEntityMetadata = ReturnType<typeof getDataEntityMetadata>;
 
-    for (const entityMetadata of entityMetadatas) {
-      if (typeof entityMetadata.target !== "function") continue;
-      entityMetadataMap.set(entityMetadata.target, entityMetadata);
-      for (const relationMetadata of entityMetadata.relations) {
-        if (typeof relationMetadata.type !== "function") continue;
-        if (!relationMetadata.isOwning) continue;
+export const getDataEntityMetadata = WeakMapFactory(
+  (metadata: EntityMetadata) => {
+    const propertyRelationMetadataMap: Record<string, RelationMetadata> = {};
+    const propertyColumnMetadataMap: Record<string, ColumnMetadata> = {};
+    const notRelationColumnKeys: string[] = [];
+    const propertyRelationMap: Record<string, DataEntityRelation> = {};
 
-        touchMap(relationMetadataMap, relationMetadata.type, () => []).push(
-          relationMetadata
-        );
+    for (const column of metadata.columns) {
+      propertyColumnMetadataMap[column.propertyName] = column;
+      if (!column.relationMetadata) {
+        if (
+          column.target === metadata.target ||
+          (<Function>metadata.target).prototype instanceof
+            <Function>column.target
+        ) {
+          notRelationColumnKeys.push(column.propertyName);
+        }
       }
     }
 
-    return { entityMetadataMap, relationMetadataMap };
+    for (let relation of metadata.relations) {
+      propertyRelationMetadataMap[relation.propertyName] = relation;
+      propertyRelationMap[relation.propertyName] = new DataEntityRelation(
+        metadata.connection,
+        <Function>metadata.target,
+        relation.propertyName,
+        false
+      );
+    }
+
+    return {
+      propertyColumnMetadataMap,
+      notRelationColumnKeys,
+      propertyRelationMap,
+      propertyRelationMetadataMap,
+      primaryPropertyNameToIndex: mapArrayToObject(
+        metadata.primaryColumns,
+        (column, index) => [column.propertyName, index]
+      ),
+    };
   }
 );
-
-export function getEntityMetadata(
-  connection: Connection,
-  entityType: Function
-): EntityMetadata {
-  return defined(
-    getEntityMetadataMaps(connection.entityMetadatas).entityMetadataMap.get(
-      entityType
-    ),
-    () => `No entity metadata for ${entityType.name}`
-  );
-}
-
-export function getRelationMetadatasTo(
-  connection: Connection,
-  entityType: Function
-): RelationMetadata[] {
-  return (
-    getEntityMetadataMaps(connection.entityMetadatas).relationMetadataMap.get(
-      entityType
-    ) || []
-  );
-}

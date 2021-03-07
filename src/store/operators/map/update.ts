@@ -51,7 +51,7 @@ function method(this: Store<any>, ...args) {
     if (prevState !== nextState) {
       state = adapt("clone", state);
       if (nextState === deleteSymbol) {
-        return adapt("deleteKeys", state, [key]);
+        return adapt("handleDelete", state, [key]);
       }
       state = adapt("setKey", state, key, nextState);
     }

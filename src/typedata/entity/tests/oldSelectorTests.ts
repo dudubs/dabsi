@@ -3,12 +3,13 @@ import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Type } from "@dabsi/common/typings2/Type";
-import { subTest } from "@dabsi/jasmine/subTest";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { buildTestRelations } from "@dabsi/typedata/entity/tests/buildTestRelations";
-import getTestConnection from "@dabsi/typedata/entity/tests/tester";
+import getTestConnection, {
+  logTestQueries,
+} from "@dabsi/typedata/entity/tests/tester";
 import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataSelector } from "@dabsi/typedata/selector";
@@ -334,44 +335,42 @@ function expectToRow(row, expectors) {
   if (!hasKeys(expectors)) throw new Error(`expector can't be empty.`);
 
   for (const [key, expector] of entries(expectors)) {
-    subTest(`At key "${key}", `, () => {
-      if (!expector) {
-        if (row[key] != null) fail(`Expect to be null or undefined`);
+    if (!expector) {
+      if (row[key] != null) fail(`Expect to be null or undefined`);
+      return;
+    }
+
+    const value = row[key];
+
+    expect(value).toBeDefined();
+
+    if (/(Text|Id)/.test(key)) {
+      expect(value).toBeInstanceOf(String);
+      return;
+    }
+
+    if (/ToOne/.test(key)) {
+      if (expector && typeof expector === "object") {
+        expectToRow(value, expector);
+      }
+      return;
+    }
+
+    if (/ToMany/.test(key)) {
+      expect(value).toBeInstanceOf(Array);
+      if (!value.length) {
+        fail(`Expected less one item.`);
         return;
       }
-
-      const value = row[key];
-
-      expect(value).toBeDefined();
-
-      if (/(Text|Id)/.test(key)) {
-        expect(value).toBeInstanceOf(String);
-        return;
-      }
-
-      if (/ToOne/.test(key)) {
-        if (expector && typeof expector === "object") {
+      if (expector && typeof expector === "object") {
+        value.forEach(value => {
           expectToRow(value, expector);
-        }
-        return;
+        });
       }
+      return;
+    }
 
-      if (/ToMany/.test(key)) {
-        expect(value).toBeInstanceOf(Array);
-        if (!value.length) {
-          fail(`Expected less one item.`);
-          return;
-        }
-        if (expector && typeof expector === "object") {
-          value.forEach(value => {
-            expectToRow(value, expector);
-          });
-        }
-        return;
-      }
-
-      console.log(`Can't assert ${key}`);
-    });
+    console.log(`Can't assert ${key}`);
   }
 }
 
@@ -404,7 +403,7 @@ describe("DataSelector", () => {
     ).toBeTruthy();
   });
 
-  it("expect to load relation", async () => {
+  it("expect to load relation because type selection", async () => {
     expect((await ASelectorSource.get(key))?.oneAToOneB).toBeTruthy();
   });
 });

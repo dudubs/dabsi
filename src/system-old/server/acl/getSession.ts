@@ -1,8 +1,8 @@
+import { Session } from "@dabsi/modules/session/entities/Session";
+import { generateSessionToken } from "@dabsi/system-old/server/acl/generateSessionToken";
 import { BasedType } from "@dabsi/typedata/BaseType";
 import { DataRow } from "@dabsi/typedata/row";
-import { BasedDataSource, DataSource } from "@dabsi/typedata/source";
-import { generateSessionToken } from "@dabsi/system-old/server/acl/generateSessionToken";
-import { Session } from "@dabsi/modules/session/entities/Session";
+import { DataSource } from "@dabsi/typedata/source";
 
 export async function getSession<T extends BasedType<Session>>({
   cookie,
@@ -19,7 +19,7 @@ export async function getSession<T extends BasedType<Session>>({
     [sessionKey, sessionToken] = cookie && JSON.parse(cookie);
   } catch (error) {}
 
-  const source: BasedDataSource<Session> = <any>_source;
+  const source: DataSource.Based<Session> = <any>_source;
 
   let session =
     typeof sessionToken === "string" &&

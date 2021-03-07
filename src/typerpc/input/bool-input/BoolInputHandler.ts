@@ -14,13 +14,13 @@ import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
 type T = BoolInput;
 
 export class BoolInputHandler extends AbstractInputHandler<T> {
-  getValueFromConfig(
+  getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig || false;
   }
 
-  async getValueElement(
+  async getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     return Boolean(value);

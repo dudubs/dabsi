@@ -18,7 +18,7 @@ export function _delete(this: Store<any>, ...keys) {
     keys = keys.filter(key => adapt("hasKey", state, key));
     if (keys.length) {
       state = adapt("clone", state);
-      state = adapt("deleteKeys", state, keys);
+      state = adapt("handleDelete", state, keys);
     }
     return state;
   });

@@ -1,27 +1,10 @@
-import { MuiDataInputMapView } from "@dabsi/browser/mui/rpc/inputs/MuiDataInputMapView";
-import { MuiDataTableView } from "@dabsi/browser/mui/rpc/MuiDataTableView";
-import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
-import { MuiFormView } from "@dabsi/browser/mui/rpc/MuiFormView";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
-import AclAdminViewWrappers from "@dabsi/system/acl/plugins/admin/browser/AclAdminViewOptions";
-import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
+import { MuiDataTableView } from "@dabsi/browser/mui/widget/MuiDataTableView";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import AclAdminUserBasicInfoInput from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserBasicInfoInput";
-import AclAdminUserGroupsForm from "@dabsi/system/acl/plugins/admin/users/common/AclAdminUserGroupsForm";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
-import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
-import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
-import SystemView from "@dabsi/system/core/view/SystemView";
-import { useSystemView } from "@dabsi/system/core/view/useSystemView";
-import { useSystemViewTheme } from "@dabsi/system/core/view/useSystemViewTheme";
-import { Form } from "@dabsi/typerpc/widget/form/Form";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
-import Button from "@material-ui/core/Button";
-import AddIcon from "@material-ui/icons/Add";
-import React, { useState } from "react";
+import React from "react";
 
-WidgetRouterView(
+WidgetRouterView.define(
   AclAdminRouter.at("users"),
   AclAdminConnection.usersManager.table,
   (props, { location }) => {
@@ -33,19 +16,15 @@ WidgetRouterView(
           console.log({ event });
           location.parent.at("editUser", { userId: event.row.$key }).push();
         }}
-        MuiTableToolbarProps={{
-          staticActions: (
-            <>
-              <Button
-                endIcon={<AddIcon />}
-                onClick={() => {
-                  location.parent.at("createNewUser").push();
-                }}
-              >{lang`CREATE_NEW_USER`}</Button>
-            </>
-          ),
+        addAction={{
+          title: lang`ADD_NEW_USER`,
+          onClick: () => {
+            location.parent.at("createNewUser").push();
+          },
         }}
       />
     );
   }
 );
+
+//

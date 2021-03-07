@@ -8,6 +8,7 @@ import {
   DataExpTypes,
   DataParameterExp,
 } from "@dabsi/typedata/exp/exp";
+import { defined } from "@dabsi/common/object/defined";
 
 type T = any;
 type O = DataExpTypes<T>;
@@ -123,7 +124,10 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
         case "$notIn":
           return this._translateIn(true, left, <DataExp<T>[]>right);
       }
-      const [inverse, base] = DataOperatorExp.map[op];
+
+      const [inverse, base] = defined(DataOperatorExp.map[op], () => {
+        return `Invalid operator like "${op}".`;
+      });
 
       return this._translateCompare(
         <any>base,
@@ -149,7 +153,7 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
             value.map(value => [value])
           );
       }
-      return this.translate([left, op, { $parameter: value }]);
+      return this.translate([left, op, { $param: value }]);
     }
     throw new TypeError(`Invalid JSONArrayExp ${exp}`);
   }
@@ -224,13 +228,13 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
               );
           }
 
-          return this.translate([key, op, { $parameter: value }]);
+          return this.translate([key, op, { $param: value }]);
         }
       case "boolean":
       case "string":
       case "number":
         return this._translateCompare("$equals", false, key, {
-          $parameter: compareExp,
+          $param: compareExp,
         });
     }
     throw new TypeError(
@@ -276,7 +280,7 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
   }
 
   $at(exp: DataExpTypes<any>["$at"]): U {
-    const [key, subExp] = firstDefinedEntry(exp);
+    const [key, subExp] = Array.isArray(exp) ? exp : firstDefinedEntry(exp);
     return this.translateAt(<any>key, subExp);
   }
 
@@ -347,19 +351,19 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
       $and: words.map(word => [
         searchInExp,
         inverse ? "$notContains" : "$contains",
-        { $parameter: word },
+        { $param: word },
       ]),
     });
   }
 
-  $parameter(exp: O["$parameter"]): U {
+  $param(exp: O["$param"]): U {
     return this.translateParameter(exp);
   }
 
   $join<K>([exps, sep]: O["$join"]): U {
     const $concat: DataExp<T>[] = [];
     for (const [index, exp] of exps.entries()) {
-      if (index) $concat.push({ $parameter: sep });
+      if (index) $concat.push({ $param: sep });
       $concat.push(exp);
     }
     return this.translate({ $concat });

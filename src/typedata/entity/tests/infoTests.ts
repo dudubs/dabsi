@@ -1,5 +1,5 @@
-import { getDataEntityInfo } from "@dabsi/typedata/entity/info";
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getDataEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 import getTestConnection from "@dabsi/typedata/entity/tests/tester";
 import {
   DChild1,
@@ -8,20 +8,18 @@ import {
   DEntity,
 } from "@dabsi/typedata/tests/BaseEntities";
 
-import objectContaining = jasmine.objectContaining;
-
-describe("DataEntityInfo", () => {
+describe("DataEntityMetadata", () => {
   it("notRelationColumnKeys", () => {
-    const aBaseInfo = getDataEntityInfo(
+    const aBaseInfo = getDataEntityMetadata(
       getEntityMetadata(getTestConnection(), DEntity)
     );
-    const dChild1Info = getDataEntityInfo(
+    const dChild1Info = getDataEntityMetadata(
       getEntityMetadata(getTestConnection(), DChild1)
     );
-    const dChild1Child1Info = getDataEntityInfo(
+    const dChild1Child1Info = getDataEntityMetadata(
       getEntityMetadata(getTestConnection(), DChild1Child1)
     );
-    const dChild2Info = getDataEntityInfo(
+    const dChild2Info = getDataEntityMetadata(
       getEntityMetadata(getTestConnection(), DChild2)
     );
 

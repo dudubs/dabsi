@@ -1,7 +1,7 @@
-import { touchSet } from "@dabsi/common/map/touchSet";
+import { touchSet } from "@dabsi/common/set/touchSet";
 import { DABSI_CURRENT_DIR, DABSI_SRC_DIR } from "@dabsi/env";
 import globalTester from "@dabsi/jasmine/globalTester";
-import "@dabsi/jasmine/register";
+import "./specFilter";
 import { LogLevel } from "@dabsi/logging/Logger";
 import { readdirSync, statSync } from "fs";
 import "jasmine";

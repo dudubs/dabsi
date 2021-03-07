@@ -1,6 +1,6 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
-import { AclRpc } from "@dabsi/system/acl/common/AclRpc";
+import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { AclContext } from "@dabsi/system/acl/context";
 import { User } from "@dabsi/system/acl/entities/User";
 import { DataRow } from "@dabsi/typedata/row";

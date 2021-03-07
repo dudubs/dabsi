@@ -78,8 +78,12 @@ export type Input<T extends TInput> = Widget<{
 
   Handler: {
     getInputElement(): Promise<T["Element"]>;
-    getValueFromConfig(valueConfig: T["ValueConfig"]): Awaitable<T["Value"]>;
-    getValueElement(value: T["Value"] | undefined): Promise<T["ValueElement"]>;
+    getInputValueFromConfig(
+      valueConfig: T["ValueConfig"]
+    ): Awaitable<T["Value"]>;
+    getInputValueElement(
+      value: T["Value"] | undefined
+    ): Promise<T["ValueElement"]>;
     loadAndCheck(
       valueData: T["ValueData"]
     ): Promise<InputErrorOrValue<Input<T>>>;

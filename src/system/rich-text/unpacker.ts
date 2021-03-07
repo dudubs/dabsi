@@ -1,7 +1,7 @@
 import mapArrayAsync from "@dabsi/common/array/mapArrayAsync";
 import { mapObjectAsync } from "@dabsi/common/object/mapObject";
 import { pick } from "@dabsi/common/object/pick";
-import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import {
   RichTextConfig,
   RichTextRelationType,
@@ -9,7 +9,7 @@ import {
 } from "@dabsi/system/rich-text/common/types";
 import { DataRow } from "@dabsi/typedata/row";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
-import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
 
 export class RichTextUnpacker {
   context = this.config.context;
@@ -18,14 +18,14 @@ export class RichTextUnpacker {
   constructor(
     public config: RichTextConfig,
     public forReadonly,
-    protected relationTypeEntityMap: Map<string, Map<string, any>>
+    protected relationTypeMap: Map<string, Map<string, any>>
   ) {}
 
   unpackRelation<K extends RichTextRelationTypeKey>(
     typeKey: K,
     entityKey: string
   ): DataRow<RichTextRelationType<K>> | undefined {
-    return this.relationTypeEntityMap.get(typeKey)?.get(entityKey);
+    return this.relationTypeMap.get(typeKey)?.get(entityKey);
   }
 
   async unpackBlack(

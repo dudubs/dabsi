@@ -14,7 +14,7 @@ import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import ProjectInfo from "@dabsi/typestack/ProjectInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
 import path from "path";
-import { touchSet } from "../common/map/touchSet";
+import { touchSet } from "../common/set/touchSet";
 
 @Module({
   dependencies: [],

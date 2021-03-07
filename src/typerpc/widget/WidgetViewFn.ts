@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Renderer } from "@dabsi/react/renderer";
+import { Renderer } from "@dabsi/view/react/renderer";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";

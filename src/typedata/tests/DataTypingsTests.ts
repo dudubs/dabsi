@@ -22,7 +22,7 @@ import {
   DataRelationKeys,
   DataRelationTypeAt,
 } from "@dabsi/typedata/relation";
-import { DataInsert } from "@dabsi/typedata/value";
+import { DataInsertRow } from "@dabsi/typedata/value";
 import {
   DEntity,
   DChild1,
@@ -1072,7 +1072,7 @@ pass(() => {
       });
 
       const x = new DUnion().$unionChildren.dChild1.$baseType;
-      const a: DataInsert<typeof x> = {
+      const a: DataInsertRow<typeof x> = {
         dId: "",
         dChild1Text: "",
       };

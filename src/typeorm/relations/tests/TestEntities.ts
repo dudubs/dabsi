@@ -50,23 +50,26 @@ export class AEntity {
   @TestRelation(() => CEntity)
   manyAToManyCOwner!: DataRelation<CEntity>[];
 
+  // one-to-many/many-to-one tree
+  @TestRelation(() => AEntity)
+  oneAToManyA!: DataRelation<AEntity>[];
+
+  @TestRelation(() => AEntity)
+  manyAToOneA?: DataRelation<AEntity>;
+
+  // many-to-many tree
   @TestRelation(() => AEntity)
   manyAToManyAOwner!: DataRelation<AEntity>[];
 
   @TestRelation(() => AEntity)
   manyAToManyA!: DataRelation<AEntity>[];
 
+  // one-to-one tree
   @TestRelation(() => AEntity)
   oneAToOneA?: DataRelation<AEntity>;
 
   @TestRelation(() => AEntity)
   oneAToOneAOwner?: DataRelation<AEntity>;
-
-  @TestRelation(() => AEntity)
-  oneAToManyA!: DataRelation<AEntity>[];
-
-  @TestRelation(() => AEntity)
-  manyAToOneA?: DataRelation<AEntity>[];
 }
 
 @Entity("B")

@@ -38,7 +38,7 @@ export function testInput<T extends AnyInput>(
   let valueElement;
 
   beforeAll(async () => {
-    valueElement = await t.handler.getValueElement(undefined);
+    valueElement = await t.handler.getInputValueElement(undefined);
   });
 
   async function testData(data, result) {

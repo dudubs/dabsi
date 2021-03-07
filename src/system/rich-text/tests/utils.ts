@@ -1,5 +1,5 @@
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
-import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
 
 export function makeContentWithEntity(
   entity: RichTextEntity.Unpacked

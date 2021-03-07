@@ -1,9 +1,8 @@
-import { Cli } from "@dabsi/modules/Cli";
-import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
+import { Module, ResolverMap } from "@dabsi/typedi";
 import RequestModule from "../../modules/RequestModule";
 import RpcModule from "../../modules/rpc";
 import SessionModule from "../../modules/session";
-import { SystemRpc } from "./common/SystemRpc";
+import { SystemRpc } from "./common/rpc";
 
 @Module({
   dependencies: [SessionModule],
@@ -16,7 +15,7 @@ export default class SystemModule {
     protected rpcModule: RpcModule
   ) {}
 
-  async check(context: ResolverContext) {
+  async check(context: ResolverMap) {
     this.log.trace(`Checking..`);
     this.rpcModule.check(SystemRpc, context);
   }

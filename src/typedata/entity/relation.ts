@@ -2,7 +2,7 @@ import { assert } from "@dabsi/common/assert";
 import { defined } from "@dabsi/common/object/defined";
 import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 import {
   ByTableOrColumn,
   DataEntityRelationSide,
@@ -82,14 +82,16 @@ export class DataEntityRelation {
       : `${leftSchema}_${this.propertyName}`;
   }
 
+  protected _query(sql, params) {
+    return this.connection.query(sql, params);
+  }
   join(
     joinType: JoinType,
     qeb: DataQueryBuilder,
     leftSchema: string,
-    rightKey: object | null
+    rightKey: object | null,
+    rightSchema = this.getRightSchema(leftSchema)
   ): string {
-    const rightSchema = this.getRightSchema(leftSchema);
-
     if (qeb.joins[rightSchema]) return rightSchema;
 
     const rightCondition = rightKey
@@ -192,7 +194,7 @@ export class DataEntityRelation {
       )
       .join(" AND ")};`;
 
-    await this.connection.query(sql, params);
+    await this._query(sql, params);
   }
 
   protected async _add(leftKey: object, rightKey: object) {

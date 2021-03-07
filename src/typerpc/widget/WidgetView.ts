@@ -1,5 +1,5 @@
-import { View } from "@dabsi/react/view/View";
-import { ViewState } from "@dabsi/react/view/ViewState";
+import { View } from "@dabsi/view/react/component/View";
+import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import {
   AnyWidget,

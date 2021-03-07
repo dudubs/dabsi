@@ -3,17 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@dabsi/*": [
-        "../src/*"
-      ]
+      "@dabsi/*": ["../src/*"]
     }
   },
-  "include": [
-    "../src",
-    "../src"
-  ],
-  "exclude": [
-    "../src/**/view",
-    "../src/**/browser"
-  ]
+  "include": ["../src"],
+  "exclude": ["../src/**/view", "../src/**/browser"]
 }

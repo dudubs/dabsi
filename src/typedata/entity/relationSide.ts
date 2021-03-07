@@ -4,7 +4,7 @@ import { DataEntityRelation } from "@dabsi/typedata/entity/relation";
 import { ObjectType, Repository, SelectQueryBuilder } from "typeorm";
 import { ColumnMetadata } from "typeorm/metadata/ColumnMetadata";
 import { DataExp } from "@dabsi/typedata/exp/exp";
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 
 export type ByTableOrColumn = "table" | "column";
 

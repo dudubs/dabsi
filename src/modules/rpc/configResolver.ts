@@ -1,5 +1,5 @@
 import { inspect } from "@dabsi/logging/inspect";
-import { ResolveMapType, ResolverMap } from "@dabsi/typedi";
+import { ResolvedMap, ResolverMap } from "@dabsi/typedi";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
 import { RpcConfig } from "@dabsi/typerpc/Rpc";
 import { Resolver } from "../../typedi";
@@ -24,7 +24,7 @@ export function isRpcConfigResolver(obj): obj is RpcConfigResolver<AnyRpc> {
 export function RpcConfigResolver<T extends AnyRpc, U extends ResolverMap<any>>(
   rpc: T,
   resolvers: U,
-  callback: (context: ResolveMapType<U>) => RpcUnresolvedConfig<T>
+  callback: (context: ResolvedMap<U>) => RpcUnresolvedConfig<T>
 ): RpcConfigResolver<T> {
   // TOOD: save stack info
 

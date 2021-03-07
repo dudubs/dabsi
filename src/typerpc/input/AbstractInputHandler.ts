@@ -29,11 +29,11 @@ export abstract class AbstractInputHandler<T extends AnyInput>
     }
   };
 
-  abstract getValueFromConfig(
+  abstract getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>>;
 
-  abstract getValueElement(
+  abstract getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>>;
 
@@ -44,7 +44,7 @@ export abstract class AbstractInputHandler<T extends AnyInput>
   ): Promise<WidgetElement<T>> {
     return {
       ...(await this.getInputElement()),
-      value: await this.getValueElement(undefined),
+      value: await this.getInputValueElement(undefined),
     } as RequireOptionalKeys<WidgetElement<T>>;
   }
 }

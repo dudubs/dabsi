@@ -30,7 +30,7 @@ export class DataInputHandler
     return Promise.resolve({});
   }
 
-  async getValueFromConfig(
+  async getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Promise<InputValue<T>> {
     valueConfig = await ValueOrAwaitableFn(valueConfig);
@@ -52,7 +52,7 @@ export class DataInputHandler
     return this.config.valueSource || this.config.source;
   }
 
-  async getValueElement(
+  async getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     if (!value) return undefined;

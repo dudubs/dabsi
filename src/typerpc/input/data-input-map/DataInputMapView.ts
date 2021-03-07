@@ -1,6 +1,6 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { Renderer } from "@dabsi/react/renderer";
+import { Renderer } from "@dabsi/view/react/renderer";
 import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
 import {
   AbstractInputView,

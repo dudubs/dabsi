@@ -1,3 +1,4 @@
+// TODO: Do Set.prototype.addAll|removeAll
 export default function addAll<T>(
   into: { add(value: T) },
   ...iterables: Iterable<T>[]

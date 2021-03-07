@@ -27,6 +27,8 @@ import {
 import { AclTokenTree } from "@dabsi/system-old/server/acl/AclTokenTree";
 import { Permission } from "@dabsi/system-old/server/acl/Permission";
 import { User } from "@dabsi/system/acl/entities/User";
+import { DataQuery } from "@dabsi/typedata/query/exp";
+import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
 
 export class AclQuery {
   constructor(protected connection: Connection) {}
@@ -214,19 +216,20 @@ export class AclQuery {
       entityType
     );
 
-    const qb = DataEntityCursor.createQueryBuilder(entityCursor);
-    qb.query.take = 1;
+    const query = DataEntityCursor.buildQuery(entityCursor);
+    const qb = new DataQueryBuilder(query);
+    query.take = 1;
 
     const translatorToQueryExp = new DataEntityTranslator(
       this.connection,
       DataTypeInfo.get(User),
       qb,
-      qb.query.alias
+      query.alias
     );
 
     const translatorToSql = new DataQueryTranslatorToSql(
       this.connection,
-      qb.query.alias,
+      query.alias,
       this.parameters
     );
 
@@ -238,7 +241,7 @@ export class AclQuery {
         return `(SELECT COUNT(*) ${this.getQueryWithoutFields()})`;
       },
       getQueryWithFields(fieldMap: Record<string, DataExp<any>>) {
-        qb.query.fields = mapObject(fieldMap, exp =>
+        query.fields = mapObject(fieldMap, exp =>
           translatorToQueryExp.translate(exp)
         );
         return translatorToSql.translateQuery(qb.query);

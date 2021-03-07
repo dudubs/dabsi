@@ -3,7 +3,7 @@ import { Session } from "@dabsi/modules/session/entities/Session";
 import {
   getEntityMetadata,
   getRelationMetadatasTo,
-} from "@dabsi/typedata/entity/metadata";
+} from "@dabsi/typedata/entity/typeormMetadata";
 import { Injectable } from "@dabsi/typedi";
 import { Connection, EntityMetadata } from "typeorm";
 

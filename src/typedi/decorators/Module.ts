@@ -6,7 +6,7 @@ import { Resolver } from "@dabsi/typedi/index";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { Consumer } from "@dabsi/typedi/operators/consume";
 
-import { ResolverContext, ResolverType } from "@dabsi/typedi/Resolver";
+import { ResolverMap, Resolved } from "@dabsi/typedi/Resolver";
 
 let lastModule: Function | null = null;
 
@@ -14,9 +14,9 @@ export type ModuleTarget = Constructor<any>;
 
 export const getLastModule = () => lastModule;
 
-export type ModuleProvider = Resolver<ResolverContext>;
+export type ModuleProvider = Resolver<ResolverMap>;
 
-export const ModuleProvider: Consumer<ResolverType<ModuleProvider>> =
+export const ModuleProvider: Consumer<Resolved<ModuleProvider>> =
   Resolver.consume;
 
 export type ModuleMetadata = { callStackInfo: CallStackInfo } & ModuleOptions;

@@ -1,7 +1,12 @@
 import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
 import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { AnyRpcHandler, IRpcHandler } from "@dabsi/typerpc/Rpc";
+import {
+  AnyRpc,
+  AnyRpcHandler,
+  IRpcHandler,
+  RpcUnresolvedConfig,
+} from "@dabsi/typerpc/Rpc";
 import {
   AnyRpcParameter,
   RpcParameter,
@@ -16,9 +21,13 @@ export class RpcParameterHandler
 
   async route(data) {
     const value = await this.rpc.parameterDataType(data);
-    const config = await ConfigFactory(this.config, value);
+
+    const config: RpcUnresolvedConfig<AnyRpc> = await ConfigFactory(
+      this.config,
+      [value]
+    );
     return this.rpc.children.target.resolveRpcHandler(
-      await config,
+      config,
       this as AnyRpcHandler
     );
   }

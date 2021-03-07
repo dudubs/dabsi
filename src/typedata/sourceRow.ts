@@ -1,9 +1,9 @@
-import { GetBaseType, WithBaseType } from "./BaseType";
 import { WithDataKey } from "@dabsi/typedata/key";
-import { DataRow } from "@dabsi/typedata/row";
-import { DataSource, DataSourceAt } from "@dabsi/typedata/source";
-import { DataUpdate } from "@dabsi/typedata/value";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
+import { DataRow } from "@dabsi/typedata/row";
+import { DataSource } from "@dabsi/typedata/source";
+import { DataUpdateRow } from "@dabsi/typedata/value";
+import { RebaseType, WithBaseType } from "./BaseType";
 
 export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
 
@@ -19,16 +19,16 @@ export class DataSourceRow {
   getSource<T extends AnyBasedDataRow>(
     this: T,
     filterThis: boolean = false
-  ): DataSource<GetBaseType<T>> {
+  ): DataSource<RebaseType<T>> {
     if (filterThis) return this[source].filter({ $is: this.$key });
     return this[source];
   }
 
-  at<T extends AnyBasedDataRow, K extends DataRelationKeys<GetBaseType<T>>>(
+  at<T extends AnyBasedDataRow, K extends DataRelationKeys<T>>(
     this: T,
     propertyName: K
-  ): DataSourceAt<GetBaseType<T>, K> {
-    return this.getSource().at(propertyName, this.$key);
+  ): DataSource.At<T, K> {
+    return <any>this.getSource().at(propertyName, this.$key);
   }
 
   delete<T extends AnyBasedDataRow>(this: T) {
@@ -41,12 +41,12 @@ export class DataSourceRow {
 
   update<T extends AnyBasedDataRow>(
     this: T,
-    value: DataUpdate<GetBaseType<T>>
+    value: DataUpdateRow<RebaseType<T>>
   ) {
     return this.getSource().update(this.$key, value);
   }
 
-  reload<T extends AnyBasedDataRow>(this: T): Promise<DataRow<GetBaseType<T>>> {
+  reload<T extends AnyBasedDataRow>(this: T): Promise<DataRow<RebaseType<T>>> {
     return this.getSource().getOrFail(this.$key);
   }
 }

@@ -1,10 +1,14 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
 
-export type ResolverMap<T> = Record<string, Resolver<T>>;
+export type ResolverMap<T = any> = Record<string, Resolver<T>>;
 
-export type ResolveMapType<T extends ResolverMap<any>> = {
-  [K in keyof T]: ResolverType<T[K]>;
+export type ObjectResolver<T extends object> = {
+  [K in keyof T]: Resolver<T[K]>;
+};
+
+export type ResolvedMap<T extends ResolverMap<any>> = {
+  [K in keyof T]: Resolved<T[K]>;
 };
 
 export const checkSymbol = Symbol("checkResolve");
@@ -25,7 +29,7 @@ export type Resolver<T = any> =
   | FnResolver<T>
   | TypeResolver<T>;
 
-export type ResolverType<T extends Resolver> = T extends Resolver<infer U>
+export type Resolved<T extends Resolver> = T extends Resolver<infer U>
   ? U
   : never;
 
@@ -43,5 +47,3 @@ export const IResolver: IResolver = <any>{
 };
 
 export const Resolver: IResolver = IResolver;
-
-export type ResolverContext<T = any> = Record<string, Resolver<T>>;

@@ -1,5 +1,5 @@
 import { keys } from "@dabsi/common/object/keys";
-import { Renderer } from "@dabsi/react/renderer";
+import { Renderer } from "@dabsi/view/react/renderer";
 import { AnyInput, AnyInputConnection } from "@dabsi/typerpc/input/Input";
 import { AnyInputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import {
@@ -9,7 +9,7 @@ import {
 import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
-import { MapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+import { MapView } from "@dabsi/typerpc/widget/widget-map/view";
 import React from "react";
 
 export type AnyInputMapConnection = RpcConnection<AnyInputMap>;

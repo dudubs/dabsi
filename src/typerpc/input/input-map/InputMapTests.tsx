@@ -3,7 +3,7 @@ import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { focusNextTest } from "@dabsi/jasmine/focusNextTest";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
 import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
 import { testInput } from "@dabsi/typerpc/input/InputTester";
 import { TestInputView } from "@dabsi/typerpc/input/InputTests";

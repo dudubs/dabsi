@@ -1,6 +1,6 @@
 import { Tester } from "@dabsi/jasmine/Tester";
 import CliModule from "@dabsi/modules/CliModule";
-import { Resolver, ResolverContext } from "@dabsi/typedi";
+import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 
 export default function ModuleTester() {
@@ -11,7 +11,7 @@ export default function ModuleTester() {
     return {
       moduleRunner,
       context: moduleRunner.context,
-      provide(...args: ResolverContext[]) {
+      provide(...args: ResolverMap[]) {
         Object.assign(moduleRunner.context, ...args);
       },
       resolve<T>(resolver: Resolver<T>): T {

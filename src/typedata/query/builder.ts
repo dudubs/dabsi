@@ -5,13 +5,6 @@ import { isDeepEqual } from "@dabsi/typeorm/utils/QueryExpBuilder";
 export type ColumnLoader = (raw: object) => any;
 
 export class DataQueryBuilder {
-  static createRoot(tableName: string, aliasName?: string): DataQueryBuilder {
-    return new DataQueryBuilder({
-      alias: aliasName ?? "r_" + tableName,
-      from: tableName,
-    });
-  }
-
   constructor(public query: DataQuery) {}
 
   get fields() {

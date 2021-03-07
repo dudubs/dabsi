@@ -1,8 +1,8 @@
-import React from "react";
 import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
-import ReactRouterView from "@dabsi/typerouter/ReactRouterView";
-import SystemRouter from "@dabsi/system/core/common/SystemRouter";
+import { SystemRouter } from "@dabsi/system/core/common/router";
+import { RouterView } from "@dabsi/typerouter/view";
+import React from "react";
 
-ReactRouterView(SystemRouter, {
-  wrap: ({ children }) => <MuiProvider>{children}</MuiProvider>,
-});
+RouterView.wrap(SystemRouter, ({ children }) => (
+  <MuiProvider>{children}</MuiProvider>
+));

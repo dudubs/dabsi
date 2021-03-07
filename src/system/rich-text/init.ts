@@ -1,51 +1,24 @@
 import RichTextModule from "@dabsi/system/rich-text";
-declare global {
-  namespace IRichText {
-    interface BlockStyleTypes {
-      align: StyleType<"CENTER" | "LEFT" | "RIGHT">;
-    }
 
-    interface BlockDataTypes {
-      regular: DataType;
-
-      header: DataType<{
-        level: 1 | 2 | 3 | 4 | 5 | 6;
-      }>;
-
-      // listitem
-      list: DataType<{
-        ordered: boolean;
-      }>;
-
-      atomic: DataType<{
-        position: "LEFT" | "RIGHT" | "CENTER" | undefined;
-      }>;
-    }
-  }
-}
-
-const aligns = new Set<any>(["LEFT", "RIGHT", "CENTER"]);
-const headerLevels = new Set([1, 2, 3, 4, 5, 6]);
-
+const enumPacker = <T>(options: T[], defualtIsUndefined = false) => {
+  const set = new Set(options);
+  return type => {
+    return set.has(type) ? type : defualtIsUndefined ? undefined : options[0];
+  };
+};
+const packListType = enumPacker(["ORDERED", "UNORDERED"]);
+const packHeaderLevel = enumPacker([6, 5, 4, 3, 2, 1]);
 export const initRichTextModule = (rtModule: RichTextModule) => {
   rtModule
-    .defineBlock("regular", {
-      pack: () => ({}),
-    })
+    .defineBlock("regular")
     .defineBlock("header", {
-      pack: ({ level }) => ({ level: headerLevels.has(level) ? level : 6 }),
+      pack: ({ level }) => ({ level: packHeaderLevel(level) }),
     })
     .defineBlock("list", {
-      pack: ({ ordered }) => ({ ordered: Boolean(ordered) }),
+      pack: ({ type }) => ({ type: packListType(type) }),
     })
-    .defineBlock("atomic", {
-      pack: ({ position }) => ({
-        position: aligns.has(position) ? position : undefined,
-      }),
-    })
+    .defineBlock("atomic")
     .defineBlockStyle("align", {
-      pack(align) {
-        return aligns.has(align) ? align : undefined;
-      },
+      pack: enumPacker(["LEFT", "RIGHT", "CENTER"], true),
     });
 };

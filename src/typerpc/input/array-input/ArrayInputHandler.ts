@@ -19,7 +19,7 @@ type T = AnyArrayInput;
 export class ArrayInputHandler
   extends AbstractInputHandler<T>
   implements IWidgetHandler<AnyArrayInput> {
-  getValueFromConfig(
+  getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig || [];
@@ -36,7 +36,7 @@ export class ArrayInputHandler
       : result.value;
 
     return await this.getChildHandler("item").then(c =>
-      c.getValueElement(itemValue)
+      c.getInputValueElement(itemValue)
     );
   }
 
@@ -56,13 +56,13 @@ export class ArrayInputHandler
     };
   }
 
-  async getValueElement(
+  async getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     const itemHandler = await this.getChildHandler("item");
     const valueElement: any[] = [];
     for (const itemValue of value || []) {
-      valueElement.push(await itemHandler.getValueElement(itemValue));
+      valueElement.push(await itemHandler.getInputValueElement(itemValue));
     }
     return valueElement;
   }

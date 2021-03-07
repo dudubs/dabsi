@@ -4,12 +4,12 @@ import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { DataKey } from "@dabsi/typedata/key";
-import { DataUpdate } from "@dabsi/typedata/value";
+import { DataUpdateRow } from "@dabsi/typedata/value";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
 
 export default function (
   source: DataEntitySource<any>,
-  value: DataUpdate<any>,
+  value: DataUpdateRow<any>,
   entityCursor: DataEntityCursor = source.entityCursor
 ) {
   const entity = {};

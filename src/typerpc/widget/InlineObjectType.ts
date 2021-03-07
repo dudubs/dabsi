@@ -27,6 +27,7 @@ export function boolean(value: any): boolean {
 }
 
 export type InlineTypeFn<T> = (value: any) => T;
+
 export type AnyInlineTypeFn = InlineTypeFn<any>;
 
 export type InlineObject = Record<string, AnyInlineTypeFn>;

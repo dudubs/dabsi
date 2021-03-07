@@ -1,139 +1,108 @@
-import { Connection, EntityMetadata, QueryRunner } from "typeorm";
 import { defined } from "@dabsi/common/object/defined";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { DataEntityRelation } from "@dabsi/typeorm/relations";
+import { getDataEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
+import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
 import { DataExp } from "@dabsi/typedata/exp/exp";
-import { ColumnLoader, DataQueryBuilder } from "@dabsi/typedata/query/builder";
+import { DataFieldsTranslator } from "@dabsi/typedata/fieldsTranslator";
+import { KeyObject } from "@dabsi/typedata/KeyObject";
+import { DataOrder } from "@dabsi/typedata/order";
+import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
+import { DataQuery } from "@dabsi/typedata/query/exp";
+import { DataQueryRunner } from "@dabsi/typedata/query/runner";
 import {
   AnyDataSelection,
   DataSelection,
 } from "@dabsi/typedata/selection/selection";
-import { DataFieldsTranslator } from "@dabsi/typedata/fieldsTranslator";
-import { DataOrder } from "@dabsi/typedata/order";
 import { DataSource } from "@dabsi/typedata/source";
 import { DataSourceRow } from "@dabsi/typedata/sourceRow";
 import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
-import { KeyObject } from "@dabsi/typedata/KeyObject";
-import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
-import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
-import { getDataEntityInfo } from "@dabsi/typedata/entity/info";
-import DataQueryRunner from "@dabsi/typedata/query/runner";
-import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
-import { mapObject } from "@dabsi/common/object/mapObject";
+import { DataEntityRelation } from "@dabsi/typeorm/relations";
+import { Connection, EntityMetadata } from "typeorm";
+
+type RowLoader = (context: RowContext) => Awaitable;
+const defaultChildKey = "";
+
+export type ColumnLoader = (raw: object) => any;
+
 type RowContext = {
   row: any;
   raw: any;
-  objectKey: object;
-  textKey: string;
-};
-type RowLoader = (context: RowContext) => Awaitable;
-
-type Props = {
-  connection: Connection;
-  qureyRunner: QueryRunner;
-  typeInfo: DataTypeInfo;
-  qb: DataQueryBuilder;
-  selection: AnyDataSelection;
-  source: DataSource<any>;
+  keyObject: object;
+  keyText: string;
 };
 
-export type DataEntityLoader = ReturnType<typeof DataEntityLoader.create>;
+export class DataEntityLoader {
+  entityMetadata = getEntityMetadata(this.connection, this.typeInfo.type);
 
-export namespace DataEntityLoader {
-  const defaultChildKey = "";
+  entityInfo = getDataEntityMetadata(this.entityMetadata);
 
-  export function buildCursor(
-    { qb, translator }: DataEntityLoader,
-    cursor: {
-      skip?: number;
-      take?: number;
-      order?: DataOrder<any>[];
-    }
-  ) {
-    qb.query.skip = cursor.skip;
-    qb.query.take = cursor.take;
+  queryBuilder = new DataQueryBuilder(this.query);
 
-    cursor.order?.forEach(order => {
-      qb.order.push({
-        by: translator.translate(order.by),
-        sort: order.sort,
-        nulls: order.nulls,
-      });
-    });
-  }
+  translator = new DataEntityTranslator(
+    this.connection,
+    this.typeInfo,
+    this.queryBuilder,
+    this.query.alias
+  );
 
-  export function createFromCursor(
-    entityCursor: DataEntityCursor,
-    source: DataSource<any>,
-    { qb = DataEntityCursor.createQueryBuilder(entityCursor) } = {}
-  ) {
-    return createRoot({
-      qureyRunner: entityCursor.queryRunner,
-      connection: entityCursor.connection,
-      typeInfo: entityCursor.typeInfo,
-      qb,
-      selection: entityCursor.cursor.selection,
-      source,
-    });
-  }
+  protected _keyLoaders = this.entityMetadata.primaryColumns.map(
+    column =>
+      <[string, ColumnLoader]>[
+        column.propertyName,
+        this.queryBuilder.selectColumn(this.schema, column.databaseName),
+      ]
+  );
 
-  export function createRoot(props: Props): DataEntityLoader {
-    return create({ ...props, schema: props.qb.query.alias });
-  }
+  protected _baseRow = new DataSourceRow(this.source);
 
-  export function create({
-    connection,
-    qureyRunner,
-    typeInfo,
-    qb,
-    selection,
-    schema,
-    source,
-  }: Props & {
-    //
-    schema: string;
-  }) {
-    selection = DataSelection.merge(typeInfo.selection, selection);
+  private _singlePrimaryColumn =
+    this.entityMetadata.primaryColumns.length === 1
+      ? this.entityMetadata.primaryColumns[0]
+      : undefined;
 
-    let rowLoader: (context: RowContext) => Awaitable;
+  private _selection = DataSelection.merge(
+    this.typeInfo.selection,
+    this.notMergedSelection
+  );
 
-    const rootBaseRow = new DataSourceRow(source);
+  protected rowLoader = hasKeys(this.typeInfo.children)
+    ? this._buildRowLoaderWithChildren()
+    : this._buildRowLoaderWithoutChildren();
 
-    const entityMetadata = getEntityMetadata(connection, typeInfo.type);
+  constructor(
+    public connection: Connection,
+    public queryRunner: DataQueryRunner,
+    public typeInfo: DataTypeInfo,
+    public notMergedSelection: AnyDataSelection,
+    public source: DataSource<any>,
+    public query: DataQuery,
+    public schema: string
+  ) {}
 
-    const entityInfo = getDataEntityInfo(entityMetadata);
-
-    const discriminatorKeyMap: Record<string, string> = {};
-
-    const singlePrimaryColumn =
-      entityMetadata.primaryColumns.length === 1
-        ? entityMetadata.primaryColumns[0]
-        : undefined;
-
-    const objectKeyLoaders = entityMetadata.primaryColumns.map(
-      column =>
-        <[string, ColumnLoader]>[
-          column.propertyName,
-          qb.selectColumn(schema, column.databaseName),
-        ]
+  private _buildRowLoaderWithoutChildren(): RowLoader {
+    const rowLoader = this._buildRowLoaderForType(
+      DataTypeInfo.get(this.typeInfo.type),
+      this.entityMetadata,
+      defaultChildKey,
+      new Set(this._selection.pick || this.entityInfo.notRelationColumnKeys),
+      this._selection.fields || {},
+      <any>this._selection.relations || {}
     );
 
-    // filter by types
-    const { discriminatorColumn, childEntityMetadatas } = entityMetadata;
-    if (discriminatorColumn) {
-      qb.filter({
+    // filter root & children union
+    if (this.entityMetadata.discriminatorColumn) {
+      this.queryBuilder.filter({
         $at: {
-          [schema]: {
-            [discriminatorColumn.propertyName]: {
-              $in: [entityMetadata]
+          [this.schema]: {
+            [this.entityMetadata.discriminatorColumn.propertyName]: {
+              $in: this.entityMetadata.childEntityMetadatas
                 .toSeq()
-                .concat(childEntityMetadatas)
-                .map(x => x.discriminatorValue)
-                .filter(x => typeof x === "string")
+                .concat([this.entityMetadata])
+                .map(m => m.discriminatorValue!)
                 .toArray(),
             },
           },
@@ -141,299 +110,341 @@ export namespace DataEntityLoader {
       });
     }
 
-    if (!hasKeys(typeInfo.children)) {
-      const rowLoaders: RowLoader[] = getRowTypeLoaders(
-        DataTypeInfo.get(typeInfo.type),
-        entityMetadata,
-        defaultChildKey,
-        new Set(selection.pick || entityInfo.notRelationColumnKeys),
-        selection.fields || {},
-        <any>selection.relations || {}
-      );
+    return rowLoader;
+  }
 
-      rowLoader = async context => {
-        for (const rowLoader of rowLoaders) {
-          await rowLoader(context);
-        }
-      };
-    } else {
-      for (const childKey of Object.keys(selection.children || {})) {
-        if (!(childKey in typeInfo.children!)) {
-          throw new Error(`No child in ${typeInfo.name} like "${childKey}".`);
-        }
-      }
-
-      const childKeyLoadersMap: Record<string, RowLoader[]> = {};
-      const discriminatorLoader = qb.selectColumn(
-        schema,
-        entityMetadata.discriminatorColumn!.databaseName
-      );
-
-      for (const [childKey, rowTypeInfo] of entries<DataTypeInfo>(
-        typeInfo.children
-      )) {
-        const childMetadata = getEntityMetadata(connection, rowTypeInfo.type);
-        const childSelection = DataSelection.atChild(selection, childKey);
-
-        const childEntityInfo = getDataEntityInfo(childMetadata);
-        discriminatorKeyMap[childMetadata.discriminatorValue!] = childKey;
-        childKeyLoadersMap[childKey] = getRowTypeLoaders(
-          rowTypeInfo,
-          childMetadata,
-          childKey,
-          new Set(childSelection.pick ?? childEntityInfo.notRelationColumnKeys),
-          childSelection.fields || {},
-          childSelection.relations || {}
+  private _buildRowLoaderWithChildren(): RowLoader {
+    for (const childKey of Object.keys(this._selection.children || {})) {
+      if (!(childKey in this.typeInfo.children!)) {
+        throw new Error(
+          `No child in ${this.typeInfo.name} like "${childKey}".`
         );
       }
-
-      rowLoader = async context => {
-        const discriminatorValue = discriminatorLoader(context.raw);
-        const childKey = defined(
-          discriminatorKeyMap[discriminatorValue],
-          () =>
-            `No have childKey for discriminatorValue "${discriminatorValue}".`
-        );
-        context.row.$type = childKey;
-        const loaders = childKeyLoadersMap[childKey];
-        for (const rowLoader of loaders) {
-          await rowLoader(context);
-        }
-      };
     }
 
-    return {
-      connection,
-      loadOneRaw,
-      loadRows,
-      qb,
-      translator: new DataEntityTranslator(
-        connection,
-        typeInfo,
-        qb,
-        qb.query.alias
-      ),
+    const childKeyLoadersMap: Record<string, RowLoader> = {};
+    const discriminatorKeyMap: Record<string, string> = {};
+    const discriminatorValues: string[] = [];
+
+    const discriminatorLoader = this.queryBuilder.selectColumn(
+      this.schema,
+      this.entityMetadata.discriminatorColumn!.databaseName
+    );
+
+    for (const [childKey, rowTypeInfo] of entries<DataTypeInfo>(
+      this.typeInfo.children
+    )) {
+      const childMetadata = getEntityMetadata(
+        this.connection,
+        rowTypeInfo.type
+      );
+
+      const childSelection = DataSelection.atChild(this._selection, childKey);
+
+      discriminatorValues.push(childMetadata.discriminatorValue!);
+      const childEntityInfo = getDataEntityMetadata(childMetadata);
+
+      discriminatorKeyMap[childMetadata.discriminatorValue!] = childKey;
+      childKeyLoadersMap[childKey] = this._buildRowLoaderForType(
+        rowTypeInfo,
+        childMetadata,
+        childKey,
+        new Set(childSelection.pick ?? childEntityInfo.notRelationColumnKeys),
+        childSelection.fields || {},
+        childSelection.relations || {}
+      );
+    }
+
+    this.queryBuilder.filter({
+      $at: {
+        [this.schema]: {
+          [this.entityMetadata.discriminatorColumn!.propertyName]: {
+            $in: discriminatorValues,
+          },
+        },
+      },
+    });
+
+    return async context => {
+      const discriminatorValue = discriminatorLoader(context.raw);
+      const childKey = defined(
+        discriminatorKeyMap[discriminatorValue],
+        () => `No have childKey for discriminatorValue "${discriminatorValue}".`
+      );
+      context.row.$type = childKey;
+      const rowLoaders = childKeyLoadersMap[childKey];
+      await childKeyLoadersMap[childKey](context);
     };
+  }
 
-    async function loadRows(baseRow?: object): Promise<any[]> {
-      const rows: any[] = [];
+  protected _buildRowLoaderForType(
+    rowTypeInfo: DataTypeInfo,
+    rowEntityMetadata: EntityMetadata,
+    childKey: string,
+    columns: Set<string>,
+    selectionFieldMap: Record<string, DataExp<any>>,
+    selectionRelationMap: Record<string, boolean | AnyDataSelection.ToOneOrMany>
+  ): RowLoader {
+    const loaders: RowLoader[] = [];
 
-      const runner = new DataQueryRunner(qb.query, qureyRunner);
+    const childEntityInfo = getDataEntityMetadata(rowEntityMetadata);
 
-      for (const raw of await runner.getRows()) {
-        const context = await loadOneRaw(raw, baseRow);
-        context && rows.push(context.row);
+    // select non-relations-columns
+    for (const columnPropertyName of columns) {
+      if (columnPropertyName in selectionFieldMap) {
+        // override by selection.fields
+        continue;
       }
-      return rows;
+      const column = definedAt(
+        childEntityInfo.propertyColumnMetadataMap,
+        columnPropertyName
+      );
+
+      const loader = this.queryBuilder.selectColumn(
+        this.schema,
+        column.databaseName
+      );
+
+      loaders.push(async context => {
+        let value = await loader(context.raw);
+
+        if (Array.isArray(column.transformer)) {
+          for (let valueTransformer of column.transformer) {
+            value = valueTransformer.from(value);
+          }
+        } else if (column.transformer) {
+          value = column.transformer.from(value);
+        }
+        context.row[columnPropertyName] = value;
+      });
     }
 
-    async function loadOneRaw(
-      raw: object,
-      baseRow: object = rootBaseRow
-    ): Promise<RowContext | undefined> {
-      const objectKey: object = {};
+    // select fields
 
-      for (const [propertyName, loader] of objectKeyLoaders) {
-        const value = loader(raw);
-        if (value == null) return undefined;
-        objectKey[propertyName] = value;
+    const fieldsTranslator = new DataFieldsTranslator(selectionFieldMap);
+
+    for (const [propertyName, exp] of entries(selectionFieldMap)) {
+      if (propertyName in childEntityInfo.propertyRelationMetadataMap) {
+        throw new Error(`Can't override relation by field "${propertyName}".`);
       }
 
-      const textKey = singlePrimaryColumn
-        ? String(objectKey[singlePrimaryColumn.propertyName])
-        : KeyObject.stringify(objectKey);
+      const loader = this.queryBuilder.select(
+        `${this.schema}${childKey ? `_as_${childKey}` : ""}_x_${propertyName}`,
+        new DataEntityTranslator(
+          this.connection,
+          rowTypeInfo,
+          this.queryBuilder,
+          this.schema
+        ).translate(fieldsTranslator.translate(exp))
+      );
 
-      const row: any = {};
-      row.$key = textKey;
+      loaders.push(context => {
+        context.row[propertyName] = loader(context.raw);
+      });
+    }
 
-      const context: RowContext = {
-        row,
-        raw,
-        objectKey,
-        textKey,
+    // select relations
+    for (const [propertyName, relationSelectionOrBoolean] of entries<
+      boolean | AnyDataSelection.ToOneOrMany
+    >(selectionRelationMap)) {
+      if (!relationSelectionOrBoolean) continue;
+
+      const relationMetadata = definedAt(
+        childEntityInfo.propertyRelationMetadataMap,
+        propertyName
+      );
+
+      const relationSelection: any =
+        relationSelectionOrBoolean === true //
+          ? {}
+          : relationSelectionOrBoolean;
+
+      loaders.push(
+        relationMetadata.isOneToOne || relationMetadata.isManyToOne
+          ? this._buildRelationToOneLoader(
+              rowTypeInfo,
+              rowEntityMetadata,
+              propertyName,
+              relationSelection
+            )
+          : this._buildReationToManyLoader(
+              rowTypeInfo,
+              rowEntityMetadata,
+              propertyName,
+              relationSelection
+            )
+      );
+    }
+
+    return context =>
+      Promise.all(
+        loaders.map(loader =>
+          //
+          loader(context)
+        )
+      );
+  }
+
+  private _buildRelationToOneLoader(
+    rowTypeInfo: DataTypeInfo,
+    rowEntityMetadata: EntityMetadata,
+    propertyName: string,
+    relationSelection: AnyDataSelection.ToOne
+  ): RowLoader {
+    const relation = new DataEntityRelation(
+      this.connection,
+      <Function>rowEntityMetadata.target,
+      propertyName,
+      false
+    );
+
+    const relationTypeInfo =
+      rowTypeInfo.relations?.[propertyName] ||
+      DataTypeInfo.get(relation.right.entityType);
+
+    const relationSchema = relation.join(
+      "LEFT",
+      this.queryBuilder,
+      this.schema,
+      null
+    );
+
+    const relationLoader = new DataEntityLoader(
+      this.connection,
+      this.queryRunner,
+      relationTypeInfo,
+      relationSelection,
+      this.source,
+      this.query,
+      relationSchema
+    );
+
+    if (relationSelection.notNull) {
+      this.queryBuilder.filter({
+        $and: relation.right.entityMetadata.primaryColumns.map(column => {
+          return {
+            $isNotNull: {
+              $at: { [relationSchema]: column.databaseName },
+            },
+          };
+        }),
+      });
+    }
+
+    return async context => {
+      const relationRow = (
+        await relationLoader.loadOneRow(
+          context.raw,
+          new DataSourceRow(
+            this.source.at(propertyName as never, context.keyText)
+          )
+        )
+      )?.row;
+      if (relationRow) {
+        context.row[propertyName] = relationRow;
+      }
+    };
+  }
+
+  private _buildReationToManyLoader(
+    rowTypeInfo: DataTypeInfo,
+    rowEntityMetadata: EntityMetadata,
+    propertyName: string,
+    relationSelection: AnyDataSelection.ToMany
+  ): RowLoader {
+    const relation = new DataEntityRelation(
+      this.connection,
+      <Function>rowEntityMetadata.target,
+      propertyName,
+      true
+    );
+    const relationTypeInfo =
+      rowTypeInfo.relations?.[propertyName] ||
+      DataTypeInfo.get(relation.left.entityType);
+
+    return async context => {
+      const relationQuery: DataQuery = {
+        from: relation.left.entityMetadata.tableName,
+        alias: "r_" + relation.propertyName,
       };
+      const relationQueryBuilder = new DataQueryBuilder(relationQuery);
 
-      Object.setPrototypeOf(row, baseRow);
+      relation.join(
+        "INNER",
+        relationQueryBuilder,
+        relationQuery.alias,
+        context.keyObject
+      );
 
-      await rowLoader(context);
+      const relationLoader = new DataEntityLoader(
+        this.connection,
+        this.queryRunner,
+        relationTypeInfo,
+        relationSelection,
+        this.source.at(propertyName as never, context.keyText),
+        relationQuery,
+        relationQuery.alias
+      ).loadCursor(relationSelection);
 
-      return context;
+      context.row[propertyName] = await relationLoader.loadManyRows();
+    };
+  }
+
+  async loadOneRow(
+    raw: object,
+    baseRow: object = this._baseRow
+  ): Promise<RowContext | undefined> {
+    const keyObject: object = {};
+
+    for (const [propertyName, loader] of this._keyLoaders) {
+      const value = loader(raw);
+      if (value == null) return undefined;
+      keyObject[propertyName] = value;
     }
 
-    function getRowTypeLoaders(
-      rowTypeInfo: DataTypeInfo,
-      rowEntityMetadata: EntityMetadata,
-      childKey: string,
-      columns: Set<string>,
-      fields: Record<string, DataExp<any>>,
-      relations: Record<string, boolean | AnyDataSelection.ToOneOrMany>
-    ) {
-      const loaders: RowLoader[] = [];
+    const keyText = this._singlePrimaryColumn
+      ? String(keyObject[this._singlePrimaryColumn.propertyName])
+      : KeyObject.stringify(keyObject);
 
-      const childEntityInfo = getDataEntityInfo(rowEntityMetadata);
+    const row: any = {};
+    row.$key = keyText;
 
-      // select non-relations-columns
-      for (const columnPropertyName of columns) {
-        if (columnPropertyName in fields) continue;
-        const column = definedAt(
-          childEntityInfo.propertyColumnMetadataMap,
-          columnPropertyName
-        );
+    const context: RowContext = {
+      row,
+      raw,
+      keyObject,
+      keyText,
+    };
+    Object.setPrototypeOf(row, baseRow);
+    await this.rowLoader(context);
+    return context;
+  }
 
-        const loader = qb.selectColumn(schema, column.databaseName);
-        loaders.push(async context => {
-          let value = await loader(context.raw);
+  async loadManyRows(baseRow?: object): Promise<any[]> {
+    const rows: any[] = [];
 
-          if (Array.isArray(column.transformer)) {
-            for (let valueTransformer of column.transformer) {
-              value = valueTransformer.from(value);
-            }
-          } else if (column.transformer) {
-            value = column.transformer.from(value);
-          }
-          context.row[columnPropertyName] = value;
-        });
-      }
-
-      // select fields
-
-      const fieldsTranslator = new DataFieldsTranslator(fields);
-
-      for (const [propertyName, exp] of entries(fields)) {
-        if (propertyName in childEntityInfo.propertyRelationMetadataMap) {
-          throw new Error(
-            `Can't override relation by field "${propertyName}".`
-          );
-        }
-
-        const loader = qb.select(
-          `${schema}${childKey ? `_as_${childKey}` : ""}_x_${propertyName}`,
-          new DataEntityTranslator(
-            connection,
-            rowTypeInfo,
-            qb,
-            schema
-          ).translate(fieldsTranslator.translate(exp))
-        );
-
-        loaders.push(context => {
-          context.row[propertyName] = loader(context.raw);
-        });
-      }
-
-      // select relations
-      for (let [propertyName, relationSelectionOrBoolean] of entries<
-        boolean | AnyDataSelection.ToOneOrMany
-      >(relations)) {
-        if (!relationSelectionOrBoolean) continue;
-
-        const relationMetadata = definedAt(
-          childEntityInfo.propertyRelationMetadataMap,
-          propertyName
-        );
-
-        if (relationMetadata.isOneToOne || relationMetadata.isManyToOne) {
-          const relation = new DataEntityRelation(
-            connection,
-            <Function>rowEntityMetadata.target,
-            propertyName,
-            false
-          );
-
-          const relationTypeInfo =
-            rowTypeInfo.relations?.[propertyName] ||
-            DataTypeInfo.get(relation.right.entityType);
-
-          const relationSelection: AnyDataSelection.ToOne =
-            relationSelectionOrBoolean === true
-              ? {}
-              : relationSelectionOrBoolean;
-
-          const relationSchema = relation.join("LEFT", qb, schema, null);
-
-          const relationLoader = create({
-            connection,
-            qureyRunner,
-            qb,
-            source,
-            selection: relationSelection,
-            typeInfo: relationTypeInfo,
-            schema: relationSchema,
-          });
-
-          if (relationSelection.notNull) {
-            qb.filter({
-              $and: relation.right.entityMetadata.primaryColumns.map(column => {
-                return {
-                  $isNotNull: {
-                    $at: { [relationSchema]: column.databaseName },
-                  },
-                };
-              }),
-            });
-          }
-
-          loaders.push(async context => {
-            const relationRow = (
-              await relationLoader.loadOneRaw(
-                context.raw,
-                new DataSourceRow(
-                  source.at(propertyName as never, context.textKey)
-                )
-              )
-            )?.row;
-            if (relationRow) {
-              context.row[propertyName] = relationRow;
-            }
-          });
-        } else if (
-          relationMetadata.isOneToMany ||
-          relationMetadata.isManyToMany
-        ) {
-          const relation = new DataEntityRelation(
-            connection,
-            <Function>rowEntityMetadata.target,
-            propertyName,
-            true
-          );
-
-          const relationSelection: AnyDataSelection.ToMany =
-            relationSelectionOrBoolean === true
-              ? {}
-              : relationSelectionOrBoolean;
-
-          loaders.push(async context => {
-            const qb = DataQueryBuilder.createRoot(
-              relation.left.entityMetadata.tableName
-            );
-
-            relation.join("INNER", qb, qb.query.alias, context.objectKey);
-
-            const relationTypeInfo =
-              rowTypeInfo.relations?.[propertyName] ||
-              DataTypeInfo.get(relation.left.entityType);
-
-            const loader = createRoot({
-              qureyRunner,
-              connection,
-              typeInfo: relationTypeInfo,
-              qb,
-              selection: relationSelection,
-              source,
-            });
-
-            buildCursor(loader, relationSelection);
-
-            context.row[propertyName] = await loader.loadRows(
-              new DataSourceRow(
-                source.at(propertyName as never, context.textKey)
-              )
-            );
-          });
-        }
-      }
-
-      return loaders;
+    for (const raw of await this.queryRunner.getRows(this.query)) {
+      const context = await this.loadOneRow(raw, baseRow);
+      context && rows.push(context.row);
     }
+    return rows;
+  }
+
+  loadCursor(cursor: {
+    skip?: number;
+    take?: number;
+    order?: DataOrder<any>[];
+  }): this {
+    this.query.skip = cursor.skip;
+    this.query.take = cursor.take;
+
+    cursor.order?.forEach(order => {
+      this.queryBuilder.order.push({
+        by: this.translator.translate(order.by),
+        sort: order.sort,
+        nulls: order.nulls,
+      });
+    });
+    return this;
   }
 }

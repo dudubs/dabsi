@@ -4,6 +4,7 @@ import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 
 import { Input } from "@dabsi/typerpc/input/Input";
 import requireRpcHandler from "../../../typerpc/requireRpcHandler";
+import { TypeRef } from "@dabsi/common/typings2/TypeRef";
 
 declare global {
   namespace IRichText {
@@ -21,10 +22,15 @@ export type RichTextInputElement = IRichText.InputElement;
 
 export type RichTextInputConfig = IRichText.InputConfig;
 
+export declare namespace RichTextInput {
+  const ValueConfig: unique symbol;
+  const Value: unique symbol;
+}
+
 export type RichTextInput = Input<{
   ValueData: null | RichTextContent.Unpacked;
 
-  Value: () => Awaitable<null | RichTextContent.Unpacked>;
+  Value: TypeRef<typeof RichTextInput.Value>;
 
   Controller: {
     plugins: typeof RichTextRpc;
@@ -38,7 +44,7 @@ export type RichTextInput = Input<{
 
   ValueElement: null | RichTextContent.Unpacked;
 
-  ValueConfig: () => Awaitable<null | RichTextContent.Unpacked>;
+  ValueConfig: undefined | TypeRef<typeof RichTextInput.ValueConfig>;
 
   Error: never;
 }>;

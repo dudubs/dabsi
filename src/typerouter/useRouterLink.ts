@@ -1,20 +1,18 @@
-import { RouterEvent } from "./RouterEvent";
+import { AnyRouter } from "@dabsi/typerouter/router";
+import { useRoute } from "@dabsi/typerouter/view/context";
+import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
 import { useState } from "react";
-import { useEmitter } from "@dabsi/react/reactor/useEmitter";
-import { useReactRouter } from "@dabsi/typerouter/ReactRouter";
-import { AnyRouter } from "@dabsi/typerouter/Router";
+import { RouterViewEvent } from "./event";
 
 export default function (getRouter: () => AnyRouter) {
   const [path, setPath] = useState(() => "#");
   const emit = useEmitter();
-  const {
-    route: { location },
-  } = useReactRouter();
+  const route = useRoute();
 
   return {
     path,
     push() {
-      emit(RouterEvent, {
+      emit(RouterViewEvent, {
         type: "push",
         location: findLocation(),
       });
@@ -27,6 +25,6 @@ export default function (getRouter: () => AnyRouter) {
   };
 
   function findLocation() {
-    return location.find(getRouter())!;
+    return route.location.find(getRouter())!;
   }
 }

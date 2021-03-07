@@ -1,7 +1,9 @@
+import { collectTestQueries } from "@dabsi/typedata/entity/tests/tester";
 import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataSource } from "@dabsi/typedata/source";
 import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
+
 describe("add/remove", () => {
   let aKey, bKey;
 
@@ -52,7 +54,21 @@ describe("add/remove", () => {
     });
   }
 });
-
+it("expect to insert relation without update", async () => {
+  const queries = collectTestQueries();
+  const bKey = await BSource.insertKey({});
+  await ASource.insert({
+    manyAToOneB: bKey,
+    oneAToOneBOwner: bKey,
+  });
+  expect(queries).not.toEqual(
+    jasmine.arrayContaining([
+      jasmine.objectContaining({
+        sql: jasmine.stringMatching(/UPDATE /i),
+      }),
+    ])
+  );
+});
 describe("expect to", () => {
   describe("add", () => {
     describe("one-at-one", () => {
@@ -69,6 +85,8 @@ describe("expect to", () => {
     });
   });
   describe("insert", () => {
+    // todo one-to-one
+
     describe("one-to-one", () => {
       it("owner", async () => {
         const bKey = await BSource.insertKey({});

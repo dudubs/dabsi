@@ -14,7 +14,7 @@ import { AnyEnumInput } from "@dabsi/typerpc/input/enum-input/EnumInput";
 type T = AnyEnumInput;
 
 export class EnumInputHandler extends AbstractNullableInputHandler<T> {
-  getValueFromConfig(
+  getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig;
@@ -33,7 +33,7 @@ export class EnumInputHandler extends AbstractNullableInputHandler<T> {
     return {};
   }
 
-  getValueElement(
+  getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     return Promise.resolve(value);

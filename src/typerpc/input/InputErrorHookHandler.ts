@@ -1,31 +1,37 @@
 import { Call } from "@dabsi/common/typings2/Call";
 import { RpcHookHandler } from "@dabsi/typerpc/RpcHook";
 import { AnyInput } from "@dabsi/typerpc/input/Input";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 
-export const InputErrorHookHandler: RpcHookHandler<AnyInput> = {
+export const InputErrorHookHandler: RpcHookHandler<
+  AnyInput,
+  {
+    (data: any): Awaitable<any>;
+  }
+> = {
   symbol: Symbol("InputErrorHook"),
-  resolveConfig(config, check) {
+  resolveHookConfig(config) {
     if (
       config &&
       typeof config === "object" &&
       typeof config.$check === "function"
     ) {
-      return [
-        config.$config,
-        async data => {
-          return (await check?.(data)) ?? (await config.$check(data));
-        },
-      ];
+      return [config.$config, config.$check];
     }
-    return [config, check];
+    return [config, undefined];
   },
-  getHandler(handler, check) {
-    const { loadAndCheck } = handler;
+  mergeHookConfig: (prevCheck, nextCheck) => {
+    return async value => {
+      return (await prevCheck(value)) ?? (await nextCheck(value));
+    };
+  },
+  installHook(handler, check) {
+    const { loadAndCheck: originalLoadAndCheck } = handler;
     handler.loadAndCheck = async function (data) {
-      const result = await (loadAndCheck.call as Call<typeof loadAndCheck>)(
-        this,
-        data
-      );
+      const result = await (originalLoadAndCheck.call as Call<
+        typeof originalLoadAndCheck
+      >)(this, data);
+
       if ("error" in result) return result;
       const error = await check(result.value);
       if (error != null) return { error, value: result.value };

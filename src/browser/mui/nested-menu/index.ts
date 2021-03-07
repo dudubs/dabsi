@@ -1,1 +1,1 @@
-export { MuiNestedMenu } from "./MuiNestedMenu";
+export { MuiNestedMenu } from "./menu";

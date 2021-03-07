@@ -1,12 +1,13 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
-import { touchSet } from "@dabsi/common/map/touchSet";
+import { touchSet } from "@dabsi/common/set/touchSet";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { inspect } from "@dabsi/logging/inspect";
 import { createRpcConfigResolverGenerator } from "@dabsi/modules/rpc/configResolverGenerator";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { Module, Resolver, ResolverContext } from "@dabsi/typedi";
+import { Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { AnyRpc, RpcConnection, RpcError } from "@dabsi/typerpc/Rpc";
+import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import colors from "colors/safe";
 import fs from "fs";
@@ -111,7 +112,7 @@ export default class RpcModule {
     }
   }
 
-  async check(rpc: AnyRpc, context: ResolverContext) {
+  async check(rpc: AnyRpc, context: ResolverMap) {
     this._isChecking = true;
     this.log.trace(() => "checking");
 
@@ -133,11 +134,7 @@ export default class RpcModule {
     }
   }
 
-  async processRequest(
-    rpc: AnyRpc,
-    rpcReq: RpcRequest,
-    context: ResolverContext
-  ) {
+  async processRequest(rpc: AnyRpc, rpcReq: RpcRequest, context: ResolverMap) {
     const { path, payload } = rpcReq;
 
     Resolver.provide(

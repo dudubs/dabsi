@@ -4,14 +4,19 @@ export declare const DataRelationSymbol: unique symbol;
 
 export type DataRelation<T = {}> = T & { [DataRelationSymbol]?: true };
 
+export type DataRelationTreeKeys<T> = Union<
+  {
+    [K in keyof T]: DataRelationTypeAt<T, K> extends T ? K : never; //
+  }
+>;
+
 export type DataRelationType<T> =
   | IfRelationToOne<T, T extends DataRelation<infer U> ? U : never>
   | IfRelationToMany<T, T extends DataRelation<infer U>[] ? U : never>;
 
-export type DataRelationTypeAt<
-  T,
-  K extends DataRelationKeys<T>
-> = DataRelationType<Required<T>[K]>;
+export type DataRelationTypeAt<T, K extends keyof T> = DataRelationType<
+  Required<T>[K]
+>;
 
 export type MapRelation<T, U> =
   | IfRelationToOne<T, DataRelation<U>>

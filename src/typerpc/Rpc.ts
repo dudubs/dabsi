@@ -168,8 +168,6 @@ export type RpcUndefinedConfig<T extends BasedRpc> = If<
   undefined
 >;
 
-export class RpcError extends Error {}
-
 export type RpcConnection<T extends BasedRpc> = _RpcConnection<RpcType<T>>;
 
 export type RpcPayload<T extends BasedRpc> = RpcType<T>["Payload"];

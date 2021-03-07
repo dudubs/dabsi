@@ -1,4 +1,4 @@
-import { RpcError } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   ErrorOrValue,

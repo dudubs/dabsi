@@ -1,6 +1,7 @@
 import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
 import useLangService from "@dabsi/lang/useLangService";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
+import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import Grid from "@material-ui/core/Grid";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import { makeStyles, MuiThemeProvider } from "@material-ui/core/styles";
@@ -79,20 +80,21 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
     props.title
   );
 
-  const titleElement = renderTitle();
+  const titleNode = renderTitle();
 
-  const panelElement = (
-    <>
-      {props.countSelectedItems ? (
-        props.selectActions
-      ) : (
+  const actionsNode = renderActions();
+  const searchNode = renderSearch();
+
+  const panelNode: React.ReactNode = props.countSelectedItems
+    ? props.selectActions
+    : (actionsNode || searchNode) && (
         <Grid container alignItems="center">
-          {renderActions()}
-          {renderSearch()}
+          {actionsNode}
+          {searchNode}
         </Grid>
-      )}
-    </>
-  );
+      );
+
+  if (!titleNode && !panelNode) return EmptyFragment;
 
   return (
     <Toolbar
@@ -100,13 +102,13 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
         className: classes.toolbar,
       })}
     >
-      {titleElement ? (
+      {titleNode ? (
         <Grid container>
-          {titleElement}
-          <Grid item>{panelElement}</Grid>
+          {titleNode}
+          <Grid item>{panelNode}</Grid>
         </Grid>
       ) : (
-        panelElement
+        panelNode
       )}
     </Toolbar>
   );
@@ -122,6 +124,7 @@ export function MuiTableToolbar(props: MuiTableToolbarProps) {
       )
     );
   }
+
   function renderActions() {
     return (
       props.staticActions && (

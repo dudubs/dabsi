@@ -5,7 +5,7 @@ import {
   getParamResolverMap,
   getParamsResolvers,
   Resolver,
-  ResolverContext,
+  ResolverMap,
 } from "@dabsi/typedi";
 import getParameterByIndex from "@dabsi/typedi/decorators/getParameterByIndex";
 import { Forward } from "@dabsi/typedi/Forward";
@@ -53,7 +53,7 @@ export function CliCommand(name: string): MethodDecorator {
   };
 }
 
-CliCommand.build = (cli: Cli, moduleInstance, context: ResolverContext) => {
+CliCommand.build = (cli: Cli, moduleInstance, context: ResolverMap) => {
   buildCliMethod.invoke(moduleInstance, cli, context);
 };
 

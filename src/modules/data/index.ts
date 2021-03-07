@@ -1,18 +1,15 @@
-import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
-import { EmptyDataCursor } from "@dabsi/typedata/cursor";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
-import { ResolverContext, Inject, Module, Resolver } from "@dabsi/typedi";
-import SqlliteQueryRunnerPool from "@dabsi/typeorm/SqlliteQueryRunnerPool";
+import { Inject, Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import { QueryRunner } from "typeorm";
 
 @Module()
 export default class DataModule {
   constructor(
     protected dbModule: DbModule,
-    @Inject(c => c) protected context: ResolverContext
+    @Inject(c => c) protected context: ResolverMap
   ) {
     Resolver.provide(
       context,

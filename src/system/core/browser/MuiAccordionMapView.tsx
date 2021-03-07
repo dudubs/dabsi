@@ -1,5 +1,5 @@
 import LangKey from "@dabsi/lang/LangKey";
-import { useStore } from "@dabsi/react/useStore";
+import { useStore } from "@dabsi/view/react/useStore";
 import { Field, Struct } from "@dabsi/struct";
 import {
   AnySystemMapConnection,

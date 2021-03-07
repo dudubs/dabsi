@@ -30,12 +30,14 @@ export default function testCli(args) {
     process.argv[0],
     [
       ...DABSI_NODE_OPTIONS,
+      ...(process.env.DABSI_DEBUG_TESTS ? ["--inspect"] : []),
       "--",
       relative(
         DABSI_CURRENT_DIR,
         path.join(NODE_MODULES_DIR, "jasmine/bin/jasmine.js")
       ),
       "--stop-on-failure=true",
+      process.env.JASMINE_OPTIONS,
       // "--random=false",
       ...[
         process.env.JASMINE_SEED ? "--seed=" + process.env.JASMINE_SEED : "",
@@ -43,7 +45,7 @@ export default function testCli(args) {
       path.join(DABSI_SRC_DIR, "jasmine/run.ts"),
       "--",
       ...args,
-    ],
+    ].filter(x => typeof x === "string"),
     {
       stdio: "inherit",
     }

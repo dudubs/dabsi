@@ -1,19 +1,12 @@
 import { Cli } from "@dabsi/modules/Cli";
-import { Hookable } from "@dabsi/modules/Hookable";
-import {
-  ResolverContext,
-  Inject,
-  Injectable,
-  Module,
-  Resolver,
-} from "@dabsi/typedi";
+import { Inject, Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import yargs from "yargs";
 
 @Module()
 export default class CliModule {
   cli = new Cli();
 
-  constructor(@Inject(c => c) context: ResolverContext) {
+  constructor(@Inject(c => c) context: ResolverMap) {
     Resolver.provide(context, { ...Cli.provide(() => this.cli) });
   }
 

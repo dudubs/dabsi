@@ -33,7 +33,7 @@ export type TestInput = Input<
 export const TestInput = Input<TestInput>({
   isConfigCanBeUndefined: false,
   handler: class extends AbstractInputHandler<TestInput> {
-    getValueFromConfig(
+    getInputValueFromConfig(
       valueConfig: InputValueConfig<TestInput>
     ): Awaitable<InputValue<TestInput>> {
       return undefined;
@@ -43,7 +43,7 @@ export const TestInput = Input<TestInput>({
       return Promise.resolve({});
     }
 
-    getValueElement(
+    getInputValueElement(
       value: InputValue<AnyInput> | undefined
     ): Promise<InputValueElement<AnyInput>> {
       return Promise.resolve(undefined);

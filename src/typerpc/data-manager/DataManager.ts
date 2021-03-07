@@ -14,11 +14,11 @@ import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
-import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/DataTable";
-import { Form } from "@dabsi/typerpc/widget/form/Form";
+import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/rpc";
+import { Form } from "@dabsi/typerpc/widget/form/rpc";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { PartialConfigKeys } from "@dabsi/typerpc/Config";
-import { DataTableOf } from "@dabsi/typerpc/widget/data-table/DataTable";
+import { DataTableOf } from "@dabsi/typerpc/widget/data-table/rpc";
 
 // Full<Type>Stack
 export type TDataManager = {

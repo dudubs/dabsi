@@ -1,22 +1,24 @@
-import { MuiButtonMenu } from "@dabsi/browser/mui/components/MuiButtonMenu";
 import { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu";
-import { useEmitted } from "@dabsi/react/reactor/useEmitted";
-import { useEmitter } from "@dabsi/react/reactor/useEmitter";
+import MuiAnchor from "@dabsi/browser/MuiAnchor";
 import { Store } from "@dabsi/store";
-import { AclConnection } from "@dabsi/system/acl/common/AclRpc";
-import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
-import AclLoginRouter from "@dabsi/system/acl/common/AclLoginRouter";
+import { AclLoginInfoEvent } from "@dabsi/system/acl/common/loginInfoEvent";
+import { AclLoginRouter } from "@dabsi/system/acl/common/router";
+import { AclConnection } from "@dabsi/system/acl/common/rpc";
 import { MuiAdminMenu } from "@dabsi/system/admin/browser/menu";
-import { AdminInfoEvent } from "@dabsi/system/admin/browser/router";
 import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 import { MuiTemplate } from "@dabsi/system/admin/browser/MuiTemplate";
 import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
+import { AdminInfoEvent } from "@dabsi/system/admin/browser/router";
 import { getAdminInfo } from "@dabsi/system/admin/common";
-import { useRoute } from "@dabsi/typerouter/ReactRouter";
+import { RouterViewEvent } from "@dabsi/typerouter/event";
+import { useEmitted } from "@dabsi/view/react/reactor/useEmitted";
+import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
+import IconButton from "@material-ui/core/IconButton";
+import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography";
-import React from "react";
-import { ReactElement, ReactNode } from "react";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import React, { ReactElement, ReactNode } from "react";
 
 export class MuiAdminViewState {
   open = true;
@@ -39,8 +41,9 @@ export function MuiAdminView(props: {
     } else {
     }
   });
-  const route = useRoute();
+
   const emit = useEmitter();
+
   // useRouterLocation
 
   if (loginInfo.type !== "success")
@@ -64,29 +67,35 @@ export function MuiAdminView(props: {
             getChildren={child => child.children || {}}
             getChildIcon={child => child.icon}
             getChildTitle={child => child.title}
-            onChildClick={path => {
-              const { child } = path;
-              // store.set("open", false);
-              child.router && route.location.find(child.router)!.push();
+            onChildClick={({ child: { router } }) => {
+              emit(RouterViewEvent, {
+                type: "push",
+                router,
+              });
             }}
           />
         </>
       }
       toolbarMenu={
-        <MuiButtonMenu
-          iconOnly
-          icon={require("@material-ui/icons/AccountCircle")}
-          color={"inherit"}
-        >
-          <MenuItem
-            onClick={() => {
-              AclConnection.logout();
-              emit(AclLoginInfoEvent, { type: "logout" });
-            }}
-          >
-            Logout
-          </MenuItem>
-        </MuiButtonMenu>
+        <MuiAnchor>
+          {({ menuProps, buttonProps }) => (
+            <>
+              <IconButton {...buttonProps} color="inherit">
+                <AccountCircleIcon />
+              </IconButton>{" "}
+              <Menu {...menuProps}>
+                <MenuItem
+                  onClick={() => {
+                    AclConnection.logout();
+                    emit(AclLoginInfoEvent, { type: "logout" });
+                  }}
+                >
+                  {lang`LOGOUT`}
+                </MenuItem>
+              </Menu>
+            </>
+          )}
+        </MuiAnchor>
       }
     >
       {children}

@@ -1,26 +1,20 @@
-import AndroidIcon from "@material-ui/icons/Android";
 import { MuiRichTextImageButton } from "@dabsi/system/rich-text-plugins/image/browser/button";
-import MuiRichTextImageComponent from "@dabsi/system/rich-text-plugins/image/browser/component";
-import { MuiRichTextEditorPlugins } from "@dabsi/system/rich-text/browser/globals";
+import { RichTextEditorGlobals } from "@dabsi/system/rich-text/browser/editor/globals";
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
-import { MuiToolbarButton } from "@dabsi/system/rich-text/browser/toolbar/button";
 
-const useStyles = makeStyles({
-  hiddenFile: {
-    display: "none",
-  },
-});
+const useStyles = makeStyles({ root: { display: "block" } });
 
-MuiRichTextEditorPlugins.push(editor => {
-  editor.atomicBlockRendererMap.image = ({ entity }) => {
-    return {
-      editable: false,
-      component: MuiRichTextImageComponent,
-    };
-  };
+RichTextEditorGlobals.mui.builders.push(
+  ({ editor: { muiToolbarMap, editor } }) => {
+    editor.defineBlock("image", {
+      render: ({ blockData }) => (
+        <img src={blockData.url} className={useStyles().root} />
+      ),
+    });
 
-  editor.toolbars.push(() => {
-    return <MuiRichTextImageButton editor={editor} />;
-  });
-});
+    muiToolbarMap.adding.push(() => {
+      return <MuiRichTextImageButton editor={editor} />;
+    });
+  }
+);

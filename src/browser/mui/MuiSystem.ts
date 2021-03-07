@@ -1,16 +1,14 @@
+import toReactElement from "@dabsi/view/react/utils/toReactElement";
 import {
   createMuiTheme,
   jssPreset,
-  makeStyles,
   StylesProvider as MuiJssProvider,
   Theme as MuiTheme,
   ThemeProvider as MuiThemeProvider,
 } from "@material-ui/core/styles";
 import { create } from "jss";
 import { createElement, ReactNode } from "react";
-
 import { ThemeProvider as JssThemeProvider } from "styled-components";
-import { toReactElement } from "@dabsi/react/utils/toReactElement";
 
 export { MuiTheme, MuiThemeProvider };
 

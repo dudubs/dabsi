@@ -10,7 +10,7 @@ export interface Adapter<T> {
   // map
   getKey(obj: T, key): any;
   setKey(obj: T, key, value): T;
-  deleteKeys(obj: T, keys: any[]): T;
+  handleDelete(obj: T, keys: any[]): T;
   hasKey(obj: T, key): boolean;
 
   // list
@@ -54,7 +54,7 @@ define(Object, {
     obj[key] = value;
     return obj;
   },
-  deleteKeys(obj, keys) {
+  handleDelete(obj, keys) {
     keys.forEach(key => {
       delete obj[key];
     });
@@ -98,7 +98,7 @@ define(Set, {
     }
     return obj;
   },
-  deleteKeys(obj, keys) {
+  handleDelete(obj, keys) {
     keys.forEach(key => {
       obj.delete(key);
     });
@@ -137,7 +137,7 @@ define(Map, {
     obj.set(key, value);
     return obj;
   },
-  deleteKeys(obj, keys) {
+  handleDelete(obj, keys) {
     keys.forEach(key => {
       obj.delete(key);
     });
@@ -174,7 +174,7 @@ define(Array, {
   setKey(obj, key, value) {
     return obj.map((item, i) => (i === key ? value : item));
   },
-  deleteKeys(obj, keys) {
+  handleDelete(obj, keys) {
     const uniqueKeys = new Set(keys);
     return obj.filter((_, i) => !uniqueKeys.has(i));
   },

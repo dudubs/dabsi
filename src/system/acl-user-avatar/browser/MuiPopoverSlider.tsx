@@ -1,5 +1,5 @@
 import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { useStore } from "@dabsi/react/useStore";
+import { useStore } from "@dabsi/view/react/useStore";
 import { Store } from "@dabsi/store";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";

@@ -1,7 +1,7 @@
-import AclLoginInfoEvent from "@dabsi/system/acl/common/AclLoginInfoEvent";
-import { AclConnection } from "@dabsi/system/acl/common/AclRpc";
+import { AclLoginInfoEvent } from "@dabsi/system/acl/common/loginInfoEvent";
+import { AclConnection } from "@dabsi/system/acl/common/rpc";
 import "@dabsi/system/acl/browser/MuiLoginRouterView";
-import { RootReactor } from "@dabsi/react/reactor/Reactor";
+import { RootReactor } from "@dabsi/view/react/reactor/Reactor";
 
 AclConnection.getLoginInfo().then(loginInfo => {
   RootReactor.emit(AclLoginInfoEvent, loginInfo);

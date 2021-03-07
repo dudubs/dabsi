@@ -35,6 +35,7 @@ export type AnyRpcConfigHook = RpcConfigHook<{
 // TODO: _ConfigToGenericConfig
 // TODO: _ConfigToConfig
 // TODO: _GenericConfigToConfig
+
 type _GenericConfigHandler<T extends TConfigHook> = (_: {
   config: Awaited<ReturnType<Extract<T["Config"], Fn>>>;
   target: T["Target"];

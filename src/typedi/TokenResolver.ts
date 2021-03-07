@@ -1,13 +1,13 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
-
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import {
-  ResolverContext,
   CustomResolver,
-  Resolver,
   IResolver,
+  Resolver,
+  ResolverMap,
 } from "@dabsi/typedi/Resolver";
+
 IResolver.token = createTokenResolver;
 declare module "./Resolver" {
   interface IResolver {
@@ -34,7 +34,7 @@ export interface TokenResolver<T> {
 export class TokenResolver<T> implements CustomResolver<T> {
   constructor(public codeStackInfo: CallStackInfo, public token: string) {}
 
-  provide(resolver?: Resolver<T>): ResolverContext<T> {
+  provide(resolver?: Resolver<T>): ResolverMap<T> {
     return {
       [this.token]:
         resolver ??

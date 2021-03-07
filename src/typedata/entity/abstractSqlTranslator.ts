@@ -1,13 +1,12 @@
 import { entries } from "@dabsi/common/object/entries";
-import { DataOperatorExp } from "@dabsi/typedata/exp/operator";
-import { DataExp } from "@dabsi/typedata/exp/exp";
-import { DataTranslator } from "@dabsi/typedata/exp/translator";
-import { DataQuery } from "@dabsi/typedata/query/exp";
-import { DataQueryTranslator } from "@dabsi/typedata/query/translator";
-import { Connection, SelectQueryBuilder } from "typeorm";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { inspect } from "@dabsi/logging/inspect";
+import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataOperatorExp } from "@dabsi/typedata/exp/operator";
+import { DataTranslator } from "@dabsi/typedata/exp/translator";
+import { DataQuery, DataQueryExp } from "@dabsi/typedata/query/exp";
+import { DataQueryTranslator } from "@dabsi/typedata/query/translator";
+import { Connection, SelectQueryBuilder } from "typeorm";
 
 const sqlOperatorMap: Record<DataOperatorExp.Base, string> = {
   $equals: "=",
@@ -15,7 +14,6 @@ const sqlOperatorMap: Record<DataOperatorExp.Base, string> = {
   $lessThanOrEqual: "<=",
   $greaterThan: ">",
   $greaterThanOrEqual: ">=",
-
   $startsWith: " LIKE ",
   $endsWith: " LIKE ",
   $contains: " LIKE ",
@@ -44,6 +42,16 @@ export default abstract class AbstractDataQueryTranslatorToSql
 
   constructor(public connection: Connection, public schema: string) {
     super();
+  }
+
+  translateInQuery(
+    inverse: boolean,
+    left: DataQueryExp,
+    right: DataQueryExp
+  ): string {
+    return `${this.translate(left)} ${
+      inverse ? "NOT IN" : "IN"
+    } (${this.translate(right)})`;
   }
 
   protected escape(name: string): string {
@@ -112,6 +120,13 @@ export default abstract class AbstractDataQueryTranslatorToSql
   }
 
   translateField(field: string): string {
+    const pos = field.indexOf(".");
+    if (pos > -1) {
+      const schema = field.substr(0, pos);
+      field = field.substr(pos + 1);
+      return `${this.escape(schema)}.${this.escape(field)}`;
+    }
+
     return `${this.escape(this.schema)}.${this.escape(field)}`;
   }
 
@@ -178,7 +193,7 @@ export default abstract class AbstractDataQueryTranslatorToSql
     throw new Error("Not support.");
   }
 
-  translateQueryCount(query: DataQuery): string {
+  translateCountQuery(query: DataQuery): string {
     return `(SELECT COUNT(*) AS value ${this.translateQueryWithoutFields(
       query
     )})`;
@@ -187,11 +202,11 @@ export default abstract class AbstractDataQueryTranslatorToSql
     return "1";
   }
 
-  translateQueryHas(inverse: boolean, query: DataQuery): string {
+  translateHasQuery(inverse: boolean, query: DataQuery): string {
     return this.translateCompare(
       inverse ? "$equals" : "$greaterThan",
       false,
-      this.translateQueryCount({
+      this.translateCountQuery({
         ...query,
         take: 1,
       }),
@@ -200,7 +215,7 @@ export default abstract class AbstractDataQueryTranslatorToSql
   }
 
   translateQueryFields(query: DataQuery) {
-    let sql = "";
+    let sql = query.schema ? `${query.schema}.*` : "";
     for (let [aliasName, selection] of entries(query.fields)) {
       sql +=
         (sql ? ", " : "") +
@@ -215,6 +230,7 @@ export default abstract class AbstractDataQueryTranslatorToSql
 
   translateQueryJoins(query: DataQuery) {
     let sql = "";
+
     for (let [aliasName, join] of entries(query.joins)) {
       switch (join.type) {
         case "LEFT":
@@ -226,10 +242,12 @@ export default abstract class AbstractDataQueryTranslatorToSql
       }
 
       if (hasKeys(join.fields)) {
-        sql += `(SELECT ${mapObjectToArray(
-          join.fields!,
-          (exp, field) => `${this.translate(exp)} AS ${this.escape(field)}`
-        )} FROM ${this.escape(join.from)} AS ${aliasName})`;
+        sql += `(SELECT ${mapObjectToArray(join.fields!, (exp, field) => {
+          const sql = this.translate(exp);
+          return `${
+            sql.startsWith("SELECT ") ? `(${sql})` : sql
+          } AS ${this.escape(field)}`;
+        })} FROM ${this.escape(join.from)} AS ${aliasName})`;
       } else {
         sql += " " + this.escape(join.from);
       }
@@ -245,10 +263,30 @@ export default abstract class AbstractDataQueryTranslatorToSql
 
   translateQuery(query: DataQuery): string {
     return (
+      this.translateQueryWith(query) +
       "SELECT " +
       this.translateQueryFields(query) +
       this.translateQueryWithoutFields(query)
     );
+  }
+
+  translateQueryWith(query: DataQuery) {
+    let sql = "";
+    for (const [schema, { fields, queries }] of entries(query.with)) {
+      const sqlFields = fields
+        .toSeq()
+        .map(field => this.escape(field))
+        .join(", ");
+
+      const sqlQueries = queries
+        .toSeq()
+        .map(query => this.translateQuery(query))
+        .join(" UNION ALL ");
+      sql += `${sql ? "," : "WITH RECURSIVE"} ${this.escape(
+        schema
+      )}(${sqlFields}) AS (${sqlQueries}) `;
+    }
+    return sql;
   }
 
   translateQueryWithoutFields(query: DataQuery): string {
@@ -294,6 +332,28 @@ export default abstract class AbstractDataQueryTranslatorToSql
         query.take
       )
     );
+  }
+
+  translateJsonQuery(query: DataQuery): string {
+    // TODO: testing
+    const fieldsNames = Object.keys(query.fields!);
+    const fieldsExp = fieldsNames
+      .toSeq()
+      .map(k => this.translate(query.fields![k]))
+      .join(",");
+
+    let sql = this.translateQueryWithoutFields(query);
+    // select row as json-array
+    sql = `SELECT JSON_ARRAY(${fieldsExp}) AS row ${sql}`;
+    // concat rows
+    sql = `SELECT GROUP_CONCAT(_json.row, ",") rows FROM (${sql}) AS _json`;
+    //
+    sql = `(SELECT ${this.translateConcat([
+      this.escape("[" + JSON.stringify(fieldsNames) + ",["),
+      "_json.rows",
+      this.escape("]]"),
+    ])} text FROM (${sql}) _json)`;
+    return sql;
   }
 }
 

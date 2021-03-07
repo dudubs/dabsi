@@ -3,7 +3,6 @@ import { Call } from "@dabsi/common/typings2/Call";
 import { Override } from "@dabsi/common/typings2/Override";
 import {
   AnyRpc,
-  AnyRpcHandler,
   BasedRpc,
   Rpc,
   RpcResolvedHandler,
@@ -11,11 +10,19 @@ import {
   TRpc,
 } from "@dabsi/typerpc/Rpc";
 
-const hookConfigMapSymbol = Symbol();
-export type RpcHookHandler<T extends AnyRpc> = {
+const globalSymbol = Symbol();
+
+export type RpcHookHandler<T extends AnyRpc, HC = any> = {
   symbol: symbol;
-  resolveConfig(config, configHook): Awaitable<[config: any, configHook: any]>;
-  getHandler(
+
+  resolveHookConfig(
+    config,
+    prevConfigHook: HC | undefined
+  ): Awaitable<[config: any, configHook: HC | undefined]>;
+
+  mergeHookConfig?(prevHookConfig: HC, nextHookConfig: HC): HC;
+
+  installHook(
     handler: RpcResolvedHandler<T>,
     configHook: any
   ): Awaitable<RpcResolvedHandler<T> | void>;
@@ -27,36 +34,47 @@ export type RpcHook<R extends BasedRpc, T extends Partial<TRpc>> = Rpc<
 
 export function RpcHook<T extends AnyRpc>(
   rpc: T,
-  { resolveConfig, getHandler, symbol }: RpcHookHandler<T>
+  { resolveHookConfig, installHook, symbol, mergeHookConfig }: RpcHookHandler<T>
 ): AnyRpc {
   if (rpc[symbol]) return rpc;
   return Object.setPrototypeOf(
     {
       [symbol]: true,
-      async resolveRpcConfig(config) {
-        const hookConfigMap = config?.[hookConfigMapSymbol];
-        let hookConfig = hookConfigMap?.[symbol];
+      async resolveRpcConfig(unrsolvedConfig) {
+        const hookConfigMap = unrsolvedConfig?.[globalSymbol];
+        const prevHookConfig = hookConfigMap?.[symbol];
+        let nextHookConfig;
 
-        [config, hookConfig] = await resolveConfig(config, hookConfig);
+        [unrsolvedConfig, nextHookConfig] = await resolveHookConfig(
+          unrsolvedConfig,
+          prevHookConfig
+        );
 
-        config = await (rpc.resolveRpcConfig.call as Call<
+        const resolvedConfig = await (rpc.resolveRpcConfig.call as Call<
           typeof rpc.resolveRpcConfig
-        >)(this, config);
+        >)(this, unrsolvedConfig);
 
-        config[hookConfigMapSymbol] = {
-          ...hookConfigMap,
-          [symbol]: hookConfig,
-        };
-        return config;
+        if (nextHookConfig !== undefined) {
+          if (mergeHookConfig && prevHookConfig !== undefined) {
+            nextHookConfig = mergeHookConfig(prevHookConfig, nextHookConfig);
+          }
+
+          resolvedConfig[globalSymbol] = {
+            ...hookConfigMap,
+            [symbol]: nextHookConfig,
+          };
+        }
+
+        return resolvedConfig;
       },
       async createRpcHandler(config, parent) {
         let handler: any = await (rpc.createRpcHandler.call as Call<
           typeof rpc.createRpcHandler
         >)(this, config, parent);
-        const configHook = config[hookConfigMapSymbol][symbol];
-        if (configHook !== undefined) {
+        const hookConfig = config[globalSymbol]?.[symbol];
+        if (hookConfig !== undefined) {
           handler =
-            (await getHandler(handler as RpcResolvedHandler<T>, configHook)) ??
+            (await installHook(handler as RpcResolvedHandler<T>, hookConfig)) ??
             handler;
         }
         return handler;

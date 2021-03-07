@@ -1,5 +1,5 @@
-import { SystemRpcPath } from "@dabsi/system/core/common/SystemRpc";
-import SystemCommand from "@dabsi/system/core/view/SystemCommand";
+import { SystemRpcPath } from "@dabsi/system/core/common/rpc";
+import { SystemCommand } from "@dabsi/system/core/common/command";
 
 export default async function processRpcWithFormData<T>(
   buildFormData: (formData: FormData) => void,

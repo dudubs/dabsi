@@ -94,12 +94,17 @@ export type WidgetHandlerClass<T extends AnyWidget> = _RpcHandlerClass<
   IWidgetHandler<T>
 >;
 
+export type WidgetCommandConfig<
+  T extends AnyWidget,
+  K extends keyof _WidgetCommands<WidgetType<T>>
+> = ToAsync<Extract<Pluck<_WidgetCommands<WidgetType<T>>, K>, Fn>>;
+
 export type IWidgetHandler<T extends AnyWidget> = IRpcHandler<T> &
   {
     [K in string &
-      keyof _WidgetCommands<WidgetType<T>> as `$${K}Command`]: ToAsync<
-      Extract<Pluck<_WidgetCommands<WidgetType<T>>, K>, Fn>
-    >;
+      keyof _WidgetCommands<
+        WidgetType<T>
+      > as `$${K}Command`]: WidgetCommandConfig<T, K>;
   };
 
 export type WidgetWithoutController<T extends AnyWidget = AnyWidget> = Widget<
@@ -212,4 +217,7 @@ export type WidgetElement<T extends BasedWidget> = WidgetType<T>["Element"];
 const isWidgetSet = new WeakSet();
 export function isWidget(obj): obj is AnyWidget {
   return isWidgetSet.has(obj);
+}
+export function isWidgetConnection(obj): obj is AnyWidgetConnection {
+  return isWidget(obj?.$widget);
 }

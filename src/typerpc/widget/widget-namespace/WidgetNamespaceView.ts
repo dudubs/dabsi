@@ -1,4 +1,4 @@
-import { touchSet } from "@dabsi/common/map/touchSet";
+import { touchSet } from "@dabsi/common/set/touchSet";
 import { entries } from "@dabsi/common/object/entries";
 import { keys } from "@dabsi/common/object/keys";
 import { touchObject } from "@dabsi/common/object/touchObject";
@@ -9,7 +9,7 @@ import {
   AnyWidgetConnection,
   isWidget,
 } from "@dabsi/typerpc/widget/Widget";
-import { MapView } from "@dabsi/typerpc/widget/widget-map/WidgetMapView";
+import { MapView } from "@dabsi/typerpc/widget/widget-map/view";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import {

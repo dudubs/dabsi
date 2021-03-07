@@ -1,9 +1,4 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
-import { mapObjectAsync } from "@dabsi/common/object/mapObject";
-import { Awaitable } from "@dabsi/common/typings2/Async";
-import { AnyRpc, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
-import { mapChildrenHandlerAsync } from "@dabsi/typerpc/widget/widget-map/mapChildrenHandlerAsync";
 import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
 import {
   InputElement,
@@ -14,6 +9,8 @@ import {
   InputValueElement,
 } from "@dabsi/typerpc/input/Input";
 import { AnyInputMap } from "@dabsi/typerpc/input/input-map/InputMap";
+import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+import { mapChildrenHandlerAsync } from "@dabsi/typerpc/widget/widget-map/mapChildrenHandlerAsync";
 
 type T = AnyInputMap;
 
@@ -23,12 +20,15 @@ export class InputMapHandler
   $mapConfig = this.config;
 
   // todo: mapChildren
-  async getValueElement(
-    value: InputValue<T> | undefined
+  async getInputValueElement(
+    valueMap: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
-    return mapChildrenHandlerAsync(this, (handler, key) =>
-      handler.getValueElement(value?.[key])
-    );
+    return mapChildrenHandlerAsync(this, (handler, key) => {
+      const value = valueMap?.[key];
+      if (value !== undefined) {
+        return handler.getInputValueElement(value);
+      }
+    });
   }
 
   async getInputElement(): Promise<InputElement<T>> {
@@ -39,11 +39,11 @@ export class InputMapHandler
     };
   }
 
-  async getValueFromConfig(
-    valueConfig: InputValueConfig<T>
+  async getInputValueFromConfig(
+    valueConfigMap: InputValueConfig<T>
   ): Promise<InputValue<T>> {
     return mapChildrenHandlerAsync(this, (handler, key) => {
-      handler.getValueFromConfig(valueConfig?.[key]);
+      return handler.getInputValueFromConfig(valueConfigMap?.[key]);
     });
   }
 

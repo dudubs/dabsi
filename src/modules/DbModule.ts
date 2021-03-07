@@ -1,4 +1,4 @@
-import { touchSet } from "@dabsi/common/map/touchSet";
+import { touchSet } from "@dabsi/common/set/touchSet";
 import { values } from "@dabsi/common/object/values";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";

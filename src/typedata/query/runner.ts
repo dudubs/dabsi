@@ -2,36 +2,42 @@ import { DataQuery } from "@dabsi/typedata/query/exp";
 import { QueryRunner } from "typeorm";
 import { DataQueryTranslatorToSql } from "./sqlTranslator";
 
-export default class DataQueryRunner {
-  constructor(public query: DataQuery, public queryRunner: QueryRunner) {}
+export class DataQueryRunner {
+  constructor(public queryRunner: QueryRunner) {}
 
-  getQueryAndParameters(): [string, any[]] {
+  protected _getSqlAndParameters(
+    query: DataQuery,
+    withoutFields: boolean
+  ): [string, any[]] {
     return DataQueryTranslatorToSql.getQueryAndParameters(
       this.queryRunner.connection,
-      this.query
+      query,
+      [],
+      { withoutFields }
     );
   }
 
-  getRows(): Promise<any> {
-    const [query, parameters] = this.getQueryAndParameters();
+  getRows(query: DataQuery): Promise<any> {
+    const [sql, parameters] = this._getSqlAndParameters(query, false);
     // console.log(formatSql(query));
-    return this.queryRunner.query(query, parameters);
+    return this.queryRunner.query(sql, parameters);
   }
 
-  hasRows(): Promise<boolean> {
-    const [sql, params] = this.getQueryAndParameters();
-    const query = `SELECT COUNT(*) value FROM (SELECT * FROM (${sql}) x LIMIT 1) _rec`;
-    return this.queryRunner.query(query, params).then(rows => {
-      return (rows[0]?.value ?? 0) > 0;
-    });
+  protected async _getCountRows(query: DataQuery, maxCount: number) {
+    const [sql, params] = this._getSqlAndParameters(
+      maxCount ? { ...query, take: maxCount } : query,
+      true
+    );
+    const sqlCount = `SELECT COUNT(*) AS value ${sql}`;
+    const [{ value = 0 } = {}] = await this.queryRunner.query(sqlCount, params);
+    return value;
   }
 
-  async getCountRows(): Promise<number> {
-    const [sql, params] = this.getQueryAndParameters();
-    return this.queryRunner
-      .query(`SELECT COUNT(*) value FROM (${sql}) _rec`, params)
-      .then(rows => {
-        return rows[0]?.value ?? 0;
-      });
+  async hasRows(query: DataQuery): Promise<boolean> {
+    return Boolean(await this._getCountRows(query, 1));
+  }
+
+  async getCountRows(query: DataQuery): Promise<number> {
+    return await this._getCountRows(query, 0);
   }
 }

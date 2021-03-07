@@ -24,7 +24,7 @@ type T = TextInput<any>;
 export class TextInputHandler
   extends AbstractInputHandler<T>
   implements IWidgetHandler<T> {
-  async getValueElement(
+  async getInputValueElement(
     value: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     return value ?? "";
@@ -56,7 +56,7 @@ export class TextInputHandler
     return { value };
   }
 
-  getValueFromConfig(
+  getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return valueConfig || "";

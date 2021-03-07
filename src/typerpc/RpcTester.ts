@@ -1,4 +1,4 @@
-import { buildTests } from "@dabsi/jasmine/buildTests";
+import { collectTests } from "@dabsi/jasmine/collectTests";
 import {
   AnyRpc,
   AnyRpcHandler,
@@ -28,7 +28,7 @@ export function testRpc<T extends AnyRpc>(
 
   const configs: { title; config; defineTests?() }[] = [];
 
-  const defineTests = buildTests("rpc", () => {
+  const defineTests = collectTests("rpc", () => {
     callback({
       rpc,
       testConfig(...args) {
@@ -36,7 +36,8 @@ export function testRpc<T extends AnyRpc>(
           args = ["default", ...args];
         }
         const [title, config, callback] = args;
-        const defineTests = callback && buildTests("config:" + title, callback);
+        const defineTests =
+          callback && collectTests("config:" + title, callback);
         configs.push({ title, config, defineTests });
       },
       connection: rpc.createRpcConnection([], (path, payload) =>

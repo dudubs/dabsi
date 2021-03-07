@@ -1,7 +1,7 @@
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Type } from "@dabsi/common/typings2/Type";
-import { EmptyFragment } from "@dabsi/react/utils/EmptyFragment";
-import { BasedType, GetBaseType } from "@dabsi/typedata/BaseType";
+import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
+import { BasedType, RebaseType } from "@dabsi/typedata/BaseType";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
 import { BasedDataRow } from "@dabsi/typedata/sourceRow";

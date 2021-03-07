@@ -5,22 +5,24 @@
  */
 import { DataContext } from "@dabsi/modules/data/context";
 import RpcModule from "@dabsi/modules/rpc";
+import RpcConfigFactoryResolver, {
+  RpcConfigFactory,
+} from "@dabsi/modules/rpc/configFactoryResolver";
 import RequestSession from "@dabsi/modules/session/RequestSession";
 import RichTextModule from "@dabsi/system/rich-text";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
-import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
-import { RichTextContent } from "@dabsi/system/rich-text/common/content";
+import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 import { DataRow } from "@dabsi/typedata/row";
-import { Inject, Injectable, Resolver, ResolverContext } from "@dabsi/typedi";
-import { RpcConfig, RpcError, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import RpcConfigFactoryResolver, {
-  RpcConfigFactory,
-} from "@dabsi/modules/rpc/configFactoryResolver";
+import { DataSource } from "@dabsi/typedata/source";
+import { Inject, Injectable } from "@dabsi/typedi";
+import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 
 declare global {
   namespace IRichText {
@@ -42,7 +44,7 @@ export class RichTextContext {
     protected rpcModule: RpcModule,
     @Inject(
       RpcConfigFactoryResolver(RichTextRpc, {
-        context: RichTextConfigResolver.provide(),
+        context: RichTextConfigContext.provide(),
       })
     )
     protected _createRpcConfig: RpcConfigFactory<typeof RichTextRpc>
@@ -51,54 +53,73 @@ export class RichTextContext {
   async pack(
     config: RichTextConfig,
     content: RichTextContent.Unpacked,
-    docKey?: string
+    docKeyOrSource?: string | DataSource<RichTextDocument>
   ): Promise<string> {
     const packer = new RichTextPacker(config);
     const packedContent = await packer.packContent(content);
     const packedContentText = JSON.stringify(packedContent);
 
-    if (!docKey) {
+    let docKey: string;
+
+    if (docKeyOrSource) {
+      if (typeof docKeyOrSource === "object") {
+        ({ $key: docKey } = await docKeyOrSource.pick([]).getOrFail());
+      } else {
+        docKey = docKeyOrSource;
+      }
+      await packer.deleteUnusedRelations(docKey);
+      await this.docs.update(docKey, { content: packedContentText });
+    } else {
       docKey = await this.docs.insertKey({
         session: this.session.$key,
         content: packedContentText,
       });
-    } else {
-      await packer.deleteUnusedRelations(docKey);
-      await this.docs.update(docKey, { content: packedContentText });
     }
+
     await packer.insertNewRelations(docKey);
     return docKey;
   }
 
   async unpack(
     config: RichTextConfig,
-    docKey: string,
+    docKeyOrSource: string | DataSource<RichTextDocument>,
     forReadonly: boolean
   ): Promise<RichTextContent.Unpacked> {
-    const relationTypeEntityMap = new Map<string, Map<string, any>>();
-    for (const rel of await this.rels
-      .filter({ $at: { document: { $is: docKey } } })
+    let docSource: DataSource<RichTextDocument>;
+
+    if (typeof docKeyOrSource === "string") {
+      const docKey = docKeyOrSource;
+      docSource = this.docs.filter({ $is: docKey });
+    } else {
+      docSource = docKeyOrSource;
+    }
+
+    const doc = await docSource.pick(["content"]).getOrFail();
+    const relationTypeMap = new Map<string, Map<string, any>>();
+    for (const rel of await doc
+      .at("relations")
       .select(
-        this.module.createSelection(
-          config,
-          forReadonly ? "forReadonly" : "forUnpacking"
+        <{ pick: ["type"] }>(
+          (<any>(
+            this.module.createSelection(
+              config,
+              forReadonly ? "forReadonly" : "forUnpacking"
+            )
+          ))
         )
       )
       .getRows()) {
-      relationTypeEntityMap
+      relationTypeMap
         .touch(rel.type, () => new Map())
         .set(rel.$key, rel[rel.type]);
     }
-    const doc = await this.docs
-      .filter({ $is: docKey })
-      .pick(["content"])
-      .getOrFail();
-    const content = JSON.parse(doc.content);
+
+    const content = JSON.parse(doc.content!);
 
     return await new RichTextUnpacker(
       config,
       forReadonly,
-      relationTypeEntityMap
+      relationTypeMap
     ).unpackContent(content);
   }
 
@@ -109,7 +130,7 @@ export class RichTextContext {
   ): RpcUnresolvedConfig<typeof RichTextRpc> {
     return async $ => {
       const rpcConfig = await this._createRpcConfig(
-        RichTextConfigResolver.provide(() => config)
+        RichTextConfigContext.provide(() => config)
       );
       return $({
         ...rpcConfig,

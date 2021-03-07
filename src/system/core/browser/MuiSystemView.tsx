@@ -1,24 +1,35 @@
 import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
-import { useProvider } from "@dabsi/react/useProvider";
-import { useMuiSystemViewTheme } from "@dabsi/system/core/browser/useMuiSystemViewTheme";
-import SystemRouter from "@dabsi/system/core/common/SystemRouter";
+import { useMuiSystemView } from "@dabsi/system/core/browser/useMuiSystemView";
+import { SystemRouter } from "@dabsi/system/core/common/router";
 import { HistoryProvider } from "@dabsi/typerouter/History";
-import { ReactRouter } from "@dabsi/typerouter/ReactRouter";
+import { RouterView } from "@dabsi/typerouter/view";
+import { ReactWrapper } from "@dabsi/view/react/wrapper";
+import Typography from "@material-ui/core/Typography";
 import { createBrowserHistory } from "history";
 import React from "react";
 
 const history = createBrowserHistory();
 
 export function MuiSystemView() {
-  const provider = useProvider();
+  return ReactWrapper(() => {
+    ReactWrapper.push(children => (
+      <HistoryProvider history={history} children={children} />
+    ));
 
-  useProvider(children => (
-    <HistoryProvider history={history} children={children} />
-  ));
+    ReactWrapper.push(children => <MuiProvider children={children} />);
 
-  useProvider(children => <MuiProvider children={children} />);
+    useMuiSystemView();
 
-  useMuiSystemViewTheme();
-
-  return provider(<ReactRouter router={SystemRouter} />);
+    return (
+      <RouterView
+        router={SystemRouter}
+        renderLoading={element => element || <>{lang`LOADING`}</>}
+        renderNoRoute={route => (
+          <Typography>
+            {lang`NO_ROUTE`} {route.type} {route.path}
+          </Typography>
+        )}
+      />
+    );
+  });
 }

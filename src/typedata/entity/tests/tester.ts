@@ -1,8 +1,7 @@
 import { defined } from "@dabsi/common/object/defined";
-import { logBeforeEach } from "@dabsi/jasmine/logBeforeEach";
+import { formatSql } from "@dabsi/system-old/server/acl/formatSql";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { findEntities } from "@dabsi/typeorm/findEntities";
 import { AEntity, CEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 import {
   BeforeUpdate,
@@ -30,6 +29,26 @@ export const getConnection = () =>
 
 let connection: Connection;
 
+let testQueries: { sql: string; params: any[] }[] | null = null;
+
+afterEach(() => {
+  testQueries = null;
+});
+
+let logTestQueriesEnabled = false;
+
+afterEach(() => {
+  logTestQueriesEnabled = false;
+});
+
+export const logTestQueries = () => {
+  logTestQueriesEnabled = true;
+};
+export const collectTestQueries = (): { sql: string; params: any[] }[] => {
+  return (testQueries = []);
+};
+
+beforeEach(() => {});
 beforeAll(async () => {
   connection = await createTestConnection([
     AEntity,
@@ -39,6 +58,13 @@ beforeAll(async () => {
     EEntity,
     XEntity,
   ]);
+
+  connection.logger.logQuery = (sql, params = []) => {
+    if (logTestQueriesEnabled) {
+      console.log(formatSql(sql), params);
+    }
+    testQueries?.push({ sql, params });
+  };
 });
 
 export default getConnection;

@@ -5,8 +5,8 @@ import {
 } from "@dabsi/browser/ImageUtils";
 import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFormData";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
-import { RichTextEditor } from "@dabsi/system/rich-text/view/editor";
-import { RichTextStore } from "@dabsi/system/rich-text/view/store";
+import { RichTextEditor } from "@dabsi/system/rich-text/browser/editor/editor";
+import { RichTextStore } from "@dabsi/system/rich-text/browser/editor/store";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 
 // getRichTextPluginConfig('image')
@@ -29,8 +29,13 @@ export async function uploadImage(
     () => connection.upload({ field: "image" })
   );
 
-  editor.store.insertAtomicBlock("image", "IMMUTABLE", {
-    url,
-    key,
-  });
+  editor.store.insertBlocks([
+    {
+      type: "image",
+      data: {
+        imageKey: key,
+        url,
+      },
+    },
+  ]);
 }

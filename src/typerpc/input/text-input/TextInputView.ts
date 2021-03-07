@@ -1,6 +1,6 @@
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { ViewState } from "@dabsi/react/view/ViewState";
+import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { InputError, InputValueElement } from "@dabsi/typerpc/input/Input";
 import {
   AbstractInputView,
@@ -37,6 +37,7 @@ export class TextInputView<
     return this._text;
   }
 
+  // TODO: use Debounce()
   protected debounceId = 0;
 
   protected _options!: TextLoaderOptions;

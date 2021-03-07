@@ -1,7 +1,7 @@
 import ExpressModule from "@dabsi/modules/express";
 import RpcModule from "@dabsi/modules/rpc";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/common/SystemRpc";
+import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/common/rpc";
 import { Module } from "@dabsi/typedi";
 import BodyParser from "body-parser";
 import multer from "multer";

@@ -1,5 +1,5 @@
 import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { useStore } from "@dabsi/react/useStore";
+import { useStore } from "@dabsi/view/react/useStore";
 import MuiAvatarEditor from "@dabsi/system/acl-user-avatar/browser/MuiAvatarEditor";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";

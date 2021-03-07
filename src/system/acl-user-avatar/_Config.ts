@@ -6,7 +6,7 @@ import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUs
 import { User } from "@dabsi/system/acl/entities/User";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { DataRow } from "@dabsi/typedata/row";
-import { RpcError } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 
 export default RpcConfigResolver(
   AclEditUserAvatarRpc,

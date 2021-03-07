@@ -16,7 +16,7 @@ export default function requireRpcHandler(fileName: string): any {
 
   const handlerName = path.basename(fileName).replace(/\.ts$/, "Handler");
   const module = require(path.join(
-    path.dirname(fileName),
+    path.resolve(path.dirname(fileName), ".."),
     handlerName + ".ts"
   ));
   const handler = module["default"];

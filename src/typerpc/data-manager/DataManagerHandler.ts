@@ -20,7 +20,7 @@ export const DataManagerHandler: RpcConfigHookHandler<AnyDataManager> = ({
     },
     edit: async ($, key) => {
       const row = await config.source.getOrFail(key);
-      return $(await ConfigFactory(config.editConfigFactory, row));
+      return $(await ConfigFactory(config.editConfigFactory, [row]));
     },
   });
 };

@@ -5,9 +5,9 @@ import {
   AnyRpc,
   Rpc,
   RpcConnection,
-  RpcError,
   RpcUnresolvedConfig,
 } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import { RpcMapHandler } from "@dabsi/typerpc/rpc-map/RpcMapHandler";
 
 export type AnyRpcRecord = Record<string, AnyRpc>;

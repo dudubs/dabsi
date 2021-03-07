@@ -1,4 +1,4 @@
-import { Renderer } from "@dabsi/react/renderer";
+import { Renderer } from "@dabsi/view/react/renderer";
 import { ReactElement } from "react";
 import ViewWrapper from "./ViewWrapper";
 

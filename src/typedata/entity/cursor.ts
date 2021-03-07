@@ -15,10 +15,13 @@ import { DataCursor } from "@dabsi/typedata/cursor";
 import { DataFieldsTranslator } from "@dabsi/typedata/fieldsTranslator";
 import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
-import { DataEntityInfo, getDataEntityInfo } from "@dabsi/typedata/entity/info";
+import {
+  DataEntityMetadata,
+  getDataEntityMetadata,
+} from "@dabsi/typedata/entity/metadata";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { DataQuery } from "@dabsi/typedata/query/exp";
-import { getEntityMetadata } from "@dabsi/typedata/entity/metadata";
+import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 
 export type BaseDataEntityCursor = {
   typeInfo: DataTypeInfo;
@@ -49,7 +52,7 @@ export type DataEntityCursor = BaseDataEntityCursor & {
 
   queryRunner: QueryRunner;
 
-  entityInfo: DataEntityInfo;
+  entityInfo: DataEntityMetadata;
 
   entityManager: EntityManager;
 
@@ -133,7 +136,7 @@ export namespace DataEntityCursor {
             cursor.filter
           ),
       entityMetadata,
-      entityInfo: getDataEntityInfo(entityMetadata),
+      entityInfo: getDataEntityMetadata(entityMetadata),
       parent,
       ...getChildKeys(typeInfo.type, cursor.keys),
     };
@@ -155,12 +158,12 @@ export namespace DataEntityCursor {
       const columnKeys: DataEntityCursor["columnKeys"] = [];
       const relationKeys: DataEntityCursor["relationKeys"] = [];
 
-      const DataEntityInfo = getDataEntityInfo(
+      const DataEntityMetadata = getDataEntityMetadata(
         getEntityMetadata(connection, entityType)
       );
 
       for (const [propertyName, value] of entries(dataChildKeys)) {
-        const relation = DataEntityInfo.propertyRelationMap[propertyName];
+        const relation = DataEntityMetadata.propertyRelationMap[propertyName];
         if (relation) {
           const key = DataEntityKey.parse(relation.right.entityMetadata, value);
           relationKeys.push({
@@ -171,7 +174,7 @@ export namespace DataEntityCursor {
         }
 
         const columnMetadata =
-          DataEntityInfo.propertyColumnMetadataMap[propertyName];
+          DataEntityMetadata.propertyColumnMetadataMap[propertyName];
         if (columnMetadata) {
           columnKeys.push({ metadata: columnMetadata, key: value });
           continue;
@@ -195,17 +198,12 @@ export namespace DataEntityCursor {
   }
 
   export function buildQuery(cursor: DataEntityCursor): DataQuery {
-    return createQueryBuilder(cursor).query;
-  }
+    const query: DataQuery = {
+      from: cursor.entityMetadata.tableName,
+      alias: "r_" + cursor.entityMetadata.tableName,
+    };
+    const qb = new DataQueryBuilder(query);
 
-  export function createQueryBuilder(
-    cursor: DataEntityCursor,
-    aliasName?: string
-  ) {
-    const qb = DataQueryBuilder.createRoot(
-      cursor.entityMetadata.tableName,
-      aliasName
-    );
     join(qb.query.alias, cursor);
 
     let schema = qb.query.alias;
@@ -219,8 +217,7 @@ export namespace DataEntityCursor {
       join(schema, path);
     }
 
-    return qb;
-
+    return query;
     function join(
       schema: string,
       path: DataEntityCursorParent | DataEntityCursor

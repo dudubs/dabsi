@@ -1,21 +1,22 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { omit } from "@dabsi/common/object/omit";
 import Lazy from "@dabsi/common/patterns/lazy";
-import { Type } from "@dabsi/common/typings2/Type";
-import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
-import { DataEntityKey } from "@dabsi/typedata/entity/key";
-import { DataEntityLoader } from "@dabsi/typedata/entity/loader";
-import DataQueryRunner from "@dabsi/typedata/query/runner";
+import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { BasedType, RebaseType } from "@dabsi/typedata/BaseType";
+import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
 import getDataContext from "@dabsi/typedata/entity/connection";
+import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
 import getDeletePlan from "@dabsi/typedata/entity/getDeletePlan";
 import getInsertPlan from "@dabsi/typedata/entity/getInsertPlan";
 import getUpdatePlan from "@dabsi/typedata/entity/getUpdatePlan";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
-import { DataRow } from "@dabsi/typedata/row";
+import { DataEntityKey } from "@dabsi/typedata/entity/key";
+import { DataEntityLoader } from "@dabsi/typedata/entity/loader";
+import { DataEntityTreeLoader } from "@dabsi/typedata/entity/treeLoader";
+import { DataQueryRunner } from "@dabsi/typedata/query/runner";
+import { DataRow, DataTreeRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import { DataInsert, DataUpdate } from "@dabsi/typedata/value";
+import { DataInsertRow, DataUpdateRow } from "@dabsi/typedata/value";
 import { Connection, QueryRunner } from "typeorm";
-import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
-import { Constructor } from "@dabsi/common/typings2/Constructor";
 
 export class DataEntitySource<T> extends DataSource<T> {
   static createFromConnection<T>(
@@ -59,30 +60,38 @@ export class DataEntitySource<T> extends DataSource<T> {
     );
   }
 
+  @Lazy() get entityQuery() {
+    return DataEntityCursor.buildQuery(this.entityCursor);
+  }
+
   getDataQueryRunner(): DataQueryRunner {
-    return new DataQueryRunner(
-      DataEntityCursor.buildQuery(this.entityCursor),
-      this.entityCursor.queryRunner
-    );
+    return new DataQueryRunner(this.entityCursor.queryRunner);
   }
 
   @Lazy() get entityLoader(): DataEntityLoader {
-    const loader = DataEntityLoader.createFromCursor(this.entityCursor, this);
-    DataEntityLoader.buildCursor(loader, this.cursor);
-    return loader;
+    return new DataEntityLoader(
+      this.getQueryRunner().connection,
+      this.getDataQueryRunner(),
+      this.entityCursor.typeInfo,
+      this.cursor.selection,
+      this,
+      this.entityQuery,
+      this.entityQuery.alias
+    ).loadCursor(this.cursor);
   }
 
   getRows(): Promise<DataRow<T>[]> {
-    return this.entityLoader.loadRows();
+    return this.entityLoader.loadManyRows();
   }
 
   getCountRows(): Promise<number> {
-    return this.getDataQueryRunner().getCountRows();
+    return this.getDataQueryRunner().getCountRows(this.entityQuery);
   }
 
   hasRows(): Promise<boolean> {
-    return this.getDataQueryRunner().hasRows();
+    return this.getDataQueryRunner().hasRows(this.entityQuery);
   }
+
   createEntitySource(entityType): DataSource<any> {
     return new DataEntitySource(
       entityType,
@@ -112,7 +121,7 @@ export class DataEntitySource<T> extends DataSource<T> {
 
   async insertKeys<T>(
     this: DataEntitySource<T>,
-    values: DataInsert<T>[]
+    values: DataInsertRow<T>[]
   ): Promise<string[]> {
     const keys: string[] = [];
     for (const value of values) {
@@ -123,26 +132,26 @@ export class DataEntitySource<T> extends DataSource<T> {
     return keys;
   }
 
-  async updateKeys(keys: string[], value: DataUpdate<T>): Promise<number> {
+  async handleUpdate(keys: string[], value: DataUpdateRow<T>): Promise<number> {
     if (!hasKeys(value)) return 0;
     const plan = getUpdatePlan(this, value);
     await plan.updateMany(keys);
     return 0;
   }
 
-  protected async updateRelationKeys(
+  protected async handleUpdateRelations(
     keysToAdd: string[],
     keysToRemove: string[]
   ): Promise<void> {
     for (let key of keysToAdd) {
-      await this._updateRelationKeys(key, "addOrSet");
+      await this._handleUpdateRelations(key, "addOrSet");
     }
     for (let key of keysToRemove) {
-      await this._updateRelationKeys(key, "removeOrUnset");
+      await this._handleUpdateRelations(key, "removeOrUnset");
     }
   }
 
-  protected async _updateRelationKeys(
+  protected async _handleUpdateRelations(
     entityTextKey: string,
     method: "removeOrUnset" | "addOrSet"
   ) {
@@ -162,8 +171,20 @@ export class DataEntitySource<T> extends DataSource<T> {
     }
   }
 
-  async deleteKeys(textKeys: string[]): Promise<void> {
+  async handleDelete(textKeys: string[]): Promise<void> {
     const plan = getDeletePlan(this);
     await plan.deleteMany(textKeys);
   }
+
+  protected handleGetTree(
+    inverse: boolean,
+    relationPropertyName: string
+  ): Promise<DataTreeRow<T>[]> {
+    return new DataEntityTreeLoader(
+      this.entityLoader,
+      relationPropertyName
+    ).loadTreeRows({ inverse });
+  }
+  // getTreeLoaction()
+  // getTree
 }

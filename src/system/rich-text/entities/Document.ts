@@ -21,5 +21,5 @@ export class RichTextDocument {
   content!: string;
 
   @OneToMany(() => RichTextRelation, rel => rel.document)
-  relations!: DataRelation<RichTextRelation[]>;
+  relations!: DataRelation<RichTextRelation>[];
 }

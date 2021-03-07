@@ -1,4 +1,4 @@
-import { useStore } from "@dabsi/react/useStore";
+import { useStore } from "@dabsi/view/react/useStore";
 import { Struct } from "@dabsi/struct";
 import AppBar from "@material-ui/core/AppBar";
 import Divider from "@material-ui/core/Divider";

@@ -2,11 +2,11 @@ import catchError from "@dabsi/common/async/catchError";
 import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import {
-  ResolverContext,
+  ResolverMap,
   CustomResolver,
   IResolver,
   Resolver,
-  ResolverType,
+  Resolved,
 } from "@dabsi/typedi/Resolver";
 
 const _operator = "object";
@@ -19,11 +19,11 @@ declare module "../Resolver" {
   }
 }
 
-function _method<T extends ResolverContext>(
+function _method<T extends ResolverMap>(
   resolverMap: T
 ): CustomResolver<
   {
-    [K in keyof T]: ResolverType<T[K]>;
+    [K in keyof T]: Resolved<T[K]>;
   }
 > {
   const resolve = createObjectProxy(resolverMap, (resolver, key, context) =>

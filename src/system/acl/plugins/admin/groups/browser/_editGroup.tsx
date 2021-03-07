@@ -1,27 +1,27 @@
-import { MuiEditFormView } from "@dabsi/browser/mui/rpc/MuiEditFormView";
-import { mergeProps } from "@dabsi/react/utils/mergeProps";
+import { MuiEditFormView } from "@dabsi/browser/mui/widget/MuiEditFormView";
 import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import AclAdminGroupBasicInfoForm from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoForm";
-import AclAdminGroupBasicInfoInput from "@dabsi/system/acl/plugins/admin/groups/common/AclAdminGroupBasicInfoInput";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
+import { AclAdminGroupBasicInfoForm } from "@dabsi/system/acl/plugins/admin/groups/common/basicInfoForm";
+import { AclAdminGroupBasicInfoInput } from "@dabsi/system/acl/plugins/admin/groups/common/basicInfoInput";
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
-import { useSystemView } from "@dabsi/system/core/view/useSystemView";
+import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
+import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { useState } from "react";
 
-WidgetRouterView(
+WidgetRouterView.define(
   AclAdminRouter.at("editGroup"),
   params => AclAdminConnection.groupsManager.edit(params.groupId),
   props => {
     const [title, setTitle] = useState("");
 
-    useSystemView(AclAdminGroupBasicInfoForm, props => (
+    SystemView.use(AclAdminGroupBasicInfoForm, props => (
       <MuiEditFormView {...props} />
     ));
 
-    useSystemView(AclAdminGroupBasicInfoInput.at(":groupName"), props =>
+    SystemView.use(AclAdminGroupBasicInfoInput.at(":groupName"), props =>
       mergeProps(props, {
         inputRef: input => {
           setTimeout(() => {

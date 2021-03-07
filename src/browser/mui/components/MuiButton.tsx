@@ -1,7 +1,7 @@
 import { MuiIcon } from "./MuiIcon";
 import { Override } from "@dabsi/common/typings2/Override";
-import { updateRef } from "@dabsi/react/HookRef";
-import { partialProps } from "@dabsi/react/utils/partialProps";
+import { updateRef } from "@dabsi/view/react/HookRef";
+import { partialProps } from "@dabsi/view/react/utils/partialProps";
 import Button, { ButtonProps } from "@material-ui/core/Button";
 import IconButton, { IconButtonProps } from "@material-ui/core/IconButton";
 import Tooltip, { TooltipProps } from "@material-ui/core/Tooltip";

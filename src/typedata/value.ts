@@ -1,4 +1,4 @@
-import { GetBaseType } from "./BaseType";
+import { RebaseType } from "./BaseType";
 import {
   DataRelationKeys,
   DataRelationToOneKeys,
@@ -41,6 +41,6 @@ export type DataValue<T> = {
     [K in NotRelationKeys<T>]?: T[K] | null | undefined;
   };
 
-export type DataUpdate<T> = DataValue<GetBaseType<T>>;
+export type DataUpdateRow<T> = DataValue<RebaseType<T>>;
 // TODO: relations can me also {$key}
-export type DataInsert<T> = DataValue<GetBaseType<T>>;
+export type DataInsertRow<T> = DataValue<RebaseType<T>>;

@@ -20,7 +20,7 @@ export class DataInputMapHandler
   implements IWidgetHandler<T> {
   $targetConfig: RpcChildConfig<T, "target"> = this.config.targetConfig;
 
-  getValueFromConfig(
+  getInputValueFromConfig(
     valueConfig: InputValueConfig<T>
   ): Awaitable<InputValue<T>> {
     return {};
@@ -34,7 +34,7 @@ export class DataInputMapHandler
     };
   }
 
-  async getValueElement(
+  async getInputValueElement(
     valueMap: InputValue<T> | undefined
   ): Promise<InputValueElement<T>> {
     const { target } = {
@@ -47,7 +47,7 @@ export class DataInputMapHandler
         valueMap?.[dataRow.$key] ?? (await this.config.getRowValue(dataRow));
       elementMap[dataRow.$key] = {
         label: this.config.getRowLabel?.(dataRow) ?? dataRow.label,
-        value: await target.getValueElement(value),
+        value: await target.getInputValueElement(value),
       };
     }
     return elementMap;

@@ -33,7 +33,7 @@ export default class RichTextImageModule {
       .defineRelation("image", ImageFile, {
         selection: { pick: ["url"] },
       })
-      .defineEntity("image", {
+      .defineBlock("image", {
         readonlyKeys: ["url"],
         pack: ({ imageKey }, c) => {
           c.packRelation("image", imageKey);

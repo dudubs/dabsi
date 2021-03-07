@@ -2,10 +2,11 @@ import { mapObject } from "@dabsi/common/object/mapObject";
 import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { AnyRpc, AnyRpcWithMap, RpcError } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, AnyRpcWithMap } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import { AnyRpcMap, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
-import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/WidgetMap";
+import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { RpcConfigResolver } from "./configResolver";
 

@@ -1,7 +1,7 @@
 import { ComponentProps, createElement, ReactElement } from "react";
 import ReactTesterRenderer from "react-test-renderer";
 import { Timeout } from "@dabsi/common/async/Timeout";
-import { buildTests } from "@dabsi/jasmine/buildTests";
+import { collectTests } from "@dabsi/jasmine/collectTests";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { WidgetViewClass } from "@dabsi/typerpc/widget/WidgetView";
 import {
@@ -86,7 +86,7 @@ export function testWidgetView<
   }[] = [];
 
   testWidget(t, wt => {
-    const defineTests = buildTests("widgetView", () => {
+    const defineTests = collectTests("widgetView", () => {
       callback({
         get view() {
           return view;
@@ -109,7 +109,7 @@ export function testWidgetView<
           renders.push({
             title,
             render,
-            defineTests: callback && buildTests("render:" + title, callback),
+            defineTests: callback && collectTests("render:" + title, callback),
           });
         },
       });

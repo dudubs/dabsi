@@ -4,6 +4,16 @@ import { Type } from "@dabsi/common/typings2/Type";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { Hookable } from "@dabsi/modules/Hookable";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
+import {
+  RichTextBlockHandler,
+  RichTextBlockOptions,
+} from "@dabsi/system/rich-text/blockHandler";
+import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
+import {
+  RichTextEntityHandler,
+  RichTextEntityOptions,
+} from "@dabsi/system/rich-text/entityHandler";
 import {
   RichTextInputConfig,
   RichTextInputElement,
@@ -14,15 +24,15 @@ import {
   RichTextRelationType,
   RichTextRelationTypeKey,
 } from "@dabsi/system/rich-text/common/types";
-import { RichTextBlock } from "@dabsi/system/rich-text/common/contentBlock";
-import { RichTextEntity } from "@dabsi/system/rich-text/common/contentEntity";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
+import { initRichTextModule } from "@dabsi/system/rich-text/init";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { Module } from "@dabsi/typedi";
+import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import "reflect-metadata";
 import { ManyToOne, RelationOptions } from "typeorm";
-import { initRichTextModule } from "@dabsi/system/rich-text/init";
-import { AnyRpc, RpcError } from "@dabsi/typerpc/Rpc";
+import { RichTextBlockStyleHandler } from "@dabsi/system/rich-text/blockStyleHandler";
 
 @Module({
   dependencies: [DbModule],
@@ -38,12 +48,12 @@ export default class RichTextModule {
     (config: RichTextInputConfig, element: RichTextInputElement) => Awaitable
   >();
 
-  protected _blockHandlerMap: Record<string, RichTextBlock.Handler<any>> = {};
-  protected _entityHandlerMap: Record<string, RichTextEntity.Handler<any>> = {};
+  protected _blockHandlerMap: Record<string, RichTextBlockHandler<any>> = {};
+  protected _entityHandlerMap: Record<string, RichTextEntityHandler<any>> = {};
   protected _allowedRpcForReadonly = new Set<AnyRpc>();
   protected _blockStyleHandlerMap: Record<
     string,
-    RichTextBlock.StyleHandler<any>
+    RichTextBlockStyleHandler<any>
   > = {};
 
   constructor(public data: DataContext) {
@@ -62,7 +72,7 @@ export default class RichTextModule {
 
   defineBlock<T extends RichTextBlock.Type>(
     type: T,
-    { unpack = data => data, ...handler }: RichTextBlock.Options<T>
+    { unpack = data => data, ...handler }: RichTextBlockOptions<T> = {}
   ): this {
     this._blockHandlerMap[type] = { ...handler, unpack };
     return this;
@@ -70,7 +80,7 @@ export default class RichTextModule {
 
   getBlockHandler<T extends RichTextBlock.Type>(
     type: T
-  ): RichTextBlock.Handler<T> {
+  ): RichTextBlockHandler<T> {
     return defined(
       this._blockHandlerMap[type],
       () => `No block handler for "${type}".`
@@ -79,7 +89,7 @@ export default class RichTextModule {
 
   defineBlockStyle<T extends RichTextBlock.StyleType>(
     type: T,
-    { ...handler }: RichTextBlock.StyleHandler<T>
+    { ...handler }: RichTextBlockStyleHandler<T>
   ): this {
     this._blockStyleHandlerMap[type] = { ...handler };
     return this;
@@ -87,7 +97,7 @@ export default class RichTextModule {
 
   getBlockStyleHandler<T extends RichTextBlock.StyleType>(
     type: T
-  ): RichTextBlock.StyleHandler<T> {
+  ): RichTextBlockStyleHandler<T> {
     return defined(
       this._blockStyleHandlerMap[type],
       () => `No style handle for "${type}".`
@@ -96,7 +106,7 @@ export default class RichTextModule {
 
   defineEntity<T extends RichTextEntity.Type>(
     type: T,
-    { ...handler }: RichTextEntity.Options<T>
+    { ...handler }: RichTextEntityOptions<T>
   ): this {
     this._entityHandlerMap[type] = {
       type,
@@ -107,7 +117,7 @@ export default class RichTextModule {
 
   getEntityHandler<T extends RichTextEntity.Type>(
     type: T
-  ): RichTextEntity.Handler<T> {
+  ): RichTextEntityHandler<T> {
     return defined(
       this._entityHandlerMap[type],
       () => `No entity handler for "${type}".`

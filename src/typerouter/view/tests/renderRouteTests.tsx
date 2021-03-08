@@ -1,12 +1,10 @@
-import { Tester } from "@dabsi/jasmine/Tester";
 import { Store } from "@dabsi/store";
-import { HistoryProvider } from "@dabsi/typerouter/History";
 import { RouterLocation } from "@dabsi/typerouter/location";
-import { getRouteByPath, Route } from "@dabsi/typerouter/route";
-import Router, { AnyRouter, RouterType } from "@dabsi/typerouter/router";
+import { getRouteByPath } from "@dabsi/typerouter/route";
+import Router, { RouterType } from "@dabsi/typerouter/router";
 import { RouterView } from "@dabsi/typerouter/view";
-import { loadRoute } from "@dabsi/typerouter/view/loadRoute";
-import { createMemoryHistory } from "history";
+import { renderRoute } from "@dabsi/typerouter/view/renderRoute";
+import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import React from "react";
 import * as ReactTestRenderer from "react-test-renderer";
 
@@ -27,11 +25,6 @@ const renderToString = element => {
     return String(node);
   }
 };
-const testLoadRoute = (route: Route) =>
-  loadRoute(
-    route,
-    Store.const(() => ({}))
-  );
 
 const router = Router({
   wrapperTests: Router({
@@ -104,7 +97,9 @@ const testRouteComponent = async ({
 }) => {
   const route = getRouteByPath(location, path);
   expect(route.type).toEqual(expectedRouteType);
-  const text = renderToString(await loadRoute(route, Store.const(null)));
+  const text = renderToString(
+    await renderRoute(route, Store.const(null), EmptyFragment)
+  );
   const kws = [...text.matchAll(/\s*([^\;]+)\;/g)].map(g => g[1]);
 
   debug && console.log({ text, kws });

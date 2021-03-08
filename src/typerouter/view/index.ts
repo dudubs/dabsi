@@ -1,69 +1,74 @@
 import Router, { TRouter } from "@dabsi/typerouter/router";
-import {
-  RouterViewComponent,
-  RouterViewComponentProps,
-} from "@dabsi/typerouter/view/component";
 import { getRouterViewMetadata } from "@dabsi/typerouter/view/metadata";
+import {
+  renderRouterView,
+  RouterViewProps,
+} from "@dabsi/typerouter/view/render";
 import { RouteViewComponent } from "@dabsi/typerouter/view/route";
+import { ReactWrapper } from "@dabsi/view/react/wrapper";
+import React from "react";
 
-export function RouterView(
-  props: RouterViewComponentProps
-): React.ReactElement {
-  return RouterViewComponent(props);
+export function RouterView(props: RouterViewProps): React.ReactElement {
+  return renderRouterView(props);
 }
 
+function isComponentFunction(
+  component: React.ComponentType<any>
+): component is (props: any) => React.ReactElement {
+  return (
+    !component.prototype || !(component.prototype instanceof React.Component)
+  );
+}
 export namespace RouterView {
   export const define = ((...args) => {
-    const {
+    let {
       options: {
         wrapper = false,
         disableIndex = wrapper,
         errorHandling = false,
         defaultHandling = false,
+        disableReactWrapper = false,
       },
-      router,
       metadata,
-      loader,
       component,
-    } = parseArgs<RouteViewComponent.Options<any, any>>(args);
+    } = parseArgs<RouteViewComponent.Options<any>>(args);
+
+    if (!disableReactWrapper && isComponentFunction(component)) {
+      const render = component;
+      component = props => ReactWrapper(() => render(props));
+    }
 
     if (!disableIndex) {
-      metadata.indexHandler = { loader, component };
+      metadata.indexHandler = { component };
     }
 
     if (errorHandling) {
-      metadata.errorHandler = { loader, component };
+      metadata.errorHandler = { component };
     }
 
     if (defaultHandling) {
-      metadata.defaultHandler = { loader, component };
+      metadata.defaultHandler = { component };
     }
 
     if (wrapper) {
-      metadata.wrappers.push({ loader, component });
+      metadata.wrappers.push({ component });
     }
 
     //
   }) as {
     <R extends TRouter>(
       router: Router<R>,
-      component: RouteViewComponent.Type<R, never>
-    ): void;
-    <R extends TRouter, D>(
-      router: Router<R>,
-      loader: RouteViewComponent.Loader<R, D>,
-      component: RouteViewComponent.Type<R, D>
+      component: RouteViewComponent.Type<R>
     ): void;
     <R extends TRouter>(
       router: Router<R>,
-      options: RouteViewComponent.Options<R, never>,
-      component: RouteViewComponent.Type<R, never>
+      options: RouteViewComponent.Options<R>,
+      component: RouteViewComponent.Type<R>
     ): void;
-    <R extends TRouter, D>(
+    <R extends TRouter>(
       router: Router<R>,
-      options: RouteViewComponent.Options<R, D>,
-      loader: RouteViewComponent.Loader<R, D>,
-      component: RouteViewComponent.Type<R, D>
+      options: RouteViewComponent.Options<R>,
+      component: RouteViewComponent.Type<R>
     ): void;
   };
 }
@@ -71,28 +76,19 @@ export namespace RouterView {
 function parseArgs<O>(args) {
   let router;
   let options;
-  let loader;
   let component;
 
   if (args.length === 2) {
     [router, component] = args;
-    [options, loader] = [null, null];
+    [options] = [null];
   } else if (args.length == 3) {
-    let optionsOrLoader;
-    [router, optionsOrLoader, component] = args;
-    [options, loader] =
-      typeof optionsOrLoader === "function"
-        ? [null, optionsOrLoader]
-        : [optionsOrLoader, null];
-  } else if (args.length === 4) {
-    [router, options, loader, component] = args;
+    [router, options, component] = args;
   }
 
   return {
     metadata: getRouterViewMetadata(router),
     router,
     options: (options || {}) as O,
-    loader,
     component,
   };
 }

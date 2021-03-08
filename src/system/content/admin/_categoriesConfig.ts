@@ -38,9 +38,10 @@ export default RpcConfigResolver(
               .filter({ $is: key })
               .pick(["title"])
               .getTreeAt("parent");
-            console.log({ tree });
 
-            return { path: tree.map(({ $key, title }) => ({ $key, title })) };
+            return {
+              path: tree.reverse().map(({ $key, title }) => ({ $key, title })),
+            };
           },
 
           addForm: $ =>

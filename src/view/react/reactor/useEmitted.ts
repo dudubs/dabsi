@@ -1,23 +1,17 @@
+import { Defined } from "@dabsi/common/typings2/Defined";
 import { useReactor } from "@dabsi/view/react/reactor/hooks";
 import { Emittable, EmittableType } from "@dabsi/view/react/reactor/Reactor";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 export function useEmitted<T extends Emittable<any>>(
   emittable: T,
-  callback?: (event: EmittableType<T>, emittable: T) => void
-): EmittableType<T> {
+  callback?: (event: Defined<EmittableType<T>>, emittable: T) => void,
+  deps: any[] = []
+): void {
   const reactor = useReactor();
-  const [state, setState] = useState(
-    () => reactor.getLast(emittable) ?? emittable.init!
-  );
   useEffect(() => {
     return reactor.listen(emittable, event => {
-      if (event != state) {
-        setState(event);
-        callback?.(event, emittable);
-      }
+      if (event !== undefined) callback?.(event, emittable);
     });
-  }, [reactor]);
-
-  return state;
+  }, [reactor, ...deps]);
 }

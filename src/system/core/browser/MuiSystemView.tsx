@@ -23,12 +23,7 @@ export function MuiSystemView() {
     return (
       <RouterView
         router={SystemRouter}
-        renderLoading={element => element || <>{lang`LOADING`}</>}
-        renderNoRoute={route => (
-          <Typography>
-            {lang`NO_ROUTE`} {route.type} {route.path}
-          </Typography>
-        )}
+        noRouteElement={<Typography>{lang`NO_ROUTE`}</Typography>}
       />
     );
   });

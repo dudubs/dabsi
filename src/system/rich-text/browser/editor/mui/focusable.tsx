@@ -1,5 +1,5 @@
 import { Emittable } from "@dabsi/view/react/reactor/Reactor";
-import { useEmitted } from "@dabsi/view/react/reactor/useEmitted";
+import { useEmittedState } from "@dabsi/view/react/reactor/useEmittedState";
 import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
 import { ReactRef } from "@dabsi/view/react/ref";
 import { createStyles, makeStyles } from "@material-ui/core/styles";
@@ -86,7 +86,7 @@ export function MuiFocusable({
     setFocus(nextFocus);
   };
 
-  useEmitted(ON_FOCUS, event => {
+  useEmittedState(ON_FOCUS, event => {
     if (currentPopoverId.size) return;
     setFocus(event?.focusId === focusId);
   });

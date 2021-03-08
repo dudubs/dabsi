@@ -13,11 +13,11 @@ import React, { useState } from "react";
 const childKey = AclAdminEditUser.getChildKey(AclEditUserAvatar)!;
 
 AclAdminViewOptions.editUser.excludeChildKeys.push(
-  AclAdminEditUser.definedChildKey(AclEditUserAvatar)
+  AclAdminEditUser.getDefinedChildKey(AclEditUserAvatar)
 );
 
 AclAdminViewOptions.editUser.childWrapperMap[
-  AclAdminEditUser.definedChildKey(AclAdminUserBasicInfoForm)
+  AclAdminEditUser.getDefinedChildKey(AclAdminUserBasicInfoForm)
 ] = children => <View>{children}</View>;
 
 function View({ children }) {

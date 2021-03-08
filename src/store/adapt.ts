@@ -51,6 +51,7 @@ define(Object, {
     return obj[key];
   },
   setKey(obj, key, value) {
+    if (!obj) obj = {};
     obj[key] = value;
     return obj;
   },

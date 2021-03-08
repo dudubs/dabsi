@@ -5,40 +5,44 @@ import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAd
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
 
-WidgetRouterView.define(
-  AclAdminRouter.at("createNewUser"),
-  AclAdminConnection.usersManager.add,
-  (props, { location }) => {
-    SystemView.use(props.connection.$widget, props => (
-      <MuiFormView
-        {...props}
-        onSubmit={() => location.parent.at("users").push()}
-      />
-    ));
+import { RouterView } from "@dabsi/typerouter/view";
+import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
 
-    SystemView.use(props.connection.input.$widget, props => (
-      <MuiGridMapView
-        for={props}
-        children={{
-          firstName: {
-            GridProps: { xs: 6 },
-          },
-          lastName: {
-            GridProps: { xs: 6 },
-          },
-        }}
-      />
-    ));
+const connection = AclAdminConnection.usersManager.add;
 
-    return (
-      <MuiSystemPage
-        title={lang`CREATE_NEW_USER`}
-        Breadcrumbs={AclBreadcrumbs.Users}
-      >
-        <SystemView {...props} />
-      </MuiSystemPage>
-    );
-  }
-);
+RouterView.define(AclAdminRouter.at("createNewUser"), (props, { location }) => {
+  SystemView.use(connection.$widget, props => (
+    <MuiFormView
+      {...props}
+      onSubmit={() => location.parent.at("users").push()}
+    />
+  ));
+
+  SystemView.use(connection.input.$widget, props => (
+    <MuiGridMapView
+      for={props}
+      children={{
+        firstName: {
+          GridProps: { xs: 6 },
+        },
+        lastName: {
+          GridProps: { xs: 6 },
+        },
+      }}
+    />
+  ));
+
+  return (
+    <WidgetLoaderView connection={AclAdminConnection.usersManager.add}>
+      {props => (
+        <MuiSystemPage
+          title={lang`CREATE_NEW_USER`}
+          Breadcrumbs={AclBreadcrumbs.Users}
+        >
+          <SystemView {...props} />
+        </MuiSystemPage>
+      )}
+    </WidgetLoaderView>
+  );
+});

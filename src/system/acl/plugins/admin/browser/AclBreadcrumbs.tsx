@@ -17,7 +17,7 @@ AclBreadcrumbs.Groups = ({ children }) => {
   return (
     <AclBreadcrumbs>
       <MuiRouterLink
-        router={() => AclAdminRouter.at("groups")}
+        to={() => AclAdminRouter.at("groups")}
       >{lang`GROUPS`}</MuiRouterLink>
       {children}
     </AclBreadcrumbs>
@@ -28,7 +28,7 @@ AclBreadcrumbs.Users = ({ children }) => {
   return (
     <AclBreadcrumbs>
       <MuiRouterLink
-        router={() => AclAdminRouter.at("users")}
+        to={() => AclAdminRouter.at("users")}
       >{lang`USERS`}</MuiRouterLink>
       {children}
     </AclBreadcrumbs>

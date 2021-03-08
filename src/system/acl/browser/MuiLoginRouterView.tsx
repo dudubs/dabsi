@@ -6,53 +6,55 @@ import { AclConnection } from "@dabsi/system/acl/common/rpc";
 import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { useHistory } from "@dabsi/typerouter/History";
-import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
+import { RouterView } from "@dabsi/typerouter/view";
+import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
 import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
 import Typography from "@material-ui/core/Typography";
 import React from "react";
 
-WidgetRouterView.define(
-  AclLoginRouter,
-  AclConnection.login,
-  { debug: true },
-  props => {
-    const emit = useEmitter();
-    const history = useHistory();
+RouterView.define(AclLoginRouter, () => {
+  const emit = useEmitter();
+  const history = useHistory();
 
-    SystemView.use(props.connection.input.map.password.$widget, props => (
-      <MuiTextInputView
-        {...props}
-        title={lang`PASSWORD`}
-        TextFieldProps={{
-          type: "password",
-        }}
-      />
-    ));
+  SystemView.use(AclConnection.login.input.map.password.$widget, props => (
+    <MuiTextInputView
+      {...props}
+      title={lang`PASSWORD`}
+      TextFieldProps={{
+        type: "password",
+      }}
+    />
+  ));
 
-    return (
-      <PaperInCenter>
-        <Typography variant={"h6"}>{lang`LOGIN`}</Typography>
-        <MuiFormView
-          {...props}
-          onSubmit={result => {
-            if (result.type !== "success") return;
-            console.log({ result });
-            emit(AclLoginInfoEvent, result);
+  return (
+    <WidgetLoaderView connection={AclConnection.login}>
+      {props => {
+        return (
+          <PaperInCenter>
+            <Typography variant={"h6"}>{lang`LOGIN`}</Typography>
+            <MuiFormView
+              {...props}
+              onSubmit={result => {
+                if (result.type !== "success") return;
+                console.log({ result });
+                emit(AclLoginInfoEvent, result);
 
-            const redirectionData = history.location.search.match(
-              /[?&]redirection=(?<x>[^&$]+)/
-            )?.groups?.x;
+                const redirectionData = history.location.search.match(
+                  /[?&]redirection=(?<x>[^&$]+)/
+                )?.groups?.x;
 
-            const redirection =
-              redirectionData &&
-              JSON.parse(decodeURIComponent(redirectionData));
+                const redirection =
+                  redirectionData &&
+                  JSON.parse(decodeURIComponent(redirectionData));
 
-            if (redirection?.type === "location") {
-              history.push(redirection.path);
-            }
-          }}
-        />
-      </PaperInCenter>
-    );
-  }
-);
+                if (redirection?.type === "location") {
+                  history.push(redirection.path);
+                }
+              }}
+            />
+          </PaperInCenter>
+        );
+      }}
+    </WidgetLoaderView>
+  );
+});

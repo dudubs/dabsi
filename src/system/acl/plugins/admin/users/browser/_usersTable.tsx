@@ -1,14 +1,14 @@
 import { MuiDataTableView } from "@dabsi/browser/mui/widget/MuiDataTableView";
 import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
 import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
+
+import { RouterView } from "@dabsi/typerouter/view";
+import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
 import React from "react";
 
-WidgetRouterView.define(
-  AclAdminRouter.at("users"),
-  AclAdminConnection.usersManager.table,
-  (props, { location }) => {
-    return (
+RouterView.define(AclAdminRouter.at("users"), ({ location }) => (
+  <WidgetLoaderView connection={AclAdminConnection.usersManager.table}>
+    {props => (
       <MuiDataTableView
         {...props}
         title={lang`USERS`}
@@ -23,8 +23,8 @@ WidgetRouterView.define(
           },
         }}
       />
-    );
-  }
-);
+    )}
+  </WidgetLoaderView>
+));
 
 //

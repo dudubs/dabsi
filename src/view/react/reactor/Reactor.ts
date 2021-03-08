@@ -1,5 +1,6 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { MetaType, WithMetaType } from "@dabsi/common/MetaType";
+import { Emitter } from "@dabsi/view/react/reactor/useEmitter";
 
 export type ReactorEvent<T> = new (...args) => T;
 

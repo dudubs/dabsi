@@ -11,7 +11,7 @@ import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
 import { AdminInfoEvent } from "@dabsi/system/admin/browser/router";
 import { getAdminInfo } from "@dabsi/system/admin/common";
 import { RouterViewEvent } from "@dabsi/typerouter/event";
-import { useEmitted } from "@dabsi/view/react/reactor/useEmitted";
+import { useEmittedState } from "@dabsi/view/react/reactor/useEmittedState";
 import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
 import IconButton from "@material-ui/core/IconButton";
 import Menu from "@material-ui/core/Menu";
@@ -30,11 +30,11 @@ export function MuiAdminView(props: {
 }): ReactElement {
   const { children } = props;
 
-  const adminInfo = useEmitted(AdminInfoEvent, adminInfo => {
+  const adminInfo = useEmittedState(AdminInfoEvent, adminInfo => {
     // console.log(adminInfo);
   });
 
-  const loginInfo = useEmitted(AclLoginInfoEvent, async loginInfo => {
+  const loginInfo = useEmittedState(AclLoginInfoEvent, async loginInfo => {
     // console.log({ loginInfoType: loginInfo.type });
     if (loginInfo.type === "success") {
       emit(AdminInfoEvent, await getAdminInfo());
@@ -50,9 +50,7 @@ export function MuiAdminView(props: {
     return (
       <PaperInCenter title={lang`ACCESS_DENIED`}>
         <Typography>
-          <MuiRouterLink
-            router={() => AclLoginRouter}
-          >{lang`LOGIN`}</MuiRouterLink>
+          <MuiRouterLink to={() => AclLoginRouter}>{lang`LOGIN`}</MuiRouterLink>
         </Typography>
       </PaperInCenter>
     );

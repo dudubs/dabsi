@@ -81,8 +81,8 @@ export type MuiDataTableViewProps<
 
   MuiTableToolbarProps?: Omit<MuiTableToolbarProps, "actions">;
 
-  beforeHead?: React.ReactElement;
-  afterHead?: React.ReactElement;
+  beforeHead?: React.ReactNode;
+  afterHead?: React.ReactNode;
 
   addAction?: {
     title: React.ReactElement;

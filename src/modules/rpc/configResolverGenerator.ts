@@ -5,7 +5,7 @@ import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { AnyRpc, AnyRpcWithMap } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 import { AnyRpcMap, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
+import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
 import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { RpcConfigResolver } from "./configResolver";

@@ -11,59 +11,65 @@ import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { Form } from "@dabsi/typerpc/widget/form/rpc";
-import { WidgetRouterView } from "@dabsi/typerpc/widget/WidgetRouterView";
+
+import { RouterView } from "@dabsi/typerouter/view";
+import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { useState } from "react";
 
-WidgetRouterView.define(
-  AclAdminRouter.at("editUser"),
-  params => AclAdminConnection.usersManager.edit(params.userId),
-  props => {
-    const [title, setTitle] = useState("");
+RouterView.define(AclAdminRouter.at("editUser"), ({ location }) => {
+  const [title, setTitle] = useState("");
 
-    SystemView.use(define => {
-      function updateTitle({ firstName = "", lastName = "" } = {}) {
-        setTitle(`${firstName} ${lastName}`);
-      }
+  SystemView.use(define => {
+    function updateTitle({ firstName = "", lastName = "" } = {}) {
+      setTitle(`${firstName} ${lastName}`);
+    }
 
-      define(Form, MuiEditFormView);
+    define(Form, MuiEditFormView);
 
-      define(AclAdminUserBasicInfoInput, props => (
-        <MuiGridMapView
-          for={mergeProps(props, {
-            onChange: input => {
+    define(AclAdminUserBasicInfoInput, props => (
+      <MuiGridMapView
+        for={mergeProps(props, {
+          onChange: input => {
+            updateTitle(input?.value);
+          },
+          inputRef: input => {
+            setTimeout(() => {
               updateTitle(input?.value);
-            },
-            inputRef: input => {
-              setTimeout(() => {
-                updateTitle(input?.value);
-              });
-            },
-          })}
-          children={{
-            firstName: { GridProps: { xs: 6 } },
-            lastName: { GridProps: { xs: 6 } },
-          }}
-        />
-      ));
+            });
+          },
+        })}
+        children={{
+          firstName: { GridProps: { xs: 6 } },
+          lastName: { GridProps: { xs: 6 } },
+        }}
+      />
+    ));
 
-      define(AclAdminUserGroupsForm.at("input"), props => (
-        <MuiDataInputMapView {...props} itemGridProps={{ xs: 4 }} />
-      ));
-    });
+    define(AclAdminUserGroupsForm.at("input"), props => (
+      <MuiDataInputMapView {...props} itemGridProps={{ xs: 4 }} />
+    ));
+  });
 
-    return (
-      <MuiSystemPage
-        title={lang`EDIT_USER`}
-        breadcrumbTitle={title}
-        Breadcrumbs={AclBreadcrumbs.Users}
-      >
-        <MuiAccordionMapView
-          for={props}
-          exclude={AclAdminViewOptions.editUser.excludeChildKeys}
-          wrappers={AclAdminViewOptions.editUser.childWrapperMap}
-        />
-      </MuiSystemPage>
-    );
-  }
-);
+  return (
+    <WidgetLoaderView
+      connection={() =>
+        AclAdminConnection.usersManager.edit(location.params.userId)
+      }
+    >
+      {props => (
+        <MuiSystemPage
+          title={lang`EDIT_USER`}
+          breadcrumbTitle={title}
+          Breadcrumbs={AclBreadcrumbs.Users}
+        >
+          <MuiAccordionMapView
+            for={props}
+            exclude={AclAdminViewOptions.editUser.excludeChildKeys}
+            wrappers={AclAdminViewOptions.editUser.childWrapperMap}
+          />
+        </MuiSystemPage>
+      )}
+    </WidgetLoaderView>
+  );
+});

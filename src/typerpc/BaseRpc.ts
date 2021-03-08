@@ -39,7 +39,7 @@ const getRpcLocator = WeakMapFactory((rpc: AnyRpc) => {
 });
 
 export class BaseRpc implements IRpc<T> {
-  rpcType;
+  rpcType: any;
 
   children = this.options.children || {};
 

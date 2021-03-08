@@ -4,7 +4,7 @@ import { DataInputView } from "@dabsi/typerpc/input/data-input/DataInputView";
 import { InputViewProps } from "@dabsi/typerpc/input/InputView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyDataTableTypes } from "@dabsi/typerpc/widget/data-table/rpc";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
+import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -90,9 +90,8 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                 subject: props.title,
               })}
             </DialogTitle>
-            <WidgetViewLoader
-              connection={props.connection.table}
-              children={props => (
+            <WidgetLoaderView connection={props.connection.table}>
+              {props => (
                 <MuiDataTableView
                   // disableToolbar
                   {...props}
@@ -126,7 +125,7 @@ export function MuiDataInputView<C extends AnyDataInputConnection>(
                   }}
                 />
               )}
-            />
+            </WidgetLoaderView>
           </DialogContent>
         </Dialog>
       )}

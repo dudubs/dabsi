@@ -1,6 +1,6 @@
 import Router from "@dabsi/typerouter/router";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
+import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
 import { SystemRouter } from "@dabsi/system/core/common/router";
 import { SystemRpc } from "@dabsi/system/core/common/rpc";
 

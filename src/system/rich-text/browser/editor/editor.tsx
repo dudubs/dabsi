@@ -9,7 +9,7 @@ import { RichTextEditorKeyCommand } from "@dabsi/system/rich-text/browser/editor
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
-import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
+import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
 import { ViewContext } from "@dabsi/view/react/context";
 import { View } from "@dabsi/view/react/component/View";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";

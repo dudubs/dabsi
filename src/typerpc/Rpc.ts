@@ -232,6 +232,7 @@ export enum RpcConfigType {
   Generic,
   Factory,
 }
+export type RpcPath = any[];
 
 export type RpcOptions<T extends TRpc> = PartialUndefinedKeys<
   {

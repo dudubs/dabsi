@@ -1,10 +1,7 @@
-import { flat } from "@dabsi/common/iterator/flat";
-import { entries } from "@dabsi/common/object/entries";
+import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
-import { RpcNamespaceHandler } from "@dabsi/typerpc/RpcNamespaceHandler";
 
 it("sanity", async () => {
   const a = RpcNamespace();

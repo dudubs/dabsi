@@ -3,7 +3,7 @@ import { Type } from "@dabsi/common/typings2/Type";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import { BasedType, RebaseType } from "@dabsi/typedata/BaseType";
 import { DataExp } from "@dabsi/typedata/exp/exp";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
+import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";
 import { BasedDataRow } from "@dabsi/typedata/sourceRow";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import {
@@ -45,7 +45,7 @@ export class AclCriterion<T> {
       const [type, key] = row;
       return new AclCriterion(
         type,
-        { ...EmptyDataCursor, filter: { $is: key } },
+        { ...EMPTY_DATA_CURSOR, filter: { $is: key } },
         undefined
       );
     }

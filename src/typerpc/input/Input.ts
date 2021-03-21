@@ -130,7 +130,7 @@ export type InputOptions<T extends TInput> = PartialUndefinedKeys<
   } & WidgetControllerOptions<T>,
   {
     handler: WidgetHandlerClass<Input<T>>;
-    type?: Function;
+    type: Function;
     getValueDataFromValueElement: (
       this: Input<T>,
       valueElement: InputValueElement<Input<T>>

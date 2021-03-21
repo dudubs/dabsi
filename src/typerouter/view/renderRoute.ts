@@ -40,6 +40,7 @@ export function renderRoute(
       locationStore: store.at(location.path),
 
       children: null,
+      useParams: makeUseParamsFn(location),
     });
 
     for (const wrppaerLocation of location.getParents()) {
@@ -49,8 +50,8 @@ export function renderRoute(
           route,
           location: wrppaerLocation,
           locationStore: store.at(wrppaerLocation.path),
-
           children: element,
+          useParams: makeUseParamsFn(wrppaerLocation),
         });
       }
     }
@@ -73,3 +74,13 @@ export function renderRoute(
     return defaultElement;
   }
 }
+
+const makeUseParamsFn = (location: AnyRouterLocation) => (
+  callback,
+  deps = []
+) => {
+  return React.useMemo(() => callback(location.params), [
+    ...location.router.params.map(p => location.params[p]),
+    ...deps,
+  ]);
+};

@@ -1,23 +1,21 @@
-import { HasKeys, IsUndefined } from "@dabsi/common/typings2/boolean";
-import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
-import { Pluck } from "@dabsi/common/typings2/Pluck";
-import { BaseType, WithBaseType } from "@dabsi/typedata/BaseType";
-
+import { HasKeys } from "@dabsi/common/typings2/boolean";
+import { PluckDefined } from "@dabsi/common/typings2/Pluck";
+import { WithBaseType } from "@dabsi/typedata/BaseType";
 import { DataFieldsRow } from "@dabsi/typedata/fields";
 import {
-  DataTypeMetaKey,
-  WithDataUnionMetaChildren,
-  DataUnionMetaChildrenKey,
-  GetDataUnionMetaChildren,
-  DefaultDataUnionMetaChildren,
-} from "@dabsi/typedata/union";
-import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
-import {
-  MapRelation,
   DataNonRelationKeys,
   DataRelationKeys,
   DataRelationTypeAt,
+  MapRelation,
 } from "@dabsi/typedata/relation";
+import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
+import {
+  DataTypeMetaKey,
+  DataUnionMetaChildrenKey,
+  DefaultDataUnionMetaChildren,
+  GetDataUnionMetaChildren,
+  WithDataUnionMetaChildren,
+} from "@dabsi/typedata/union";
 
 type _PickRow<T, S> = S extends { pick: ReadonlyArray<infer K> }
   ? Pick<T, Extract<K | DataTypeMetaKey, DataNonRelationKeys<T>>>
@@ -38,7 +36,7 @@ type _ChildrenRow<
           MergeDataSelection<
             //
             SWithoutChildren,
-            Pluck<SChildren, K>
+            PluckDefined<SChildren, K>
             //
           >
         >;
@@ -55,7 +53,9 @@ type _RelationsRow<T, S, SRelations> = {
     _Row<
       //
       DataRelationTypeAt<T, K>,
-      Pluck<SRelations, K> extends true | false ? {} : Pluck<SRelations, K>
+      PluckDefined<SRelations, K> extends true | false
+        ? {}
+        : PluckDefined<SRelations, K>
       //
     >
     //

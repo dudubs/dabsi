@@ -1,23 +1,22 @@
+import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import RequestSession from "@dabsi/modules/session/RequestSession";
+import { RequestSession } from "@dabsi/modules/session";
+import { Session } from "@dabsi/modules/session/entities/Session";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { AclContext } from "@dabsi/system/acl/context";
 import { User } from "@dabsi/system/acl/entities/User";
-import { DataRow } from "@dabsi/typedata/row";
 import { getPasswordHash } from "./getPasswordHash";
 
 export default RpcConfigResolver(
   AclRpc,
   {
-    session: DataRow(RequestSession),
+    session: RequestSession,
     acl: AclContext,
   },
   c => async $ => {
     return $({
       async logout() {
-        if (c.session.user) {
-          await c.session.update({ user: null });
-        }
+        await c.session.update({ user: null });
       },
       login: {
         async submit({ loginName, password }) {
@@ -34,12 +33,15 @@ export default RpcConfigResolver(
         },
       },
       async getLoginInfo() {
-        if (!c.session.user) return { type: "fail" };
-        const { fullName } = await c.session.user
-          .getSource(true)
-          .pick({ fullName: { $base: User.FullName } })
-          .getOrFail();
-        return { type: "success", fullName };
+        const { user } = await c.session.fetch({
+          relations: { user: { pick: ["firstName", "lastName"] } },
+        });
+        if (!user) return { type: "fail" };
+
+        return {
+          type: "success",
+          fullName: `${user.firstName} ${user.lastName}`,
+        };
       },
     });
   }

@@ -1,7 +1,7 @@
 import {
   RouterLinkTarget,
   useRouterLink,
-} from "@dabsi/typerouter/view/useRouterLinkOld";
+} from "@dabsi/typerouter/view/useRouterLink";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import Link, { LinkProps } from "@material-ui/core/Link";
 import React, { ReactElement } from "react";

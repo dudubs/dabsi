@@ -5,17 +5,17 @@ import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 import { IResolver } from "@dabsi/typedi/Resolver";
 
-const _operator = "checkType";
+const NAME = "checkType";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method(type: Type<any>, context: ResolverMap<any>) {
+function method(type: Type<any>, context: ResolverMap<any>) {
   for (
     let baseType = type;
     typeof baseType === "function";

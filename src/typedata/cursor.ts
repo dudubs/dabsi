@@ -14,7 +14,8 @@ export type DataRelationMap<T> = {
 };
 
 export type DataCursorPath<T = any> = {
-  keys: Record<string, string | number>;
+  keyMap: Record<string, string | number>;
+  keys: string[];
   filter: DataExp<T>;
   propertyName: string;
   selection: AnyDataSelection;
@@ -22,11 +23,12 @@ export type DataCursorPath<T = any> = {
   type: string;
 };
 
-export const EmptyDataCursor: DataCursor = {
+export const EMPTY_DATA_CURSOR: DataCursor = {
   root: [],
   selection: {},
   location: [],
-  keys: {},
+  keyMap: {},
+  keys: [],
   filter: undefined,
   skip: 0,
   take: 0,
@@ -35,7 +37,7 @@ export const EmptyDataCursor: DataCursor = {
   // textFilters: {...} // TODO
 };
 
-// TODO: change to type, EmptyDataCursor const.
+// TODO: change to type, EMPTY_DATA_CURSOR const.
 export type DataCursor<T = any> = {
   root: string[];
 
@@ -46,7 +48,9 @@ export type DataCursor<T = any> = {
   filter: DataExp<any>;
 
   // TODO: rename to keyMap
-  keys: Record<string, string | number>;
+  keyMap: Record<string, string | number>;
+
+  keys: string[];
 
   selection: AnyDataSelection;
 
@@ -65,11 +69,12 @@ export namespace DataCursor {
     key: string
   ): DataCursor<ArrayTypeOrObject<T[K]>> {
     const cursorAt: DataCursor = {
-      ...EmptyDataCursor,
+      ...EMPTY_DATA_CURSOR,
       location: [
         ...cursor.location,
         {
           filter: cursor.filter,
+          keyMap: cursor.keyMap,
           keys: cursor.keys,
           selection: cursor.selection,
           propertyName,
@@ -86,13 +91,22 @@ export namespace DataCursor {
     return <any>cursorAt;
   }
 
-  export function of(
+  export function ofKeyMap(
     cursor: DataCursor<any>,
     keyMap: Record<string, any>
   ): DataCursor<any> {
     return {
       ...cursor,
-      keys: { ...cursor.keys, ...keyMap },
+      keyMap: { ...cursor.keyMap, ...keyMap },
+    };
+  }
+  export function ofKeys(
+    cursor: DataCursor<any>,
+    keys: string[]
+  ): DataCursor<any> {
+    return {
+      ...cursor,
+      keys,
     };
   }
 }

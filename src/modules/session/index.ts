@@ -6,19 +6,24 @@ import { Type } from "@dabsi/common/typings2/Type";
 import { Cli } from "@dabsi/modules/Cli";
 import DataModule from "@dabsi/modules/data";
 import { DataContext } from "@dabsi/modules/data/context";
+import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
 import { DbModule } from "@dabsi/modules/DbModule";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import getResourceTypes from "@dabsi/modules/session/getResourceTypes";
 import { Resource } from "@dabsi/modules/session/resource";
+import { User } from "@dabsi/system/acl/entities/User";
 import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataUnion } from "@dabsi/typedata/union";
-import { Module } from "@dabsi/typedi";
+import { Module, Resolver } from "@dabsi/typedi";
 
 export const SESSION_TIMEOUT = 1000 * 60 * 10;
+
+export const RequestUser = Resolver.token<DataRowTicker<User>>();
+export const RequestSession = Resolver.token<DataRowTicker<Session>>();
 
 @Module({
   dependencies: [DataModule],

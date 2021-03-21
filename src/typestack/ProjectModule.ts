@@ -63,7 +63,20 @@ export default class ProjectModule {
     for (const m of this.runner.getInstances()) {
       const moduleFileName = m.metadata.callStackInfo.lineInfo.fileName;
 
-      if (!(/*is index file*/ /[\\\/]index\.ts/.test(moduleFileName))) continue;
+      const moduleIsIndex = /[\\\/]index\.ts/.test(moduleFileName);
+
+      if (!moduleIsIndex) continue;
+
+      this.loaderModule
+        .findIndexFiles(path.join(path.dirname(moduleFileName), "common"))
+        ?.forEach(commonIndexFile => {
+          const init = exports => {
+            if (typeof exports.initmodule !== "function") return;
+            exports.initmodule(exports)?.forEach(init);
+          };
+
+          init(require(commonIndexFile));
+        });
 
       if (
         !(

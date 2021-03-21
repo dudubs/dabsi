@@ -136,6 +136,7 @@ export function ArrayInput<
   } = (options || {}) as ArrayInputOptions<AnyInput, AnyInput, boolean>;
 
   return <any>Input<AnyArrayInput>({
+    type: ArrayInput,
     isConfigCanBeUndefined: false,
     children: {
       item,

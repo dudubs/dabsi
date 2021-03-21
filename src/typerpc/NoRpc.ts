@@ -12,6 +12,7 @@ export type NoRpc = Rpc<{
 export const NoRpc: NoRpc = Rpc<NoRpc>({
   connect: () => ({}),
   isConfigCanBeUndefined: true,
+  type: () => NoRpc,
   handler: class
     extends AbstractRpcHandler<NoRpc>
     implements IRpcHandler<NoRpc> {

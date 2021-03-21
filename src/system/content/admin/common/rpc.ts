@@ -6,7 +6,7 @@ import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
-import { DataTable } from "@dabsi/typerpc/widget/data-table/rpc";
+import { DataTable } from "@dabsi/typerpc/data-table/rpc";
 import { Form } from "@dabsi/typerpc/widget/form/rpc";
 
 const _PageForm = Form({
@@ -44,18 +44,22 @@ export const [ContentAdminRpc, ContentAdminConnection] = AdminRpc.register(
     pages: RpcMap({
       create: _PageForm,
       edit: RpcParameter(String, _PageForm),
-      table: ContentCategoryTable,
+      table: DataTable({
+        title: String,
+      }),
     }),
 
     categories: RpcMap({
-      addForm: ContentCategoryAddForm,
+      add: ContentCategoryAddForm,
+
       item: RpcParameter(
         String,
         RpcMap({
+          delete: RpcFn<(moveTo: null | string) => void>(),
           get: RpcFn<() => ContentCategoryData>(),
           table: ContentCategoryTable,
-          addForm: ContentCategoryAddForm,
-          editForm: Form({
+          add: ContentCategoryAddForm,
+          edit: Form({
             input: ContentCategoryInput,
           }),
         })

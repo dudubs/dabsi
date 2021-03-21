@@ -1,11 +1,11 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
 import { DataContext } from "@dabsi/modules/data/context";
-import RequestSession from "@dabsi/modules/session/RequestSession";
+import { RequestSession } from "@dabsi/modules/session";
 import Storage from "@dabsi/system/storage/Storage";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataInsertRow } from "@dabsi/typedata/value";
-import { Inject, Injectable } from "@dabsi/typedi";
+import { Inject, Injectable, Resolved } from "@dabsi/typedi";
 import { StorageFile } from "./entities/file";
 
 @Injectable()
@@ -13,7 +13,7 @@ export default class StorageManager {
   constructor(
     protected storage: Storage,
     protected data: DataContext,
-    @Inject(RequestSession) protected session: DataRow<RequestSession>
+    @Inject(RequestSession) protected session: Resolved<typeof RequestSession>
   ) {}
 
   async upload<T extends StorageFile = StorageFile>(
@@ -32,7 +32,7 @@ export default class StorageManager {
       key: await files.insertKey({
         ...entityData,
         url,
-        session: this.session,
+        session: this.session.$key,
       }),
     };
 

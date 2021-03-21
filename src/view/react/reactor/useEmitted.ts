@@ -9,9 +9,11 @@ export function useEmitted<T extends Emittable<any>>(
   deps: any[] = []
 ): void {
   const reactor = useReactor();
-  useEffect(() => {
-    return reactor.listen(emittable, event => {
-      if (event !== undefined) callback?.(event, emittable);
-    });
-  }, [reactor, ...deps]);
+  useEffect(
+    () =>
+      reactor.listen(emittable, event => {
+        if (event !== undefined) callback?.(event, emittable);
+      }),
+    [reactor, ...deps]
+  );
 }

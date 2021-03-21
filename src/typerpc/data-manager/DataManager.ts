@@ -14,11 +14,11 @@ import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
 import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
-import { AnyDataTable } from "@dabsi/typerpc/widget/data-table/rpc";
+import { AnyDataTable } from "@dabsi/typerpc/data-table/rpc";
 import { Form } from "@dabsi/typerpc/widget/form/rpc";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
 import { PartialConfigKeys } from "@dabsi/typerpc/Config";
-import { DataTableOf } from "@dabsi/typerpc/widget/data-table/rpc";
+import { Old_DataTableOf } from "@dabsi/typerpc/data-table/rpc";
 
 // Full<Type>Stack
 export type TDataManager = {
@@ -34,7 +34,7 @@ export type TDataManager = {
 };
 
 interface _Types<T extends TDataManager> {
-  Table: DataTableOf<T["Table"], T["Data"]>;
+  Table: Old_DataTableOf<T["Table"], T["Data"]>;
 
   TableTypes: WidgetType<_Types<T>["Table"]>["Types"];
 

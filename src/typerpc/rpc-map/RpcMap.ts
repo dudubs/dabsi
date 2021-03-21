@@ -9,6 +9,7 @@ import {
 } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 import { RpcMapHandler } from "@dabsi/typerpc/rpc-map/RpcMapHandler";
+import { Expect } from "@dabsi/common/typings2/Expect";
 
 export type AnyRpcRecord = Record<string, AnyRpc>;
 
@@ -21,25 +22,7 @@ export type RpcConfigMap<T extends AnyRpcRecord> = UndefinedIfEmptyObject<
     }
   >
 >;
-export type RpcMap2<T extends AnyRpcRecord> = Rpc<{
-  Children: {};
 
-  Payload: undefined;
-
-  Connection: {
-    // [K in keyof T]: RpcConnection<T[K]>;
-  };
-
-  Props: {};
-
-  Config;
-  // : UndefinedIfEmptyObject<
-  // PartialUndefinedKeys<{
-  //   [K in keyof T]: RpcUnresolvedConfig<T[K]>;
-  // }>
-  // >;
-  Handler: {};
-}>;
 export type RpcMap<T extends AnyRpcRecord> = Rpc<{
   Children: T;
 

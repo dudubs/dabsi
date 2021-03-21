@@ -5,23 +5,25 @@ import { DataSource } from "@dabsi/typedata/source";
 import { DataUpdateRow } from "@dabsi/typedata/value";
 import { RebaseType, WithBaseType } from "./BaseType";
 
+// rename DataSourceRow
 export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
 
 export type AnyBasedDataRow = BasedDataRow<any>;
 
-const source = Symbol("dataSource");
+const rowSourceSymbol = Symbol();
 
+// rename: BaseDataSourceRow
 export class DataSourceRow {
-  constructor(protected _source: DataSource<any>) {
-    this[source] = _source;
+  constructor(source: DataSource<any>) {
+    this[rowSourceSymbol] = source;
   }
 
   getSource<T extends AnyBasedDataRow>(
     this: T,
     filterThis: boolean = false
   ): DataSource<RebaseType<T>> {
-    if (filterThis) return this[source].filter({ $is: this.$key });
-    return this[source];
+    const source = this[rowSourceSymbol];
+    return filterThis ? <any>source.filter({ $is: this.$key }) : source;
   }
 
   at<T extends AnyBasedDataRow, K extends DataRelationKeys<T>>(

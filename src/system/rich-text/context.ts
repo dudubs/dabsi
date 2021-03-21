@@ -8,7 +8,7 @@ import RpcModule from "@dabsi/modules/rpc";
 import RpcConfigFactoryResolver, {
   RpcConfigFactory,
 } from "@dabsi/modules/rpc/configFactoryResolver";
-import RequestSession from "@dabsi/modules/session/RequestSession";
+import { RequestSession } from "@dabsi/modules/session";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
@@ -18,9 +18,8 @@ import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
-import { DataRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import { Inject, Injectable } from "@dabsi/typedi";
+import { Inject, Injectable, Resolved } from "@dabsi/typedi";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 
@@ -39,7 +38,7 @@ export class RichTextContext {
 
   constructor(
     public module: RichTextModule,
-    @Inject(RequestSession) public session: DataRow<RequestSession>,
+    @Inject(RequestSession) public session: Resolved<typeof RequestSession>,
     public data: DataContext,
     protected rpcModule: RpcModule,
     @Inject(

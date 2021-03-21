@@ -12,6 +12,7 @@ export type DataTypeInfo = {
   selection?: AnyDataSelection;
 };
 
+// TODO: use only WeakMap()
 export namespace DataTypeInfo {
   export const map = new WeakMap();
   export const symbol = Symbol();

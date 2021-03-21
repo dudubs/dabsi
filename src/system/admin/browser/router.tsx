@@ -4,8 +4,12 @@ import { RouterView } from "@dabsi/typerouter/view";
 import { Emittable } from "@dabsi/view/react/reactor/Reactor";
 import React from "react";
 
-RouterView.define(AdminRouter, { wrapper: true }, ({ children }) => {
-  return <MuiAdminView>{children}</MuiAdminView>;
-});
+RouterView.define(
+  AdminRouter,
+  { wrapper: true, disableIndex: false },
+  ({ children }) => {
+    return <MuiAdminView>{children}</MuiAdminView>;
+  }
+);
 
 export const AdminInfoEvent = Emittable<AdminInfo>();

@@ -10,7 +10,6 @@ export namespace RouteViewComponent {
 
   export type Options<T extends TRouter> = {
     disableIndex?: boolean;
-    disableReactWrapper?: boolean;
     wrapper?: boolean;
     errorHandling?: boolean;
     defaultHandling?: boolean;
@@ -22,6 +21,7 @@ export namespace RouteViewComponent {
     location: RouterLocation<T>;
     locationStore: Store<any>;
     children: React.ReactElement | null;
+    useParams: <U>(callback: (params: T["Params"]) => U, deps?: any[]) => U;
   };
 
   export type Type<T extends TRouter> = React.ComponentType<Props<T>>;

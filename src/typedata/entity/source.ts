@@ -3,7 +3,7 @@ import { omit } from "@dabsi/common/object/omit";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { BasedType, RebaseType } from "@dabsi/typedata/BaseType";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
+import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";
 import getDataContext from "@dabsi/typedata/entity/connection";
 import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
 import getDeletePlan from "@dabsi/typedata/entity/getDeletePlan";
@@ -26,7 +26,7 @@ export class DataEntitySource<T> extends DataSource<T> {
     return new DataEntitySource(
       entityType,
       () => (connection || getDataContext)().createQueryRunner(),
-      EmptyDataCursor
+      EMPTY_DATA_CURSOR
     );
   }
 
@@ -34,7 +34,11 @@ export class DataEntitySource<T> extends DataSource<T> {
     entityType: Constructor<T>,
     queryRunner: QueryRunner
   ): DataEntitySource<T> {
-    return new DataEntitySource(entityType, () => queryRunner, EmptyDataCursor);
+    return new DataEntitySource(
+      entityType,
+      () => queryRunner,
+      EMPTY_DATA_CURSOR
+    );
   }
   constructor(
     public entityType: Constructor<T>,
@@ -96,27 +100,8 @@ export class DataEntitySource<T> extends DataSource<T> {
     return new DataEntitySource(
       entityType,
       this.getQueryRunner,
-      EmptyDataCursor
+      EMPTY_DATA_CURSOR
     );
-  }
-
-  async withTransaction<T = void>(callback: () => Promise<T>): Promise<T> {
-    const {
-      entityCursor: { queryRunner },
-    } = this;
-    if (queryRunner.isTransactionActive) {
-      return await callback();
-    }
-    let result;
-    await queryRunner.startTransaction();
-    try {
-      result = await callback();
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    }
-    await queryRunner.commitTransaction();
-    return result;
   }
 
   async insertKeys<T>(
@@ -143,31 +128,31 @@ export class DataEntitySource<T> extends DataSource<T> {
     keysToAdd: string[],
     keysToRemove: string[]
   ): Promise<void> {
+    const update = async (
+      entityTextKey: string,
+      method: "removeOrUnset" | "addOrSet"
+    ) => {
+      const entityKey = DataEntityKey.parse(
+        this.entityCursor.entityMetadata,
+        entityTextKey
+      );
+
+      if (this.entityCursor.parent) {
+        const { relation, relationKey } = this.entityCursor.parent;
+        await relation.update(method, entityKey.object, relationKey.object!);
+      }
+
+      for (const { relation, key: relationKey } of this.entityCursor
+        .relationKeys) {
+        await relation.update(method, entityKey.object, relationKey.object);
+      }
+    };
+
     for (let key of keysToAdd) {
-      await this._handleUpdateRelations(key, "addOrSet");
+      await update(key, "addOrSet");
     }
     for (let key of keysToRemove) {
-      await this._handleUpdateRelations(key, "removeOrUnset");
-    }
-  }
-
-  protected async _handleUpdateRelations(
-    entityTextKey: string,
-    method: "removeOrUnset" | "addOrSet"
-  ) {
-    const entityKey = DataEntityKey.parse(
-      this.entityCursor.entityMetadata,
-      entityTextKey
-    );
-
-    if (this.entityCursor.parent) {
-      const { relation, relationKey } = this.entityCursor.parent;
-      await relation.update(method, entityKey.object, relationKey.object!);
-    }
-
-    for (const { relation, key: relationKey } of this.entityCursor
-      .relationKeys) {
-      await relation.update(method, entityKey.object, relationKey.object);
+      await update(key, "removeOrUnset");
     }
   }
 

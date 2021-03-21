@@ -1,7 +1,5 @@
-import { entries } from "@dabsi/common/object/entries";
 import { mergeObject } from "@dabsi/common/object/mergeObject";
 import { omit } from "@dabsi/common/object/omit";
-import { values } from "@dabsi/common/object/values";
 import { HasKeys, If } from "@dabsi/common/typings2/boolean";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataOrder } from "@dabsi/typedata/order";
@@ -44,12 +42,12 @@ export namespace DataSelection {
       >
     : undefined;
   export type Relations<T> = {
-    [K in DataRelationKeys<T>]?:
-      | true
-      | false
-      | IfRelationToOne<T[K], _RelationToOne<DataRelationTypeAt<T, K>>>
-      | IfRelationToMany<T[K], _RelationToMany<DataRelationTypeAt<T, K>>>;
+    [K in DataRelationKeys<T>]?: true | false | RelationAt<T, K>;
   };
+
+  export type RelationAt<T, K extends DataRelationKeys<T>> =
+    | IfRelationToOne<T[K], _RelationToOne<DataRelationTypeAt<T, K>>>
+    | IfRelationToMany<T[K], _RelationToMany<DataRelationTypeAt<T, K>>>;
 }
 
 export type DataSelection<T> = {
@@ -104,6 +102,7 @@ export namespace DataSelection {
   export function merge(
     a: AnyDataSelection | undefined,
     b: AnyDataSelection | undefined
+    // {attachPicks}
   ): AnyDataSelection {
     if (!(a && b)) {
       return a || b || {};

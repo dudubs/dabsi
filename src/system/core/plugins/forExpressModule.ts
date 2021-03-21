@@ -1,7 +1,7 @@
 import ExpressModule from "@dabsi/modules/express";
 import RpcModule from "@dabsi/modules/rpc";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { SystemRpc, SystemRpcPath } from "@dabsi/system/core/common/rpc";
+import { SystemRpc, SYSTEM_RPC_PATH } from "@dabsi/system/core/common/rpc";
 import { Module } from "@dabsi/typedi";
 import BodyParser from "body-parser";
 import multer from "multer";
@@ -23,31 +23,42 @@ export default class SystemForExpressModule {
     );
     expressModule.beforeBuildRoutes(app => {
       app.post(
-        SystemRpcPath,
+        SYSTEM_RPC_PATH,
         BodyParser.json(),
         BodyParser.urlencoded({ extended: true }),
         multer().any(),
-        expressModule.processRequest(async (req, res, context) => {
-          const { path, payload } =
-            typeof req.body.command === "string"
-              ? JSON.parse(req.body.command)
-              : req.body;
+        expressModule.processRequest(
+          async ({ files, body: originalBody }, res, context) => {
+            const body = {};
 
-          if (Array.isArray(req.files)) {
-            for (const file of req.files) {
-              req.body[file.fieldname] = file.buffer;
+            if (Array.isArray(files)) {
+              for (const file of files) {
+                body[file.fieldname] = file.buffer;
+              }
             }
+
+            const requestDatas =
+              typeof originalBody.command === "string"
+                ? JSON.parse(originalBody.command)
+                : originalBody;
+
+            rpcModule.log.info(() => `got ${requestDatas.length} requests.`);
+            res.json({
+              responses: await Promise.all(
+                requestDatas.map(async ({ path, payload }, index) => {
+                  const request = new RpcRequest(path, payload, body);
+                  rpcModule.log.info(() => `handle ${JSON.stringify(path)}`);
+                  return rpcModule.processRequest(
+                    SystemRpc,
+                    request,
+                    Object.create(context)
+                  );
+                })
+              ),
+            });
+            // cleanup...
           }
-          const rpcReq = new RpcRequest(path, payload, req.body);
-
-          const result = await rpcModule.processRequest(
-            SystemRpc,
-            rpcReq,
-            context
-          );
-
-          res.json({ result });
-        })
+        )
       );
     });
   }

@@ -14,7 +14,10 @@ import {
 import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { WidgetView, WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import {
+  WidgetView,
+  WidgetViewProps,
+} from "@dabsi/typerpc/widget/view/component";
 import {
   createElement,
   Fragment,

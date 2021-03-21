@@ -1,23 +1,23 @@
 import { canvasToBlob } from "@dabsi/browser/ImageUtils";
 import MuiAvatarInput from "@dabsi/system/acl-user-avatar/browser/MuiAvatarInput";
 import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUserAvatarRpc";
-import AclEditUserAvatar from "@dabsi/system/acl-user-avatar/plugins/admin/common/AclAdminEditUserAvatarRpc";
+import AclEditUserAvatar from "@dabsi/system/acl-user-avatar/plugins/admin/common/ACL_Admin_UserRpcAvatarRpc";
 import AclAdminViewOptions from "@dabsi/system/acl/plugins/admin/browser/AclAdminViewOptions";
-import { AclAdminEditUser } from "@dabsi/system/acl/plugins/admin/users/common/editRpc";
-import { AclAdminUserBasicInfoForm } from "@dabsi/system/acl/plugins/admin/users/common/basicInfoForm";
+import { ACL_Admin_UserBaiscInfoInput } from "@dabsi/system/acl/plugins/admin/users/common/basicInfoInput";
+import { ACL_Admin_UserRpc } from "@dabsi/system/acl/plugins/admin/users/common/userRpc";
 import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFormData";
 import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
 import Grid from "@material-ui/core/Grid";
 import React, { useState } from "react";
 
-const childKey = AclAdminEditUser.getChildKey(AclEditUserAvatar)!;
+const childKey = ACL_Admin_UserRpc.getChildKey(AclEditUserAvatar)!;
 
 AclAdminViewOptions.editUser.excludeChildKeys.push(
-  AclAdminEditUser.getDefinedChildKey(AclEditUserAvatar)
+  ACL_Admin_UserRpc.getDefinedChildKey(AclEditUserAvatar)
 );
 
 AclAdminViewOptions.editUser.childWrapperMap[
-  AclAdminEditUser.getDefinedChildKey(AclAdminUserBasicInfoForm)
+  ACL_Admin_UserRpc.getDefinedChildKey(ACL_Admin_UserBaiscInfoInput)
 ] = children => <View>{children}</View>;
 
 function View({ children }) {

@@ -2,7 +2,7 @@
 
 import { testRpc } from "@dabsi/typerpc/RpcTester";
 import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { DataInput } from "@dabsi/typerpc/input/data-input/DataInput";
+import { DataInput } from "@dabsi/typerpc/input/data-input/rpc";
 import { DataInputTester } from "@dabsi/typerpc/input/data-input/DataInputTester";
 
 testRpc(DataInput(), t => {

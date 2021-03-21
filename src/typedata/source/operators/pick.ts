@@ -2,10 +2,7 @@ import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { DataFields } from "@dabsi/typedata/fields";
 import { DataRelationKeys, DataRelationType } from "@dabsi/typedata/relation";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
-import {
-  AnyDataSelection,
-  DataPickableKeys,
-} from "@dabsi/typedata/selection/selection";
+import { DataPickableKeys } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source/source";
 
 const operator = "pick";

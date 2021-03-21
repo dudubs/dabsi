@@ -9,17 +9,17 @@ import {
   Resolved,
 } from "@dabsi/typedi/Resolver";
 
-const _operator = "object";
+const NAME = "object";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method<T extends ResolverMap>(
+function method<T extends ResolverMap>(
   resolverMap: T
 ): CustomResolver<
   {

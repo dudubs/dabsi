@@ -10,7 +10,7 @@ import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
 import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
-import { ViewContext } from "@dabsi/view/react/context";
+import { ReactContext } from "@dabsi/view/react/context";
 import { View } from "@dabsi/view/react/component/View";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import clsx from "clsx";
@@ -329,9 +329,9 @@ export class RichTextEditor extends View<RichTextEditorProps> {
   renderView() {
     return (
       // TODO: use React.Context
-      <ViewContext.provide value={[this.store, this]}>
+      <ReactContext provide={[this.store, this]}>
         <this.Component />
-      </ViewContext.provide>
+      </ReactContext>
     );
   }
 }

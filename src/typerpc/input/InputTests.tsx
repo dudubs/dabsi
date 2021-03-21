@@ -31,7 +31,9 @@ export type TestInput = Input<
 >;
 
 export const TestInput = Input<TestInput>({
+  isGenericConfig: false,
   isConfigCanBeUndefined: false,
+  type: () => TestInput,
   handler: class extends AbstractInputHandler<TestInput> {
     getInputValueFromConfig(
       valueConfig: InputValueConfig<TestInput>

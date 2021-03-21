@@ -3,7 +3,7 @@ import { InputErrorHook } from "@dabsi/typerpc/input/InputErrorHook";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 import { NameInput } from "@dabsi/system-old/common/NameInput";
 
-export const AclAdminUserBasicInfoInput = InputMap({
+export const ACL_Admin_UserBaiscInfoInput = InputMap({
   firstName: NameInput,
   lastName: NameInput,
   loginName: InputErrorHook<"ALREADY_EXISTS">()(

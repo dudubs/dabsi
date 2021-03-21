@@ -114,12 +114,15 @@ export function Router(paramsOrChildren?, maybeChildren?) {
 export type RouterAt<
   T extends TRouter, //
   K extends keyof T["Children"]
-> = Router<
-  T["Children"][K] & {
-    Parent: T;
-    Stack: T["Stack"] & Record<K, T["Children"][K]>;
-  }
->;
+> = Router<TRouterAt<T, K>>;
+
+export type TRouterAt<
+  T extends TRouter, //
+  K extends keyof T["Children"]
+> = T["Children"][K] & {
+  Parent: T;
+  Stack: T["Stack"] & Record<K, T["Children"][K]>;
+};
 
 export namespace RouterType {
   export function register<T extends AnyRouter>(

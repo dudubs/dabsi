@@ -7,13 +7,13 @@ import {
   ResolverMap,
 } from "@dabsi/typedi/Resolver";
 
-const _operator = "consume";
+const NAME = "consume";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
@@ -52,11 +52,11 @@ export type Consumer<T> = <U extends ConsumeDeps>(
   callback: ConsumeFactory<T, U>
 ) => Resolver<T>;
 
-export function _method<T, U extends ConsumeDeps>(
+export function method<T, U extends ConsumeDeps>(
   deps: U,
   create: ConsumeFactory<T, U>
 ): CustomResolver<T>;
-export function _method(deps, create): any {
+export function method(deps, create): any {
   if (Array.isArray(deps)) {
     const depsResolver = Resolver.array(deps);
     return (context =>

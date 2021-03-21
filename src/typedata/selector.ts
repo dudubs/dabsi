@@ -9,8 +9,6 @@ import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 
 export interface DataSelector<T, S extends DataSelection<T>> {
   new (): DataSelectionRow<T, S>;
-
-  select(selection: DataSelection<T>): void;
 }
 
 export function DataSelector<T, S extends DataSelection<T>>(
@@ -19,20 +17,18 @@ export function DataSelector<T, S extends DataSelection<T>>(
 ): DataSelector<T, S> {
   const typeInfo = DataTypeInfo.get(type);
 
-  const newTypeInfo = (Selector[DataTypeInfo.symbol] = {
+  const newTypeInfo = {
     ...typeInfo,
     selection: DataSelection.merge(
       typeInfo.selection,
       selection as AnyDataSelection
     ),
-  });
-
-  Selector.select = function (selection) {
-    Selector[DataTypeInfo.symbol] = {
-      ...newTypeInfo,
-      selection: DataSelection.merge(newTypeInfo.selection, selection),
-    };
   };
+  Selector[DataTypeInfo.symbol] = newTypeInfo;
+
+  Object.defineProperty(Selector, "name", {
+    value: `DataSelector<${typeInfo.name}>`,
+  });
 
   return <any>Selector;
 

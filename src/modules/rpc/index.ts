@@ -16,6 +16,8 @@ import { DABSI_ROOT_DIR } from "../../env";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
 import { isRpcConfigResolver, RpcConfigResolver } from "./configResolver";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { Ticker } from "@dabsi/common/async/Ticker";
 
 @Module()
 export default class RpcModule {
@@ -36,7 +38,8 @@ export default class RpcModule {
 
   constructor(
     protected projectModule: ProjectModule,
-    protected loaderModule: LoaderModule
+    protected loaderModule: LoaderModule,
+    protected runner: ModuleRunner
   ) {
     loaderModule.directoryLoaders.push(dir => this._loadDir(dir, true));
   }
@@ -70,26 +73,36 @@ export default class RpcModule {
     );
   }
 
-  protected async _loadConfig(configFileName: string) {
+  protected async _loadConfigFile(configFileName: string) {
     this.log.trace(() => `Load config "${configFileName}".`);
     const configModule = require(configFileName);
-    const configResolver = configModule?.default;
-    if (isRpcConfigResolver(configResolver)) {
-      this.log.trace(() => `Found config resolver ${inspect(configResolver)}}`);
+    const defaultExport = configModule?.default;
+
+    const nodeModule = require.cache[require.resolve(configFileName)]!;
+
+    const registerConfigResolver = configResolver => {
       this.loadedConfigs.push({
-        nodeModule: require.cache[require.resolve(configFileName)]!,
+        nodeModule,
         resolver: configResolver,
       });
       this.configureRpcResolver(configResolver);
-    } else {
-      this.log.trace(() => `No default config "${configFileName}".`);
+    };
+
+    const configResolvers = Array.isArray(defaultExport)
+      ? defaultExport
+      : [defaultExport];
+
+    for (const configResolver of configResolvers) {
+      if (isRpcConfigResolver(configResolver)) {
+        registerConfigResolver(configResolver);
+      }
     }
   }
 
   protected async _loadDir(dir: string, isRoot = false) {
     if (!isRoot) {
       if (!touchSet(this._loadedDirs, dir)) return;
-      if (await this.loaderModule.getIndexFile(dir)) {
+      if (await this.loaderModule.findIndexFileName(dir)) {
         this.log.trace(() => `Skip directory ${dir}.`);
         return;
       }
@@ -107,7 +120,7 @@ export default class RpcModule {
         await this._loadDir(fileName);
         continue;
       } else if (/config\.ts$/i.test(fileName)) {
-        await this._loadConfig(fileName);
+        await this._loadConfigFile(fileName);
       }
     }
   }
@@ -134,6 +147,11 @@ export default class RpcModule {
     }
   }
 
+  requestContext: ResolverMap = Resolver.createContext(
+    this.runner.context,
+    Ticker.provide()
+  );
+
   async processRequest(rpc: AnyRpc, rpcReq: RpcRequest, context: ResolverMap) {
     const { path, payload } = rpcReq;
 
@@ -141,16 +159,6 @@ export default class RpcModule {
       context,
       RpcRequest.provide(() => rpcReq)
     );
-
-    this.log.info(
-      () =>
-        `${(path as any[])
-          .toSeq()
-          .map(path => (typeof path === "object" ? JSON.stringify(path) : path))
-          .join("/")}`
-    );
-
-    this.log.trace(() => colors.gray(JSON.stringify(payload, null, 2)));
 
     const configResolver = this.getRpcConfigResolver(rpc);
     const config = Resolver.resolve(configResolver, context);

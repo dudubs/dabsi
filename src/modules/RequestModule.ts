@@ -1,12 +1,19 @@
+import { Ticker } from "@dabsi/common/async/Ticker";
 import { Inject, Module, Resolver, ResolverMap } from "@dabsi/typedi";
+
 import { Awaitable } from "../common/typings2/Async";
 import { Cli } from "./Cli";
 import { Hookable } from "./Hookable";
 
 export class Request {
-  onEnd = Hookable<() => Awaitable>();
-  onStart = Hookable<() => Awaitable>();
-  onError = Hookable<(error: any) => Awaitable>();
+  cleanups: (() => Awaitable)[] = [];
+}
+
+function emitAllAsync<T extends (...args: any[]) => any>(
+  callbacks: T[],
+  ...args: Parameters<T>
+) {
+  return Promise.all(callbacks.map(async callback => callback(...args)));
 }
 
 @Module()
@@ -16,34 +23,46 @@ export default class RequestModule {
   context: ResolverMap = Object.setPrototypeOf(
     {
       ...Request.provide(),
+      ...Ticker.provide(),
     },
     this.runnerContext
   );
 
-  contextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
+  requestCleanups: ((context: ResolverMap) => Awaitable)[] = [];
+
+  requestErrorHandlers: ((
+    context: ResolverMap,
+    error: any
+  ) => Awaitable)[] = [];
+
+  requestContextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
 
   async processRequest<T>(
     callback: (context: ResolverMap) => Awaitable<T>
   ): Promise<T> {
     // TODO: flat
     const context = Object.create(this.context);
+    const ticker = new Ticker();
 
     const req = new Request();
-    Resolver.provide(
-      context,
-      Request.provide(() => req)
-    );
-    for (const resolver of this.contextResolvers) {
+
+    Resolver.provide(context, {
+      ...Request.provide(() => req),
+      ...Ticker.provide(() => ticker),
+    });
+
+    for (const resolver of this.requestContextResolvers) {
       Resolver.provide(context, await Resolver.resolve(resolver, context));
     }
-    await req.onStart.invoke();
+
     try {
-      return await callback(context);
+      return ticker.wait((async () => callback(context))());
     } catch (error) {
-      await req.onError.invoke(error);
+      await emitAllAsync(this.requestErrorHandlers, context, error);
       throw error;
     } finally {
-      await req.onEnd.invoke();
+      await emitAllAsync(req.cleanups.reverse());
+      await emitAllAsync(this.requestCleanups.reverse(), context);
     }
   }
 

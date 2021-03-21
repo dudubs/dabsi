@@ -1,6 +1,5 @@
 import { Renderer } from "@dabsi/view/react/renderer";
 import { ReactElement } from "react";
-import ViewWrapper from "./ViewWrapper";
 
 export default {
   editUser: {

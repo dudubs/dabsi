@@ -30,9 +30,8 @@ export type NumberInput = Input<{
 export function NumberInput(): NumberInput {
   return <any>Input<NumberInput>({
     handler: NumberInputHandler,
-
+    type: NumberInput,
     isConfigCanBeUndefined: true,
-
     getValueDataFromValueElement(value) {
       return value;
     },

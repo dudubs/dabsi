@@ -1,10 +1,12 @@
+import { Ticker } from "@dabsi/common/async/Ticker";
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import { RpcTester } from "@dabsi/modules/rpc/tests/tester";
-import { SESSION_TIMEOUT } from "@dabsi/modules/session";
+import { RpcModuleTester } from "@dabsi/modules/rpc/tests/RpcModuleTester";
+import { RequestSession, SESSION_TIMEOUT } from "@dabsi/modules/session";
+import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
-import RequestSession from "@dabsi/modules/session/RequestSession";
-import DbTester from "@dabsi/modules/tests/DbTester";
+import DbModuleTester from "@dabsi/modules/tests/DbModuleTester";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
@@ -16,12 +18,11 @@ import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
 import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
 import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/utils";
 import Storage from "@dabsi/system/storage/Storage";
-import { DataRow } from "@dabsi/typedata/row";
 import { ModuleTarget } from "@dabsi/typedi";
 
 const t = ModuleTester();
-const db = DbTester(t);
-const rpc = RpcTester(t);
+const db = DbModuleTester(t);
+const rpc = RpcModuleTester(t);
 
 export const rtTestModules = [] as ModuleTarget[];
 export const rtTestBeforeInit = [] as (() => Awaitable)[];
@@ -47,12 +48,24 @@ export const rtTester = t
     await t.loaderModule.load();
     await db.dbModule.init();
 
-    const session = await db.data.getSource(RequestSession).insert({
+    const session = await db.data.getSource(Session).insert({
       token: "test",
       timeout: getCurrentTime() + SESSION_TIMEOUT,
     });
 
-    t.provide(DataRow(RequestSession).provide(() => session));
+    const sessionTicker = new DataRowTicker(
+      db.data,
+      Session,
+      session.$key,
+      callback => callback()
+    );
+
+    t.provide(
+      RequestSession.provide(
+        // only for $key
+        () => sessionTicker
+      )
+    );
 
     let rtConfig: RichTextConfig;
 

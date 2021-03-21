@@ -1,16 +1,16 @@
 import { IResolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
-const _operator = "createContext";
+const NAME = "createContext";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method(context: ResolverMap, ...args: ResolverMap[]): ResolverMap {
+function method(context: ResolverMap, ...args: ResolverMap[]): ResolverMap {
   context = Object.create(context);
   Object.assign(context, ...args);
   return context;

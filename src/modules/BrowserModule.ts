@@ -1,5 +1,8 @@
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { entries } from "@dabsi/common/object/entries";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
+import { inspect } from "@dabsi/logging/inspect";
 import { Cli } from "@dabsi/modules/Cli";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { Module } from "@dabsi/typedi";
@@ -29,62 +32,92 @@ export default class BrowserModule {
     );
   }
 
-  protected _buildWebpack() {
+  protected _buildEntriesAndVirtualFiles() {
     const platforms = ["common", "view", "browser"];
 
-    const outDir = path.posix.join(
+    const virtualDir = path.posix.join(
       this.projectModule.mainProject.srcDir,
       "__virtual__"
     );
 
-    const getTsPath = fsPath =>
-      this.projectModule.mainProject.configPaths.getTsPath(fsPath, outDir)!;
+    const platformFilesMap: Record<
+      string,
+      {
+        tests: string[];
+        indexes: string[];
+      }
+    > = {};
 
-    const platformDirs = this.loaderModule.loadedDirs
-      .toSeq()
-      .flatMap(dir =>
-        platforms.toSeq().map(platform => path.join(<string>dir, platform))
-      )
-      .filter(dir => this.loaderModule.isDir(dir))
-      .toArray();
+    const findTestsFiles = (
+      testsDir: string,
+      callback: (fileName: string) => void
+    ) => {
+      if (!this.loaderModule.isDir(testsDir)) return;
 
-    const indexFiles = platformDirs
-      .toSeq()
-      .map(dir => this.loaderModule.getIndexFile(dir))
-      .filter(x => !!x)
-      .concat(this.viewModule.commonFiles.toSeq())
-      .map(getTsPath);
-
-    const testFiles = platformDirs
-      .toSeq()
-      .flatMap(dir => {
-        const testsDir = path.join(dir, "tests");
-        if (!this.loaderModule.isDir(testsDir)) return [];
-
-        return this.loaderModule
-          .readDir(testsDir)
-          .toSeq()
-          .filter(name => /(Tests||[\\\/]index)\.tsx?$/.test(name))
-          .map(name => path.join(testsDir, name));
-      })
-      .map(getTsPath);
-
-    const entries = {
-      index: path.posix.join(outDir, "index.ts"),
-      tests: path.posix.join(outDir, "tests.ts"),
+      for (const baseName of this.loaderModule.readDir(testsDir)) {
+        if (!/(Tests||[\\\/]index)\.tsx?$/.test(baseName)) continue;
+        callback(path.join(testsDir, baseName));
+      }
     };
 
+    for (const platform of platforms) {
+      const platformFiles = (platformFilesMap[platform] = {
+        tests: [] as string[],
+        indexes: [] as string[],
+      });
+
+      for (const loadedDir of this.loaderModule.loadedDirs) {
+        const platformDir = path.join(loadedDir, platform);
+        const platformTestsDir = path.join(platformDir, "tests");
+
+        const indexFiles = this.loaderModule.findIndexFiles(platformDir);
+
+        if (indexFiles) {
+          platformFiles.indexes.push(...indexFiles);
+        }
+        findTestsFiles(platformTestsDir, fileName => {
+          platformFiles.tests.push(fileName);
+        });
+      }
+    }
+
+    const getTsPath = fsPath =>
+      this.projectModule.mainProject.configPaths.getTsPath(fsPath, virtualDir)!;
+
+    const entryMap = {
+      index: path.posix.join(virtualDir, "index.ts"),
+      tests: path.posix.join(virtualDir, "tests.ts"),
+    };
+
+    const indexCode: string[] = [
+      "const l = m => {" +
+        " if (typeof m.initmodule==='function')" +
+        " m.initmodule(m)?.forEach(l); " +
+        "};",
+    ];
+    const testsCode: string[] = [];
+
+    for (const [platform, platformFiles] of entries(platformFilesMap)) {
+      [indexCode, testsCode].forEach(code => {
+        code.push(`// ${platform} platform`);
+      });
+
+      for (const indexFileName of platformFiles.indexes) {
+        indexCode.push(
+          `l(require(${JSON.stringify(getTsPath(indexFileName))}));`
+        );
+      }
+      for (const testsFileName of platformFiles.tests) {
+        const tsPath = JSON.stringify(getTsPath(testsFileName));
+        testsCode.push(`describe(${tsPath},()=> { require(${tsPath}) });`);
+      }
+    }
+
     return {
-      entries,
+      entries: entryMap,
       virtualFiles: {
-        [entries.index]: indexFiles
-          .map(tsPath => `import "${tsPath}";\n`)
-          .join(""),
-        [entries.tests]: testFiles
-          .map(
-            tsPath => `describe("${tsPath}", ()=>{ require("${tsPath}") });\n`
-          )
-          .join(""),
+        [entryMap.index]: indexCode.join("\n"),
+        [entryMap.tests]: testsCode.join("\n"),
       },
     };
   }
@@ -104,7 +137,7 @@ export default class BrowserModule {
   };
 
   protected async _getWebpackConfig(): Promise<webpack.Configuration> {
-    const { entries, virtualFiles } = this._buildWebpack();
+    const { entries, virtualFiles } = this._buildEntriesAndVirtualFiles();
 
     const virtualModules = new WebpackVirtualModulesPlugin(virtualFiles);
 

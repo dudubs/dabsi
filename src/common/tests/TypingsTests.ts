@@ -6,7 +6,7 @@ import { IsSome } from "@dabsi/common/typings2/boolean/IsSome";
 import { OptionalKeys } from "@dabsi/common/typings2/OptionalKeys";
 import { OptionalObjectArg } from "@dabsi/common/typings2/OptionalObjectArg";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { Pluck, PluckDefined } from "@dabsi/common/typings2/Pluck";
 import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
 
 (_ => {})(() => {
@@ -171,7 +171,7 @@ import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys"
   }
   // Pluck
   {
-    test<IsNever<Pluck<never, "">>>(true);
+    test<IsNever<PluckDefined<never, "">>>(true);
   }
 
   // IsAny

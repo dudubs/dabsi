@@ -1,34 +1,32 @@
 import { HasKeys } from "@dabsi/common/typings2/boolean";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Expect } from "@dabsi/common/typings2/Expect";
-import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
-import { Pluck } from "@dabsi/common/typings2/Pluck";
-
+import { PluckDefined } from "@dabsi/common/typings2/Pluck";
 import { DataExp } from "@dabsi/typedata/exp/exp";
-import { AEntity, BEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
-import { DataRow } from "@dabsi/typedata/row";
-import { DataSelection } from "@dabsi/typedata/selection/selection";
-import { DataSelectionRow } from "@dabsi/typedata/selection/row";
-import { DataSource } from "@dabsi/typedata/source";
-
 import {
-  DataUnion,
-  WithDataUnionMetaChildren,
-  DataUnionMetaChildrenKey,
-} from "@dabsi/typedata/union";
-import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
-import {
-  MapRelation,
   DataRelationKeys,
   DataRelationTypeAt,
+  MapRelation,
 } from "@dabsi/typedata/relation";
-import { DataInsertRow } from "@dabsi/typedata/value";
+import { DataRow } from "@dabsi/typedata/row";
+import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
+import { DataSelectionRow } from "@dabsi/typedata/selection/row";
+import { DataSelection } from "@dabsi/typedata/selection/selection";
+import { DataSource } from "@dabsi/typedata/source";
 import {
-  DEntity,
   DChild1,
+  DEntity,
   DUnion,
   EUnion,
 } from "@dabsi/typedata/tests/BaseEntities";
+import {
+  DataUnion,
+  DataUnionMetaChildrenKey,
+  WithDataUnionMetaChildren,
+} from "@dabsi/typedata/union";
+import { DataInsertRow } from "@dabsi/typedata/value";
+import { AEntity, BEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 
 pass(() => {
   // DataSelectionRow
@@ -180,7 +178,7 @@ pass(() => {
     // MergePicks
     {
       function testPicks<L, R>(
-        x: Pluck<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
+        x: PluckDefined<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
       ) {}
 
       testPicks<undefined, undefined>(undefined);
@@ -240,11 +238,14 @@ pass(() => {
       : HasKeys<S> extends false
       ? T
       : Omit<T, DataUnionMetaChildrenKey | DataRelationKeys<T>> & {
-          x: Pluck<S, "x">;
+          x: PluckDefined<S, "x">;
         } & {
             [K in DataRelationKeys<T>]: MapRelation<
               T[K],
-              X<DataRelationTypeAt<T, K>, Pluck<Pluck<S, "relations">, K>>
+              X<
+                DataRelationTypeAt<T, K>,
+                PluckDefined<PluckDefined<S, "relations">, K>
+              >
             >;
           };
 
@@ -262,10 +263,10 @@ pass(() => {
       >
     >(d => {});
 
-    assertType<IsNever<Pluck<never, "x">>>(true);
+    assertType<IsNever<PluckDefined<never, "x">>>(true);
 
     // @ts-expect-error
-    assertType<IsNever<Pluck<never, "x">>>(false);
+    assertType<IsNever<PluckDefined<never, "x">>>(false);
 
     testSelection(AEntity, { pick: ["aText"] } as const, (row, sr, s) => {
       void row.aText;
@@ -507,17 +508,24 @@ pass(() => {
         }
       >
     >(s => {
-      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>(
+      assertType<PluckDefined<typeof s.relations.oneDToOneE.pick, number>>(
         // @ts-expect-error
         "x"
       );
 
-      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("eId");
+      assertType<PluckDefined<typeof s.relations.oneDToOneE.pick, number>>(
+        "eId"
+      );
 
-      assertType<Pluck<typeof s.relations.oneDToOneE.pick, number>>("eText");
+      assertType<PluckDefined<typeof s.relations.oneDToOneE.pick, number>>(
+        "eText"
+      );
 
       assertType<
-        Pluck<typeof s.relations.oneDToOneE.children.eChild1.pick, number>
+        PluckDefined<
+          typeof s.relations.oneDToOneE.children.eChild1.pick,
+          number
+        >
       >(
         // @ts-expect-error
 
@@ -525,7 +533,10 @@ pass(() => {
       );
 
       assertType<
-        Pluck<typeof s.relations.oneDToOneE.children.eChild1.pick, number>
+        PluckDefined<
+          typeof s.relations.oneDToOneE.children.eChild1.pick,
+          number
+        >
       >("eChild1Text");
 
       // @ts-expect-error

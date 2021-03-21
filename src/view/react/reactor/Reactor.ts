@@ -22,9 +22,12 @@ export function Emittable(init?): Emittable<any> {
 // UserInfoEvent = Emittable<UserInfo>();
 
 export class Reactor {
-  protected eventMap = new Map();
+  protected _emittableEventMap = new Map<Emittable<any>, any>();
 
-  protected eventListenerMap = new Map<any, Set<ReactorListener>>();
+  protected _emittableCallbacksMap = new Map<
+    Emittable<any>,
+    Set<ReactorListener>
+  >();
 
   constructor(
     protected handle?: (event: any, emittable: Emittable<any>) => boolean | void
@@ -33,13 +36,13 @@ export class Reactor {
   getLast<T extends Emittable<any>>(
     emittable: T
   ): EmittableType<T> | undefined {
-    return this.eventMap.get(emittable.id);
+    return this._emittableEventMap.get(emittable);
   }
 
   emit<T extends Emittable<any>>(emittable: T, event: EmittableType<T>) {
     if (this.handle?.(event, emittable) === false) return;
-    this.eventMap.set(emittable.id, event);
-    this.eventListenerMap.get(emittable.id)?.forEach(callback => {
+    this._emittableEventMap.set(emittable, event);
+    this._emittableCallbacksMap.get(emittable)?.forEach(callback => {
       callback(event, emittable);
     });
   }
@@ -48,16 +51,16 @@ export class Reactor {
     emittable: T,
     callback: (event: EmittableType<T>) => void
   ) {
-    const listeners = touchMap(
-      this.eventListenerMap,
-      emittable.id,
+    const callbacks = touchMap(
+      this._emittableCallbacksMap,
+      emittable,
       () => new Set()
     );
-    listeners.add(callback);
+    callbacks.add(callback);
     return () => {
-      listeners.delete(callback);
-      if (!listeners.size) {
-        this.eventListenerMap.delete(emittable.id);
+      callbacks.delete(callback);
+      if (!callbacks.size) {
+        this._emittableCallbacksMap.delete(emittable);
       }
     };
   }

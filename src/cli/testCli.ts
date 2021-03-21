@@ -30,6 +30,7 @@ export default function testCli(args) {
     process.argv[0],
     [
       ...DABSI_NODE_OPTIONS,
+      process.env.JASMINE_NODE_OPTIONS,
       ...(process.env.DABSI_DEBUG_TESTS ? ["--inspect"] : []),
       "--",
       relative(

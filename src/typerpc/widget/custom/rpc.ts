@@ -42,6 +42,7 @@ export function CustomWidget<
 }> {
   return <any>Widget({
     isConfigCanBeUndefined: false,
+    isGenericConfig: false,
     type: CustomWidget,
     handler: CustomWidgetHandler,
     children: { controller },

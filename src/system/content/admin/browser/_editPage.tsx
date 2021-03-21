@@ -1,13 +1,13 @@
-import { MuiFormView } from "@dabsi/browser/mui/widget/MuiFormView";
+import { MuiFormView } from "@dabsi/browser/mui/form/view";
 import { ContentAdminConnection } from "@dabsi/system/content/admin/common/rpc";
 import { ContentAdminRouter } from "@dabsi/system/content/admin/view/router";
 
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 import React from "react";
 
 RouterView.define(ContentAdminRouter.at("pages").at("edit"), ({ location }) => (
-  <WidgetLoaderView
+  <WidgetViewLoader
     connection={() => ContentAdminConnection.pages.edit(location.params.id)}
     deps={[location.params.id]}
   >
@@ -19,5 +19,5 @@ RouterView.define(ContentAdminRouter.at("pages").at("edit"), ({ location }) => (
         }}
       />
     )}
-  </WidgetLoaderView>
+  </WidgetViewLoader>
 ));

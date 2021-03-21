@@ -27,6 +27,10 @@ export default RpcConfigResolver(
         const childrenSource = source.at("children", key);
 
         return $({
+          async delete(moveTo) {
+            await childrenSource.update({ parent: moveTo });
+            await source.filter({ $is: key }).delete();
+          },
           table: $ =>
             $({
               source: childrenSource.addFields({
@@ -44,14 +48,14 @@ export default RpcConfigResolver(
             };
           },
 
-          addForm: $ =>
+          add: $ =>
             $({
               async submit({ title }) {
                 return { $key: await childrenSource.insertKey({ title }) };
               },
             }),
 
-          editForm: {
+          edit: {
             valueConfig: async $ => {
               const { title } = await source.pick(["title"]).getOrFail(key);
 
@@ -68,7 +72,7 @@ export default RpcConfigResolver(
         });
       },
 
-      addForm: {
+      add: {
         // inputConfig: {},
         async submit({ title }) {
           return {

@@ -30,14 +30,6 @@ const configHandlerCacheMap = new WeakMap<
 
 let isServiceCommand = false;
 
-const getRpcLocator = WeakMapFactory((rpc: AnyRpc) => {
-  const proxy: any = createObjectProxy(rpc.children, child => {
-    return getRpcLocator(child);
-  });
-  proxy.__rpc = rpc;
-  return proxy;
-});
-
 export class BaseRpc implements IRpc<T> {
   rpcType: any;
 
@@ -45,20 +37,19 @@ export class BaseRpc implements IRpc<T> {
 
   constructor(public options: RpcOptions<T>) {}
 
-  at(arg) {
-    if (typeof arg === "function") {
-      return arg(getRpcLocator(this)).__rpc;
-    }
+  at(path): any {
+    const child = this.children[path];
+    if (child) return child;
 
-    if (typeof arg === "string") {
-      const key = arg;
-      if (key.startsWith(":")) {
-        return (this.children.map || this.children.target).children[
-          key.slice(1)
-        ];
+    const pos = path.indexOf(".");
+    if (pos > -1) {
+      const childKey = path.substr(0, pos);
+      const child = this.children[childKey];
+      if (child) {
+        return child.at(path.substr(pos + 1));
       }
-      return this.children[key];
     }
+    throw new Error(`No ${path}`);
   }
 
   commandRpc(command) {

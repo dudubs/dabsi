@@ -1,11 +1,15 @@
+import DataModule from "@dabsi/modules/data";
 import { DataContext } from "@dabsi/modules/data/context";
+import { DataTicker } from "@dabsi/modules/data/ticker";
 import ExpressModule, { ExpressResolver } from "@dabsi/modules/express";
-import { Inject, Module, Resolver } from "@dabsi/typedi";
+import { Request } from "@dabsi/modules/RequestModule";
+import { Session } from "@dabsi/modules/session/entities/Session";
+import { User } from "@dabsi/system/acl/entities/User";
+import { Module, Resolver } from "@dabsi/typedi";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import CookieParser from "cookie-parser";
-import { getSession } from "../../../system-old/server/acl/getSession";
-import { DataRow } from "../../../typedata/row";
-import SessionModule from "../../session";
-import RequestSession from "../../session/RequestSession";
+import { getSessionKey } from "../../../system-old/server/acl/getSession";
+import SessionModule, { RequestSession, RequestUser } from "../../session";
 
 const cookieParser = CookieParser();
 
@@ -13,22 +17,44 @@ const cookieParser = CookieParser();
   dependencies: [SessionModule],
 })
 export default class SessionForExpressModule {
-  constructor(@Inject() expressModule: ExpressModule) {
-    Resolver.provide(expressModule.context, RequestSession.provide());
+  constructor(expressModule: ExpressModule, dataModule: DataModule) {
+    Resolver.provide(
+      expressModule.context,
+      RequestSession.provide(),
+      RequestUser.provide()
+    );
 
-    expressModule.contextResolvers.push(
+    expressModule.requestContextResolvers.push(
       Resolver.consume(
-        [DataContext, ExpressResolver],
-        async (conn, [req, res]) => {
-          await new Promise(next => cookieParser(req, res, next));
-          const session = await getSession({
-            source: conn.getSource(RequestSession),
-            cookie: req.cookies["session"],
+        [DataContext, ExpressResolver, Request, DataTicker],
+        async (data, [expReq, expRes], req, ticker) => {
+          await new Promise(next => cookieParser(expReq, expRes, next));
+          const sessions = data.getSource(Session);
+          const [sessionKey, userKey] = await getSessionKey({
+            source: data.getSource(Session),
+            cookie: expReq.cookies["session"],
             setCookie(value) {
-              res.cookie("session", value);
+              expRes.cookie("session", value);
             },
           });
-          return DataRow(RequestSession).provide(() => session);
+
+          req.cleanups.push(() =>
+            sessions.update({
+              timeout: new Date().getTime(),
+            })
+          );
+
+          return {
+            ...RequestSession.provide(() =>
+              ticker.getRowTicker(Session, sessionKey)
+            ),
+            ...RequestUser.provide(() => {
+              if (!userKey) {
+                throw new RpcError("No loging user");
+              }
+              return ticker.getRowTicker(User, userKey);
+            }),
+          };
         }
       )
     );

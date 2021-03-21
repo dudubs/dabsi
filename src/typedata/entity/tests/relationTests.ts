@@ -1,4 +1,4 @@
-import { collectTestQueries } from "@dabsi/typedata/entity/tests/tester";
+import { collectTestSqlQueries } from "@dabsi/typedata/entity/tests/tester";
 import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataSource } from "@dabsi/typedata/source";
@@ -55,7 +55,7 @@ describe("add/remove", () => {
   }
 });
 it("expect to insert relation without update", async () => {
-  const queries = collectTestQueries();
+  const queries = collectTestSqlQueries();
   const bKey = await BSource.insertKey({});
   await ASource.insert({
     manyAToOneB: bKey,

@@ -22,6 +22,7 @@ testRpc(
   Rpc<AnyRpcWithGenericConfig>({
     isGenericConfig: true,
     isConfigFn: false,
+    type: () => null,
     connect() {
       return {};
     },
@@ -69,8 +70,10 @@ it("RpcConfigHook", async () => {
       isGenericConfig: false,
 
       target: Rpc<AnyRpc>({
+        type: () => null,
         isGenericConfig: false,
         isConfigCanBeUndefined: false,
+        isConfigFn: false,
         connect() {
           return undefined as any;
         },

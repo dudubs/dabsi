@@ -1,7 +1,7 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
-import getTestConnection from "@dabsi/typedata/entity/tests/tester";
+import { getTestConnection } from "@dabsi/typedata/entity/tests/tester";
 import { DataSource } from "@dabsi/typedata/source";
 import {
   AEntity,

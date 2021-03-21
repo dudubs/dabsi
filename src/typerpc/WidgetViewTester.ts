@@ -3,13 +3,13 @@ import ReactTesterRenderer from "react-test-renderer";
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { collectTests } from "@dabsi/jasmine/collectTests";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { WidgetViewClass } from "@dabsi/typerpc/widget/WidgetView";
+import { WidgetViewClass } from "@dabsi/typerpc/widget/view/component";
 import {
   AnyWidget,
   AnyWidgetConnection,
   WidgetElement,
 } from "@dabsi/typerpc/widget/Widget";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
 import { RpcTester } from "@dabsi/typerpc/RpcTester";
 
 export type WidgetTester<T extends AnyWidget> = {

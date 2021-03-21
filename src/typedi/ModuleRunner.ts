@@ -37,6 +37,7 @@ export class ModuleRunner {
       log.trace(() => `init module ${target.name}`);
       const argsResolver = getConstructorParamsResolver(target);
       const options = moduleMetadataMap.get(target)!;
+
       for (const dependencyModule of options.dependencies || []) {
         this.getInstance(dependencyModule);
       }

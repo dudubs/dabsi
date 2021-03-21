@@ -6,7 +6,10 @@ import {
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyForm, TForm } from "@dabsi/typerpc/widget/form/rpc";
 import { WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { WidgetView, WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import {
+  WidgetView,
+  WidgetViewProps,
+} from "@dabsi/typerpc/widget/view/component";
 import { Emittable } from "@dabsi/view/react/reactor/Reactor";
 import { ReactorListener } from "@dabsi/view/react/reactor/ReactorListener";
 import { Renderer } from "@dabsi/view/react/renderer";
@@ -63,15 +66,17 @@ export class FormView<C extends RpcConnection<AnyForm>> extends WidgetView<
   renderView(): React.ReactNode {
     return (
       <ReactorListener
-        emittable={FormViewEvent}
-        onEvent={event => {
-          switch (event) {
-            case "submit":
-              return this.submit();
-            case "reset":
-              return this.reset();
-          }
-        }}
+        listen={[
+          FormViewEvent,
+          event => {
+            switch (event) {
+              case "submit":
+                return this.submit();
+              case "reset":
+                return this.reset();
+            }
+          },
+        ]}
       >
         {this.props.children({
           form: this,

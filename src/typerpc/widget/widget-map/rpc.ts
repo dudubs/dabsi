@@ -1,4 +1,5 @@
-import { RpcConfig } from "@dabsi/typerpc/Rpc";
+import { Expect } from "@dabsi/common/typings2/Expect";
+import { AnyRpc, RpcConfig } from "@dabsi/typerpc/Rpc";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import {
   AnyWidget,

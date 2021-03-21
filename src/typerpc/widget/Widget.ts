@@ -8,9 +8,8 @@ import { Fn } from "@dabsi/common/typings2/Fn";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { PickByValue } from "@dabsi/common/typings2/PickByValue";
-import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { PluckDefined } from "@dabsi/common/typings2/Pluck";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
-import { UndefinedIfIsUndefined } from "@dabsi/common/typings2/UndefinedIfIsUndefined";
 import {
   AnyRpc,
   BasedRpc,
@@ -79,12 +78,13 @@ export type WidgetControllerOptions<T extends Pick<T, "Controller">> = {
 };
 export type WidgetOptions<T extends TWidget> = PartialUndefinedKeys<
   {
+    // move to handler
     isGenericConfig: RpcIsGenericConfigOption<T>;
     isConfigCanBeUndefined: RpcIsConfigCanBeUndefinedOption<T>;
     props: RpcPropsOption<T>;
   } & WidgetControllerOptions<T>,
   {
-    type?: Function;
+    type: Function;
     handler: WidgetHandlerClass<Widget<T>>;
   }
 >;
@@ -97,7 +97,7 @@ export type WidgetHandlerClass<T extends AnyWidget> = _RpcHandlerClass<
 export type WidgetCommandConfig<
   T extends AnyWidget,
   K extends keyof _WidgetCommands<WidgetType<T>>
-> = ToAsync<Extract<Pluck<_WidgetCommands<WidgetType<T>>, K>, Fn>>;
+> = ToAsync<Extract<PluckDefined<_WidgetCommands<WidgetType<T>>, K>, Fn>>;
 
 export type IWidgetHandler<T extends AnyWidget> = IRpcHandler<T> &
   {
@@ -186,6 +186,7 @@ export function Widget<R extends AnyWidget, T extends TWidget = WidgetType<R>>(
     handler,
     isGenericConfig,
     isConfigCanBeUndefined,
+    isConfigFn: false,
     children,
     type,
     props: assignDescriptors(props as {}, {
@@ -208,6 +209,7 @@ export type BasedWidget<T extends TWidget = TWidget> = BasedRpc<
 >;
 
 export type WidgetType<T extends BasedWidget> = RpcType<T>["TWidget"];
+
 export type WidgetElementState<
   T extends BasedWidget
 > = WidgetType<T>["ElementState"];

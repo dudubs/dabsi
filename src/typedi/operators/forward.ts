@@ -1,17 +1,17 @@
 import Lazy from "@dabsi/common/patterns/lazy";
 import { CustomResolver, IResolver, Resolver } from "@dabsi/typedi/Resolver";
 
-const _operator = "forward";
+const NAME = "forward";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method<T>(getResolver: () => Resolver<T>): CustomResolver<T> {
+function method<T>(getResolver: () => Resolver<T>): CustomResolver<T> {
   const _getResolver = Lazy(() => {
     return getResolver();
   });

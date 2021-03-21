@@ -1,48 +1,49 @@
-import { MuiFormView } from "@dabsi/browser/mui/widget/MuiFormView";
-import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
-import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
-import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
+import { MuiFormView } from "@dabsi/browser/mui/form/view";
+import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/breadcrumbs";
+import { ACL_Admin_Connection } from "@dabsi/system/acl/plugins/admin/common/rpc";
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
+import { MuiPage } from "@dabsi/core/browser/mui/page";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 
-const connection = AclAdminConnection.usersManager.add;
+const connection = ACL_Admin_Connection.usersManager.add;
 
-RouterView.define(AclAdminRouter.at("createNewUser"), (props, { location }) => {
-  SystemView.use(connection.$widget, props => (
-    <MuiFormView
-      {...props}
-      onSubmit={() => location.parent.at("users").push()}
-    />
-  ));
+RouterView.define(
+  ACL_Admin_Router.at("createNewUser"),
+  (props, { location }) => {
+    SystemView.use(connection.$widget, props => (
+      <MuiFormView
+        {...props}
+        onSubmit={() => location.parent.at("users").push()}
+      />
+    ));
 
-  SystemView.use(connection.input.$widget, props => (
-    <MuiGridMapView
-      for={props}
-      children={{
-        firstName: {
-          GridProps: { xs: 6 },
-        },
-        lastName: {
-          GridProps: { xs: 6 },
-        },
-      }}
-    />
-  ));
+    SystemView.use(connection.input.$widget, props => (
+      <MuiGridMapView
+        for={props}
+        children={{
+          firstName: {
+            GridProps: { xs: 6 },
+          },
+          lastName: {
+            GridProps: { xs: 6 },
+          },
+        }}
+      />
+    ));
 
-  return (
-    <WidgetLoaderView connection={AclAdminConnection.usersManager.add}>
-      {props => (
-        <MuiSystemPage
-          title={lang`CREATE_NEW_USER`}
-          Breadcrumbs={AclBreadcrumbs.Users}
-        >
-          <SystemView {...props} />
-        </MuiSystemPage>
-      )}
-    </WidgetLoaderView>
-  );
-});
+    return (
+      <WidgetViewLoader connection={ACL_Admin_Connection.usersManager.add}>
+        {props => (
+          <MuiPage
+            title={lang`CREATE_NEW_USER`}
+            Breadcrumbs={ACL_Admin_Browser_Breadcrumbs.Users}
+          >
+            <SystemView {...props} />
+          </MuiPage>
+        )}
+      </WidgetViewLoader>
+    );
+  }
+);

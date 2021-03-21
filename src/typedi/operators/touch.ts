@@ -1,16 +1,16 @@
 import { CustomResolver, IResolver, Resolver } from "@dabsi/typedi/Resolver";
 
-const _operator = "touch";
+const NAME = "touch";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method<T>(resolver: Resolver<T>): CustomResolver<T> {
+function method<T>(resolver: Resolver<T>): CustomResolver<T> {
   const cache = new WeakMap();
   return (context => {
     let value = cache.get(context);

@@ -12,7 +12,7 @@ import {
 } from "@dabsi/typerpc/input/Input";
 import { AbstractNullableInputHandler } from "@dabsi/typerpc/input/nullable-input/AbstractNullableInputHandler";
 import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
-import { AnyDataInput } from "@dabsi/typerpc/input/data-input/DataInput";
+import { AnyDataInput } from "@dabsi/typerpc/input/data-input/rpc";
 
 type T = AnyDataInput;
 

@@ -12,7 +12,7 @@ export default class LoaderModule {
 
   directoryLoaders: ((dir: string) => Awaitable)[] = [];
 
-  loadedDirs = new Set();
+  loadedDirs = new Set<string>();
 
   async load() {
     while (this.loaders.length) {
@@ -52,13 +52,32 @@ export default class LoaderModule {
   }
 
   @Cache(cachedProperties)
-  getIndexFile(dir: string): string | undefined {
+  findIndexFileName(dir: string): string | undefined {
     for (const baseName of ["index.ts", "index.tsx"]) {
       const indexFileName = path.join(dir, baseName);
       if (this.isFile(indexFileName)) {
         return indexFileName;
       }
     }
+  }
+
+  findIndexFiles(dir: string) {
+    const indexFileName = this.findIndexFileName(dir);
+    if (!indexFileName) return;
+
+    const files: string[] = [indexFileName];
+
+    for (const baseName of this.readDir(dir)) {
+      if (!baseName.startsWith("index.")) continue;
+      const fileName = path.join(dir, baseName);
+      if (/\.tsx?$/.test(baseName)) {
+        files.push(fileName);
+        continue;
+      }
+      const indexFileName = this.findIndexFileName(fileName);
+      indexFileName && files.push(indexFileName);
+    }
+    return files;
   }
 
   @Cache(cachedProperties)
@@ -68,6 +87,7 @@ export default class LoaderModule {
   }
 
   @Cache(cachedProperties) readDir(dir: string): string[] {
+    if (!this.isDir(dir)) return [];
     return readdirSync(dir);
   }
 

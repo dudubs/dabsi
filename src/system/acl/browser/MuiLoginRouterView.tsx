@@ -1,33 +1,33 @@
-import { MuiTextInputView } from "@dabsi/browser/mui/widget/input/MuiTextInputView";
-import { MuiFormView } from "@dabsi/browser/mui/widget/MuiFormView";
+import { MuiFormView } from "@dabsi/browser/mui/form/view";
+import { MuiTextInputView } from "@dabsi/browser/mui/input/TextInput";
 import { AclLoginInfoEvent } from "@dabsi/system/acl/common/loginInfoEvent";
 import { AclLoginRouter } from "@dabsi/system/acl/common/router";
-import { AclConnection } from "@dabsi/system/acl/common/rpc";
+import { AclConnection, AclRpc } from "@dabsi/system/acl/common/rpc";
 import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { useHistory } from "@dabsi/typerouter/History";
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
 import Typography from "@material-ui/core/Typography";
 import React from "react";
+
+SystemView.define(AclRpc.at(`login.input.map.password`), props => (
+  <MuiTextInputView
+    {...props}
+    title={lang`PASSWORD`}
+    TextFieldProps={{
+      type: "password",
+    }}
+  />
+));
 
 RouterView.define(AclLoginRouter, () => {
   const emit = useEmitter();
   const history = useHistory();
 
-  SystemView.use(AclConnection.login.input.map.password.$widget, props => (
-    <MuiTextInputView
-      {...props}
-      title={lang`PASSWORD`}
-      TextFieldProps={{
-        type: "password",
-      }}
-    />
-  ));
-
   return (
-    <WidgetLoaderView connection={AclConnection.login}>
+    <WidgetViewLoader connection={AclConnection.login}>
       {props => {
         return (
           <PaperInCenter>
@@ -55,6 +55,6 @@ RouterView.define(AclLoginRouter, () => {
           </PaperInCenter>
         );
       }}
-    </WidgetLoaderView>
+    </WidgetViewLoader>
   );
 });

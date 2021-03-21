@@ -12,13 +12,34 @@ export function mapObject<T, R>(
   return result;
 }
 
-export async function mapObjectAsync<T, R>(
+export function mapObjectAsync<T, R>(
   obj: Record<string, T>,
   mapper: (value: T, key: string) => Awaitable<R>
 ): Promise<Record<string, R>> {
   const result: any = {};
+  const promises: Promise<any>[] = [];
+  const errors: { key; error }[] = [];
   for (const [key, value] of entries(obj)) {
-    result[key] = await mapper(value, key);
+    promises.push(
+      Promise.resolve(mapper(value, key))
+        .then(value => {
+          result[key] = value;
+        })
+        .catch(error => {
+          errors.push({ error, key });
+        })
+    );
   }
-  return result;
+  return Promise.all(promises).then(() => {
+    if (errors.length) {
+      const [{ key, error }] = errors;
+      if (typeof error.stack === "string") {
+        error.stack = error.stack.replace(/(\n\s*at\s+)/, x =>
+          [x, `key ${JSON.stringify(key)}`, x].join("")
+        );
+      }
+      throw error;
+    }
+    return result;
+  });
 }

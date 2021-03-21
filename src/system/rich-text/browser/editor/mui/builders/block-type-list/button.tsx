@@ -1,6 +1,6 @@
 import { MuiEditorButtonGroup } from "@dabsi/system/rich-text/browser/editor/mui/buttonGroup";
 import { RichTextStore } from "@dabsi/system/rich-text/browser/editor/store";
-import { ViewContext } from "@dabsi/view/react/context";
+import { ReactContext } from "@dabsi/view/react/context";
 import FormatListBulletedIcon from "@material-ui/icons/FormatListBulleted";
 import FormatListNumberedIcon from "@material-ui/icons/FormatListNumbered";
 import React from "react";

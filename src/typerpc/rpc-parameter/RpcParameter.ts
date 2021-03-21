@@ -39,6 +39,7 @@ export function RpcParameter<Target extends AnyRpc, Data>(
     isGenericConfig: false,
     isConfigFn: true,
     children: { target },
+    type: RpcParameter,
     handler: RpcParameterHandler,
     props: { parameterDataType: dataType },
     connect(path, command) {

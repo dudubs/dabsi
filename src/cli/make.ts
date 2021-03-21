@@ -150,7 +150,7 @@ export default async function ({ projectDir = ".", force = false }) {
       for (const baseName of readdirSync(dir)) {
         const fileName = path.join(dir, baseName);
         if (platforms.has(baseName)) {
-          if (getIndexFile(fileName)) {
+          if (findIndexFileName(fileName)) {
             makeModuleConfig(baseName, fileName);
             continue;
           }
@@ -159,7 +159,7 @@ export default async function ({ projectDir = ".", force = false }) {
         if (!statSync(fileName).isDirectory()) continue;
         scanModules(fileName);
       }
-      function getIndexFile(dir: string) {
+      function findIndexFileName(dir: string) {
         for (const baseName of ["index.ts", "index.tsx"]) {
           const fileName = path.join(dir, baseName);
           if (existsSync(fileName)) return fileName;

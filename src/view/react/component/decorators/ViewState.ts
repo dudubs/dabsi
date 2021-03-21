@@ -8,9 +8,24 @@ export function ViewState<Method extends PropertyKey>(
 ): {
   (target: View<any> & Record<Method, () => any>, key): void;
 };
+export function ViewState<Method extends PropertyKey>(): MethodDecorator;
 
 export function ViewState(updateMethod?) {
-  return (target: View<any>, key: string) => {
+  return (target: View<any>, key: string, descriptor?) => {
+    if (descriptor) {
+      const map = new WeakMap();
+      const { get } = descriptor;
+      descriptor.get = function (this: View<any>) {
+        let value = map.get(this.state);
+        if (value || map.has(this.state)) {
+          return value;
+        }
+
+        map.set(this.state, (value = get.call(this)));
+        return value;
+      };
+      return;
+    }
     Object.defineProperty(target, key, {
       get(this: View) {
         return this.currentState[key];

@@ -1,8 +1,6 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import RequestSession from "@dabsi/modules/session/RequestSession";
+import { RequestUser } from "@dabsi/modules/session";
 import { AdminRpc } from "@dabsi/system/admin/common";
-import { DataRow } from "@dabsi/typedata/row";
-import { RpcError } from "@dabsi/typerpc/RpcError";
 import RpcConfigFactoryResolver from "../../../modules/rpc/configFactoryResolver";
 
 export default RpcConfigResolver(
@@ -10,12 +8,11 @@ export default RpcConfigResolver(
   {
     // TODO: Automatic by cycle
     createConfig: RpcConfigFactoryResolver(AdminRpc, { create: true }),
-    session: DataRow(RequestSession),
+    user: RequestUser,
   },
   c => async $ => {
-    const user = c.session.user;
-    if (!user) throw new RpcError(`Access denied.`);
-
     return $(await c.createConfig());
   }
 );
+
+// LoggingUserContext: Resolver<DataRowFetcher)

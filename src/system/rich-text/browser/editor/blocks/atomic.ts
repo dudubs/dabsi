@@ -1,5 +1,5 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { Like } from "@dabsi/common/typings2/_";
+import { Like } from "@dabsi/common/typings2/Like";
 import { RichTextEditor } from "@dabsi/system/rich-text/browser/editor/editor";
 import { RichTextEditorBlock } from "@dabsi/system/rich-text/browser/editor/editorBlock";
 import { RichTextEditorGlobals } from "@dabsi/system/rich-text/browser/editor/globals";

@@ -3,17 +3,17 @@ import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { IResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
-const _operator = "checkObject";
+const NAME = "checkObject";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method(resolverMap: ResolverMap, context: ResolverMap) {
+function method(resolverMap: ResolverMap, context: ResolverMap) {
   const errors: [key: string, message: string][] = [];
   let message = "";
   for (const [key, resolver] of entries(resolverMap)) {

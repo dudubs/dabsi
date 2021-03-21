@@ -1,19 +1,25 @@
+import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import RequestSession from "@dabsi/modules/session/RequestSession";
+import { Session } from "@dabsi/modules/session/entities/Session";
 import AclModule from "@dabsi/system/acl";
 import { AdminInfoRpc } from "@dabsi/system/admin/common";
-import { DataRow } from "@dabsi/typedata/row";
 
 export default RpcConfigResolver(
   AdminInfoRpc,
   {
     aclModule: AclModule,
-    session: DataRow(RequestSession),
+    session: DataRowContext(Session),
   },
-  c => {
-    return async () => {
-      if (!c.session.user) return { type: "fail" };
-      return { type: "success", tokens: [] };
-    };
+  c => async () => {
+    console.log("xx");
+
+    const { user } = await c.session.fetch({
+      relations: { user: { pick: [] } },
+    });
+
+    console.log({ user });
+
+    if (!user) return { type: "fail" };
+    return { type: "success", tokens: [] };
   }
 );

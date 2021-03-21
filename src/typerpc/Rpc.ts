@@ -16,7 +16,7 @@ export type TRpc = {
   Handler: object;
   Connection: any;
   Children: Record<string, AnyRpc>;
-  Config: object | undefined;
+  Config: any;
   Props: object;
 };
 
@@ -39,6 +39,17 @@ export type RpcLocator<T extends AnyRpc> = WithMetaType<{ rpc: T }> &
     [K in RpcChildKey<T>]: RpcLocator<T["children"][K]>;
   };
 
+export type RpcAt<T extends AnyRpc, K extends string> =
+  //
+
+  K extends RpcChildKey<T>
+    ? RpcChild<T, K>
+    : K extends `${infer P}.${infer K}`
+    ? P extends RpcChildKey<T>
+      ? RpcAt<RpcChild<T, P>, K>
+      : { invalidChildKey: K }
+    : { invalidChildKey: K };
+
 export interface IRpc<T extends TRpc> {
   options: RpcOptions<TRpc>;
 
@@ -46,30 +57,7 @@ export interface IRpc<T extends TRpc> {
 
   rpcType: (...args) => AnyRpc;
 
-  at<T extends AnyRpc, U extends AnyRpc>(
-    this: T,
-    callback: (locator: RpcLocator<T>) => WithMetaType<{ rpc: U }>
-  ): U;
-  at<
-    T extends AnyRpcWithMap,
-    K extends string & keyof T["children"]["map"]["children"]
-  >(
-    this: T,
-    key: `:${K}`
-  ): T["children"]["map"]["children"][K];
-
-  at<
-    T extends AnyRpcWithTarget,
-    K extends string & keyof T["children"]["target"]["children"]
-  >(
-    this: T,
-    key: `:${K}`
-  ): T["children"]["target"]["children"][K];
-
-  at<T extends AnyRpc, K extends keyof T["children"]>(
-    this: T,
-    key: K
-  ): T["children"][K];
+  at<T extends AnyRpc, K extends string>(this: T, path: K): RpcAt<T, K>;
 
   createRpcConnection(path: any[], command: RpcCommand): T["Connection"];
 
@@ -244,8 +232,6 @@ export type RpcOptions<T extends TRpc> = PartialUndefinedKeys<
 
     props: RpcPropsOption<T>;
 
-    type?: Function;
-
     children: RpcChildrenOption<T>;
   },
   {
@@ -254,10 +240,16 @@ export type RpcOptions<T extends TRpc> = PartialUndefinedKeys<
     connect: _RpcConnectionFactory<T>;
 
     handler: RpcHandlerClass<Rpc<T>>;
+
+    type: Function;
   }
 >;
 
 export type BasedRpc<T extends TRpc = TRpc> = WithMetaType<{ TRpc: T }>;
+
+export type RpcBase<T extends AnyRpc> =
+  //
+  BasedRpc<RpcType<T>>;
 
 export type RpcType<T extends BasedRpc> = MetaType<T>["TRpc"];
 

@@ -14,7 +14,7 @@ import {
 import { MapView, WidgetMapView } from "@dabsi/typerpc/widget/widget-map/view";
 import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
 import {
   ComponentType,
   createElement,

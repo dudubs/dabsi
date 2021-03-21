@@ -1,6 +1,9 @@
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { WidgetView, WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
+import {
+  WidgetView,
+  WidgetViewProps,
+} from "@dabsi/typerpc/widget/view/component";
 import { AnyWidgetWrapper } from "@dabsi/typerpc/widget/wrapper/rpc";
 
 export class WidgetWrapperView<

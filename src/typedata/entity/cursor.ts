@@ -59,8 +59,6 @@ export type DataEntityCursor = BaseDataEntityCursor & {
   entityMetadata: EntityMetadata;
 };
 
-const __doNotTranslateFilter = false;
-
 export namespace DataEntityCursor {
   export function create(
     queryRunner: QueryRunner,
@@ -90,11 +88,12 @@ export namespace DataEntityCursor {
       );
 
       parent = {
-        filter: __doNotTranslateFilter
-          ? path.filter
-          : new DataFieldsTranslator(cursor.selection.fields || {}).translate(
-              path.filter
-            ),
+        filter: DataExp(
+          new DataFieldsTranslator(cursor.selection.fields || {}).translate(
+            path.filter
+          ),
+          path.keys.length ? { $is: path.keys } : undefined
+        ),
         typeInfo,
         parent,
         relation,
@@ -103,7 +102,7 @@ export namespace DataEntityCursor {
           path.key
         ),
 
-        ...getChildKeys(typeInfo.type, path.keys),
+        ...getChildKeys(typeInfo.type, path.keyMap),
       };
 
       const entityType = relation.left.entityType;
@@ -130,15 +129,16 @@ export namespace DataEntityCursor {
       entityManager: connection.createEntityManager(queryRunner),
       typeInfo,
 
-      filter: __doNotTranslateFilter
-        ? cursor.filter
-        : new DataFieldsTranslator(cursor.selection.fields || {}).translate(
-            cursor.filter
-          ),
+      filter: DataExp(
+        new DataFieldsTranslator(cursor.selection.fields || {}).translate(
+          cursor.filter
+        ),
+        cursor.keys.length ? { $is: cursor.keys } : undefined
+      ),
       entityMetadata,
       entityInfo: getDataEntityMetadata(entityMetadata),
       parent,
-      ...getChildKeys(typeInfo.type, cursor.keys),
+      ...getChildKeys(typeInfo.type, cursor.keyMap),
     };
 
     function updateTypeInfo(childTypeName: string) {
@@ -151,10 +151,7 @@ export namespace DataEntityCursor {
       typeInfo = childTypeInfo;
     }
 
-    function getChildKeys(
-      entityType: Function,
-      dataChildKeys: Record<string, any>
-    ) {
+    function getChildKeys(entityType: Function, keyMap: Record<string, any>) {
       const columnKeys: DataEntityCursor["columnKeys"] = [];
       const relationKeys: DataEntityCursor["relationKeys"] = [];
 
@@ -162,7 +159,7 @@ export namespace DataEntityCursor {
         getEntityMetadata(connection, entityType)
       );
 
-      for (const [propertyName, value] of entries(dataChildKeys)) {
+      for (const [propertyName, value] of entries(keyMap)) {
         const relation = DataEntityMetadata.propertyRelationMap[propertyName];
         if (relation) {
           const key = DataEntityKey.parse(relation.right.entityMetadata, value);

@@ -5,14 +5,6 @@ import ServerModule from "@dabsi/modules/server";
 import { Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import express from "express";
 
-declare global {
-  namespace Express {
-    interface Request {
-      requestContext: ResolverMap;
-    }
-  }
-}
-
 export const ExpressResolver = Resolver.token<
   [express.Request, express.Response]
 >();
@@ -30,7 +22,6 @@ export default class ExpressModule {
       const app = express();
 
       app.use((req, res, next) => {
-        req.requestContext = Object.create(requestModule.context);
         this.log.info(
           () => `${req.method} ${req.path} HTTP/${req.httpVersion}`
         );
@@ -62,7 +53,9 @@ export default class ExpressModule {
     this.requestModule.context
   );
 
-  contextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
+  requestContextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
+
+  // onRequest: () => () => void;
 
   listen(port: number, addr = "0.0.0.0") {
     this.onRun(app => {
@@ -81,16 +74,24 @@ export default class ExpressModule {
       context: ResolverMap
     ) => Awaitable
   ): express.Handler {
-    return (req, res) =>
-      this.requestModule.processRequest(async context => {
+    return (req, res) => {
+      return this.requestModule.processRequest(async context => {
         Resolver.provide(
           context,
           ExpressResolver.provide(() => [req, res])
         );
-        for (const resolver of this.contextResolvers) {
+        for (const resolver of this.requestContextResolvers) {
           Resolver.provide(context, await Resolver.resolve(resolver, context));
         }
-        return callback(req, res, context);
+        await callback(req, res, context);
+
+        // cleanup
       });
+    };
   }
+
+  processMultipleRequests(
+    requests: { path: any[]; payload: any }[],
+    body: any
+  ) {}
 }

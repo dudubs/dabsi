@@ -2,10 +2,12 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 // TODO: DataSource.clone(), DataSource.freeze()
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
+import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Fn } from "@dabsi/common/typings2/Fn";
 import { inspect } from "@dabsi/logging/inspect";
 import { BaseType, RebaseType } from "@dabsi/typedata/BaseType";
 import { chunks } from "@dabsi/typedata/chunks";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
+import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataFields, DataFieldsRow } from "@dabsi/typedata/fields";
 import { DataKey, DataKeyOrKeys } from "@dabsi/typedata/key";
@@ -143,20 +145,16 @@ export abstract class DataSource<T> {
   // relation
 
   async updateRelations(keyMap: Record<string, boolean>): Promise<void> {
-    const existsKeys = new Set(
-      await this.filter({
-        $is: Object.keys(keyMap),
-      }).getKeys()
-    );
-
     const keysToAdd: string[] = [];
     const keysToRemove: string[] = [];
 
     for (const [key, toAdd] of entries(keyMap)) {
       if (toAdd) {
-        !existsKeys.has(key) && keysToAdd.push(key);
+        // !existsKeys.has(key) &&
+        keysToAdd.push(key);
       } else {
-        existsKeys.has(key) && keysToRemove.push(key);
+        // existsKeys.has(key) &&
+        keysToRemove.push(key);
       }
     }
     await this.handleUpdateRelations(keysToAdd, keysToRemove);
@@ -181,6 +179,10 @@ export abstract class DataSource<T> {
     callback: (keys: string[]) => Promise<void>
   ): Promise<string[]> {
     let keys: string[];
+
+    if (!keyOrKeys && this.cursor.keys.length) {
+      keyOrKeys = this.cursor.keys;
+    }
 
     if (keyOrKeys !== undefined) {
       if (Array.isArray(keyOrKeys)) {
@@ -270,24 +272,55 @@ export abstract class DataSource<T> {
 
   T?: T;
 
+  protected _buildCursor<
+    K extends ExtractKeys<
+      typeof DataCursor,
+      (cursor: DataCursor<any>, ...args: any[]) => DataCursor<any>
+    >
+  >(
+    method: K,
+    ...args: typeof DataCursor[K] extends (_: any, ...args: infer U) => any
+      ? U
+      : []
+  ): DataSource<any> {
+    return <any>(
+      this.withCursor((DataCursor as any)[method](this.cursor, ...args))
+    );
+  }
+
   of<T>(this: DataSource<T>, keyMap: Record<string, any>): DataSource<T>;
+  of<T>(this: DataSource<T>, keyOrKeys: string | string[]): DataSource<T>;
+
   of<T, K extends string & keyof Required<T>>(
     this: DataSource<T>,
     propertyName: string & K,
     value: DataKey<T[K]>
   ): DataSource<T>;
-  of(keyMap, value?) {
-    if (typeof keyMap === "string") {
-      keyMap = { [keyMap]: value };
+  of(...args) {
+    if (args.length === 2) {
+      const [k, v] = args;
+      return this._buildCursor("ofKeyMap", { [k]: v });
     }
-    return this.withCursor(DataCursor.of(this.cursor, keyMap));
+    const [arg0] = args;
+
+    if (typeof arg0 === "string") {
+      return this._buildCursor("ofKeys", [arg0]);
+    }
+    if (Array.isArray(arg0)) {
+      return this._buildCursor("ofKeys", arg0);
+    }
+
+    return this._buildCursor("ofKeyMap", arg0);
   }
 
   at<T, K extends DataRelationKeys<T>>(
     this: DataSource<T>,
     propertyName: string & K,
-    key: DataKey<DataRelationType<T[K]>>
+    key: DataKey<DataRelationType<T[K]>> = this.cursor.keys[0]
   ): DataSource.At<T, K> {
+    if (!key) {
+      throw new Error("No data-key for location.");
+    }
     return this.withCursor(
       DataCursor.at(this.cursor, propertyName, DataKey(key))
     );
@@ -337,7 +370,7 @@ export abstract class DataSource<T> {
   ): DataSource<DataRelationType<T[K]>> {
     return this.withCursor({
       ...this.cursor,
-      ...EmptyDataCursor,
+      ...EMPTY_DATA_CURSOR,
       root: [
         ...this.cursor.root,
         ...this.cursor.location.map(p => p.propertyName),
@@ -382,9 +415,3 @@ export abstract class DataSource<T> {
     }
   }
 }
-
-export type DataSourceTreeOfQuery = {
-  relationPropertyName: string;
-  minDepth?: number;
-  maxDepth?: number;
-};

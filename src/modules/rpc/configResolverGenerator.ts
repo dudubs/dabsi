@@ -9,6 +9,7 @@ import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
 import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { RpcConfigResolver } from "./configResolver";
+import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
 
 export type RpcConfigResolverGenerator = {
   (rpc: AnyRpc): undefined | RpcConfigResolver<AnyRpc>;

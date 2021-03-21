@@ -1,7 +1,7 @@
 import { AssignKeys } from "@dabsi/common/typings2/AssignKeys";
 import { HasKeys } from "@dabsi/common/typings2/boolean";
 import { Merge } from "@dabsi/common/typings2/Merge";
-import { Pluck } from "@dabsi/common/typings2/Pluck";
+import { PluckDefined } from "@dabsi/common/typings2/Pluck";
 
 type _MergeRelation<L, R> = L extends boolean
   ? R
@@ -15,7 +15,7 @@ type _MergeRelations<L, R> = Merge<
   {
     [K in keyof R]: _MergeRelation<
       //
-      Pluck<L, K, undefined>,
+      PluckDefined<L, K, undefined>,
       R[K]
     >;
   }
@@ -27,7 +27,7 @@ type _MergeChildren<L, R> = Merge<
   {
     [RK in keyof R]: _Merge<
       //
-      Pluck<L, RK, undefined>, // L ChildOf K
+      PluckDefined<L, RK, undefined>, // L ChildOf K
       R[RK]
       ///
     >;
@@ -48,23 +48,23 @@ type _MergeObject<L, R> = Merge<
   {
     pick: _MergePicks<
       //
-      Pluck<L, "pick", undefined>,
-      Pluck<R, "pick", undefined>
+      PluckDefined<L, "pick", undefined>,
+      PluckDefined<R, "pick", undefined>
     >;
     fields: AssignKeys<
       //
-      Pluck<L, "fields">,
-      Pluck<R, "fields">
+      PluckDefined<L, "fields">,
+      PluckDefined<R, "fields">
     >;
     relations: _MergeRelations<
       //
-      Pluck<L, "relations">,
-      Pluck<R, "relations">
+      PluckDefined<L, "relations">,
+      PluckDefined<R, "relations">
     >;
     children: _MergeChildren<
       //
-      Pluck<L, "children">,
-      Pluck<R, "children">
+      PluckDefined<L, "children">,
+      PluckDefined<R, "children">
     >;
   }
 >;

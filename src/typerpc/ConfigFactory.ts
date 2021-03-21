@@ -25,11 +25,10 @@ export type FnIsConfigFactory<T extends Fn> = Is<
   { [isConfigFactory]: true }
 >;
 
-export function ConfigFactory<
-  T extends ConfigFactory<any, any[]>,
-  C,
-  U extends any[]
->(config: T | undefined, args: U): Promise<C | undefined>;
+export function ConfigFactory<C, U extends any[]>(
+  config: ConfigFactory<C, U> | undefined,
+  args: U
+): Promise<C | undefined>;
 
 export function ConfigFactory<T extends ConfigFactory<C, []>, C>(
   config: T | undefined

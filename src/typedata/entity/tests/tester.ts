@@ -1,4 +1,5 @@
 import { defined } from "@dabsi/common/object/defined";
+import Lazy from "@dabsi/common/patterns/lazy";
 import { formatSql } from "@dabsi/system-old/server/acl/formatSql";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
@@ -24,8 +25,12 @@ export class XEntity {
     console.log("xx");
   }
 }
-export const getConnection = () =>
+export const getTestConnection = () =>
   defined(connection, `No data test connection`);
+
+export const getTestQueryRunner = Lazy(() =>
+  getTestConnection().createQueryRunner()
+);
 
 let connection: Connection;
 
@@ -35,16 +40,16 @@ afterEach(() => {
   testQueries = null;
 });
 
-let logTestQueriesEnabled = false;
+let logTestSqlQueriesEnabled = false;
 
 afterEach(() => {
-  logTestQueriesEnabled = false;
+  logTestSqlQueriesEnabled = false;
 });
 
-export const logTestQueries = () => {
-  logTestQueriesEnabled = true;
+export const logTestSqlQueries = () => {
+  logTestSqlQueriesEnabled = true;
 };
-export const collectTestQueries = (): { sql: string; params: any[] }[] => {
+export const collectTestSqlQueries = (): { sql: string; params: any[] }[] => {
   return (testQueries = []);
 };
 
@@ -60,11 +65,9 @@ beforeAll(async () => {
   ]);
 
   connection.logger.logQuery = (sql, params = []) => {
-    if (logTestQueriesEnabled) {
+    if (logTestSqlQueriesEnabled) {
       console.log(formatSql(sql), params);
     }
     testQueries?.push({ sql, params });
   };
 });
-
-export default getConnection;

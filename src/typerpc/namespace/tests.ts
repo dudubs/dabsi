@@ -17,7 +17,6 @@ it("sanity", async () => {
       e,
     })
   );
-
   const [mf, mfc] = e.register("mf", RpcFn());
 
   const config: RpcUnresolvedConfig<RpcNamespace> = {

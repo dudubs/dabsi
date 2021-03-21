@@ -1,70 +1,61 @@
 import { SystemRpc } from "@dabsi/system/core/common/rpc";
 import { RpcCommand } from "@dabsi/typerpc/Rpc";
+import {
+  RpcMultiplexer,
+  RpcCommandRequest,
+  RpcMultiplexerHandler,
+} from "@dabsi/typerpc/RpcMultiplexer";
 
-let _captureCallback: ((path, payload) => Promise<void>) | null;
+let _captureCommand: ((path, payload) => Promise<void>) | null;
 
-let _requests: null | { path; payload; resolve }[] = [];
+let _currentHandler: RpcMultiplexerHandler | null = null;
+let _currentRequests: RpcCommandRequest[] = [];
 
-let _command: RpcCommand = (path, payload) => {
-  return new Promise<any>(resolve => {
-    _requests!.push({ path, payload, resolve });
-  });
-};
-
-SystemRpc.commandRpc((path, payload) => {
-  if (_captureCallback) {
-    const lastCaptureCallback = _captureCallback;
-    _captureCallback = null;
-    return lastCaptureCallback(path, payload);
+const multiplexer = new RpcMultiplexer(requests => {
+  //
+  if (!_currentHandler) {
+    _currentRequests.push(...requests);
+    return;
   }
-  return _command(path, payload);
+  _currentHandler(requests);
 });
 
-export function catchSystemCommand<T>(
-  callback: () => T
-): {
-  command: { path: any[]; payload: any; resolve: (result) => void };
-  result: T;
-} {
-  let command;
+SystemRpc.commandRpc((path, payload) => {
+  if (_captureCommand) {
+    const lastCaptureCallback = _captureCommand;
+    _captureCommand = null;
+    return lastCaptureCallback(path, payload);
+  }
+  return multiplexer.send(path, payload);
+});
 
-  _captureCallback = (path, payload) => {
-    return new Promise(resolve => {
-      command = { resolve, path, payload };
-    });
-  };
-
-  //
-  const result = callback();
-  return { result, command };
-}
-
+// RpcMultiplexer
 export namespace SystemCommand {
-  export function handle(command: RpcCommand) {
-    const requests = _requests!;
-    _requests = null;
-    _command = command;
-    for (let { path, payload, resolve } of requests) {
-      command(path, payload).then(resolve);
+  export function handle(handler: RpcMultiplexerHandler) {
+    _currentHandler = handler;
+
+    if (_currentRequests.length) {
+      const requests = _currentRequests;
+      _currentRequests = [];
+      handler(requests);
     }
   }
 
-  export function capture<T>(
-    callback: () => T
-  ): {
-    command: { path: any[]; payload: any; resolve: (result) => void };
-    result: T;
-  } {
-    let command;
+  export function capture<T>(callback: () => T): [T, RpcCommandRequest] {
+    let request: RpcCommandRequest | null = null;
 
-    _captureCallback = (path, payload) => {
+    _captureCommand = (path, payload) => {
       return new Promise(resolve => {
-        command = { resolve, path, payload };
+        request = { path, payload, resolve };
       });
     };
 
-    //
     const result = callback();
-    return { result, command };
+
+    if (!request) {
+      throw new Error(`Not cuapured rpc request.`);
+    }
+    //
+    return [result, request];
   }
 }

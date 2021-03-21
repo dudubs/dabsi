@@ -7,8 +7,9 @@ import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { buildTestRelations } from "@dabsi/typedata/entity/tests/buildTestRelations";
-import getTestConnection, {
-  logTestQueries,
+import {
+  getTestConnection,
+  logTestSqlQueries,
 } from "@dabsi/typedata/entity/tests/tester";
 import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { DataSelection } from "@dabsi/typedata/selection/selection";

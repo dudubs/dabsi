@@ -1,13 +1,13 @@
-import { MuiDataTableView } from "@dabsi/browser/mui/widget/MuiDataTableView";
+import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
 import { ContentAdminConnection } from "@dabsi/system/content/admin/common/rpc";
 import { ContentAdminRouter } from "@dabsi/system/content/admin/view/router";
 
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 import React from "react";
 
 RouterView.define(ContentAdminRouter.at("pages"), ({ location }) => (
-  <WidgetLoaderView connection={ContentAdminConnection.pages.table}>
+  <WidgetViewLoader connection={ContentAdminConnection.pages.table}>
     {props => (
       <MuiDataTableView
         title={lang`CONTENT_PAGES`}
@@ -23,5 +23,5 @@ RouterView.define(ContentAdminRouter.at("pages"), ({ location }) => (
         }}
       />
     )}
-  </WidgetLoaderView>
+  </WidgetViewLoader>
 ));

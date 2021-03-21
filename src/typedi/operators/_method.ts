@@ -1,13 +1,13 @@
 import { IResolver } from "@dabsi/typedi/Resolver";
 
-const _operator = "xxx";
+const NAME = "xxx";
 
-IResolver[_operator] = _method;
+IResolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {
-    [_operator]: typeof _method;
+    [NAME]: typeof method;
   }
 }
 
-function _method() {}
+function method() {}

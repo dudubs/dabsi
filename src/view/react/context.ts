@@ -3,28 +3,33 @@ import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { WeakId } from "@dabsi/common/WeakId";
 import React from "react";
 
-export namespace ViewContext {
-  export const original = React.createContext({});
+export const context = React.createContext(new Map());
 
-  export function provide({
-    children,
-    value,
-  }: {
-    value: object[] | object;
-    children: React.ReactElement;
-  }) {
-    const prev = React.useContext(original);
-    const next = Object.create(prev);
+export function ReactContext({
+  provide: values,
+  children,
+}: {
+  provide: object[] | object;
+  children: React.ReactElement;
+}) {
+  const parent = React.useContext(context);
 
-    if (!Array.isArray(value)) value = [value];
-    for (const o of value as object[]) {
-      next[WeakId(o.constructor)] = o;
+  if (!Array.isArray(values)) values = [values];
+
+  const next = React.useMemo(() => {
+    const map = new Map(parent.entries());
+    for (const o of values as object[]) {
+      map.set(o.constructor, o);
     }
-    return React.createElement(original.Provider, { value: next }, children);
-  }
+    return map;
+  }, values as any[]);
 
+  return React.createElement(context.Provider, { value: next }, children);
+}
+
+export namespace ReactContext {
   export function consume<T>(type: Constructor<T>): T | undefined {
-    return React.useContext(original)[WeakId(type)];
+    return React.useContext(context).get(type);
   }
 
   export function require<T>(type: Constructor<T>): T {

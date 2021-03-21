@@ -10,7 +10,7 @@ import { Type } from "@dabsi/common/typings2/Type";
 import { WeakId } from "@dabsi/common/WeakId";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { getExpNode } from "@dabsi/typedata/exp/getExpNode";
-import { DataCursor, EmptyDataCursor } from "@dabsi/typedata/cursor";
+import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";
 import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 import { DataEntityCursor } from "@dabsi/typedata/entity/cursor";
 import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
@@ -157,7 +157,7 @@ export class AclQuery {
     const user = { $is: this.userKey };
     const permissionQuery = this.createEntityQuery(
       Permission,
-      EmptyDataCursor,
+      EMPTY_DATA_CURSOR,
       {
         $and: [
           {
@@ -252,7 +252,7 @@ export class AclQuery {
   protected getUserQuery(): string {
     if (!hasKeys(this.userFieldExpMap)) return "";
 
-    return `(${this.createEntityQuery(User, EmptyDataCursor, {
+    return `(${this.createEntityQuery(User, EMPTY_DATA_CURSOR, {
       $is: this.userKey,
     }).getQueryWithFields(this.userFieldExpMap)}) _user`;
   }

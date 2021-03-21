@@ -8,6 +8,8 @@ export abstract class View<P = {}> extends Component<P, object> {
 
   isWillUnmount = false;
 
+  state: {} = {};
+
   currentState = {};
 
   isDidSetState = false;

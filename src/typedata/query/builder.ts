@@ -1,3 +1,6 @@
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { entries } from "@dabsi/common/object/entries";
+import { mapObject } from "@dabsi/common/object/mapObject";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataQuery, DataQueryExp } from "@dabsi/typedata/query/exp";
 import { isDeepEqual } from "@dabsi/typeorm/utils/QueryExpBuilder";

@@ -36,6 +36,7 @@ export function EnumInput<K extends string, N extends boolean = false>(
 ): EnumInput<K, N> {
   return <any>Input<AnyEnumInput>({
     isConfigCanBeUndefined: true,
+    type: EnumInput,
     handler: EnumInputHandler,
     props: {
       nullable: options?.nullable ?? false,

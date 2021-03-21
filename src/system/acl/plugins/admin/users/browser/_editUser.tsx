@@ -1,23 +1,22 @@
-import { MuiDataInputMapView } from "@dabsi/browser/mui/widget/input/MuiDataInputMapView";
-import { MuiEditFormView } from "@dabsi/browser/mui/widget/MuiEditFormView";
+import { MuiDataInputMapView } from "@dabsi/browser/mui/input/DataInputMap";
+import { MuiEditFormView } from "@dabsi/browser/mui/widget/EditFormView";
 import AclAdminViewOptions from "@dabsi/system/acl/plugins/admin/browser/AclAdminViewOptions";
-import { AclBreadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/AclBreadcrumbs";
-import AclAdminRouter from "@dabsi/system/acl/plugins/admin/common/AclAdminRouter";
-import { AclAdminConnection } from "@dabsi/system/acl/plugins/admin/common/AclAdminRpc";
-import { AclAdminUserBasicInfoInput } from "@dabsi/system/acl/plugins/admin/users/common/basicInfoInput";
-import { AclAdminUserGroupsForm } from "@dabsi/system/acl/plugins/admin/users/common/groupsForm";
+import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/breadcrumbs";
+import { ACL_Admin_Connection } from "@dabsi/system/acl/plugins/admin/common/rpc";
+import { ACL_Admin_UserBaiscInfoInput } from "@dabsi/system/acl/plugins/admin/users/common/basicInfoInput";
+import { ACL_Admin_UserGroupsForm } from "@dabsi/system/acl/plugins/admin/users/common/groupsForm";
+import { ACL_Admin_Router } from "@dabsi/system/acl/plugins/admin/view/router";
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
-import MuiSystemPage from "@dabsi/system/core/browser/MuiSystemPage";
+import { MuiPage } from "@dabsi/browser/mui/MuiPage";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { Form } from "@dabsi/typerpc/widget/form/rpc";
-
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetLoaderView } from "@dabsi/typerpc/widget/WidgetLoaderView";
+import { Form } from "@dabsi/typerpc/widget/form/rpc";
+import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { useState } from "react";
 
-RouterView.define(AclAdminRouter.at("editUser"), ({ location }) => {
+RouterView.define(ACL_Admin_Router.at("editUser"), ({ location }) => {
   const [title, setTitle] = useState("");
 
   SystemView.use(define => {
@@ -27,7 +26,7 @@ RouterView.define(AclAdminRouter.at("editUser"), ({ location }) => {
 
     define(Form, MuiEditFormView);
 
-    define(AclAdminUserBasicInfoInput, props => (
+    define(ACL_Admin_UserBaiscInfoInput, props => (
       <MuiGridMapView
         for={mergeProps(props, {
           onChange: input => {
@@ -46,30 +45,30 @@ RouterView.define(AclAdminRouter.at("editUser"), ({ location }) => {
       />
     ));
 
-    define(AclAdminUserGroupsForm.at("input"), props => (
+    define(ACL_Admin_UserGroupsForm.at("input"), props => (
       <MuiDataInputMapView {...props} itemGridProps={{ xs: 4 }} />
     ));
   });
 
   return (
-    <WidgetLoaderView
+    <WidgetViewLoader
       connection={() =>
-        AclAdminConnection.usersManager.edit(location.params.userId)
+        ACL_Admin_Connection.usersManager.edit(location.params.userId)
       }
     >
       {props => (
-        <MuiSystemPage
+        <MuiPage
           title={lang`EDIT_USER`}
           breadcrumbTitle={title}
-          Breadcrumbs={AclBreadcrumbs.Users}
+          Breadcrumbs={ACL_Admin_Browser_Breadcrumbs.Users}
         >
           <MuiAccordionMapView
             for={props}
             exclude={AclAdminViewOptions.editUser.excludeChildKeys}
             wrappers={AclAdminViewOptions.editUser.childWrapperMap}
           />
-        </MuiSystemPage>
+        </MuiPage>
       )}
-    </WidgetLoaderView>
+    </WidgetViewLoader>
   );
 });

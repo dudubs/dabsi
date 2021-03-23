@@ -24,6 +24,7 @@ export const ACL_Admin_GroupsRpc = RpcMap({
     String,
     RpcMap({
       //
+      delete: RpcFn(),
       basicInfo: ACL_Admin_GroupBasicInfoForm,
       users: ACL_Admin_UsersTable,
       updateUsers: RpcFn<(checkMap: Record<string, boolean>) => void>(),

@@ -1,23 +1,30 @@
+import { Ticker } from "@dabsi/common/async/Ticker";
 import { touchMap } from "@dabsi/common/map/touchMap";
-import { touchSet } from "@dabsi/common/set/touchSet";
 import Lazy from "@dabsi/common/patterns/lazy";
-import { inspect } from "@dabsi/logging/inspect";
+import { touchSet } from "@dabsi/common/set/touchSet";
 import { createRpcConfigResolverGenerator } from "@dabsi/modules/rpc/configResolverGenerator";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { Module, Resolver, ResolverMap } from "@dabsi/typedi";
+import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, RpcPath } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
-import colors from "colors/safe";
 import fs from "fs";
 import path from "path";
 import { DABSI_ROOT_DIR } from "../../env";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
 import { isRpcConfigResolver, RpcConfigResolver } from "./configResolver";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
-import { Ticker } from "@dabsi/common/async/Ticker";
+
+export type RpcConfigPath = {
+  rpc: AnyRpc;
+  parent?: { key: string; path: RpcConfigPath };
+};
+
+export const RpcConfigPathResolver = Resolver.token<RpcConfigPath>(
+  "rpc-config-path"
+);
 
 @Module()
 export default class RpcModule {
@@ -52,17 +59,20 @@ export default class RpcModule {
   }
 
   @Lazy() get generateRpcConfigResolver() {
-    return createRpcConfigResolverGenerator(rpc =>
-      this.getRpcConfigResolver(rpc)
+    return createRpcConfigResolverGenerator((rpc, path) =>
+      this.getRpcConfigResolver(rpc, path)
     );
   }
 
-  getRpcConfigResolver<T extends AnyRpc>(rpc: T): RpcConfigResolver<T> {
+  getRpcConfigResolver<T extends AnyRpc>(
+    rpc: T,
+    path: RpcConfigPath
+  ): RpcConfigResolver<T> {
     return <any>touchMap(
       this._rpcConfigResolverMap,
       rpc,
       (): RpcConfigResolver<T> => {
-        const configResolver = this.generateRpcConfigResolver(rpc);
+        const configResolver = this.generateRpcConfigResolver(rpc, path);
         if (configResolver) {
           return configResolver as RpcConfigResolver<T>;
         }
@@ -131,10 +141,11 @@ export default class RpcModule {
 
     context = Resolver.createContext(context, {
       ...RpcRequest.provide(),
+      ...RpcConfigPathResolver.provide(() => ({ rpc })),
     });
 
     try {
-      const configResolver = this.getRpcConfigResolver(rpc);
+      const configResolver = this.getRpcConfigResolver(rpc, { rpc });
       Resolver.check(configResolver, context);
     } catch (error) {
       if (error instanceof ResolveError) {
@@ -160,7 +171,7 @@ export default class RpcModule {
       RpcRequest.provide(() => rpcReq)
     );
 
-    const configResolver = this.getRpcConfigResolver(rpc);
+    const configResolver = this.getRpcConfigResolver(rpc, { rpc });
     const config = Resolver.resolve(configResolver, context);
     const command = await rpc.createRpcCommand(config);
     return await command(path, payload);

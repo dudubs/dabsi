@@ -11,15 +11,13 @@ RouterView.define(ACL_Admin_Router.at("users"), ({ location }) => (
       <MuiDataTableView
         {...props}
         title={lang`USERS`}
-        onEditClick={async event => {
+        onEditRow={async event => {
           console.log({ event });
           location.parent.at("editUser", { userId: event.row.$key }).push();
         }}
-        addAction={{
-          title: lang`ADD_NEW_USER`,
-          onClick: () => {
-            location.parent.at("createNewUser").push();
-          },
+        addButtonTitle={lang`ADD_NEW_USER`}
+        onAddNewRow={() => {
+          location.parent.at("createNewUser").push();
         }}
       />
     )}

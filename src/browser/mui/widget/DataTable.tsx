@@ -11,6 +11,8 @@ import {
   MuiTableToolbar,
   MuiTableToolbarProps,
 } from "@dabsi/browser/mui/components/MuiTableToolbar";
+import { MuiSection } from "@dabsi/browser/mui/section";
+import { MuiSearchField } from "@dabsi/browser/mui/widget/searchField";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
@@ -85,23 +87,13 @@ export type MuiDataTableViewProps<
 
   disableToolbar?: boolean;
 
-  MuiTableToolbarProps?: Omit<MuiTableToolbarProps, "actions">;
-
   beforeHead?: React.ReactNode;
 
   afterHead?: React.ReactNode;
 
-  addAction?: {
-    title: React.ReactElement;
-    onClick: (event: React.SyntheticEvent<any>) => void;
-  };
+  onAddNewRow?(): void;
 
-  toolbarActions?: Record<
-    string,
-    MuiButtonProps<{
-      onClick(props: { table: Readonly<DataTableView<C>> });
-    }>
-  >;
+  addButtonTitle?: React.ReactNode;
 
   columns?: PartialUndefinedKeys<
     {
@@ -112,10 +104,10 @@ export type MuiDataTableViewProps<
   >;
 
   // TODO: change to editAction: { onClick ..}
-  onEditClick?(event: MuiDataTableActionEvent<C>): void;
+  onEditRow?(event: MuiDataTableActionEvent<C>): void;
 
   // TODO: change to deleteAction: { onClick ..}
-  onDeleteClick?(event: MuiDataTableActionEvent<C>): Awaitable;
+  onDeleteRow?(event: MuiDataTableActionEvent<C>): Awaitable;
 
   actions?: Record<
     string,
@@ -132,7 +124,7 @@ export type MuiDataTableViewProps<
 };
 
 export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
-  props: MuiDataTableViewProps<C>
+  p: MuiDataTableViewProps<C>
 ) {
   let {
     TableProps,
@@ -141,51 +133,53 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
     TableFooterProps,
     beforeHead,
     afterHead,
-    onDeleteClick,
-    onEditClick,
+    onDeleteRow,
+    onEditRow,
     actions,
     columns: columnPropsMap,
-    MuiTableToolbarProps,
-    toolbarActions = {},
-    addAction,
     disableToolbar,
-    title = MuiTableToolbarProps?.title,
+    title,
+    onAddNewRow,
+    addButtonTitle,
     ...DataTableViewProps
-  } = props as MuiDataTableViewProps<RpcConnection<AnyDataTable>>;
+  } = p;
 
   const tableRef = useRef<DataTableView<C>>(null);
 
   actions = { ...actions };
-  const staticActions: React.ReactElement[] = [];
 
-  onEditClick &&
+  onEditRow &&
     (actions.edit = {
       title: lang`EDIT`,
       icon: <EditIcon />,
-      onClick: onEditClick,
+      onClick: onEditRow,
     });
 
-  onDeleteClick &&
+  onDeleteRow &&
     (actions.delete = {
       icon: <DeleteIcon />,
       IconButtonProps: {
         color: "secondary",
       },
       onClick: async event => {
-        await onDeleteClick!(event);
+        await onDeleteRow!(event);
         await tableRef.current!.reloadAfterRemove(event.row.$key);
       },
     });
 
-  if (addAction) {
-    staticActions.push(
-      <Button endIcon={<AddIcon />} key="add" onClick={addAction.onClick}>
-        {addAction.title}
-      </Button>
-    );
-  }
+  const addButtonElement = onAddNewRow && (
+    <Button
+      endIcon={<AddIcon />}
+      key="add"
+      onClick={() => {
+        onAddNewRow!();
+      }}
+    >
+      {addButtonTitle || lang`ADD_NEW`}
+    </Button>
+  );
 
-  const columns = mapObject(props.element.columns, (element, key, index) => {
+  const columns = mapObject(p.element.columns, (element, key, index) => {
     return { element, key, props: columnPropsMap?.[key] || {}, index };
   });
 
@@ -196,7 +190,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
   return (
     <DataTableView
       {...DataTableViewProps}
-      ref={ReactRef.merge(props.tableRef, tableRef)}
+      ref={ReactRef.merge(p.tableRef, tableRef)}
     >
       {table => {
         const renderCell = (column: Column, children) => (
@@ -219,6 +213,7 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
             renderRowColumn ? renderRowColumn(props) : <>{String(data)}</>
           );
         };
+
         const tableHeadCells = mapObjectToArray(columns, column => {
           return renderCell(
             column,
@@ -344,10 +339,33 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
           </Table>
         );
 
+        const searchElement = !p.element.searchable ? null : (
+          <MuiSearchField
+            onSearch={text => {
+              table.search(text);
+            }}
+          />
+        );
+
+        const sidebarElement = (addButtonElement || searchElement) && (
+          <Grid container>
+            {searchElement && (
+              <Grid item xs>
+                {searchElement}
+              </Grid>
+            )}
+            {addButtonElement && <Grid item>{addButtonElement}</Grid>}
+          </Grid>
+        );
+
+        const sectionElement = (sidebarElement || title) && (
+          <MuiSection title={title} sidebar={sidebarElement}>
+            {tableElement}
+          </MuiSection>
+        );
         const toolbarElement = !disableToolbar && (
           <MuiTableToolbar
             title={title}
-            {...MuiTableToolbarProps}
             search={
               !table.element?.searchable
                 ? undefined
@@ -358,33 +376,11 @@ export function MuiDataTableView<C extends RpcConnection<AnyDataTable>>(
                     },
                   }
             }
-            staticActions={
-              <>
-                {staticActions}
-                {MuiTableToolbarProps?.staticActions}
-                {mapObjectToArray(toolbarActions, (props, key) => (
-                  <MuiButton
-                    iconOnly
-                    key={key}
-                    {...props}
-                    onClick={() => {
-                      props.onClick?.({ table });
-                    }}
-                  />
-                ))}
-              </>
-            }
+            staticActions={<>{addButtonElement}</>}
           />
         );
 
-        return toolbarElement ? (
-          <Grid container direction="column">
-            <Grid item>{toolbarElement}</Grid>
-            <Grid item>{tableElement}</Grid>
-          </Grid>
-        ) : (
-          tableElement
-        );
+        return sectionElement || tableElement;
       }}
     </DataTableView>
   );

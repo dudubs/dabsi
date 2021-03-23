@@ -48,22 +48,17 @@ const ContentCategoryTableView = WidgetViewComponent(
         TableProps={{ size: "small" }}
         {...props}
         title={lang`CONTENT_CATEGORIES`}
-        onDeleteClick={event => connection.item(event.row.$key).delete(null)}
-        addAction={{
-          title: lang`ADD_CATEGORY`,
-          onClick: () => {
-            emit(RouterLocationEvent, location => {
-              (item
-                ? location
-                    .find(router)!
-                    .at("item", { id: item?.$key! })
-                    .at("add")
-                : location.find(router)!.at("add")
-              ).push();
-            });
-          },
+        onDeleteRow={event => connection.item(event.row.$key).delete(null)}
+        addButtonTitle={lang`ADD_CATEGORY`}
+        onAddNewRow={() => {
+          emit(RouterLocationEvent, location => {
+            (item
+              ? location.find(router)!.at("item", { id: item?.$key! }).at("add")
+              : location.find(router)!.at("add")
+            ).push();
+          });
         }}
-        onEditClick={event => {
+        onEditRow={event => {
           emit(RouterLocationEvent, location => {
             location
               .find(router)!

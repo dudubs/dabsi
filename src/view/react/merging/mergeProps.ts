@@ -1,17 +1,16 @@
 import { entries } from "@dabsi/common/object/entries";
 import { ReactRef } from "@dabsi/view/react/ref";
+import { merge } from "immutable4";
 import { mergeCallbacks } from "./mergeCallbacks";
 
-export const $merge = "$merge";
-const $default = "$default";
-
-export type BaseMergeProp<T> =
-  | Record<typeof $merge, (value: T) => T>
-  | Record<typeof $default, T>;
+export type PropMerger<T> =
+  | Record<"$merge", MergeProps<T> | ((value: T | undefined) => T)>
+  | Record<"$default", T>
+  | Record<"$override", T>;
 
 export type MergeProp<T> =
-  | Exclude<T, BaseMergeProp<any>>
-  | BaseMergeProp<T>
+  | Exclude<T, PropMerger<any>>
+  | PropMerger<T>
   | (T extends object ? MergeProps<T> : never);
 
 export type MergeProps<P> = {
@@ -25,48 +24,68 @@ export function mergeProps<P, E extends MergeProps<P>>(
   let _props = { ...propMap };
 
   for (let [key, merger] of entries(mergerMap)) {
-    _props[key] = mergeProp(_props[key], merger);
+    try {
+      _props[key] = mergeProp(_props[key], merger);
+    } catch (error) {
+      if (error.constructor === MergeError) {
+        error.message = `at ${JSON.stringify(key)}, ${error.message}`;
+      }
+      throw error;
+    }
   }
 
   return _props as any;
 }
 
-export function mergeProp(prop, merger) {
+class MergeError extends Error {}
+
+export function mergeProp(value, merger) {
   const mergerType = typeof merger;
-  const propType = typeof prop;
+  const valueType = typeof value;
 
   // TODO: $reverse
 
   if (mergerType === "undefined") {
-    return prop ?? merger;
+    return value ?? merger;
   }
-  if (ReactRef.isRefObject(prop) || ReactRef.isRefObject(merger)) {
-    return ReactRef.merge(prop, merger);
+  if (ReactRef.isRefObject(value) || ReactRef.isRefObject(merger)) {
+    return ReactRef.merge(value, merger);
   }
 
   if (merger && mergerType === "object") {
-    if ($default in merger) {
-      return prop ?? merger[$default];
+    if (merger.constructor !== Object) {
+      return merger;
     }
 
-    const customMergeProp = merger[$merge];
-    if (typeof customMergeProp === "function") {
-      return customMergeProp.call(merger, prop);
+    if ("$default" in merger) {
+      return value ?? merger.$default;
     }
-    if (propType === "undefined") {
-      if (Object.getPrototypeOf(merger) === Object.prototype)
-        return mergeProps({}, merger);
+
+    if ("$override" in merger) {
+      return merger.$override;
     }
+
+    if (typeof merger.$merge === "function") {
+      return merger.$merge(value);
+    }
+
+    if (typeof merger.$merge === "object") {
+      return mergeProps(value, merger.$merge);
+    }
+
+    if (merger.type && merger.props) {
+      // react-element
+      return merger;
+    }
+    throw new MergeError(`Can't merge object`);
   }
 
-  if (propType === mergerType) {
-    switch (propType) {
+  if (valueType === mergerType) {
+    switch (valueType) {
       case "string":
-        return `${prop} ${merger}`;
+        return `${value} ${merger}`;
       case "function":
-        return mergeCallbacks(prop, merger);
-      case "object":
-        throw new Error(`Can't merge object`);
+        return mergeCallbacks(value, merger);
     }
   }
 

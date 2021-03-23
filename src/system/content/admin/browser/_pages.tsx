@@ -12,14 +12,12 @@ RouterView.define(ContentAdminRouter.at("pages"), ({ location }) => (
       <MuiDataTableView
         title={lang`CONTENT_PAGES`}
         {...props}
-        onEditClick={event => {
+        onEditRow={event => {
           location.at("edit", { id: event.row.$key }).push();
         }}
-        addAction={{
-          title: lang`CREATE_NEW_PAGE`,
-          onClick: () => {
-            location.at("create").push();
-          },
+        addButtonTitle={lang`CREATE_NEW_PAGE`}
+        onAddNewRow={() => {
+          location.at("create").push();
         }}
       />
     )}

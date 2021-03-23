@@ -25,6 +25,7 @@ import {
   ReactNode,
   RefCallback,
 } from "react";
+import { BaseProps } from "@dabsi/view/react/BaseProps";
 
 type InputErrorKey<T> =
   | Extract<T, string>
@@ -52,6 +53,17 @@ export interface InputViewProps<C extends AnyInputConnection>
 
   value?: InputValueElement<C> | undefined;
 }
+
+export const InputViewProps = BaseProps<InputViewProps<AnyInputConnection>>({
+  ...WidgetViewProps.map,
+
+  errorMap: true,
+  onChange: true,
+  inputRef: true,
+  onError: true,
+  value: true,
+  renderError: true,
+});
 
 export type InputViewFn<C extends AnyInput> = Renderer<
   InputViewProps<RpcConnection<C>>

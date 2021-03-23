@@ -2,6 +2,7 @@
   "extends": "../../configs/tsconfig.base.server.json",
   "compilerOptions": {
     "outDir": "../../packages/vscode/dist",
+    "sourceMap": true,
     "module": "commonjs",
     "target": "es2019",
     "lib": ["ES2019"],

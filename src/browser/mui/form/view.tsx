@@ -1,79 +1,89 @@
-import SendIcon from "@material-ui/icons/Send";
-import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { MuiThemeProvider } from "@dabsi/browser/mui/MuiSystem";
-import { MuiFormViewTheme } from "@dabsi/browser/mui/form/theme";
+import { MuiForm, MuiFormProps } from "@dabsi/browser/mui/form";
+import { Override } from "@dabsi/common/typings2/Override";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { Hook } from "@dabsi/view/react/Hook";
-import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
-import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
 import { RpcConnection } from "@dabsi/typerpc/Rpc";
 import { AnyForm } from "@dabsi/typerpc/widget/form/rpc";
-import {
-  FormView,
-  FormViewEvent,
-  FormViewProps,
-} from "@dabsi/typerpc/widget/form/view";
-import Button, { ButtonProps } from "@material-ui/core/Button";
-import React, { ReactElement, ReactNode } from "react";
-import Grid from "@material-ui/core/Grid";
+import { FormView, FormViewProps } from "@dabsi/typerpc/widget/form/view";
+import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
+import React, { ReactElement } from "react";
 
-export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = PartialKeys<
-  FormViewProps<C>,
-  "renderInput"
-> & {
-  submitButtonProps?: ButtonProps;
-  resetButtonProps?: ButtonProps;
+export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = Override<
+  PartialKeys<FormViewProps<C>, "children">,
+  {
+    disableResetButton?: boolean;
+    // noDisableButtons?: boolean
+    MuiFormProps?: Omit<MuiFormProps, "children">;
+    variant?: "save" | "submit";
+  }
+>;
 
-  disableResetButton?: boolean;
+export const MuiFormView = <C extends RpcConnection<AnyForm>>({
+  children,
+  disableResetButton,
+  MuiFormProps,
+  variant = "submit",
+  ...FormViewProps
+}: MuiFormViewProps<C>): ReactElement => {
+  // mixing
 
-  submitTitle?: ReactNode;
-  resetTitle?: ReactNode;
-};
+  const isVariant: { [K in typeof variant]?: true } = {
+    [variant]: true,
+  };
 
-export const MuiFormView = <C extends RpcConnection<AnyForm>>(
-  props: MuiFormViewProps<C>
-): ReactElement => {
-  const { submitTitle = lang`SUBMIT`, resetTitle = lang`RESET` } = props;
+  if (disableResetButton === undefined) {
+    if (isVariant.save) {
+      disableResetButton = true;
+    }
+  }
+
+  const defaultDisabled = !isVariant.submit;
+  const [disabled, setDisabled] = React.useState(defaultDisabled);
 
   return (
-    <MuiThemeProvider theme={MuiFormViewTheme}>
-      <FormView
-        {...props}
-        renderInput={props.renderInput || SystemView.render}
-        children={({ input }) => (
-          <MuiGrid direction={"column"} spacing={2}>
-            {input}
-            <MuiGrid key="buttons" spacing={2}>
-              <Hook
-                context={() => useEmitter()}
-                children={emit => (
-                  <MuiGrid spacing={1}>
-                    <Button
-                      children={submitTitle}
-                      {...mergeProps(props.submitButtonProps, {
-                        onClick: () => {
-                          emit(FormViewEvent, "submit");
-                        },
-                      })}
-                    />
-                    {!props.disableResetButton && (
-                      <Button
-                        children={resetTitle}
-                        {...mergeProps(props.resetButtonProps, {
-                          onClick: () => {
-                            emit(FormViewEvent, "reset");
-                          },
-                        })}
-                      />
-                    )}
-                  </MuiGrid>
-                )}
-              />
-            </MuiGrid>
-          </MuiGrid>
-        )}
-      />
-    </MuiThemeProvider>
+    <FormView
+      {...mergeProps(FormViewProps, {
+        onSubmit: () => {
+          setDisabled(defaultDisabled);
+        },
+      })}
+    >
+      {(inputProps, view) => {
+        inputProps = mergeProps(inputProps, {
+          onChange: () => {
+            setDisabled(false);
+          },
+        });
+        return (
+          <MuiForm
+            {...mergeProps(MuiFormProps, {
+              submitButtonProps: {
+                $merge: { disabled: { $override: disabled } },
+              },
+              resetButtonProps: {
+                $merge: { disabled: { $override: disabled } },
+              },
+              submitTitle: isVariant.save && lang`SAVE_CHANGES`,
+              onSubmitClick: () => {
+                view.submit();
+              },
+              onResetClick: disableResetButton
+                ? undefined
+                : () => {
+                    view.reset();
+                    setDisabled(defaultDisabled);
+                  },
+            })}
+          >
+            {children ? (
+              children(inputProps, view)
+            ) : (
+              <SystemView {...(inputProps as InputViewProps<any>)} />
+            )}
+          </MuiForm>
+        );
+      }}
+    </FormView>
   );
 };

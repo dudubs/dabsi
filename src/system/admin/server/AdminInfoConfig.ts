@@ -17,8 +17,6 @@ export default RpcConfigResolver(
       relations: { user: { pick: [] } },
     });
 
-    console.log({ user });
-
     if (!user) return { type: "fail" };
     return { type: "success", tokens: [] };
   }

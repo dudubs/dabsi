@@ -8,6 +8,7 @@ import {
   WidgetElementState,
 } from "@dabsi/typerpc/widget/Widget";
 import { ReactElement } from "react";
+import { BaseProps } from "@dabsi/view/react/BaseProps";
 
 export type WidgetViewRenderer<T extends AnyWidget, P = {}> = (
   props: WidgetViewProps<RpcConnection<T>> & P
@@ -28,6 +29,16 @@ export interface WidgetViewProps<C extends AnyWidgetConnection> {
 
   onElementStateChange: ((state: WidgetElementState<C>) => void) | undefined;
 }
+
+export const WidgetViewProps = BaseProps<WidgetViewProps<any>>({
+  key: true,
+  mapKey: true,
+  connection: true,
+  element: true,
+  elementState: true,
+  onElementChange: true,
+  onElementStateChange: true,
+});
 
 export class WidgetView<
   C extends AnyWidgetConnection,

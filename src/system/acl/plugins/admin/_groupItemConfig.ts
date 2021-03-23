@@ -1,6 +1,7 @@
 import { DataContext } from "@dabsi/modules/data/context";
 import { DataParameterConfigResolver } from "@dabsi/modules/data/paramterConfigResolver";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
+import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
@@ -11,6 +12,13 @@ export default [
     //
     ACL_Admin_GroupsRpc.at("item"),
     Group
+  ),
+  RpcConfigResolver(
+    ACL_Admin_GroupsRpc.at("item.target.delete"),
+    { data: DataContext, group: DataRowContext(Group) },
+    c => async () => {
+      await c.group.getSource().delete();
+    }
   ),
   RpcConfigResolver(
     ACL_Admin_GroupsRpc.at("item.target.users"),

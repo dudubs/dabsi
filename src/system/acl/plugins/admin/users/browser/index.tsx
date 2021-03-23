@@ -23,7 +23,7 @@
 //           title={lang`Users`}
 //           // TableProps={{ size: "small" }}
 //           {...props}
-//           onEditClick={event => {
+//           onEditRow={event => {
 //             location.at("edit", { id: event.row.$key }).push();
 //           }}
 //         />

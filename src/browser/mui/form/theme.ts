@@ -1,6 +1,6 @@
 import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
 
-export function MuiFormViewTheme(theme: MuiTheme): MuiTheme {
+export function MuiFormTheme(theme: MuiTheme): MuiTheme {
   return {
     ...theme,
     typography: {

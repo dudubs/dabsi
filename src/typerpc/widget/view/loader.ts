@@ -1,4 +1,7 @@
-import { AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
+import {
+  AnyWidgetConnection,
+  WidgetElement,
+} from "@dabsi/typerpc/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
 import { useLoader } from "@dabsi/view/react/useLoader";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
@@ -8,10 +11,12 @@ export function WidgetViewLoader<C extends AnyWidgetConnection>({
   connection: connectionOrGetConnection,
   deps = [],
   children,
+  onLoad,
 }: {
   connection: C | (() => C);
   deps?: any[];
   children?(props: WidgetViewProps<C>): React.ReactElement;
+  onLoad?: (element: WidgetElement<C>) => void;
 }): React.ReactElement {
   const connection: C = React.useMemo(() => {
     if (typeof connectionOrGetConnection === "function")
@@ -19,19 +24,23 @@ export function WidgetViewLoader<C extends AnyWidgetConnection>({
     return connectionOrGetConnection;
   }, deps);
 
-  const props = WidgetViewLoader.use(connection);
+  const props = WidgetViewLoader.use(connection, { onLoad });
 
   return props && children ? children(props) : EmptyFragment;
 }
 
 WidgetViewLoader.use = function <C extends AnyWidgetConnection>(
   connection: C,
-  { deps = [] }: { deps?: any[] } = {}
+  {
+    deps = [],
+    onLoad,
+  }: { deps?: any[]; onLoad?(element: WidgetElement<C>): void } = {}
 ): null | WidgetViewProps<C> {
-  const element = useLoader(() => connection.getElement(), [
-    connection,
-    ...deps,
-  ]);
+  const element = useLoader(
+    () => connection.getElement(),
+    [connection, ...deps],
+    onLoad
+  );
 
   return element
     ? {

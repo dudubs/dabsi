@@ -19,7 +19,8 @@ export const LoaderEvent = Emittable<
 
 export function useLoader<T>(
   callback: () => Promise<T>,
-  deps: any[] = []
+  deps: any[] = [],
+  onLoad?: (value: T) => void
 ): T | null {
   const emit = useEmitter();
 
@@ -35,7 +36,9 @@ export function useLoader<T>(
     callback()
       .then(result => {
         emit(LoaderEvent, { type: "end", id });
+
         setState({ result });
+        onLoad?.(result);
       })
       .catch(error => {
         setState({ error });

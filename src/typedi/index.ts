@@ -15,14 +15,13 @@ import "./operators/try";
 import "./operators/array";
 import "./operators/resolve";
 import "./operators/forward";
-import "./operators/provide";
 import "./operators/checkAndResolve";
 import "./operators/object";
 import "./operators/checkType";
 import "./operators/catch";
 import "./operators/check";
 import "./operators/touch";
-import "./operators/createContext";
+import "./context";
 
 import "./register";
 import "./TokenResolver";

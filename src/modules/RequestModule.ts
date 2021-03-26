@@ -35,7 +35,7 @@ export default class RequestModule {
     error: any
   ) => Awaitable)[] = [];
 
-  requestContextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
+  requestBuilders: Resolver<Awaitable<void>>[] = [];
 
   async processRequest<T>(
     callback: (context: ResolverMap) => Awaitable<T>
@@ -46,13 +46,13 @@ export default class RequestModule {
 
     const req = new Request();
 
-    Resolver.provide(context, {
+    Resolver.Context.provide(context, {
       ...Request.provide(() => req),
       ...Ticker.provide(() => ticker),
     });
 
-    for (const resolver of this.requestContextResolvers) {
-      Resolver.provide(context, await Resolver.resolve(resolver, context));
+    for (const resolver of this.requestBuilders) {
+      await Resolver.resolve(resolver, context);
     }
 
     try {

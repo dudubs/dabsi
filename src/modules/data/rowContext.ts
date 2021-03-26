@@ -13,8 +13,8 @@ export function DataRowContext<T>(
 ): CustomResolver<DataRowTicker<T>> {
   return Resolver.consume(
     [DataTicker, Resolver.try(getRowKeyResolver(rowType))],
-    (ticker, rowKey) => {
-      return ticker.getRowTicker(rowType, rowKey || null);
+    (dataTicker, rowKey) => {
+      return dataTicker.getRowTicker(rowType, rowKey || null);
     }
   );
 }

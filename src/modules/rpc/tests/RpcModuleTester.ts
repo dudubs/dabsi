@@ -4,26 +4,28 @@ import RpcModule from "@dabsi/modules/rpc";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
 import { Resolver } from "@dabsi/typedi";
-import { AnyRpc, Rpc, RpcConnection } from "@dabsi/typerpc/Rpc";
+import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
 
 // RpcModuleTester
 export const RpcModuleTester = (t: ReturnType<typeof ModuleTester>) => {
   return Tester.beforeAll(() => {
     const module = t.moduleRunner.getInstance(RpcModule);
-    const request = { current: new RpcRequest([], {}, {}) };
-    t.provide(RpcRequest.provide(() => request.current));
+    const requestRef = { current: new RpcRequest([], {}, {}) };
+
+    t.provide(RpcRequest.provide(() => requestRef.current));
+
     return {
       module,
-      request,
+      requestRef,
       createConnection: <T extends AnyRpc>(rpc: T): RpcConnection<T> => {
-        const configResolver = module.getRpcConfigResolver(rpc);
+        const configResolver = module.getConfigResolver(rpc);
 
         return rpc.createRpcConnection([], async (path, payload) => {
           const ticker = new Ticker();
 
           const config = Resolver.resolve(
             configResolver,
-            Resolver.createContext(
+            Resolver.Context.create(
               t.moduleRunner.context,
               Ticker.provide(() => ticker)
             )

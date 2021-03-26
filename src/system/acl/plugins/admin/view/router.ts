@@ -1,7 +1,7 @@
 import { AdminRouter } from "@dabsi/system/admin/common/index";
 import Router from "@dabsi/typerouter/router";
 
-export const ACL_Admin_Router = AdminRouter.register(
+export const ACL_AdminRouter = AdminRouter.register(
   "acl",
   Router({
     //
@@ -9,7 +9,7 @@ export const ACL_Admin_Router = AdminRouter.register(
       edit: Router(["id"]),
     }),
     createNewUser: Router(),
-    editUser: Router(["userId"]),
+    editUser: Router(["id"]),
 
     //
     groups: Router(),

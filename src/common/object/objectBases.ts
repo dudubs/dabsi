@@ -1,4 +1,4 @@
-export default function* objectBases(o) {
+export function* objectBases(o) {
   while (o) {
     yield o;
     o = Object.getPrototypeOf(o);

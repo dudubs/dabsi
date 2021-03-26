@@ -18,6 +18,7 @@ import {
 } from "typeorm";
 import ProjectModuleInfo from "../typestack/ProjectModuleInfo";
 import LoaderModule from "./LoaderModule";
+import CliModule from "@dabsi/modules/CliModule";
 
 @Module({})
 export class DbModule {
@@ -48,7 +49,7 @@ export class DbModule {
     );
     serverModule.onStart(() => this.init());
 
-    Resolver.provide(
+    Resolver.Context.provide(
       runner.context,
       Connection.provide(() => this.connection)
     );
@@ -56,6 +57,16 @@ export class DbModule {
     projectModule.onLoadModule(async projectModuleInfo => {
       await this._loadProjectModule(projectModuleInfo);
     });
+  }
+
+  @Module.Plugin() protected forCliModule({ cli }: CliModule) {
+    cli.command("db", cli =>
+      cli.command("sync", cli =>
+        cli //
+          .onBuild(y => y.boolean(["f", "force"]))
+          .onRun(args => this.sync(args))
+      )
+    );
   }
 
   protected _loadEntityType(entityType: Function) {
@@ -78,6 +89,7 @@ export class DbModule {
       .filter(t => typeof t === "function")
       .toSet();
   }
+
   protected async _loadEntityModule(moduleFileName) {
     this.log.trace(() => `Load entities file ${moduleFileName}.`);
     const moduleExports = require(moduleFileName);

@@ -44,3 +44,4 @@ export type DataValue<T> = {
 export type DataUpdateRow<T> = DataValue<RebaseType<T>>;
 // TODO: relations can me also {$key}
 export type DataInsertRow<T> = DataValue<RebaseType<T>>;
+export type DataCommitRow<T> = DataValue<RebaseType<T>>;

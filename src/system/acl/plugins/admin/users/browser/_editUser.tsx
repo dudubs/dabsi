@@ -5,7 +5,7 @@ import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/plugins/admin/b
 import { ACL_Admin_Connection } from "@dabsi/system/acl/plugins/admin/common/rpc";
 import { ACL_Admin_UserBaiscInfoInput } from "@dabsi/system/acl/plugins/admin/users/common/basicInfoInput";
 import { ACL_Admin_UserGroupsForm } from "@dabsi/system/acl/plugins/admin/users/common/groupsForm";
-import { ACL_Admin_Router } from "@dabsi/system/acl/plugins/admin/view/router";
+import { ACL_AdminRouter } from "@dabsi/system/acl/plugins/admin/view/router";
 import { MuiAccordionMapView } from "@dabsi/system/core/browser/MuiAccordionMapView";
 import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import { MuiPage } from "@dabsi/browser/mui/MuiPage";
@@ -16,7 +16,7 @@ import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { useState } from "react";
 
-RouterView.define(ACL_Admin_Router.at("editUser"), ({ location }) => {
+RouterView.define(ACL_AdminRouter.at("editUser"), ({ location }) => {
   const [title, setTitle] = useState("");
 
   SystemView.use(define => {

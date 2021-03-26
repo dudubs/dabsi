@@ -46,7 +46,7 @@ export class User {
   email?: string;
 
   @Column({ nullable: true })
-  phoneNumber?: string;
+  mobilePhone?: string;
 
   @ManyToMany(() => Group, group => group.users)
   groups!: DataRelation<Group>[];

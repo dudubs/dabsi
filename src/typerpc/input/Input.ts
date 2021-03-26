@@ -131,6 +131,9 @@ export type InputOptions<T extends TInput> = PartialUndefinedKeys<
   {
     handler: WidgetHandlerClass<Input<T>>;
     type: Function;
+
+    // getValueDataChange(before:InputValueData, after:InputValueData):undefined|InputValueData
+
     getValueDataFromValueElement: (
       this: Input<T>,
       valueElement: InputValueElement<Input<T>>

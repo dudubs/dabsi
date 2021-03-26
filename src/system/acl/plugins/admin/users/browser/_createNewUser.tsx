@@ -10,7 +10,7 @@ import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 const connection = ACL_Admin_Connection.usersManager.add;
 
 RouterView.define(
-  ACL_Admin_Router.at("createNewUser"),
+  ACL_AdminRouter.at("createNewUser"),
   (props, { location }) => {
     SystemView.use(connection.$widget, props => (
       <MuiFormView

@@ -6,8 +6,7 @@ import RpcConfigFactoryResolver from "../../../modules/rpc/configFactoryResolver
 export default RpcConfigResolver(
   AdminRpc,
   {
-    // TODO: Automatic by cycle
-    createConfig: RpcConfigFactoryResolver(AdminRpc, { create: true }),
+    createConfig: RpcConfigFactoryResolver(AdminRpc, { generate: true }),
     user: RequestUser,
   },
   c => async $ => {

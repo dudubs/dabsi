@@ -20,7 +20,7 @@ export default class LocalStorageModule {
         },
       })
     );
-    Resolver.provide(
+    Resolver.Context.provide(
       context,
       Storage.provide(() => {
         return new LocalStorage(this.localDir, "/storage");

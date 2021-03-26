@@ -11,7 +11,7 @@ export default class DataModule {
     protected dbModule: DbModule,
     @Inject(c => c) protected context: ResolverMap
   ) {
-    Resolver.provide(
+    Resolver.Context.provide(
       context,
       DataContext.provide(
         () =>

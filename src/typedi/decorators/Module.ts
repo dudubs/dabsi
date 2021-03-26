@@ -29,10 +29,6 @@ export type ModuleOptions = {
   plugins?: ModuleTarget[];
 };
 
-// TODO: @Configure() x(module, ...arsg)
-// TODO: @Plugin()
-
-// ModuleRunner.configureSync(MyModule, ...)
 export function Module(options: ModuleOptions = {}) {
   const callStackInfo = new CallStackInfo(new Error(), __filename);
   return (target: ModuleTarget) => {
@@ -57,4 +53,14 @@ export function Module(options: ModuleOptions = {}) {
 
 export function isModuleTarget(obj): obj is ModuleTarget {
   return moduleMetadataMap.has(obj);
+}
+
+export namespace Module {
+  export function Plugin(targets?: ModuleTarget[]): MethodDecorator {
+    return () => {};
+  }
+
+  export function OnLoad(): MethodDecorator {
+    return () => {};
+  }
 }

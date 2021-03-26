@@ -53,7 +53,7 @@ export default class ExpressModule {
     this.requestModule.context
   );
 
-  requestContextResolvers: Resolver<Awaitable<ResolverMap>>[] = [];
+  requestBuilders: Resolver<Awaitable<void>>[] = [];
 
   // onRequest: () => () => void;
 
@@ -76,12 +76,12 @@ export default class ExpressModule {
   ): express.Handler {
     return (req, res) => {
       return this.requestModule.processRequest(async context => {
-        Resolver.provide(
+        Resolver.Context.provide(
           context,
           ExpressResolver.provide(() => [req, res])
         );
-        for (const resolver of this.requestContextResolvers) {
-          Resolver.provide(context, await Resolver.resolve(resolver, context));
+        for (const resolver of this.requestBuilders) {
+          await Resolver.resolve(resolver, context);
         }
         await callback(req, res, context);
 

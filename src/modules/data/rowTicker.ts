@@ -1,9 +1,9 @@
-import { Tick } from "@dabsi/common/async/Tick";
-import { Ticker } from "@dabsi/common/async/Ticker";
+import { defined } from "@dabsi/common/object/defined";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DataRowLoader } from "@dabsi/modules/data/rowLoader";
 import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import {
@@ -12,8 +12,6 @@ import {
   DataSelection,
 } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source";
-import { DataEmptySource } from "@dabsi/typedata/source/emptySource";
-import { BasedDataRow, DataSourceRow } from "@dabsi/typedata/sourceRow";
 import { DataUpdateRow } from "@dabsi/typedata/value";
 
 export class DataRowTicker<T = any> {
@@ -35,12 +33,28 @@ export class DataRowTicker<T = any> {
   }
 
   getSource<T>(this: DataRowTicker<T>): DataSource<T> {
-    if (!this.rowKey) return new DataEmptySource<T>();
-    return this.data.getSource(this.rowType).of(this.rowKey);
+    return this.data.getSource(this.rowType);
   }
 
+  at<T, K extends DataRelationKeys<T>>(
+    this: DataRowTicker<T>,
+    relationPropertyName: K
+  ): DataSource.At<T, K> {
+    return this.getSource().at(relationPropertyName, this._key);
+  }
+
+  // TODO: updateBeforeFetch, updateAfterFetch
   async update<T>(this: DataRowTicker<T>, row: DataUpdateRow<T>) {
-    await this.getSource().update(row);
+    // TODO: update on tick: runUpdate(), runFetch()
+    await this.getSource().update(this._key, row);
+  }
+
+  protected get _key(): string {
+    return defined(this.$key, () => `No "${this.rowType.name}" key`);
+  }
+
+  async delete() {
+    return this.getSource().delete(this._key);
   }
 
   async run(tick: number) {
@@ -49,6 +63,7 @@ export class DataRowTicker<T = any> {
     this._callbacks = [];
 
     const row = await this.getSource()
+      .of(this._key)
       .filter(this.filter)
       .select(this._selection as {})
       .get();
@@ -84,6 +99,8 @@ export class DataRowTicker<T = any> {
   ): Promise<DataRow<DataSelectionRow<T, S>>>;
 
   fetch(keysOrSel, maybeSel?) {
+    if (!this.$key) return Promise.resolve({});
+
     const selection: AnyDataSelection = Array.isArray(keysOrSel)
       ? {
           ...maybeSel,

@@ -5,7 +5,7 @@ import { SystemRouter } from "@dabsi/system/core/common/router";
 import { SystemRpc } from "@dabsi/system/core/common/rpc";
 
 export const AdminRouter = Router({});
-
+// move to view
 SystemRouter.register("admin", AdminRouter);
 
 export const [AdminInfoRpc, getAdminInfo] = SystemRpc.register(

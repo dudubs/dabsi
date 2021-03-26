@@ -60,7 +60,7 @@ export default class ProjectModule {
   }
 
   protected async _loadModules() {
-    for (const m of this.runner.getInstances()) {
+    for (const m of this.runner.getCurrentInstances()) {
       const moduleFileName = m.metadata.callStackInfo.lineInfo.fileName;
 
       const moduleIsIndex = /[\\\/]index\.ts/.test(moduleFileName);

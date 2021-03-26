@@ -4,22 +4,14 @@ import { MuiSection, MuiSectionList } from "@dabsi/browser/mui/section";
 import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
 import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/plugins/admin/browser/breadcrumbs";
 import { ACL_Admin_Connection } from "@dabsi/system/acl/plugins/admin/common/rpc";
-import { ACL_Admin_Router } from "@dabsi/system/acl/plugins/admin/view/router";
-import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { ACL_AdminRouter } from "@dabsi/system/acl/plugins/admin/view/router";
 import { RouterView } from "@dabsi/typerouter/view";
 import { DataTableView } from "@dabsi/typerpc/data-table/view";
 import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
-import { Breadcrumbs, Divider, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import React from "react";
-import styled from "styled-components";
 
-const StyledDivider = styled(Divider)`
-  margin-top: ${p => p.theme.spacing(1)}px !important;
-  margin-bottom: ${p => p.theme.spacing(2)}px !important;
-`;
-
-RouterView.define(ACL_Admin_Router, {
+RouterView.define(ACL_AdminRouter, {
   children: {
     groups: ({ location }) => {
       return (
@@ -48,12 +40,26 @@ RouterView.define(ACL_Admin_Router, {
         </>
       );
     },
-    createNewGroup: props => (
-      <WidgetViewLoader connection={ACL_Admin_Connection.groups.add}>
-        {props => <SystemView {...props} />}
-      </WidgetViewLoader>
+    createNewGroup: ({ location }) => (
+      <>
+        <ACL_Admin_Browser_Breadcrumbs.Groups>
+          <Typography>{lang`ADD_NEW_GROUP`}</Typography>
+        </ACL_Admin_Browser_Breadcrumbs.Groups>
+        <MuiSection title={lang`ADD_NEW_GROUP`}>
+          <WidgetViewLoader connection={ACL_Admin_Connection.groups.add}>
+            {props => (
+              <MuiFormView
+                {...props}
+                onSubmit={() => {
+                  location.parent.at("groups").push();
+                }}
+              />
+            )}
+          </WidgetViewLoader>
+        </MuiSection>
+      </>
     ),
-    editGroup: ({ useParams, location }) => {
+    editGroup: ({ useParams }) => {
       const connection = useParams(({ id }) =>
         ACL_Admin_Connection.groups.item(id)
       );
@@ -69,7 +75,11 @@ RouterView.define(ACL_Admin_Router, {
       return (
         <>
           <ACL_Admin_Browser_Breadcrumbs.Groups>
-            <Typography>{groupName}</Typography>
+            <Typography>
+              {lang`EDIT_${"GROUP_NAME"}`({
+                GROUP_NAME: `"${groupName}"`,
+              })}
+            </Typography>
           </ACL_Admin_Browser_Breadcrumbs.Groups>
 
           <MuiSectionList>

@@ -1,4 +1,4 @@
-import { ACL_Admin_Router } from "@dabsi/system/acl/plugins/admin/view/router";
+import { ACL_AdminRouter } from "@dabsi/system/acl/plugins/admin/view/router";
 import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 import { Breadcrumbs, Divider } from "@material-ui/core";
 import Typography from "@material-ui/core/Typography";
@@ -29,7 +29,7 @@ ACL_Admin_Browser_Breadcrumbs.Groups = ({
 }) => (
   <ACL_Admin_Browser_Breadcrumbs>
     <MuiRouterLink
-      to={() => ACL_Admin_Router.at("groups")}
+      to={() => ACL_AdminRouter.at("groups")}
     >{lang`GROUPS`}</MuiRouterLink>
     {children}
   </ACL_Admin_Browser_Breadcrumbs>
@@ -40,10 +40,10 @@ ACL_Admin_Browser_Breadcrumbs.Users = ({
 }) => (
   <ACL_Admin_Browser_Breadcrumbs>
     <MuiRouterLink
-      to={() => ACL_Admin_Router.at("users")}
+      to={() => ACL_AdminRouter.at("users")}
     >{lang`USERS`}</MuiRouterLink>
     {children}
   </ACL_Admin_Browser_Breadcrumbs>
 );
 
-// ACL_Admin_Router
+// ACL_AdminRouter

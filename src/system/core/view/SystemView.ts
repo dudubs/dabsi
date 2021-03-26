@@ -1,4 +1,5 @@
 import { entries } from "@dabsi/common/object/entries";
+import { objectBases } from "@dabsi/common/object/objectBases";
 import { useSystemView } from "@dabsi/system/core/view/use";
 import { AnyInput, AnyInputConnection } from "@dabsi/typerpc/input/Input";
 import { InputViewProps } from "@dabsi/typerpc/input/InputView";
@@ -27,17 +28,23 @@ export function SystemView<C extends AnyWidgetConnection>({
   ...props
 }: SystemView.Props<C>): ReactElement {
   const componentMap = useContext(SystemView.Context);
-  const { rpcType } = props.connection.$widget;
 
-  const component =
-    (defaultByType ? null : componentMap.get(props.connection.$widget)) ||
-    componentMap.get(props.connection.$widget.rpcType);
+  let component = defaultByType
+    ? null
+    : componentMap.get(props.connection.$widget);
+  for (const rpcType of objectBases(props.connection.$widget.rpcType)) {
+    if (component) break;
+    if (typeof rpcType !== "function") break;
+    component = componentMap.get(rpcType);
+  }
 
   if (!component)
     return createElement(
       Fragment,
       null,
-      `No system-view for ${props.connection.$path.join("/")}, ${rpcType?.name}`
+      `No system-view for ${props.connection.$path.join("/")}, ${
+        props.connection.$widget.rpcType?.name
+      }`
     );
   return createElement(component, props);
 }

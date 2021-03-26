@@ -22,7 +22,7 @@ export class ModuleRunner {
     return Resolver.resolve(resolver, this.context);
   }
 
-  *getInstances(): IterableIterator<{
+  *getCurrentInstances(): IterableIterator<{
     target: ModuleTarget;
     instance: any;
     metadata: ModuleMetadata;

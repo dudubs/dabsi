@@ -4,15 +4,13 @@ import { IResolver } from "@dabsi/typedi/Resolver";
 
 const NAME = "resolve";
 
-IResolver[NAME] = method;
-
 declare module "../Resolver" {
   interface IResolver {
-    [NAME]: typeof method;
+    resolve<T>(resolver: Resolver<T>, context: ResolverMap<any>): T;
   }
 }
 
-function method<T>(resolver: Resolver<T>, context: ResolverMap<any>): T {
+Resolver.resolve = function (resolver, context) {
   if (!context) {
     throw new Error("No context");
   }
@@ -20,5 +18,13 @@ function method<T>(resolver: Resolver<T>, context: ResolverMap<any>): T {
     throw new Error("No resolver");
   }
 
-  return resolver[Resolver.resolveSymbol](context);
-}
+  try {
+    return resolver[Resolver.resolveSymbol](context);
+  } catch (error) {
+    if (error.constructor === TypeError) {
+      const x = resolver[Resolver.resolveSymbol];
+      console.log({ x });
+    }
+    throw error;
+  }
+};

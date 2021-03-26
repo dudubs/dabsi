@@ -1,47 +1,77 @@
 import { mapObject } from "@dabsi/common/object/mapObject";
 import nested from "@dabsi/common/string/nested";
-import { RpcConfigPath } from "@dabsi/modules/rpc";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
-import { AnyRpc, AnyRpcWithMap } from "@dabsi/typerpc/Rpc";
-import { AnyRpcMap, RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
+import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
 import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
 import { RpcConfigResolver } from "./configResolver";
 
-export type RpcConfigResolverGenerator = {
-  (rpc: AnyRpc, path: RpcConfigPath): undefined | RpcConfigResolver<AnyRpc>;
-};
-
 // RpcPathResolver()
 
-export function createRpcConfigResolverGenerator(
-  getConfigResolver: <T>(
-    rpc: AnyRpc,
-    path: RpcConfigPath
-  ) => RpcConfigResolver<AnyRpc>
-): RpcConfigResolverGenerator {
-  const generatorMap = new Map<
-    (...args) => AnyRpc,
-    (rpc: AnyRpc, path: RpcConfigPath) => RpcConfigResolver<AnyRpc>
-  >()
-    .set(RpcNamespace, _generateForRpcNamespace)
-    .set(WidgetNamespace, _generateForWidgetNamespace)
-    .set(RpcMap, _generateForRpcMap)
-    .set(WidgetMap, _generateForWidgetMap)
-    .set(InputMap, _generateForWidgetMap);
+type RpcConfigResolverGenerator2<T extends AnyRpc = AnyRpc> = (
+  rpc: T,
+  getChildConfigResolver: (rpc: AnyRpc) => RpcConfigResolver<AnyRpc>
+) => RpcConfigResolver<T>;
 
-  return (rpc, path) => {
-    const factory = generatorMap.get(rpc.rpcType);
-    if (factory) return factory(rpc, path);
-    if (rpc.options.isConfigCanBeUndefined)
-      return RpcConfigResolver(rpc, {}, _ => $ => $(undefined));
-    // throw new RpcError(`Can't generate config for ${rpc}`);
-  };
+type RpcConfigResolverGetter<T extends AnyRpc = AnyRpc> = (
+  rpc: AnyRpc
+) => RpcConfigResolver<AnyRpc>;
 
-  function _generateForRpcNamespace(rpc: RpcNamespace, path: RpcConfigPath) {
-    return RpcConfigResolver(rpc, _createChildrenConfig(rpc, path), c => ({
+const generatorMap = new Map<
+  (...args) => AnyRpc,
+  RpcConfigResolverGenerator2
+>();
+
+const define = <T extends AnyRpc>(
+  rpcType: (...args) => T,
+  generator: RpcConfigResolverGenerator2<T>
+) => {
+  generatorMap.set(rpcType, generator);
+};
+
+export { define as defineRpcConfigResolverGenerator };
+
+function generateChildrenConfigResolverMap(
+  getConfigResolver: RpcConfigResolverGetter,
+  rpc: AnyRpc,
+  parentKey: string | null
+): Record<string, RpcConfigResolver<AnyRpc>> {
+  let message = "";
+
+  if (parentKey) {
+    rpc = rpc.at(parentKey);
+  }
+
+  const resolvers = mapObject(rpc.children, (child, childKey) => {
+    let configResolver;
+    try {
+      configResolver = getConfigResolver(child);
+    } catch (error) {
+      if (error instanceof ResolveError) {
+        message += `${message ? `\nAlso at` : `At`} key '${childKey}':${nested(
+          error.message
+        )}`;
+        return;
+      }
+      throw error;
+    }
+
+    // Inject child rpc config path
+    return configResolver;
+  });
+  if (message) {
+    throw new ResolveError(message);
+  }
+  return resolvers as Record<string, RpcConfigResolver<AnyRpc>>;
+}
+
+define(RpcNamespace, (rpc, getConfigResolver) => {
+  return RpcConfigResolver(
+    rpc,
+    generateChildrenConfigResolverMap(getConfigResolver, rpc, null),
+    c => ({
       getNamespaceConfig: (childRpc, key) => {
         if (!(key in c)) {
           throw new ResolveError(
@@ -52,71 +82,47 @@ export function createRpcConfigResolverGenerator(
         }
         return c[key];
       },
-    }));
-  }
+    })
+  );
+});
 
-  function _createChildrenConfig(rpc: AnyRpc, path: RpcConfigPath) {
-    let message = "";
-    const resolvers = mapObject(rpc.children, (child, childKey) => {
-      try {
-        return getConfigResolver(child, {
-          rpc: child,
-          parent: {
-            key: childKey,
-            path,
-          },
-        });
-      } catch (error) {
-        if (error instanceof ResolveError) {
-          message += `${
-            message ? `\nAlso at` : `At`
-          } key '${childKey}':${nested(error.message)}`;
-          return;
+define(WidgetNamespace, (rpc, getConfigResolver) => {
+  return RpcConfigResolver(
+    rpc,
+    generateChildrenConfigResolverMap(getConfigResolver, rpc, "ns"),
+    c => ({
+      getNamespaceConfig: (childRpc, key) => {
+        if (!(key in c)) {
+          throw new ResolveError(`No config for ${key}`);
         }
-        throw error;
-      }
-    });
-    if (message) {
-      throw new ResolveError(message);
-    }
-    return resolvers as Record<string, RpcConfigResolver<AnyRpc>>;
-  }
+        return c[key];
+      },
+    })
+  );
+});
 
-  function _generateForWidgetNamespace(
-    rpc: WidgetNamespace,
-    path: RpcConfigPath
-  ) {
-    return RpcConfigResolver(
-      rpc,
-      _createChildrenConfig(rpc.children.ns, path),
-      c => ({
-        getNamespaceConfig: (childRpc, key) => {
-          if (!(key in c)) {
-            throw new ResolveError(`No config for ${key}`);
-          }
-          return c[key];
-        },
-      })
-    );
-  }
+define(RpcMap, (rpc, getConfigResolver) => {
+  return RpcConfigResolver(
+    rpc,
+    generateChildrenConfigResolverMap(getConfigResolver, rpc, null),
+    c => $ => $(c)
+  );
+});
 
-  function _generateForWidgetMap(rpc: AnyRpcWithMap, path: RpcConfigPath) {
-    return RpcConfigResolver(
-      rpc,
-      _createChildrenConfig(rpc.children.map, {
-        rpc: rpc.children.map,
-        parent: {
-          key: "map",
-          path,
-        },
-      }),
-      c => $ => $(c)
-    );
-  }
+define(InputMap, (rpc, getConfigResolver) => {
+  return RpcConfigResolver(
+    rpc,
+    generateChildrenConfigResolverMap(getConfigResolver, rpc, "map"),
+    c => $ => $(c)
+  );
+});
 
-  function _generateForRpcMap(rpc: AnyRpcMap, path: RpcConfigPath) {
-    return RpcConfigResolver(rpc, _createChildrenConfig(rpc, path), c => $ =>
-      $(c)
-    );
-  }
+export function generateRpcConfigResolver(
+  getConfigResolver: RpcConfigResolverGetter,
+  rpc: AnyRpc
+): RpcConfigResolver<AnyRpc> | undefined {
+  const factory = generatorMap.get(rpc.rpcType);
+  if (factory) return factory(rpc, getConfigResolver);
+  if (rpc.options.isConfigCanBeUndefined)
+    return RpcConfigResolver(rpc, {}, _ => $ => $(undefined));
 }

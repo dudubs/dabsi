@@ -315,7 +315,7 @@ export abstract class DataSource<T> {
 
   at<T, K extends DataRelationKeys<T>>(
     this: DataSource<T>,
-    propertyName: string & K,
+    propertyName: K,
     key: DataKey<DataRelationType<T[K]>> = this.cursor.keys[0]
   ): DataSource.At<T, K> {
     if (!key) {

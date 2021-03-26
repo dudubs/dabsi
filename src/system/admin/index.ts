@@ -7,5 +7,7 @@ import SessionModule from "../../modules/session";
   dependencies: [AclModule, SystemModule, SessionModule],
 })
 export default class AdminModule {
-  constructor() {}
+  constructor() {
+    // registerPluginsDirectory("admin")
+  }
 }

@@ -18,16 +18,16 @@ const cookieParser = CookieParser();
 })
 export default class SessionForExpressModule {
   constructor(expressModule: ExpressModule, dataModule: DataModule) {
-    Resolver.provide(
+    Resolver.Context.provide(
       expressModule.context,
       RequestSession.provide(),
       RequestUser.provide()
     );
 
-    expressModule.requestContextResolvers.push(
+    expressModule.requestBuilders.push(
       Resolver.consume(
-        [DataContext, ExpressResolver, Request, DataTicker],
-        async (data, [expReq, expRes], req, ticker) => {
+        [c => c, DataContext, ExpressResolver, Request, DataTicker],
+        async (context, data, [expReq, expRes], req, ticker) => {
           await new Promise(next => cookieParser(expReq, expRes, next));
           const sessions = data.getSource(Session);
           const [sessionKey, userKey] = await getSessionKey({
@@ -44,17 +44,20 @@ export default class SessionForExpressModule {
             })
           );
 
-          return {
-            ...RequestSession.provide(() =>
-              ticker.getRowTicker(Session, sessionKey)
-            ),
-            ...RequestUser.provide(() => {
+          Resolver.Context.provide(
+            context,
+            RequestSession.provide(() => {
+              console.log({ sessionKey });
+
+              return ticker.getRowTicker(Session, sessionKey);
+            }),
+            RequestUser.provide(() => {
               if (!userKey) {
                 throw new RpcError("No loging user");
               }
               return ticker.getRowTicker(User, userKey);
-            }),
-          };
+            })
+          );
         }
       )
     );

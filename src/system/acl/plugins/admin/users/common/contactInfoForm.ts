@@ -8,7 +8,7 @@
 //   "contactInfo",
 //   Form({
 //     input: InputMap({
-//       phoneNumber: TextInput({ nullable: true, trim: true }),
+//       mobilePhone: TextInput({ nullable: true, trim: true }),
 
 //       // TODO: Unique, also builtin- unique error
 //       email: TextInput({ nullable: true, trim: true }),

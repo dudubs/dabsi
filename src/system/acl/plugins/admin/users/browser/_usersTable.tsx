@@ -1,11 +1,11 @@
 import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
 import { ACL_Admin_Connection } from "@dabsi/system/acl/plugins/admin/common/rpc";
-import { ACL_Admin_Router } from "@dabsi/system/acl/plugins/admin/view/router";
+import { ACL_AdminRouter } from "@dabsi/system/acl/plugins/admin/view/router";
 import { RouterView } from "@dabsi/typerouter/view";
 import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
 import React from "react";
 
-RouterView.define(ACL_Admin_Router.at("users"), ({ location }) => (
+RouterView.define(ACL_AdminRouter.at("users"), ({ location }) => (
   <WidgetViewLoader connection={ACL_Admin_Connection.usersManager.table}>
     {props => (
       <MuiDataTableView

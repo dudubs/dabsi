@@ -1,4 +1,3 @@
-import { Ticker } from "@dabsi/common/async/Ticker";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
 import LoaderModule from "@dabsi/modules/LoaderModule";
@@ -66,7 +65,6 @@ export const rtTester = t
         () => sessionTicker
       )
     );
-
     let rtConfig: RichTextConfig;
 
     const testContent = async (content: RichTextContent.Unpacked) => {

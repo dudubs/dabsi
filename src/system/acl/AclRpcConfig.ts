@@ -36,6 +36,7 @@ export default RpcConfigResolver(
         const { user } = await c.session.fetch({
           relations: { user: { pick: ["firstName", "lastName"] } },
         });
+
         if (!user) return { type: "fail" };
 
         return {

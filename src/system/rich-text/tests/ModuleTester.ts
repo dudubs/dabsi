@@ -11,8 +11,8 @@ export default function ModuleTester() {
     return {
       moduleRunner,
       context: moduleRunner.context,
-      provide(...args: ResolverMap[]) {
-        Object.assign(moduleRunner.context, ...args);
+      provide(...args: any[]) {
+        Resolver.Context.provide(moduleRunner.context, ...args);
       },
       resolve<T>(resolver: Resolver<T>): T {
         return Resolver.resolve(resolver, moduleRunner.context);

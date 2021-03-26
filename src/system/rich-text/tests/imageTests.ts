@@ -11,7 +11,7 @@ const t = rtTester.beforeAll(async t => {
 
   const rpcConn = t.rpc.createConnection(RichTextImageRpc);
 
-  t.rpc.request.current = new RpcRequest(
+  t.rpc.requestRef.current = new RpcRequest(
     [],
     {},
     {

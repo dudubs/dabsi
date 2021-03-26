@@ -2,27 +2,27 @@ import { DataContext } from "@dabsi/modules/data/context";
 import { DataParameterConfigResolver } from "@dabsi/modules/data/paramterConfigResolver";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import { Group } from "@dabsi/system/acl/entities/Group";
-import { ACL_Admin_GroupsRpc } from "@dabsi/system/acl/plugins/admin/common/groupsRpc";
+import { User } from "@dabsi/system/acl/entities/User";
+import { ACL_Admin_UsersRpc } from "@dabsi/system/acl/plugins/admin/common/usersRpc";
 
 export default [
   DataParameterConfigResolver(
     //
-    ACL_Admin_GroupsRpc.at("item"),
-    Group
+    ACL_Admin_UsersRpc.at("item"),
+    User
   ),
   RpcConfigResolver(
-    ACL_Admin_GroupsRpc.at("item.target.delete"),
-    { data: DataContext, group: DataRowContext(Group) },
+    ACL_Admin_UsersRpc.at("item.target.delete"),
+    { data: DataContext, group: DataRowContext(User) },
     c => async () => {
       await c.group.delete();
     }
   ),
   RpcConfigResolver(
-    ACL_Admin_GroupsRpc.at("item.target.updateUsers"),
-    { group: DataRowContext(Group) },
+    ACL_Admin_UsersRpc.at("item.target.updateGroups"),
+    { group: DataRowContext(User) },
     c => async checkMap => {
-      await c.group.at("users").updateRelations(checkMap);
+      await c.group.at("groups").updateRelations(checkMap);
     }
   ),
 ];

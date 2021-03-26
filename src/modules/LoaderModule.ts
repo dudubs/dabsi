@@ -95,7 +95,6 @@ export default class LoaderModule {
     return statSync(path);
   }
 
-  @Cache(cachedProperties)
   *readDirDeep(dir: string): IterableIterator<string> {
     for (const baseName of this.readDir(dir)) {
       const fileName = path.join(dir, baseName);

@@ -5,9 +5,7 @@ import ServerModule from "@dabsi/modules/server";
 import { Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import express from "express";
 
-export const ExpressResolver = Resolver.token<
-  [express.Request, express.Response]
->();
+export const ExpressResolver = Resolver<[express.Request, express.Response]>();
 
 @Module()
 export default class ExpressModule {
@@ -46,12 +44,9 @@ export default class ExpressModule {
 
   onRun = Hookable<(app: express.Application) => Awaitable>();
 
-  context: ResolverMap = Object.setPrototypeOf(
-    {
-      ...ExpressResolver.provide(),
-    },
-    this.requestModule.context
-  );
+  context: ResolverMap = Resolver.Context.create(this.requestModule.context, [
+    ExpressResolver,
+  ]);
 
   requestBuilders: Resolver<Awaitable<void>>[] = [];
 
@@ -75,10 +70,12 @@ export default class ExpressModule {
     ) => Awaitable
   ): express.Handler {
     return (req, res) => {
+      Resolver(ExpressResolver, () => [req, res]);
+
       return this.requestModule.processRequest(async context => {
-        Resolver.Context.provide(
+        Resolver.Context.assign(
           context,
-          ExpressResolver.provide(() => [req, res])
+          Resolver(ExpressResolver, () => [req, res])
         );
         for (const resolver of this.requestBuilders) {
           await Resolver.resolve(resolver, context);
@@ -89,9 +86,4 @@ export default class ExpressModule {
       });
     };
   }
-
-  processMultipleRequests(
-    requests: { path: any[]; payload: any }[],
-    body: any
-  ) {}
 }

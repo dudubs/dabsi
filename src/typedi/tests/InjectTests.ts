@@ -1,5 +1,5 @@
 import { Inject, Injectable, Resolver } from "@dabsi/typedi";
-import { Forward } from "@dabsi/typedi/Forward";
+import { Forward } from "@dabsi/common/reflection/Forward";
 
 it("sanity", done => {
   class B {

@@ -20,7 +20,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
   } = {}
 ): CustomResolver<RpcConfigFactory<T>> {
   return Resolver.toCheck(
-    Resolver.consume([RpcModule, c => c], (rpcModule, context) => {
+    Resolver([RpcModule, c => c], (rpcModule, context) => {
       const rpcConfigResolver = getRpcConfigResolver(rpcModule);
       return childContext => {
         const rpcConfig = Resolver.resolve(

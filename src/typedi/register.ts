@@ -1,6 +1,5 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
-
 import { provideType } from "@dabsi/typedi/provideType";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
@@ -67,3 +66,7 @@ Function.prototype.provide = function (resolver?) {
       })
   );
 };
+
+if ((() => null).prototype) {
+  throw new Error("Engine not support arrow-resolver.");
+}

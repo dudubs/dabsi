@@ -25,10 +25,7 @@ export const RpcModuleTester = (t: ReturnType<typeof ModuleTester>) => {
 
           const config = Resolver.resolve(
             configResolver,
-            Resolver.Context.create(
-              t.moduleRunner.context,
-              Ticker.provide(() => ticker)
-            )
+            Resolver.Context.create(t.moduleRunner.context, [ticker])
           );
           const command = rpc.createRpcCommand(config);
 

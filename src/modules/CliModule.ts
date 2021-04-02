@@ -7,7 +7,7 @@ export default class CliModule {
   cli = new Cli();
 
   constructor(@Inject(c => c) context: ResolverMap) {
-    Resolver.Context.provide(context, { ...Cli.provide(() => this.cli) });
+    Resolver.Context.assign(context, [this.cli]);
   }
 
   async main(scriptName: string) {

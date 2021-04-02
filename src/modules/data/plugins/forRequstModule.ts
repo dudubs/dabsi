@@ -4,8 +4,6 @@ import { Module, Resolver } from "@dabsi/typedi";
 import DataModule from "..";
 import RequestModule from "../../RequestModule";
 
-const releaseResolver = Resolver.token<() => void>();
-
 class DataQueryRunnerLock {
   constructor(public release: () => void) {}
 }
@@ -16,7 +14,7 @@ export default class DataRequestModule {
     requestModule.requestBuilders.push(async context => {
       const [queryRunner, release] = await dataModule.createQueryRunner();
 
-      Resolver.Context.provide(context, [
+      Resolver.Context.assign(context, [
         new DataContext(entityType =>
           DataEntitySource.fromQueryRunner(entityType, queryRunner)
         ),

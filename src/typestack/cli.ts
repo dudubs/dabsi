@@ -29,9 +29,8 @@ export default function typestackCli(): boolean {
       ...[
         ...DABSI_NODE_OPTIONS,
         ...["-r", "@dabsi/register.ts"],
-        ...["-r", "@dabsi/typestack/register.ts"],
         "--",
-        "src/index.ts",
+        require.resolve("@dabsi/typestack/main.ts"),
       ],
       ...process.argv.slice(process.argv.indexOf("typestack") + 1),
     ],

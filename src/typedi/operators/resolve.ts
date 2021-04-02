@@ -1,8 +1,4 @@
-import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
-
-import { IResolver } from "@dabsi/typedi/Resolver";
-
-const NAME = "resolve";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   interface IResolver {

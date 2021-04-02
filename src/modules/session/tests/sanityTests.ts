@@ -8,7 +8,7 @@ import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { Resource } from "@dabsi/modules/session/resource";
 import TestDbModule from "@dabsi/modules/tests/TestDbModule";
 import { DataRelation } from "@dabsi/typedata/relation";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 import { findEntities } from "@dabsi/typeorm/findEntities";
 import {
   ChildEntity,

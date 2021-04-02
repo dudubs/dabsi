@@ -1,26 +1,23 @@
 import catchError from "@dabsi/common/async/catchError";
 import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { IResolver, Resolver } from "@dabsi/typedi/Resolver";
-
-const NAME = "array";
-
-IResolver[NAME] = method;
+import { Resolver } from "@dabsi/typedi/Resolver";
+import { locateError } from "@dabsi/typemodule/locateError";
 
 declare module "../Resolver" {
   interface IResolver {
-    [NAME]: typeof method;
+    array<T>(
+      resolvers: Resolver<T>[],
+      getItemName?: (index: number) => string | void
+    ): Resolver<T[]>;
   }
 }
 
-function method<T>(
-  resolvers: Resolver<T>[],
-  getArgName?: (index: number) => string | void
-): Resolver<T[]> {
+Resolver.array = function (resolvers, getItemName) {
   function errorAt(index: number) {
-    const argName = getArgName?.(index);
+    const argName = getItemName?.(index);
     if (argName) {
-      return `argument "${argName}"`;
+      return `argument ${argName}`;
     } else {
       return `index ${index}`;
     }
@@ -32,9 +29,7 @@ function method<T>(
         ResolveError,
         () => Resolver.resolve(item, context),
         error => {
-          throw new ResolveError(
-            `at ${errorAt(index)}:${nested(error.message)}`
-          );
+          throw locateError(error, errorAt(index));
         }
       );
       return Resolver.resolve(item, context);
@@ -58,4 +53,4 @@ function method<T>(
       throw new ResolveError(message);
     }
   });
-}
+};

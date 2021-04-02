@@ -11,9 +11,9 @@ export default class DataModule {
     protected dbModule: DbModule,
     @Inject(c => c) protected context: ResolverMap
   ) {
-    Resolver.Context.provide(
+    Resolver.Context.assign(
       context,
-      DataContext.provide(
+      DataContext.assign(
         () =>
           new DataContext(entityType =>
             DataEntitySource.fromQueryRunner(entityType, dbModule.queryRunner!)

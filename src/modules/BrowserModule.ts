@@ -6,7 +6,7 @@ import { inspect } from "@dabsi/logging/inspect";
 import { Cli } from "@dabsi/modules/Cli";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { Module } from "@dabsi/typedi";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import * as path from "path";
 import tsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";

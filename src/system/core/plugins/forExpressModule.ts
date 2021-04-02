@@ -5,7 +5,7 @@ import { SystemRpc, SYSTEM_RPC_PATH } from "@dabsi/system/core/common/rpc";
 import { Module } from "@dabsi/typedi";
 import BodyParser from "body-parser";
 import multer from "multer";
-import SystemModule from "..";
+import SystemModule from "../module";
 import { Cli } from "../../../modules/Cli";
 
 @Module({})

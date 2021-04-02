@@ -1,20 +1,16 @@
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { CustomResolver, IResolver, Resolver } from "@dabsi/typedi/Resolver";
-
-const NAME = "catch";
-
-IResolver[NAME] = method;
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   interface IResolver {
-    [NAME]: typeof method;
+    catch<T>(
+      resolver: Resolver<T>,
+      callback: (error: ResolveError) => any
+    ): CustomResolver<T>;
   }
 }
 
-function method<T>(
-  resolver: Resolver<T>,
-  callback: (error: ResolveError) => any
-): CustomResolver<T> {
+Resolver.catch = function (resolver, callback) {
   return (context => Resolver.resolve(resolver, context)).toCheck(context => {
     try {
       Resolver.check(resolver, context);
@@ -25,4 +21,4 @@ function method<T>(
       throw error;
     }
   });
-}
+};

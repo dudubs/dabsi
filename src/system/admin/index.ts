@@ -1,4 +1,4 @@
-import SystemModule from "@dabsi/system/core";
+import SystemModule from "@dabsi/system/core/module";
 import AclModule from "@dabsi/system/acl";
 import { Module } from "@dabsi/typedi";
 import SessionModule from "../../modules/session";

@@ -6,7 +6,7 @@ import { Cli } from "./Cli";
 import { Hookable } from "./Hookable";
 
 export class Request {
-  cleanups: (() => Awaitable)[] = [];
+  readonly cleaners: (() => Awaitable)[] = [];
 }
 
 function emitAllAsync<T extends (...args: any[]) => any>(
@@ -20,13 +20,10 @@ function emitAllAsync<T extends (...args: any[]) => any>(
 export default class RequestModule {
   log = log.get("REQUEST");
 
-  context: ResolverMap = Object.setPrototypeOf(
-    {
-      ...Request.provide(),
-      ...Ticker.provide(),
-    },
-    this.runnerContext
-  );
+  context: ResolverMap = Resolver.Context.create(this.runnerContext, {
+    ...Resolver(Ticker),
+    ...Resolver(Request),
+  });
 
   requestCleanups: ((context: ResolverMap) => Awaitable)[] = [];
 
@@ -46,10 +43,7 @@ export default class RequestModule {
 
     const req = new Request();
 
-    Resolver.Context.provide(context, {
-      ...Request.provide(() => req),
-      ...Ticker.provide(() => ticker),
-    });
+    Resolver.Context.assign(context, [req, ticker]);
 
     for (const resolver of this.requestBuilders) {
       await Resolver.resolve(resolver, context);
@@ -61,7 +55,7 @@ export default class RequestModule {
       await emitAllAsync(this.requestErrorHandlers, context, error);
       throw error;
     } finally {
-      await emitAllAsync(req.cleanups.reverse());
+      await emitAllAsync(req.cleaners.reverse());
       await emitAllAsync(this.requestCleanups.reverse(), context);
     }
   }

@@ -1,6 +1,6 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
 
-export default function Cache(propertyNames?: string[]): MethodDecorator {
+export default function Cached(propertyNames?: string[]): MethodDecorator {
   return <
     K extends string,
     T extends Record<K, (key: any, ...args: any[]) => any>
@@ -23,6 +23,6 @@ export default function Cache(propertyNames?: string[]): MethodDecorator {
   };
 }
 
-Cache.clear = function <T, K extends keyof T>(instance: T, propertName: K) {
+Cached.clear = function <T, K extends keyof T>(instance: T, propertName: K) {
   (<any>instance[propertName]).cacheMap.delete(instance);
 };

@@ -1,19 +1,15 @@
 import { entries } from "@dabsi/common/object/entries";
 import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { IResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
-
-const NAME = "checkObject";
-
-IResolver[NAME] = method;
+import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   interface IResolver {
-    [NAME]: typeof method;
+    checkObject(resolverMap: ResolverMap, context: ResolverMap);
   }
 }
 
-function method(resolverMap: ResolverMap, context: ResolverMap) {
+Resolver.checkObject = function (resolverMap, context) {
   const errors: [key: string, message: string][] = [];
   let message = "";
   for (const [key, resolver] of entries(resolverMap)) {
@@ -33,4 +29,4 @@ function method(resolverMap: ResolverMap, context: ResolverMap) {
   if (message) {
     throw new ResolveError(message);
   }
-}
+};

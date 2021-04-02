@@ -1,6 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { ResolvedMap, ResolverMap } from "@dabsi/typedi";
-import { CallStackInfo } from "@dabsi/typedi/CallStackInfo";
+import { CallStackAnchor } from "@dabsi/typedi/CallStackAnchor";
 import { RpcConfig } from "@dabsi/typerpc/Rpc";
 import { Resolver } from "../../typedi";
 import { AnyRpc, RpcUnresolvedConfig } from "../../typerpc/Rpc";
@@ -11,7 +11,7 @@ export type RpcConfigResolver<T extends AnyRpc> = Resolver<
   rpc: T;
 };
 
-export const RpcConfigResolverMap = Resolver.token<
+export const RpcConfigResolverMap = Resolver<
   Record<any, Resolver<RpcUnresolvedConfig<AnyRpc>>>
 >();
 
@@ -28,9 +28,9 @@ export function RpcConfigResolver<T extends AnyRpc, U extends ResolverMap<any>>(
 ): RpcConfigResolver<T> {
   // TOOD: save stack info
 
-  const callStackInfo = new CallStackInfo(new Error(), __filename);
+  const anchor = CallStackAnchor.capture(RpcConfigResolver);
   // stackInfo = {};
-  let resolver = Resolver.consume<any, any>(resolvers, context => {
+  let resolver = Resolver<any, any>(resolvers, context => {
     return RpcConfig(rpc, callback(context));
   });
 
@@ -41,7 +41,7 @@ export function RpcConfigResolver<T extends AnyRpc, U extends ResolverMap<any>>(
   resolver[inspect.custom] = () => {
     return `<RpcConfigResolver${
       rpc.rpcType?.name ? ` for ${rpc.rpcType.name}` : ""
-    } ${callStackInfo.description}>`;
+    } ${anchor.description}>`;
   };
   Object.assign(resolver, {
     rpc,

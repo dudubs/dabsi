@@ -1,6 +1,6 @@
 import { Resolver } from "@dabsi/typedi";
 
-const r1 = Resolver.token<string>();
+const r1 = Resolver<{ v: string }>();
 
 it("expect to throw resolve for empty context", () => {
   expect(() => Resolver.check(r1, {})).toThrowError();
@@ -8,9 +8,10 @@ it("expect to throw resolve for empty context", () => {
 it("expect to resolve for context", () => {
   expect(
     Resolver.checkAndResolve(r1, {
-      ...r1.provide("hello"),
+      // ...r1.provide({ v: "hello" }),
+      ...Resolver(r1, () => ({ v: "hello" })),
     })
-  ).toEqual("hello");
+  ).toEqual({ v: "hello" });
 });
 
 abstract class MyAbstractType {
@@ -29,7 +30,7 @@ it("expect to resolve type", () => {
   expect(
     Resolver.checkAndResolve(
       MyType,
-      MyType.provide(() => new MyType())
+      Resolver(MyType, () => new MyType())
     )
   ).toBeInstanceOf(MyType);
 });
@@ -37,8 +38,8 @@ it("expect to resolve type", () => {
 it("expect to consume resolver", () => {
   expect(
     Resolver.checkAndResolve(
-      Resolver.consume([r1], name => `Hello ${name}!`),
-      r1.provide("World")
+      Resolver([r1], name => `Hello ${name.v}!`),
+      Resolver(r1, () => ({ v: "World" }))
     )
   ).toEqual("Hello World!");
 });

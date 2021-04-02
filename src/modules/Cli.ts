@@ -11,6 +11,7 @@ export class Cli {
       cli.onRunAsParent(args => {
         return this.onRunAsParent.invoke(args);
       });
+
       this.onBuild(y =>
         y.command(
           name,

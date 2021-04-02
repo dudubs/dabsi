@@ -1,9 +1,11 @@
 import { assert } from "@dabsi/common/assert";
 import { BaseMap, MapKey, MapValue } from "@dabsi/common/map/BaseMap";
+import { Defined } from "@dabsi/common/typings2/Defined";
 
 export type MapFactory<T extends BaseMap<any, any>> = {
   map: T;
-  (key: MapKey<T>): NonNullable<MapValue<T>>;
+  (key: MapKey<T>): Defined<MapValue<T>>;
+  (key: MapKey<T>, getOnly: true): Defined<MapValue<T>> | undefined;
 };
 
 function mapFactory<K, V>(
@@ -13,9 +15,9 @@ function mapFactory<K, V>(
   touch.map = map;
   return touch;
 
-  function touch(key, callback?): any {
-    if (callback) {
-      return map.has(key) ? callback(map.get(key)) : undefined;
+  function touch(key, getOnly?): any {
+    if (getOnly) {
+      return map.get(key);
     }
 
     let value = map.get(key);

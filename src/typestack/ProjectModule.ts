@@ -3,14 +3,9 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DABSI_DIR } from "@dabsi/env";
 import { Hookable } from "@dabsi/modules/Hookable";
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import {
-  getDesignParamTypes,
-  isModuleTarget,
-  Module,
-  moduleMetadataMap,
-  ModuleTarget,
-} from "@dabsi/typedi";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { getDesignParamTypes, Module, moduleMetadataMap } from "@dabsi/typedi";
+import { isModuleTarget, ModuleTarget } from "@dabsi/typedi/OldModuleMetadata2";
+import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 import ProjectInfo from "@dabsi/typestack/ProjectInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
 import path from "path";
@@ -61,7 +56,7 @@ export default class ProjectModule {
 
   protected async _loadModules() {
     for (const m of this.runner.getCurrentInstances()) {
-      const moduleFileName = m.metadata.callStackInfo.lineInfo.fileName;
+      const moduleFileName = m.metadata.callStack.lineInfo.fileName;
 
       const moduleIsIndex = /[\\\/]index\.ts/.test(moduleFileName);
 

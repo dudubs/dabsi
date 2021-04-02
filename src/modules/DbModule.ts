@@ -1,12 +1,12 @@
-import { touchSet } from "@dabsi/common/set/touchSet";
 import { values } from "@dabsi/common/object/values";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
+import { touchSet } from "@dabsi/common/set/touchSet";
 import { Cli } from "@dabsi/modules/Cli";
 import { Hookable } from "@dabsi/modules/Hookable";
 import ServerModule from "@dabsi/modules/server";
 import { Module, Resolver } from "@dabsi/typedi";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import path from "path";
 import {
@@ -18,7 +18,6 @@ import {
 } from "typeorm";
 import ProjectModuleInfo from "../typestack/ProjectModuleInfo";
 import LoaderModule from "./LoaderModule";
-import CliModule from "@dabsi/modules/CliModule";
 
 @Module({})
 export class DbModule {
@@ -49,24 +48,14 @@ export class DbModule {
     );
     serverModule.onStart(() => this.init());
 
-    Resolver.Context.provide(
+    Resolver.Context.assign(
       runner.context,
-      Connection.provide(() => this.connection)
+      Resolver(Connection, () => this.connection)
     );
 
     projectModule.onLoadModule(async projectModuleInfo => {
       await this._loadProjectModule(projectModuleInfo);
     });
-  }
-
-  @Module.Plugin() protected forCliModule({ cli }: CliModule) {
-    cli.command("db", cli =>
-      cli.command("sync", cli =>
-        cli //
-          .onBuild(y => y.boolean(["f", "force"]))
-          .onRun(args => this.sync(args))
-      )
-    );
   }
 
   protected _loadEntityType(entityType: Function) {

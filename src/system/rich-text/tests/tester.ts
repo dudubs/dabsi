@@ -92,7 +92,7 @@ export const rtTester = t
       configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
         const context = t.resolve(RichTextContext);
         rtConfig = { ...config, context };
-        t.provide(RichTextConfigContext.provide(() => rtConfig));
+        t.provide(RichTextConfigContext.assign(() => rtConfig));
         return rtConfig;
       },
 

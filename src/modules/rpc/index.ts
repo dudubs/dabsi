@@ -4,7 +4,7 @@ import { touchSet } from "@dabsi/common/set/touchSet";
 import { generateRpcConfigResolver } from "@dabsi/modules/rpc/configResolverGenerator";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { Module, Resolver, ResolverMap } from "@dabsi/typedi";
-import { ModuleRunner } from "@dabsi/typedi/ModuleRunner";
+import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
@@ -15,7 +15,6 @@ import { DABSI_ROOT_DIR } from "../../env";
 import LoaderModule from "../LoaderModule";
 import { relativePosixPath } from "../pathHelpers";
 import { isRpcConfigResolver, RpcConfigResolver } from "./configResolver";
-
 
 @Module()
 export default class RpcModule {
@@ -128,9 +127,7 @@ export default class RpcModule {
     this._isChecking = true;
     this.log.trace(() => "checking");
 
-    context = Resolver.Context.create(context, {
-      ...RpcRequest.provide(),
-    });
+    context = Resolver.Context.create(context, [RpcRequest]);
 
     try {
       const configResolver = this.getConfigResolver(rpc);
@@ -146,10 +143,9 @@ export default class RpcModule {
     }
   }
 
-  requestContext: ResolverMap = Resolver.Context.create(
-    this.runner.context,
-    Ticker.provide()
-  );
+  requestContext: ResolverMap = Resolver.Context.create(this.runner.context, {
+    ...Resolver(Ticker),
+  });
 
   async processRequest(rpc: AnyRpc, rpcReq: RpcRequest, context: ResolverMap) {
     const { path, payload } = rpcReq;

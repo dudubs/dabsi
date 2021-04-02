@@ -37,7 +37,7 @@ export function DataParameterConfigResolver<T, U extends ResolverMap>(
       ticker: Ticker,
       context: Resolver.object(resolverMap || {}),
       createTargetConfig: RpcConfigFactoryResolver(rpc.children.target, {
-        context: DataRowContext.provide(rowType),
+        context: DataRowContext.assign(rowType),
       }),
     },
     c => async ($, rowKey) => {
@@ -69,7 +69,7 @@ export function DataParameterConfigResolver<T, U extends ResolverMap>(
       return $(
         c.createTargetConfig(
           //
-          DataRowContext.provide(rowType, rowKey)
+          DataRowContext.assign(rowType, rowKey)
         )
       );
     }

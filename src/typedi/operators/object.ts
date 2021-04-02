@@ -2,16 +2,15 @@ import catchError from "@dabsi/common/async/catchError";
 import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import {
-  ResolverMap,
   CustomResolver,
-  IResolver,
-  Resolver,
   Resolved,
+  Resolver,
+  ResolverMap,
 } from "@dabsi/typedi/Resolver";
 
 const NAME = "object";
 
-IResolver[NAME] = method;
+Resolver[NAME] = method;
 
 declare module "../Resolver" {
   interface IResolver {

@@ -1,18 +1,16 @@
-import { ModuleMetadata } from "./decorators/Module";
+import { ModuleMetadata } from "./decorators/OldModule";
 import { touchMap } from "@dabsi/common/map/touchMap";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver } from "@dabsi/typedi/index";
 import { getConstructorParamsResolver } from "@dabsi/typedi/decorators/Injectable";
-import {
-  moduleMetadataMap,
-  ModuleTarget,
-} from "@dabsi/typedi/decorators/Module";
+import { moduleMetadataMap } from "@dabsi/typedi/decorators/OldModule";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { ModuleTarget } from "@dabsi/typedi/OldModuleMetadata2";
 
-export class ModuleRunner {
+export class OldModuleRunner {
   instanceMap = new Map<ModuleTarget, any>();
 
-  context = { ...ModuleRunner.provide(() => this) };
+  context = { ...OldModuleRunner.provide(() => this) };
 
   mainTarget: ModuleTarget | null = null;
 
@@ -40,11 +38,6 @@ export class ModuleRunner {
 
       for (const dependencyModule of options.dependencies || []) {
         this.getInstance(dependencyModule);
-      }
-
-      for (const provider of options.providers || []) {
-        const context = Resolver.checkAndResolve(provider, this.context) || {};
-        Object.assign(this.context, context);
       }
 
       const args = Resolver.checkAndResolve(

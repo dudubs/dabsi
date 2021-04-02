@@ -1,7 +1,6 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
 import { Cli } from "@dabsi/modules/Cli";
 import DataModule from "@dabsi/modules/data";
@@ -22,8 +21,9 @@ import { Module, Resolver } from "@dabsi/typedi";
 
 export const SESSION_TIMEOUT = 1000 * 60 * 10;
 
-export const RequestUser = Resolver.token<DataRowTicker<User>>();
-export const RequestSession = Resolver.token<DataRowTicker<Session>>();
+export class RequestUser extends Resolver<DataRowTicker<User>>() {}
+
+export class RequestSession extends Resolver<DataRowTicker<Session>>() {}
 
 @Module({
   dependencies: [DataModule],

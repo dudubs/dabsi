@@ -1,4 +1,4 @@
-import Cache from "./Cache";
+import Cache from "./Cached";
 
 it("sanity", () => {
   let count = 0;

@@ -5,7 +5,7 @@ import { Resolver } from "@dabsi/typedi";
 export function RichTextConfigResolver(
   config: Omit<RichTextConfig, "context">
 ): Resolver<RichTextConfig> {
-  return Resolver.consume([RichTextContext], context => {
+  return Resolver([RichTextContext], context => {
     return { context, ...config };
   });
 }

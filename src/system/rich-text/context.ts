@@ -43,7 +43,7 @@ export class RichTextContext {
     protected rpcModule: RpcModule,
     @Inject(
       RpcConfigFactoryResolver(RichTextRpc, {
-        context: RichTextConfigContext.provide(),
+        context: RichTextConfigContext.assign(),
       })
     )
     protected _createRpcConfig: RpcConfigFactory<typeof RichTextRpc>
@@ -129,7 +129,7 @@ export class RichTextContext {
   ): RpcUnresolvedConfig<typeof RichTextRpc> {
     return async $ => {
       const rpcConfig = await this._createRpcConfig(
-        RichTextConfigContext.provide(() => config)
+        RichTextConfigContext.assign(() => config)
       );
       return $({
         ...rpcConfig,

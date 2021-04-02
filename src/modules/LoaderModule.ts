@@ -1,4 +1,4 @@
-import Cache from "@dabsi/common/patterns/Cache";
+import Cache from "@dabsi/common/patterns/Cached";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Module } from "@dabsi/typedi";
 import fs, { readdirSync, readFileSync, statSync } from "fs";

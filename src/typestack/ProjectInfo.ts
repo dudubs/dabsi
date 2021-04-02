@@ -1,4 +1,4 @@
-import Cache from "@dabsi/common/patterns/Cache";
+import Cache from "@dabsi/common/patterns/Cached";
 import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import { DABSI_DIR } from "@dabsi/env";

@@ -1,16 +1,12 @@
-import { IResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
-
-const NAME = "toCheck";
-
-IResolver[NAME] = method;
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   interface IResolver {
-    [NAME]: typeof method;
+    toCheck<T>(resolver: Resolver<T>, check: (context) => void);
   }
 }
 
-function method<T>(resolver: Resolver<T>, check: (context) => void) {
+Resolver.toCheck = function method(resolver, check) {
   return {
     [Resolver.resolveSymbol](context) {
       return Resolver.resolve(resolver, context);
@@ -20,4 +16,4 @@ function method<T>(resolver: Resolver<T>, check: (context) => void) {
       check(context);
     },
   };
-}
+};

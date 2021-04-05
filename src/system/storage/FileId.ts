@@ -1,5 +1,5 @@
 let counter = 0;
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import crypto from "crypto";
 import os from "os";
 

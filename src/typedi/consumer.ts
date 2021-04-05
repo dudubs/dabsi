@@ -40,29 +40,23 @@ export type ConsumerFactory<T, U extends ConsumerDeps> = U extends ResolverArray
   ? (...args: ResolvedArray<U>) => T
   : (context: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
 
-export interface Consumer {
-  <T, U extends ConsumerDeps>(
-    deps: U,
-    factory: ConsumerFactory<T, U>
-  ): CustomResolver<T>;
-}
-
-export const Consumer: Consumer = (deps: any, factory: any): any => {
+export const Consumer = (deps: any, factory: any): any => {
   if (Array.isArray(deps)) {
     const depsResolver = Resolver.array(deps);
-    return (context =>
-      factory(...Resolver.resolve(depsResolver, context))).toCheck(context => {
-      Resolver.check(depsResolver, context);
-    });
+    return Resolver.create(
+      context => factory(...Resolver.resolve(depsResolver, context)),
+      context => {
+        Resolver.check(depsResolver, context);
+      }
+    );
   }
   const depsResolver = Resolver.object(deps);
-  return (context => {
-    return factory(Resolver.resolve(depsResolver, context));
-  }).toCheck(context => {
-    Resolver.check(depsResolver, context);
-  });
+  return Resolver.create(
+    context => {
+      return factory(Resolver.resolve(depsResolver, context));
+    },
+    context => {
+      Resolver.check(depsResolver, context);
+    }
+  );
 };
-
-declare module "./Resolver" {
-  function Resolver();
-}

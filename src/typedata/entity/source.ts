@@ -1,6 +1,6 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { omit } from "@dabsi/common/object/omit";
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { BasedType, RebaseType } from "@dabsi/typedata/BaseType";
 import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";

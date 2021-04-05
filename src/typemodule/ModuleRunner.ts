@@ -3,13 +3,14 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
+import { LocalLaundryService } from "@material-ui/icons";
 import { AsyncProcess } from "../common/async/AsyncProcess";
 import { InstanceEmitter } from "./InstanceEmitter";
 import { locateError } from "./locateError";
 
 export type ModuleTarget = Function;
 
-export interface ModuleLoader {
+export interface ModuleLoaderFn {
   (target: ModuleTarget): Awaitable;
 }
 
@@ -23,7 +24,10 @@ export class ModuleRunner {
 
   protected _moduleInstanceMap = new Map<ModuleTarget, any>();
 
-  protected _loaders: ModuleLoader[] = [];
+  protected _loaders: {
+    callback: ModuleLoaderFn;
+    descriptor: () => string;
+  }[] = [];
 
   protected _moduleEmitter = new InstanceEmitter();
 
@@ -51,24 +55,26 @@ export class ModuleRunner {
     this._moduleEmitter.emit(instance);
 
     this._loadModulePlugins(target);
-    this.process.push(() =>
-      Promise.all(this._loaders.map(loader => loader(target)))
-    );
+
+    for (const loader of this._loaders) {
+      this.process.push(
+        () => `Module<${target.name}>, ${loader.descriptor()}`,
+        () => loader.callback(target)
+      );
+    }
 
     return instance;
   }
 
-  pushLoader(loader: ModuleLoader) {
-    this._loaders.push(loader);
-    this.process.push(
-      Promise.all(
-        // makes copy of loaded-modules
-        [...this._moduleInstanceMap.keys()].map(
-          //
-          target => loader(target)
-        )
-      )
-    );
+  pushLoader(descriptor: () => string, callback: ModuleLoaderFn) {
+    this._loaders.push({ callback, descriptor });
+
+    for (const target of this._moduleInstanceMap.keys()) {
+      this.process.push(
+        () => `Module<${target.name}>, ${descriptor()}`,
+        () => callback(target)
+      );
+    }
   }
 
   resolve<T>(resolver: Resolver<T>): T {
@@ -79,20 +85,23 @@ export class ModuleRunner {
     const metadata = ModuleMetadata.get(target);
     for (const propertyName of metadata.pluginParamIndexesMap.keys()) {
       this._waitForPlugins(metadata, propertyName).then(() => {
-        this.process.push(async () => {
-          try {
-            await Resolver.Injectability.resolve(
-              this._moduleInstanceMap.get(target)!,
-              this.context,
-              propertyName
-            );
-          } catch (error) {
-            throw locateError(
-              error,
-              `module "${metadata.target.name}", plugin "${propertyName}".`
-            );
+        this.process.push(
+          () => `Module<${target.name}>.Plugin<${propertyName}>`,
+          async () => {
+            try {
+              await Resolver.Injectability.resolve(
+                this._moduleInstanceMap.get(target)!,
+                this.context,
+                propertyName
+              );
+            } catch (error) {
+              throw locateError(
+                error,
+                `module "${metadata.target.name}", plugin "${propertyName}".`
+              );
+            }
           }
-        });
+        );
       });
     }
   }

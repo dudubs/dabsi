@@ -21,6 +21,6 @@ it("sanity", done => {
   }
 
   Resolver.checkAndResolve(A, {
-    ...B.provide(() => new B()),
+    ...Resolver(B, () => new B()),
   });
 });

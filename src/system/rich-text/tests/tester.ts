@@ -17,7 +17,8 @@ import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
 import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
 import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/utils";
 import Storage from "@dabsi/system/storage/Storage";
-import { ModuleTarget } from "@dabsi/typedi";
+import { Resolver } from "@dabsi/typedi";
+import { ModuleTarget } from "@dabsi/typedi/OldModuleMetadata2";
 
 const t = ModuleTester();
 const db = DbModuleTester(t);
@@ -35,7 +36,7 @@ export const rtTester = t
   .beforeAll(async t => {
     const rtModule = await t.moduleRunner.getInstance(RichTextModule);
 
-    t.provide(Storage.provide(() => new TestStorage()));
+    t.provide(Resolver(Storage, () => new TestStorage()));
 
     for (const module of rtTestModules) {
       t.moduleRunner.getInstance(module);
@@ -59,12 +60,7 @@ export const rtTester = t
       callback => callback()
     );
 
-    t.provide(
-      RequestSession.provide(
-        // only for $key
-        () => sessionTicker
-      )
-    );
+    t.provide(Resolver(RequestSession, () => sessionTicker));
     let rtConfig: RichTextConfig;
 
     const testContent = async (content: RichTextContent.Unpacked) => {
@@ -92,7 +88,7 @@ export const rtTester = t
       configure: (config: Omit<RichTextConfig, "context">): RichTextConfig => {
         const context = t.resolve(RichTextContext);
         rtConfig = { ...config, context };
-        t.provide(RichTextConfigContext.assign(() => rtConfig));
+        t.provide(Resolver(RichTextConfigContext, () => rtConfig));
         return rtConfig;
       },
 

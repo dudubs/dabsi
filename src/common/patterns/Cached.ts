@@ -1,6 +1,6 @@
 import { touchMap } from "@dabsi/common/map/touchMap";
 
-export default function Cached(propertyNames?: string[]): MethodDecorator {
+export function Cached(propertyNames?: string[]): MethodDecorator {
   return <
     K extends string,
     T extends Record<K, (key: any, ...args: any[]) => any>

@@ -1,19 +1,13 @@
 import { DABSI_DIR, DABSI_ROOT_DIR } from "@dabsi/env";
 import { relativePosixPath } from "@dabsi/modules/pathHelpers";
-import { getProjectDir } from "@dabsi/typestack/ProjectModule";
-import { TsConfigPathsSync } from "@dabsi/typestack/TsConfigPathsSync";
-import fs, {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  realpathSync,
-  statSync,
-} from "fs";
+import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
+import fs, { existsSync, readdirSync, realpathSync, statSync } from "fs";
 import path from "path";
 
 export default async function ({ projectDir = ".", force = false }) {
-  throw new Error("TODO: add view* files to client");
-  throw new Error("TODO: add common* files to view/client");
+  //   throw new Error("TODO: add view* files to client");
+  //   throw new Error("TODO: add common* files to view/client");
+
   projectDir = realpathSync(projectDir);
   const promises: any[] = [];
   const makedProjectDirs = new Set();
@@ -22,25 +16,41 @@ export default async function ({ projectDir = ".", force = false }) {
 
   makeProject(projectDir);
 
-  function makeProject(projectDir) {
+  async function makeProject(projectDir) {
     if (!makedProjectDirs.touch(projectDir)) return;
 
     const configsDir = path.join(projectDir, "configs");
     const configFileName = path.join(projectDir, "tsconfig.json");
 
-    const configPaths = TsConfigPathsSync.fromFile(
-      configFileName,
-      path => JSON.parse(readFileSync(path, "utf8")),
-      path => statSync(path).isFile(),
-      path => statSync(path).isDirectory()
-    );
+    const configPaths = new TsConfigPaths2({
+      readFile: path => fs.promises.readFile(path, "utf-8"),
+      isFile: path =>
+        fs.promises
+          .stat(path)
+          .then(stat => stat.isFile())
+          .catch(() => false),
+      isDir: path =>
+        fs.promises
+          .stat(path)
+          .then(stat => stat.isDirectory())
+          .catch(() => false),
+    });
+    await configPaths.load(configFileName);
 
     //   makeRootConfigs();
-    const parentProjectDirs = configPaths.fsPaths
+    const parentProjectDirs = configPaths
+      .getFsPaths()
       .toSeq()
-      .map(getProjectDir)
-      .toSet()
-      .toArray();
+      .flatMap(path => {
+        const pathLessSrc = path.split(/[\\\/]+src[\\\/]*/, 1)[0];
+        console.log({ path, pathLessSrc });
+
+        return pathLessSrc.length === path.length ? [] : [pathLessSrc];
+      })
+      .toSet();
+
+    console.log({ x: [...parentProjectDirs] });
+    return;
 
     for (const projectDir of parentProjectDirs) {
       makeProject(projectDir);
@@ -73,7 +83,7 @@ export default async function ({ projectDir = ".", force = false }) {
           path.join(DABSI_DIR, "configs", "tsconfig.base.server.json")
         ),
         compilerOptions: {
-          ...configPaths.getConfigForDir(configsDir),
+          ...configPaths.createConfig(configsDir),
         },
         include,
         exclude: include
@@ -98,7 +108,7 @@ export default async function ({ projectDir = ".", force = false }) {
           path.join(DABSI_DIR, "configs", `tsconfig.base.${platform}.json`)
         ),
         compilerOptions: {
-          ...configPaths.getConfigForDir(configsDir),
+          ...configPaths.createConfig(configsDir),
         },
         include: getIncludes(projectDir).toSeq().toSet().toArray(),
       };
@@ -129,8 +139,8 @@ export default async function ({ projectDir = ".", force = false }) {
     function makeFile(outFileName, content: string) {
       if (!force && existsSync(outFileName)) return;
       console.log(`make "${path.relative(DABSI_ROOT_DIR, outFileName)}"`);
-      // console.log("\t" + content.replace(/\n/g, "\n\t"));
-      promises.push(fs.promises.writeFile(outFileName, content, "utf8"));
+      console.log("\t" + content.replace(/\n/g, "\n\t"));
+      //   promises.push(fs.promises.writeFile(outFileName, content, "utf8"));
     }
 
     function makeJsonFile(outFileName, content: any) {

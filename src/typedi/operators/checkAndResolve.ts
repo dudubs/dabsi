@@ -1,4 +1,4 @@
-import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   interface IResolver {

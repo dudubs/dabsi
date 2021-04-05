@@ -1,5 +1,5 @@
 import { Connection, ObjectType, Repository } from "typeorm";
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataQueryBuilder } from "@dabsi/typedata/query/builder";

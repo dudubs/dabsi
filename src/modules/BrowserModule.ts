@@ -1,15 +1,12 @@
-import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { entries } from "@dabsi/common/object/entries";
-import Lazy from "@dabsi/common/patterns/lazy";
 import { Once } from "@dabsi/common/patterns/Once";
-import { inspect } from "@dabsi/logging/inspect";
 import { Cli } from "@dabsi/modules/Cli";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { Module } from "@dabsi/typedi";
 import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 import ProjectModule from "@dabsi/typestack/ProjectModule";
 import * as path from "path";
-import tsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
+import TsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
 import WebpackVirtualModulesPlugin from "webpack-virtual-modules";
 import { ViewModule } from "./ViewModule";
@@ -166,7 +163,7 @@ export default class BrowserModule {
         // symlinks: false,
         plugins: [
           // @ts-expect-error
-          new tsConfigPathsWebpackPlugin(),
+          new TsConfigPathsWebpackPlugin(),
         ],
         alias: {
           // // TODO: @dabsi

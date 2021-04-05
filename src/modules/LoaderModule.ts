@@ -1,4 +1,4 @@
-import Cache from "@dabsi/common/patterns/Cached";
+import { Cached } from "@dabsi/common/patterns/Cached";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Module } from "@dabsi/typedi";
 import fs, { readdirSync, readFileSync, statSync } from "fs";
@@ -24,7 +24,7 @@ export default class LoaderModule {
 
   clearCache() {
     for (const propertyName of cachedProperties) {
-      Cache.clear(this, propertyName);
+      Cached.clear(this, propertyName);
     }
   }
 
@@ -44,14 +44,14 @@ export default class LoaderModule {
     }
   }
 
-  @Cache(cachedProperties) readFile(path: string): string {
+  @Cached(cachedProperties) readFile(path: string): string {
     return readFileSync(path, "utf8");
   }
-  @Cache(cachedProperties) readJsonFile(path: string) {
+  @Cached(cachedProperties) readJsonFile(path: string) {
     return JSON.parse(this.readFile(path));
   }
 
-  @Cache(cachedProperties)
+  @Cached(cachedProperties)
   findIndexFileName(dir: string): string | undefined {
     for (const baseName of ["index.ts", "index.tsx"]) {
       const indexFileName = path.join(dir, baseName);
@@ -80,18 +80,18 @@ export default class LoaderModule {
     return files;
   }
 
-  @Cache(cachedProperties)
+  @Cached(cachedProperties)
   async loadDir(dir: string) {
     if (!this.loadedDirs.touch(dir)) return;
     await Promise.all(this.directoryLoaders.map(loader => loader(dir)));
   }
 
-  @Cache(cachedProperties) readDir(dir: string): string[] {
+  @Cached(cachedProperties) readDir(dir: string): string[] {
     if (!this.isDir(dir)) return [];
     return readdirSync(dir);
   }
 
-  @Cache(cachedProperties) stat(path: string): fs.Stats {
+  @Cached(cachedProperties) stat(path: string): fs.Stats {
     return statSync(path);
   }
 

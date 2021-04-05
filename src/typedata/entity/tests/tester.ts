@@ -1,5 +1,5 @@
 import { defined } from "@dabsi/common/object/defined";
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { formatSql } from "@dabsi/system-old/server/acl/formatSql";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";

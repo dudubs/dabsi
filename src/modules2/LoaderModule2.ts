@@ -1,11 +1,8 @@
-import fs from "fs";
 import { Module } from "@dabsi/typemodule";
 import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
-import { dirname, join } from "path";
-import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
-import { from } from "rxjs";
-import { Tick } from "@dabsi/common/async/Tick";
+import fs from "fs";
+import { basename, dirname, join } from "path";
 
 @Module()
 export class LoaderModule2 {
@@ -14,24 +11,28 @@ export class LoaderModule2 {
   protected _loadedDirs = new Set<string>();
 
   constructor(protected moduleRunner: ModuleRunner) {
-    moduleRunner.pushLoader(async target => {
-      const metadata = ModuleMetadata.get(target);
+    moduleRunner.pushLoader(
+      () => `${this.constructor.name}.Loader`,
+      async target => {
+        const metadata = ModuleMetadata.get(target);
 
-      if (!/[\\\/](module|index)\.ts$/.test(metadata.anchor.path)) {
-        return;
+        if (!/[\\\/](module|index)\.ts$/.test(metadata.anchor.path)) {
+          return;
+        }
+        const dir = dirname(metadata.anchor.path);
+        if (!this._loadedDirs.touch(dir)) return;
+
+        await Promise.all(this._dirLoaders.map(loader => loader(dir)));
       }
-      const dir = dirname(metadata.anchor.path);
-      if (!this._loadedDirs.touch(dir)) return;
-
-      await Promise.all(this._dirLoaders.map(loader => loader(dir)));
-    });
+    );
     ///
   }
 
-  pushLoader(loader: (dir: string) => Promise<any>) {
+  pushLoader(descriptor: () => string, loader: (dir: string) => Promise<any>) {
     this._dirLoaders.push(loader);
 
     this.moduleRunner.process.push(
+      () => `${this.constructor.name}, ${descriptor()}`,
       Promise.all(
         this._loadedDirs
           .toSeq()
@@ -52,7 +53,7 @@ export class LoaderModule2 {
     return this._statCache.touch(path, () => fs.promises.stat(path));
   }
 
-  isFile(path: string): Promise<boolean> {
+  async isFile(path: string): Promise<boolean> {
     return this.stat(path)
       .then(s => s.isFile())
       .catch(() => false);
@@ -76,19 +77,4 @@ export class LoaderModule2 {
     );
     return files.find(f => f.isFile)?.indexPath;
   }
-}
-
-function readDirAsync(d) {
-  console.log({ readDirAsync: d });
-  return fs.promises
-    .readdir(d)
-    .then(files => {
-      console.log({ files });
-
-      return files;
-    })
-    .catch(error => {
-      console.log({ readDirError: error });
-      return [];
-    });
 }

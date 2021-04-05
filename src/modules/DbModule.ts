@@ -1,5 +1,5 @@
 import { values } from "@dabsi/common/object/values";
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { Once } from "@dabsi/common/patterns/Once";
 import { touchSet } from "@dabsi/common/set/touchSet";
 import { Cli } from "@dabsi/modules/Cli";

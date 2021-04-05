@@ -1,6 +1,11 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { Type } from "@dabsi/common/typings2/Type";
+import {
+  Consumer,
+  ConsumerDeps,
+  ConsumerFactory,
+} from "@dabsi/typedi/consumer";
 import { getTypeToken } from "@dabsi/typedi/getTypeToken";
-import { Consumer } from "@dabsi/typedi/consumer";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export type ResolverMap<T = any> = Record<string, Resolver<T>>;
@@ -24,22 +29,29 @@ export type CustomResolver<T> = {
 
 export type ArrowResolver<T> = (context: ResolverMap<any>) => T;
 
-export type TypeResolver<T> = Constructor<T>;
-
 export type Resolver<T = any> =
   | CustomResolver<T>
   | ArrowResolver<T>
-  | TypeResolver<T>;
+  | Constructor<T>;
 
 export type Resolved<T extends Resolver> = T extends Resolver<infer U>
   ? U
   : never;
 
-export interface IResolver extends Consumer {
+export interface IResolver {
   checkSymbol: typeof checkSymbol;
   resolveSymbol: typeof resolveSymbol;
-  <T extends object = any>(): new () => T;
-  <T>(provider: TypeResolver<T>, resolver?: Resolver<T>): ResolverMap<T>;
+  <T extends object = {}>(): new (context: ResolverMap) => T;
+
+  <T extends new (context: ResolverMap) => any>(
+    provider: T,
+    resolver?: Resolver<InstanceType<T>>
+  ): ResolverMap<any>;
+
+  <T, U extends ConsumerDeps>(
+    deps: U,
+    factory: ConsumerFactory<T, U>
+  ): CustomResolver<T>;
 }
 
 export const Resolver: IResolver = <any>function _Resolver(...args) {
@@ -63,8 +75,8 @@ export const Resolver: IResolver = <any>function _Resolver(...args) {
   }
 
   class _ResolverClass {
-    constructor() {
-      throw new Error(`Can't create instance of ${this.constructor.name}.`);
+    constructor(context: ResolverMap) {
+      return Resolver.resolve(this.constructor as any, context);
     }
   }
 

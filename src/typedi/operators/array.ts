@@ -23,34 +23,37 @@ Resolver.array = function (resolvers, getItemName) {
     }
   }
 
-  return (context => {
-    return resolvers.map((item, index) => {
-      catchError(
-        ResolveError,
-        () => Resolver.resolve(item, context),
-        error => {
-          throw locateError(error, errorAt(index));
+  return Resolver.create(
+    context => {
+      return resolvers.map((item, index) => {
+        catchError(
+          ResolveError,
+          () => Resolver.resolve(item, context),
+          error => {
+            throw locateError(error, errorAt(index));
+          }
+        );
+        return Resolver.resolve(item, context);
+      });
+    },
+    context => {
+      let message = "";
+      for (let [index, resolver] of resolvers.entries()) {
+        try {
+          Resolver.check(resolver, context);
+        } catch (error) {
+          if (error instanceof ResolveError) {
+            message += `${message ? "\nAlso at" : "At"} ${errorAt(
+              index
+            )}${nested(error.message)}`;
+            continue;
+          }
+          throw error;
         }
-      );
-      return Resolver.resolve(item, context);
-    });
-  }).toCheck(context => {
-    let message = "";
-    for (let [index, resolver] of resolvers.entries()) {
-      try {
-        Resolver.check(resolver, context);
-      } catch (error) {
-        if (error instanceof ResolveError) {
-          message += `${message ? "\nAlso at" : "At"} ${errorAt(index)}${nested(
-            error.message
-          )}`;
-          continue;
-        }
-        throw error;
+      }
+      if (message) {
+        throw new ResolveError(message);
       }
     }
-    if (message) {
-      throw new ResolveError(message);
-    }
-  });
+  );
 };

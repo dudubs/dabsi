@@ -1,18 +1,18 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import yargs from "yargs";
 
-export type CliBuilderFn = (y: yargs.Argv<any>) => yargs.Argv<any>;
+export type CliExtenderFn = (y: yargs.Argv<any>) => yargs.Argv<any>;
 export type CliRunnerFn = (args: any) => Awaitable;
 export type CliWrapperFn = (
-  args: any[],
+  args: any,
   execute: () => Promise<void>,
   level: number
-) => Promise<void>;
+) => Promise<any>;
 
 export class CliBuilder {
   protected _commandMap = new Map<string, CliBuilder>();
 
-  readonly builders: CliBuilderFn[] = [];
+  readonly extenders: CliExtenderFn[] = [];
 
   readonly runners: CliRunnerFn[] = [];
 
@@ -23,9 +23,9 @@ export class CliBuilder {
     protected parent?: CliBuilder
   ) {}
 
-  build(y: yargs.Argv<any>): yargs.Argv<any> {
-    for (const builder of this.builders) {
-      y = builder(y);
+  build(y: yargs.Argv<{}>): yargs.Argv<any> {
+    for (const extender of this.extenders) {
+      y = extender(y);
     }
     return y;
   }
@@ -66,7 +66,7 @@ export class CliBuilder {
   touch(command: string): CliBuilder {
     return this._commandMap.touch(command, () => {
       const builder = new CliBuilder(this.runner, this);
-      this.builders.push(y => {
+      this.extenders.push(y => {
         return y.command(
           command,
           "",

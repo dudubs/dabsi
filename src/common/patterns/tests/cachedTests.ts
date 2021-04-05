@@ -1,12 +1,12 @@
-import Cache from "./Cached";
+import { Cached } from "../Cached";
 
 it("sanity", () => {
   let count = 0;
   class A {
-    @Cache() test(key: string) {
+    @Cached() test(key: string) {
       return ++count;
     }
-    @Cache() otherTest(key: string) {
+    @Cached() otherTest(key: string) {
       return ++count;
     }
   }
@@ -20,6 +20,6 @@ it("sanity", () => {
   expect(x).not.toEqual(a.otherTest("hello"));
   expect(x).not.toEqual(otherA.test("hello"));
 
-  Cache.clear(a, "test");
+  Cached.clear(a, "test");
   expect(x).not.toEqual(a.test("hello"));
 });

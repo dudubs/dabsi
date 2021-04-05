@@ -1,6 +1,6 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { entries } from "@dabsi/common/object/entries";
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { joinUrl } from "@dabsi/common/string/joinUrl";
 import { HasKeys } from "@dabsi/common/typings2/boolean";
 import { Override } from "@dabsi/common/typings2/Override";

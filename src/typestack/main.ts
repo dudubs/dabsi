@@ -13,4 +13,6 @@ if (require.main === module)
     const cliModule = moduleRunner.get(CliModule2);
     await moduleRunner.process.wait();
     await cliModule.run("ts", process.argv.slice(2));
-  })();
+  })().catch(error => {
+    console.error(error);
+  });

@@ -1,11 +1,13 @@
 export class AsyncProcess {
-  protected _promises = new Set<any>();
   protected _callbacks: (() => void)[] = [];
+
+  protected _descriptors = new Set<() => string>();
 
   protected _errors: any[] = [];
 
   wait(): Promise<void> {
-    if (!this._promises.size) return Promise.resolve();
+    if (!this._descriptors.size) return Promise.resolve();
+
     return new Promise<void>((resolve, reject) => {
       this._callbacks.push(() => {
         this._errors.length ? reject(this._errors[0]) : resolve();
@@ -14,6 +16,11 @@ export class AsyncProcess {
   }
 
   protected _emit() {
+    if (this._internval) {
+      clearInterval(this._internval);
+
+      this._internval = null;
+    }
     const { _callbacks } = this;
     this._callbacks = [];
     for (const callback of _callbacks) {
@@ -21,7 +28,15 @@ export class AsyncProcess {
     }
   }
 
-  push(promise: Promise<any> | (() => Promise<any>)) {
+  log() {
+    for (const descriptor of this._descriptors) {
+      console.log(`- ${descriptor()}`);
+    }
+  }
+
+  protected _internval: ReturnType<typeof setInterval> | null = null;
+
+  push(descriptor: () => string, promise: Promise<any> | (() => Promise<any>)) {
     if (this._errors.length) {
       console.log({ nErrors: this._errors.length });
 
@@ -30,7 +45,15 @@ export class AsyncProcess {
     if (typeof promise === "function") {
       promise = promise();
     }
-    this._promises.add(promise);
+
+    if (!this._internval) {
+      this._internval = setInterval(() => {
+        console.log("process still running:");
+        this.log();
+      }, 3000);
+    }
+
+    this._descriptors.add(descriptor);
 
     promise
       .catch(error => {
@@ -38,9 +61,10 @@ export class AsyncProcess {
         this._emit();
       })
       .finally(() => {
-        this._promises.delete(promise);
-        if (this._promises.size) return;
-        this._emit();
+        this._descriptors.delete(descriptor);
+        if (!this._descriptors.size) {
+          this._emit();
+        }
       });
   }
 }

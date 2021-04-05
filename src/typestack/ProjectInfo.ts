@@ -1,11 +1,9 @@
-import Cache from "@dabsi/common/patterns/Cached";
-import Lazy from "@dabsi/common/patterns/lazy";
-import { Once } from "@dabsi/common/patterns/Once";
+import { Cached } from "@dabsi/common/patterns/Cached";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { DABSI_DIR } from "@dabsi/env";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import ProjectPlatformInfo from "@dabsi/modules/ProjectPlatformInfo";
 import ProjectModuleInfo from "@dabsi/typestack/ProjectModuleInfo";
-import { TsConfigPaths } from "@dabsi/typestack/TsConfigPaths";
 import { TsConfigPathsSync } from "@dabsi/typestack/TsConfigPathsSync";
 import path from "path";
 
@@ -26,7 +24,7 @@ export default class ProjectInfo {
 
   isRoot = this.dir === DABSI_DIR;
 
-  @Cache() getPlatformInfo(name: string): ProjectPlatformInfo {
+  @Cached() getPlatformInfo(name: string): ProjectPlatformInfo {
     return new ProjectPlatformInfo(this, name);
   }
 

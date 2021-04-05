@@ -30,23 +30,23 @@ export class ExpressModule2 {
 
   readonly postbuilders: ExpressBuilderFn[] = [];
 
-  protected log = log.get("server");
+  readonly log = log.get("Express");
 
   readonly requestContext = Resolver.Context.create(
     this.requestModule.requestContext,
-    {
-      ...ExpressContext.assign(),
-    }
+    [ExpressContext]
   );
 
   constructor(protected requestModule: RequestModule2) {}
 
   installCli(@Plugin() cliModule: CliModule2) {
-    cliModule.extend("server.start", y => y.number(["port", "p"]));
+    cliModule.extend({
+      path: "start",
+      extender: y => y.number(["port", "p"]),
+    });
   }
 
   installServer(@Plugin() serverModule: ServerModule2) {
-    console.log("works2");
     serverModule.starters.push(async ({ p, port = p || 7777 }) => {
       //
       const app = express();

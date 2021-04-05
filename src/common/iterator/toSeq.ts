@@ -10,6 +10,8 @@ declare global {
 
   interface Map<K, V> {
     toSeq(): Seq.Keyed<K, V>;
+    toSeq(type: "values"): Seq.Indexed<V>;
+    toSeq(type: "keys"): Seq.Indexed<K>;
   }
 }
 
@@ -17,20 +19,17 @@ Array.prototype.toSeq = Set.prototype.toSeq = function () {
   return Seq.Indexed(this);
 };
 
-Map.prototype.toSeq = function () {
-  return Seq.Keyed(this.entries());
+Map.prototype.toSeq = function (type?): any {
+  switch (type) {
+    case "values":
+      return Seq.Indexed(this.values());
+    case "keys":
+      return Seq.Indexed(this.keys());
+    default:
+      return Seq.Keyed(this.entries());
+  }
 };
 
-Object.defineProperty(Set.prototype, "toSeq", {
-  enumerable: false,
-  value() {
-    return Seq.Indexed(this);
-  },
-});
-
-Object.defineProperty(Map.prototype, "toSeq", {
-  enumerable: false,
-  value() {
-    return Seq.Keyed(this.entries());
-  },
-});
+Set.prototype.toSeq = function () {
+  return Seq.Indexed(this);
+};

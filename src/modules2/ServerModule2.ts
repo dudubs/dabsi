@@ -1,4 +1,4 @@
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
 import { AsyncJsonFile } from "./AsyncJsonFile";

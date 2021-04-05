@@ -33,10 +33,7 @@ function _assign(context, args: Provider[]): ResolverMap {
         }
       }
     } else {
-      Object.assign(
-        context,
-        arg.constructor.provide(() => arg)
-      );
+      context[getTypeToken(arg.constructor)] = () => arg;
     }
   }
   return context;

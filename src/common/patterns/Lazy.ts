@@ -1,7 +1,5 @@
 import { assert } from "@dabsi/common/assert";
 
-const markToDelete = Symbol("deleted");
-
 const map = new WeakMap();
 
 export default function Lazy<T extends (...args) => any>(callback: T): T;
@@ -34,11 +32,7 @@ function lazyProperty(target, prop, desc) {
   const getter = desc.get;
   assert(!desc.set);
   desc.set = function (value) {
-    if (markToDelete === value) {
-      map.delete(this);
-    } else {
-      map.set(this, value);
-    }
+    map.set(this, value);
   };
   desc.get = function () {
     if (map.has(this)) {
@@ -61,11 +55,3 @@ function lazyMethod(target, prop, desc) {
     return value;
   };
 }
-
-Lazy.delete = function (target, prop?) {
-  if (prop) {
-    target[prop] = markToDelete;
-  } else {
-    map.delete(target);
-  }
-};

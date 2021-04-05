@@ -12,7 +12,7 @@ export const RpcModuleTester = (t: ReturnType<typeof ModuleTester>) => {
     const module = t.moduleRunner.getInstance(RpcModule);
     const requestRef = { current: new RpcRequest([], {}, {}) };
 
-    t.provide(RpcRequest.provide(() => requestRef.current));
+    t.provide(Resolver(RpcRequest, () => requestRef.current));
 
     return {
       module,

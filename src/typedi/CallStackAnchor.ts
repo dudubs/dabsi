@@ -1,4 +1,4 @@
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { realpathSync } from "fs";
 import path from "path";
 

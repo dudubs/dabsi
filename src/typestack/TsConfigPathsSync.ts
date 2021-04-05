@@ -19,6 +19,7 @@ export function TsConfigPathsSync(
     string,
     Record<string, [prefix: string, suffix: string][]>
   >;
+
   const tsPrefixMap: PrefixMap = {};
 
   const fsPrefixMap: PrefixMap = {};

@@ -1,6 +1,11 @@
 import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { CliBuilder, CliBuilderFn } from "@dabsi/typecli/CliBuilder";
+import {
+  CliBuilder,
+  CliExtenderFn,
+  CliRunnerFn,
+  CliWrapperFn,
+} from "@dabsi/typecli/CliBuilder";
 import { CliMetadata } from "@dabsi/typecli/CliMetadata";
 import { Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
@@ -8,36 +13,50 @@ import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import yargs from "yargs";
 
+declare module "@dabsi/typemodule/ModuleMetadata" {
+  interface ModuleOptions {
+    cli?: string;
+  }
+}
 @Module()
 export class CliModule2 {
-  readonly wrappers: ((execute: () => Promise<void>) => Promise<void>)[] = [];
   readonly builders: ((cliBuilder: CliBuilder) => void)[] = [];
 
   constructor(protected moduleRunner: ModuleRunner) {}
 
-  extend(
-    path: string,
-    builderFn: CliBuilderFn,
-    runnerFn?: (args) => Awaitable
-  ): this {
-    this.builders.push((builder: CliBuilder | undefined) => {
-      for (const key of path.split(".")) {
-        builder = builder!.get(key);
-        if (!builder) return this;
+  extend({
+    path,
+    wrapper,
+    runner,
+    extender,
+  }: {
+    path?: string;
+    wrapper?: CliWrapperFn;
+    runner?: CliRunnerFn;
+    extender?: CliExtenderFn;
+  }) {
+    this.builders.push(builder => {
+      if (path) {
+        for (const key of path.split(".")) {
+          builder = builder.touch(key);
+        }
       }
-      builder?.builders.push(builderFn);
-      runnerFn && builder?.runners.push(runnerFn);
-      return this;
+      extender && builder.extenders.push(extender);
+      wrapper && builder.wrappers.push(wrapper);
+      runner && builder.runners.push(runner);
     });
-    return this;
   }
 
   build(): { builder: CliBuilder; process: AsyncProcess } {
     const process = new AsyncProcess();
 
     const rootBuilder = new CliBuilder(promise => {
-      process.push(promise);
+      process.push(() => `${this.constructor.name}.Runner`, promise);
     });
+
+    for (const extender of this.builders) {
+      extender(rootBuilder);
+    }
 
     const locateBuilder = (
       builder: CliBuilder,
@@ -67,7 +86,7 @@ export class CliModule2 {
           cliCommandMetadata.name
         );
 
-        commandBuilder.builders.push(y => {
+        commandBuilder.extenders.push(y => {
           for (const builders of [
             cliMetadata.argumentBuilders,
             cliCommandMetadata.builders,
@@ -108,8 +127,15 @@ export class CliModule2 {
 
   run(scriptName: string, args: any[]) {
     const { builder, process } = this.build();
-    builder.build(yargs(args)).help().exitProcess(false).scriptName(scriptName)
-      .argv;
+    builder
+      //
+      .build(yargs(args))
+      .middleware(argv => {
+        argv.$args = args;
+      })
+      .help()
+      .exitProcess(false)
+      .scriptName(scriptName).argv;
     return process.wait();
   }
 }

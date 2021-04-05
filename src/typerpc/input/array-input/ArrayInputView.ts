@@ -1,4 +1,4 @@
-import { RandomId } from "@dabsi/common/patterns/RandomId";
+import { generateRandomId } from "@dabsi/common/patterns/generateRandomId";
 import { RequiredOnly } from "@dabsi/common/typings2/RequiredOnly";
 import {
   AnyArrayInput,
@@ -55,7 +55,7 @@ export class ArrayInputView<
     const itemKey =
       this.connection.$widget.uniqueItem?.getNewItemDataKey(
         this.newItemInput.data
-      ) ?? RandomId();
+      ) ?? generateRandomId();
 
     if (this.children.viewMap[itemKey]) {
       this.newItemInput.setError("UNIQUE_ITEM");

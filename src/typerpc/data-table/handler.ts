@@ -1,7 +1,7 @@
 import { entries } from "@dabsi/common/object/entries";
 import { mapObject, mapObjectAsync } from "@dabsi/common/object/mapObject";
 import { values } from "@dabsi/common/object/values";
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { inspect } from "@dabsi/logging/inspect";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataOrder } from "@dabsi/typedata/order";

@@ -10,7 +10,7 @@ import { ModuleTarget } from "@dabsi/typedi/OldModuleMetadata2";
 export class OldModuleRunner {
   instanceMap = new Map<ModuleTarget, any>();
 
-  context = { ...OldModuleRunner.provide(() => this) };
+  context = { ...Resolver(OldModuleRunner, () => this) };
 
   mainTarget: ModuleTarget | null = null;
 

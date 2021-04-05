@@ -1,4 +1,4 @@
-import Lazy from "@dabsi/common/patterns/lazy";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
@@ -7,15 +7,14 @@ declare module "../Resolver" {
   }
 }
 
-Resolver.forward = function <T>(
-  getResolver: () => Resolver<T>
-): CustomResolver<T> {
+Resolver.forward = function (getResolver) {
   const _getResolver = Lazy(() => {
     return getResolver();
   });
-  return (context => {
-    return Resolver.resolve(_getResolver(), context);
-  }).toCheck(context => {
-    Resolver.check(_getResolver(), context);
-  });
+  return Resolver.create(
+    context => Resolver.resolve(_getResolver(), context),
+    context => {
+      Resolver.check(_getResolver(), context);
+    }
+  );
 };

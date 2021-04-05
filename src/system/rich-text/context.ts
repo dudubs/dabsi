@@ -19,7 +19,7 @@ import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 import { DataSource } from "@dabsi/typedata/source";
-import { Inject, Injectable, Resolved } from "@dabsi/typedi";
+import { Inject, Injectable, Resolved, Resolver } from "@dabsi/typedi";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 
@@ -43,7 +43,7 @@ export class RichTextContext {
     protected rpcModule: RpcModule,
     @Inject(
       RpcConfigFactoryResolver(RichTextRpc, {
-        context: RichTextConfigContext.assign(),
+        context: Resolver(RichTextConfigContext),
       })
     )
     protected _createRpcConfig: RpcConfigFactory<typeof RichTextRpc>
@@ -129,7 +129,7 @@ export class RichTextContext {
   ): RpcUnresolvedConfig<typeof RichTextRpc> {
     return async $ => {
       const rpcConfig = await this._createRpcConfig(
-        RichTextConfigContext.assign(() => config)
+        Resolver(RichTextConfigContext, () => config)
       );
       return $({
         ...rpcConfig,

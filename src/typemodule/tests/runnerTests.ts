@@ -52,9 +52,12 @@ it("expect to load modules", async () => {
   class A {
     constructor(moduleRunner: ModuleRunner) {
       //
-      moduleRunner.pushLoader(target => {
-        events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
-      });
+      moduleRunner.pushLoader(
+        () => ``,
+        target => {
+          events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
+        }
+      );
     }
   }
   @Module({
@@ -63,9 +66,12 @@ it("expect to load modules", async () => {
   class B {
     constructor(moduleRunner: ModuleRunner) {
       //
-      moduleRunner.pushLoader(target => {
-        events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
-      });
+      moduleRunner.pushLoader(
+        () => ``,
+        target => {
+          events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
+        }
+      );
     }
   }
   await ModuleRunner.run(B);

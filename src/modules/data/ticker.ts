@@ -13,8 +13,8 @@ const getRowTickerMap = WeakMapFactory(
   (ticker: Ticker): DataRowTickerMap => {
     const map = new Map();
     ticker.push(tick =>
-      Promise.all([
-        ...map
+      Promise.all(
+        map
           .toSeq()
           .toIndexedSeq()
           .flatMap(rows =>
@@ -22,8 +22,8 @@ const getRowTickerMap = WeakMapFactory(
               .toSeq()
               .toIndexedSeq()
               .map(row => row.run(tick))
-          ),
-      ])
+          )
+      )
     );
     return map;
   }

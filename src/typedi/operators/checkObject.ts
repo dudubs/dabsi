@@ -4,8 +4,8 @@ import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    checkObject(resolverMap: ResolverMap, context: ResolverMap);
+  namespace Resolver {
+    function checkObject(resolverMap: ResolverMap, context: ResolverMap);
   }
 }
 

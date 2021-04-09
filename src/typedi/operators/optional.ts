@@ -2,8 +2,8 @@ import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    default<T, U = undefined>(
+  namespace Resolver {
+    function optional<T, U = undefined>(
       //
       resolver: Resolver<T>,
       elseResolver?: Resolver<U>
@@ -11,7 +11,7 @@ declare module "../Resolver" {
   }
 }
 
-Resolver.default = function (resolver, elseResolver = () => undefined as any) {
+Resolver.optional = function (resolver, elseResolver = () => undefined as any) {
   return Resolver.create(
     context => {
       try {

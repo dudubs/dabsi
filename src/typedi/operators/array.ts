@@ -5,8 +5,8 @@ import { Resolver } from "@dabsi/typedi/Resolver";
 import { locateError } from "@dabsi/typemodule/locateError";
 
 declare module "../Resolver" {
-  interface IResolver {
-    array<T>(
+  namespace Resolver {
+    function array<T>(
       resolvers: Resolver<T>[],
       getItemName?: (index: number) => string | void
     ): Resolver<T[]>;

@@ -1,8 +1,11 @@
 import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    checkAndResolve<T>(resolver: Resolver<T>, context: ResolverMap<any>): T;
+  namespace Resolver {
+    function checkAndResolve<T>(
+      resolver: Resolver<T>,
+      context: ResolverMap<any>
+    ): T;
   }
 }
 

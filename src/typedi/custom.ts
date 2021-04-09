@@ -1,5 +1,4 @@
 import {
-  CustomResolver,
   Resolved,
   ResolvedMap,
   Resolver,
@@ -30,17 +29,21 @@ export type ResolvedArray<U extends ResolverArray> = [
   A<U, 40>, A<U, 41>, A<U, 42>, A<U, 43>, A<U, 44>, A<U, 45>, A<U, 46>, A<U, 47>, A<U, 48>, A<U, 49>,
 ];
 
-export type ConsumerDeps = ResolverArray | ResolverMap<any>;
+export type ResolverDeps = ResolverArray | ResolverMap<any>;
 
-export type ConsumedDeps<U extends ConsumerDeps> = U extends ResolverArray
+export type ResolvedDeps<U extends ResolverDeps> = U extends ResolverArray
   ? ResolvedArray<U>
   : ResolvedMap<Extract<U, ResolverMap<any>>>;
 
-export type ConsumerFactory<T, U extends ConsumerDeps> = U extends ResolverArray
-  ? (...args: ResolvedArray<U>) => T
-  : (context: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
+export type CustomResolverFn<
+  T,
+  U extends ResolverDeps
+> = U extends ResolverArray
+  ? (...deps: ResolvedArray<U>) => T
+  : (depMap: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
 
-export const Consumer = (deps: any, factory: any): any => {
+export function createCustomResolver(deps: any, factory: any): any {
+  // TODO: locate error
   if (Array.isArray(deps)) {
     const depsResolver = Resolver.array(deps);
     return Resolver.create(
@@ -51,12 +54,11 @@ export const Consumer = (deps: any, factory: any): any => {
     );
   }
   const depsResolver = Resolver.object(deps);
+
   return Resolver.create(
-    context => {
-      return factory(Resolver.resolve(depsResolver, context));
-    },
+    context => factory(Resolver.resolve(depsResolver, context)),
     context => {
       Resolver.check(depsResolver, context);
     }
   );
-};
+}

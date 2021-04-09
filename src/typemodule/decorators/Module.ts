@@ -19,12 +19,15 @@ export default (function Module(options = {}) {
 
     Object.assign(args.options, options);
 
-    target[Resolver.resolveSymbol] = function (context) {
-      return Resolver.resolve(ModuleRunner, context).get(this);
-    };
-    target[Resolver.checkSymbol] = function (context) {
-      Resolver.check(ModuleRunner, context);
-    };
+    Resolver.define(
+      target,
+      function (context) {
+        return Resolver.resolve(ModuleRunner, context).get(this);
+      },
+      function (context) {
+        Resolver.resolve(ModuleRunner, context).addUsedModuleByResolver?.(this);
+      }
+    );
   };
 } as {
   (options?: ModuleOptions): ClassDecorator;

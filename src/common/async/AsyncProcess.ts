@@ -18,10 +18,16 @@ export class AsyncProcess {
   protected _emit() {
     if (this._internval) {
       clearInterval(this._internval);
-
       this._internval = null;
     }
+    if (!this._callbacks.length) {
+      if (this._errors[0]) {
+        throw this._errors[0];
+      }
+      return;
+    }
     const { _callbacks } = this;
+
     this._callbacks = [];
     for (const callback of _callbacks) {
       callback();
@@ -36,11 +42,18 @@ export class AsyncProcess {
 
   protected _internval: ReturnType<typeof setInterval> | null = null;
 
+  waitAndPush(
+    descriptor: () => string,
+    promise: Promise<any> | (() => Promise<any>)
+  ) {
+    return this.wait().then(() => {
+      this.push(descriptor, promise);
+    });
+  }
+
   push(descriptor: () => string, promise: Promise<any> | (() => Promise<any>)) {
     if (this._errors.length) {
-      console.log({ nErrors: this._errors.length });
-
-      throw this._errors[0];
+      return;
     }
     if (typeof promise === "function") {
       promise = promise();
@@ -57,6 +70,7 @@ export class AsyncProcess {
 
     promise
       .catch(error => {
+        // TODO: locate error by descriptor.
         this._errors.push(error);
         this._emit();
       })

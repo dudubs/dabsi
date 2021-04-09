@@ -1,7 +1,7 @@
 import SystemModule from "@dabsi/system/core/module";
 import AclModule from "@dabsi/system/acl";
 import { Module } from "@dabsi/typedi";
-import SessionModule from "../../modules/session";
+import SessionModule from "../../modules/session/module";
 
 @Module({
   dependencies: [AclModule, SystemModule, SessionModule],

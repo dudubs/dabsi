@@ -1,9 +1,11 @@
 import Lazy from "@dabsi/common/patterns/Lazy";
-import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    forward<T>(getResolver: () => Resolver<T>): CustomResolver<T>;
+  namespace Resolver {
+    function forward<T>(
+      getResolver: () => Resolver<T>
+    ): CustomResolverFactory<T>;
   }
 }
 

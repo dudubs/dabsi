@@ -4,10 +4,10 @@ import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    object<T extends ResolverMap>(
+  namespace Resolver {
+    function object<T extends ResolverMap>(
       resolverMap: T
-    ): CustomResolver<
+    ): CustomResolverFactory<
       {
         [K in keyof T]: Resolved<T[K]>;
       }

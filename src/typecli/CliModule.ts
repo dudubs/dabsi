@@ -1,4 +1,5 @@
 import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
+import { Timeout } from "@dabsi/common/async/Timeout";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   CliBuilder,
@@ -20,7 +21,7 @@ declare module "@dabsi/typemodule/ModuleMetadata" {
 }
 @Module()
 export class CliModule2 {
-  readonly builders: ((cliBuilder: CliBuilder) => void)[] = [];
+  protected _extenders: ((cliBuilder: CliBuilder) => void)[] = [];
 
   constructor(protected moduleRunner: ModuleRunner) {}
 
@@ -35,10 +36,11 @@ export class CliModule2 {
     runner?: CliRunnerFn;
     extender?: CliExtenderFn;
   }) {
-    this.builders.push(builder => {
+    this._extenders.push(builder => {
       if (path) {
         for (const key of path.split(".")) {
-          builder = builder.touch(key);
+          builder = builder.get(key)!;
+          if (!builder) return;
         }
       }
       extender && builder.extenders.push(extender);
@@ -47,16 +49,12 @@ export class CliModule2 {
     });
   }
 
-  build(): { builder: CliBuilder; process: AsyncProcess } {
+  build(): CliBuilder {
     const process = new AsyncProcess();
 
     const rootBuilder = new CliBuilder(promise => {
       process.push(() => `${this.constructor.name}.Runner`, promise);
     });
-
-    for (const extender of this.builders) {
-      extender(rootBuilder);
-    }
 
     const locateBuilder = (
       builder: CliBuilder,
@@ -86,6 +84,8 @@ export class CliModule2 {
           cliCommandMetadata.name
         );
 
+        commandBuilder.declarations.push(...cliCommandMetadata.declarations);
+
         commandBuilder.extenders.push(y => {
           for (const builders of [
             cliMetadata.argumentBuilders,
@@ -106,28 +106,30 @@ export class CliModule2 {
             // after - invoke commands
             cliCommandMetadata.propertyNames,
           ]) {
-            await Promise.all(
-              propertyNames
-                .toSeq()
-                .map(propertyName =>
-                  Resolver.Injectability.resolve(
-                    instance,
-                    Resolver.Context.create(this.moduleRunner.context, [args]),
-                    propertyName
-                  )
-                )
-                .toArray()
-            );
+            for (const propertyName of propertyNames) {
+              const { invoke } = Resolver.Injectability.resolve(
+                instance,
+                Resolver.Context.create(this.moduleRunner.context, [args]),
+                propertyName
+              );
+              this.moduleRunner.process.waitAndPush(
+                () => `CliCommand<${target.name}.${propertyName}>`,
+                async () => invoke()
+              );
+            }
           }
         });
       }
     }
-    return { builder: rootBuilder, process };
+
+    for (const extender of this._extenders) {
+      extender(rootBuilder);
+    }
+    return rootBuilder;
   }
 
-  run(scriptName: string, args: any[]) {
-    const { builder, process } = this.build();
-    builder
+  run(args: any[]) {
+    this.build()
       //
       .build(yargs(args))
       .middleware(argv => {
@@ -135,7 +137,7 @@ export class CliModule2 {
       })
       .help()
       .exitProcess(false)
-      .scriptName(scriptName).argv;
-    return process.wait();
+      .scriptName("ts").argv;
+    return this.moduleRunner.process.wait();
   }
 }

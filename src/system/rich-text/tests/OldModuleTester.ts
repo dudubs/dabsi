@@ -3,7 +3,7 @@ import CliModule from "@dabsi/modules/CliModule";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
 
-export default function ModuleTester() {
+export default function OldModuleTester() {
   return Tester.beforeAll(async () => {
     const moduleRunner = new ModuleRunner();
     moduleRunner.getInstance(CliModule);

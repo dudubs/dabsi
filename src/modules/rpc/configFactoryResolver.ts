@@ -1,5 +1,5 @@
 import RpcModule from ".";
-import { CustomResolver, Resolver, ResolverMap } from "../../typedi";
+import { CustomResolverFactory, Resolver, ResolverMap } from "../../typedi";
 import { ResolveError } from "../../typedi/ResolveError";
 import { AnyRpc, RpcResolvedConfig } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "./configResolver";
@@ -18,7 +18,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
     generate?: boolean;
     context?: ResolverMap;
   } = {}
-): CustomResolver<RpcConfigFactory<T>> {
+): CustomResolverFactory<RpcConfigFactory<T>> {
   return Resolver.chainCheck(
     Resolver([RpcModule, c => c], (rpcModule, context) => {
       const rpcConfigResolver = getRpcConfigResolver(rpcModule);

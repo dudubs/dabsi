@@ -1,4 +1,3 @@
-import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { getParameterName } from "@dabsi/common/reflection/getParameterName";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
@@ -10,26 +9,23 @@ export const parameterResolverMap = new WeakMap<
 >();
 
 declare module "./Resolver" {
-  interface IResolver {
-    Injectability: typeof ResolverInjectability;
-
-    resolveInjectable<T>(
-      target: Constructor<T>,
-      context: ResolverMap<any>,
-      args?: any[]
-    ): T;
+  namespace Resolver {
+    let Injectability: typeof ResolverInjectability;
   }
 }
 
-const _getArgsResolver = (
+const _getParametersResolver = (
   target: Function,
   propertyName: string | undefined
 ): Resolver<any[]> =>
   Resolver.array(
-    Reflector.getParamTypes(target, propertyName).map(
-      (paramType, paramIndex) =>
-        parameterResolverMap.get(target)?.get(paramIndex) ||
-        (paramType as Constructor)
+    Reflector.getParamTypes(target, propertyName).map((paramType, paramIndex) =>
+      ResolverInjectability.getParameterResolver(
+        target,
+        paramIndex,
+        propertyName,
+        paramType
+      )
     ),
     paramIndex => {
       const paramName = getParameterName(
@@ -47,29 +43,56 @@ const _getArgsResolver = (
   );
 
 namespace ResolverInjectability {
+  export function getParameterResolver(
+    target: Function,
+    index: number,
+    propertyName?: string,
+    paramType?: Function
+  ): Resolver<any> {
+    return (
+      parameterResolverMap.get(target)?.get(index) ||
+      <Resolver>paramType ||
+      <Resolver>Reflector.getParamType(target, index, propertyName)
+    );
+  }
+
+  export function invoke(
+    target: any,
+    context: ResolverMap,
+    propertyName?: string
+  ) {
+    return resolve(target, context, propertyName).invoke();
+  }
+
   export function resolve(
     target: any,
     context: ResolverMap,
     propertyName?: string
   ) {
-    const argsResolver = _getArgsResolver(
+    const paramsResolver = _getParametersResolver(
       typeof target === "function" ? target : target.constructor,
       propertyName
     );
-    const args = Resolver.resolve(argsResolver, context);
+    const args = Resolver.resolve(paramsResolver, context);
 
-    if (propertyName) {
-      return target[propertyName](...args);
-    } else {
-      return new (target as any)(...args);
-    }
+    return {
+      args,
+      invoke: () => {
+        if (propertyName) {
+          return target[propertyName](...args);
+        } else {
+          return new (target as any)(...args);
+        }
+      },
+    };
   }
+
   export function check(
     target: Function,
     context: ResolverMap,
     propertyName?: string
   ) {
-    Resolver.check(_getArgsResolver(target, propertyName), context);
+    Resolver.check(_getParametersResolver(target, propertyName), context);
   }
 }
 

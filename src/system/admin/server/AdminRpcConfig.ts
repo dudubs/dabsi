@@ -1,5 +1,5 @@
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import { RequestUser } from "@dabsi/modules/session";
+import { RequestUser } from "@dabsi/modules/session/module";
 import { AdminRpc } from "@dabsi/system/admin/common";
 import RpcConfigFactoryResolver from "../../../modules/rpc/configFactoryResolver";
 

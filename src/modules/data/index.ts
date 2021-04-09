@@ -16,7 +16,7 @@ export default class DataModule {
       DataContext.assign(
         () =>
           new DataContext(entityType =>
-            DataEntitySource.fromQueryRunner(entityType, dbModule.queryRunner!)
+            DataEntitySource.create(entityType, dbModule.queryRunner!)
           )
       )
     );

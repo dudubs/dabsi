@@ -1,4 +1,4 @@
-import { RequestModule2 } from "@dabsi/modules2/RequestModule2";
+import { Request2 } from "@dabsi/modules2/Request2";
 import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -7,76 +7,73 @@ import express from "express";
 
 export type ExpressBuilderFn = (app: express.Application) => void;
 
-declare module "@dabsi/modules2/ServerModule2" {
-  interface StartArgs {
-    port?: number;
-    p?: number;
-  }
-}
+export class ExpressRequest extends Resolver<express.Request>() {}
+export class ExpressResponse extends Resolver<express.Response>() {}
 
-export class ExpressContext {
-  constructor(
-    public readonly request: express.Request,
-    public readonly response: express.Response
-  ) {}
-}
-
-@Module({
-  dependencies: [ServerModule2],
-})
+@Module({})
 export class ExpressModule2 {
-  readonly prebuilders: ExpressBuilderFn[] = [];
+  readonly preBuilders: ExpressBuilderFn[] = [];
+
   readonly builders: ExpressBuilderFn[] = [];
 
-  readonly postbuilders: ExpressBuilderFn[] = [];
+  readonly postBuilders: ExpressBuilderFn[] = [];
 
   readonly log = log.get("Express");
 
-  readonly requestContext = Resolver.Context.create(
-    this.requestModule.requestContext,
-    [ExpressContext]
-  );
+  readonly request = new Request2([ExpressRequest, ExpressResponse]);
 
-  constructor(protected requestModule: RequestModule2) {}
-
-  installCli(@Plugin() cliModule: CliModule2) {
-    cliModule.extend({
-      path: "start",
-      extender: y => y.number(["port", "p"]),
-    });
+  createApplication(): express.Application {
+    const app = express();
+    for (const builders of [
+      this.preBuilders,
+      this.builders,
+      this.postBuilders,
+    ]) {
+      for (const builder of builders) {
+        builder(app);
+      }
+    }
+    return app;
   }
 
   installServer(@Plugin() serverModule: ServerModule2) {
-    serverModule.starters.push(async ({ p, port = p || 7777 }) => {
+    serverModule.starters.push(async ({ port }: { port: number }) => {
       //
-      const app = express();
-      for (const builders of [
-        this.prebuilders,
-        this.builders,
-        // execute postbuilder in reverse.
-        this.postbuilders.reverse(),
-      ]) {
-        for (const builder of builders) {
-          builder(app);
-        }
-      }
-
+      const app = this.createApplication();
       this.log.info(() => `listening at port ${port}.`);
       app.listen(port, "0.0.0.0");
     });
   }
 
+  useRequest(handlerResolver: Resolver<express.Handler>) {
+    this.request.initializers.push(
+      Resolver(
+        [ExpressRequest, ExpressResponse, handlerResolver],
+        (req, res, handler) => () =>
+          new Promise<void>(next => {
+            handler(req, res, () => next());
+          })
+      )
+    );
+  }
+
   processRequest(
-    callback: (context: ResolverMap) => Promise<void>
+    context: ResolverMap,
+    callback: (
+      req: express.Request,
+      res: express.Response,
+      context: ResolverMap
+    ) => Promise<void>
   ): express.Handler {
-    return (req, res) => {
-      this.requestModule.processRequest(async context => {
-        Resolver.Context.assign(context, [
-          //
-          new ExpressContext(req, res),
-        ]);
-        await callback(context);
-      });
+    return async (req, res) => {
+      context = Resolver.Context.create(
+        context,
+        Resolver(ExpressRequest, () => req),
+        Resolver(ExpressResponse, () => res)
+      );
+      await this.request.process(context, context =>
+        callback(req, res, context)
+      );
     };
   }
 }

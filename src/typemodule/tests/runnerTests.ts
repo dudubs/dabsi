@@ -1,4 +1,5 @@
-import { Injectable } from "@dabsi/typedi";
+import { toAsync } from "@dabsi/common/async/toAsync";
+import { Injectable, Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 
@@ -121,4 +122,33 @@ it("expect to load plugins", async () => {
   await ModuleRunner.run(D);
 
   !installedC && fail({ installedC });
+});
+
+it("expect to get resolver plugins.", () => {
+  //
+  @Module()
+  class A {}
+
+  @Module()
+  class B {}
+
+  @Module()
+  class C {}
+
+  const moduleRunner = new ModuleRunner();
+
+  expect([
+    ...moduleRunner.getUsedModulesByResolver(
+      Resolver(
+        [
+          A,
+          Resolver.object({
+            b: B,
+            c: Resolver([C], c => c),
+          }),
+        ],
+        () => null
+      )
+    ),
+  ]).toEqual([A, B, C]);
 });

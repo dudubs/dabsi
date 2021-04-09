@@ -10,7 +10,7 @@ export function findEntityTypes(
 
   const entityTypes = new Set<Function>();
 
-  const relationTypeTargetsMap = new Map();
+  const relationTypeTargetsMap = new Map<Function, Set<Function>>();
 
   for (const relationArg of args.relations) {
     if (typeof relationArg.type !== "function") continue;
@@ -24,7 +24,9 @@ export function findEntityTypes(
 
   Seq.Indexed(rootEntityTypes).forEach(function callback(entityType) {
     if (!entityTypes.touch(entityType)) return;
-    relationTypeTargetsMap.forEach(callback);
+    relationTypeTargetsMap.forEach(targets => {
+      targets.forEach(callback);
+    });
   });
 
   return [...entityTypes];

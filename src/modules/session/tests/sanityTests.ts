@@ -2,7 +2,7 @@ import { Tester } from "@dabsi/jasmine/Tester";
 import CliModule from "@dabsi/modules/CliModule";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
-import SessionModule, { SESSION_TIMEOUT } from "@dabsi/modules/session";
+import SessionModule, { SESSION_TIMEOUT } from "@dabsi/modules/session/module";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { Resource } from "@dabsi/modules/session/resource";

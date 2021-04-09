@@ -3,10 +3,10 @@ import { Tester } from "@dabsi/jasmine/Tester";
 import DataModule from "@dabsi/modules/data";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DbModule } from "@dabsi/modules/DbModule";
-import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
+import OldModuleTester from "@dabsi/system/rich-text/tests/OldOldModuleTester";
 import { findEntities } from "@dabsi/typeorm/findEntities";
 
-export default function DbTester(t: ReturnType<typeof ModuleTester>) {
+export default function DbTester(t: ReturnType<typeof OldModuleTester>) {
   return Tester.beforeAll(() => {
     const dbModule = t.moduleRunner.getInstance(DbModule);
     const dataModule = t.moduleRunner.getInstance(DataModule);

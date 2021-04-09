@@ -2,17 +2,21 @@ import { Module } from "@dabsi/typemodule";
 import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import fs from "fs";
-import { basename, dirname, join } from "path";
+import { dirname, join } from "path";
 
 @Module()
 export class LoaderModule2 {
-  protected _dirLoaders: ((dir: string) => Promise<any>)[] = [];
+  protected _loaderCallbacks: ((dir: string) => Promise<any>)[] = [];
+
+  protected _readDirCache = new Map<string, Promise<string[]>>();
+  protected _statCache = new Map<string, Promise<fs.Stats>>();
+  protected _readJsonFileCache = new Map<string, any>();
 
   protected _loadedDirs = new Set<string>();
 
   constructor(protected moduleRunner: ModuleRunner) {
     moduleRunner.pushLoader(
-      () => `${this.constructor.name}.Loader`,
+      () => this.constructor.name,
       async target => {
         const metadata = ModuleMetadata.get(target);
 
@@ -22,28 +26,27 @@ export class LoaderModule2 {
         const dir = dirname(metadata.anchor.path);
         if (!this._loadedDirs.touch(dir)) return;
 
-        await Promise.all(this._dirLoaders.map(loader => loader(dir)));
+        await Promise.all(this._loaderCallbacks.map(loader => loader(dir)));
       }
     );
     ///
   }
 
-  pushLoader(descriptor: () => string, loader: (dir: string) => Promise<any>) {
-    this._dirLoaders.push(loader);
+  pushLoader(
+    descriptor: () => string,
+    loader: (dir: string) => Promise<any>,
+    after?: () => any
+  ) {
+    this._loaderCallbacks.push(loader);
 
     this.moduleRunner.process.push(
       () => `${this.constructor.name}, ${descriptor()}`,
-      Promise.all(
-        this._loadedDirs
-          .toSeq()
-          .map(dir => loader(dir))
-          .toArray()
-      )
+      async () => {
+        await Promise.all(this._loadedDirs.toSeq().map(dir => loader(dir)));
+        await after?.();
+      }
     );
   }
-
-  protected _readDirCache = new Map<string, Promise<string[]>>();
-  protected _statCache = new Map<string, Promise<fs.Stats>>();
 
   readDir(dir: string): Promise<string[]> {
     return this._readDirCache.touch(dir, () => fs.promises.readdir(dir));
@@ -51,6 +54,12 @@ export class LoaderModule2 {
 
   stat(path: string): Promise<fs.Stats> {
     return this._statCache.touch(path, () => fs.promises.stat(path));
+  }
+
+  readJsonFile(path: string): Promise<any> {
+    return this._readJsonFileCache.touch(path, async () =>
+      JSON.parse(await fs.promises.readFile(path, "utf-8"))
+    );
   }
 
   async isFile(path: string): Promise<boolean> {

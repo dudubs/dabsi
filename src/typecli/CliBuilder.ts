@@ -18,6 +18,8 @@ export class CliBuilder {
 
   readonly wrappers: CliWrapperFn[] = [];
 
+  readonly declarations: string[] = [];
+
   constructor(
     protected runner: (promise: Promise<any>) => void,
     protected parent?: CliBuilder
@@ -68,7 +70,9 @@ export class CliBuilder {
       const builder = new CliBuilder(this.runner, this);
       this.extenders.push(y => {
         return y.command(
-          command,
+          builder.declarations.length
+            ? command + " " + builder.declarations.join(" ")
+            : command,
           "",
           y => builder.build(y),
           args => {

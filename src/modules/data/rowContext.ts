@@ -2,7 +2,7 @@ import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
 import { DataTicker } from "@dabsi/modules/data/ticker";
-import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi";
+import { CustomResolverFactory, Resolver, ResolverMap } from "@dabsi/typedi";
 
 export type DataKeyContext = {
   new (key: string | null): { $key: string | null; rowType: Function };
@@ -23,9 +23,9 @@ export const DataKeyContext = WeakMapFactory(
 
 export function DataRowContext<T>(
   rowType: Constructor<T>
-): CustomResolver<DataRowTicker<T>> {
+): CustomResolverFactory<DataRowTicker<T>> {
   return Resolver(
-    [DataTicker, Resolver.default(DataKeyContext(rowType))],
+    [DataTicker, Resolver.optional(DataKeyContext(rowType))],
     (dataTicker, rowKey) => {
       return dataTicker.getRowTicker(rowType, rowKey?.$key || null);
     }

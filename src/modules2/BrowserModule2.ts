@@ -1,6 +1,7 @@
 import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
 import { makeHtml } from "@dabsi/common/makeHtml";
-import { DevModule2 } from "@dabsi/modules2/DevModule";
+import { DABSI_DIR, NODE_MODULES_DIR } from "@dabsi/env";
+import { DevModule2 } from "@dabsi/modules2/DevModule2";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
 import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
 import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
@@ -20,6 +21,10 @@ export class BrowserModule2 {
   readonly scripts: string[] = [];
 
   log = log.get("Browser");
+
+  constructor() {
+    console.log("creating");
+  }
 
   installPlatform(@Plugin() platformModule: PlatformModule2) {
     platformModule.platformConfigMap.set("browser", { view: true });
@@ -103,13 +108,39 @@ export class BrowserModule2 {
     }
   }
 
-  installExress(@Plugin() expressModule: ExpressModule2) {
+  installExpress(@Plugin() expressModule: ExpressModule2) {
+    expressModule.postBuilders.push(app => {
+      app.get("/*", (req, res) => {
+        res.contentType("text/html").send(
+          makeHtml({
+            head: `<meta charset="utf-8">`,
+            scripts: [
+              ...this.scripts,
+              ...["vendor", "index", "runtime"].map(
+                name => `/bundle/browser/${name}.js`
+              ),
+            ],
+          })
+        );
+      });
+    });
+  }
+
+  installProjectWithExpress(
+    @Plugin() projectModule: ProjectModule2,
+    @Plugin() expressModule: ExpressModule2
+  ) {
+    console.log("installing");
+
     expressModule.builders.push(app => {
-      //
-      const bundlePath = realpathSync("bundle/browser");
+      const bundlePath = path.join(projectModule.directory, "bundle/browser");
+      console.log("building");
+
       const bundleStatic = express.static(bundlePath);
-      app.use("/bundle/browser", (req, res, next) => {
+      app.use("/bundle/browser", (req, res) => {
         bundleStatic(req, res, () => {
+          console.log({ req });
+
           if (req.path.endsWith(".js")) {
             return res
               .contentType("text/javascript")
@@ -117,19 +148,6 @@ export class BrowserModule2 {
           }
           res.status(404).send(`File not found`);
         });
-      });
-    });
-    expressModule.postbuilders.push(app => {
-      app.get("/*", (req, res) => {
-        res.contentType("text/html").send(
-          makeHtml({
-            head: `<meta charset="utf-8">`,
-            scripts: [
-              ...this.scripts,
-              ...[].map(name => `/bundle/browser/${name}.js`),
-            ],
-          })
-        );
       });
     });
   }
@@ -141,7 +159,7 @@ export class BrowserModule2 {
   ) {
     let reload: null | (() => void) = null;
     this.scripts.push("/reload/reload.js");
-    expressModule.prebuilders.push(app => {
+    expressModule.preBuilders.push(app => {
       ReloadServer(app).then(server => {
         expressModule.log.info(() => `reload server is ready.`);
         reload = () => {
@@ -150,12 +168,36 @@ export class BrowserModule2 {
         };
       });
     });
-    devModule.watch("view", () => {
-      reload?.();
-    });
 
-    devModule.watch("browser", () => {
-      reload?.();
+    for (const platform of ["common", "view", "browser"]) {
+      devModule.watch(platform, () => {
+        reload?.();
+      });
+    }
+
+    expressModule.preBuilders.push(app => {
+      app.use(
+        "/jasmine/lib",
+        express.static(
+          path.join(NODE_MODULES_DIR, "jasmine-core/lib/jasmine-core")
+        )
+      );
+      app.get("/jasmine", (req, res) => {
+        res.contentType("text/html").send(
+          makeHtml({
+            scripts: [
+              "/reload/reload.js",
+              ...["jasmine", "jasmine-html", "boot"].map(
+                name => `/jasmine/lib/${name}.js`
+              ),
+              ...["vendor", "index", "tests", "runtime"].map(
+                name => `/bundle/browser/${name}.js`
+              ),
+            ],
+            head: `<link rel="stylesheet" href="/jasmine/lib/jasmine.css">`,
+          })
+        );
+      });
     });
   }
 }

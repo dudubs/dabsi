@@ -1,5 +1,8 @@
+import { Ticker } from "@dabsi/common/async/Ticker";
 import Lazy from "@dabsi/common/patterns/Lazy";
+import { Request2 } from "@dabsi/modules2/Request2";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
+import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
 import { AsyncJsonFile } from "./AsyncJsonFile";
 
@@ -7,6 +10,7 @@ export interface StartArgs {
   force: boolean;
   f: boolean;
   disablePid?: boolean;
+  port?: number;
 }
 export interface StopArgs {}
 
@@ -14,10 +18,14 @@ const PID_FILENAME = "ts-server.pid";
 
 @Module({})
 export class ServerModule2 {
-  readonly starters: ((args: Partial<StartArgs>) => Promise<void>)[] = [];
+  readonly starters: ((args: Partial<StartArgs>) => Promise<void>)[] = [
+    async args => {},
+  ];
   readonly stoppers: ((args: Partial<StopArgs>) => Promise<void>)[] = [];
 
   protected _pidFilename = PID_FILENAME;
+
+  readonly request = new Request2([Ticker]);
 
   @Lazy() protected get _pidFile() {
     return new AsyncJsonFile<{ pid: number }>(this._pidFilename);
@@ -28,7 +36,11 @@ export class ServerModule2 {
     this._pidFilename = pidFilename;
   }
 
-  @CliCommand("start", y => y.option("disable-pid", { type: "boolean" }))
+  @CliCommand("start", y =>
+    y
+      .option("disable-pid", { type: "boolean" })
+      .option("port", { type: "number", alias: "p", default: 7777 })
+  )
   async start(args: Partial<StartArgs> = {}) {
     if (!args.disablePid) {
       const runningPid = (await this._pidFile.read())?.pid;
@@ -64,6 +76,19 @@ export class ServerModule2 {
 
     await Promise.all(this.stoppers.map(stopper => stopper(args)));
   }
+
+  processRequest(
+    context: ResolverMap,
+    callback: (context: ResolverMap) => Promise<void>
+  ): Promise<void> {
+    const ticker = new Ticker();
+    return this.request.process(
+      Resolver.Context.assign(context, [ticker]),
+      async context => {
+        await ticker.wait(callback(context));
+      }
+    );
+  }
 }
 
 function tryToKill(pid: number) {
@@ -73,3 +98,5 @@ function tryToKill(pid: number) {
     //
   }
 }
+
+export class ServerRequest extends Resolver([ServerModule2], x => x.request) {}

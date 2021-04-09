@@ -8,7 +8,7 @@ import RpcModule from "@dabsi/modules/rpc";
 import RpcConfigFactoryResolver, {
   RpcConfigFactory,
 } from "@dabsi/modules/rpc/configFactoryResolver";
-import { RequestSession } from "@dabsi/modules/session";
+import { RequestSession } from "@dabsi/modules/session/module";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";

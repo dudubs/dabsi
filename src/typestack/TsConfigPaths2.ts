@@ -55,7 +55,7 @@ export class TsConfigPaths2 {
       isDir(path: string): Promise<boolean>;
       isFile(path: string): Promise<boolean>;
       // TODO: change to readFile
-      readFile(path: string): Promise<any>;
+      readJsonFile(path: string): Promise<any>;
     }
   ) {
     //
@@ -125,7 +125,7 @@ export class TsConfigPaths2 {
 
     while (loadedConfigPaths.touch(configPath)) {
       const configDir = path.dirname(configPath);
-      const config = JSON.parse(await this.fs.readFile(configPath));
+      const config = await this.fs.readJsonFile(configPath);
 
       if (config?.compilerOptions?.paths) {
         const baseUrl = path.resolve(

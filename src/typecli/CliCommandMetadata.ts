@@ -7,4 +7,6 @@ export class CliCommandMetadata {
   propertyNames = new Set<string>();
 
   builders: ((y: yargs.Argv<{}>) => yargs.Argv<any>)[] = [];
+
+  declarations: string[] = [];
 }

@@ -1,14 +1,12 @@
-import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
+import { defined } from "@dabsi/common/object/defined";
 import { values } from "@dabsi/common/object/values";
-import { Defined } from "@dabsi/common/patterns/Defined";
-import Lazy from "@dabsi/common/patterns/Lazy";
+import { Once } from "@dabsi/common/patterns/Once";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { RequestModule2 } from "@dabsi/modules2/RequestModule2";
+import { ServerRequest } from "@dabsi/modules2/ServerModule2";
 import { CliCommand } from "@dabsi/typecli";
-import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
-import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
+import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
 import { join } from "path";
 import {
   Connection,
@@ -19,7 +17,8 @@ import {
 } from "typeorm";
 import { findEntityTypes } from "./findEntityTypes";
 
-export class DbQueryRunner extends Resolver<QueryRunner>() {}
+export class DbQueryRunnerRef extends Resolver<() => QueryRunner>() {}
+
 export class DbConnectionRef extends Resolver<() => Connection>() {}
 
 @Module({
@@ -28,44 +27,31 @@ export class DbConnectionRef extends Resolver<() => Connection>() {}
 export class DbModule2 {
   protected _maybeEntityTypes = new Set<Function>();
 
-  readonly log = log.get("db");
+  readonly log = log.get("DB");
 
   connectionOptions: ConnectionOptions | null = null;
 
-  @CliCommand("sync", y => y.boolean(["force", "f"])) sync({
-    f,
-    force = f || false,
-  }) {
-    //
-  }
-
   protected _connection: Connection | null = null;
 
-  constructor(moduleRunner: ModuleRunner) {
-    Resolver.Context.assign(
-      moduleRunner.context,
-      Resolver(DbConnectionRef, () => {
-        if (!this._connection) {
-          moduleRunner.process.push(
-            () => `Connecting
-            
-            
-            
-            
-            
-            `,
-            this._connectionPromise.then(connection => {
-              this._connection = connection;
-            })
-          );
-        }
+  constructor(protected loaderModule: LoaderModule2) {}
 
-        return () => this._connection!;
-      })
+  installContext(
+    @Plugin()
+    context: ModuleRunnerContext
+  ) {
+    Resolver.Context.assign(
+      context,
+      Resolver(DbConnectionRef, () => {
+        !this._connection && this.loadAndConnect();
+        return () => defined(this._connection, () => "No DB connection");
+      }),
+      Resolver(DbQueryRunnerRef, [DbConnectionRef], getConnection => () =>
+        getConnection().createQueryRunner()
+      )
     );
   }
 
-  getEntityTypes(): Function[] {
+  findEntityTypes(): Function[] {
     return findEntityTypes(
       getMetadataArgsStorage()
         .tables.toSeq()
@@ -76,86 +62,42 @@ export class DbModule2 {
     );
   }
 
-  createConnection() {
-    return createConnection({
-      logging: ["schema"],
-      ...(this.connectionOptions || {
-        name: "default",
-        type: "sqlite",
-        database: "./bundle/db.sqlite3",
-      }),
-      entities: this.getEntityTypes(),
-    });
-  }
-
   installRequest(
     @Plugin()
-    requestModule: RequestModule2
+    request: ServerRequest
   ) {
-    requestModule.requestInitalizers.push(
-      Resolver([Connection, c => c], async (connection, context) => {
-        const queryRunner = connection.createQueryRunner();
-        await queryRunner.connect();
+    request.initializers.push(
+      Resolver(
+        [c => c, DbConnectionRef],
+        (context, getConnection) => async () => {
+          const queryRunner = getConnection().createQueryRunner();
+          await queryRunner.connect();
 
-        Resolver.Context.assign(
-          context,
-          Resolver(DbQueryRunner, () => queryRunner)
-        );
-      })
+          Resolver.Context.assign(
+            context,
+            Resolver(DbQueryRunnerRef, () => () => queryRunner)
+          );
+        }
+      )
     );
 
-    requestModule.requestFinaliziers.push(
-      Resolver([DbQueryRunner], async queryRunner => {
-        await queryRunner.release();
+    request.finalizers.push(
+      Resolver([DbQueryRunnerRef], getQueryRunner => async () => {
+        await getQueryRunner().release();
       })
     );
   }
 
-  @Lazy() protected get _connectionPromise(): Promise<Connection> {
-    return this.createConnection();
-  }
-
-  installCli(
-    @Plugin()
-    cliModule: CliModule2,
-    moduleRunner: ModuleRunner,
-    process: AsyncProcess
-  ) {
-    let connectionRef = {};
-
-    Resolver.Context.assign(
-      moduleRunner.context,
-      Resolver(DbConnectionRef, () => {
-        process.push(() => `connect to `, this._connectionPromise);
-
-        return connectionRef;
-      })
-    );
-
-    // Resolver.async(Connection, ()=> promise)
-    // TODO: push to process for wait connection
-    cliModule.extend({
-      wrapper: (args, execute) => {
-        return execute();
-      },
-    });
-    cliModule.builders.push(builder => {
-      builder.wrappers.push(async (args, execute) => {
-        await execute();
-      });
-    });
-  }
-
-  installLoader(
-    @Plugin()
-    loaderModule: LoaderModule2
-  ) {
-    loaderModule.pushLoader(
-      () => `${this.constructor.name}.Loader`,
+  @Once()
+  protected loadAndConnect() {
+    this.loaderModule.pushLoader(
+      () => this.constructor.name,
       async dir => {
+        if (this._connection) {
+          throw new Error(`Can't load module entities after connection.`);
+        }
         const entitiesDir = join(dir, "entities");
-
-        for (const baseName of await loaderModule
+        for (const baseName of await this.loaderModule
           .readDir(entitiesDir)
           .catch(() => [])) {
           const modulePath = join(entitiesDir, baseName);
@@ -165,7 +107,29 @@ export class DbModule2 {
             this._maybeEntityTypes.add(value);
           }
         }
+      },
+      async () => {
+        this._connection = await createConnection({
+          logging: ["schema"],
+          ...(this.connectionOptions || {
+            type: "sqlite",
+            database: "./bundle/db.sqlite3",
+          }),
+          name: "default",
+          entities: this.findEntityTypes(),
+        });
       }
     );
+  }
+
+  @CliCommand("sync", y => y.boolean(["force", "f"])) async sync(
+    { f, force = f || false },
+    getConnection: DbConnectionRef
+  ) {
+    const connection = getConnection();
+    if (force) {
+      await connection.query(`PRAGMA foreign_keys = OFF;`);
+    }
+    await connection.synchronize();
   }
 }

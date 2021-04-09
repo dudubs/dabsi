@@ -3,10 +3,11 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
-import { LocalLaundryService } from "@material-ui/icons";
+import { Seq } from "immutable4";
 import { AsyncProcess } from "../common/async/AsyncProcess";
 import { InstanceEmitter } from "./InstanceEmitter";
 import { locateError } from "./locateError";
+import { catchAndLocateError } from "./catchAndLocateError";
 
 export type ModuleTarget = Function;
 
@@ -15,6 +16,17 @@ export interface ModuleLoaderFn {
 }
 
 export class ModuleRunner {
+  static async run(
+    target: ModuleTarget,
+    context: ResolverMap = {}
+  ): Promise<ModuleRunner> {
+    const runner = new ModuleRunner();
+    Object.assign(runner.context, context);
+    runner.get(target);
+    await runner.process.wait();
+    return runner;
+  }
+
   readonly process = new AsyncProcess();
 
   readonly context: ResolverMap = Resolver.Context.flat({}, [
@@ -45,11 +57,16 @@ export class ModuleRunner {
     }
 
     const metadata = ModuleMetadata.get(target);
-    for (const target of metadata.dependencies) {
+    for (const [index, target] of metadata.dependencies.toSeq().entries()) {
+      if (typeof target !== "function") {
+        throw new Error(
+          `Invalid module dependency ${metadata.target.name}, #${index}.`
+        );
+      }
       void this.get(target);
     }
 
-    const instance = Resolver.Injectability.resolve(target, this.context);
+    const instance = Resolver.Injectability.invoke(target, this.context);
 
     this._moduleInstanceMap.set(target, instance);
     this._moduleEmitter.emit(instance);
@@ -59,7 +76,7 @@ export class ModuleRunner {
     for (const loader of this._loaders) {
       this.process.push(
         () => `Module<${target.name}>, ${loader.descriptor()}`,
-        () => loader.callback(target)
+        async () => loader.callback(target)
       );
     }
 
@@ -71,8 +88,8 @@ export class ModuleRunner {
 
     for (const target of this._moduleInstanceMap.keys()) {
       this.process.push(
-        () => `Module<${target.name}>, ${descriptor()}`,
-        () => callback(target)
+        () => `${descriptor()}, Module<${target.name}>`,
+        async () => callback(target)
       );
     }
   }
@@ -84,55 +101,84 @@ export class ModuleRunner {
   protected _loadModulePlugins(target: ModuleTarget) {
     const metadata = ModuleMetadata.get(target);
     for (const propertyName of metadata.pluginParamIndexesMap.keys()) {
-      this._waitForPlugins(metadata, propertyName).then(() => {
-        this.process.push(
-          () => `Module<${target.name}>.Plugin<${propertyName}>`,
-          async () => {
-            try {
-              await Resolver.Injectability.resolve(
-                this._moduleInstanceMap.get(target)!,
-                this.context,
-                propertyName
-              );
-            } catch (error) {
-              throw locateError(
-                error,
-                `module "${metadata.target.name}", plugin "${propertyName}".`
-              );
-            }
+      const pluginUsedModules = this._getPluginUsedModules(
+        metadata,
+        propertyName
+      );
+      const descriptor = () => `Plugin<${target.name}.${propertyName}>`;
+      this._waitForModules(pluginUsedModules).then(() => {
+        this.process.push(descriptor, async () => {
+          try {
+            await Resolver.Injectability.invoke(
+              this._moduleInstanceMap.get(target)!,
+              this.context,
+              propertyName
+            );
+          } catch (error) {
+            // TODO: catchAndLocateErrorAsync
+            throw locateError(
+              error,
+              `Plugin<${metadata.target.name}.${propertyName}>`
+            );
           }
-        );
+        });
       });
     }
   }
 
-  protected async _waitForPlugins(
+  protected _getPluginUsedModules(
     metadata: ModuleMetadata,
     propertyName: string
   ) {
-    const paramIndexes = metadata.pluginParamIndexesMap.get(propertyName)!;
+    return metadata.pluginParamIndexesMap
+      .get(propertyName)!
+      .toSeq()
+      .flatMap(paramIndex => {
+        //
+        const resolver = Resolver.Injectability.getParameterResolver(
+          metadata.target,
+          paramIndex,
+          propertyName
+        );
+        return catchAndLocateError(
+          () => this.getUsedModulesByResolver(resolver),
+          () => `Plugin<${metadata.target.name}.${propertyName}>`
+        );
+      })
+      .toSet();
+  }
+
+  protected _waitForModules(targets: Iterable<ModuleTarget>) {
     return Promise.all(
-      Reflector.getParamTypes(metadata.target, propertyName)
-        .toSeq()
-        .filter((_, index) => paramIndexes.has(index))
-        .map(
-          paramType =>
-            new Promise(resolve => {
-              this._moduleEmitter.listen(paramType, resolve);
-            })
-        )
-        .toArray()
+      Seq.Indexed(targets).map(
+        target =>
+          new Promise(resolve => {
+            this._moduleEmitter.listen(target, resolve);
+          })
+      )
     );
   }
 
-  static async run(
-    target: ModuleTarget,
-    context: ResolverMap = {}
-  ): Promise<ModuleRunner> {
-    const runner = new ModuleRunner();
-    Object.assign(runner.context, context);
-    runner.get(target);
-    await runner.process.wait();
-    return runner;
+  addUsedModuleByResolver?: null | ((target: ModuleTarget) => void) = null;
+
+  getUsedModulesByResolver(resolver: Resolver) {
+    if (this.addUsedModuleByResolver) {
+      throw new Error(`Can't override addUsedModuleByResolver.`);
+    }
+    const plugins = new Set<ModuleTarget>();
+    this.addUsedModuleByResolver = target => {
+      plugins.add(target);
+    };
+    try {
+      Resolver.check(resolver, this.context);
+    } finally {
+      this.addUsedModuleByResolver = null;
+    }
+    return plugins;
   }
 }
+
+export class ModuleRunnerContext extends Resolver(
+  [ModuleRunner],
+  x => x.context
+) {}

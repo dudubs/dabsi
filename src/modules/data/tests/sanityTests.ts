@@ -8,7 +8,7 @@ import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 
 export const testDataContext = new DataContext(entityType =>
-  DataEntitySource.fromQueryRunner(entityType, getTestQueryRunner())
+  DataEntitySource.create(entityType, getTestQueryRunner())
 );
 
 const t = Tester.beforeAll(async () => {

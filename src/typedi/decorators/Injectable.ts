@@ -52,19 +52,21 @@ export const getConstructorParamsResolver = WeakMapFactory(
 
 export function Injectable() {
   return target => {
-    target[Resolver.resolveSymbol] = function (context) {
-      if (target !== this) {
-        return Resolver.resolveType(this, context);
+    Resolver.define(
+      target,
+      function (context) {
+        if (target !== this) {
+          return Resolver.Providability.resolve(this, context);
+        }
+        return Resolver.Injectability.invoke(this, context);
+      },
+      function (context) {
+        if (target !== this) {
+          return Resolver.Providability.check(this, context);
+        }
+        Resolver.Injectability.check(this, context);
       }
-      return Resolver.Injectability.resolve(this, context);
-    };
-
-    target[Resolver.checkSymbol] = function (context) {
-      if (target !== this) {
-        return Resolver.checkType(this, context);
-      }
-      Resolver.Injectability.check(this, context);
-    };
+    );
   };
 }
 

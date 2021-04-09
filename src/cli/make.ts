@@ -23,7 +23,7 @@ export default async function ({ projectDir = ".", force = false }) {
     const configFileName = path.join(projectDir, "tsconfig.json");
 
     const configPaths = new TsConfigPaths2({
-      readFile: path => fs.promises.readFile(path, "utf-8"),
+      readJsonFile: async path => require(path),
       isFile: path =>
         fs.promises
           .stat(path)
@@ -35,6 +35,7 @@ export default async function ({ projectDir = ".", force = false }) {
           .then(stat => stat.isDirectory())
           .catch(() => false),
     });
+
     await configPaths.load(configFileName);
 
     //   makeRootConfigs();

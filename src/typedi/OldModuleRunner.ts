@@ -32,7 +32,6 @@ export class OldModuleRunner {
 
   getInstance<T>(target: Constructor<T>): T {
     return touchMap(this.instanceMap, target, () => {
-      log.trace(() => `init module ${target.name}`);
       const argsResolver = getConstructorParamsResolver(target);
       const options = moduleMetadataMap.get(target)!;
 
@@ -41,7 +40,7 @@ export class OldModuleRunner {
       }
 
       const args = Resolver.checkAndResolve(
-        Resolver.catch(argsResolver, error => {
+        Resolver.catchOnCheck(argsResolver, error => {
           throw new ResolveError(`At module ${target.name}, ${error.message}`);
         }),
         this.context

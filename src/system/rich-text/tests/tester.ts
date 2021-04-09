@@ -1,11 +1,11 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import { RpcModuleTester } from "@dabsi/modules/rpc/tests/RpcModuleTester";
-import { RequestSession, SESSION_TIMEOUT } from "@dabsi/modules/session";
+import { RpcOldModuleTester } from "@dabsi/modules/rpc/tests/RpcOldModuleTester";
+import { RequestSession, SESSION_TIMEOUT } from "@dabsi/modules/session/module";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
-import DbModuleTester from "@dabsi/modules/tests/DbModuleTester";
+import DbOldModuleTester from "@dabsi/modules/tests/DbOldModuleTester";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
@@ -13,16 +13,16 @@ import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 import { RichTextContext } from "@dabsi/system/rich-text/context";
-import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
+import OldModuleTester from "@dabsi/system/rich-text/tests/OldOldModuleTester";
 import { TestStorage } from "@dabsi/system/rich-text/tests/TestStorage";
 import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/utils";
 import Storage from "@dabsi/system/storage/Storage";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTarget } from "@dabsi/typedi/OldModuleMetadata2";
 
-const t = ModuleTester();
-const db = DbModuleTester(t);
-const rpc = RpcModuleTester(t);
+const t = OldModuleTester();
+const db = DbOldModuleTester(t);
+const rpc = RpcOldModuleTester(t);
 
 export const rtTestModules = [] as ModuleTarget[];
 export const rtTestBeforeInit = [] as (() => Awaitable)[];

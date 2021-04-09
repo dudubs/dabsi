@@ -4,10 +4,7 @@ import { Inject, Module, Resolver, ResolverMap } from "@dabsi/typedi";
 import { Awaitable } from "../common/typings2/Async";
 import { Cli } from "./Cli";
 import { Hookable } from "./Hookable";
-
-export class Request {
-  readonly cleaners: (() => Awaitable)[] = [];
-}
+import { Request } from "./Request";
 
 function emitAllAsync<T extends (...args: any[]) => any>(
   callbacks: T[],
@@ -68,3 +65,5 @@ export default class RequestModule {
     );
   }
 }
+
+export class RequestContext extends Resolver([RequestModule], x => x.context) {}

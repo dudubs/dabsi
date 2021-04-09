@@ -1,7 +1,7 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
 import { DataContext } from "@dabsi/modules/data/context";
-import { RequestSession } from "@dabsi/modules/session";
+import { RequestSession } from "@dabsi/modules/session/module";
 import Storage from "@dabsi/system/storage/Storage";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataInsertRow } from "@dabsi/typedata/value";

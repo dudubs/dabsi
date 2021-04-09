@@ -2,15 +2,15 @@ import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    catch<T>(
+  namespace Resolver {
+    let catchOnCheck: <T>(
       resolver: Resolver<T>,
       callback: (error: ResolveError) => any
-    ): CustomResolver<T>;
+    ) => CustomResolverFactory<T>;
   }
 }
 
-Resolver.catch = function (resolver, callback) {
+Resolver.catchOnCheck = function (resolver, callback) {
   return Resolver.create(
     context => Resolver.resolve(resolver, context),
     context => {

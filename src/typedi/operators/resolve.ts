@@ -1,26 +1,30 @@
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { inspect } from "@dabsi/logging/inspect";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import {
+  ArrowResolver,
+  ProvidableResolver,
+  Resolver,
+} from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
-  interface IResolver {
-    resolve<T>(resolver: Resolver<T>, context: ResolverMap<any>): T;
+  namespace Resolver {
+    function resolve<T>(resolver: Resolver<T>, context: ResolverMap): T;
   }
 }
 
 Resolver.resolve = function (resolver, context) {
-  if (!context) {
-    throw new Error("No context");
+  const resolve = resolver[Resolver.resolveSymbol];
+  if (resolve) {
+    return resolve.call(resolver, context);
   }
-  if (resolver == null) {
-    throw new Error("No resolver");
-  }
-
-  try {
-    return resolver[Resolver.resolveSymbol](context);
-  } catch (error) {
-    if (error.constructor === TypeError) {
-      const x = resolver[Resolver.resolveSymbol];
-      console.log({ x });
+  if (typeof resolver === "function") {
+    if (!resolver.prototype) {
+      return (resolver as ArrowResolver<any>)(context);
     }
-    throw error;
+    return Resolver.Providability.resolve(
+      resolver as ProvidableResolver<any>,
+      context
+    );
   }
+  throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);
 };

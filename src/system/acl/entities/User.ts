@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -20,14 +21,15 @@ export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   firstName!: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
   lastName!: string;
 
-  @Column({ nullable: true })
-  loginName?: string;
+  @Index({ unique: true })
+  @Column({ nullable: false })
+  loginName!: string;
 
   @Column({
     nullable: true,

@@ -2,14 +2,17 @@ import DataModule from "@dabsi/modules/data";
 import { DataContext } from "@dabsi/modules/data/context";
 import { DataTicker } from "@dabsi/modules/data/ticker";
 import ExpressModule, { ExpressResolver } from "@dabsi/modules/express";
-import { Request } from "@dabsi/modules/RequestModule";
+import { Request } from "@dabsi/modules/Request";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import { User } from "@dabsi/system/acl/entities/User";
 import { Module, Resolver } from "@dabsi/typedi";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 import CookieParser from "cookie-parser";
 import { getSessionKey } from "../../../system-old/server/acl/getSession";
-import SessionModule, { RequestSession, RequestUser } from "../../session";
+import SessionModule, {
+  RequestSession,
+  RequestUser,
+} from "../../session/module";
 
 const cookieParser = CookieParser();
 

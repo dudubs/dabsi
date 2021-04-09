@@ -143,10 +143,6 @@ export default class RpcModule {
     }
   }
 
-  requestContext: ResolverMap = Resolver.Context.create(this.runner.context, {
-    ...Resolver(Ticker),
-  });
-
   async processRequest(rpc: AnyRpc, rpcReq: RpcRequest, context: ResolverMap) {
     const { path, payload } = rpcReq;
 

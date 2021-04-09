@@ -3,9 +3,9 @@ import { Tester } from "@dabsi/jasmine/Tester";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import { DataParameterConfigResolver } from "@dabsi/modules/data/paramterConfigResolver";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import { RpcModuleTester } from "@dabsi/modules/rpc/tests/RpcModuleTester";
-import DbModuleTester from "@dabsi/modules/tests/DbModuleTester";
-import ModuleTester from "@dabsi/system/rich-text/tests/ModuleTester";
+import { RpcOldModuleTester } from "@dabsi/modules/rpc/tests/RpcOldModuleTester";
+import DbOldModuleTester from "@dabsi/modules/tests/DbOldModuleTester";
+import OldModuleTester from "@dabsi/system/rich-text/tests/OldOldModuleTester";
 import { BSource } from "@dabsi/typedata/entity/tests/utils";
 import TestEntities, {
   AEntity,
@@ -23,9 +23,9 @@ const testRpc = RpcMap({
   ),
 });
 
-const mt = ModuleTester();
-const db = DbModuleTester(mt);
-const rpc = RpcModuleTester(mt);
+const mt = OldModuleTester();
+const db = DbOldModuleTester(mt);
+const rpc = RpcOldModuleTester(mt);
 
 const t = Tester.beforeAll(async () => {
   db.addEntities(...TestEntities);

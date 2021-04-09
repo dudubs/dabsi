@@ -30,13 +30,13 @@ export class DataEntitySource<T> extends DataSource<T> {
     );
   }
 
-  static fromQueryRunner<T>(
+  static create<T>(
     entityType: Constructor<T>,
-    queryRunner: QueryRunner
+    queryRunner: QueryRunner | (() => QueryRunner)
   ): DataEntitySource<T> {
     return new DataEntitySource(
       entityType,
-      () => queryRunner,
+      typeof queryRunner === "function" ? queryRunner : () => queryRunner,
       EMPTY_DATA_CURSOR
     );
   }

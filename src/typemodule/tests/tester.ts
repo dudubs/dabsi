@@ -1,7 +1,6 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { Module } from "@dabsi/typemodule";
-import { ModuleRunner, ModuleTarget } from "@dabsi/typemodule/ModuleRunner";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 
 export type Module2Tester = ReturnType<typeof Module2Tester>;
 

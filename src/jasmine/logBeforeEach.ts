@@ -1,4 +1,4 @@
-import { CallStackAnchor } from "@dabsi/typedi/CallStackAnchor";
+import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
 import { getJasmineSpecReporterResult } from "@dabsi/jasmine/getJasmineSpecReporterResult";
 
 export function logBeforeEach(

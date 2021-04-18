@@ -1,6 +1,5 @@
-import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
 import { makeHtml } from "@dabsi/common/makeHtml";
-import { DABSI_DIR, NODE_MODULES_DIR } from "@dabsi/env";
+import { NODE_MODULES_DIR } from "@dabsi/env";
 import { DevModule2 } from "@dabsi/modules2/DevModule2";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
 import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
@@ -8,7 +7,6 @@ import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
 import express from "express";
-import { realpathSync } from "fs";
 import path from "path";
 import ReloadServer from "reload";
 import TsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
@@ -22,29 +20,32 @@ export class BrowserModule2 {
 
   log = log.get("Browser");
 
-  constructor() {
-    console.log("creating");
-  }
+  constructor(
+    protected projectModule: ProjectModule2,
+    protected platformModule: PlatformModule2
+  ) {}
 
   installPlatform(@Plugin() platformModule: PlatformModule2) {
     platformModule.platformConfigMap.set("browser", { view: true });
   }
 
-  @CliCommand("pack") async pack(
-    { w, watch = w || false }: { w?: boolean; watch?: boolean } = {},
-    platformModule: PlatformModule2,
-    projectModule: ProjectModule2,
-    process: AsyncProcess
-  ) {
-    await process.wait();
-
-    const generatedOutDir = path.join(projectModule.directory, "src/generated");
+  async createWebpackCompiler() {
+    const generatedOutDir = path.join(
+      this.projectModule.directory,
+      "src/generated"
+    );
+    console.log("xxasdsadsadxxx");
     const {
       entityMap: generatedEntityMap,
       codeMap: generatedCodeMap,
-    } = await platformModule.generateCode(generatedOutDir, "browser");
-
-    const compiler = webpack({
+    } = await this.platformModule
+      .generateCode(generatedOutDir, "browser")
+      .catch(error => {
+        console.log({ error });
+        throw error;
+      });
+    console.log("xxasdsadsadxxx");
+    return webpack({
       mode: "development",
       devtool: "inline-source-map",
       node: {
@@ -63,7 +64,7 @@ export class BrowserModule2 {
         ...generatedEntityMap,
       },
       output: {
-        path: path.resolve(projectModule.directory, "bundle/browser"),
+        path: path.resolve(this.projectModule.directory, "bundle/browser"),
       },
       resolve: {
         plugins: [<any>new TsConfigPathsWebpackPlugin()],
@@ -76,7 +77,7 @@ export class BrowserModule2 {
             loader: "ts-loader",
             options: {
               configFile: path.resolve(
-                projectModule.directory,
+                this.projectModule.directory,
                 `configs/tsconfig.browser.json`
               ),
               transpileOnly: true,
@@ -92,25 +93,39 @@ export class BrowserModule2 {
         ],
       },
     });
+  }
 
-    const compileCallback = (error, stats) => {
-      if (stats) {
-        this.log.info(stats.toString({ colors: true, warnings: false }));
-      } else if (error) {
-        throw error;
-      }
-    };
-
+  @CliCommand("pack", y =>
+    y.option("watch", { type: "boolean", alias: "w", default: false })
+  )
+  async pack({ watch }) {
+    // console.log(await this.createWebpackCompiler2());
+    // return;
+    const compiler = await this.createWebpackCompiler();
+    return;
     if (watch) {
-      compiler.watch({}, compileCallback);
-    } else {
-      compiler.run(compileCallback);
     }
+
+    return new Promise<webpack.Stats>((resolve, reject) => {
+      compiler.run((error, stats: webpack.Stats) => {
+        console.log({ error });
+
+        if (error) return reject(error);
+        resolve(stats);
+        console.log({ stats });
+      });
+    });
   }
 
   installExpress(@Plugin() expressModule: ExpressModule2) {
     expressModule.postBuilders.push(app => {
       app.get("/*", (req, res) => {
+        if (req.path.endsWith(".js")) {
+          return res
+            .contentType("text/javascript")
+            .send(`console.error("File not found.")`);
+        }
+
         res.contentType("text/html").send(
           makeHtml({
             head: `<meta charset="utf-8">`,
@@ -130,25 +145,11 @@ export class BrowserModule2 {
     @Plugin() projectModule: ProjectModule2,
     @Plugin() expressModule: ExpressModule2
   ) {
-    console.log("installing");
-
     expressModule.builders.push(app => {
-      const bundlePath = path.join(projectModule.directory, "bundle/browser");
-      console.log("building");
-
-      const bundleStatic = express.static(bundlePath);
-      app.use("/bundle/browser", (req, res) => {
-        bundleStatic(req, res, () => {
-          console.log({ req });
-
-          if (req.path.endsWith(".js")) {
-            return res
-              .contentType("text/javascript")
-              .send(`console.error("File not found");`);
-          }
-          res.status(404).send(`File not found`);
-        });
-      });
+      app.use(
+        "/bundle/browser",
+        express.static(path.join(projectModule.directory, "bundle/browser"))
+      );
     });
   }
 

@@ -1,7 +1,11 @@
 import { reversed } from "@dabsi/common/array/reversed";
 import { objectBases } from "@dabsi/common/object/objectBases";
 
-import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
+import {
+  ProvidableResolver,
+  Resolver,
+  ResolverMap,
+} from "@dabsi/typedi/Resolver";
 
 declare module "./Resolver" {
   namespace Resolver {
@@ -15,9 +19,7 @@ function _assign(context, args: Provider[]): ResolverMap {
   for (const arg of args) {
     if (!arg) continue;
     if (typeof arg === "function") {
-      context[Resolver.Providability.token(arg)] = () => {
-        throw new Error(`Can't resolve "${(arg as any).name}".`);
-      };
+      _assginNoResolve(arg);
       continue;
     }
     if (arg.constructor === Object) {
@@ -25,9 +27,7 @@ function _assign(context, args: Provider[]): ResolverMap {
     } else if (Array.isArray(arg)) {
       for (const item of arg) {
         if (typeof item === "function") {
-          context[Resolver.Providability.token(item)] = () => {
-            throw new Error(`Can't resolve "${item.name}".`);
-          };
+          _assginNoResolve(item);
         } else {
           context[Resolver.Providability.token(item.constructor)] = () => item;
         }
@@ -37,6 +37,13 @@ function _assign(context, args: Provider[]): ResolverMap {
     }
   }
   return context;
+
+  function _assginNoResolve(resolver: ProvidableResolver<any>) {
+    const token = Resolver.Providability.token(resolver);
+    context[token] = context => {
+      throw new Error(`No resolve for "${token}".`);
+    };
+  }
 }
 export function ResolverContext(...args: Provider[]): ResolverMap {
   return _assign({}, args);

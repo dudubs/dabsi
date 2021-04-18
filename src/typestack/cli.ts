@@ -61,7 +61,7 @@ export default function typestackCli(): boolean {
   moduleRunner.get(moduleTarget);
   const cliModule = moduleRunner.get(CliModule2);
 
-  moduleRunner.process.wait().then(() => {
+  moduleRunner.process.waitAndPush(async () => {
     cliModule.run(tsArgs);
   });
 

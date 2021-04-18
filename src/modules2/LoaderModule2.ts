@@ -2,6 +2,7 @@ import { Module } from "@dabsi/typemodule";
 import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import fs from "fs";
+import { Seq } from "immutable4";
 import { dirname, join } from "path";
 
 @Module()
@@ -9,7 +10,9 @@ export class LoaderModule2 {
   protected _loaderCallbacks: ((dir: string) => Promise<any>)[] = [];
 
   protected _readDirCache = new Map<string, Promise<string[]>>();
+
   protected _statCache = new Map<string, Promise<fs.Stats>>();
+
   protected _readJsonFileCache = new Map<string, any>();
 
   protected _loadedDirs = new Set<string>();
@@ -30,6 +33,24 @@ export class LoaderModule2 {
       }
     );
     ///
+  }
+
+  getLoadedDirectories(): Seq.Indexed<string> {
+    return this._loadedDirs.toSeq();
+  }
+
+  tryToLoad(paths: string[], dir?: string) {
+    return Promise.all(
+      paths.toSeq().map(async modulePath => {
+        if (dir) {
+          modulePath = join(dir, modulePath);
+        }
+        if (!(await this.isFile(modulePath))) return;
+        const { default: moduleTarget } = require(modulePath);
+        if (typeof moduleTarget !== "function") return;
+        this.moduleRunner.get(moduleTarget);
+      })
+    );
   }
 
   pushLoader(

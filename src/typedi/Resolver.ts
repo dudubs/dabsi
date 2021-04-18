@@ -1,7 +1,8 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
+import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
 import {
-  createCustomResolver,
   CustomResolverFn,
+  ResolvedDeps,
   ResolverDeps,
 } from "@dabsi/typedi/custom";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
@@ -28,7 +29,7 @@ export type ProvidableResolver<T> = Constructor<T> & {
   [providableSymbol]?: true;
 };
 
-export type CustomResolverFactory<T> = {
+export type CustomResolver<T> = {
   new (context: ResolverMap): T;
   [providableSymbol]: false;
 };
@@ -60,7 +61,7 @@ export interface IResolver {
   <T, U extends ResolverDeps>(
     deps: U,
     factory: CustomResolverFn<T, U>
-  ): CustomResolverFactory<T>;
+  ): CustomResolver<T>;
 }
 
 export function Resolver<T = {}>(): new (context: ResolverMap) => T;
@@ -82,11 +83,34 @@ export function Resolver<
 export function Resolver<T, U extends ResolverDeps>(
   deps: U,
   factory: CustomResolverFn<T, U>
-): CustomResolverFactory<T>;
+): CustomResolver<T>;
+
+export function Resolver<T extends ResolverDeps>(
+  deps: T
+): CustomResolver<ResolvedDeps<T>>;
+
 export function Resolver(...args) {
+  //
+  if (!args.length) return Providable;
+
+  const [arg0] = args;
+  if (
+    args.length === 1 &&
+    (Array.isArray(arg0) || Object.getPrototypeOf(arg0 === Object.prototype))
+  ) {
+    if (Array.isArray(arg0)) {
+      return Resolver.array(arg0);
+    }
+    if (Object.getPrototypeOf(arg0) === Object.prototype) {
+      return Resolver.object(arg0);
+    }
+  }
+
+  // TODO: Resolver.locate(resolver, anchor)
+
   if (args.length === 3) {
     const [provider, deps, resolver] = args;
-    args = [provider, Resolver(deps, resolver)];
+    args = [provider, Resolver.custom(deps, resolver)];
   }
 
   if (args.length === 2 && typeof args[1] === "function") {
@@ -95,7 +119,7 @@ export function Resolver(...args) {
       Array.isArray(deps) ||
       Object.getPrototypeOf(deps) === Object.prototype
     ) {
-      return createCustomResolver(deps, factory);
+      return Resolver.custom(deps, factory);
     }
   }
 
@@ -114,7 +138,7 @@ export function Resolver(...args) {
     };
   }
 
-  return Providable;
+  throw new TypeError("No overload.");
 }
 class Providable {
   constructor(context: ResolverMap) {

@@ -1,4 +1,3 @@
-import { toAsync } from "@dabsi/common/async/toAsync";
 import { Injectable, Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";

@@ -21,7 +21,7 @@ export class CliBuilder {
   readonly declarations: string[] = [];
 
   constructor(
-    protected runner: (promise: Promise<any>) => void,
+    protected runner: (getPromise: () => Promise<any>) => void,
     protected parent?: CliBuilder
   ) {}
 
@@ -76,7 +76,7 @@ export class CliBuilder {
           "",
           y => builder.build(y),
           args => {
-            this.runner(builder.execute(args));
+            this.runner(() => builder.execute(args));
           }
         );
       });

@@ -1,10 +1,10 @@
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import RichTextImageModule from "@dabsi/system/rich-text-plugins/image";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
-import { rtTester, rtTestModules } from "@dabsi/system/rich-text/tests/tester";
+import { rtTestBuilders, rtTester } from "@dabsi/system/rich-text/tests/tester";
 import sharp from "sharp";
 
-rtTestModules.push(RichTextImageModule);
+rtTestBuilders.push(RichTextImageModule);
 
 const t = rtTester.beforeAll(async t => {
   t.configure({ allowAll: true });

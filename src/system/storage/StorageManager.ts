@@ -1,19 +1,18 @@
-import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Type } from "@dabsi/common/typings2/Type";
-import { DataContext } from "@dabsi/modules/data/context";
+
 import { RequestSession } from "@dabsi/modules/session/module";
-import Storage from "@dabsi/system/storage/Storage";
-import { DataRow } from "@dabsi/typedata/row";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { Storage } from "@dabsi/system/storage/Storage";
 import { DataInsertRow } from "@dabsi/typedata/value";
-import { Inject, Injectable, Resolved } from "@dabsi/typedi";
-import { StorageFile } from "./entities/file";
+import { Injectable } from "@dabsi/typedi";
+import { StorageFile } from "./entities/StorageFile";
 
 @Injectable()
 export default class StorageManager {
   constructor(
     protected storage: Storage,
-    protected data: DataContext,
-    @Inject(RequestSession) protected session: Resolved<typeof RequestSession>
+    protected getDataSource: DataSourceFactory2,
+    protected session: RequestSession
   ) {}
 
   async upload<T extends StorageFile = StorageFile>(
@@ -23,7 +22,7 @@ export default class StorageManager {
     entityType?: Type<T>,
     entityData?: DataInsertRow<T>
   ): Promise<{ url: string; key: string }> {
-    const files = this.data.getSource(
+    const files = this.getDataSource(
       (entityType || StorageFile) as typeof StorageFile
     );
     const { url } = await this.storage.upload(tag, type, buffer);

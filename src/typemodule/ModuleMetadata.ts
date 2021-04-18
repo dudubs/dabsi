@@ -1,6 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { defined } from "@dabsi/common/object/defined";
-import { CallStackAnchor } from "@dabsi/typedi/CallStackAnchor";
+import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
 import { ModuleTarget } from "@dabsi/typemodule/ModuleRunner";
 
 export interface BaseModuleOptions {

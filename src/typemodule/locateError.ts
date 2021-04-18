@@ -5,5 +5,6 @@ export function locateError(error, location: string) {
     );
     return error;
   }
+
   return error;
 }

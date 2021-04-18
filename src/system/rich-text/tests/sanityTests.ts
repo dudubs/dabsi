@@ -2,9 +2,9 @@ import { Tester } from "@dabsi/jasmine/Tester";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextPacker } from "@dabsi/system/rich-text/packer";
-import { rtTester, rtTestModules } from "@dabsi/system/rich-text/tests/tester";
-import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/utils";
-import { Module } from "@dabsi/typedi";
+import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/makeContentWithEntity";
+import { rtTestBuilders, rtTester } from "@dabsi/system/rich-text/tests/tester";
+import { Resolver } from "@dabsi/typedi";
 
 declare global {
   namespace IRichText {
@@ -24,14 +24,17 @@ declare global {
     }
   }
 }
-@Module()
-class TestModule {
-  constructor(protected rtModule: RichTextModule) {
+
+rtTestBuilders.push(
+  Resolver([RichTextModule], rtModule => {
     rtModule
       .defineEntity("test-entity", {
         readonlyKeys: ["commonString"],
         pack({ unpackedString }, { config }) {
-          return { packedString: unpackedString, commonString: unpackedString };
+          return {
+            packedString: unpackedString,
+            commonString: unpackedString,
+          };
         },
         unpack({ packedString, commonString }, { config }) {
           return { unpackedString: packedString, commonString };
@@ -40,15 +43,17 @@ class TestModule {
       .defineBlock("test-block", {
         readonlyKeys: ["commonString"],
         pack({ unpackedString }, { config }) {
-          return { packedString: unpackedString, commonString: unpackedString };
+          return {
+            packedString: unpackedString,
+            commonString: unpackedString,
+          };
         },
         unpack({ packedString, commonString }, { config }) {
           return { unpackedString: packedString, commonString };
         },
       });
-  }
-}
-rtTestModules.push(TestModule);
+  })
+);
 
 const t = Tester.beforeAll(async () => {
   const t = rtTester;

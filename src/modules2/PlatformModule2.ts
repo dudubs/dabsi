@@ -1,5 +1,4 @@
-import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
-import { MapFactory } from "@dabsi/common/map/mapFactory";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Defined } from "@dabsi/common/patterns/Defined";
 import { DABSI_DIR } from "@dabsi/env";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
@@ -17,69 +16,33 @@ export class PlatformModule2 {
   constructor(
     protected loaderModule: LoaderModule2,
     protected projectModule: ProjectModule2,
-    protected process: AsyncProcess
+    protected process: AsyncProcess2
   ) {}
 
   readonly viewLibs = new Set<string>();
 
   protected _map = new Map<string, Platform2>();
+  protected _platformMap = new Map<string, Platform2>();
+
+  getPlatform(name: string) {
+    return this._platformMap.touch(
+      name,
+      () => new Platform2(name, this.loaderModule)
+    );
+  }
 
   readonly platformConfigMap = new Map<string, { view: boolean }>();
 
-  get(platformName: string): Platform2 {
-    return this._map.touch(platformName, () => {
-      const platform = new Platform2(platformName);
-
-      this.loaderModule.pushLoader(
-        () => `${this.constructor.name}.PlatformLoader<${platformName}>`,
-        async dir => {
-          const platformDir = path.join(dir, platformName);
-          const platformTestsDir = path.join(platformDir, "tests");
-          const [indexFile, testsFiles] = await Promise.all([
-            //
-            this.loaderModule.resolveIndexFile(platformDir),
-            this.loaderModule
-              .readDir(path.join(platformTestsDir))
-              .catch(() => []),
-          ]);
-
-          (testsFiles.length || indexFile) &&
-            platform.directories.add(platformDir);
-
-          indexFile && platform.indexFileNames.add(indexFile);
-
-          for (const testFile of testsFiles) {
-            if (
-              /tests\.tsx?$/i.test(testFile) ||
-              /[\\\/]index\.tsx?$/i.test(testFile)
-            ) {
-              platform.testsFileNames.add(testFile);
-            }
-          }
-        }
-      );
-
-      return platform;
-    });
-  }
-
-  get commonPlatform(): Platform2 {
-    return this.get("common");
-  }
-
-  get viewPlatform(): Platform2 {
-    return this.get("view");
-  }
+  // TODO: Once() getViewPlatform
 
   async generateCode(outDir: string, platformName: string) {
-    const platforms = [
-      this.commonPlatform,
-      this.viewPlatform,
-      this.get(platformName),
+    const platforms: Platform2[] = [
+      this.getPlatform("common"),
+      this.getPlatform("view"),
+      this.getPlatform(platformName),
     ];
-    // waiting for platform loaders.
 
-    await this.process.wait();
+    await Promise.all(platforms.toSeq().map(p => p.load()));
 
     const indexCode: string[] = [
       `const l = m => { (typeof m.initmodule==="function") && m.initmodule(m)?.forEach(l) }`,
@@ -124,12 +87,16 @@ export class PlatformModule2 {
   }
 
   @CliCommand("make")
-  async make({}, process: AsyncProcess) {
-    const platforms: Platform2[] = [
-      this.commonPlatform,
-      this.viewPlatform,
-      ...this.platformConfigMap.toSeq("keys").map(name => this.get(name)),
-    ];
+  async make({}, process: AsyncProcess2) {
+    const platforms: Platform2[] = await Promise.all([
+      this.getPlatform("common"),
+      this.getPlatform("view"),
+      ...this.platformConfigMap
+        .toSeq("keys")
+        .map(name => this.getPlatform(name)),
+    ]);
+
+    await Promise.all(platforms.toSeq().map(p => p.load()));
 
     const viewPlatforms = this.platformConfigMap
       .toSeq()
@@ -137,13 +104,10 @@ export class PlatformModule2 {
       .keySeq()
       .toSet();
 
-    await process.wait();
-
     const fs = TsConfigPaths2.createFs();
 
     class Project {
       platformMap = new Map<Platform2, ProjectPlatform>();
-
       configsDir = path.join(this.dir, "configs");
 
       @Defined() paths!: TsConfigPaths2;

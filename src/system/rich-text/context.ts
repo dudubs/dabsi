@@ -3,12 +3,11 @@
  *  private user key ^ private config key ^ private entity key
  *
  */
-import { DataContext } from "@dabsi/modules/data/context";
-import RpcModule from "@dabsi/modules/rpc";
-import RpcConfigFactoryResolver, {
-  RpcConfigFactory,
-} from "@dabsi/modules/rpc/configFactoryResolver";
+
+import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
 import { RequestSession } from "@dabsi/modules/session/module";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { RpcModule2 } from "@dabsi/modules/rpc";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
@@ -19,7 +18,7 @@ import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
 import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 import { DataSource } from "@dabsi/typedata/source";
-import { Inject, Injectable, Resolved, Resolver } from "@dabsi/typedi";
+import { Injectable, Resolver } from "@dabsi/typedi";
 import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 
@@ -31,22 +30,21 @@ declare global {
   }
 }
 
+class RichTextConfigFactory extends RpcConfigFactoryResolver(RichTextRpc, {
+  context: Resolver(RichTextConfigContext),
+}) {}
+
 @Injectable()
 export class RichTextContext {
-  docs = this.data.getSource(RichTextDocument);
-  rels = this.data.getSource(RichTextRelation);
+  docs = this.getDataSource(RichTextDocument);
+  rels = this.getDataSource(RichTextRelation);
 
   constructor(
     public module: RichTextModule,
-    @Inject(RequestSession) public session: Resolved<typeof RequestSession>,
-    public data: DataContext,
-    protected rpcModule: RpcModule,
-    @Inject(
-      RpcConfigFactoryResolver(RichTextRpc, {
-        context: Resolver(RichTextConfigContext),
-      })
-    )
-    protected _createRpcConfig: RpcConfigFactory<typeof RichTextRpc>
+    public session: RequestSession,
+    public getDataSource: DataSourceFactory2,
+    protected rpcModule: RpcModule2,
+    protected _createRpcConfig: RichTextConfigFactory
   ) {}
 
   async pack(

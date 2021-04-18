@@ -1,4 +1,4 @@
-import StorageModule from "@dabsi/system/storage";
+import StorageModule from "@dabsi/system/storage/module";
 import { Module } from "@dabsi/typedi";
 
 @Module({

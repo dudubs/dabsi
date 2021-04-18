@@ -1,7 +1,6 @@
 import catchError from "@dabsi/common/async/catchError";
-import nested from "@dabsi/common/string/nested";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 import { locateError } from "@dabsi/typemodule/locateError";
 
 declare module "../Resolver" {
@@ -19,21 +18,18 @@ Resolver.array = function (resolvers, getItemName) {
     if (argName) {
       return `argument ${argName}`;
     } else {
-      return `index ${index}`;
+      return `array item ${index}`;
     }
   }
 
   return Resolver.create(
     context => {
       return resolvers.map((item, index) => {
-        catchError(
-          ResolveError,
-          () => Resolver.resolve(item, context),
-          error => {
-            throw locateError(error, errorAt(index));
-          }
-        );
-        return Resolver.resolve(item, context);
+        try {
+          return Resolver.resolve(item, context);
+        } catch (error) {
+          throw locateError(error, errorAt(index));
+        }
       });
     },
     context => {
@@ -42,13 +38,7 @@ Resolver.array = function (resolvers, getItemName) {
         try {
           Resolver.check(resolver, context);
         } catch (error) {
-          if (error instanceof ResolveError) {
-            message += `${message ? "\nAlso at" : "At"} ${errorAt(
-              index
-            )}${nested(error.message)}`;
-            continue;
-          }
-          throw error;
+          throw locateError(error, errorAt(index));
         }
       }
       if (message) {

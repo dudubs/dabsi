@@ -7,7 +7,7 @@ import AclContext from "./context";
   dependencies: [DbModule2],
   cli: "acl",
 })
-export default class AclModule {
+export class AclModule {
   log = log.get("ACL");
 
   @CliCommand("show.groups")

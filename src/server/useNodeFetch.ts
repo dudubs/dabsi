@@ -1,10 +1,10 @@
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import nodeFetch from "node-fetch";
-import Lazy from "@dabsi/common/patterns/Lazy";
 
 declare global {
   // let fetch: typeof nodeFetch;
 }
 
-export const useNodeFetch = Lazy(() => {
+export const useNodeFetch = SingleCall(() => {
   global["fetch"] = nodeFetch;
 });

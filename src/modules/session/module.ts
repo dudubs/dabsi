@@ -1,20 +1,22 @@
+import { defined } from "@dabsi/common/object/defined";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
-import Lazy from "@dabsi/common/patterns/Lazy";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
+import { DataTicker } from "@dabsi/modules/data/ticker";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import getResourceTypes from "@dabsi/modules/session/getResourceTypes";
-import { Resource } from "@dabsi/modules/session/resource";
+import { BaseResource } from "@dabsi/modules/session/resource";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
-import { DbConnectionRef } from "@dabsi/modules2/DbModule2";
+import { DbConnectionRef, DbModule2 } from "@dabsi/modules2/DbModule2";
 import {
   ExpressModule2,
   ExpressRequest,
   ExpressResponse,
 } from "@dabsi/modules2/ExpressModule2";
-import { ServerRequest } from "@dabsi/modules2/ServerModule2";
+import { ServerRequestBuilder } from "@dabsi/modules2/ServerModule2";
+import { generateSessionToken } from "@dabsi/modules/session/generateSessionToken";
 import { User } from "@dabsi/system/acl/entities/User";
 import { CliCommand } from "@dabsi/typecli";
 import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
@@ -33,30 +35,17 @@ export class RequestUser extends Resolver<DataRowTicker<User>>() {}
 
 export class RequestSession extends Resolver<DataRowTicker<Session>>() {}
 
-class CleanContext extends Resolver.object({
+class CleanContext extends Resolver({
   getDataSource: DataSourceFactory2,
   getConnection: DbConnectionRef,
 }) {}
 
 @Module({
   cli: "session",
+  dependencies: [DbModule2],
 })
 export class SessionModule {
-  @CliCommand("clean")
-  async cleanAll(context: CleanContext) {
-    await this.cleanTimeoutSessions(context);
-    await this.cleanUnusedResources(context);
-  }
-
-  defineResourceType<T extends Resource, S extends DataSelection<T> = {}>(
-    type: Type<T>,
-    options: {
-      selection?: S;
-      handle: (resource: DataRow<DataSelectionRow<T, S>>) => Awaitable;
-    }
-  ) {
-    this._resourceTypeOptionsMap.set(type, options);
-  }
+  cookieName = "session-k";
 
   protected _resourceTypeOptionsMap = new Map<
     Function,
@@ -65,6 +54,24 @@ export class SessionModule {
       handle: (resource) => Awaitable;
     }
   >();
+
+  constructor() {}
+
+  @CliCommand("clean")
+  async cleanAll(context: CleanContext) {
+    await this.cleanTimeoutSessions(context);
+    await this.cleanUnusedResources(context);
+  }
+
+  defineResourceType<T extends BaseResource, S extends DataSelection<T> = {}>(
+    type: Type<T>,
+    options: {
+      selection?: S;
+      handle: (resource: DataRow<DataSelectionRow<T, S>>) => Awaitable;
+    }
+  ) {
+    this._resourceTypeOptionsMap.set(type, options);
+  }
 
   getResourceHandler(
     connection: Connection,
@@ -136,7 +143,7 @@ export class SessionModule {
       const handler = this.getResourceHandler(getConnection(), resourceType);
 
       if (!handler) {
-        await getDataSource(resourceType as typeof Resource)
+        await getDataSource(resourceType as typeof BaseResource)
           // TODO: use $not
           .filter({
             $and: [{ $notHas: "session" }, [{ $countRefs: "any" }, "=", 0]],
@@ -169,40 +176,93 @@ export class SessionModule {
   }
 
   installExpress(@Plugin() expressModule: ExpressModule2) {
-    expressModule.useRequest(Lazy(() => CookieParser()));
-
-    expressModule.request.initializers.push(
-      Resolver([], () => async () => {
-        await new Promise(next => {
-          CookieParser()();
-        });
-      })
-    );
+    expressModule.useRequest(() => CookieParser());
 
     Resolver.Context.assign(
       expressModule.request.context,
       Resolver(SessionCookie, [ExpressRequest, ExpressResponse], (req, res) => {
         return {
-          value: req.cookies["session"],
-          setValue(value) {
-            res.cookie("session", value);
+          get: () => req.cookies[this.cookieName],
+          define: value => {
+            res.cookie(this.cookieName, value);
           },
         };
       })
     );
   }
 
-  installRequest(@Plugin() request: ServerRequest) {
-    request.initializers.push(
-      Resolver([SessionCookie], () => async () => {
-        // TODO
+  installRequest(
+    @Plugin() request: ServerRequestBuilder,
+    getDataSource: DataSourceFactory2
+  ) {
+    request.finalizers.push(
+      Resolver([], () => async () => {
+        //
       })
+    );
+
+    request.initializers.push(
+      Resolver(
+        [SessionCookie, DataTicker, c => c],
+        (cookie, dataTicker, context) => async () => {
+          // TODO
+
+          const [sessionKey, userKey] = await getSession();
+
+          Resolver.Context.assign(
+            context,
+            Resolver(RequestSession, () =>
+              dataTicker.getRowTicker(Session, sessionKey)
+            ),
+            Resolver(RequestUser, () =>
+              dataTicker.getRowTicker(User, defined(userKey, `No user Key`))
+            )
+          );
+
+          async function getSession(): Promise<
+            [sessionKey: string, userKey?: string]
+          > {
+            const { key, token } = getCookie() || {};
+            if (typeof key === "string" && typeof token === "string") {
+              const session = await getDataSource(Session)
+                .filter({
+                  $and: [{ $is: key }, { token }],
+                })
+                .select({ relations: { user: { pick: [] } } })
+                .get();
+              if (session) return [key, session.user?.$key];
+            }
+            {
+              const token = generateSessionToken();
+              const key = await getDataSource(Session).insertKey({
+                token,
+                timeout: getCurrentTime(),
+              });
+              defineCookie(key, token);
+              return [key];
+            }
+          }
+
+          function getCookie() {
+            const data = cookie.get();
+            if (!data) return;
+            try {
+              const [key, token] = JSON.parse(data);
+              return { key, token };
+            } catch (error) {}
+          }
+
+          function defineCookie(key: string, token: string) {
+            cookie.define(JSON.stringify([key, token]));
+          }
+        }
+      )
     );
   }
 }
 
 export class SessionCookie {
-  value!: string;
+  get!: () => string;
 
-  setValue!: (value: string) => void;
+  define!: (value: string) => void;
 }

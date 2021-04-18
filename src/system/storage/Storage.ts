@@ -5,12 +5,12 @@ export enum StorageDeleteResult {
 }
 export type StorageUploadResult = { url: string };
 
-export default abstract class Storage {
-  abstract upload(
+export class Storage {
+  upload!: (
     tag: string,
     type: string,
     buffer: Buffer
-  ): Promise<StorageUploadResult>;
+  ) => Promise<StorageUploadResult>;
 
-  abstract delete(url: string): Promise<StorageDeleteResult>;
+  delete!: (url: string) => Promise<StorageDeleteResult>;
 }

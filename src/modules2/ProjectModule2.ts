@@ -1,4 +1,4 @@
-import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
 import { Inject, Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
@@ -19,7 +19,7 @@ export class ProjectModule2 {
 
   constructor(
     protected loaderModule: LoaderModule2,
-    process: AsyncProcess,
+    process: AsyncProcess2,
 
     @Inject(ProjectDirectory)
     public readonly directory: string

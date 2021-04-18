@@ -1,3 +1,5 @@
+import { locateError } from "@dabsi/typemodule/locateError";
+
 export class AsyncProcess {
   protected _callbacks: (() => void)[] = [];
 
@@ -5,7 +7,7 @@ export class AsyncProcess {
 
   protected _errors: any[] = [];
 
-  wait(): Promise<void> {
+  protected wait(): Promise<void> {
     if (!this._descriptors.size) return Promise.resolve();
 
     return new Promise<void>((resolve, reject) => {
@@ -16,10 +18,6 @@ export class AsyncProcess {
   }
 
   protected _emit() {
-    if (this._internval) {
-      clearInterval(this._internval);
-      this._internval = null;
-    }
     if (!this._callbacks.length) {
       if (this._errors[0]) {
         throw this._errors[0];
@@ -40,38 +38,23 @@ export class AsyncProcess {
     }
   }
 
-  protected _internval: ReturnType<typeof setInterval> | null = null;
-
-  waitAndPush(
-    descriptor: () => string,
-    promise: Promise<any> | (() => Promise<any>)
-  ) {
+  waitAndPush(descriptor: () => string, getPromise: () => Promise<any>) {
     return this.wait().then(() => {
-      this.push(descriptor, promise);
+      this.push(descriptor, getPromise);
     });
   }
 
-  push(descriptor: () => string, promise: Promise<any> | (() => Promise<any>)) {
+  push(descriptor: () => string, getPromise: () => Promise<any>) {
     if (this._errors.length) {
       return;
-    }
-    if (typeof promise === "function") {
-      promise = promise();
-    }
-
-    if (!this._internval) {
-      this._internval = setInterval(() => {
-        console.log("process still running:");
-        this.log();
-      }, 3000);
     }
 
     this._descriptors.add(descriptor);
 
-    promise
+    getPromise()
       .catch(error => {
         // TODO: locate error by descriptor.
-        this._errors.push(error);
+        this._errors.push(locateError(error, descriptor()));
         this._emit();
       })
       .finally(() => {

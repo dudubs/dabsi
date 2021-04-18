@@ -1,7 +1,7 @@
-import RpcModule from ".";
-import { CustomResolverFactory, Resolver, ResolverMap } from "../../typedi";
-import { ResolveError } from "../../typedi/ResolveError";
-import { AnyRpc, RpcResolvedConfig } from "../../typerpc/Rpc";
+import { RpcModule2 } from "@dabsi/modules/rpc";
+import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi";
+import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { AnyRpc, RpcResolvedConfig, RpcType } from "../../typerpc/Rpc";
 import { RpcConfigResolver } from "./configResolver";
 
 export type RpcConfigFactory<T extends AnyRpc> = (
@@ -18,9 +18,9 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
     generate?: boolean;
     context?: ResolverMap;
   } = {}
-): CustomResolverFactory<RpcConfigFactory<T>> {
+): CustomResolver<RpcConfigFactory<T>> {
   return Resolver.chainCheck(
-    Resolver([RpcModule, c => c], (rpcModule, context) => {
+    Resolver([RpcModule2, c => c], (rpcModule, context) => {
       const rpcConfigResolver = getRpcConfigResolver(rpcModule);
       return childContext => {
         const rpcConfig = Resolver.resolve(
@@ -33,7 +33,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
     }),
     childContext => {
       const rpcConfigResolver = getRpcConfigResolver(
-        Resolver.resolve(RpcModule, childContext)
+        Resolver.resolve(RpcModule2, childContext)
       );
       Resolver.checkObject(rpcContext, childContext);
       Resolver.check(
@@ -44,7 +44,7 @@ export default function RpcConfigFactoryResolver<T extends AnyRpc>(
   );
 
   function getRpcConfigResolver(
-    rpcModule: RpcModule
+    rpcModule: RpcModule2
   ): RpcConfigResolver<AnyRpc> {
     const rpcConfigResolver = generate
       ? rpcModule.generateConfigResolver(rpc)

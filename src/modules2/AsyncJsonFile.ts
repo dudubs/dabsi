@@ -1,6 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import fs from "fs";
-import path from "path";
+
 export class AsyncJsonFile<T> {
   constructor(protected path: string) {}
 

@@ -11,7 +11,7 @@ describe("CliBuilder", () => {
 
   beforeEach(() => {
     b = new CliBuilder(p => {
-      p.then(() => {});
+      p();
     });
   });
 
@@ -43,8 +43,9 @@ describe("CliRunner", () => {
     const moduleRunner = new ModuleRunner();
     const cliModule = moduleRunner.get(CliModule2);
     moduleRunner.get(m);
-    await moduleRunner.process.wait();
-    await cliModule.run("test", args);
+    moduleRunner.process.waitAndPush(async () => {
+      cliModule.run(args);
+    });
   };
 
   it("expect to inject and run command.", async done => {

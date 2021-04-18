@@ -11,14 +11,14 @@ import { BaseRpc } from "@dabsi/typerpc/BaseRpc";
 import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
 import { IsGenericConfig } from "@dabsi/typerpc/GenericConfig";
 
-export type TRpc = {
+export interface TRpc {
   Payload?: any;
   Handler: object;
   Connection: any;
   Children: Record<string, AnyRpc>;
   Config: any;
   Props: object;
-};
+}
 
 export type AnyRpcWithChildren<T extends TRpc["Children"]> = Rpc<
   Override<
@@ -159,6 +159,7 @@ export type RpcUndefinedConfig<T extends BasedRpc> = If<
 export type RpcConnection<T extends BasedRpc> = _RpcConnection<RpcType<T>>;
 
 export type RpcPayload<T extends BasedRpc> = RpcType<T>["Payload"];
+export type RpcProps<T extends BasedRpc> = RpcType<T>["Props"];
 
 export function RpcConfig<T extends AnyRpc>(
   rpc: T,
@@ -235,8 +236,6 @@ export type RpcOptions<T extends TRpc> = PartialUndefinedKeys<
     children: RpcChildrenOption<T>;
   },
   {
-    // configType;
-
     connect: _RpcConnectionFactory<T>;
 
     handler: RpcHandlerClass<Rpc<T>>;

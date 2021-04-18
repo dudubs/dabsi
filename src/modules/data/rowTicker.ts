@@ -1,7 +1,8 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { DataContext } from "@dabsi/modules/data/context";
+
 import { DataRowLoader } from "@dabsi/modules/data/rowLoader";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";
@@ -22,7 +23,7 @@ export class DataRowTicker<T = any> {
   protected _callbacks: ((row: any, tick: number) => Promise<void>)[] = [];
 
   constructor(
-    protected data: DataContext,
+    protected getDataSource: DataSourceFactory2,
     protected rowType: Constructor<T>,
     protected rowKey: string | null,
     protected runner: (callback: () => Promise<void>) => void
@@ -33,7 +34,7 @@ export class DataRowTicker<T = any> {
   }
 
   getSource<T>(this: DataRowTicker<T>): DataSource<T> {
-    return this.data.getSource(this.rowType);
+    return this.getDataSource(this.rowType);
   }
 
   at<T, K extends DataRelationKeys<T>>(
@@ -68,18 +69,19 @@ export class DataRowTicker<T = any> {
       .select(this._selection as {})
       .get();
 
-    await Promise.all(
-      _callbacks.map(
-        //
-        async callback => callback(row, tick)
-      )
-    );
+    // reset selection
+    this._selection = { pick: [] };
+
+    await Promise.all(_callbacks.map(async callback => callback(row, tick)));
   }
 
   push(callback: (row: any, tick: number) => Promise<void>) {
     if (this._callbacks.length === 0) {
-      this.runner(() => this.run(0));
+      this.runner(() => {
+        return this.run(0);
+      });
     }
+
     this._callbacks.push(callback);
   }
 
@@ -107,6 +109,7 @@ export class DataRowTicker<T = any> {
           pick: keysOrSel,
         }
       : keysOrSel;
+
     const selLoader = DataRowLoader(
       this._selection,
       selection as AnyDataSelection

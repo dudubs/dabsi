@@ -12,7 +12,7 @@ import { NoRpc } from "@dabsi/typerpc/NoRpc";
 import { AnyRpc, RpcType, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
+import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
 import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
 import { AnyDataTable } from "@dabsi/typerpc/data-table/rpc";
 import { Form } from "@dabsi/typerpc/widget/form/rpc";

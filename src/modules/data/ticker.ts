@@ -1,7 +1,8 @@
-import { Ticker } from "@dabsi/common/async/Ticker";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { DataContext } from "@dabsi/modules/data/context";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+
 import { Injectable } from "@dabsi/typedi";
 import { DataRowTicker } from "./rowTicker";
 
@@ -10,19 +11,14 @@ import { DataRowTicker } from "./rowTicker";
 export type DataRowTickerMap = Map<Function, Map<string, DataRowTicker>>;
 
 const getRowTickerMap = WeakMapFactory(
-  (ticker: Ticker): DataRowTickerMap => {
-    const map = new Map();
-    ticker.push(tick =>
+  (prcoess: AsyncProcess2): DataRowTickerMap => {
+    const map: DataRowTickerMap = new Map();
+    prcoess.push(tick =>
       Promise.all(
         map
-          .toSeq()
-          .toIndexedSeq()
-          .flatMap(rows =>
-            rows
-              .toSeq()
-              .toIndexedSeq()
-              .map(row => row.run(tick))
-          )
+          .toSeq("values")
+          .flatMap(rows => rows.toSeq("values"))
+          .map(row => row.run(tick))
       )
     );
     return map;
@@ -31,23 +27,29 @@ const getRowTickerMap = WeakMapFactory(
 
 @Injectable()
 export class DataTicker {
-  constructor(protected ticker: Ticker, protected data: DataContext) {}
+  constructor(
+    //
+    protected process: AsyncProcess2,
+    protected getDataSource: DataSourceFactory2
+  ) {}
 
   getRowTicker<T>(
     rowType: Constructor<T>,
     rowKey: string | null
   ): DataRowTicker<T> {
     if (!rowKey)
-      return new DataRowTicker(this.data, rowType, null, callback => {
-        this.ticker.push(callback);
+      return new DataRowTicker(this.getDataSource, rowType, null, callback => {
+        this.process.push(callback);
       });
-    return getRowTickerMap(this.ticker)
+    return getRowTickerMap(this.process)
       .touch(rowType, () => new Map())
       .touch(
         rowKey,
         () =>
-          new DataRowTicker(this.data, rowType, rowKey, callback => {
-            this.ticker.push(callback);
+          new DataRowTicker(this.getDataSource, rowType, rowKey, callback => {
+            this.process.push(() => {
+              return callback();
+            });
           })
       );
   }

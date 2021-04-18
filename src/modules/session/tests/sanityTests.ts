@@ -1,15 +1,13 @@
 import { Tester } from "@dabsi/jasmine/Tester";
-import CliModule from "@dabsi/modules/CliModule";
-import { DataContext } from "@dabsi/modules/data/context";
-import { DbModule } from "@dabsi/modules/DbModule";
-import SessionModule, { SESSION_TIMEOUT } from "@dabsi/modules/session/module";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
-import { Resource } from "@dabsi/modules/session/resource";
-import TestDbModule from "@dabsi/modules/tests/TestDbModule";
+import { SessionModule, SESSION_TIMEOUT } from "@dabsi/modules/session/module";
+import { BaseResource } from "@dabsi/modules/session/resource";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DbConnectionRef } from "@dabsi/modules2/DbModule2";
+import { DbModuleTester } from "@dabsi/modules2/tests/DbModuleTester";
 import { DataRelation } from "@dabsi/typedata/relation";
-import { OldModuleRunner as ModuleRunner } from "@dabsi/typedi/OldModuleRunner";
-import { findEntities } from "@dabsi/typeorm/findEntities";
+import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import {
   ChildEntity,
   Column,
@@ -19,15 +17,15 @@ import {
   ManyToOne,
   TableInheritance,
 } from "typeorm";
-import TestIdColumn from "../../../typedata/entity/tests/TestIdColumn";
+import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
 
 @Entity()
-class TestRes1 extends Resource {
+class TestRes1 extends BaseResource {
   @TestIdColumn() id!: string;
 }
 
 @Entity()
-class TestRes2 extends Resource {
+class TestRes2 extends BaseResource {
   @TestIdColumn() id!: string;
 
   @ManyToOne(() => TestRes1)
@@ -36,7 +34,7 @@ class TestRes2 extends Resource {
 
 @Entity()
 @TableInheritance({ column: "type" })
-class TestRes3 extends Resource {
+class TestRes3 extends BaseResource {
   @TestIdColumn() id!: string;
 
   @Column()
@@ -73,17 +71,19 @@ class TestDoc {
   manyRes3!: DataRelation<TestRes3>[];
 }
 
-const t = Tester.beforeAll(async () => {
-  const moduleRunner = new ModuleRunner();
-  moduleRunner.getInstance(CliModule);
-  await moduleRunner.getInstance(TestDbModule);
-  const sessionModule = moduleRunner.getInstance(SessionModule);
-  const dbModule = moduleRunner.getInstance(DbModule);
-  dbModule.entityTypes.addAll(
-    findEntities([TestRes1, TestRes2, TestDoc, TestRes3])
-  );
-  await dbModule.init();
-  const data = moduleRunner.resolve(DataContext);
+const mt = ModuleTester({
+  dependencies: [SessionModule],
+});
+const dbt = DbModuleTester(mt);
+
+const t = Tester.beforeAll(async t => {
+  dbt.module.entityTypes.push(TestRes1, TestRes3, TestRes2);
+  const sessionModule = await mt.getAndWait(SessionModule);
+
+  const getDataSource = mt.resolve(DataSourceFactory2);
+  const getConnection = mt.resolve(DbConnectionRef);
+
+  await mt.wait();
 
   const handledResouces: any[] = [];
 
@@ -107,36 +107,41 @@ const t = Tester.beforeAll(async () => {
     relataions: { session: { pick: [] } },
   });
 
-  const sessions = data.getSource(Session);
+  const sessions = getDataSource(Session);
+  const resources1 = getDataSource(TestRes1);
+  const resources2 = getDataSource(TestRes2);
+  const resources3 = getDataSource(TestRes3);
+
   return {
     handledResouces,
     sessions,
     sessionModule,
-    resources1: data.getSource(TestRes1),
-    resources2: data.getSource(TestRes2),
-    resources3: data.getSource(TestRes3),
+    resources1,
+    resources2,
+    resources3,
 
-    connection: dbModule.getConnection(),
-    docs: data.getSource(TestDoc),
+    getConnection,
+    getDataSource,
+    docs: getDataSource(TestDoc),
     createResouces: async session => {
-      const res1 = await t.resources1.insertKey({
+      const res1 = await resources1.insertKey({
         session,
       });
-      const res2 = await t.resources2.insertKey({
+      const res2 = await resources2.insertKey({
         res1,
         session,
       });
-      const res3Child1 = await data.getSource(TestRes3Child1).insertKey({
+      const res3Child1 = await getDataSource(TestRes3Child1).insertKey({
         session,
         res1,
       });
 
-      const res3Child1Child1 = await data
-        .getSource(TestRes3Child1Child1)
-        .insertKey({
-          session,
-          res1,
-        });
+      const res3Child1Child1 = await getDataSource(
+        TestRes3Child1Child1
+      ).insertKey({
+        session,
+        res1,
+      });
       return { res1, res2, res3Child1, res3Child1Child1 };
     },
   };
@@ -170,7 +175,7 @@ const t = Tester.beforeAll(async () => {
   });
 
 beforeAll(async () => {
-  await t.sessionModule.cleanAll();
+  await t.sessionModule.cleanAll(t);
 });
 
 it("expect to delete timeout session", async () => {

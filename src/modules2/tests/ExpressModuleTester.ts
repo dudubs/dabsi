@@ -1,4 +1,5 @@
 import Lazy from "@dabsi/common/patterns/Lazy";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Tester } from "@dabsi/jasmine/Tester";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
@@ -31,6 +32,6 @@ export function ExpressModuleTester(t: ModuleTester) {
   });
 }
 
-ExpressModuleTester.default = Lazy(() =>
+ExpressModuleTester.default = SingleCall(() =>
   ExpressModuleTester(ModuleTester.default())
 );

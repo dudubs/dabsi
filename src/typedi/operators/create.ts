@@ -14,10 +14,10 @@ Resolver.create = function (resolve, check) {
     [Resolver.checkSymbol, check],
     [Resolver.providableSymbol, false],
   ] as [PropertyKey, any][]) {
-    Object.defineProperty(CustomResolverFactory, propertyName, {
+    Object.defineProperty(CustomResolver, propertyName, {
       enumerable: false,
       get() {
-        if (this !== CustomResolverFactory) {
+        if (this !== CustomResolver) {
           Object.defineProperty(this, propertyName, {
             enumerable: false,
             value,
@@ -28,8 +28,8 @@ Resolver.create = function (resolve, check) {
     });
   }
 
-  return CustomResolverFactory as any;
-  function CustomResolverFactory(context) {
-    return Resolver.resolve(CustomResolverFactory, context);
+  return CustomResolver as any;
+  function CustomResolver(context) {
+    return Resolver.resolve(CustomResolver, context);
   }
 };

@@ -1,5 +1,5 @@
-import { DataContext } from "@dabsi/modules/data/context";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { User } from "@dabsi/system/acl/entities/User";
 import { RichTextMentionRpc } from "@dabsi/system/rich-text-plugins/mention/common/rpc";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
@@ -8,7 +8,7 @@ export default RpcConfigResolver(
   RichTextMentionRpc,
   {
     config: RichTextConfigContext,
-    data: DataContext,
+    getDataSource: DataSourceFactory2,
   },
   c => $ =>
     $({

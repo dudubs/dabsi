@@ -5,7 +5,7 @@ import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
 import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
+import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
 import { DataTable } from "@dabsi/typerpc/data-table/rpc";
 import { Form } from "@dabsi/typerpc/widget/form/rpc";
 

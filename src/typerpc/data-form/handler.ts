@@ -1,10 +1,10 @@
 import { IfUndefined } from "@dabsi/common/typings2/boolean";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { DataContext } from "@dabsi/modules/data/context";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
@@ -44,7 +44,9 @@ export type DataFormConfig<
     noUpdate?: boolean;
 
     insertConfig?: ConfigFactory<DataInsertRow<Data>, [InputValue<Input>]>;
+
     updateConfig?: ConfigFactory<DataUpdateRow<Data>, [InputValue<Input>]>;
+
     commitConfig?: ConfigFactory<DataCommitRow<Data>, [InputValue<Input>]>;
   }
 >;
@@ -69,7 +71,7 @@ export function DataFormConfigResolver<
     {
       createInputConfig: RpcConfigFactoryResolver(input as AnyInput),
       row: DataRowContext(rowType),
-      data: DataContext,
+      getDataSource: DataSourceFactory2,
       configContext: Resolver.object(configContext || {}),
     },
     c => async $ => {
@@ -97,7 +99,7 @@ export function DataFormConfigResolver<
             ])
           ),
         async submit(value) {
-          const source = c.data.getSource(rowType);
+          const source = c.getDataSource(rowType);
 
           const commitRow = Object.assign(
             {},

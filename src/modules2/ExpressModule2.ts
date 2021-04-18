@@ -1,13 +1,14 @@
-import { Request2 } from "@dabsi/modules2/Request2";
+import CookieParser from "cookie-parser";
+import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
 import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
-import { CliModule2 } from "@dabsi/typecli/CliModule";
-import { Resolver, ResolverMap } from "@dabsi/typedi";
+import { Injectable, Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import express from "express";
 
 export type ExpressBuilderFn = (app: express.Application) => void;
 
 export class ExpressRequest extends Resolver<express.Request>() {}
+
 export class ExpressResponse extends Resolver<express.Response>() {}
 
 @Module({})
@@ -20,7 +21,9 @@ export class ExpressModule2 {
 
   readonly log = log.get("Express");
 
-  readonly request = new Request2([ExpressRequest, ExpressResponse]);
+  readonly request = new RequestBuilder();
+
+  constructor(protected serverModule: ServerModule2) {}
 
   createApplication(): express.Application {
     const app = express();
@@ -72,7 +75,9 @@ export class ExpressModule2 {
         Resolver(ExpressResponse, () => res)
       );
       await this.request.process(context, context =>
-        callback(req, res, context)
+        this.serverModule.processRequest(context, context => {
+          return callback(req, res, context);
+        })
       );
     };
   }

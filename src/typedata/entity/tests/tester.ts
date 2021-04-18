@@ -1,5 +1,5 @@
 import { defined } from "@dabsi/common/object/defined";
-import Lazy from "@dabsi/common/patterns/Lazy";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { formatSql } from "@dabsi/system-old/server/acl/formatSql";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
@@ -28,7 +28,7 @@ export class XEntity {
 export const getTestConnection = () =>
   defined(connection, `No data test connection`);
 
-export const getTestQueryRunner = Lazy(() =>
+export const getTestQueryRunner = SingleCall(() =>
   getTestConnection().createQueryRunner()
 );
 

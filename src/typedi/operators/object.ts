@@ -7,7 +7,7 @@ declare module "../Resolver" {
   namespace Resolver {
     function object<T extends ResolverMap>(
       resolverMap: T
-    ): CustomResolverFactory<
+    ): CustomResolver<
       {
         [K in keyof T]: Resolved<T[K]>;
       }

@@ -1,27 +1,23 @@
-interface _Map<K, V> {
-  touch(
-    key: K,
-    callback: (key: K) => V,
-    afterCallback?: (value: V, key: K) => void
-  ): V;
+interface TouchableMap<K, V> {
+  touch(key: K, create: (key: K) => V, set?: (value: V, key: K) => void): V;
 }
 
 declare global {
-  interface Map<K, V> extends _Map<K, V> {}
-  interface WeakMap<K extends object, V> extends _Map<K, V> {}
+  interface Map<K, V> extends TouchableMap<K, V> {}
+  interface WeakMap<K extends object, V> extends TouchableMap<K, V> {}
 }
 
 [WeakMap, Map].forEach(mapType => {
   mapType.prototype.touch = Map.prototype.touch = function (
     keyOrFactory,
-    callback,
-    afterCallback?
+    create,
+    set?
   ) {
     const key = keyOrFactory;
     if (this.has(key)) return this.get(key);
-    const value = callback(key);
+    const value = create(key);
     this.set(key, value);
-    afterCallback?.(value, key);
+    set?.(value, key);
     return value;
   };
 });

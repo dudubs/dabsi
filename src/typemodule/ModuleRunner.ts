@@ -1,13 +1,12 @@
-import { Reflector } from "@dabsi/common/reflection/Reflector";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
 import { Seq } from "immutable4";
-import { AsyncProcess } from "../common/async/AsyncProcess";
+import { catchAndLocateError } from "./catchAndLocateError";
 import { InstanceEmitter } from "./InstanceEmitter";
 import { locateError } from "./locateError";
-import { catchAndLocateError } from "./catchAndLocateError";
 
 export type ModuleTarget = Function;
 
@@ -16,18 +15,17 @@ export interface ModuleLoaderFn {
 }
 
 export class ModuleRunner {
-  static async run(
+  static run(
     target: ModuleTarget,
     context: ResolverMap = {}
   ): Promise<ModuleRunner> {
     const runner = new ModuleRunner();
     Object.assign(runner.context, context);
     runner.get(target);
-    await runner.process.wait();
-    return runner;
+    return runner.process.wait().then(() => runner);
   }
 
-  readonly process = new AsyncProcess();
+  readonly process = new AsyncProcess2();
 
   readonly context: ResolverMap = Resolver.Context.flat({}, [
     this,
@@ -92,10 +90,6 @@ export class ModuleRunner {
         async () => callback(target)
       );
     }
-  }
-
-  resolve<T>(resolver: Resolver<T>): T {
-    return Resolver.resolve(resolver, this.context);
   }
 
   protected _loadModulePlugins(target: ModuleTarget) {

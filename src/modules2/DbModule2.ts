@@ -2,7 +2,7 @@ import { defined } from "@dabsi/common/object/defined";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { ServerRequest } from "@dabsi/modules2/ServerModule2";
+import { ServerRequestBuilder } from "@dabsi/modules2/ServerModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
@@ -33,6 +33,8 @@ export class DbModule2 {
 
   protected _connection: Connection | null = null;
 
+  readonly entityTypes: Function[] = [];
+
   constructor(protected loaderModule: LoaderModule2) {}
 
   installContext(
@@ -52,19 +54,12 @@ export class DbModule2 {
   }
 
   findEntityTypes(): Function[] {
-    return findEntityTypes(
-      getMetadataArgsStorage()
-        .tables.toSeq()
-        .filter(tableArg => typeof tableArg.target === "function")
-        .map(tableArg => tableArg.target as Function)
-        .filter(target => this._maybeEntityTypes.has(target))
-        .toSet()
-    );
+    return findEntityTypes([...this._maybeEntityTypes, ...this.entityTypes]);
   }
 
   installRequest(
     @Plugin()
-    request: ServerRequest
+    request: ServerRequestBuilder
   ) {
     request.initializers.push(
       Resolver(
@@ -89,7 +84,7 @@ export class DbModule2 {
   }
 
   @Once()
-  protected loadAndConnect() {
+  loadAndConnect() {
     this.loaderModule.pushLoader(
       () => this.constructor.name,
       async dir => {
@@ -109,6 +104,7 @@ export class DbModule2 {
         }
       },
       async () => {
+        Object.seal(this.entityTypes);
         this._connection = await createConnection({
           logging: ["schema"],
           ...(this.connectionOptions || {

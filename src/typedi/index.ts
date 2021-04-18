@@ -6,7 +6,7 @@ export * from "./decorators/Injectable";
 import "./operators";
 import "./providability";
 import "./injectability";
-
+import "./custom";
 import "./context";
 
 import "./register";

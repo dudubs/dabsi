@@ -1,10 +1,10 @@
-import { DataContext } from "@dabsi/modules/data/context";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import { RichTextPlugin } from "@dabsi/system/rich-text/common/plugin";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
-import { ImageFile } from "@dabsi/system/storage/entities/image";
+import { StorageImage } from "@dabsi/system/storage/entities/StorageImage";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 import sharp from "sharp";
@@ -16,7 +16,7 @@ export default RpcConfigResolver(
 
     storageManager: StorageManager,
     rpcReq: RpcRequest,
-    data: DataContext,
+    getDataSource: DataSourceFactory2,
   },
   c => $ =>
     $({
@@ -42,7 +42,7 @@ export default RpcConfigResolver(
           "rt-image", // rich-text-image
           "png",
           await sharp(buffer).png().toBuffer(),
-          ImageFile,
+          StorageImage,
           {
             imageWidth: 100,
             imageHeight: 100,

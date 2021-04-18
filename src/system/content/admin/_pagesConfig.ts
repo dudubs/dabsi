@@ -1,5 +1,5 @@
-import { DataContext } from "@dabsi/modules/data/context";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { ContentAdminRpc } from "@dabsi/system/content/admin/common/rpc";
 import { ContentPage } from "@dabsi/system/content/entities/Page";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
@@ -10,10 +10,10 @@ export default RpcConfigResolver(
     contentConfig: RichTextConfigResolver({
       allowAll: true,
     }),
-    data: DataContext,
+    getDataSource: DataSourceFactory2,
   },
   c => $ => {
-    const source = c.data.getSource(ContentPage);
+    const source = c.getDataSource(ContentPage);
     return $({
       edit: async ($, key) => {
         return $({
@@ -21,8 +21,8 @@ export default RpcConfigResolver(
             content: c.contentConfig,
           },
           valueConfig: async $ => {
-            const page = await c.data
-              .getSource(ContentPage)
+            const page = await c
+              .getDataSource(ContentPage)
               .pick(["title"])
               .getOrFail(key);
 
@@ -53,7 +53,7 @@ export default RpcConfigResolver(
           content: c.contentConfig,
         },
         async submit({ title, content }) {
-          const pageKey = await c.data.getSource(ContentPage).insertKey({
+          const pageKey = await c.getDataSource(ContentPage).insertKey({
             title,
             content: await content.save(),
           });

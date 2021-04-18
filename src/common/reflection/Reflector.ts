@@ -45,8 +45,21 @@ export namespace Reflector {
     propertyName
   ): Function | undefined {
     return (
-      Forward.getPropertyType(target, propertyName) ||
-      Reflect.getMetadata("design:type", target.prototype, propertyName)
+      getPropertyForwardType(target, propertyName) ||
+      getPropertyDesignType(target, propertyName)
     );
+  }
+  export function getPropertyForwardType(
+    target: Function,
+    propertyName
+  ): Function | undefined {
+    return Forward.getPropertyType(target, propertyName);
+  }
+
+  export function getPropertyDesignType(
+    target: Function,
+    propertyName
+  ): Function | undefined {
+    return Reflect.getMetadata("design:type", target.prototype, propertyName);
   }
 }

@@ -12,7 +12,7 @@ type PathTable = {
 type TsConfigPathsFs = {
   isDir(path: string): Promise<boolean>;
   isFile(path: string): Promise<boolean>;
-  readFile(path: string): Promise<any>;
+  readJsonFile(path: string): Promise<any>;
 };
 export class TsConfigPaths2 {
   static createFs(): TsConfigPathsFs {
@@ -21,7 +21,9 @@ export class TsConfigPaths2 {
       return path => map.touch(path, () => callback(path));
     };
     return {
-      readFile: cached(path => fs.promises.readFile(path, "utf-8")),
+      readJsonFile: cached(async path =>
+        JSON.parse(await fs.promises.readFile(path, "utf-8"))
+      ),
       isDir: cached(path =>
         fs.promises
           .stat(path)

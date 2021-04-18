@@ -7,7 +7,7 @@ const t = RpcModuleTester.default();
 
 it("expect to call rpc-fn.", async done => {
   const rpc = RpcFn();
-  t.rpcModule.configure(
+  t.module.configure(
     RpcConfigResolver(rpc, {}, c => () => {
       done();
     })
@@ -20,7 +20,7 @@ it("expect to generate call rpc-fn", done => {
     fn: RpcFn<(text: string) => void>(),
   });
 
-  t.rpcModule.configure(
+  t.module.configure(
     RpcConfigResolver(rpc.at("fn"), {}, c => msg => {
       expect(msg).toEqual("hello");
       done();

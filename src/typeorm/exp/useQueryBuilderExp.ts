@@ -1,11 +1,11 @@
-import { SelectQueryBuilder } from "typeorm";
-import Lazy from "@dabsi/common/patterns/Lazy";
-import { DataSort } from "@dabsi/typedata/order";
-import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
+import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
 import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataSort } from "@dabsi/typedata/order";
 import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
 import { DataQueryTranslatorToSqb } from "@dabsi/typedata/query/sqbTranslator";
-import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
+import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
+import { SelectQueryBuilder } from "typeorm";
 
 declare module "typeorm" {
   interface SelectQueryBuilder<Entity> {
@@ -39,7 +39,7 @@ declare module "typeorm" {
   }
 }
 
-export const useQueryBuilderExp = Lazy(() => {
+export const useQueryBuilderExp = SingleCall(() => {
   const qb = SelectQueryBuilder.prototype;
 
   qb.exp = function <T>(this: SelectQueryBuilder<T>, exp: DataExp<T>) {

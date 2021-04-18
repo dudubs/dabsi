@@ -1,9 +1,10 @@
-import Storage, {
+import {
   StorageDeleteResult,
   StorageUploadResult,
+  Storage,
 } from "@dabsi/system/storage/Storage";
 
-export class TestStorage extends Storage {
+export class TestStorage implements Storage {
   counter = 0;
   upload(
     tag: string,

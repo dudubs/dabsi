@@ -7,10 +7,10 @@
     }
   },
   "include": [
-    "../**/common",
-    "../**/view",
-    "../**/*view.ts",
-    "../**/*view.tsx",
-    "../**/browser"
+    "../src/**/common",
+    "../src/**/view",
+    "../src/**/browser",
+    "../src/typerpc/*view.ts",
+    "../src/typerpc/*view.tsx"
   ]
 }

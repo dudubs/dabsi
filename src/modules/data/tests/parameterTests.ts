@@ -1,18 +1,19 @@
-import { Ticker } from "@dabsi/common/async/Ticker";
 import { Tester } from "@dabsi/jasmine/Tester";
+import { DataParameterConfigResolver } from "@dabsi/modules/data/parameter";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
-import { DataParameterConfigResolver } from "@dabsi/modules/data/paramterConfigResolver";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
-import { RpcOldModuleTester } from "@dabsi/modules/rpc/tests/RpcOldModuleTester";
-import DbOldModuleTester from "@dabsi/modules/tests/DbOldModuleTester";
-import OldModuleTester from "@dabsi/system/rich-text/tests/OldOldModuleTester";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DbModuleTester } from "@dabsi/modules2/tests/DbModuleTester";
+import { RpcModuleTester } from "@dabsi/modules2/tests/RpcModuleTester";
+
 import { BSource } from "@dabsi/typedata/entity/tests/utils";
+import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import TestEntities, {
   AEntity,
 } from "@dabsi/typeorm/relations/tests/TestEntities";
 import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
 import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/RpcParameter";
+import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
 
 const testRpc = RpcMap({
   aParam: RpcParameter(
@@ -23,31 +24,33 @@ const testRpc = RpcMap({
   ),
 });
 
-const mt = OldModuleTester();
-const db = DbOldModuleTester(mt);
-const rpc = RpcOldModuleTester(mt);
+const mt = ModuleTester();
+const dbt = DbModuleTester(mt);
+const rpct = RpcModuleTester(mt);
 
 const t = Tester.beforeAll(async () => {
-  db.addEntities(...TestEntities);
-  await db.dbModule.init();
+  dbt.module.entityTypes.push(...TestEntities);
 
-  rpc.module.configureRpcResolver(
-    DataParameterConfigResolver(testRpc.at("aParam"), AEntity)
-  );
-
-  rpc.module.configureRpcResolver(
+  rpct.module.configure([
+    DataParameterConfigResolver(testRpc.at("aParam"), AEntity),
     RpcConfigResolver(
       testRpc.at("aParam").at("target").at("hello"),
       {
         aRow: DataRowContext(AEntity),
       },
       c => async () => {
-        return `hello ${await c.aRow.fetch(["aText"]).then(row => row?.aText)}`;
+        return `hello ${await c.aRow.fetch(["aText"]).then(row => {
+          return row?.aText;
+        })}`;
       }
-    )
-  );
+    ),
+  ]);
 
-  const ASource = db.data.getSource(AEntity);
+  const getDataSource = mt.resolve(DataSourceFactory2);
+
+  await mt.wait();
+
+  const ASource = getDataSource(AEntity);
 
   const b1 = await BSource.insert({
     bText: "world-b",
@@ -57,11 +60,11 @@ const t = Tester.beforeAll(async () => {
       aText: "world-a",
       oneAToOneB: b1.$key,
     }),
-    connection: rpc.createConnection(testRpc),
+    connection: rpct.createConnection(testRpc),
   };
 });
 
-it("expect to fetch row", async () => {
+fit("expect to fetch row", async () => {
   expect(await t.connection.aParam(t.a1.$key).hello()).toEqual("hello world-a");
 });
 

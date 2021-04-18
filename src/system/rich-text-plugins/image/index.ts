@@ -1,6 +1,6 @@
 import RichTextModule from "@dabsi/system/rich-text";
-import StorageModule from "@dabsi/system/storage";
-import { ImageFile } from "@dabsi/system/storage/entities/image";
+import StorageModule from "@dabsi/system/storage/module";
+import { StorageImage } from "@dabsi/system/storage/entities/StorageImage";
 import { Module } from "@dabsi/typedi";
 
 declare global {
@@ -15,7 +15,7 @@ declare global {
           };
     }
     interface RelationTypes {
-      image: ImageFile;
+      image: StorageImage;
     }
 
     interface EntityDataTypes {
@@ -30,7 +30,7 @@ export default class RichTextImageModule {
 
   constructor(rtModule: RichTextModule) {
     rtModule //
-      .defineRelation("image", ImageFile, {
+      .defineRelation("image", StorageImage, {
         selection: { pick: ["url"] },
       })
       .defineBlock("image", {

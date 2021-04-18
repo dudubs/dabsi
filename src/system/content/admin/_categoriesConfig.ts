@@ -1,5 +1,5 @@
-import { DataContext } from "@dabsi/modules/data/context";
 import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { ContentAdminRpc } from "@dabsi/system/content/admin/common/rpc";
 import { ContentCategory } from "@dabsi/system/content/entities/Category";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
@@ -10,10 +10,10 @@ export default RpcConfigResolver(
     contentConfig: RichTextConfigResolver({
       allowAll: true,
     }),
-    data: DataContext,
+    getDataSource: DataSourceFactory2,
   },
   c => $ => {
-    const source = c.data.getSource(ContentCategory);
+    const source = c.getDataSource(ContentCategory);
 
     return $({
       table: $ =>

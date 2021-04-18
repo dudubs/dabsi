@@ -1,4 +1,5 @@
 import Lazy from "@dabsi/common/patterns/Lazy";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Tester } from "@dabsi/jasmine/Tester";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -10,23 +11,35 @@ export function ModuleTester({
   dependencies = [],
   providers = [],
 }: { dependencies?: ModuleTarget[]; providers?: ResolverMap[] } = {}) {
-  return Tester.beforeAll(async () => {
+  const t = Tester.beforeAll(async () => {
     const moduleRunner = new ModuleRunner();
 
     Resolver.Context.assign(moduleRunner.context, ...providers);
     dependencies?.forEach(target => {
       void moduleRunner.get(target);
     });
+    // beforeWait
     await moduleRunner.process.wait();
+    // afterWait
     return {
       moduleRunner,
+      resolve<T>(resolver: Resolver<T>): T {
+        return Resolver.resolve(resolver, moduleRunner.context);
+      },
       getAndWait: async <T>(target: Constructor<T>): Promise<T> => {
         const instance = moduleRunner.get(target);
         await moduleRunner.process.wait();
         return instance;
       },
+      wait() {
+        return moduleRunner.process.wait();
+      },
+      provide(...args) {
+        Resolver.Context.assign(moduleRunner.context, ...args);
+      },
     };
   });
+  return t;
 }
 
-ModuleTester.default = Lazy(() => ModuleTester());
+ModuleTester.default = SingleCall(() => ModuleTester());

@@ -1,19 +1,16 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
-import { DataContext } from "@dabsi/modules/data/context";
-import { DbModule } from "@dabsi/modules/DbModule";
 import { Hookable } from "@dabsi/modules/Hookable";
-import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
+import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DbModule2 } from "@dabsi/modules2/DbModule2";
 import {
   RichTextBlockHandler,
   RichTextBlockOptions,
 } from "@dabsi/system/rich-text/blockHandler";
+import { RichTextBlockStyleHandler } from "@dabsi/system/rich-text/blockStyleHandler";
+import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
 import { RichTextEntity } from "@dabsi/system/rich-text/common/entity";
-import {
-  RichTextEntityHandler,
-  RichTextEntityOptions,
-} from "@dabsi/system/rich-text/entityHandler";
 import {
   RichTextInputConfig,
   RichTextInputElement,
@@ -25,17 +22,20 @@ import {
   RichTextRelationTypeKey,
 } from "@dabsi/system/rich-text/common/types";
 import { RichTextRelation } from "@dabsi/system/rich-text/entities/Relation";
+import {
+  RichTextEntityHandler,
+  RichTextEntityOptions,
+} from "@dabsi/system/rich-text/entityHandler";
 import { initRichTextModule } from "@dabsi/system/rich-text/init";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
-import { Module } from "@dabsi/typedi";
+import { Module } from "@dabsi/typemodule";
 import { AnyRpc } from "@dabsi/typerpc/Rpc";
 import { RpcError } from "@dabsi/typerpc/RpcError";
 import "reflect-metadata";
 import { ManyToOne, RelationOptions } from "typeorm";
-import { RichTextBlockStyleHandler } from "@dabsi/system/rich-text/blockStyleHandler";
 
 @Module({
-  dependencies: [DbModule],
+  dependencies: [DbModule2],
 })
 export default class RichTextModule {
   styleTypes = new Set<string>();
@@ -56,7 +56,7 @@ export default class RichTextModule {
     RichTextBlockStyleHandler<any>
   > = {};
 
-  constructor(public data: DataContext) {
+  constructor(public getDataSoruce: DataSourceFactory2) {
     initRichTextModule(this);
   }
 

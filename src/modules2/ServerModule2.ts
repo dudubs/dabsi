@@ -1,6 +1,7 @@
-import { Ticker } from "@dabsi/common/async/Ticker";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
+
 import Lazy from "@dabsi/common/patterns/Lazy";
-import { Request2 } from "@dabsi/modules2/Request2";
+import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
@@ -16,6 +17,8 @@ export interface StopArgs {}
 
 const PID_FILENAME = "ts-server.pid";
 
+class RequestProcess extends AsyncProcess2 {}
+
 @Module({})
 export class ServerModule2 {
   readonly starters: ((args: Partial<StartArgs>) => Promise<void>)[] = [
@@ -25,7 +28,7 @@ export class ServerModule2 {
 
   protected _pidFilename = PID_FILENAME;
 
-  readonly request = new Request2([Ticker]);
+  readonly request = new RequestBuilder();
 
   @Lazy() protected get _pidFile() {
     return new AsyncJsonFile<{ pid: number }>(this._pidFilename);
@@ -81,11 +84,12 @@ export class ServerModule2 {
     context: ResolverMap,
     callback: (context: ResolverMap) => Promise<void>
   ): Promise<void> {
-    const ticker = new Ticker();
+    const process = new AsyncProcess2();
+
     return this.request.process(
-      Resolver.Context.assign(context, [ticker]),
+      Resolver.Context.assign(context, [process]),
       async context => {
-        await ticker.wait(callback(context));
+        await process.waitFor(() => callback(context));
       }
     );
   }
@@ -99,4 +103,7 @@ function tryToKill(pid: number) {
   }
 }
 
-export class ServerRequest extends Resolver([ServerModule2], x => x.request) {}
+export class ServerRequestBuilder extends Resolver(
+  [ServerModule2],
+  x => x.request
+) {}

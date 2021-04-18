@@ -1,6 +1,4 @@
-import { AsyncProcess } from "@dabsi/common/async/AsyncProcess";
-import { Timeout } from "@dabsi/common/async/Timeout";
-import { Awaitable } from "@dabsi/common/typings2/Async";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import {
   CliBuilder,
   CliExtenderFn,
@@ -50,10 +48,10 @@ export class CliModule2 {
   }
 
   build(): CliBuilder {
-    const process = new AsyncProcess();
+    const process = new AsyncProcess2();
 
-    const rootBuilder = new CliBuilder(promise => {
-      process.push(() => `${this.constructor.name}.Runner`, promise);
+    const rootBuilder = new CliBuilder(getPromise => {
+      process.push(() => `${this.constructor.name}.Runner`, getPromise);
     });
 
     const locateBuilder = (
@@ -137,7 +135,7 @@ export class CliModule2 {
       })
       .help()
       .exitProcess(false)
+      .strict()
       .scriptName("ts").argv;
-    return this.moduleRunner.process.wait();
   }
 }

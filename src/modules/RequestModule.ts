@@ -1,4 +1,4 @@
-import { Ticker } from "@dabsi/common/async/Ticker";
+import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Inject, Module, Resolver, ResolverMap } from "@dabsi/typedi";
 
 import { Awaitable } from "../common/typings2/Async";
@@ -18,7 +18,7 @@ export default class RequestModule {
   log = log.get("REQUEST");
 
   context: ResolverMap = Resolver.Context.create(this.runnerContext, {
-    ...Resolver(Ticker),
+    ...Resolver(AsyncProcess2),
     ...Resolver(Request),
   });
 
@@ -36,18 +36,18 @@ export default class RequestModule {
   ): Promise<T> {
     // TODO: flat
     const context = Object.create(this.context);
-    const ticker = new Ticker();
+    const process = new AsyncProcess2();
 
     const req = new Request();
 
-    Resolver.Context.assign(context, [req, ticker]);
+    Resolver.Context.assign(context, [req, process]);
 
     for (const resolver of this.requestBuilders) {
       await Resolver.resolve(resolver, context);
     }
 
     try {
-      return ticker.wait((async () => callback(context))());
+      return process.waitFor(async () => callback(context));
     } catch (error) {
       await emitAllAsync(this.requestErrorHandlers, context, error);
       throw error;

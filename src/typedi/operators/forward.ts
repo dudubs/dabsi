@@ -1,16 +1,14 @@
-import Lazy from "@dabsi/common/patterns/Lazy";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
-    function forward<T>(
-      getResolver: () => Resolver<T>
-    ): CustomResolverFactory<T>;
+    function forward<T>(getResolver: () => Resolver<T>): CustomResolver<T>;
   }
 }
 
 Resolver.forward = function (getResolver) {
-  const _getResolver = Lazy(() => {
+  const _getResolver = SingleCall(() => {
     return getResolver();
   });
   return Resolver.create(

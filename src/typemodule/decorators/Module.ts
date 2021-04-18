@@ -1,5 +1,5 @@
 import { Resolver } from "@dabsi/typedi";
-import { CallStackAnchor } from "@dabsi/typedi/CallStackAnchor";
+import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
 import {
   ModuleMetadata,
   ModuleOptions,

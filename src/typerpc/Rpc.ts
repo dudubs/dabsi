@@ -7,9 +7,9 @@ import { Defined } from "@dabsi/common/typings2/Defined";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { BaseRpc } from "@dabsi/typerpc/BaseRpc";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { IsGenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { BaseRpc } from "@dabsi/old-typerpc/BaseRpc";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { IsGenericConfig } from "@dabsi/old-typerpc/GenericConfig";
 
 export interface TRpc {
   Payload?: any;

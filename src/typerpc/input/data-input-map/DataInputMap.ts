@@ -5,19 +5,19 @@ import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKey
 import { Payload } from "@dabsi/common/typings2/Payload";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { DataInputMapHandler } from "@dabsi/typerpc/input/data-input-map/DataInputMapHandler";
+import { GenericConfig } from "@dabsi/old-typerpc/GenericConfig";
+import { DataInputMapHandler } from "@dabsi/old-typerpc/input/data-input-map/DataInputMapHandler";
 import {
   Input,
   InputError,
   InputValue,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
-import { InputErrorMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
-import { AnyInput } from "@dabsi/typerpc/input/Input";
+} from "@dabsi/old-typerpc/input/Input";
+import { InputErrorMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { WidgetElement } from "@dabsi/old-typerpc/widget/Widget";
+import { AnyInput } from "@dabsi/old-typerpc/input/Input";
 
 export type AnyDataInputMap = DataInputMap<TDataInputMap>;
 

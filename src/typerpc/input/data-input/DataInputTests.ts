@@ -1,9 +1,9 @@
 // TODO
 
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { DataInput } from "@dabsi/typerpc/input/data-input/rpc";
-import { DataInputTester } from "@dabsi/typerpc/input/data-input/DataInputTester";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { testInput } from "@dabsi/old-typerpc/input/InputTester";
+import { DataInput } from "@dabsi/old-typerpc/input/data-input/rpc";
+import { DataInputTester } from "@dabsi/old-typerpc/input/data-input/DataInputTester";
 
 testRpc(DataInput(), t => {
   t.testConfig($ =>

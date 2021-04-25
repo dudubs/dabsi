@@ -5,8 +5,8 @@ import {
   AnyArrayInputConnection,
   ArrayInputView,
   ArrayInputViewProps,
-} from "@dabsi/typerpc/input/array-input/ArrayInputView";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+} from "@dabsi/old-typerpc/input/array-input/ArrayInputView";
+import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
 import { MuiAddButton } from "@dabsi/browser/mui/components/MuiButton";
 import {
   MuiDialog,

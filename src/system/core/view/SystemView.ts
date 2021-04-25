@@ -1,16 +1,19 @@
 import { entries } from "@dabsi/common/object/entries";
 import { objectBases } from "@dabsi/common/object/objectBases";
 import { useSystemView } from "@dabsi/system/core/view/use";
-import { AnyInput, AnyInputConnection } from "@dabsi/typerpc/input/Input";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { AnyInput, AnyInputConnection } from "@dabsi/old-typerpc/input/Input";
+import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
 import {
   AnyRpc,
   RpcChild,
   RpcChildren,
   RpcConnection,
-} from "@dabsi/typerpc/Rpc";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
-import { AnyWidget, AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/Rpc";
+import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
+import {
+  AnyWidget,
+  AnyWidgetConnection,
+} from "@dabsi/old-typerpc/widget/Widget";
 import {
   createContext,
   createElement,

@@ -3,7 +3,7 @@ import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextInput } from "@dabsi/system/rich-text/common/input";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { DataSource } from "@dabsi/typedata/source";
-import { RpcResolvedConfig } from "@dabsi/typerpc/Rpc";
+import { RpcResolvedConfig } from "@dabsi/old-typerpc/Rpc";
 
 export class RichTextInputValue {
   constructor(

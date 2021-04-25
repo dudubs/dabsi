@@ -4,7 +4,7 @@ import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 
 import { Injectable } from "@dabsi/typedi";
-import { DataRowTicker } from "./rowTicker";
+import { DataRowTicker } from "./DataRowTicker";
 
 // DataTicker
 

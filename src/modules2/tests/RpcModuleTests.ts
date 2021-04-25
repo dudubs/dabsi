@@ -1,14 +1,14 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcModuleTester } from "@dabsi/modules2/tests/RpcModuleTester";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { RpcFn } from "@dabsi/old-typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 
 const t = RpcModuleTester.default();
 
 it("expect to call rpc-fn.", async done => {
   const rpc = RpcFn();
   t.module.configure(
-    RpcConfigResolver(rpc, {}, c => () => {
+    RpcResolver(rpc, {}, c => () => {
       done();
     })
   );
@@ -21,7 +21,7 @@ it("expect to generate call rpc-fn", done => {
   });
 
   t.module.configure(
-    RpcConfigResolver(rpc.at("fn"), {}, c => msg => {
+    RpcResolver(rpc.at("fn"), {}, c => msg => {
       expect(msg).toEqual("hello");
       done();
     })

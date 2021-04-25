@@ -23,9 +23,9 @@ import {
   RpcType,
   TRpc,
   _RpcHandlerClass,
-} from "@dabsi/typerpc/Rpc";
-import { AnyRpcRecord } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { BaseWidgetConnection } from "@dabsi/typerpc/widget/BaseWidgetConnection";
+} from "@dabsi/old-typerpc/Rpc";
+import { AnyRpcRecord } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+import { BaseWidgetConnection } from "@dabsi/old-typerpc/widget/BaseWidgetConnection";
 
 export type TWidget = {
   Controller: Record<string, Fn | AnyRpc>;

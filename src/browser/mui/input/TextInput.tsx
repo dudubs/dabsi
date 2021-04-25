@@ -1,11 +1,11 @@
 import LangKey from "@dabsi/lang/LangKey";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
 import {
   TextInputView,
   TextInputViewProps,
-} from "@dabsi/typerpc/input/text-input/TextInputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { FormViewEvent } from "@dabsi/typerpc/widget/form/view";
+} from "@dabsi/old-typerpc/input/text-input/TextInputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { FormViewEvent } from "@dabsi/old-typerpc/widget/form/view";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
 import TextField, { TextFieldProps } from "@material-ui/core/TextField";

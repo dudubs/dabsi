@@ -1,8 +1,8 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { CustomWidgetHandler } from "@dabsi/typerpc/widget/custom/handler";
-import { TWidget, Widget } from "@dabsi/typerpc/widget/Widget";
+import { AnyRpc, RpcConfig, RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { CustomWidgetHandler } from "@dabsi/old-typerpc/widget/custom/handler";
+import { TWidget, Widget } from "@dabsi/old-typerpc/widget/Widget";
 
 export type TCustomWidget = {
   Element: TWidget["Element"];

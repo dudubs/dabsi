@@ -1,8 +1,8 @@
 import { ReactElement } from "react";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { AnyWidgetExtra } from "@dabsi/typerpc/widget/extra/rpc";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { WidgetElement, WidgetType } from "@dabsi/old-typerpc/widget/Widget";
+import { AnyWidgetExtra } from "@dabsi/old-typerpc/widget/extra/rpc";
+import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
 
 export function WidgetExtraView<T extends RpcConnection<AnyWidgetExtra>>({
   children,

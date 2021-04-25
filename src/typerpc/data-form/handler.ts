@@ -3,7 +3,7 @@ import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
@@ -14,14 +14,17 @@ import {
   DataUpdateRow,
 } from "@dabsi/typedata/value";
 import { ResolvedMap, Resolver, ResolverMap } from "@dabsi/typedi";
-import { ConfigFactory, ConfigOrFactory } from "@dabsi/typerpc/ConfigFactory";
-import { DataForm } from "@dabsi/typerpc/data-form/rpc";
+import {
+  ConfigFactory,
+  ConfigOrFactory,
+} from "@dabsi/old-typerpc/ConfigFactory";
+import { DataForm } from "@dabsi/old-typerpc/data-form/rpc";
 import {
   AnyInput,
   InputValue,
   InputValueConfig,
-} from "@dabsi/typerpc/input/Input";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+} from "@dabsi/old-typerpc/input/Input";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 export type DataFormConfig<
   Input extends AnyInput,
@@ -66,7 +69,7 @@ export function DataFormConfigResolver<
     DataFormConfig<Input, Data, Selection>
   >
 ) {
-  return <any>RpcConfigResolver(
+  return <any>RpcResolver(
     DataForm(input as AnyInput),
     {
       createInputConfig: RpcConfigFactoryResolver(input as AnyInput),

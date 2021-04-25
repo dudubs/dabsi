@@ -1,7 +1,7 @@
 import adapt from "@dabsi/store/adapt";
 import { GetNextState, Store } from "@dabsi/store/Store";
 
-export const deleteSymbol = Symbol();
+export const deleteSymbol = Symbol("deleteSymbol");
 
 const op = "update";
 

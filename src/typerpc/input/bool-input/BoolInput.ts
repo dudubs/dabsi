@@ -1,7 +1,7 @@
-import { NoRpc } from "@dabsi/typerpc/NoRpc";
-import { Input } from "@dabsi/typerpc/input/Input";
-import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
-import { BoolInputHandler } from "@dabsi/typerpc/input/bool-input/BoolInputHandler";
+import { NoRpc } from "@dabsi/old-typerpc/NoRpc";
+import { Input } from "@dabsi/old-typerpc/input/Input";
+import { ValueOrAwaitableFn } from "@dabsi/old-typerpc/input/ValueOrAwaitableFn";
+import { BoolInputHandler } from "@dabsi/old-typerpc/input/bool-input/BoolInputHandler";
 
 export type BoolInput = Input<{
   ValueData: boolean;

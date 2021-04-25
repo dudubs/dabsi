@@ -1,10 +1,10 @@
 import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
-import { DataInputView } from "@dabsi/typerpc/input/data-input/DataInputView";
-import { AnyDataInput } from "@dabsi/typerpc/input/data-input/rpc";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { DataTable } from "@dabsi/typerpc/data-table/rpc";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
+import { DataInputView } from "@dabsi/old-typerpc/input/data-input/DataInputView";
+import { AnyDataInput } from "@dabsi/old-typerpc/input/data-input/rpc";
+import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
+import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";
 import Dialog from "@material-ui/core/Dialog";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";

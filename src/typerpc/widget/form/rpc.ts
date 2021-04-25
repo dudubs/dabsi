@@ -8,21 +8,21 @@ TODO:
  */
 import { Rejectable } from "@dabsi/common/async/Rejectable";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { ConfigOrFactory } from "@dabsi/typerpc/ConfigFactory";
+import { ConfigOrFactory } from "@dabsi/old-typerpc/ConfigFactory";
 import {
   AnyInput,
   InputError,
   InputValue,
   InputValueConfig,
   InputValueData,
-} from "@dabsi/typerpc/input/Input";
-import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { FormHandler } from "@dabsi/typerpc/widget/form/handler";
+} from "@dabsi/old-typerpc/input/Input";
+import { RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { FormHandler } from "@dabsi/old-typerpc/widget/form/handler";
 import {
   Widget,
   WidgetElement,
   WidgetElementState,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 
 export type TForm = {
   Input: AnyInput;

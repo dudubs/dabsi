@@ -8,13 +8,13 @@ import {
   AnyDataTable,
   DataTable,
   DataTableType,
-} from "@dabsi/typerpc/data-table/rpc";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/data-table/rpc";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import {
   WidgetView,
   WidgetViewProps,
-} from "@dabsi/typerpc/widget/view/component";
-import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/view/component";
+import { WidgetElement } from "@dabsi/old-typerpc/widget/Widget";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { ReactElement } from "react";
 

@@ -3,7 +3,7 @@ import { ContentAdminConnection } from "@dabsi/system/content/admin/common/rpc";
 import { ContentAdminRouter } from "@dabsi/system/content/admin/view/router";
 
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
+import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";
 import React from "react";
 
 RouterView.define(ContentAdminRouter.at("pages"), ({ location }) => (

@@ -1,10 +1,10 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { User } from "@dabsi/system/acl/entities/User";
 import { RichTextMentionRpc } from "@dabsi/system/rich-text-plugins/mention/common/rpc";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 
-export default RpcConfigResolver(
+export default RpcResolver(
   RichTextMentionRpc,
   {
     config: RichTextConfigContext,

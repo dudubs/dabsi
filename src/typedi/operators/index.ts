@@ -9,4 +9,5 @@ import "./checkObject";
 import "./optional";
 import "./forward";
 import "./object";
+import "./injector";
 import "./resolve";

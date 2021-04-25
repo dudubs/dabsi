@@ -1,6 +1,6 @@
 import { Call } from "@dabsi/common/typings2/Call";
-import { RpcHookHandler } from "@dabsi/typerpc/RpcHook";
-import { AnyInput } from "@dabsi/typerpc/input/Input";
+import { RpcHookHandler } from "@dabsi/old-typerpc/RpcHook";
+import { AnyInput } from "@dabsi/old-typerpc/input/Input";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 
 export const InputErrorHookHandler: RpcHookHandler<

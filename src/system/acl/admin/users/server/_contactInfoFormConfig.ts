@@ -1,10 +1,10 @@
-// import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+// import { RpcResolver } from "@dabsi/modules/rpc/configResolver";
 // import { User } from "@dabsi/system/acl/entities/User";
 // import { AclAdminUserContactInfoForm } from "@dabsi/system/acl/admin/users/common/contactInfoForm";
 // import { DataRow } from "@dabsi/typedata/row";
 // import RpcConfigFactoryResolver from "../../../../../../modules/rpc/configFactoryResolver";
 
-// export default RpcConfigResolver(
+// export default RpcResolver(
 //   AclAdminUserContactInfoForm,
 //   {
 //     user: DataRow(User),

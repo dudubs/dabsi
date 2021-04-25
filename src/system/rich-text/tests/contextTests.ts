@@ -1,12 +1,12 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RichTextRpc } from "@dabsi/system/rich-text/common/rpc";
 import { RichTextConfig } from "@dabsi/system/rich-text/common/types";
 import {
   rtTestBeforeInit,
   rtTester,
 } from "@dabsi/system/rich-text/tests/tester";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { RpcFn } from "@dabsi/old-typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 
 const t = rtTester.beforeAll(t => {
   return {
@@ -29,7 +29,7 @@ const testRpc = RichTextRpc.registerDefault(
 
 rtTestBeforeInit.push(() => {
   t.rpc.module.configureRpcResolver(
-    RpcConfigResolver(testRpc, {}, c => $ =>
+    RpcResolver(testRpc, {}, c => $ =>
       $({
         test() {
           return "works";

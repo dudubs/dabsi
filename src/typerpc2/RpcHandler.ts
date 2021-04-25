@@ -7,6 +7,7 @@ import {
   RpcParametrialMember,
   RpcType,
 } from "@dabsi/typerpc2";
+import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
 
 export declare const RpcHandlerSymbol: unique symbol;
 
@@ -21,14 +22,23 @@ export type RpcMemberHandler<T> =
   T extends RpcFunctionalMember<infer R, infer U>
     ? (...args: U) => Awaitable<R>
     : T extends RpcParametrialMember<infer R, infer U>
-    ? (rpcType: RpcType<R>, ...args: U) => Awaitable<RpcHandler<R>>
+    ? (
+        rpcType: RpcType<R>,
+        ...args: U
+      ) => Awaitable<RpcHandler<R> | ConfigFactory<RpcHandler<R>>>
     : T extends RpcContextualMember<infer R>
-    ? (rpcType: RpcType<R>) => Awaitable<RpcHandler<R>>
+    ? (
+        rpcType: RpcType<R>
+      ) => Awaitable<RpcHandler<R> | ConfigFactory<RpcHandler<R>>>
     : never;
 
 export type RpcMemberKey<T extends Rpc> = ExtractKeys<
   T,
   RpcFunctionalMember | RpcContextualMember | RpcParametrialMember
+>;
+export type RpcChildKey<T extends Rpc> = ExtractKeys<
+  T,
+  RpcContextualMember | RpcParametrialMember
 >;
 
 export type RpcHandlerMap<T extends Rpc> = {

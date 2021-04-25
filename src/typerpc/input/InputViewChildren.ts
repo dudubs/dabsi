@@ -2,9 +2,9 @@ import { RefCallback } from "react";
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { If } from "@dabsi/common/typings2/boolean";
-import { AnyInputConnection } from "@dabsi/typerpc/input/Input";
-import { InputErrorMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { AnyInputView, InputView } from "@dabsi/typerpc/input/InputView";
+import { AnyInputConnection } from "@dabsi/old-typerpc/input/Input";
+import { InputErrorMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { AnyInputView, InputView } from "@dabsi/old-typerpc/input/InputView";
 
 export class InputViewChildren {
   viewMap: Record<string, AnyInputView> = {};

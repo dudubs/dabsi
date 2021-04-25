@@ -1,6 +1,6 @@
 import { If } from "@dabsi/common/typings2/boolean";
 import { Nullable } from "@dabsi/common/typings2/Nullable";
-import { Input, TInput } from "@dabsi/typerpc/input/Input";
+import { Input, TInput } from "@dabsi/old-typerpc/input/Input";
 
 export type NullableInput<
   N extends boolean,

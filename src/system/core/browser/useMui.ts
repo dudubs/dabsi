@@ -7,14 +7,13 @@ import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import { SystemBrowserComponents } from "@dabsi/system/core/browser/components";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { SystemViewDefiner } from "@dabsi/system/core/view/use";
-import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
-import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
-import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { DataTable } from "@dabsi/typerpc/data-table/rpc";
-import { Form } from "@dabsi/typerpc/widget/form/rpc";
-import { WidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
-import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
+import { BoolInput } from "@dabsi/old-typerpc/input/bool-input/BoolInput";
+import { DataInputMap } from "@dabsi/old-typerpc/input/data-input-map/DataInputMap";
+import { InputMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
+import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
+import { Form } from "@dabsi/old-typerpc/widget/form/rpc";
+import { WidgetMap } from "@dabsi/old-typerpc/widget/widget-map/rpc";
 import { createElement } from "react";
 
 export function useSystemBrowserMui(
@@ -30,8 +29,7 @@ export function useSystemBrowserMui(
 
     define(InputMap, props => createElement(MuiGridMapView, { for: props }));
     define(WidgetMap, props => createElement(MuiGridMapView, { for: props }));
-    define(WidgetNamespace, props =>
-      createElement(MuiGridMapView, { for: props }));
+
     callback?.(define);
 
     for (const callback of SystemBrowserComponents) {

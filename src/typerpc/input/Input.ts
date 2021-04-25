@@ -13,14 +13,14 @@ import {
   RpcPropsOption,
   RpcType,
   TRpc,
-} from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/Rpc";
 import {
   TWidget,
   Widget,
   WidgetControllerOptions,
   WidgetHandlerClass,
   WidgetType,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 
 export type InputWithoutController<T extends AnyInput = AnyInput> = Input<
   Override<

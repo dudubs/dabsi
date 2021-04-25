@@ -1,9 +1,9 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { RpcConfig, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcHook } from "@dabsi/typerpc/RpcHook";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { RpcConfig, RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcHook } from "@dabsi/old-typerpc/RpcHook";
 import {
   AnyWidget,
   TWidget,
@@ -11,8 +11,8 @@ import {
   WidgetElement,
   WidgetElementState,
   WidgetType,
-} from "@dabsi/typerpc/widget/Widget";
-import { WidgetWrapperHandler } from "@dabsi/typerpc/widget/wrapper/handler";
+} from "@dabsi/old-typerpc/widget/Widget";
+import { WidgetWrapperHandler } from "@dabsi/old-typerpc/widget/wrapper/handler";
 
 export type TWidgetWrapper = {
   Element: TWidget["Element"];

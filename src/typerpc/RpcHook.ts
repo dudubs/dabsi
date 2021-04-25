@@ -8,7 +8,7 @@ import {
   RpcResolvedHandler,
   RpcType,
   TRpc,
-} from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/Rpc";
 
 const globalSymbol = Symbol();
 

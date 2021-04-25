@@ -1,9 +1,9 @@
 // import { DataContext } from "@dabsi/modules/data/context";
-// import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+// import { RpcResolver } from "@dabsi/modules/rpc/configResolver";
 // import { User } from "@dabsi/system/acl/entities/User";
 // import { ACL_Admin_UsersTable } from "@dabsi/system/acl/admin/users/common/rpc";
 
-// import { DataTable } from "@dabsi/typerpc/data-table/rpc";
+// import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
 
 // export namespace ACL_Admin_UsersTableConfig {
 //   export const columns: Record<
@@ -23,7 +23,7 @@
 //   };
 // }
 
-// export default RpcConfigResolver(
+// export default RpcResolver(
 //   ACL_Admin_UsersTable,
 //   {
 //     getDataSource: DataSourceFactory2,

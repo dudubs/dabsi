@@ -1,9 +1,9 @@
 import { OmitKeys } from "@dabsi/common/typings2/OmitKeys";
-import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
+import { BoolInput } from "@dabsi/old-typerpc/input/bool-input/BoolInput";
 import BoolInputView, {
   BoolInputViewProps,
-} from "@dabsi/typerpc/input/bool-input/BoolInputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/bool-input/BoolInputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import Checkbox, { CheckboxProps } from "@material-ui/core/Checkbox";
 import React, { ReactNode } from "react";

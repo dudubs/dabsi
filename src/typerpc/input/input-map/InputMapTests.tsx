@@ -1,15 +1,18 @@
 import React from "react";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { focusNextTest } from "@dabsi/jasmine/focusNextTest";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
-import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
-import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { TestInputView } from "@dabsi/typerpc/input/InputTests";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { AnyInputMap, InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { AnyWidgetMap } from "@dabsi/old-typerpc/widget/widget-map/rpc";
+import { testWidgetView } from "@dabsi/old-typerpc/WidgetViewTester";
+import { testInput } from "@dabsi/old-typerpc/input/InputTester";
+import { TestInputView } from "@dabsi/old-typerpc/input/InputTests";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
+import {
+  AnyInputMap,
+  InputMap,
+} from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { InputMapView } from "@dabsi/old-typerpc/input/input-map/InputMapView";
 import objectContaining = jasmine.objectContaining;
 
 testRpc(

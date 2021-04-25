@@ -3,11 +3,12 @@ import { entries } from "@dabsi/common/object/entries";
 
 export function mapObject<T, R>(
   obj: Record<string, T>,
-  mapper: (value: T, key: string, index: number, isLast: boolean) => R
+  mapper: (value: T, key: string, index: number, isLast: boolean) => R,
+  alias?: (key: string) => string
 ): Record<string, R> {
   const result: any = {};
   for (const [key, value, index, isLast] of entries(obj)) {
-    result[key] = mapper(value, key, index, isLast);
+    result[alias ? alias(key) : key] = mapper(value, key, index, isLast);
   }
   return result;
 }

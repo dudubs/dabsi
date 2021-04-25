@@ -1,10 +1,10 @@
 import { SystemRpc } from "@dabsi/system/core/common/rpc";
-import { RpcCommand } from "@dabsi/typerpc/Rpc";
+import { RpcCommand } from "@dabsi/old-typerpc/Rpc";
 import {
   RpcMultiplexer,
   RpcCommandRequest,
   RpcMultiplexerHandler,
-} from "@dabsi/typerpc/RpcMultiplexer";
+} from "@dabsi/old-typerpc/RpcMultiplexer";
 
 let _captureCommand: ((path, payload) => Promise<void>) | null;
 

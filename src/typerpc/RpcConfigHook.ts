@@ -3,10 +3,18 @@ import { If, Not } from "@dabsi/common/typings2/boolean";
 import { Call } from "@dabsi/common/typings2/Call";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { GenericConfig, IsGenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { AnyRpc, RpcType, RpcUnresolvedConfig, TRpc } from "@dabsi/typerpc/Rpc";
-import { RpcHook } from "@dabsi/typerpc/RpcHook";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import {
+  GenericConfig,
+  IsGenericConfig,
+} from "@dabsi/old-typerpc/GenericConfig";
+import {
+  AnyRpc,
+  RpcType,
+  RpcUnresolvedConfig,
+  TRpc,
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcHook } from "@dabsi/old-typerpc/RpcHook";
 
 export type RpcConfigHook<
   T extends TConfigHook & {

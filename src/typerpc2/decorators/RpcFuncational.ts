@@ -1,5 +1,5 @@
 import { getRpcArgs, RpcFunctionalMember } from "@dabsi/typerpc2/Rpc";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMemberType";
+import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export function RpcFuncational(): {
   <K extends string>(
@@ -8,7 +8,7 @@ export function RpcFuncational(): {
   ): void;
 } {
   return (target, propertyName) => {
-    RpcMemberType.define(
+    RpcMembers.define(
       target.constructor,
       propertyName,
       RpcMemberType.Functional

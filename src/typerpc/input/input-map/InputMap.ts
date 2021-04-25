@@ -11,10 +11,10 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
-import { InputMapHandler } from "@dabsi/typerpc/input/input-map/InputMapHandler";
-import { RpcConfig } from "@dabsi/typerpc/Rpc";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+} from "@dabsi/old-typerpc/input/Input";
+import { InputMapHandler } from "@dabsi/old-typerpc/input/input-map/InputMapHandler";
+import { RpcConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 
 export type AnyInputRecord = Record<string, AnyInput>;
 export type AnyInputMap = InputMap<AnyInputRecord>;

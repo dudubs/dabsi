@@ -1,13 +1,13 @@
 import { type } from "@dabsi/common/typings2/Typing";
 import { AdminRpc } from "@dabsi/system/admin/common";
 import { RichTextInput } from "@dabsi/system/rich-text/common/input";
-import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
-import { DataTable } from "@dabsi/typerpc/data-table/rpc";
-import { Form } from "@dabsi/typerpc/widget/form/rpc";
+import { InputMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
+import { RpcFn } from "@dabsi/old-typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+import { RpcParameter } from "@dabsi/old-typerpc/rpc-parameter/rpc";
+import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
+import { Form } from "@dabsi/old-typerpc/widget/form/rpc";
 
 const _PageForm = Form({
   input: InputMap({

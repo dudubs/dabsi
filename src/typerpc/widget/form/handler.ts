@@ -1,14 +1,14 @@
 import { Rejectable } from "@dabsi/common/async/Rejectable";
-import { ConfigOrFactory } from "@dabsi/typerpc/ConfigFactory";
-import { AnyInput, InputValueData } from "@dabsi/typerpc/input/Input";
-import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
-import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
-import { AnyForm } from "@dabsi/typerpc/widget/form/rpc";
+import { ConfigOrFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { AnyInput, InputValueData } from "@dabsi/old-typerpc/input/Input";
+import { RpcChildConfig } from "@dabsi/old-typerpc/Rpc";
+import { AbstractWidgetHandler } from "@dabsi/old-typerpc/widget/AbstractWidgetHandler";
+import { AnyForm } from "@dabsi/old-typerpc/widget/form/rpc";
 import {
   IWidgetHandler,
   WidgetCommandConfig,
   WidgetElement,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 
 type T = AnyForm;
 

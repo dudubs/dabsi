@@ -1,11 +1,11 @@
 import { keys } from "@dabsi/common/object/keys";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AnyWidgetConnection } from "@dabsi/typerpc/widget/Widget";
-import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { AnyWidgetConnection } from "@dabsi/old-typerpc/widget/Widget";
+import { AnyWidgetMap } from "@dabsi/old-typerpc/widget/widget-map/rpc";
 import {
   WidgetView,
   WidgetViewProps,
-} from "@dabsi/typerpc/widget/view/component";
+} from "@dabsi/old-typerpc/widget/view/component";
 import { Renderer } from "@dabsi/view/react/renderer";
 import React from "react";
 

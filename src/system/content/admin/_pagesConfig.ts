@@ -1,10 +1,10 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { ContentAdminRpc } from "@dabsi/system/content/admin/common/rpc";
 import { ContentPage } from "@dabsi/system/content/entities/Page";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
 
-export default RpcConfigResolver(
+export default RpcResolver(
   ContentAdminRpc.at("pages"),
   {
     contentConfig: RichTextConfigResolver({

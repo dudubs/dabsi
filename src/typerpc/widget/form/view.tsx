@@ -4,19 +4,19 @@ import {
   InputError,
   InputValue,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
+} from "@dabsi/old-typerpc/input/Input";
 import {
   InputView,
   InputViewInstance,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { AnyForm, TForm } from "@dabsi/typerpc/widget/form/rpc";
+} from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { AnyForm, TForm } from "@dabsi/old-typerpc/widget/form/rpc";
 import {
   WidgetView,
   WidgetViewProps,
-} from "@dabsi/typerpc/widget/view/component";
-import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/view/component";
+import { WidgetElement, WidgetType } from "@dabsi/old-typerpc/widget/Widget";
 import { BaseProps } from "@dabsi/view/react/BaseProps";
 import { Emittable } from "@dabsi/view/react/reactor/Reactor";
 import { ReactorListener } from "@dabsi/view/react/reactor/ReactorListener";

@@ -1,6 +1,6 @@
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { EnumInput } from "@dabsi/typerpc/input/enum-input/EnumInput";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { testInput } from "@dabsi/old-typerpc/input/InputTester";
+import { EnumInput } from "@dabsi/old-typerpc/input/enum-input/EnumInput";
 import objectContaining = jasmine.objectContaining;
 
 testRpc(EnumInput(["k1", "k2"]), t => {

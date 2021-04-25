@@ -11,8 +11,8 @@ import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import { MuiPage } from "@dabsi/browser/mui/MuiPage";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { RouterView } from "@dabsi/typerouter/view";
-import { Form } from "@dabsi/typerpc/widget/form/rpc";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
+import { Form } from "@dabsi/old-typerpc/widget/form/rpc";
+import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { useState } from "react";
 

@@ -1,10 +1,10 @@
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { WidgetElement, WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { WidgetElement, WidgetType } from "@dabsi/old-typerpc/widget/Widget";
 import {
   WidgetView,
   WidgetViewProps,
-} from "@dabsi/typerpc/widget/view/component";
-import { AnyWidgetWrapper } from "@dabsi/typerpc/widget/wrapper/rpc";
+} from "@dabsi/old-typerpc/widget/view/component";
+import { AnyWidgetWrapper } from "@dabsi/old-typerpc/widget/wrapper/rpc";
 
 export class WidgetWrapperView<
   C extends RpcConnection<AnyWidgetWrapper>

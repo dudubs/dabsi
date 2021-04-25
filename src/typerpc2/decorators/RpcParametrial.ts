@@ -5,7 +5,7 @@ import {
   RpcParametrialMember,
   RpcType,
 } from "@dabsi/typerpc2/Rpc";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMemberType";
+import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export function RpcParametrial<T extends RpcType>(
   getConnectionType: () => T
@@ -18,7 +18,7 @@ export function RpcParametrial<T extends RpcType>(
   return (target, propertyName: string) => {
     Forward(getConnectionType)(target, propertyName);
 
-    RpcMemberType.define(
+    RpcMembers.define(
       target.constructor,
       propertyName,
       RpcMemberType.Parametrial

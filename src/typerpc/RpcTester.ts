@@ -5,7 +5,7 @@ import {
   RpcConnection,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/Rpc";
 
 export type RpcTester<T extends AnyRpc> = {
   rpc: T;

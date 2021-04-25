@@ -1,16 +1,16 @@
-import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
+import { AbstractRpcHandler } from "@dabsi/old-typerpc/AbstractRpcHandler";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
 import {
   AnyRpc,
   AnyRpcHandler,
   IRpcHandler,
   RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/Rpc";
 import {
   AnyRpcParameter,
   RpcParameter,
-} from "@dabsi/typerpc/rpc-parameter/rpc";
+} from "@dabsi/old-typerpc/rpc-parameter/rpc";
 
 type T = AnyRpcParameter;
 

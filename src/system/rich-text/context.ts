@@ -19,8 +19,8 @@ import { RichTextPacker } from "@dabsi/system/rich-text/packer";
 import { RichTextUnpacker } from "@dabsi/system/rich-text/unpacker";
 import { DataSource } from "@dabsi/typedata/source";
 import { Injectable, Resolver } from "@dabsi/typedi";
-import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 declare global {
   namespace IRichText {

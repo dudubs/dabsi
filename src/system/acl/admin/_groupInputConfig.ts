@@ -1,9 +1,9 @@
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { checkUniqueName } from "@dabsi/system/acl/checkUniqueName";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { ACL_Admin_GroupBasicInput } from "@dabsi/system/acl/admin/common/groupsRpc";
-import { DataFormConfigResolver } from "@dabsi/typerpc/data-form/handler";
+import { DataFormConfigResolver } from "@dabsi/old-typerpc/data-form/handler";
 
 //
 export default [
@@ -21,7 +21,7 @@ export default [
         }),
     })
   ),
-  RpcConfigResolver(
+  RpcResolver(
     ACL_Admin_GroupBasicInput.at("map.groupName"),
     { group: DataRowContext(Group) },
     c => $ =>

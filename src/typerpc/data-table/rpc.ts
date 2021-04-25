@@ -12,10 +12,10 @@ import { RebaseType } from "@dabsi/typedata/BaseType";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import { DataTableHandler } from "@dabsi/typerpc/data-table/handler";
-import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { RpcBase } from "@dabsi/typerpc/Rpc";
-import { Widget, WidgetType } from "@dabsi/typerpc/widget/Widget";
+import { DataTableHandler } from "@dabsi/old-typerpc/data-table/handler";
+import { GenericConfig } from "@dabsi/old-typerpc/GenericConfig";
+import { RpcBase } from "@dabsi/old-typerpc/Rpc";
+import { Widget, WidgetType } from "@dabsi/old-typerpc/widget/Widget";
 
 export declare namespace DataTable {
   type ColumnLoader<T extends TDataTable> =

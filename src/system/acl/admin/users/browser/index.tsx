@@ -6,7 +6,7 @@
 // import { AclAdminUsersConnection } from "@dabsi/system/acl/admin/users/common/rpc";
 // import { ACL_AdminRouter } from "@dabsi/system/acl/admin/view/router";
 // import { RouterView } from "@dabsi/typerouter/view";
-// import { WidgetViewLoader } from "@dabsi/typerpc/widget/WidgetViewLoader";
+// import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/WidgetViewLoader";
 // import React from "react";
 
 // const router = ACL_AdminRouter.at("users");

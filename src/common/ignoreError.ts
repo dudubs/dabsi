@@ -1,7 +1,7 @@
 import { Awaitable } from "./typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
 
-export const IgnoredError = Symbol();
+export const IgnoredError = Symbol("IgnoredError");
 
 export function ignoreError<T, E>(
   errorType: Type<T>,

@@ -1,6 +1,6 @@
 import { entries } from "./entries";
 
-const proxyContext = Symbol();
+const proxyContext = Symbol("proxyContext");
 
 export function createObjectProxy(object, getter) {
   const proxy = {};

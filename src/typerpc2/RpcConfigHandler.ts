@@ -1,52 +1,69 @@
+import { defined } from "@dabsi/common/object/defined";
 import { capitalize } from "@dabsi/common/string/capitalize";
-import { If } from "@dabsi/common/typings2/boolean";
+import { Awaitable } from "@dabsi/common/typings2/Async";
+import { If, IsUndefined } from "@dabsi/common/typings2/boolean";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { UndefinedIfIsUndefined } from "@dabsi/common/typings2/UndefinedIfIsUndefined";
 import {
   AnyGenericConfig,
+  ConfiguratorType,
   GenericConfig2,
-  GenericConfigOrFactoryType,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
 import {
+  Rpc,
   RpcContextualMember,
   RpcParametrialMember,
   RpcType,
 } from "@dabsi/typerpc2/Rpc";
 import { RpcHandler, RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMemberType";
-import { AnyRpcWithConfig, InferredRpcConfig } from "./RpcConfig";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { assignDescriptorsWithoutOverride } from "./assignDescriptorsWithoutOverride";
+import {
+  AnyRpcWithConfig,
+  InferredRpcConfig,
+  RpcConfigurator,
+  RpcWithConfigSymbol,
+} from "./RpcConfig";
 
 export type InferredRpcHandlerConfig<
   T extends AnyRpcWithConfig
-> = GenericConfigOrFactoryType<InferredRpcConfig<T>>;
+> = ConfiguratorType<InferredRpcConfig<T>>;
 
-export class BaseRpcConfigHandler<T extends AnyRpcWithConfig> {
+export class BaseRpcConfigHandler<T extends Rpc, C> {
   readonly rpcType!: RpcType<T>;
 
-  constructor(readonly config: InferredRpcHandlerConfig<T>) {}
+  constructor(
+    readonly config: NonNullable<C>,
+    readonly configurator: RpcConfigurator<T>
+  ) {}
 
   protected _getContextualHandlerCache = new Map();
 
   protected _getHandler<T extends AnyRpcWithConfig, K extends keyof T>(
-    this: BaseRpcConfigHandler<T>,
-    memerName: string & K
+    this: BaseRpcConfigHandler<T, any>,
+    memberKey: string & K
   ): RpcMemberHandler<T[K]> {
-    return this["handle" + capitalize(memerName)].bind(this);
+    return defined(
+      this["handle" + capitalize(memberKey)],
+      () =>
+        `No handle function for "${this.rpcType.name}.${memberKey}" in ${this.constructor.name}`
+    ).bind(this);
   }
 
   getContextualHandler<
     T extends AnyRpcWithConfig,
     K extends ExtractKeys<T, RpcContextualMember>
   >(
-    this: BaseRpcConfigHandler<T>,
-    memberName: string & K
+    this: BaseRpcConfigHandler<T, any>,
+    memberKey: string & K
   ): Promise<RpcHandler<T[K]>> {
-    return this._getContextualHandlerCache.touch(memberName, async () =>
-      this._getHandler(memberName)(
-        RpcMemberType.getValidRpcType(this.rpcType, memberName)
+    return this._getContextualHandlerCache.touch(memberKey, async () =>
+      this._getHandler(memberKey)(
+        RpcMembers.getValidRpcType(this.rpcType, memberKey)
       )
     );
   }
@@ -55,38 +72,45 @@ export class BaseRpcConfigHandler<T extends AnyRpcWithConfig> {
     T extends AnyRpcWithConfig,
     K extends ExtractKeys<T, RpcParametrialMember>
   >(
-    this: BaseRpcConfigHandler<T>,
-    memberName: string & K,
+    this: BaseRpcConfigHandler<T, any>,
+    memberKey: string & K,
     params: Parameters<T[K]>
   ): Promise<RpcHandler<ReturnType<T[K]>>> {
     return <any>(
-      this._getHandler(memberName)(
-        RpcMemberType.getValidRpcType(this.rpcType, memberName),
+      this._getHandler(memberKey)(
+        RpcMembers.getValidRpcType(this.rpcType, memberKey),
         ...params
       )
     );
   }
 }
 
-export interface RpcConfigHandlerType<
-  T extends AnyRpcWithConfig = AnyRpcWithConfig,
-  H = BaseRpcConfigHandler<T>
-> {
+export interface RpcConfigHandlerType<T extends AnyRpcWithConfig, H> {
   readonly rpcType: RpcType<T>;
 
-  readonly rpcConfigType: "GENERIC" | "REGULAR" | "FUNCATION";
+  readonly rpcConfigType: "GENERIC" | "REGULAR" | "FUNCTION";
 
-  readonly rpcConfigResolve: RpcConfigResolve<T>;
+  readonly resolveRpcGenericConfig: RpcGenericConfigResolver<T>;
 
-  new (config: InferredRpcHandlerConfig<T>): H;
+  readonly resolveRpcHandlerConfig: any;
+
+  readonly isRpcConfigCanBeUndefined: boolean;
+
+  createRpcMemberHandler?(
+    memberKey: string,
+    memberType: RpcMemberType,
+    propertyType: Function
+  ): Function;
+
+  new (config: any, configurator: RpcConfigurator<T>): H;
 }
 
 export type RpcConfigType<
   T extends AnyRpcWithConfig,
   U = InferredRpcConfig<T>
-> = U extends Fn ? If<IsGenericConfig<U>, "GENERIC", "FUNCATION"> : "REGULAR";
+> = U extends Fn ? If<IsGenericConfig<U>, "GENERIC", "FUNCTION"> : "REGULAR";
 
-export type RpcConfigResolve<
+export type RpcGenericConfigResolver<
   R extends AnyRpcWithConfig
 > = InferredRpcConfig<R> extends AnyGenericConfig
   ?
@@ -94,61 +118,98 @@ export type RpcConfigResolve<
       | If<GenericConfig2.IsWithoutResolveFn<InferredRpcConfig<R>>, undefined>
   : undefined;
 
-export type RpcConfigHandler<
+export type RpcHandlerConfigResolver<R extends AnyRpcWithConfig, C> =
+  | ((config: InferredRpcHandlerConfig<R>) => Awaitable<C>)
+  | If<Is<C, InferredRpcHandlerConfig<R>>, undefined>;
+
+export type RpcConfigHandlerOptions<
   R extends AnyRpcWithConfig,
-  H,
   E,
   OH = {}, // extra optional handler
-  RH = {} // extra required handler
+  RH = {}, // extra required handler,
+  C = InferredRpcHandlerConfig<R>
 > = PartialUndefinedKeys<
   OH & {
     configType:
       | RpcConfigType<R>
       | If<Is<RpcConfigType<R>, "REGULAR">, undefined>;
 
-    configResolve: RpcConfigResolve<R>;
+    resolveGenericConfig: RpcGenericConfigResolver<R>;
+
+    resolveHandlerConfig: RpcHandlerConfigResolver<R, C>;
+
+    configCanBeUndefined: IsUndefined<InferredRpcHandlerConfig<R>> extends true
+      ? boolean
+      : false | undefined;
   },
   RH & {
-    custom?: E;
-    handler: H & ThisType<{ config: InferredRpcHandlerConfig<R> } & E>;
+    helpers?: E & ThisType<BaseRpcConfigHandler<R, C>>;
+
+    createMemberHandler?(
+      this: RpcType<R>,
+      memberKey: string,
+      memberType: RpcMemberType,
+      propertyType: Function
+    ): undefined | ((this: BaseRpcConfigHandler<R, C>, ...args: any[]) => any);
   }
 >;
+export const RpcConfigHandlerTypeSymbol = Symbol("RpcConfigHandlerTypeSymbol");
 
-export const RpcConfigHandlerMap = new WeakMap<RpcType, RpcConfigHandlerType>();
+export type RpcHandlerProps<T extends Rpc> = Omit<RpcHandler<T>, "config">;
+
 export function RpcConfigHandler<
   R extends AnyRpcWithConfig,
-  H extends RpcHandler<R>,
-  E extends object = {}
+  H extends RpcHandlerProps<R>,
+  E = {}
 >(
   rpcType: RpcType<R>,
-  rpcConfigHandler: RpcConfigHandler<R, H, E>
+  options: RpcConfigHandlerOptions<R, E>,
+  handler: H &
+    ThisType<BaseRpcConfigHandler<R, InferredRpcHandlerConfig<R>> & E>
 ): RpcConfigHandlerType<R, H>;
 
 export function RpcConfigHandler(
   rpcType,
   {
-    handler,
     configType = "REGULAR",
-    configResolve,
-    custom = {},
-  }: RpcConfigHandler<any, any, any>
+    resolveGenericConfig,
+    resolveHandlerConfig,
+    createMemberHandler,
+    configCanBeUndefined,
+    helpers,
+  }: RpcConfigHandlerOptions<any, any>,
+  handler
 ) {
-  class HandlerType extends BaseRpcConfigHandler<any> {
+  Object.defineProperty(rpcType, RpcWithConfigSymbol, {
+    value: true,
+    enumerable: false,
+  });
+  class HandlerType extends BaseRpcConfigHandler<AnyRpcWithConfig, any> {
     static readonly rpcType = rpcType;
 
     static readonly rpcConfigType: any = configType;
 
-    static readonly rpcConfigResolve = configResolve;
+    static readonly resolveRpcGenericConfig = resolveGenericConfig;
 
-    readonly rpcType = rpcType;
+    static readonly resolveRpcHandlerConfig = resolveHandlerConfig;
+
+    static readonly createRpcMemberHandler = createMemberHandler;
+
+    static readonly isRpcConfigCanBeUndefined = configCanBeUndefined;
   }
 
-  Object.assign(HandlerType.prototype, custom, handler);
+  assignDescriptorsWithoutOverride(HandlerType.prototype, handler);
+
+  assignDescriptorsWithoutOverride(HandlerType.prototype, helpers);
 
   Object.defineProperty(HandlerType, "name", {
     value: `RpcConfigHandler<${rpcType.name}>`,
   });
 
-  RpcConfigHandlerMap.set(rpcType, HandlerType);
+  Object.defineProperty(rpcType, RpcConfigHandlerTypeSymbol, {
+    enumerable: false,
+    value: HandlerType,
+  });
+
   return <any>HandlerType;
 }

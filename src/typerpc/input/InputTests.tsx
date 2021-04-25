@@ -1,6 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
-import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
+import { AbstractInputHandler } from "@dabsi/old-typerpc/input/AbstractInputHandler";
 import {
   AnyInput,
   Input,
@@ -11,14 +11,14 @@ import {
   InputValueData,
   InputValueElement,
   TInput,
-} from "@dabsi/typerpc/input/Input";
+} from "@dabsi/old-typerpc/input/Input";
 import {
   AbstractInputView,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
+} from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { testWidgetView } from "@dabsi/old-typerpc/WidgetViewTester";
 import React from "react";
 
 export type TestInput = Input<

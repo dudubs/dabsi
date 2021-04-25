@@ -1,6 +1,6 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { DataTicker } from "@dabsi/modules/data/ticker";
+import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { getTestConnection } from "@dabsi/typedata/entity/tests/tester";
 import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";

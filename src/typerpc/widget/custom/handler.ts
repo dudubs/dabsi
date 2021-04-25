@@ -1,9 +1,9 @@
-import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
+import { AbstractWidgetHandler } from "@dabsi/old-typerpc/widget/AbstractWidgetHandler";
 import {
   AnyCustomWidget,
   CustomWidget,
-} from "@dabsi/typerpc/widget/custom/rpc";
-import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/custom/rpc";
+import { IWidgetHandler } from "@dabsi/old-typerpc/widget/Widget";
 
 type T = AnyCustomWidget;
 

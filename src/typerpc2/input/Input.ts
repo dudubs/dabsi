@@ -1,9 +1,10 @@
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { Widget } from "@dabsi/typerpc2/widget/rpc";
+import { RpcType } from "@dabsi/typerpc2/Rpc";
+import { Widget } from "@dabsi/typerpc2/widget/Widget";
 
-const __isInput = Symbol();
+const __isInput = Symbol("__isInput");
 
-export const inputValueElementToData = Symbol();
+export const inputValueElementToData = Symbol("inputValueElementToData");
 
 export declare const inputCustomError: unique symbol;
 
@@ -11,13 +12,23 @@ export abstract class Input<
   ValueData,
   ValueElement,
   Error,
-  Element extends object
+  Element
 > extends Widget<Element> {
   [__isInput]: true = true;
+
+  static [__isInput]: true = true;
 
   @RpcFuncational() check!: (data: ValueData) => Promise<null | Error>;
 
   abstract [inputValueElementToData](element: ValueElement): ValueData;
+
+  static isInputType(o): o is RpcType<AnyInput> {
+    return typeof o === "function" && o[__isInput];
+  }
+
+  static isInput(o): o is AnyInput {
+    return typeof o === "object" && o[__isInput];
+  }
 }
 
 export type InferredInput<T extends AnyInput> = T extends Input<
@@ -34,7 +45,7 @@ export type InferredInput<T extends AnyInput> = T extends Input<
     }
   : never;
 
-export type AnyInput = Input<any, any, any, any>;
+export interface AnyInput extends Input<any, any, any, any> {}
 
 export type InputValueData<T extends AnyInput> = InferredInput<T>["ValueData"];
 

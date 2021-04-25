@@ -2,19 +2,20 @@ import { Override } from "@dabsi/common/typings2/Override";
 import { Renderer } from "@dabsi/view/react/renderer";
 import { ReactRendererOrProps } from "@dabsi/view/react/patterns/ReactRendererOrProps";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { InputMapView } from "@dabsi/typerpc/input/input-map/InputMapView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { TWidget, Widget } from "@dabsi/typerpc/widget/Widget";
+import { InputMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { InputMapView } from "@dabsi/old-typerpc/input/input-map/InputMapView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+import { TWidget, Widget } from "@dabsi/old-typerpc/widget/Widget";
 import {
   AnyWidgetRecord,
   WidgetMap,
-} from "@dabsi/typerpc/widget/widget-map/rpc";
-import { MapView, WidgetMapView } from "@dabsi/typerpc/widget/widget-map/view";
-import { WidgetNamespaceView } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamespaceView";
-import { WidgetNamespace } from "@dabsi/typerpc/widget/widget-namespace/WidgetNamspace";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
+} from "@dabsi/old-typerpc/widget/widget-map/rpc";
+import {
+  MapView,
+  WidgetMapView,
+} from "@dabsi/old-typerpc/widget/widget-map/view";
+import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
 import {
   ComponentType,
   createElement,
@@ -29,15 +30,12 @@ const componentViewSymbol = Symbol("system-map-view");
 
 InputMap[componentViewSymbol] = InputMapView;
 WidgetMap[componentViewSymbol] = WidgetMapView;
-WidgetNamespace[componentViewSymbol] = WidgetNamespaceView;
 
 export type AnyMapViewComponent = ComponentType<{
   children: Renderer<MapView<WidgetViewProps<any>>>;
 }>;
 
-export type AnySystemMapConnection =
-  | AnyWidgetConnectionWithWidgetMap
-  | RpcConnection<WidgetNamespace>;
+export type AnySystemMapConnection = AnyWidgetConnectionWithWidgetMap;
 
 export type SystemMapChildKey<
   C extends AnySystemMapConnection

@@ -1,6 +1,6 @@
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { BaseType } from "@dabsi/typedata/BaseType";
-import { DataTable, TDataTable } from "@dabsi/typerpc/data-table/rpc";
+import { DataTable, TDataTable } from "@dabsi/old-typerpc/data-table/rpc";
 
 type Row = {
   name: string;

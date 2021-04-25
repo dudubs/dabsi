@@ -1,13 +1,15 @@
 import { defined } from "@dabsi/common/object/defined";
-import { values } from "@dabsi/common/object/values";
+import { Reflector } from "@dabsi/common/reflection/Reflector";
+import { capitalize } from "@dabsi/common/string/capitalize";
+import { assignDescriptorsWithoutOverride } from "@dabsi/typerpc2/assignDescriptorsWithoutOverride";
+import handler from "@dabsi/typerpc2/form/handler";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
+import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 import { AnyRpcWithConfig, RpcConfigMetadataMap } from "./RpcConfig";
 import {
-  BaseRpcConfigHandler,
-  RpcConfigHandlerMap,
   RpcConfigHandlerType,
+  RpcConfigHandlerTypeSymbol,
 } from "./RpcConfigHandler";
 
 export function getRpcWithConfigHandlerType<T extends AnyRpcWithConfig>(
@@ -15,17 +17,73 @@ export function getRpcWithConfigHandlerType<T extends AnyRpcWithConfig>(
 ): RpcConfigHandlerType<T, RpcHandler<T>>;
 
 export function getRpcWithConfigHandlerType(rpcType: RpcType) {
-  const metadata = defined(
-    RpcConfigMetadataMap.get(rpcType),
-    () => `No rpc config metadata for "${rpcType.name}".`
-  );
-  const pathWithoutBaseName = metadata.anchor.path.replace(/[^\\\/]+$/, "");
+  const handlerType = loadHandlerType();
 
-  require(pathWithoutBaseName + "handler.ts");
+  if (handlerType.rpcType !== rpcType) {
+    const baseRpcType = rpcType;
+    class newHandlerType extends handlerType {
+      static readonly rpcType = baseRpcType;
 
-  const handlerType = RpcConfigHandlerMap.get(rpcType);
-  if (!handlerType) {
-    throw new Error(`No rpc-config-handler for ${rpcType.name}.`);
+      readonly rpcType = baseRpcType;
+    }
+
+    for (
+      ;
+      handlerType.rpcType !== rpcType;
+      rpcType = Object.getPrototypeOf(rpcType)
+    ) {
+      for (const memberKey of RpcMembers.getKeys(rpcType)) {
+        const memberHandlerKey = "handle" + capitalize(memberKey);
+        if (memberHandlerKey in newHandlerType.prototype) continue;
+        const memberType = RpcMembers.getMemberType(rpcType, memberKey);
+        const memberPropertyType = Reflector.getPropertyType(
+          rpcType,
+          memberKey
+        );
+        console.log({ memberHandlerKey });
+
+        newHandlerType.prototype[memberHandlerKey] = defined(
+          newHandlerType.createRpcMemberHandler?.(
+            memberKey,
+            memberType!,
+            memberPropertyType!
+          ),
+          () => `No member handler for "${rpcType.name}.${memberKey}".`
+        );
+      }
+    }
+
+    Object.defineProperty(newHandlerType, "name", {
+      configurable: false,
+      value: handlerType.name + "*",
+    });
+
+    Object.defineProperty(baseRpcType, RpcConfigHandlerTypeSymbol, {
+      enumerable: false,
+      value: newHandlerType,
+    });
+
+    return newHandlerType;
   }
-  return handlerType!;
+
+  return handlerType;
+
+  function loadHandlerType(): RpcConfigHandlerType<AnyRpcWithConfig, {}> {
+    const handlerType = rpcType[RpcConfigHandlerTypeSymbol];
+    if (handlerType) {
+      return handlerType;
+    }
+    const metadata = defined(
+      RpcConfigMetadataMap.get(rpcType),
+      () => `No rpc config metadata for "${rpcType.name}".`
+    );
+    const pathWithoutBaseName = metadata.anchor.path.replace(/[^\\\/]+$/, "");
+
+    require(pathWithoutBaseName + "handler.ts");
+
+    return defined(
+      rpcType[RpcConfigHandlerTypeSymbol],
+      () => `No rpc config handler for ${rpcType.name}.`
+    );
+  }
 }

@@ -24,12 +24,12 @@ import {
   AnyDataTable,
   DataTable,
   DataTableType,
-} from "@dabsi/typerpc/data-table/rpc";
+} from "@dabsi/old-typerpc/data-table/rpc";
 import {
   DataTableView,
   DataTableViewProps,
-} from "@dabsi/typerpc/data-table/view";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/data-table/view";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { ReactRef } from "@dabsi/view/react/ref";
 import { Renderer } from "@dabsi/view/react/renderer";
 import Button from "@material-ui/core/Button";

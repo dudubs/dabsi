@@ -1,3 +1,4 @@
+// TODO: use reflect.defineMetadata
 import "reflect-metadata";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Type } from "@dabsi/common/typings2/Type";

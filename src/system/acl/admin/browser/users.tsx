@@ -7,8 +7,8 @@ import { ACL_Admin_Connection } from "@dabsi/system/acl/admin/common/rpc";
 import { ACL_AdminRouter } from "@dabsi/system/acl/admin/view/router";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { RouterView } from "@dabsi/typerouter/view";
-import { DataTableView } from "@dabsi/typerpc/data-table/view";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
+import { DataTableView } from "@dabsi/old-typerpc/data-table/view";
+import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";
 import { Typography } from "@material-ui/core";
 import React from "react";
 

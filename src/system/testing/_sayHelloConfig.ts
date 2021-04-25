@@ -1,8 +1,8 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { SystemTestingRpc } from "@dabsi/system/testing/common/SystemTestingRpc";
 
-export default RpcConfigResolver(
+export default RpcResolver(
   SystemTestingRpc.at("sayHello"),
   { rpcReq: RpcRequest },
   c => ({ name }) => {

@@ -1,7 +1,7 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
-import { DataTicker } from "@dabsi/modules/data/ticker";
+import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { CustomResolver, Resolver, ResolverMap } from "@dabsi/typedi";
 
 export type DataRowKeyContext = {

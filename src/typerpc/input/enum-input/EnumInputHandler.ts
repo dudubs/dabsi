@@ -7,9 +7,9 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
-import { AbstractNullableInputHandler } from "@dabsi/typerpc/input/nullable-input/AbstractNullableInputHandler";
-import { AnyEnumInput } from "@dabsi/typerpc/input/enum-input/EnumInput";
+} from "@dabsi/old-typerpc/input/Input";
+import { AbstractNullableInputHandler } from "@dabsi/old-typerpc/input/nullable-input/AbstractNullableInputHandler";
+import { AnyEnumInput } from "@dabsi/old-typerpc/input/enum-input/EnumInput";
 
 type T = AnyEnumInput;
 

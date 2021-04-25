@@ -1,7 +1,7 @@
-import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
-import { RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { RpcNamespace } from "@dabsi/old-typerpc/namespace/rpc";
+import { RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcFn } from "@dabsi/old-typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 
 it("sanity", async () => {
   const a = RpcNamespace();

@@ -1,5 +1,5 @@
-import { AnyInput } from "@dabsi/typerpc/input/Input";
-import { Form } from "@dabsi/typerpc/widget/form/rpc";
+import { AnyInput } from "@dabsi/old-typerpc/input/Input";
+import { Form } from "@dabsi/old-typerpc/widget/form/rpc";
 
 export type DataForm<Input extends AnyInput> = Form<{
   Value: string;

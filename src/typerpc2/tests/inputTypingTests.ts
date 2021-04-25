@@ -9,7 +9,7 @@ import {
 import { InputWithConfig } from "@dabsi/typerpc2/input/InputHandler";
 import { InputWithError } from "@dabsi/typerpc2/input/InputWithError";
 import { InputWithValue } from "@dabsi/typerpc2/input/InputWithValue";
-import { GenericConfigOrFactory } from "@dabsi/typerpc2/RpcConfig";
+import { RpcConfig } from "@dabsi/typerpc2/RpcConfig";
 
 export function typingTests() {
   class TestInput1 extends Input<
@@ -55,16 +55,16 @@ export function typingTests() {
     //
     Expect<InputError<TestInput1WithExtraErr>, "EXTRA_ERR">,
     //
-    Expect<GenericConfigOrFactory<TestInput1>, "hello">,
+    Expect<RpcConfigurator<TestInput1>, "hello">,
     Expect<
-      GenericConfigOrFactory<TestInput1WithValue1>,
+      RpcConfigurator<TestInput1WithValue1>,
       {
         config: "";
         load: () => { value: "VALUE1" };
       }
     >,
     Expect<
-      GenericConfigOrFactory<TestInput1WithValue1>,
+      RpcConfigurator<TestInput1WithValue1>,
       // @ts-expect-error
       {
         config: "";

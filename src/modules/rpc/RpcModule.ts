@@ -1,57 +1,40 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Once } from "@dabsi/common/patterns/Once";
 import { DABSI_SRC_DIR } from "@dabsi/env";
-import { inspect } from "@dabsi/logging/inspect";
-import {
-  isRpcConfigResolver,
-  RpcConfigResolver,
-} from "@dabsi/modules/rpc/configResolver";
-import { generateRpcConfigResolver } from "@dabsi/modules/rpc/configResolverGenerator";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
+import {
+  isRpcResolver,
+  RpcMemberResolver,
+  RpcResolver,
+} from "@dabsi/modules/rpc/RpcResolver";
+import { RpcResolverMap } from "@dabsi/modules/rpc/RpcResolverMap";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
 import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
 import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
-import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Module, Plugin } from "@dabsi/typemodule";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
+import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
+import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
+import { RpcType } from "@dabsi/typerpc2/Rpc";
 import path from "path";
 
-type Configuration = RpcConfigResolver<AnyRpc> | Configuration[];
 @Module({ cli: "rpc" })
 export class RpcModule2 {
   log = log.get("RPC");
 
-  protected _configResolverMap = new Map<AnyRpc, RpcConfigResolver<AnyRpc>>();
+  protected rpcResolverMap = new RpcResolverMap();
+
+  readonly request = new RequestBuilder();
 
   constructor(
     protected loaderModule: LoaderModule2,
     protected process: AsyncProcess2
   ) {}
 
-  defineConfigResolver(rpcConfigResolver: RpcConfigResolver<AnyRpc>) {
-    if (this._configResolverMap.has(rpcConfigResolver.rpc)) {
-      throw new Error(`Can't override rpc config resolver.`);
-    }
-    this._configResolverMap.set(rpcConfigResolver.rpc, rpcConfigResolver);
-  }
-
-  generateConfigResolver(rpc: AnyRpc): RpcConfigResolver<AnyRpc> | undefined {
-    return generateRpcConfigResolver(
-      childRpc => this.getConfigResolver(childRpc),
-      rpc
-    );
-  }
-
-  getConfigResolver(rpc: AnyRpc): RpcConfigResolver<AnyRpc> {
-    return this._configResolverMap.touch(rpc, () => {
-      const configResolver = this.generateConfigResolver(rpc);
-      if (configResolver) {
-        return configResolver;
-      }
-      throw new ResolveError(`No config resolver for ${inspect(rpc)}.`);
-    });
+  installContext(@Plugin() context: ModuleRunnerContext) {
+    Resolver.Context.assign(context, [this.rpcResolverMap]);
   }
 
   async installPlatform(@Plugin() platformModule2: PlatformModule2) {
@@ -68,15 +51,17 @@ export class RpcModule2 {
       });
   }
 
-  configure(config: Configuration | undefined) {
+  configure(
+    config: RpcResolver<any> | RpcMemberResolver<any, any> | undefined
+  ) {
     if (Array.isArray(config)) {
       for (const configItem of config) {
         this.configure(configItem);
       }
       return;
     }
-    if (isRpcConfigResolver(config)) {
-      this.defineConfigResolver(config);
+    if (isRpcResolver(config)) {
+      this.rpcResolverMap.add(config);
       return;
     }
   }
@@ -96,32 +81,30 @@ export class RpcModule2 {
     );
   }
 
-  @CliCommand("check") check(rpc: AnyRpc, context: ResolverMap) {
+  @CliCommand("check") check(rpc: RpcType, context: ResolverMap) {
     context = Resolver.Context.create(context, [RpcRequest]);
-    const configResolver = this.getConfigResolver(rpc);
-    Resolver.check(configResolver, context);
+    Resolver.check(this.rpcResolverMap.getResolver(rpc), context);
   }
 
-  readonly request = new RequestBuilder();
-
   async processRequest(
-    rpc: AnyRpc,
+    rpcType: RpcType,
     rpcRequest: RpcRequest,
     context: ResolverMap
   ): Promise<any> {
     context = Resolver.Context.assign(context, [rpcRequest]);
     let result: any;
     await this.request.process(context, async () => {
-      const configResolver = this.getConfigResolver(rpc);
-      const config = Resolver.resolve(configResolver, context);
-      const command = rpc.createRpcCommand(config);
-      result = await command(rpcRequest.path, rpcRequest.payload);
+      const configuratorResolver = this.rpcResolverMap.getResolver(rpcType);
+      const handler = createRpcHandler(rpcType, configuratorResolver);
+
+      const command = createRpcCommandFromHandler(rpcType, handler);
+      result = await command(rpcRequest.payload);
     });
     return result;
   }
 
   processMultipleRequests(
-    rpc: AnyRpc,
+    rpc: RpcType,
     datas: any[],
     body: any,
     context: ResolverMap
@@ -129,11 +112,11 @@ export class RpcModule2 {
     this.log.info(() => `Got ${datas.length} requests.`);
 
     return Promise.all(
-      datas.toSeq().map(async ({ path, payload }) => {
+      datas.toSeq().map(async payload => {
         this.log.info(() => `handle ${JSON.stringify(path)}`);
         return this.processRequest(
           rpc,
-          new RpcRequest(path, payload, body),
+          new RpcRequest(payload, body),
           Resolver.Context.create(context)
         );
       })

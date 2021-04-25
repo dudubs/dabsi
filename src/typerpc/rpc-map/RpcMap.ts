@@ -6,9 +6,9 @@ import {
   Rpc,
   RpcConnection,
   RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
-import { RpcMapHandler } from "@dabsi/typerpc/rpc-map/RpcMapHandler";
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
+import { RpcMapHandler } from "@dabsi/old-typerpc/rpc-map/RpcMapHandler";
 import { Expect } from "@dabsi/common/typings2/Expect";
 
 export type AnyRpcRecord = Record<string, AnyRpc>;

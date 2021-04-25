@@ -3,16 +3,16 @@ import { RequiredOnly } from "@dabsi/common/typings2/RequiredOnly";
 import {
   AnyArrayInput,
   TArrayInput,
-} from "@dabsi/typerpc/input/array-input/ArrayInput";
-import { InputType } from "@dabsi/typerpc/input/Input";
+} from "@dabsi/old-typerpc/input/array-input/ArrayInput";
+import { InputType } from "@dabsi/old-typerpc/input/Input";
 import {
   AbstractInputView,
   InputViewInstance,
   InputView,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { InputViewChildren } from "@dabsi/typerpc/input/InputViewChildren";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/InputView";
+import { InputViewChildren } from "@dabsi/old-typerpc/input/InputViewChildren";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { createElement, Fragment, ReactElement, ReactNode } from "react";
 
 export type AnyArrayInputConnection = RpcConnection<AnyArrayInput>;

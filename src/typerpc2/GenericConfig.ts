@@ -93,11 +93,16 @@ export async function GenericConfig2(
   return result;
 }
 
-export type GenericConfigOrFactory<T> =
-  | T
-  | If<IsGenericConfig<T>, never, GenericConfig2<(config: T) => T>>;
+export type ConfigFactory<T, U extends any[] = []> = GenericConfig2<
+  (config: T) => T,
+  U
+>;
 
-export type GenericConfigOrFactoryType<T> = If<
+export type Configurator<T> =
+  | T
+  | If<IsGenericConfig<T>, never, ConfigFactory<T>>;
+
+export type ConfiguratorType<T> = If<
   IsGenericConfig<T>,
   ReturnType<GenericConfigFn<Extract<T, AnyGenericConfig>>>,
   T

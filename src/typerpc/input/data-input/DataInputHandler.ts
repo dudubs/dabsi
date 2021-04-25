@@ -1,6 +1,6 @@
 import { DataRow } from "@dabsi/typedata/row";
-import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
-import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+import { RpcChildConfig } from "@dabsi/old-typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/old-typerpc/widget/Widget";
 import {
   ErrorOrValue,
   InputElement,
@@ -9,10 +9,10 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
-import { AbstractNullableInputHandler } from "@dabsi/typerpc/input/nullable-input/AbstractNullableInputHandler";
-import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
-import { AnyDataInput } from "@dabsi/typerpc/input/data-input/rpc";
+} from "@dabsi/old-typerpc/input/Input";
+import { AbstractNullableInputHandler } from "@dabsi/old-typerpc/input/nullable-input/AbstractNullableInputHandler";
+import { ValueOrAwaitableFn } from "@dabsi/old-typerpc/input/ValueOrAwaitableFn";
+import { AnyDataInput } from "@dabsi/old-typerpc/input/data-input/rpc";
 
 type T = AnyDataInput;
 

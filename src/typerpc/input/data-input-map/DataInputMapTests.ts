@@ -1,8 +1,8 @@
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { DataInputTester } from "@dabsi/typerpc/input/data-input/DataInputTester";
-import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { NumberInput } from "@dabsi/typerpc/input/number-input/NumberInput";
-import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { DataInputTester } from "@dabsi/old-typerpc/input/data-input/DataInputTester";
+import { testInput } from "@dabsi/old-typerpc/input/InputTester";
+import { NumberInput } from "@dabsi/old-typerpc/input/number-input/NumberInput";
+import { DataInputMap } from "@dabsi/old-typerpc/input/data-input-map/DataInputMap";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 

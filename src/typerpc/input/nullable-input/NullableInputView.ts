@@ -1,11 +1,11 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { InputError, TInput } from "@dabsi/typerpc/input/Input";
+import { InputError, TInput } from "@dabsi/old-typerpc/input/Input";
 import {
   AbstractInputView,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/InputView";
+import { NullableInput } from "@dabsi/old-typerpc/input/nullable-input/NullableInput";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { ReactElement } from "react";
 
 export class NullableInputView<

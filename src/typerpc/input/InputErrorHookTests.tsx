@@ -1,10 +1,10 @@
 import { InputErrorHook } from "./InputErrorHook";
-import { InputErrorHookView } from "@dabsi/typerpc/input/InputErrorHookView";
-import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { TestInput, TestInputView } from "@dabsi/typerpc/input/InputTests";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
+import { InputErrorHookView } from "@dabsi/old-typerpc/input/InputErrorHookView";
+import { testInput } from "@dabsi/old-typerpc/input/InputTester";
+import { TestInput, TestInputView } from "@dabsi/old-typerpc/input/InputTests";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { testWidgetView } from "@dabsi/old-typerpc/WidgetViewTester";
 import React from "react";
 
 // InputValueHook()

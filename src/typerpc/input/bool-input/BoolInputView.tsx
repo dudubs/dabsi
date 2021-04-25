@@ -1,9 +1,9 @@
-import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
+import { BoolInput } from "@dabsi/old-typerpc/input/bool-input/BoolInput";
 import {
   AbstractInputView,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { ReactElement } from "react";
 
 export type BoolInputViewProps<

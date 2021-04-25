@@ -28,6 +28,7 @@ export type ArrowResolver<T> = (context: ResolverMap<any>) => T;
 export type ProvidableResolver<T> = Constructor<T> & {
   [providableSymbol]?: true;
 };
+export type ResolverLike<T extends Resolver> = Resolver<Resolved<T>>;
 
 export type CustomResolver<T> = {
   new (context: ResolverMap): T;

@@ -1,11 +1,11 @@
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
     function create<T>(
       resolve: (context: ResolverMap) => T,
       check: (context: ResolverMap) => void
-    );
+    ): CustomResolver<T>;
   }
 }
 Resolver.create = function (resolve, check) {

@@ -1,9 +1,9 @@
-import { RpcCommand } from "@dabsi/typerpc/Rpc";
+import { RpcCommand } from "@dabsi/old-typerpc/Rpc";
 import {
   AnyWidget,
   TWidget,
   _WidgetConnection,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 
 export class BaseWidgetConnection implements _WidgetConnection<TWidget> {
   constructor(

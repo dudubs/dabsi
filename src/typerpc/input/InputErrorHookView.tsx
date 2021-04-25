@@ -1,16 +1,16 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { AnyInput, InputType } from "@dabsi/typerpc/input/Input";
+import { AnyInput, InputType } from "@dabsi/old-typerpc/input/Input";
 import {
   AnyInputErrorHook,
   TInputErrorHook,
-} from "@dabsi/typerpc/input/InputErrorHook";
+} from "@dabsi/old-typerpc/input/InputErrorHook";
 import {
   AbstractInputView,
   InputViewInstance,
   InputView,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { ReactElement } from "react";
 
 export class InputErrorHookView<

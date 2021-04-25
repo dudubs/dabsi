@@ -1,10 +1,10 @@
-import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
+import { AbstractWidgetHandler } from "@dabsi/old-typerpc/widget/AbstractWidgetHandler";
 import {
   IWidgetHandler,
   WidgetElement,
   WidgetElementState,
-} from "@dabsi/typerpc/widget/Widget";
-import { AnyWidgetMap } from "@dabsi/typerpc/widget/widget-map/rpc";
+} from "@dabsi/old-typerpc/widget/Widget";
+import { AnyWidgetMap } from "@dabsi/old-typerpc/widget/widget-map/rpc";
 
 type T = AnyWidgetMap;
 

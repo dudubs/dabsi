@@ -1,7 +1,7 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { Fn } from "@dabsi/common/typings2/Fn";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 declare const isConfigFactory: unique symbol;
 

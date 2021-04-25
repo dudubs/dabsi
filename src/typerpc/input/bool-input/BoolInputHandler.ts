@@ -1,6 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 
-import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
+import { AbstractInputHandler } from "@dabsi/old-typerpc/input/AbstractInputHandler";
 import {
   InputElement,
   InputErrorOrValue,
@@ -8,8 +8,8 @@ import {
   InputValueConfig,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
-import { BoolInput } from "@dabsi/typerpc/input/bool-input/BoolInput";
+} from "@dabsi/old-typerpc/input/Input";
+import { BoolInput } from "@dabsi/old-typerpc/input/bool-input/BoolInput";
 
 type T = BoolInput;
 

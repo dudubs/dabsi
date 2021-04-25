@@ -10,7 +10,7 @@ declare global {
   interface Map<K, V> extends Freezable {}
   interface Set<T> extends Freezable {}
 }
-const isForzen = Symbol();
+const isForzen = Symbol("isForzen");
 
 function setFreezability<T extends Freezable>(
   target: T,

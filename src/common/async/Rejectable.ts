@@ -1,6 +1,6 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 
-const rejection = Symbol();
+const rejection = Symbol("rejection");
 
 export type Rejected<V, E> = { [rejection]: { id: number; error: E } };
 

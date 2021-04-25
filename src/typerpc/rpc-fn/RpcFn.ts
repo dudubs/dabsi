@@ -1,8 +1,8 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { Awaitable, Awaited } from "@dabsi/common/typings2/Async";
 import { Fn } from "@dabsi/common/typings2/Fn";
-import { RpcFnHandler } from "@dabsi/typerpc/rpc-fn/RpcFnHandler";
-import { Rpc } from "@dabsi/typerpc/Rpc";
+import { RpcFnHandler } from "@dabsi/old-typerpc/rpc-fn/RpcFnHandler";
+import { Rpc } from "@dabsi/old-typerpc/Rpc";
 
 export type RpcFn<T extends Fn> = Rpc<{
   Connection: (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>>;

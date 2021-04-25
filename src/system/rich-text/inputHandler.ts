@@ -7,15 +7,15 @@ import {
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { BasedType, RebaseType } from "@dabsi/typedata/BaseType";
 import { DataSource } from "@dabsi/typedata/source";
-import { AbstractInputHandler } from "@dabsi/typerpc/input/AbstractInputHandler";
+import { AbstractInputHandler } from "@dabsi/old-typerpc/input/AbstractInputHandler";
 import {
   ErrorOrValue,
   InputValue,
   InputValueConfig,
   InputValueElement,
-} from "@dabsi/typerpc/input/Input";
-import { RpcChildConfig } from "@dabsi/typerpc/Rpc";
-import { IWidgetHandler } from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/input/Input";
+import { RpcChildConfig } from "@dabsi/old-typerpc/Rpc";
+import { IWidgetHandler } from "@dabsi/old-typerpc/widget/Widget";
 import { RichTextInputValue } from "./inputValue";
 
 type T = RichTextInput;

@@ -5,7 +5,7 @@ import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
 import { MuiPage } from "@dabsi/core/browser/mui/page";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { RouterView } from "@dabsi/typerouter/view";
-import { WidgetViewLoader } from "@dabsi/typerpc/widget/view/loader";
+import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";
 
 const connection = ACL_Admin_Connection.usersManager.add;
 

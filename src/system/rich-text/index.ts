@@ -29,8 +29,8 @@ import {
 import { initRichTextModule } from "@dabsi/system/rich-text/init";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { Module } from "@dabsi/typemodule";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+import { AnyRpc } from "@dabsi/old-typerpc/Rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 import "reflect-metadata";
 import { ManyToOne, RelationOptions } from "typeorm";
 

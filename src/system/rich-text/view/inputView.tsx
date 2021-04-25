@@ -6,8 +6,8 @@ import { RichTextInput } from "@dabsi/system/rich-text/common/input";
 import {
   AbstractInputView,
   InputViewProps,
-} from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import React from "react";
 
 export class RichTextInputView<

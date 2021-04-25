@@ -1,16 +1,16 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { RpcConnection, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcHook } from "@dabsi/typerpc/RpcHook";
+import { RpcConnection, RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcHook } from "@dabsi/old-typerpc/RpcHook";
 import {
   AnyInput,
   Input,
   InputType,
   InputValue,
   TInput,
-} from "@dabsi/typerpc/input/Input";
-import { InputErrorHookHandler } from "@dabsi/typerpc/input/InputErrorHookHandler";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+} from "@dabsi/old-typerpc/input/Input";
+import { InputErrorHookHandler } from "@dabsi/old-typerpc/input/InputErrorHookHandler";
+import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
 
 export type AnyInputErrorHook = InputErrorHook<TInputErrorHook>;
 

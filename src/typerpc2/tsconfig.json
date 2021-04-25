@@ -1,4 +1,4 @@
 {
   "extends": "../../configs/tsconfig.base.server.json",
-  "include": ["../common", "."]
+  "include": ["../common", ".", "../view"]
 }

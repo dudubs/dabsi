@@ -1,6 +1,6 @@
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { RpcHookHandler } from "@dabsi/typerpc/RpcHook";
-import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { RpcHookHandler } from "@dabsi/old-typerpc/RpcHook";
+import { AnyWidget } from "@dabsi/old-typerpc/widget/Widget";
 
 export const WidgetWrapperHandler: RpcHookHandler<
   AnyWidget,

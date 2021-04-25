@@ -40,7 +40,7 @@ function end(children: React.ReactElement) {
 
 export namespace ReactWrapper {
   export function createContext<T>(init: () => T): () => T {
-    const symbol = Symbol();
+    const symbol = Symbol("symbol");
     return () => {
       return currentContext!.touch(symbol, () => init());
     };

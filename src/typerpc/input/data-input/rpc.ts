@@ -10,14 +10,14 @@ import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKey
 import { TStruct } from "@dabsi/struct/Struct";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { DataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
-import { DataInputHandler } from "@dabsi/typerpc/input/data-input/DataInputHandler";
-import { Input } from "@dabsi/typerpc/input/Input";
-import { NullableInput } from "@dabsi/typerpc/input/nullable-input/NullableInput";
-import { ValueOrAwaitableFn } from "@dabsi/typerpc/input/ValueOrAwaitableFn";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
-import { DataTable, TDataTable } from "@dabsi/typerpc/data-table/rpc";
+import { GenericConfig } from "@dabsi/old-typerpc/GenericConfig";
+import { DataInputMap } from "@dabsi/old-typerpc/input/data-input-map/DataInputMap";
+import { DataInputHandler } from "@dabsi/old-typerpc/input/data-input/DataInputHandler";
+import { Input } from "@dabsi/old-typerpc/input/Input";
+import { NullableInput } from "@dabsi/old-typerpc/input/nullable-input/NullableInput";
+import { ValueOrAwaitableFn } from "@dabsi/old-typerpc/input/ValueOrAwaitableFn";
+import { AnyRpc } from "@dabsi/old-typerpc/Rpc";
+import { DataTable, TDataTable } from "@dabsi/old-typerpc/data-table/rpc";
 
 export declare namespace DataInput {
   type TTable<T extends TDataInput> = Expect<

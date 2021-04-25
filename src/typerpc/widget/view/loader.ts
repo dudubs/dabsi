@@ -1,8 +1,8 @@
 import {
   AnyWidgetConnection,
   WidgetElement,
-} from "@dabsi/typerpc/widget/Widget";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
+} from "@dabsi/old-typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
 import { useLoader } from "@dabsi/view/react/useLoader";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import React from "react";

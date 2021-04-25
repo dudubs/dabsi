@@ -1,11 +1,11 @@
 import { If } from "@dabsi/common/typings2/boolean";
 import { Override } from "@dabsi/common/typings2/Override";
-import { Input } from "@dabsi/typerpc/input/Input";
-import { TextInputHandler } from "@dabsi/typerpc/input/text-input/TextInputHandler";
+import { Input } from "@dabsi/old-typerpc/input/Input";
+import { TextInputHandler } from "@dabsi/old-typerpc/input/text-input/TextInputHandler";
 import {
   TextLoaderError,
   TextLoaderOptions,
-} from "@dabsi/typerpc/input/text-input/TextInputLoader";
+} from "@dabsi/old-typerpc/input/text-input/TextInputLoader";
 
 // TODO: Builtin unique error, & error override.
 export type TextInput<N extends boolean = any> = Input<{

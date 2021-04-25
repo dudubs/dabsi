@@ -1,12 +1,12 @@
 import { ACL_Admin_UsersTable } from "@dabsi/system/acl/admin/common/usersTable";
-import { DataForm } from "@dabsi/typerpc/data-form/rpc";
-import { InputMap } from "@dabsi/typerpc/input/input-map/InputMap";
-import { NameInput } from "@dabsi/typerpc/input/NameInput";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import UniqueInput from "@dabsi/typerpc/input/UniqueInput";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
+import { DataForm } from "@dabsi/old-typerpc/data-form/rpc";
+import { InputMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
+import { NameInput } from "@dabsi/old-typerpc/input/NameInput";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
+import UniqueInput from "@dabsi/old-typerpc/input/UniqueInput";
+import { RpcFn } from "@dabsi/old-typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+import { RpcParameter } from "@dabsi/old-typerpc/rpc-parameter/rpc";
 
 export const ACL_Admin_User_BasicInfoInput = InputMap({
   firstName: NameInput(),

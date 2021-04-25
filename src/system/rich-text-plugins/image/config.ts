@@ -1,4 +1,4 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
@@ -6,10 +6,10 @@ import { RichTextPlugin } from "@dabsi/system/rich-text/common/plugin";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 import { StorageImage } from "@dabsi/system/storage/entities/StorageImage";
 import StorageManager from "@dabsi/system/storage/StorageManager";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 import sharp from "sharp";
 
-export default RpcConfigResolver(
+export default RpcResolver(
   RichTextImageRpc,
   {
     config: RichTextConfigContext,

@@ -7,7 +7,7 @@ import processRpcWithFormData from "@dabsi/system/core/browser/processRpcWithFor
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import { RichTextEditor } from "@dabsi/system/rich-text/browser/editor/editor";
 import { RichTextStore } from "@dabsi/system/rich-text/browser/editor/store";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 
 // getRichTextPluginConfig('image')
 

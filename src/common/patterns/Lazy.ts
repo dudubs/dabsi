@@ -19,7 +19,7 @@ export default function Lazy(arg0, arg1?): any {
 }
 
 function lazySymbolCallback(callback) {
-  const symbol = Symbol();
+  const symbol = Symbol("symbol");
   return function (this: any) {
     if (symbol in this) return this[symbol];
     return (this[symbol] = callback.call(this, this));

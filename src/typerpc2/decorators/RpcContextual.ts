@@ -1,5 +1,4 @@
 import { defined } from "@dabsi/common/object/defined";
-import Lazy from "@dabsi/common/patterns/Lazy";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Forward } from "@dabsi/common/reflection/Forward";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
@@ -9,21 +8,21 @@ import {
   RpcContextualMember,
   RpcType,
 } from "@dabsi/typerpc2/Rpc";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMemberType";
+import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export function RpcContextual<T extends Rpc>(
   getConnectionType?: () => RpcType<T>
 ): {
   <K extends string>(
-    target: Record<K, RpcContextualMember<T>>,
+    target: Rpc & Record<K, RpcContextualMember<T>>,
     propertyName: K
   ): void;
 } {
   return (target, propertyName: string) => {
     getConnectionType && Forward(getConnectionType)(target, propertyName);
 
-    RpcMemberType.define(
-      target.constructor,
+    RpcMembers.define(
+      <any>target.constructor,
       propertyName,
       RpcMemberType.Contextual
     );
@@ -39,6 +38,7 @@ export function RpcContextual<T extends Rpc>(
           `No forward or design type for ${target.constructor.name}.${propertyName}`
       );
     });
+
     Object.defineProperty(target, propertyName, {
       configurable: false,
       get() {

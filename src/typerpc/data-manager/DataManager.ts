@@ -4,21 +4,21 @@ import { Expect } from "@dabsi/common/typings2/Expect";
 import { Override } from "@dabsi/common/typings2/Override";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSource } from "@dabsi/typedata/source";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { DataManagerHandler } from "@dabsi/typerpc/data-manager/DataManagerHandler";
-import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
-import { AnyInput, InputValue } from "@dabsi/typerpc/input/Input";
-import { NoRpc } from "@dabsi/typerpc/NoRpc";
-import { AnyRpc, RpcType, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcFn } from "@dabsi/typerpc/rpc-fn/RpcFn";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
-import { RpcConfigHook } from "@dabsi/typerpc/RpcConfigHook";
-import { AnyDataTable } from "@dabsi/typerpc/data-table/rpc";
-import { Form } from "@dabsi/typerpc/widget/form/rpc";
-import { WidgetType } from "@dabsi/typerpc/widget/Widget";
-import { PartialConfigKeys } from "@dabsi/typerpc/Config";
-import { Old_DataTableOf } from "@dabsi/typerpc/data-table/rpc";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { DataManagerHandler } from "@dabsi/old-typerpc/data-manager/DataManagerHandler";
+import { GenericConfig } from "@dabsi/old-typerpc/GenericConfig";
+import { AnyInput, InputValue } from "@dabsi/old-typerpc/input/Input";
+import { NoRpc } from "@dabsi/old-typerpc/NoRpc";
+import { AnyRpc, RpcType, RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcFn } from "@dabsi/old-typerpc/rpc-fn/RpcFn";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+import { RpcParameter } from "@dabsi/old-typerpc/rpc-parameter/rpc";
+import { RpcConfigHook } from "@dabsi/old-typerpc/RpcConfigHook";
+import { AnyDataTable } from "@dabsi/old-typerpc/data-table/rpc";
+import { Form } from "@dabsi/old-typerpc/widget/form/rpc";
+import { WidgetType } from "@dabsi/old-typerpc/widget/Widget";
+import { PartialConfigKeys } from "@dabsi/old-typerpc/Config";
+import { Old_DataTableOf } from "@dabsi/old-typerpc/data-table/rpc";
 
 // Full<Type>Stack
 export type TDataManager = {

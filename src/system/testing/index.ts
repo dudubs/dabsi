@@ -1,4 +1,4 @@
-import SystemModule from "@dabsi/system/core/module";
+import SystemModule from "@dabsi/system/core";
 import { Module } from "@dabsi/typedi";
 
 @Module({

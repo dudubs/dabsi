@@ -1,14 +1,14 @@
 import sharp from "sharp";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import AclAdminUserAvatarModule from "@dabsi/system/acl-user-avatar";
 import AclEditUserAvatarRpc from "@dabsi/system/acl-user-avatar/common/AclEditUserAvatarRpc";
 import { User } from "@dabsi/system/acl/entities/User";
 import StorageManager from "@dabsi/system/storage/StorageManager";
 import { DataRow } from "@dabsi/typedata/row";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
-export default RpcConfigResolver(
+export default RpcResolver(
   AclEditUserAvatarRpc,
   {
     user: DataRow(User),

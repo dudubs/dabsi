@@ -1,6 +1,6 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { RpcNamespaceHandler } from "@dabsi/typerpc/namespace/handler";
+import { RpcNamespaceHandler } from "@dabsi/old-typerpc/namespace/handler";
 import {
   AnyRpc,
   AnyRpcHandler,
@@ -8,8 +8,8 @@ import {
   RpcCommand,
   RpcConnection,
   RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 export type RpcNamespace = Rpc<{
   Handler: {};

@@ -1,15 +1,15 @@
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { checkUniqueName } from "@dabsi/system/acl/checkUniqueName";
 import { User } from "@dabsi/system/acl/entities/User";
 import {
   ACL_Admin_User_BasicInfoInput,
   ACL_Admin_User_ContactInfoInput,
 } from "@dabsi/system/acl/admin/common/usersRpc";
-import { DataFormConfigResolver } from "@dabsi/typerpc/data-form/handler";
+import { DataFormConfigResolver } from "@dabsi/old-typerpc/data-form/handler";
 
 export default [
-  RpcConfigResolver(
+  RpcResolver(
     ACL_Admin_User_BasicInfoInput.at("map.loginName"),
     {
       user: DataRowContext(User),

@@ -3,15 +3,15 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
-import { DataTicker } from "@dabsi/modules/data/ticker";
+import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { ResolvedMap, Resolver, ResolverMap } from "@dabsi/typedi";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { AnyRpc } from "@dabsi/typerpc/Rpc";
-import { RpcParameter } from "@dabsi/typerpc/rpc-parameter/rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { AnyRpc } from "@dabsi/old-typerpc/Rpc";
+import { RpcParameter } from "@dabsi/old-typerpc/rpc-parameter/rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 export type DataParameter = RpcParameter<{ Target: AnyRpc; Data: string }>;
 
@@ -27,8 +27,8 @@ export function DataParameterConfigResolver<T, U extends ResolverMap>(
     },
     [ResolvedMap<U>]
   >
-): RpcConfigResolver<DataParameter> {
-  return RpcConfigResolver(
+): RpcResolver<DataParameter> {
+  return RpcResolver(
     rpc,
     {
       rowTickerResolver: DataTicker,

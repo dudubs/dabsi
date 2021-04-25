@@ -1,12 +1,12 @@
 import { View } from "@dabsi/view/react/component/View";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import {
   AnyWidget,
   AnyWidgetConnection,
   WidgetElement,
   WidgetElementState,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 import { ReactElement } from "react";
 import { BaseProps } from "@dabsi/view/react/BaseProps";
 

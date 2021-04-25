@@ -1,6 +1,6 @@
 // import { AdminRpc } from "@dabsi/system/admin/common";
-// import { DataTable } from "@dabsi/typerpc/data-table/rpc";
-// import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+// import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
+// import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 
 // export const xACL_Admin_UsersTable = DataTable({
 //   firstName: String,

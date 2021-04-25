@@ -1,5 +1,5 @@
 import { DataRowContext } from "@dabsi/modules/data/rowContext";
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
 import { ACL_Admin_GroupsTable } from "@dabsi/system/acl/admin/common/groupsTable";
@@ -7,7 +7,7 @@ import { ACL_Admin_UsersTable } from "@dabsi/system/acl/admin/common/usersTable"
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 
 export default [
-  RpcConfigResolver(
+  RpcResolver(
     ACL_Admin_GroupsTable,
     { getDataSource: DataSourceFactory2, user: DataRowContext(User) },
     c => $ =>
@@ -27,7 +27,7 @@ export default [
         loadIsChecked: c.user.$key ? row => Boolean(row.checked) : undefined,
       })
   ),
-  RpcConfigResolver(
+  RpcResolver(
     ACL_Admin_UsersTable,
     { getDataSource: DataSourceFactory2, group: DataRowContext(Group) },
     c => $ =>

@@ -10,8 +10,8 @@ import {
   RpcResolvedConfig,
   RpcResolvedHandler,
   RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 export abstract class AbstractRpcHandler<T extends AnyRpc>
   implements IRpcHandler<RpcWithoutChildren> {

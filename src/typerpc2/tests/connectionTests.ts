@@ -7,7 +7,7 @@ import {
 } from "@dabsi/typerpc2";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMemberType";
+import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 class A extends Rpc {
   @RpcFuncational() fx!: (xs: string, xi: number) => Promise<string>;
@@ -78,15 +78,15 @@ it("expect to create command for parametrial member", async () => {
 });
 
 it("expect member type will be functional", () => {
-  expect(RpcMemberType.get(A, "fx")).toEqual(RpcMemberType.Functional);
+  expect(RpcMembers.getMemberType(A, "fx")).toEqual(RpcMemberType.Functional);
 });
 
 it("expect member type will be contextual", () => {
-  expect(RpcMemberType.get(B, "a")).toEqual(RpcMemberType.Contextual);
+  expect(RpcMembers.getMemberType(B, "a")).toEqual(RpcMemberType.Contextual);
 });
 
 it("expect member type will be parametrial", () => {
-  expect(RpcMemberType.get(B, "px")).toEqual(RpcMemberType.Parametrial);
+  expect(RpcMembers.getMemberType(B, "px")).toEqual(RpcMemberType.Parametrial);
 });
 
 it("expect to functional payload", async () => {

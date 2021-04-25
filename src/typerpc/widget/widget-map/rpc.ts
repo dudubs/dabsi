@@ -1,13 +1,13 @@
 import { Expect } from "@dabsi/common/typings2/Expect";
-import { AnyRpc, RpcConfig } from "@dabsi/typerpc/Rpc";
-import { RpcMap } from "@dabsi/typerpc/rpc-map/RpcMap";
+import { AnyRpc, RpcConfig } from "@dabsi/old-typerpc/Rpc";
+import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 import {
   AnyWidget,
   Widget,
   WidgetElement,
   WidgetElementState,
-} from "@dabsi/typerpc/widget/Widget";
-import { WidgetMapHandler } from "@dabsi/typerpc/widget/widget-map/handler";
+} from "@dabsi/old-typerpc/widget/Widget";
+import { WidgetMapHandler } from "@dabsi/old-typerpc/widget/widget-map/handler";
 
 export type AnyWidgetRecord = Record<string, AnyWidget>;
 

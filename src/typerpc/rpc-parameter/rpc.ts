@@ -1,11 +1,11 @@
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
 import {
   AnyRpc,
   Rpc,
   RpcConnection,
   RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
-import { RpcParameterHandler } from "@dabsi/typerpc/rpc-parameter/handler";
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcParameterHandler } from "@dabsi/old-typerpc/rpc-parameter/handler";
 
 export type TRpcParameter = { Target: AnyRpc; Data: any };
 

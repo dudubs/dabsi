@@ -1,10 +1,10 @@
 import React from "react";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
-import { testRpc } from "@dabsi/typerpc/RpcTester";
-import { testWidgetView } from "@dabsi/typerpc/WidgetViewTester";
-import { testInput } from "@dabsi/typerpc/input/InputTester";
-import { TextInput } from "@dabsi/typerpc/input/text-input/TextInput";
-import { TextInputView } from "@dabsi/typerpc/input/text-input/TextInputView";
+import { testRpc } from "@dabsi/old-typerpc/RpcTester";
+import { testWidgetView } from "@dabsi/old-typerpc/WidgetViewTester";
+import { testInput } from "@dabsi/old-typerpc/input/InputTester";
+import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";
+import { TextInputView } from "@dabsi/old-typerpc/input/text-input/TextInputView";
 import objectContaining = jasmine.objectContaining;
 
 // afterAll(() => {

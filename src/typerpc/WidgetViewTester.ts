@@ -2,15 +2,15 @@ import { ComponentProps, createElement, ReactElement } from "react";
 import ReactTesterRenderer from "react-test-renderer";
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { collectTests } from "@dabsi/jasmine/collectTests";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
-import { WidgetViewClass } from "@dabsi/typerpc/widget/view/component";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
+import { WidgetViewClass } from "@dabsi/old-typerpc/widget/view/component";
 import {
   AnyWidget,
   AnyWidgetConnection,
   WidgetElement,
-} from "@dabsi/typerpc/widget/Widget";
-import { WidgetViewProps } from "@dabsi/typerpc/widget/view/component";
-import { RpcTester } from "@dabsi/typerpc/RpcTester";
+} from "@dabsi/old-typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
+import { RpcTester } from "@dabsi/old-typerpc/RpcTester";
 
 export type WidgetTester<T extends AnyWidget> = {
   element: WidgetElement<T>;

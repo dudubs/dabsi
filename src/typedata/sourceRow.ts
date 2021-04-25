@@ -10,7 +10,7 @@ export type BasedDataRow<T> = WithDataKey & WithBaseType<T> & DataSourceRow;
 
 export type AnyBasedDataRow = BasedDataRow<any>;
 
-const rowSourceSymbol = Symbol();
+const rowSourceSymbol = Symbol("rowSourceSymbol");
 
 // rename: BaseDataSourceRow
 export class DataSourceRow {

@@ -12,12 +12,12 @@ import {
   InputValueElement,
 } from "@dabsi/typerpc2/input/Input";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcConfigSymbol } from "@dabsi/typerpc2/RpcConfig";
+import { RpcWithConfigSymbol } from "@dabsi/typerpc2/RpcConfig";
 import { RpcHandlerSymbol } from "@dabsi/typerpc2/RpcHandler";
 
 type BaseInput<T extends AnyInput> = Omit<
   T,
-  typeof RpcHandlerSymbol | typeof RpcConfigSymbol
+  typeof RpcHandlerSymbol | typeof RpcWithConfigSymbol
 >;
 
 export type InputWithError<T extends AnyInput, Error> = BaseInput<T> &

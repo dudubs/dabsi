@@ -1,15 +1,11 @@
-import Lazy from "@dabsi/common/patterns/Lazy";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Tester } from "@dabsi/jasmine/Tester";
-import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { RpcModule2 } from "@dabsi/modules/rpc";
-import {
-  ServerModule2,
-  ServerRequestBuilder,
-} from "@dabsi/modules2/ServerModule2";
+import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
+import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
-import { AnyRpc, RpcConnection } from "@dabsi/typerpc/Rpc";
-import { SingleCall } from "@dabsi/common/patterns/SingleCall";
+import { Rpc, RpcType } from "@dabsi/typerpc2";
 
 export function RpcModuleTester(t: ModuleTester) {
   return Tester.beforeAll(async () => {
@@ -18,15 +14,15 @@ export function RpcModuleTester(t: ModuleTester) {
 
     return {
       module,
-      createConnection<T extends AnyRpc>(rpc: T): RpcConnection<T> {
-        return rpc.createRpcConnection([], async (path, payload) => {
+      createRpc<T extends Rpc>(rpcType: RpcType<T>): T {
+        return new rpcType([], async payload => {
           let result: any = undefined;
           await serverMoudle.processRequest(
             Resolver.Context.create(t.moduleRunner.context),
             async context =>
               (result = await module.processRequest(
-                rpc,
-                new RpcRequest(path, payload, {}),
+                rpcType,
+                new RpcRequest(payload, {}),
                 Resolver.Context.create(context)
               ))
           );

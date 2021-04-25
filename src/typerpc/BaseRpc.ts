@@ -3,8 +3,8 @@ import { touchMap } from "@dabsi/common/map/touchMap";
 import { createObjectProxy } from "@dabsi/common/object/createObjectProxy";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { inspect } from "@dabsi/logging/inspect";
-import { ConfigFactory } from "@dabsi/typerpc/ConfigFactory";
-import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
+import { GenericConfig } from "@dabsi/old-typerpc/GenericConfig";
 import {
   AnyRpc,
   AnyRpcHandler,
@@ -15,8 +15,8 @@ import {
   _RpcResolvedConfig,
   _RpcResolvedHandler,
   _RpcUnresolvedConfig,
-} from "@dabsi/typerpc/Rpc";
-import { RpcError } from "@dabsi/typerpc/RpcError";
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcError } from "@dabsi/old-typerpc/RpcError";
 
 type T = TRpc;
 

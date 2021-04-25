@@ -3,7 +3,7 @@ import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
 import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
-import { DataTicker } from "@dabsi/modules/data/ticker";
+import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import getResourceTypes from "@dabsi/modules/session/getResourceTypes";

@@ -15,7 +15,7 @@ export type DataTypeInfo = {
 // TODO: use only WeakMap()
 export namespace DataTypeInfo {
   export const map = new WeakMap();
-  export const symbol = Symbol();
+  export const symbol = Symbol("symbol");
 
   function create(unionOrType): DataTypeInfo {
     if (DataUnion.isDataUnion(unionOrType)) {

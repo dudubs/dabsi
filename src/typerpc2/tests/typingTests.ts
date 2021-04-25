@@ -1,14 +1,40 @@
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { Fn } from "@dabsi/common/typings2/Fn";
+import { Rpc } from "@dabsi/typerpc2";
 import {
   GenericConfig2,
-  GenericConfigOrFactory,
+  Configurator,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
+import { RpcAt } from "@dabsi/typerpc2/Rpc";
 
 //
-export async function TypingTests() {
+
+export function RpcAtTypingTests() {
+  type A = Rpc & {
+    getB(xs: string): B;
+    b: B;
+  };
+  type B = Rpc & {
+    c: C;
+    getC(): C;
+  };
+  type C = Rpc & {
+    a: A;
+    getA(): A;
+  };
+
+  type _ = [
+    ///
+    Expect<C, RpcAt<A, "b.c">>,
+    Expect<never, RpcAt<A, "b.x">>,
+    Expect<A, RpcAt<A, "b.c.a">>,
+    Expect<A, RpcAt<A, "b.c.getA">>,
+    Expect<never, RpcAt<A, "b.c.getA.x">>
+  ];
+}
+export async function ConfigTypingsTests() {
   let GC1: GenericConfig2<
     <T extends Fn>(o: {
       type: T;
@@ -111,7 +137,7 @@ export async function TypingTests() {
     }
   }
 
-  // GenericConfigOrFactoryTests
+  // ConfiguratorTests
   {
     //
 
@@ -121,10 +147,10 @@ export async function TypingTests() {
       Expect<false, IsGenericConfig<() => any>>
     ];
 
-    let CO_GC1: GenericConfigOrFactory<typeof GC1>;
-    let CO_GC2: GenericConfigOrFactory<typeof GC2>;
-    let CO_C1: GenericConfigOrFactory<{ xs: string }>;
-    let CO_C2: GenericConfigOrFactory<($: (any) => any) => any>;
+    let CO_GC1: Configurator<typeof GC1>;
+    let CO_GC2: Configurator<typeof GC2>;
+    let CO_C1: Configurator<{ xs: string }>;
+    let CO_C2: Configurator<($: (any) => any) => any>;
 
     CO_GC1 = GC1;
 

@@ -1,11 +1,11 @@
-import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RequestSession } from "@dabsi/modules/session/module";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import AclContext from "@dabsi/system/acl/context";
 import { User } from "@dabsi/system/acl/entities/User";
 import { getPasswordHash } from "./getPasswordHash";
 
-export default RpcConfigResolver(
+export default RpcResolver(
   AclRpc,
   {
     session: RequestSession,

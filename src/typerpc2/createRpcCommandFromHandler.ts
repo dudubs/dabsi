@@ -1,8 +1,10 @@
 import { capitalize } from "@dabsi/common/string/capitalize";
 import { RpcType } from "@dabsi/typerpc2";
+import { ConfigFactory, GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
+import { Rpc } from "@dabsi/typerpc2/Rpc";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMemberType";
-import { RpcHandler, RpcHandlerMap } from "./RpcHandler";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { RpcHandler } from "./RpcHandler";
 
 export function createRpcCommandFromHandler<T extends RpcType>(
   rpcType: T,
@@ -15,15 +17,15 @@ export function createRpcCommandFromHandler<T extends RpcType>(
     };
 
     for (let index = 0; payload.length > index; index++) {
-      const memberName = payload[index];
-      if (typeof memberName !== "string") {
+      const memberKey = payload[index];
+      if (typeof memberKey !== "string") {
         throw new RpcError(
-          `Invalid member key type, exected to string, got "${typeof memberName}".`
+          `Invalid member key type, exected to string, got "${typeof memberKey}".`
         );
       }
-      const memberType = RpcMemberType.get(cursor.type, memberName);
+      const memberType = RpcMembers.getMemberType(cursor.type, memberKey);
 
-      const memberHandlerName = "handle" + capitalize(memberName);
+      const memberHandlerName = "handle" + capitalize(memberKey);
 
       const memberHandler = cursor.handler[memberHandlerName]?.bind(
         cursor.handler
@@ -31,7 +33,7 @@ export function createRpcCommandFromHandler<T extends RpcType>(
 
       if (typeof memberHandler !== "function") {
         throw new RpcError(
-          `No handler for member "${cursor.type.name}.${memberName}" in ${cursor.handler.constructor.name}.`
+          `No member handler for "${cursor.type.name}.${memberKey}" in ${cursor.handler.constructor.name}.`
         );
       }
 
@@ -40,7 +42,7 @@ export function createRpcCommandFromHandler<T extends RpcType>(
           return await memberHandler(...payload.slice(index + 1));
 
         case RpcMemberType.Parametrial:
-          cursor.type = RpcMemberType.getRpcType(cursor.type, memberName);
+          cursor.type = RpcMembers.getRpcType(cursor.type, memberKey);
           cursor.handler = await memberHandler(
             cursor.type,
             ...payload[++index]
@@ -48,15 +50,23 @@ export function createRpcCommandFromHandler<T extends RpcType>(
           break;
 
         case RpcMemberType.Contextual:
-          cursor.type = RpcMemberType.getRpcType(cursor.type, memberName);
+          cursor.type = RpcMembers.getRpcType(cursor.type, memberKey);
           cursor.handler = await memberHandler(cursor.type);
           break;
 
         default:
           throw new RpcError(
-            `No member key like ${cursor.type.name}.${memberName}`
+            `No member key like ${cursor.type.name}.${memberKey}`
           );
+      }
+
+      if (typeof cursor.handler === "function") {
+        cursor.handler = await GenericConfig2(
+          cursor.handler as ConfigFactory<any>
+        );
       }
     }
   };
 }
+
+const cache = new WeakMap();

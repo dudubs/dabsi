@@ -1,4 +1,4 @@
-// import { RpcConfigResolver } from "@dabsi/modules/rpc/configResolver";
+// import { RpcResolver } from "@dabsi/modules/rpc/configResolver";
 // import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
 // import AclContext  from "@dabsi/system/acl/context";
 // import { User } from "@dabsi/system/acl/entities/User";
@@ -6,7 +6,7 @@
 // import { DataRow } from "@dabsi/typedata/row";
 // import { Resolver } from "@dabsi/typedi";
 
-// export default RpcConfigResolver(
+// export default RpcResolver(
 //   ACL_Admin_UserBaiscInfoInput,
 //   {
 //     acl: AclContext,

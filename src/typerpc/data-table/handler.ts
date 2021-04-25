@@ -6,13 +6,13 @@ import { inspect } from "@dabsi/logging/inspect";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataOrder } from "@dabsi/typedata/order";
 import { DataRow } from "@dabsi/typedata/row";
-import { AbstractWidgetHandler } from "@dabsi/typerpc/widget/AbstractWidgetHandler";
-import { AnyDataTable, DataTable } from "@dabsi/typerpc/data-table/rpc";
+import { AbstractWidgetHandler } from "@dabsi/old-typerpc/widget/AbstractWidgetHandler";
+import { AnyDataTable, DataTable } from "@dabsi/old-typerpc/data-table/rpc";
 import {
   IWidgetHandler,
   WidgetElement,
   WidgetElementState,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
 
 type T = AnyDataTable;

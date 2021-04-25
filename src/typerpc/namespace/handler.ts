@@ -1,7 +1,11 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { AbstractRpcHandler } from "@dabsi/typerpc/AbstractRpcHandler";
-import { AnyRpc, IRpcHandler, RpcUnresolvedConfig } from "@dabsi/typerpc/Rpc";
-import { RpcNamespace } from "@dabsi/typerpc/namespace/rpc";
+import { AbstractRpcHandler } from "@dabsi/old-typerpc/AbstractRpcHandler";
+import {
+  AnyRpc,
+  IRpcHandler,
+  RpcUnresolvedConfig,
+} from "@dabsi/old-typerpc/Rpc";
+import { RpcNamespace } from "@dabsi/old-typerpc/namespace/rpc";
 
 type T = RpcNamespace;
 

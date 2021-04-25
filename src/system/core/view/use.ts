@@ -1,12 +1,12 @@
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { useSystemViewBuilders } from "@dabsi/system/core/view/useBuilders";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import {
   AnyWidget,
   AnyWidgetConnection,
   isWidget,
   isWidgetConnection,
-} from "@dabsi/typerpc/widget/Widget";
+} from "@dabsi/old-typerpc/widget/Widget";
 import React, { createElement } from "react";
 
 type Renderer<C extends AnyWidgetConnection> = (

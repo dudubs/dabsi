@@ -1,12 +1,12 @@
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { AnyDataInputMap } from "@dabsi/typerpc/input/data-input-map/DataInputMap";
+import { AnyDataInputMap } from "@dabsi/old-typerpc/input/data-input-map/DataInputMap";
 import {
   DataInputMapView,
   DataInputMapViewProps,
-} from "@dabsi/typerpc/input/data-input-map/DataInputMapView";
-import { InputViewProps } from "@dabsi/typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/typerpc/Rpc";
+} from "@dabsi/old-typerpc/input/data-input-map/DataInputMapView";
+import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
+import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { FormControlLabel } from "@material-ui/core";
 import Grid, { GridProps } from "@material-ui/core/Grid";
 import Typography, { TypographyProps } from "@material-ui/core/Typography";

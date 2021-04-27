@@ -2,7 +2,7 @@ import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
 import { AclModule } from "@dabsi/system/acl/module";
 import { SystemModule } from "@dabsi/system/core";
 import { Module, Plugin } from "@dabsi/typemodule";
-import { SessionModule } from "../../modules/session/module";
+import { SessionModule } from "../../modules/session";
 
 @Module({
   dependencies: [AclModule, SystemModule, SessionModule],

@@ -19,17 +19,12 @@ export type InferredRpcHandler<
 
 export type RpcMemberHandler<T> =
   //
-  T extends RpcFunctionalMember<infer R, infer U>
+  T extends RpcParametrialMember<infer R, infer U>
+    ? (rpcType: RpcType<R>, ...args: U) => Awaitable<RpcHandler<R>>
+    : T extends RpcFunctionalMember<infer R, infer U>
     ? (...args: U) => Awaitable<R>
-    : T extends RpcParametrialMember<infer R, infer U>
-    ? (
-        rpcType: RpcType<R>,
-        ...args: U
-      ) => Awaitable<RpcHandler<R> | ConfigFactory<RpcHandler<R>>>
     : T extends RpcContextualMember<infer R>
-    ? (
-        rpcType: RpcType<R>
-      ) => Awaitable<RpcHandler<R> | ConfigFactory<RpcHandler<R>>>
+    ? (rpcType: RpcType<R>) => Awaitable<RpcHandler<R>>
     : never;
 
 export type RpcMemberKey<T extends Rpc> = ExtractKeys<

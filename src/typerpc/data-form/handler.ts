@@ -1,7 +1,7 @@
 import { IfUndefined } from "@dabsi/common/typings2/boolean";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { DataRowContext } from "@dabsi/modules/data/rowContext";
+import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";

@@ -1,7 +1,7 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 
-import { DataRowLoader } from "@dabsi/modules/data/rowLoader";
+import { DataRowLoader } from "@dabsi/modules/data/DataRowLoader";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataRelationKeys } from "@dabsi/typedata/relation";

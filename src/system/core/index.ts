@@ -1,4 +1,4 @@
-import { SessionModule } from "@dabsi/modules/session/module";
+import { SessionModule } from "@dabsi/modules/session";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
 import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
 import { RpcModule2 } from "@dabsi/modules/rpc";

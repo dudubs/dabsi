@@ -1,23 +1,36 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { defined } from "@dabsi/common/object/defined";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
-import { RpcMemberResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import {
+  RpcMemberFactory,
+  RpcMemberResolver,
+  RpcResolver,
+} from "@dabsi/modules/rpc/RpcResolver";
 import { Resolver, ResolverLike, ResolverMap } from "@dabsi/typedi";
-import { Rpc, RpcMemberKey, RpcType } from "@dabsi/typerpc2";
+import {
+  Rpc,
+  RpcContextualMember,
+  RpcMemberKey,
+  RpcType,
+} from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
 import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
-import { getRpcWithConfigHandlerType } from "@dabsi/typerpc2/getRpcWithConfigHandlerType";
+import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
 import {
   AnyInputMap,
   BaseObjectInput,
   ObjectInput,
 } from "@dabsi/typerpc2/object-input/rpc";
-import { isRpcTypeWithConfig } from "@dabsi/typerpc2/RpcConfig";
+import {
+  isRpcTypeWithConfig,
+  RpcConfigurator,
+} from "@dabsi/typerpc2/RpcConfig";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 import { capitalize } from "@material-ui/core";
 
-export class RpcResolverMap {
+export class RpcResolverBuilder {
   protected _resolverMap = new Map<RpcType, ResolverLike<RpcResolver<any>>>();
 
   protected _memberResolverMap = new Map<
@@ -65,9 +78,9 @@ export class RpcResolverMap {
 
   buildResolver(rpcType: RpcType): ResolverLike<RpcResolver<any>> {
     if (isRpcTypeWithConfig(rpcType)) {
-      const handlerType = getRpcWithConfigHandlerType(rpcType);
+      const handlerType = getRpcConfigHandlerType(rpcType);
       if (handlerType.isRpcConfigCanBeUndefined) {
-        return () => undefined;
+        return () => () => createRpcHandler(rpcType, undefined);
       }
       throw new Error(
         `Can't build rpc-resolver for rpc-with-config (${rpcType.name}).`
@@ -76,7 +89,7 @@ export class RpcResolverMap {
 
     const handlerResolverMap: ResolverMap = {};
     for (const memberKey of getRpcMetadata(rpcType).memberKeys) {
-      handlerResolverMap["handle" + capitalize(memberKey)] = Resolver.custom(
+      handlerResolverMap["handle" + capitalize(memberKey)] = Resolver.consume(
         [this.getMemberResolver(rpcType, memberKey)],
         configFactory =>
           async function (this: any) {
@@ -94,7 +107,7 @@ export class RpcResolverMap {
   getMemberResolver<T extends Rpc, K extends RpcMemberKey<T>>(
     rpcType: RpcType<T>,
     memberKey: string & K
-  ): ResolverLike<RpcMemberResolver<T, K>> {
+  ): Resolver<RpcMemberFactory<T[K]>> {
     const memberResolver = this._memberResolverMap.get(rpcType)?.get(memberKey);
 
     if (memberResolver) {
@@ -104,15 +117,16 @@ export class RpcResolverMap {
     if (
       RpcMembers.getMemberType(rpcType, memberKey) === RpcMemberType.Contextual
     ) {
-      const memberRpcType = Reflector.getPropertyType(rpcType, memberKey);
+      const childRpcType = defined(
+        getRpcMetadata(rpcType).childTypeMap[memberKey]
+      );
 
-      return Resolver.custom(
-        [this.getResolver(memberRpcType as RpcType)],
-        configurator => async $ => {
-          return ($ as any)(rpcType => {
-            return createRpcHandler(rpcType, configurator);
-          });
-        }
+      return <Resolver<RpcMemberFactory<RpcContextualMember>>>(
+        Resolver.consume(
+          [this.getResolver(childRpcType as RpcType)],
+          configurator => $ =>
+            $(rpcType => createRpcHandler(rpcType, configurator))
+        )
       );
     }
 
@@ -141,13 +155,13 @@ export class RpcResolverMap {
 
 const __generateSymbol = Symbol("__generateSymbol");
 
-export namespace RpcResolverMap {
+export namespace RpcResolverBuilder {
   export function defineGenerator<T extends Rpc>(
     rpcType: RpcType<T>,
     generator: (
       rpcType: RpcType<T>,
-      map: RpcResolverMap
-    ) => ResolverLike<RpcResolver<T>>
+      builder: RpcResolverBuilder
+    ) => Resolver<RpcConfigurator<T>>
   ) {
     Object.defineProperty(rpcType, __generateSymbol, {
       enumerable: false,
@@ -156,19 +170,16 @@ export namespace RpcResolverMap {
   }
 }
 
-RpcResolverMap.defineGenerator(
+RpcResolverBuilder.defineGenerator(
   (BaseObjectInput as any) as RpcType<ObjectInput<AnyInputMap>>,
-  (objectInputType, map) => {
+  (rpcType, builder) => {
     return Resolver(
       [
         Resolver.object(
-          mapArrayToObject(
-            getRpcMetadata(objectInputType).contextualKeys,
-            childKey => [
-              childKey,
-              map.getMemberResolver(objectInputType, childKey),
-            ]
-          )
+          mapArrayToObject(getRpcMetadata(rpcType).contextualKeys, childKey => [
+            childKey,
+            builder.getMemberResolver(rpcType, childKey),
+          ])
         ) as Resolver<Record<string, any>>,
       ],
       x => $ => $(x)

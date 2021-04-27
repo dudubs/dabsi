@@ -1,5 +1,5 @@
 import { DataParameterConfigResolver } from "@dabsi/modules/data";
-import { DataRowContext } from "@dabsi/modules/data/rowContext";
+import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { User } from "@dabsi/system/acl/entities/User";
 import { ACL_Admin_UsersRpc } from "@dabsi/system/acl/admin/common/usersRpc";

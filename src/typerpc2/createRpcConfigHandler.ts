@@ -1,5 +1,5 @@
 import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
-import { getRpcWithConfigHandlerType } from "@dabsi/typerpc2/getRpcWithConfigHandlerType";
+import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { BaseRpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
@@ -18,7 +18,7 @@ export async function createRpcConfigHandler(
     | RpcType<AnyRpcWithConfig>,
   rpcConfigurator: RpcConfigurator<AnyRpcWithConfig>
 ) {
-  const rpcConfigHandlerType = getRpcWithConfigHandlerType(rpcType);
+  const rpcConfigHandlerType = getRpcConfigHandlerType(rpcType);
 
   if (rpcConfigurator == null) {
     return new rpcConfigHandlerType({}, <any>{});

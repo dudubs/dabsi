@@ -1,8 +1,8 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
+import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 
-import { RequestSession, SESSION_TIMEOUT } from "@dabsi/modules/session/module";
+import { RequestSession, SESSION_TIMEOUT } from "@dabsi/modules/session";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 

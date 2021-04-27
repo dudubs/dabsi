@@ -34,7 +34,7 @@ export class BrowserModule2 {
       this.projectModule.directory,
       "src/generated"
     );
-    console.log("xxasdsadsadxxx");
+
     const {
       entityMap: generatedEntityMap,
       codeMap: generatedCodeMap,
@@ -44,7 +44,7 @@ export class BrowserModule2 {
         console.log({ error });
         throw error;
       });
-    console.log("xxasdsadsadxxx");
+
     return webpack({
       mode: "development",
       devtool: "inline-source-map",
@@ -102,19 +102,21 @@ export class BrowserModule2 {
     // console.log(await this.createWebpackCompiler2());
     // return;
     const compiler = await this.createWebpackCompiler();
-    return;
+
     if (watch) {
+      throw new Error("no support yet.");
     }
 
-    return new Promise<webpack.Stats>((resolve, reject) => {
+    const stats = await new Promise<webpack.Stats>((resolve, reject) => {
       compiler.run((error, stats: webpack.Stats) => {
         console.log({ error });
 
         if (error) return reject(error);
         resolve(stats);
-        console.log({ stats });
       });
     });
+
+    console.log(stats.toString(true));
   }
 
   installExpress(@Plugin() expressModule: ExpressModule2) {

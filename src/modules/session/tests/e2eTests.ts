@@ -1,4 +1,4 @@
-import { RequestSession, SessionModule } from "@dabsi/modules/session/module";
+import { RequestSession, SessionModule } from "@dabsi/modules/session";
 import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
 import { DbModuleTester } from "@dabsi/modules2/tests/DbModuleTester";
 import { ExpressModuleTester } from "@dabsi/modules2/tests/ExpressModuleTester";

@@ -59,7 +59,7 @@ export function RpcWithConfig(): { (rpcType: RpcType): void } {
 
 export type RpcConfigurator<T extends Rpc> = T extends AnyRpcWithConfig
   ? Configurator<InferredRpcConfig<T>>
-  : ConfigFactory<RpcHandler<T>>;
+  : ConfigFactory<RpcHandler<T>, [RpcType<T>]>;
 
 export function isRpcTypeWithConfig(
   rpcType: RpcType

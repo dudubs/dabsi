@@ -59,12 +59,6 @@ export function createRpcCommandFromHandler<T extends RpcType>(
             `No member key like ${cursor.type.name}.${memberKey}`
           );
       }
-
-      if (typeof cursor.handler === "function") {
-        cursor.handler = await GenericConfig2(
-          cursor.handler as ConfigFactory<any>
-        );
-      }
     }
   };
 }

@@ -1,11 +1,11 @@
-import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { ConsumeResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
     function create<T>(
       resolve: (context: ResolverMap) => T,
       check: (context: ResolverMap) => void
-    ): CustomResolver<T>;
+    ): ConsumeResolver<T>;
   }
 }
 Resolver.create = function (resolve, check) {
@@ -14,10 +14,10 @@ Resolver.create = function (resolve, check) {
     [Resolver.checkSymbol, check],
     [Resolver.providableSymbol, false],
   ] as [PropertyKey, any][]) {
-    Object.defineProperty(CustomResolver, propertyName, {
+    Object.defineProperty(Consumer, propertyName, {
       enumerable: false,
       get() {
-        if (this !== CustomResolver) {
+        if (this !== Consumer) {
           Object.defineProperty(this, propertyName, {
             enumerable: false,
             value,
@@ -28,8 +28,8 @@ Resolver.create = function (resolve, check) {
     });
   }
 
-  return CustomResolver as any;
-  function CustomResolver(context) {
-    return Resolver.resolve(CustomResolver, context);
+  return Consumer as any;
+  function Consumer(context) {
+    return Resolver.resolve(Consumer, context);
   }
 };

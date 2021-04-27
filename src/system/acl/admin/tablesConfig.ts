@@ -1,4 +1,4 @@
-import { DataRowContext } from "@dabsi/modules/data/rowContext";
+import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";

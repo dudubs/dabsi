@@ -41,7 +41,7 @@ export class ServerModule2 {
 
   @CliCommand("start", y =>
     y
-      .option("disable-pid", { type: "boolean" })
+      .option("disable-pid", { type: "boolean", default: true })
       .option("port", { type: "number", alias: "p", default: 7777 })
   )
   async start(args: Partial<StartArgs> = {}) {

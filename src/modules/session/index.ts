@@ -2,7 +2,7 @@ import { defined } from "@dabsi/common/object/defined";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
-import { DataRowTicker } from "@dabsi/modules/data/rowTicker";
+import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";

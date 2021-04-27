@@ -1,5 +1,5 @@
 import { DABSI_DIR, DABSI_ROOT_DIR } from "@dabsi/env";
-import { relativePosixPath } from "@dabsi/modules/pathHelpers";
+
 import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
 import fs, { existsSync, readdirSync, realpathSync, statSync } from "fs";
 import path from "path";
@@ -76,10 +76,10 @@ export default async function ({ projectDir = ".", force = false }) {
     function makeServerConfig() {
       const include = [...parentProjectDirs, projectDir]
         .toSeq()
-        .map(dir => relativePosixPath(configsDir, path.join(dir, "src")))
+        .map(dir => path.posix.relative(configsDir, path.join(dir, "src")))
         .toArray();
       makeJsonFile(path.join(configsDir, "tsconfig.server.json"), {
-        extends: relativePosixPath(
+        extends: path.posix.relative(
           configsDir,
           path.join(DABSI_DIR, "configs", "tsconfig.base.server.json")
         ),
@@ -104,7 +104,7 @@ export default async function ({ projectDir = ".", force = false }) {
       parentPlatforms: string[] = []
     ) {
       const prodConfig = {
-        extends: relativePosixPath(
+        extends: path.posix.relative(
           configsDir,
           path.join(DABSI_DIR, "configs", `tsconfig.base.${platform}.json`)
         ),
@@ -132,7 +132,7 @@ export default async function ({ projectDir = ".", force = false }) {
         );
       function getIncludes(projectDir) {
         return [...parentPlatforms, platform].map(platform =>
-          relativePosixPath(configsDir, path.join(projectDir, "**", platform))
+          path.posix.relative(configsDir, path.join(projectDir, "**", platform))
         );
       }
     }
@@ -150,7 +150,7 @@ export default async function ({ projectDir = ".", force = false }) {
 
     function makeModuleConfig(platform: string, platformDir: string) {
       makeJsonFile(path.join(platformDir, "tsconfig.json"), {
-        extends: relativePosixPath(
+        extends: path.posix.relative(
           platformDir,
           path.join(configsDir, `tsconfig.${platform}.json`)
         ),

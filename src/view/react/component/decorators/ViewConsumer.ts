@@ -7,11 +7,11 @@ function ViewHook({ callback, hook }) {
   return EmptyFragment;
 }
 
-export function ViewConsumer<T>(
+export function ViewConsumeResolver<T>(
   context: React.Context<T>
 ): <K extends string>(target: Record<K, T>, propertyName: K) => void;
 
-export function ViewConsumer<T>(
+export function ViewConsumeResolver<T>(
   hook: () => T
 ): <K extends string>(target: Record<K, T>, propertyName: K) => void;
 export function ViewConsumer(contextOrHook) {

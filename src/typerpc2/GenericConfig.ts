@@ -88,7 +88,7 @@ export async function GenericConfig2(
   }, ...(args || []));
 
   if (!resolved) {
-    throw new Error(" GenericConfig is not resolved, did you used $?");
+    throw new Error("GenericConfig is not resolved, did you used $?");
   }
   return result;
 }

@@ -1,16 +1,16 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverMap } from "@dabsi/modules/rpc/RpcResolverMap";
+import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Rpc, RpcContextual, RpcFuncational, RpcType } from "@dabsi/typerpc2";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
 
-let map: RpcResolverMap;
+let map: RpcResolverBuilder;
 let context: ResolverMap;
 
 const testRpc = <T extends Rpc>(rpcType: RpcType<T>): T =>
   createRpc(rpcType, Resolver.resolve(map.getResolver(rpcType), context));
 beforeEach(() => {
-  map = new RpcResolverMap();
+  map = new RpcResolverBuilder();
   context = Resolver.Context([map]);
 });
 
@@ -87,7 +87,7 @@ describe("generate", () => {
   }
 
   class SR extends R {}
-  RpcResolverMap.defineGenerator(R, rpcType => () => $ =>
+  RpcResolverBuilder.defineGenerator(R, rpcType => () => $ =>
     $({
       handleTestFn() {
         return "generated-for-" + rpcType.name;

@@ -1,10 +1,9 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
 import {
-  CustomResolverFn,
+  ConsumerFactory,
   ResolvedDeps,
   ResolverDeps,
-} from "@dabsi/typedi/custom";
+} from "@dabsi/typedi/consume";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 
 export type ResolverMap<T = any> = Record<string, Resolver<T>>;
@@ -30,7 +29,8 @@ export type ProvidableResolver<T> = Constructor<T> & {
 };
 export type ResolverLike<T extends Resolver> = Resolver<Resolved<T>>;
 
-export type CustomResolver<T> = {
+// TokenableResolver
+export type ConsumeResolver<T> = {
   new (context: ResolverMap): T;
   [providableSymbol]: false;
 };
@@ -56,13 +56,13 @@ export interface IResolver {
   <T extends ProvidableResolver<any>, U extends ResolverDeps>(
     provider: T,
     deps: U,
-    resolver?: CustomResolverFn<InstanceType<T>, U>
+    resolver?: ConsumerFactory<InstanceType<T>, U>
   ): ResolverMap<any>;
 
   <T, U extends ResolverDeps>(
     deps: U,
-    factory: CustomResolverFn<T, U>
-  ): CustomResolver<T>;
+    factory: ConsumerFactory<T, U>
+  ): ConsumeResolver<T>;
 }
 
 export function Resolver<T = {}>(): new (context: ResolverMap) => T;
@@ -78,17 +78,17 @@ export function Resolver<
 >(
   provider: T,
   deps: U,
-  resolver?: CustomResolverFn<InstanceType<T>, U>
+  resolver?: ConsumerFactory<InstanceType<T>, U>
 ): ResolverMap<any>;
 
 export function Resolver<T, U extends ResolverDeps>(
   deps: U,
-  factory: CustomResolverFn<T, U>
-): CustomResolver<T>;
+  factory: ConsumerFactory<T, U>
+): ConsumeResolver<T>;
 
 export function Resolver<T extends ResolverDeps>(
   deps: T
-): CustomResolver<ResolvedDeps<T>>;
+): ConsumeResolver<ResolvedDeps<T>>;
 
 export function Resolver(...args) {
   //
@@ -111,7 +111,7 @@ export function Resolver(...args) {
 
   if (args.length === 3) {
     const [provider, deps, resolver] = args;
-    args = [provider, Resolver.custom(deps, resolver)];
+    args = [provider, Resolver.consume(deps, resolver)];
   }
 
   if (args.length === 2 && typeof args[1] === "function") {
@@ -120,7 +120,7 @@ export function Resolver(...args) {
       Array.isArray(deps) ||
       Object.getPrototypeOf(deps) === Object.prototype
     ) {
-      return Resolver.custom(deps, factory);
+      return Resolver.consume(deps, factory);
     }
   }
 

@@ -1,8 +1,6 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { capitalize } from "@dabsi/common/string/capitalize";
-import { assignDescriptorsWithoutOverride } from "@dabsi/typerpc2/assignDescriptorsWithoutOverride";
-import handler from "@dabsi/typerpc2/form/handler";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
@@ -12,11 +10,11 @@ import {
   RpcConfigHandlerTypeSymbol,
 } from "./RpcConfigHandler";
 
-export function getRpcWithConfigHandlerType<T extends AnyRpcWithConfig>(
+export function getRpcConfigHandlerType<T extends AnyRpcWithConfig>(
   rpcType: RpcType<T>
 ): RpcConfigHandlerType<T, RpcHandler<T>>;
 
-export function getRpcWithConfigHandlerType(rpcType: RpcType) {
+export function getRpcConfigHandlerType(rpcType: RpcType) {
   const handlerType = loadHandlerType();
 
   if (handlerType.rpcType !== rpcType) {

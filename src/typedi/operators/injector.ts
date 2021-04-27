@@ -4,14 +4,14 @@ import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { ProvidableResolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { CustomResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { Consumer, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
     function injector<T extends Record<string, ProvidableResolver<any>>, U>(
       providableMap: T,
       resolver: Resolver<U>
-    ): CustomResolver<
+    ): ConsumeResolver<
       (resolvedMap: { [K in keyof T]: InstanceType<T[K]> }) => U
     >;
   }

@@ -1,7 +1,7 @@
 import { Tester } from "@dabsi/jasmine/Tester";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
-import { SessionModule, SESSION_TIMEOUT } from "@dabsi/modules/session/module";
+import { SessionModule, SESSION_TIMEOUT } from "@dabsi/modules/session";
 import { BaseResource } from "@dabsi/modules/session/resource";
 import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
 import { DbConnectionRef } from "@dabsi/modules2/DbModule2";

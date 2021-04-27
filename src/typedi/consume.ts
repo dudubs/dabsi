@@ -1,11 +1,9 @@
-import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
 import {
   Resolved,
   ResolvedMap,
   Resolver,
   ResolverMap,
 } from "@dabsi/typedi/Resolver";
-import { locateError } from "@dabsi/typemodule/locateError";
 
 type A<U extends (Resolver | undefined)[], N extends number> = Resolved<
   NonNullable<U[N]>
@@ -37,14 +35,11 @@ export type ResolvedDeps<U extends ResolverDeps> = U extends ResolverArray
   ? ResolvedArray<U>
   : ResolvedMap<Extract<U, ResolverMap<any>>>;
 
-export type CustomResolverFn<
-  T,
-  U extends ResolverDeps
-> = U extends ResolverArray
+export type ConsumerFactory<T, U extends ResolverDeps> = U extends ResolverArray
   ? (...deps: ResolvedArray<U>) => T
   : (depMap: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
 
-Resolver.custom = function (deps: any, factory: any): any {
+Resolver.consume = function (deps: any, factory: any): any {
   // TODO: locate error
   if (Array.isArray(deps)) {
     const depsResolver = Resolver.array(deps);
@@ -66,18 +61,18 @@ Resolver.custom = function (deps: any, factory: any): any {
 
 declare module "./Resolver" {
   namespace Resolver {
-    export function custom<
+    export function consume<
       T extends ProvidableResolver<any>,
       U extends ResolverDeps
     >(
       provider: T,
       deps: U,
-      resolver?: CustomResolverFn<InstanceType<T>, U>
+      resolver?: ConsumerFactory<InstanceType<T>, U>
     ): ResolverMap<any>;
 
-    export function custom<T, U extends ResolverDeps>(
+    export function consume<T, U extends ResolverDeps>(
       deps: U,
-      factory: CustomResolverFn<T, U>
-    ): CustomResolver<T>;
+      factory: ConsumerFactory<T, U>
+    ): ConsumeResolver<T>;
   }
 }

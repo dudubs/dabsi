@@ -1,5 +1,5 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RequestSession, RequestUser } from "@dabsi/modules/session/module";
+import { RequestSession, RequestUser } from "@dabsi/modules/session";
 import AclModule from "@dabsi/system/acl";
 import { AdminInfoRpc } from "@dabsi/system/admin/common";
 

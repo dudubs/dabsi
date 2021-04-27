@@ -1,3 +1,4 @@
+import fs from "fs";
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Defined } from "@dabsi/common/patterns/Defined";
 import { DABSI_DIR } from "@dabsi/env";
@@ -104,7 +105,7 @@ export class PlatformModule2 {
       .keySeq()
       .toSet();
 
-    const fs = TsConfigPaths2.createFs();
+    const cfs = TsConfigPaths2.createFs();
 
     class Project {
       platformMap = new Map<Platform2, ProjectPlatform>();
@@ -140,10 +141,12 @@ export class PlatformModule2 {
     const makeFile = async (path: string, text: string) => {
       console.log("write file ", path);
       console.log("  " + text.replace(/\n/g, "\n  "));
+
+      await fs.promises.writeFile(path, text);
     };
 
     const makeProject = async (project: Project) => {
-      project.paths = new TsConfigPaths2(fs);
+      project.paths = new TsConfigPaths2(cfs);
       await project.paths.load(path.join(project.dir, "tsconfig.json"));
       project.configsDirConfig = project.paths.createConfig(project.configsDir);
       await Promise.all([

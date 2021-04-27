@@ -1,9 +1,9 @@
 import { MuiNestedMenu } from "@dabsi/browser/mui/nested-menu";
 import MuiAnchor from "@dabsi/browser/MuiAnchor";
 import { Store } from "@dabsi/store";
-import { AclLoginInfoEvent } from "@dabsi/system/acl/common/loginInfoEvent";
-import { AclLoginRouter } from "@dabsi/system/acl/common/router";
-import { AclConnection } from "@dabsi/system/acl/common/rpc";
+import { AclLoginInfoEvent } from "@dabsi/system/acl/old-common/loginInfoEvent";
+import { AclLoginRouter } from "@dabsi/system/acl/old-common/router";
+import { AclConnection } from "@dabsi/system/acl/old-common/rpc";
 import { MuiAdminMenu } from "@dabsi/system/admin/browser/menu";
 import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 import { MuiTemplate } from "@dabsi/system/admin/browser/MuiTemplate";

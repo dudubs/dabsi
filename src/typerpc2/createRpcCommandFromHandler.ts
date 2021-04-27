@@ -25,9 +25,9 @@ export function createRpcCommandFromHandler<T extends RpcType>(
       }
       const memberType = RpcMembers.getMemberType(cursor.type, memberKey);
 
-      const memberHandlerName = "handle" + capitalize(memberKey);
+      const memberHandlerKey = "handle" + capitalize(memberKey);
 
-      const memberHandler = cursor.handler[memberHandlerName]?.bind(
+      const memberHandler = cursor.handler[memberHandlerKey]?.bind(
         cursor.handler
       );
 

@@ -1,7 +1,7 @@
 import { MuiForm, MuiFormProps } from "@dabsi/browser/mui/form";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
 import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { AnyForm } from "@dabsi/old-typerpc/widget/form/rpc";

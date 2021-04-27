@@ -13,10 +13,16 @@ export const RpcChildMemberTypes = new Set([
   RpcMemberType.Parametrial,
 ]);
 
+const frozeenRpcTypes = new Set<RpcType>();
+
 export namespace RpcMembers {
   const memeberTypeKey = "rpc:membertype";
 
   const typeMembersMap = new WeakMap<RpcType, string[]>();
+
+  export function freeze(rpcType: RpcType) {
+    frozeenRpcTypes.add(rpcType);
+  }
 
   export function getMemberType(
     rpcType: RpcType,
@@ -42,11 +48,17 @@ export namespace RpcMembers {
       }
     }
   }
+
   export function define(
     rpcType: RpcType,
     memberKey: string,
     type: RpcMemberType
   ) {
+    if (frozeenRpcTypes.has(rpcType)) {
+      throw new Error(
+        `Can't define rpc-member-type "${rpcType.name}.${memberKey}" because is frozeen.`
+      );
+    }
     if (Reflect.getMetadata(memeberTypeKey, rpcType.prototype, memberKey)) {
       throw new Error(
         `Can't override rpc member "${rpcType.name}.${memberKey}".`

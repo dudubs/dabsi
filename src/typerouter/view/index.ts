@@ -16,7 +16,7 @@ import {
   RouterViewProps,
 } from "@dabsi/typerouter/view/render";
 import { RouteViewComponent } from "@dabsi/typerouter/view/route";
-import { ReactWrapper } from "@dabsi/view/react/wrapper";
+import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import React from "react";
 
 export function RouterView(props: RouterViewProps): React.ReactElement {

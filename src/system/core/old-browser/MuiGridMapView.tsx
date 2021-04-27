@@ -4,7 +4,7 @@ import {
   AnySystemMapConnection,
   SystemMapView,
   SystemMapViewProps,
-} from "@dabsi/system/core/view/SystemMapView";
+} from "@dabsi/system/core/old-view/SystemMapView";
 import { Divider } from "@material-ui/core";
 import Grid, { GridProps } from "@material-ui/core/Grid";
 import React, { ReactElement, ReactNode } from "react";

@@ -1,5 +1,6 @@
 {
   "extends": "../../configs/tsconfig.base.server.json",
+
   "compilerOptions": {
     "outDir": "../../packages/vscode/dist",
     "sourceMap": true,

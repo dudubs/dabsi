@@ -5,7 +5,7 @@ import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
 import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/admin/browser/breadcrumbs";
 import { ACL_Admin_Connection } from "@dabsi/system/acl/admin/common/rpc";
 import { ACL_AdminRouter } from "@dabsi/system/acl/admin/view/router";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { RouterView } from "@dabsi/typerouter/view";
 import { DataTableView } from "@dabsi/old-typerpc/data-table/view";
 import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";

@@ -1,5 +1,5 @@
-import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { ReactWrapper } from "@dabsi/view/react/wrapper";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
+import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import React from "react";
 
 export const useSystemViewBuilders = ReactWrapper.createContext(() => {

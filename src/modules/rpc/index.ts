@@ -38,7 +38,7 @@ export class RpcModule2 {
   }
 
   async installPlatform(@Plugin() platformModule2: PlatformModule2) {
-    const viewFilePattern = path.join(DABSI_SRC_DIR, "typerpc/**/*view.ts");
+    const viewFilePattern = path.join(DABSI_SRC_DIR, "typerpc2/**/*view.ts");
     platformModule2.viewLibs.add(viewFilePattern).add(viewFilePattern + "x");
 
     platformModule2

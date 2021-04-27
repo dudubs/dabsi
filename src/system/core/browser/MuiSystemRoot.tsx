@@ -1,24 +1,26 @@
 import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
-import { useSystemBrowserMui } from "@dabsi/system/core/browser/useMui";
-import { SystemRouter } from "@dabsi/system/core/common/router";
+import { SystemRouter } from "@dabsi/system/core/view/SystemRouter";
 import { HistoryProvider } from "@dabsi/typerouter/History";
 import { RouterView } from "@dabsi/typerouter/view";
-import { ReactWrapper } from "@dabsi/view/react/wrapper";
+import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import Typography from "@material-ui/core/Typography";
 import { createBrowserHistory } from "history";
 import React from "react";
 
 const history = createBrowserHistory();
 
-export function MuiSystemView(): React.ReactElement {
+export const MuiSystemHooks: (() => void)[] = [];
+
+export function MuiSystemRoot(): React.ReactElement {
   return ReactWrapper(() => {
-    ReactWrapper.push(children => (
-      <HistoryProvider history={history} children={children} />
-    ));
+    ReactWrapper.push(
+      element => <HistoryProvider history={history}>{element}</HistoryProvider>,
+      element => <MuiProvider>{element}</MuiProvider>
+    );
 
-    ReactWrapper.push(children => <MuiProvider children={children} />);
-
-    useSystemBrowserMui();
+    for (const hook of MuiSystemHooks) {
+      hook();
+    }
 
     return (
       <RouterView

@@ -1,4 +1,4 @@
-import { DABSI_DIR, DABSI_ROOT_DIR } from "@dabsi/env";
+import { DABSI_DIR, DABSI_WORKSPACE_DIR } from "@dabsi/env";
 
 import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
 import fs, { existsSync, readdirSync, realpathSync, statSync } from "fs";
@@ -12,7 +12,7 @@ export default async function ({ projectDir = ".", force = false }) {
   const promises: any[] = [];
   const makedProjectDirs = new Set();
 
-  //   makeProject(path.join(DABSI_ROOT_DIR, "test-projects", "test-system"));
+  //   makeProject(path.join(DABSI_WORKSPACE_DIR, "test-projects", "test-system"));
 
   makeProject(projectDir);
 
@@ -84,7 +84,7 @@ export default async function ({ projectDir = ".", force = false }) {
           path.join(DABSI_DIR, "configs", "tsconfig.base.server.json")
         ),
         compilerOptions: {
-          ...configPaths.createConfig(configsDir),
+          ...configPaths.createPathsWithBaseUrl(configsDir),
         },
         include,
         exclude: include
@@ -109,7 +109,7 @@ export default async function ({ projectDir = ".", force = false }) {
           path.join(DABSI_DIR, "configs", `tsconfig.base.${platform}.json`)
         ),
         compilerOptions: {
-          ...configPaths.createConfig(configsDir),
+          ...configPaths.createPathsWithBaseUrl(configsDir),
         },
         include: getIncludes(projectDir).toSeq().toSet().toArray(),
       };
@@ -139,7 +139,7 @@ export default async function ({ projectDir = ".", force = false }) {
 
     function makeFile(outFileName, content: string) {
       if (!force && existsSync(outFileName)) return;
-      console.log(`make "${path.relative(DABSI_ROOT_DIR, outFileName)}"`);
+      console.log(`make "${path.relative(DABSI_WORKSPACE_DIR, outFileName)}"`);
       console.log("\t" + content.replace(/\n/g, "\n\t"));
       //   promises.push(fs.promises.writeFile(outFileName, content, "utf8"));
     }

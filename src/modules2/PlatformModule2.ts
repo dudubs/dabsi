@@ -6,9 +6,13 @@ import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
 import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
-import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
+import {
+  TsConfigPaths2,
+  TsPathsWithBaseUrl,
+} from "@dabsi/typestack/TsConfigPaths2";
 import path from "path";
 import { Platform2 } from "./Platform2";
+import { Record } from "immutable";
 
 @Module({
   cli: "platform",
@@ -112,7 +116,7 @@ export class PlatformModule2 {
       configsDir = path.join(this.dir, "configs");
 
       @Defined() paths!: TsConfigPaths2;
-      @Defined() configsDirConfig!: any;
+      @Defined() pathsWithBaseUrl!: TsPathsWithBaseUrl;
 
       constructor(public dir: string) {}
     }
@@ -139,8 +143,8 @@ export class PlatformModule2 {
       makeFile(path, JSON.stringify(data, null, 2));
 
     const makeFile = async (path: string, text: string) => {
-      console.log("write file ", path);
-      console.log("  " + text.replace(/\n/g, "\n  "));
+      console.log("write file " + path);
+      // console.log("  " + text.replace(/\n/g, "\n  "));
 
       await fs.promises.writeFile(path, text);
     };
@@ -148,7 +152,13 @@ export class PlatformModule2 {
     const makeProject = async (project: Project) => {
       project.paths = new TsConfigPaths2(cfs);
       await project.paths.load(path.join(project.dir, "tsconfig.json"));
-      project.configsDirConfig = project.paths.createConfig(project.configsDir);
+
+      await fs.promises.mkdir(project.configsDir, { recursive: true });
+
+      project.pathsWithBaseUrl = project.paths.createPathsWithBaseUrl(
+        project.configsDir
+      );
+
       await Promise.all([
         makeJsonFile(path.join(project.configsDir, "tsconfig.server.json"), {
           extends: path.join(
@@ -181,7 +191,7 @@ export class PlatformModule2 {
           path.relative(project.configsDir, libConfigsDir),
           `tsconfig.base.${platform.name}.json`
         ),
-        compilerOptions: project.configsDirConfig,
+        compilerOptions: project.pathsWithBaseUrl,
       };
       return Promise.all([
         makeJsonFile(prodConfigFileName, {

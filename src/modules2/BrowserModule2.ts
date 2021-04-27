@@ -1,12 +1,21 @@
 import { makeHtml } from "@dabsi/common/makeHtml";
-import { NODE_MODULES_DIR } from "@dabsi/env";
+import { Once } from "@dabsi/common/patterns/Once";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
+import {
+  DABSI_WORKSPACE_DIR,
+  DABSI_SRC_DIR,
+  NODE_MODULES_DIR,
+} from "@dabsi/env";
+import { touchFile } from "@dabsi/filesystem/touchFile";
 import { DevModule2 } from "@dabsi/modules2/DevModule2";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
 import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
 import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
+import axios from "axios";
 import express from "express";
+import { realpathSync, watch } from "fs";
 import path from "path";
 import ReloadServer from "reload";
 import TsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
@@ -29,7 +38,7 @@ export class BrowserModule2 {
     platformModule.platformConfigMap.set("browser", { view: true });
   }
 
-  async createWebpackCompiler() {
+  @Once() async getWebpackCompiler() {
     const generatedOutDir = path.join(
       this.projectModule.directory,
       "src/generated"
@@ -38,12 +47,17 @@ export class BrowserModule2 {
     const {
       entityMap: generatedEntityMap,
       codeMap: generatedCodeMap,
-    } = await this.platformModule
-      .generateCode(generatedOutDir, "browser")
-      .catch(error => {
-        console.log({ error });
-        throw error;
-      });
+    } = await this.platformModule.generateCode(generatedOutDir, "browser");
+
+    const tsConfigFile = realpathSync(
+      path.resolve(
+        this.projectModule.directory,
+        `configs/tsconfig.prod.browser.json`
+      )
+    );
+
+    // Fixing bug: TsconfigPaths preffer TS_NODE_PORJECY instead configFile.
+    delete process.env["TS_NODE_PROJECT"];
 
     return webpack({
       mode: "development",
@@ -67,7 +81,19 @@ export class BrowserModule2 {
         path: path.resolve(this.projectModule.directory, "bundle/browser"),
       },
       resolve: {
-        plugins: [<any>new TsConfigPathsWebpackPlugin()],
+        plugins: [
+          new TsConfigPathsWebpackPlugin({
+            configFile: path.resolve(
+              this.projectModule.directory,
+              "tsconfig.json"
+            ),
+            logLevel: "WARN",
+            silent: false,
+            mainFields: ["browser", "main"],
+            extensions: [".ts", ".tsx"],
+          }),
+        ],
+
         extensions: [".ts", ".tsx", ".js"],
       },
       module: {
@@ -76,10 +102,7 @@ export class BrowserModule2 {
             test: /\.tsx?$/,
             loader: "ts-loader",
             options: {
-              configFile: path.resolve(
-                this.projectModule.directory,
-                `configs/tsconfig.browser.json`
-              ),
+              configFile: tsConfigFile,
               transpileOnly: true,
               compilerOptions: {
                 noEmit: false,
@@ -95,28 +118,32 @@ export class BrowserModule2 {
     });
   }
 
-  @CliCommand("pack", y =>
-    y.option("watch", { type: "boolean", alias: "w", default: false })
-  )
-  async pack({ watch }) {
-    // console.log(await this.createWebpackCompiler2());
-    // return;
-    const compiler = await this.createWebpackCompiler();
-
-    if (watch) {
-      throw new Error("no support yet.");
+  protected _isPacking = false;
+  protected _repack = false;
+  protected async _pack() {
+    if (this._isPacking) {
+      this._repack = true;
+      return;
     }
-
+    this._isPacking = true;
+    const compiler = await this.getWebpackCompiler();
     const stats = await new Promise<webpack.Stats>((resolve, reject) => {
       compiler.run((error, stats: webpack.Stats) => {
-        console.log({ error });
-
         if (error) return reject(error);
         resolve(stats);
       });
     });
+    this._isPacking = false;
+    console.log(stats.toString({ colors: true }));
+    if (this._repack) {
+      this._repack = false;
+      await this._pack();
+    }
+  }
 
-    console.log(stats.toString(true));
+  @CliCommand("pack")
+  async pack({ watch }) {
+    await this._pack();
   }
 
   installExpress(@Plugin() expressModule: ExpressModule2) {
@@ -162,6 +189,12 @@ export class BrowserModule2 {
   ) {
     let reload: null | (() => void) = null;
     this.scripts.push("/reload/reload.js");
+
+    const reloadFile = path.join(
+      DABSI_WORKSPACE_DIR,
+      `reload.packed-browser.lock`
+    );
+
     expressModule.preBuilders.push(app => {
       ReloadServer(app).then(server => {
         expressModule.log.info(() => `reload server is ready.`);
@@ -170,11 +203,23 @@ export class BrowserModule2 {
           server.reload();
         };
       });
+
+      touchFile(reloadFile).then(() => {
+        watch(reloadFile, () => {
+          reload?.();
+        });
+      });
     });
 
+    devModule.parentRunners.push(() => this._pack());
     for (const platform of ["common", "view", "browser"]) {
-      devModule.watch(platform, () => {
-        reload?.();
+      devModule.watch(platform, async () => {
+        //
+
+        console.log("pack and reload");
+        await this._pack();
+        await touchFile(reloadFile);
+        // reload?.();
       });
     }
 

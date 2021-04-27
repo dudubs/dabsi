@@ -1,12 +1,11 @@
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
-import { BaseRpcNamespace } from "@dabsi/typerpc2/rpc-namespace/rpc";
-import { RpcConfigurator, RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
+import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
 import { RpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
-import { RpcHandler, RpcHandlerSymbol } from "@dabsi/typerpc2/RpcHandler";
+import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { BaseRpcNamespace } from "@dabsi/typerpc2/RpcNamespace";
 
-declare module "./rpc" {
+declare module "./RpcNamespace" {
   interface BaseRpcNamespace
     extends RpcWithConfig<{
       getRpcHandler<T extends Rpc>(
@@ -16,7 +15,7 @@ declare module "./rpc" {
     }> {}
 }
 
-RpcConfigHandler(
+export default RpcConfigHandler(
   BaseRpcNamespace,
   {
     createMemberHandler(memberKey, memberType) {
@@ -25,6 +24,7 @@ RpcConfigHandler(
           `Can't create member handler for not contextual member (${this.name}.${memberKey}).`
         );
       }
+
       return function (rpcType) {
         return this.config.getRpcHandler(rpcType, memberKey);
       };

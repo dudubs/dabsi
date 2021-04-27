@@ -118,10 +118,10 @@ export class DbModule2 {
     );
   }
 
-  @CliCommand("sync", y => y.boolean(["force", "f"])) async sync(
-    { f, force = f || false },
-    getConnection: DbConnectionRef
-  ) {
+  @CliCommand("sync", y =>
+    y.option("force", { type: "boolean", default: false, alias: "f" })
+  )
+  async sync({ force }, getConnection: DbConnectionRef) {
     const connection = getConnection();
     if (force) {
       await connection.query(`PRAGMA foreign_keys = OFF;`);

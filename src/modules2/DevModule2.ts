@@ -1,7 +1,7 @@
 import { callAndWaitAll } from "@dabsi/common/async/callAndWaitAll";
 import { Debounce2 } from "@dabsi/common/async/Debounce";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { DABSI_ROOT_DIR } from "@dabsi/env";
+import { DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ChildProcess, spawn } from "child_process";
@@ -12,22 +12,18 @@ import path from "path";
 export class DevModule2 {
   //
 
-  readonly parentRunners: (() => Awaitable)[] = [
-    async () =>
-      Promise.all([
-        //
-        this.watch("server", () => this.reload()),
-        this.watch("common", () => this.reload()),
-        this._run(),
-      ]),
-  ];
-
   readonly childRunners: (() => Awaitable)[] = [];
+
+  readonly parentRunners: (() => Awaitable)[] = [];
 
   protected _reloadDebounce = new Debounce2();
 
   protected _process!: ChildProcess;
 
+  constructor() {
+    this.watch("server", () => this.reload());
+    this.watch("common", () => this.reload());
+  }
   async reload() {
     if (!(await this._reloadDebounce.wait())) return;
     log.info(`reloading dev server..`);
@@ -60,6 +56,9 @@ export class DevModule2 {
         if (process.env.DEV_CHILD) {
           return Promise.all([callAndWaitAll(this.childRunners), execute()]);
         }
+
+        this._run();
+
         await callAndWaitAll(this.parentRunners);
       },
     });
@@ -67,7 +66,11 @@ export class DevModule2 {
 
   watch(platform: string, callback: () => void) {
     this.parentRunners.push(async () => {
-      const watchPath = path.join(DABSI_ROOT_DIR, `reload.${platform}.lock`);
+      const watchPath = path.join(
+        DABSI_WORKSPACE_DIR,
+        `reload.${platform}.lock`
+      );
+
       const debounce = new Debounce2(200);
       if (
         !(await fs.promises

@@ -17,8 +17,14 @@ export class BaseRpcNamespace extends Rpc {
       });
     } else {
       const ns = RpcNamespace();
+
+      Object.defineProperty(ns, "name", {
+        value: name,
+      });
       RpcContextual(() => ns)(<any>this.prototype, name);
+
       ns.command = payload => this.command([name, ...payload]);
+
       return ns;
     }
   }

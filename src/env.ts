@@ -1,6 +1,5 @@
-import Lazy from "@dabsi/common/patterns/Lazy";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import path, { dirname, resolve } from "path";
 
 export const DABSI_SRC_DIR = __dirname;
@@ -14,12 +13,12 @@ export const DABSI_NODE_OPTIONS = process.env
 
 export const DABSI_DIR = dirname(DABSI_SRC_DIR);
 
-export const DABSI_ROOT_DIR = resolve(DABSI_DIR, "..");
+export const DABSI_WORKSPACE_DIR = resolve(DABSI_DIR, "..");
 
-export const NODE_MODULES_DIR = resolve(DABSI_ROOT_DIR, "node_modules");
+export const NODE_MODULES_DIR = resolve(DABSI_WORKSPACE_DIR, "node_modules");
 
 export const getPackageConfig = SingleCall(() => {
   return JSON.parse(
-    readFileSync(path.join(DABSI_ROOT_DIR, "package.json"), "utf8")
+    readFileSync(path.join(DABSI_WORKSPACE_DIR, "package.json"), "utf8")
   );
 });

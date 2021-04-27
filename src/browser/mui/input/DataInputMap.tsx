@@ -1,5 +1,5 @@
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { AnyDataInputMap } from "@dabsi/old-typerpc/input/data-input-map/DataInputMap";
 import {
   DataInputMapView,

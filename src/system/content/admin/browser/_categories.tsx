@@ -10,7 +10,7 @@ import {
   ContentCategoryTable,
 } from "@dabsi/system/content/admin/common/rpc";
 import { ContentAdminRouter } from "@dabsi/system/content/admin/view/router";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { RouterLocationEvent } from "@dabsi/typerouter/event";
 import { AnyRouterLocation } from "@dabsi/typerouter/location";
 import { RouterView } from "@dabsi/typerouter/view";

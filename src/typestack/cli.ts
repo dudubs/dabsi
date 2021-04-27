@@ -1,7 +1,7 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import {
   DABSI_CURRENT_DIR,
-  DABSI_ROOT_DIR,
+  DABSI_WORKSPACE_DIR,
   getPackageConfig,
 } from "@dabsi/env";
 import { ProjectDirectory } from "@dabsi/modules2/ProjectModule2";
@@ -19,7 +19,7 @@ const getProjectDir = (): string => {
 
   const config = getPackageConfig().typestack || {};
   if (config.current) {
-    return realpathSync(path.resolve(DABSI_ROOT_DIR, config.current));
+    return realpathSync(path.resolve(DABSI_WORKSPACE_DIR, config.current));
   }
 
   return DABSI_CURRENT_DIR;

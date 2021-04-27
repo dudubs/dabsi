@@ -1,0 +1,3 @@
+{
+  "extends": "../../../../configs/tsconfig.dev.browser.json"
+}

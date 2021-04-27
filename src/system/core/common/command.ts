@@ -1,61 +1,50 @@
 import { SystemRpc } from "@dabsi/system/core/common/rpc";
-import { RpcCommand } from "@dabsi/old-typerpc/Rpc";
 import {
   RpcMultiplexer,
-  RpcCommandRequest,
-  RpcMultiplexerHandler,
-} from "@dabsi/old-typerpc/RpcMultiplexer";
+  RpcQueueHandler,
+  RpcQueueRequest,
+} from "@dabsi/typerpc2/RpcMultiplexer";
 
-let _captureCommand: ((path, payload) => Promise<void>) | null;
+let currentHandler: RpcQueueHandler | null = null;
 
-let _currentHandler: RpcMultiplexerHandler | null = null;
-let _currentRequests: RpcCommandRequest[] = [];
+let currentRequests: RpcQueueRequest[] = [];
 
 const multiplexer = new RpcMultiplexer(requests => {
-  //
-  if (!_currentHandler) {
-    _currentRequests.push(...requests);
+  if (currentHandler) {
+    currentHandler(requests);
     return;
   }
-  _currentHandler(requests);
+  currentRequests.push(...requests);
 });
 
-SystemRpc.commandRpc((path, payload) => {
-  if (_captureCommand) {
-    const lastCaptureCallback = _captureCommand;
-    _captureCommand = null;
-    return lastCaptureCallback(path, payload);
-  }
-  return multiplexer.send(path, payload);
-});
-
-// RpcMultiplexer
 export namespace SystemCommand {
-  export function handle(handler: RpcMultiplexerHandler) {
-    _currentHandler = handler;
-
-    if (_currentRequests.length) {
-      const requests = _currentRequests;
-      _currentRequests = [];
+  export function handle(handler: RpcQueueHandler) {
+    currentHandler = handler;
+    if (currentRequests.length) {
+      const requests = currentRequests;
+      currentRequests = [];
       handler(requests);
     }
   }
 
-  export function capture<T>(callback: () => T): [T, RpcCommandRequest] {
-    let request: RpcCommandRequest | null = null;
+  SystemRpc.command = async payload => {
+    return multiplexer.send(payload);
+  };
 
-    _captureCommand = (path, payload) => {
-      return new Promise(resolve => {
-        request = { path, payload, resolve };
+  export function capture<T>(callback: () => T): [T, RpcQueueRequest] {
+    let req: RpcQueueRequest | null = null;
+    const lastCommand = SystemRpc.command;
+    SystemRpc.command = payload => {
+      SystemRpc.command = lastCommand;
+      return new Promise((resolve, reject) => {
+        req = { payload, resolve, reject };
       });
     };
-
     const result = callback();
-
-    if (!request) {
-      throw new Error(`Not cuapured rpc request.`);
+    if (!req) {
+      SystemRpc.command = lastCommand;
+      throw new Error(`No captured any rpc-req.`);
     }
-    //
-    return [result, request];
+    return [result, req];
   }
 }

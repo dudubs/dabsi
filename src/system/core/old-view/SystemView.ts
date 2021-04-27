@@ -1,6 +1,6 @@
 import { entries } from "@dabsi/common/object/entries";
 import { objectBases } from "@dabsi/common/object/objectBases";
-import { useSystemView } from "@dabsi/system/core/view/use";
+import { useSystemView } from "@dabsi/system/core/old-view/use";
 import { AnyInput, AnyInputConnection } from "@dabsi/old-typerpc/input/Input";
 import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
 import {

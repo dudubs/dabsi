@@ -1,10 +1,10 @@
 import { MuiFormView } from "@dabsi/browser/mui/form/view";
 import { MuiTextInputView } from "@dabsi/browser/mui/input/TextInput";
-import { AclLoginInfoEvent } from "@dabsi/system/acl/common/loginInfoEvent";
-import { AclLoginRouter } from "@dabsi/system/acl/common/router";
-import { AclConnection, AclRpc } from "@dabsi/system/acl/common/rpc";
+import { AclLoginInfoEvent } from "@dabsi/system/acl/old-common/loginInfoEvent";
+import { AclLoginRouter } from "@dabsi/system/acl/old-common/router";
+import { AclConnection, AclRpc } from "@dabsi/system/acl/old-common/rpc";
 import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { useHistory } from "@dabsi/typerouter/History";
 import { RouterView } from "@dabsi/typerouter/view";
 import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";

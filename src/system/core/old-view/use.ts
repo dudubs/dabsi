@@ -1,5 +1,5 @@
-import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { useSystemViewBuilders } from "@dabsi/system/core/view/useBuilders";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
+import { useSystemViewBuilders } from "@dabsi/system/core/old-view/useBuilders";
 import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import {
   AnyWidget,

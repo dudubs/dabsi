@@ -1,5 +1,5 @@
-import { RpcNamespace } from "@dabsi/old-typerpc/namespace/rpc";
+import { RpcNamespace } from "@dabsi/typerpc2/RpcNamespace";
 
 export const SYSTEM_RPC_PATH = "/system-rpc";
+
 export const SystemRpc = RpcNamespace();
-//

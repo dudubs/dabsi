@@ -1,6 +1,7 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { capitalize } from "@dabsi/common/string/capitalize";
+import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
@@ -16,6 +17,7 @@ export function getRpcConfigHandlerType<T extends AnyRpcWithConfig>(
 
 export function getRpcConfigHandlerType(rpcType: RpcType) {
   const handlerType = loadHandlerType();
+  RpcMembers.freeze(rpcType);
 
   if (handlerType.rpcType !== rpcType) {
     const baseRpcType = rpcType;
@@ -38,7 +40,6 @@ export function getRpcConfigHandlerType(rpcType: RpcType) {
           rpcType,
           memberKey
         );
-        console.log({ memberHandlerKey });
 
         newHandlerType.prototype[memberHandlerKey] = defined(
           newHandlerType.createRpcMemberHandler?.(

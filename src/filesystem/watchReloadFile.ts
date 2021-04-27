@@ -1,4 +1,4 @@
-import { DABSI_ROOT_DIR } from "@dabsi/env";
+import { DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import fs, { existsSync, writeFileSync } from "fs";
 import * as path from "path";
 import { Debounce } from "@dabsi/common/async/Debounce";
@@ -7,7 +7,7 @@ export default function watchReloadFile(platform, callback) {
   const debounce = Debounce(200);
 
   const reloadFileName = path.join(
-    DABSI_ROOT_DIR,
+    DABSI_WORKSPACE_DIR,
     "reload." + platform + ".lock"
   );
 

@@ -1,9 +1,9 @@
 import { MuiFormView } from "@dabsi/browser/mui/form/view";
 import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/admin/browser/breadcrumbs";
 import { ACL_Admin_Connection } from "@dabsi/system/acl/admin/common/rpc";
-import { MuiGridMapView } from "@dabsi/system/core/browser/MuiGridMapView";
+import { MuiGridMapView } from "@dabsi/system/core/old-browser/MuiGridMapView";
 import { MuiPage } from "@dabsi/core/browser/mui/page";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { RouterView } from "@dabsi/typerouter/view";
 import { WidgetViewLoader } from "@dabsi/old-typerpc/widget/view/loader";
 

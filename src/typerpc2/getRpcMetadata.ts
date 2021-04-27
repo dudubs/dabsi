@@ -9,6 +9,8 @@ export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
   const parent: Partial<RpcMetadata> =
     rpcType === Rpc ? {} : getRpcMetadata(Object.getPrototypeOf(rpcType));
 
+  RpcMembers.freeze(rpcType);
+
   const memberKeys: string[] = [...(parent.memberKeys || [])];
   const contextualKeys: string[] = [...(parent.contextualKeys || [])];
   const functionalKeys: Set<string> = new Set(parent.functionalKeys);

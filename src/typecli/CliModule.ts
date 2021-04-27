@@ -137,5 +137,7 @@ export class CliModule2 {
       .exitProcess(false)
       .strict()
       .scriptName("ts").argv;
+
+    this.moduleRunner.process.waitToEnd();
   }
 }

@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 import React from "react";
 import styled from "styled-components";
 import { Override } from "@dabsi/common/typings2/Override";
-import BoxInCenter from "@dabsi/system/acl/browser/BoxInCenter";
+import BoxInCenter from "@dabsi/system/acl/old-browser/BoxInCenter";
 
 const StyledPaper = styled(Paper)`
   padding: ${t => t.theme.spacing(1)}px;

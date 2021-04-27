@@ -1,5 +1,5 @@
 import { SYSTEM_RPC_PATH } from "@dabsi/system/core/common/rpc";
-import { SystemCommand } from "@dabsi/system/core/common/command";
+import { SystemCommand } from "@dabsi/system/core/common/SystemCommand";
 
 export default async function processRpcWithFormData<T>(
   buildFormData: (formData: FormData) => void,
@@ -13,9 +13,9 @@ export default async function processRpcWithFormData<T>(
     throw new Error();
   }
 
-  const [result, { path, payload, resolve }] = SystemCommand.capture(callback);
+  const [result, { payload, resolve }] = SystemCommand.capture(callback);
 
-  formData.set("command", JSON.stringify({ path, payload }));
+  formData.set("command", JSON.stringify({ payload }));
 
   resolve(
     await fetch(SYSTEM_RPC_PATH, {

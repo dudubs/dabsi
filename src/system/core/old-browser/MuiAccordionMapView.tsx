@@ -1,11 +1,11 @@
 import LangKey from "@dabsi/lang/LangKey";
-import { useStore } from "@dabsi/view/react/useStore";
 import { Field, Struct } from "@dabsi/struct";
 import {
   AnySystemMapConnection,
   SystemMapView,
   SystemMapViewProps,
-} from "@dabsi/system/core/view/SystemMapView";
+} from "@dabsi/system/core/old-view/SystemMapView";
+import { useStore } from "@dabsi/view/react/useStore";
 import {
   AccordionDetails,
   AccordionSummary,

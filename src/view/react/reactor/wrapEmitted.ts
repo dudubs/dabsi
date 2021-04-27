@@ -1,7 +1,7 @@
 import { Defined } from "@dabsi/common/typings2/Defined";
 import { Emittable, EmittableType } from "@dabsi/view/react/reactor/Reactor";
 import { ReactorListener } from "@dabsi/view/react/reactor/ReactorListener";
-import { ReactWrapper } from "@dabsi/view/react/wrapper";
+import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import React from "react";
 
 const useContext = ReactWrapper.createContext(() => {

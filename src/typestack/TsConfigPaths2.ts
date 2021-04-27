@@ -3,6 +3,10 @@ import { entries } from "@dabsi/common/object/entries";
 import { touchObject } from "@dabsi/common/object/touchObject";
 import path, { join } from "path";
 
+export type TsPathsWithBaseUrl = {
+  baseUrl: string;
+  paths: Record<string, string[]>;
+};
 type PathTable = {
   [SrcPrefix: string]: {
     [SrcSuffix: string]: [TargetPrefix: string, TargetSuffix: string][];
@@ -63,9 +67,7 @@ export class TsConfigPaths2 {
     //
   }
 
-  createConfig(
-    outDir: string
-  ): { baseUrl: string; paths: Record<string, string[]> } {
+  createPathsWithBaseUrl(outDir: string): TsPathsWithBaseUrl {
     const paths = {};
     for (const [tsPath, fsPaths] of this._allPaths) {
       paths[tsPath] = fsPaths

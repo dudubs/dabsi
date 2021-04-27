@@ -1,6 +1,9 @@
+import { reversed } from "@dabsi/common/array/reversed";
 import React, { ReactElement } from "react";
 
-let currentWrapper: ((children: ReactElement) => ReactElement) | null = null;
+export type ReactWrapper = (children: ReactElement) => ReactElement;
+
+let currentWrappers: ReactWrapper[] | null = null;
 
 let currentContext: Map<any, any> | null = null;
 
@@ -10,32 +13,37 @@ export function ReactWrapper(callback: () => React.ReactElement) {
   try {
     element = callback();
   } catch (error) {
-    clean();
     throw error;
+  } finally {
+    clean();
   }
   return end(element);
 }
 
 function clean() {
-  currentWrapper = null;
+  currentWrappers = null;
   currentContext = null;
 }
 
 function begin() {
-  if (currentWrapper) {
+  if (currentWrappers) {
     throw new Error(`Can't create new wapper`);
   }
-  currentWrapper = children => children;
+  currentWrappers = [];
   currentContext = new Map();
 }
 
-function end(children: React.ReactElement) {
-  if (!currentWrapper) {
+function end(element: React.ReactElement) {
+  if (!currentWrappers) {
     throw new Error(`No wrapper.`);
   }
-  const wrapper = currentWrapper;
+
+  for (const wrapper of reversed(currentWrappers)) {
+    element = wrapper(element);
+  }
+
   clean();
-  return wrapper(children);
+  return element;
 }
 
 export namespace ReactWrapper {
@@ -46,13 +54,10 @@ export namespace ReactWrapper {
     };
   }
 
-  export function push(
-    wrapper: (children: ReactElement) => ReactElement
-  ): void {
-    if (!currentWrapper) {
+  export function push(...wrappers: ReactWrapper[]): void {
+    if (!currentWrappers) {
       throw new Error(`No provider`);
     }
-    const prevWrapper = currentWrapper;
-    currentWrapper = children => prevWrapper(wrapper(children));
+    currentWrappers.push(...wrappers);
   }
 }

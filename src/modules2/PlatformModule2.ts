@@ -40,7 +40,7 @@ export class PlatformModule2 {
 
   // TODO: Once() getViewPlatform
 
-  async generateCode(outDir: string, platformName: string) {
+  async generateCode(outDir: string, platformName: string, sharedCode = "") {
     const platforms: Platform2[] = [
       this.getPlatform("common"),
       this.getPlatform("view"),
@@ -56,6 +56,7 @@ export class PlatformModule2 {
 
     for (const platform of platforms) {
       for (const code of [indexCode, testsCode]) {
+        sharedCode && code.push(sharedCode);
         code.push(`/* ${platform.name} platform */`);
       }
 

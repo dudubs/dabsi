@@ -1,3 +1,3 @@
-import Router from "@dabsi/typerouter/router";
+import { Router } from "@dabsi/typerouter2/Router";
 
-export const SystemRouter = Router();
+export default class SystemRouter extends Router {}

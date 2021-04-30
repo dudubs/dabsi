@@ -1,7 +1,7 @@
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { ConsumeResolver, Resolver, ResolverLike } from "@dabsi/typedi";
-import { ConsumerFactory, ResolverDeps } from "@dabsi/typedi/consume";
+import { ConsumeFactory, ResolverDeps } from "@dabsi/typedi/consume";
 import {
   Rpc,
   RpcContextualMember,
@@ -49,7 +49,7 @@ export function RpcResolver<
   rpcType: RpcType<T>,
   rpcMemberKey: K,
   deps: U,
-  factory: ConsumerFactory<RpcMemberFactory<T[K]>, U>
+  factory: ConsumeFactory<RpcMemberFactory<T[K]>, U>
 ): RpcMemberResolver<T, K>;
 
 export function RpcResolver<T extends Rpc, K extends RpcMemberKey<T>>(
@@ -60,7 +60,7 @@ export function RpcResolver<T extends Rpc, K extends RpcMemberKey<T>>(
 export function RpcResolver<T extends Rpc, U extends ResolverDeps>(
   rpcType: RpcType<T>,
   deps: U,
-  factory: ConsumerFactory<RpcConfigurator<T>, U>
+  factory: ConsumeFactory<RpcConfigurator<T>, U>
 ): RpcResolver<T>;
 
 export function RpcResolver<T extends Rpc>(

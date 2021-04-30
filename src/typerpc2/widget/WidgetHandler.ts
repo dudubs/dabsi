@@ -1,5 +1,6 @@
+import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { assignDescriptorsWithoutOverride } from "@dabsi/typerpc2/assignDescriptorsWithoutOverride";
+
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import {
   InferredHandlerConfig,
@@ -88,6 +89,6 @@ export function WidgetHandler(
   return RpcConfigHandler(
     rpcType,
     options,
-    assignDescriptorsWithoutOverride(baseHandler, handler)
+    assignDescriptors(baseHandler, handler)
   );
 }

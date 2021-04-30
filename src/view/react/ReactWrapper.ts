@@ -13,9 +13,8 @@ export function ReactWrapper(callback: () => React.ReactElement) {
   try {
     element = callback();
   } catch (error) {
-    throw error;
-  } finally {
     clean();
+    throw error;
   }
   return end(element);
 }
@@ -37,12 +36,13 @@ function end(element: React.ReactElement) {
   if (!currentWrappers) {
     throw new Error(`No wrapper.`);
   }
+  const wrappers = currentWrappers;
+  clean();
 
-  for (const wrapper of reversed(currentWrappers)) {
+  for (const wrapper of reversed(wrappers)) {
     element = wrapper(element);
   }
 
-  clean();
   return element;
 }
 

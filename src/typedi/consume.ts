@@ -35,7 +35,7 @@ export type ResolvedDeps<U extends ResolverDeps> = U extends ResolverArray
   ? ResolvedArray<U>
   : ResolvedMap<Extract<U, ResolverMap<any>>>;
 
-export type ConsumerFactory<T, U extends ResolverDeps> = U extends ResolverArray
+export type ConsumeFactory<T, U extends ResolverDeps> = U extends ResolverArray
   ? (...deps: ResolvedArray<U>) => T
   : (depMap: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
 
@@ -62,17 +62,17 @@ Resolver.consume = function (deps: any, factory: any): any {
 declare module "./Resolver" {
   namespace Resolver {
     export function consume<
-      T extends ProvidableResolver<any>,
+      T extends TokenResolver<any>,
       U extends ResolverDeps
     >(
       provider: T,
       deps: U,
-      resolver?: ConsumerFactory<InstanceType<T>, U>
+      resolver?: ConsumeFactory<InstanceType<T>, U>
     ): ResolverMap<any>;
 
     export function consume<T, U extends ResolverDeps>(
       deps: U,
-      factory: ConsumerFactory<T, U>
+      factory: ConsumeFactory<T, U>
     ): ConsumeResolver<T>;
   }
 }

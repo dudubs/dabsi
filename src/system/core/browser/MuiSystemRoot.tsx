@@ -1,9 +1,8 @@
 import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
-import { SystemRouter } from "@dabsi/system/core/view/SystemRouter";
+import SystemRouter from "@dabsi/system/core/view/SystemRouter";
 import { HistoryProvider } from "@dabsi/typerouter/History";
-import { RouterView } from "@dabsi/typerouter/view";
+import { RouterView } from "@dabsi/typerouter2/view/RouterView";
 import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
-import Typography from "@material-ui/core/Typography";
 import { createBrowserHistory } from "history";
 import React from "react";
 
@@ -22,11 +21,6 @@ export function MuiSystemRoot(): React.ReactElement {
       hook();
     }
 
-    return (
-      <RouterView
-        router={SystemRouter}
-        noRouteElement={<Typography>{lang`NO_ROUTE`}</Typography>}
-      />
-    );
+    return <RouterView routerType={SystemRouter} history={history} />;
   });
 }

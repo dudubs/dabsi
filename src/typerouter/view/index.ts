@@ -11,16 +11,13 @@ import {
   getRouterViewMetadata,
   RouterViewMetadata,
 } from "@dabsi/typerouter/view/metadata";
-import {
-  renderRouterView,
-  RouterViewProps,
-} from "@dabsi/typerouter/view/render";
+import { BaseRouterView, RouterViewProps } from "@dabsi/typerouter/view/render";
 import { RouteViewComponent } from "@dabsi/typerouter/view/route";
 import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import React from "react";
 
-export function RouterView(props: RouterViewProps): React.ReactElement {
-  return renderRouterView(props);
+export function OldRouterView(props: RouterViewProps): React.ReactElement {
+  return BaseRouterView(props);
 }
 
 function isComponentFunction(

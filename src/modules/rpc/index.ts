@@ -104,22 +104,23 @@ export class RpcModule2 {
   }
 
   processMultipleRequests(
-    rpc: RpcType,
-    datas: any[],
+    rpcType: RpcType,
+    payloads: any[],
     body: any,
     context: ResolverMap
   ): Promise<any[]> {
-    this.log.info(() => `Got ${datas.length} requests.`);
+    this.log.info(() => `process ${payloads.length} payloads.`);
 
     return Promise.all(
-      datas.toSeq().map(async payload => {
-        this.log.info(() => `handle ${JSON.stringify(path)}`);
-        return this.processRequest(
-          rpc,
-          new RpcRequest(payload, body),
-          Resolver.Context.create(context)
-        );
-      })
+      payloads
+        .toSeq()
+        .map(async payload =>
+          this.processRequest(
+            rpcType,
+            new RpcRequest(payload, body),
+            Resolver.Context.create(context)
+          )
+        )
     );
   }
 }

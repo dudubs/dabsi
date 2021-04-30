@@ -47,7 +47,11 @@ export class BrowserModule2 {
     const {
       entityMap: generatedEntityMap,
       codeMap: generatedCodeMap,
-    } = await this.platformModule.generateCode(generatedOutDir, "browser");
+    } = await this.platformModule.generateCode(
+      generatedOutDir,
+      "browser",
+      'import "@dabsi/browser/register";'
+    );
 
     const tsConfigFile = realpathSync(
       path.resolve(

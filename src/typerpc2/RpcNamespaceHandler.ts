@@ -1,32 +1,35 @@
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
+import { Fn } from "@dabsi/common/typings2/Fn";
+import { Rpc, RpcMemberKey, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
 import { RpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
-import { BaseRpcNamespace } from "@dabsi/typerpc2/RpcNamespace";
+import { RpcNamespace } from "@dabsi/typerpc2/RpcNamespace";
 
 declare module "./RpcNamespace" {
-  interface BaseRpcNamespace
+  interface RpcNamespace
     extends RpcWithConfig<{
-      getRpcHandler<T extends Rpc>(
-        nsRpcType: RpcType<T>,
-        nsKey: string
-      ): RpcHandler<T>;
+      getRpcMemberHandler<T extends Rpc, K extends RpcMemberKey<T>>(
+        rpcType: RpcType<T>,
+        memberKey: K,
+        memberType: RpcMemberType,
+        propertyType: Function
+      ): RpcHandler<T[K]>;
     }> {}
 }
 
 export default RpcConfigHandler(
-  BaseRpcNamespace,
+  RpcNamespace,
   {
-    createMemberHandler(memberKey, memberType) {
-      if (memberType !== RpcMemberType.Contextual) {
-        throw new Error(
-          `Can't create member handler for not contextual member (${this.name}.${memberKey}).`
+    createMemberHandler(memberKey, memberType, propertyType) {
+      return async function () {
+        const memberHandler: Fn = this.config.getRpcMemberHandler(
+          this.rpcType,
+          <never>memberKey,
+          memberType,
+          propertyType
         );
-      }
-
-      return function (rpcType) {
-        return this.config.getRpcHandler(rpcType, memberKey);
+        return await memberHandler.apply(this, <any>arguments);
       };
     },
   },

@@ -21,7 +21,7 @@ import {
 } from "@dabsi/typerpc2/Rpc";
 import { RpcHandler, RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
-import { assignDescriptorsWithoutOverride } from "./assignDescriptorsWithoutOverride";
+import { assignDescriptors } from "../common/object/assignDescriptors";
 import {
   AnyRpcWithConfig,
   InferredRpcConfig,
@@ -198,9 +198,9 @@ export function RpcConfigHandler(
     static readonly isRpcConfigCanBeUndefined = configCanBeUndefined;
   }
 
-  assignDescriptorsWithoutOverride(HandlerType.prototype, handler);
+  assignDescriptors(HandlerType.prototype, handler);
 
-  assignDescriptorsWithoutOverride(HandlerType.prototype, helpers);
+  assignDescriptors(HandlerType.prototype, helpers);
 
   Object.defineProperty(HandlerType, "name", {
     value: `RpcConfigHandler<${rpcType.name}>`,

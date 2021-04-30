@@ -1,11 +1,7 @@
 import { reversed } from "@dabsi/common/array/reversed";
 import { objectBases } from "@dabsi/common/object/objectBases";
 
-import {
-  ProvidableResolver,
-  Resolver,
-  ResolverMap,
-} from "@dabsi/typedi/Resolver";
+import { TokenResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 declare module "./Resolver" {
   namespace Resolver {
@@ -38,7 +34,7 @@ function _assign(context, args: Provider[]): ResolverMap {
   }
   return context;
 
-  function _assginNoResolve(resolver: ProvidableResolver<any>) {
+  function _assginNoResolve(resolver: TokenResolver<any>) {
     const token = Resolver.Providability.token(resolver);
     context[token] = context => {
       throw new Error(`No resolve for "${token}".`);

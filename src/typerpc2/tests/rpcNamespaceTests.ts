@@ -1,21 +1,27 @@
+import { defined } from "@dabsi/common/object/defined";
+import { RpcNamespace } from "@dabsi/typerpc2";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
 import { Rpc } from "@dabsi/typerpc2/Rpc";
-import { RpcNamespace } from "@dabsi/typerpc2";
-import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { defined } from "@dabsi/common/object/defined";
 
-fit("sanity", async () => {
-  const a = RpcNamespace();
-  const b = a.register("b");
-  const c = b.register("c");
-  const d = c.register("d");
+it("", async () => {
+  class A extends RpcNamespace {}
+
+  @A.register()
+  class B extends RpcNamespace {}
+
+  @B.register()
+  class C extends RpcNamespace {}
+
+  @C.register()
+  class D extends RpcNamespace {}
 
   class R extends Rpc {
     @RpcFuncational() testFn!: () => Promise<string>;
   }
 
-  const r = d.register("r", R);
+  const r = D.register(R);
 
   const rpcHandlerMap = new Map().set(
     R,
@@ -26,18 +32,21 @@ fit("sanity", async () => {
     })
   );
 
-  for (const x of [a, b, c, d]) {
+  for (const x of [A, B, C, D]) {
     rpcHandlerMap.set(
       x,
       createRpcHandler(x, {
-        getRpcHandler(nsRpcType, nsKey) {
-          return defined(rpcHandlerMap.get(nsRpcType), () => `No ${nsKey}`);
+        getRpcMemberHandler(rpcType, memberKey, memberType, propertyType) {
+          return defined(
+            rpcHandlerMap.get(propertyType),
+            () => `No ${memberKey}`
+          );
         },
       })
     );
   }
 
-  a.command = createRpcCommandFromHandler(a, await rpcHandlerMap.get(a));
+  A.command = createRpcCommandFromHandler(A, await rpcHandlerMap.get(A));
 
   expect(await r.testFn()).toEqual("hello");
 });

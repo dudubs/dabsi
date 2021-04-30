@@ -1,5 +1,6 @@
 // TODO: Rename to *Input
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
+import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";

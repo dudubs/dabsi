@@ -17,7 +17,7 @@ export type RouterViewProps = {
   router: AnyRouter;
 };
 
-export function renderRouterView({
+export function BaseRouterView({
   router,
   noRouteElement = EmptyFragment,
 }: RouterViewProps): React.ReactElement {

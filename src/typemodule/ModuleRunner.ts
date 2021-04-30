@@ -15,14 +15,15 @@ export interface ModuleLoaderFn {
 }
 
 export class ModuleRunner {
-  static run(
+  static async run(
     target: ModuleTarget,
     context: ResolverMap = {}
   ): Promise<ModuleRunner> {
     const runner = new ModuleRunner();
     Object.assign(runner.context, context);
     runner.get(target);
-    return runner.process.wait().then(() => runner);
+    await runner.process.waitToEnd();
+    return runner;
   }
 
   readonly process = new AsyncProcess2();

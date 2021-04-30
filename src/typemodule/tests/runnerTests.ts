@@ -113,6 +113,7 @@ it("expect to load plugins", async () => {
       b: B
     ) {
       installedC = true;
+
       expect(c).toBeInstanceOf(C);
       expect(b).toBeInstanceOf(B);
     }

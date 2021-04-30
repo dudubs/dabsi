@@ -1,6 +1,6 @@
+import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { assignDescriptorsWithoutOverride } from "@dabsi/typerpc2/assignDescriptorsWithoutOverride";
 import {
   AnyInput,
   InputError,
@@ -216,6 +216,6 @@ export function InputHandler(
         return config;
       },
     },
-    assignDescriptorsWithoutOverride(baseHandler, handler, ["loadAndCheck"])
+    assignDescriptors(baseHandler, handler, ["loadAndCheck"])
   );
 }

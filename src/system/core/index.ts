@@ -8,7 +8,7 @@ import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
 import express from "express";
 import multer from "multer";
-import { SystemRpc, SYSTEM_RPC_PATH } from "./common/rpc";
+import SystemRpc, { SYSTEM_RPC_PATH } from "./common/rpc";
 
 @Module({
   dependencies: [SessionModule],
@@ -38,24 +38,24 @@ export class SystemModule {
         express.urlencoded({ extended: true }),
         multer().any(),
         expressModule.processRequest(context, async (req, res, context) => {
-          const bodyWithFiles = { ...req.body };
+          const body = { ...req.body };
           if (Array.isArray(req.files)) {
             for (const { fieldname, buffer } of req.files) {
-              bodyWithFiles[fieldname] = buffer;
+              body[fieldname] = buffer;
             }
           }
-          const requestDatas: any[] =
-            typeof bodyWithFiles.command === "string"
-              ? JSON.parse(bodyWithFiles.command)
-              : bodyWithFiles;
+          const payloads: any[] =
+            typeof body.payloads === "string"
+              ? JSON.parse(body.payloads)
+              : body.payloads;
 
-          this.log.info(() => `Got ${requestDatas.length} requests.`);
+          this.log.info(() => `Got ${payloads.length} requests.`);
 
           res.json({
             responses: await rpcModule.processMultipleRequests(
               SystemRpc,
-              requestDatas,
-              bodyWithFiles,
+              payloads,
+              body,
               context
             ),
           });

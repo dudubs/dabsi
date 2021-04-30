@@ -1,10 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import {
-  ArrowResolver,
-  ProvidableResolver,
-  Resolver,
-} from "@dabsi/typedi/Resolver";
+import { ArrowResolver, TokenResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
@@ -22,7 +18,7 @@ Resolver.resolve = function (resolver, context) {
       return (resolver as ArrowResolver<any>)(context);
     }
     return Resolver.Providability.resolve(
-      resolver as ProvidableResolver<any>,
+      resolver as TokenResolver<any>,
       context
     );
   }

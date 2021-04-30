@@ -1,11 +1,7 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { WeakId } from "@dabsi/common/WeakId";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import {
-  ProvidableResolver,
-  Resolver,
-  ResolverMap,
-} from "@dabsi/typedi/Resolver";
+import { TokenResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 declare module "./Resolver" {
   namespace Resolver {
@@ -15,7 +11,7 @@ declare module "./Resolver" {
 
 namespace ResolverProvidability {
   export function resolve<T>(
-    providable: ProvidableResolver<T>,
+    providable: TokenResolver<T>,
     context: ResolverMap
   ) {
     return Resolver.resolve(check(providable, context), context);
@@ -29,7 +25,7 @@ namespace ResolverProvidability {
   });
 
   export function check<T>(
-    providable: ProvidableResolver<T>,
+    providable: TokenResolver<T>,
     context: ResolverMap
   ): Resolver<T> {
     const resolver = context[token(providable)];

@@ -1,7 +1,13 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
-import { Rpc, RpcContextual, RpcFuncational, RpcType } from "@dabsi/typerpc2";
+import {
+  Rpc,
+  RpcContextual,
+  RpcFuncational,
+  RpcParametrial,
+  RpcType,
+} from "@dabsi/typerpc2";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
 
 let map: RpcResolverBuilder;
@@ -15,69 +21,127 @@ beforeEach(() => {
 });
 
 class R1 extends Rpc {
-  @RpcFuncational() testFn!: (xs?: string) => Promise<void>;
+  @RpcFuncational() testFn!: (xs?: string) => Promise<string>;
 }
 
-it("expect to resolve rpc-configurator", done => {
+it("expect to resolve rpc-configurator", async () => {
   map.add(
     RpcResolver(R1, [], c => $ =>
       $({
         handleTestFn() {
-          done();
+          return "works";
         },
       })
     )
   );
 
-  testRpc(R1).testFn();
+  expect(await testRpc(R1).testFn()).toEqual("works");
 });
 
 it("expect to throw eroror because no member handler.", () => {
   expect(() => testRpc(R1)).toThrow();
 });
 
-it("expect to build resolver from member resolvers.", done => {
+it("expect to build resolver from member resolvers.", async () => {
   map.add(
     RpcResolver(R1, "testFn", [], c => $ =>
       $(() => {
-        done();
+        return "works";
       })
     )
   );
-  testRpc(R1).testFn();
+  expect(await testRpc(R1).testFn()).toEqual("works");
 });
 
 class R2 extends Rpc {
   @RpcContextual() r1!: R1;
+
+  @RpcParametrial(() => R1) getR1!: (pText: string) => R1;
 }
 
 it("expect to throw error because no configurator for R1", () => {
   expect(() => testRpc(R2)).toThrow();
 });
 
-it("expect to build R1 configurator for R2", done => {
-  map.add(
-    RpcResolver(R1, "testFn", [], c => $ =>
-      $(text => {
-        expect(text).toEqual("hello");
-        done();
-      })
-    )
-  );
-  testRpc(R2).r1.testFn("hello");
+describe("build R1", () => {
+  beforeEach(() => {
+    map.add(
+      RpcResolver(R1, "testFn", [], c => $ =>
+        $(text => {
+          expect(text).toEqual("hello");
+          return "works";
+        })
+      ),
+      RpcResolver(R2, "getR1", [], c => $ =>
+        $((rpcType, pText) => ({
+          handleTestFn(aText) {
+            expect(rpcType).toBe(R1);
+            return `x-${pText}-${aText}`;
+          },
+        }))
+      )
+    );
+  });
+
+  it("expect to get functional handler", async () => {
+    const testFnHandler = Resolver.resolve(
+      map.getMemberHandlerResolver(R1, "testFn"),
+      {}
+    );
+
+    expect(await testFnHandler("hello")).toEqual("works");
+  });
+
+  it("expect to build R1", async () => {
+    expect(await testRpc(R1).testFn("hello")).toEqual("works");
+  });
+
+  it("expect to build R2", async () => {
+    expect(await testRpc(R2).getR1("hello").testFn("world")).toEqual(
+      "x-hello-world"
+    );
+  });
 });
 
 it("expect to error because rpc-member-resolver override rpc-resolver", () => {
-  map.add(RpcResolver(R1, [], c => $ => $({ handleTestFn() {} })));
+  map.add(
+    RpcResolver(R1, [], c => $ =>
+      $({
+        handleTestFn() {
+          return "works";
+        },
+      })
+    )
+  );
   expect(() => {
-    map.add(RpcResolver(R1, "testFn", [], c => $ => $(() => {})));
+    map.add(
+      RpcResolver(R1, "testFn", [], c => $ =>
+        $(() => {
+          return "works";
+        })
+      )
+    );
   }).toThrow();
 });
 
 it("expect to error because rpc-resolver override rpc-member-resolver", () => {
-  map.add(RpcResolver(R1, "testFn", [], c => $ => $(() => {})));
+  map.add(
+    RpcResolver(R1, "testFn", [], c => $ =>
+      $(() => {
+        return "works";
+      })
+    )
+  );
   expect(() => {
-    map.add(RpcResolver(R1, [], c => $ => $({ handleTestFn() {} })));
+    map.add(
+      RpcResolver(R1, [], c => $ =>
+        $({
+          handleTestFn() {
+            return "works";
+          },
+        })
+      )
+    );
   }).toThrow();
 });
 

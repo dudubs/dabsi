@@ -1,5 +1,3 @@
-import { useStore } from "@dabsi/view/react/useStore";
-import { Struct } from "@dabsi/struct";
 import AppBar from "@material-ui/core/AppBar";
 import Divider from "@material-ui/core/Divider";
 import Drawer from "@material-ui/core/Drawer";
@@ -81,9 +79,6 @@ export const useStyles = makeStyles(theme => ({
     marginLeft: 0,
   },
 }));
-export class MuiTemplateState extends Struct({
-  open: true,
-}) {}
 
 export function MuiTemplate({
   children,
@@ -91,25 +86,30 @@ export function MuiTemplate({
   title,
   drawerMenu,
   ...props
+}: {
+  children;
+  toolbarMenu?;
+  title;
+  drawerMenu?;
 }) {
   const classes = useStyles();
   const theme = useTheme();
-  const { state, store } = useStore(MuiTemplateState);
+  const [open, setOpen] = React.useState(false);
   return (
     <div className={classes.root}>
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: state.open,
+          [classes.appBarShift]: open,
         })}
       >
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
-            onClick={() => store.set("open", true)}
+            onClick={() => setOpen(true)}
             edge="start"
-            className={clsx(classes.menuButton, state.open && classes.hide)}
+            className={clsx(classes.menuButton, open && classes.hide)}
           >
             <MenuIcon />
           </IconButton>
@@ -118,7 +118,7 @@ export function MuiTemplate({
         </Toolbar>
       </AppBar>
       <Drawer
-        open={state.open}
+        open={open}
         className={classes.drawer}
         variant="persistent"
         anchor="left"
@@ -127,7 +127,7 @@ export function MuiTemplate({
         }}
       >
         <div className={classes.drawerHeader}>
-          <IconButton onClick={() => store.set("open", false)}>
+          <IconButton onClick={() => setOpen(false)}>
             {theme.direction === "ltr" ? (
               <ChevronLeftIcon />
             ) : (
@@ -140,7 +140,7 @@ export function MuiTemplate({
       </Drawer>
       <main
         className={clsx(classes.content, {
-          [classes.contentShift]: state.open,
+          [classes.contentShift]: open,
         })}
       >
         <div className={classes.drawerHeader} />

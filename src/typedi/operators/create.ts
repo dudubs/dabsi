@@ -12,7 +12,7 @@ Resolver.create = function (resolve, check) {
   for (const [propertyName, value] of [
     [Resolver.resolveSymbol, resolve],
     [Resolver.checkSymbol, check],
-    [Resolver.providableSymbol, false],
+    [Resolver.tokenableSymbol, false],
   ] as [PropertyKey, any][]) {
     Object.defineProperty(Consumer, propertyName, {
       enumerable: false,

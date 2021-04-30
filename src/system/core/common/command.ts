@@ -1,29 +1,33 @@
-import { SystemRpc } from "@dabsi/system/core/common/rpc";
+import SystemRpc from "@dabsi/system/core/common/rpc";
 import {
   RpcMultiplexer,
-  RpcQueueHandler,
+  RpcMultiplexerHandler,
   RpcQueueRequest,
 } from "@dabsi/typerpc2/RpcMultiplexer";
 
-let currentHandler: RpcQueueHandler | null = null;
+let currentHandler: RpcMultiplexerHandler | null = null;
 
-let currentRequests: RpcQueueRequest[] = [];
+let waitingPayloads: {
+  payloads: any[][];
+  resolve: (result: any) => void;
+}[] = [];
 
-const multiplexer = new RpcMultiplexer(requests => {
+const multiplexer = new RpcMultiplexer(payloads => {
   if (currentHandler) {
-    currentHandler(requests);
-    return;
+    return currentHandler(payloads);
   }
-  currentRequests.push(...requests);
+  return new Promise<any[]>(resolve => {
+    waitingPayloads.push({ payloads, resolve });
+  });
 });
 
 export namespace SystemCommand {
-  export function handle(handler: RpcQueueHandler) {
+  export function handle(handler: RpcMultiplexerHandler) {
     currentHandler = handler;
-    if (currentRequests.length) {
-      const requests = currentRequests;
-      currentRequests = [];
-      handler(requests);
+    for (const { resolve, payloads } of waitingPayloads) {
+      handler(payloads).then(results => {
+        resolve(results);
+      });
     }
   }
 

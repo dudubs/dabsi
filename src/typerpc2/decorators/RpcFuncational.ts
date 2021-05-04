@@ -1,4 +1,5 @@
-import { getRpcArgs, RpcFunctionalMember } from "@dabsi/typerpc2/Rpc";
+import { RpcFunctionalMember, RpcType } from "@dabsi/typerpc2/Rpc";
+import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export function RpcFuncational(): {
@@ -9,15 +10,15 @@ export function RpcFuncational(): {
 } {
   return (target, propertyName) => {
     RpcMembers.define(
-      target.constructor,
+      target.constructor as RpcType,
       propertyName,
       RpcMemberType.Functional
     );
     Object.defineProperty(target, propertyName, {
       configurable: false,
       get() {
-        const { payload, command } = getRpcArgs(this);
-        return (...args) => command([...payload, propertyName, ...args]);
+        const { getPath, command } = RpcArgs.get(this);
+        return (...args) => command([...getPath(), propertyName, ...args]);
       },
     });
   };

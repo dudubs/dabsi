@@ -26,10 +26,14 @@ function test<T extends RpcType>(
 ) {
   return new Promise(resolve => {
     callback(
-      new connCls(path, payload => {
-        resolve(payload);
-        return Promise.resolve();
-      })
+      new connCls(
+        () => path,
+        payload => {
+          resolve(payload);
+          return Promise.resolve();
+        },
+        null
+      )
     );
   });
 }
@@ -58,8 +62,8 @@ const bHandler: RpcHandler<B> = {
 const aCommand = createRpcCommandFromHandler(A, aHandler);
 const bCommand = createRpcCommandFromHandler(B, bHandler);
 
-const a = new A([], aCommand);
-const b = new B([], bCommand);
+const a = new A(() => [], aCommand, null);
+const b = new B(() => [], bCommand, null);
 
 it("expect to create command for functional member", async () => {
   expect(await a.fx("Hello", 10)).toEqual("xs: Hello, xi: 10");

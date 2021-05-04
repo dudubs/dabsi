@@ -4,6 +4,7 @@ import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFro
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
 import { Rpc } from "@dabsi/typerpc2/Rpc";
+import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 
 it("", async () => {
   class A extends RpcNamespace {}
@@ -36,17 +37,16 @@ it("", async () => {
     rpcHandlerMap.set(
       x,
       createRpcHandler(x, {
-        getRpcMemberHandler(rpcType, memberKey, memberType, propertyType) {
-          return defined(
-            rpcHandlerMap.get(propertyType),
-            () => `No ${memberKey}`
-          );
+        getRpcMemberHandler(rpcType, memberKey, memberType, propertyType): any {
+          return () =>
+            defined(rpcHandlerMap.get(propertyType), () => `No ${memberKey}`);
         },
       })
     );
   }
 
-  A.command = createRpcCommandFromHandler(A, await rpcHandlerMap.get(A));
+  A.nsCommand = createRpcCommandFromHandler(A, await rpcHandlerMap.get(A));
+  A.nsGetPath = () => [];
 
   expect(await r.testFn()).toEqual("hello");
 });

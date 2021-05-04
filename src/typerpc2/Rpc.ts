@@ -1,25 +1,34 @@
 import { Forward } from "@dabsi/common/reflection/Forward";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
 import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
-
-const RpcArgsSymbol = Symbol("RpcArgsSymbol");
 
 export type RpcMemberKey<T extends Rpc> = ExtractKeys<
   T,
   RpcContextualMember | RpcFunctionalMember | RpcParametrialMember
 >;
 
-export class Rpc {
-  [RpcArgsSymbol]!: RpcArgs;
+const __isRpcSymbol = Symbol("isRpc");
 
-  constructor(payload: any[], command: RpcCommand) {
-    const args: RpcArgs = { payload, command };
-    Object.defineProperty(this, RpcArgsSymbol, {
-      configurable: false,
-      enumerable: false,
-      value: args,
-    });
+export function getRpcType(rpc: Rpc): RpcType {
+  return <any>rpc.constructor;
+}
+
+export class Rpc {
+  [__isRpcSymbol]: true = true;
+
+  constructor(
+    getPath: () => any[],
+    command: RpcCommand,
+    getRootRpcType: null | (() => RpcType)
+  ) {
+    RpcArgs.define(
+      this,
+      getPath,
+      command,
+      getRootRpcType || (() => getRpcType(this))
+    );
   }
 
   static at: RpcType<Rpc>["at"] = function (path) {
@@ -74,17 +83,15 @@ export type RpcParametrialMember<
   U extends any[] = any[]
 > = (...args: U) => T;
 
-export type RpcArgs = { payload: any[]; command: RpcCommand };
-
-export function getRpcArgs(rpc: Rpc): RpcArgs {
-  return rpc[RpcArgsSymbol];
-}
-
 export function isRpc(o): o is Rpc {
-  return typeof o[RpcArgsSymbol] === "object";
+  return o[__isRpcSymbol] === true;
 }
 export type RpcType<T = any> = {
-  new (payload: any[], command: RpcCommand): T;
+  new (
+    getPath: () => any[],
+    command: RpcCommand,
+    getRootRpcType: null | (() => RpcType)
+  ): T;
 
   at<T extends Rpc, P extends string>(
     this: RpcType<T>,

@@ -40,14 +40,11 @@ export class BrowserModule2 {
 
   @Once() async getWebpackCompiler() {
     const generatedOutDir = path.join(
-      this.projectModule.directory,
+      this.projectModule.settings.directory,
       "src/generated"
     );
 
-    const {
-      entityMap: generatedEntityMap,
-      codeMap: generatedCodeMap,
-    } = await this.platformModule.generateCode(
+    const generated = await this.platformModule.generateCode(
       generatedOutDir,
       "browser",
       'import "@dabsi/browser/register";'
@@ -55,7 +52,7 @@ export class BrowserModule2 {
 
     const tsConfigFile = realpathSync(
       path.resolve(
-        this.projectModule.directory,
+        this.projectModule.settings.directory,
         `configs/tsconfig.prod.browser.json`
       )
     );
@@ -77,18 +74,21 @@ export class BrowserModule2 {
           name: "vendor",
         },
       },
-      plugins: [new WebpackVirtualModulesPlugin(generatedCodeMap)],
+      plugins: [new WebpackVirtualModulesPlugin(generated.codeMap)],
       entry: {
-        ...generatedEntityMap,
+        ...generated.entityMap,
       },
       output: {
-        path: path.resolve(this.projectModule.directory, "bundle/browser"),
+        path: path.resolve(
+          this.projectModule.settings.directory,
+          "bundle/browser"
+        ),
       },
       resolve: {
         plugins: [
           new TsConfigPathsWebpackPlugin({
             configFile: path.resolve(
-              this.projectModule.directory,
+              this.projectModule.settings.directory,
               "tsconfig.json"
             ),
             logLevel: "WARN",
@@ -181,7 +181,9 @@ export class BrowserModule2 {
     expressModule.builders.push(app => {
       app.use(
         "/bundle/browser",
-        express.static(path.join(projectModule.directory, "bundle/browser"))
+        express.static(
+          path.join(projectModule.settings.directory, "bundle/browser")
+        )
       );
     });
   }

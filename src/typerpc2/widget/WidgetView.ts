@@ -7,22 +7,20 @@ import {
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { View } from "@dabsi/view/react/component/View";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
+import { WSA_E_CANCELLED } from "node:constants";
 import React from "react";
 
 export interface WidgetViewProps<T extends AnyWidget> {
-  widget: T;
+  key?: string | number;
+  mapKey?: undefined | string;
 
-  widgetKey: undefined | string;
+  connection: T;
 
-  element: WidgetElement<T> | undefined;
+  element?: WidgetElement<T> | undefined;
 
-  state: WidgetState<T> | undefined;
+  state?: WidgetState<T> | undefined;
 
-  parent: undefined | WidgetView<T>;
-
-  onUpdateElement: undefined | ((view: WidgetView<T>) => void);
-
-  onUpdateState: undefined | ((view: WidgetView<T>) => void);
+  parent?: undefined | WidgetView<any>;
 }
 
 export class WidgetView<
@@ -38,8 +36,8 @@ export class WidgetView<
     return defined(this._element, () => `No widget element`);
   }
 
-  get widget(): T {
-    return this.props.widget;
+  get connection(): T {
+    return this.props.connection;
   }
 
   setElement(element: WidgetElement<T>): void {
@@ -52,15 +50,13 @@ export class WidgetView<
     if (!this.isDidMount) return;
     if (!this._element) return;
     this.updateElement?.(this._element);
-    if (this.isDidMount) {
-      this.props.onUpdateElement?.(this);
-    }
   }
 
   renderWidget(): React.ReactNode {
-    if (this.props.renderWidget) {
-      return this.props.renderWidget(this);
+    if (typeof this.props.children === "function") {
+      return this.props.children(this);
     }
+
     return React.createElement(
       React.Fragment,
       null,
@@ -68,16 +64,37 @@ export class WidgetView<
     );
   }
 
-  renderView() {
+  renderView(): React.ReactNode {
     if (!this._element) {
       return EmptyFragment;
     }
+
     return this.renderWidget();
   }
 
   updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
+    super.updateViewProps?.(prevProps, nextProps);
+    console.log({
+      prevElement: nextProps.element,
+      thisType: this.constructor.name,
+    });
     if (nextProps.element !== prevProps.element) {
+      console.log({
+        nextElement: nextProps.element,
+      });
+
       this._element = nextProps.element;
+    }
+  }
+
+  componentDidMount() {
+    super.componentDidMount?.();
+    if (!this.props.parent && !this.props.element) {
+      this.connection.getElement().then(element => {
+        console.log({ element });
+
+        this.setElement(element);
+      });
     }
   }
 
@@ -89,6 +106,6 @@ export class WidgetView<
   }
 
   async reloadElement() {
-    this._element = await this.widget.getElement();
+    this._element = await this.connection.getElement();
   }
 }

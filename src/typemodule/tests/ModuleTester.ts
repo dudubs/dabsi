@@ -7,17 +7,14 @@ import { ModuleRunner, ModuleTarget } from "@dabsi/typemodule/ModuleRunner";
 
 export type ModuleTester = ReturnType<typeof ModuleTester>;
 
-export function ModuleTester({
-  dependencies = [],
-  providers = [],
-}: { dependencies?: ModuleTarget[]; providers?: ResolverMap[] } = {}) {
-  const t = Tester.beforeAll(async () => {
+export function ModuleTester(resolvers: Resolver[] = []) {
+  return Tester.beforeAll(async t => {
     const moduleRunner = new ModuleRunner();
 
-    Resolver.Context.assign(moduleRunner.context, ...providers);
-    dependencies?.forEach(target => {
-      void moduleRunner.get(target);
-    });
+    for (const resolver of resolvers || []) {
+      await Resolver.resolve(resolver, moduleRunner.context);
+    }
+
     // beforeWait
     await moduleRunner.process.wait();
     // afterWait
@@ -39,7 +36,6 @@ export function ModuleTester({
       },
     };
   });
-  return t;
 }
 
 ModuleTester.default = SingleCall(() => ModuleTester());

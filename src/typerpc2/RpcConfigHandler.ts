@@ -13,6 +13,7 @@ import {
   GenericConfig2,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
+import { getRpcChildType } from "@dabsi/typerpc2/getRpcMetadata";
 import {
   Rpc,
   RpcContextualMember,
@@ -62,9 +63,7 @@ export class BaseRpcConfigHandler<T extends Rpc, C> {
     memberKey: string & K
   ): Promise<RpcHandler<T[K]>> {
     return this._getContextualHandlerCache.touch(memberKey, async () =>
-      this._getHandler(memberKey)(
-        RpcMembers.getValidRpcType(this.rpcType, memberKey)
-      )
+      this._getHandler(memberKey)(getRpcChildType(this.rpcType, memberKey))
     );
   }
 
@@ -78,7 +77,7 @@ export class BaseRpcConfigHandler<T extends Rpc, C> {
   ): Promise<RpcHandler<ReturnType<T[K]>>> {
     return <any>(
       this._getHandler(memberKey)(
-        RpcMembers.getValidRpcType(this.rpcType, memberKey),
+        getRpcChildType(this.rpcType, memberKey),
         ...params
       )
     );
@@ -184,6 +183,7 @@ export function RpcConfigHandler(
     value: true,
     enumerable: false,
   });
+
   class HandlerType extends BaseRpcConfigHandler<AnyRpcWithConfig, any> {
     static readonly rpcType = rpcType;
 

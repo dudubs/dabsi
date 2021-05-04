@@ -31,6 +31,11 @@ export type RpcMemberKey<T extends Rpc> = ExtractKeys<
   T,
   RpcFunctionalMember | RpcContextualMember | RpcParametrialMember
 >;
+
+export type RpcChild<T extends Rpc> =
+  | RpcContextualMember<T>
+  | RpcParametrialMember<T>;
+
 export type RpcChildKey<T extends Rpc> = ExtractKeys<
   T,
   RpcContextualMember | RpcParametrialMember

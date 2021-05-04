@@ -1,4 +1,5 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -28,6 +29,8 @@ export class ModuleRunner {
 
   readonly process = new AsyncProcess2();
 
+  protected _locked = false;
+
   readonly context: ResolverMap = Resolver.Context.flat({}, [
     this,
     this.process,
@@ -46,6 +49,10 @@ export class ModuleRunner {
 
   log = log.get("runner");
 
+  get isLocked() {
+    return this._locked;
+  }
+
   get loadedModules(): ModuleTarget[] {
     return [...this._moduleInstanceMap.keys()];
   }
@@ -53,6 +60,10 @@ export class ModuleRunner {
   get<T>(target: ModuleTarget | Constructor<T>): T {
     if (this._moduleInstanceMap.has(target)) {
       return this._moduleInstanceMap.get(target);
+    }
+
+    if (this._locked) {
+      throw new Error(`Can't resolve module "${target.name}" after lock.`);
     }
 
     const metadata = ModuleMetadata.get(target);
@@ -82,7 +93,15 @@ export class ModuleRunner {
     return instance;
   }
 
+  lock() {
+    // lock for new modules.
+    this._locked = true;
+  }
+
   pushLoader(descriptor: () => string, callback: ModuleLoaderFn) {
+    if (this._locked) {
+      throw new Error(`Can't pushLoader after lock.`);
+    }
     this._loaders.push({ callback, descriptor });
 
     for (const target of this._moduleInstanceMap.keys()) {
@@ -100,23 +119,15 @@ export class ModuleRunner {
         metadata,
         propertyName
       );
-      const descriptor = () => `Plugin<${target.name}.${propertyName}>`;
-      this._waitForModules(pluginUsedModules).then(() => {
-        this.process.push(descriptor, async () => {
-          try {
-            await Resolver.Injectability.invoke(
-              this._moduleInstanceMap.get(target)!,
-              this.context,
-              propertyName
-            );
-          } catch (error) {
-            // TODO: catchAndLocateErrorAsync
-            throw locateError(
-              error,
-              `Plugin<${metadata.target.name}.${propertyName}>`
-            );
-          }
-        });
+
+      this._waitForModules2(pluginUsedModules, () => {
+        this.process.catch(() =>
+          Resolver.Injectability.invoke(
+            this._moduleInstanceMap.get(target)!,
+            this.context,
+            propertyName
+          )
+        );
       });
     }
   }
@@ -140,7 +151,7 @@ export class ModuleRunner {
           () => `Plugin<${metadata.target.name}.${propertyName}>`
         );
       })
-      .toSet();
+      .toArray();
   }
 
   protected _waitForModules(targets: Iterable<ModuleTarget>) {
@@ -152,6 +163,21 @@ export class ModuleRunner {
           })
       )
     );
+  }
+
+  protected _waitForModules2(targets: ModuleTarget[], callback: () => void) {
+    let counter = targets.length;
+    if (!counter) {
+      return callback();
+    }
+    for (const target of targets) {
+      this._moduleEmitter.listen(target, () => {
+        counter--;
+        if (!counter) {
+          callback();
+        }
+      });
+    }
   }
 
   addUsedModuleByResolver?: null | ((target: ModuleTarget) => void) = null;

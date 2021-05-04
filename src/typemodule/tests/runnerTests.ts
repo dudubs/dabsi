@@ -1,4 +1,4 @@
-import { Injectable, Resolver } from "@dabsi/typedi";
+import { Inject, Injectable, Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 
@@ -151,4 +151,25 @@ it("expect to get resolver plugins.", () => {
       )
     ),
   ]).toEqual([A, B, C]);
+});
+
+it("expect to install context", () => {
+  class X {
+    constructor(readonly n: number) {}
+  }
+
+  @Module()
+  class A {
+    installContext(@Plugin() @Inject(c => c) context: any) {
+      Resolver.Context.assign(context, [new X(123)]);
+    }
+  }
+
+  @Module({ dependencies: [A] })
+  class B {
+    constructor(readonly x: X) {}
+  }
+
+  const mr = new ModuleRunner();
+  expect(mr.get(B).x.n).toEqual(123);
 });

@@ -12,7 +12,10 @@ export function createRpc<T extends Rpc>(
     const handler = await createRpcHandler(rpcType, rpcConfigrator);
     return createRpcCommandFromHandler(rpcType, handler);
   });
-  return new rpcType([], async payload => {
-    return (await getCommand())(payload);
-  });
+  return new rpcType(
+    () => [],
+    async payload => {
+      return (await getCommand())(payload);
+    }
+  );
 }

@@ -1,16 +1,13 @@
 import { MuiForm, MuiFormProps } from "@dabsi/browser/mui/form";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { SystemView } from "@dabsi/system/core/old-view/SystemView";
-import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";
-import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
-import { AnyForm } from "@dabsi/old-typerpc/widget/form/rpc";
-import { FormView, FormViewProps } from "@dabsi/old-typerpc/widget/form/view";
+import { AnyForm } from "@dabsi/typerpc2/form/rpc";
+import { FormView, FormViewProps } from "@dabsi/typerpc2/form/view";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import React, { ReactElement } from "react";
 
-export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = Override<
-  PartialKeys<FormViewProps<C>, "children">,
+export type MuiFormViewProps<T extends AnyForm> = Override<
+  PartialKeys<FormViewProps<T>, "children">,
   {
     disableResetButton?: boolean;
     // noDisableButtons?: boolean
@@ -19,13 +16,13 @@ export type MuiFormViewProps<C extends RpcConnection<AnyForm>> = Override<
   }
 >;
 
-export const MuiFormView = <C extends RpcConnection<AnyForm>>({
+export const MuiFormView = <T extends AnyForm>({
   children,
   disableResetButton,
   MuiFormProps,
   variant = "submit",
   ...FormViewProps
-}: MuiFormViewProps<C>): ReactElement => {
+}: MuiFormViewProps<T>): ReactElement => {
   // mixing
 
   const isVariant: { [K in typeof variant]?: true } = {
@@ -51,7 +48,7 @@ export const MuiFormView = <C extends RpcConnection<AnyForm>>({
     >
       {(inputProps, view) => {
         inputProps = mergeProps(inputProps, {
-          onChange: () => {
+          onInputValue: () => {
             setDisabled(false);
           },
         });
@@ -76,11 +73,10 @@ export const MuiFormView = <C extends RpcConnection<AnyForm>>({
                   },
             })}
           >
-            {children ? (
-              children(inputProps, view)
-            ) : (
-              <SystemView {...(inputProps as InputViewProps<any>)} />
-            )}
+            {
+              children ? children(inputProps, view) : null
+              // <SystemView {...(inputProps as InputViewProps<any>)} />
+            }
           </MuiForm>
         );
       }}

@@ -1,6 +1,6 @@
 import CloseIcon from "@material-ui/icons/Close";
 import { Debounce2 } from "@dabsi/common/async/Debounce";
-import useLangService from "@dabsi/lang/useLangService";
+import useLangService from "@dabsi/view/lang/useLangService";
 import { mergeProps } from "@dabsi/view/react/merging";
 import { Grid, InputAdornment, makeStyles, Tooltip } from "@material-ui/core";
 import TextField, { TextFieldProps } from "@material-ui/core/TextField";

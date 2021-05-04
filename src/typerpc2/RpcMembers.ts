@@ -76,24 +76,4 @@ export namespace RpcMembers {
     }
     return memberRpcType as any;
   }
-
-  export function getValidRpcType(
-    rpcType: RpcType,
-    memberKey: string
-  ): RpcType {
-    const memberType = getMemberType(rpcType, memberKey);
-
-    if (typeof memberType !== "number") {
-      throw new TypeError(`No member like "${rpcType.name}.${memberKey}".`);
-    }
-    switch (memberType) {
-      case RpcMemberType.Parametrial:
-      case RpcMemberType.Contextual:
-        break;
-      default:
-        throw new Error("expected to contextual or parametrial member type.");
-    }
-
-    return getRpcType(rpcType, memberKey);
-  }
 }

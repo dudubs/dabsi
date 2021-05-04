@@ -17,11 +17,17 @@ const testRpc = <T extends Rpc>(rpcType: RpcType<T>): T =>
   createRpc(rpcType, Resolver.resolve(map.getResolver(rpcType), context));
 beforeEach(() => {
   map = new RpcResolverBuilder();
-  context = Resolver.Context([map]);
+  context = Resolver.Context.assign({}, [map]);
 });
 
 class R1 extends Rpc {
   @RpcFuncational() testFn!: (xs?: string) => Promise<string>;
+}
+
+class R2 extends Rpc {
+  @RpcContextual() r1!: R1;
+
+  @RpcParametrial(() => R1) getR1!: (pText: string) => R1;
 }
 
 it("expect to resolve rpc-configurator", async () => {
@@ -34,7 +40,6 @@ it("expect to resolve rpc-configurator", async () => {
       })
     )
   );
-
   expect(await testRpc(R1).testFn()).toEqual("works");
 });
 
@@ -52,12 +57,6 @@ it("expect to build resolver from member resolvers.", async () => {
   );
   expect(await testRpc(R1).testFn()).toEqual("works");
 });
-
-class R2 extends Rpc {
-  @RpcContextual() r1!: R1;
-
-  @RpcParametrial(() => R1) getR1!: (pText: string) => R1;
-}
 
 it("expect to throw error because no configurator for R1", () => {
   expect(() => testRpc(R2)).toThrow();
@@ -81,6 +80,19 @@ describe("build R1", () => {
         }))
       )
     );
+  });
+
+  it("expect to resolve rpc-member-resolver before rpc-resolver", async () => {
+    map.add(
+      RpcResolver(R2, "r1", [], c => $ =>
+        $({
+          handleTestFn() {
+            return "works-by-member";
+          },
+        })
+      )
+    );
+    expect(await testRpc(R2).r1.testFn()).toEqual("works-by-member");
   });
 
   it("expect to get functional handler", async () => {

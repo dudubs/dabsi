@@ -1,19 +1,23 @@
-import { AdminRouter } from "@dabsi/system/admin/common/index";
-import Router from "@dabsi/typerouter/router";
+// import { AdminRouter } from "@dabsi/system/admin/common/index";
+// import Router from "@dabsi/typerouter/router";
 
-export const ACL_AdminRouter = AdminRouter.register(
-  "acl",
-  Router({
-    //
-    users: Router({
-      edit: Router(["id"]),
-    }),
-    createNewUser: Router(),
-    editUser: Router(["id"]),
+import AdminRouter from "@dabsi/system/admin/view/AdminRouter";
+import { Router, Route } from "@dabsi/typerouter2";
 
-    //
-    groups: Router(),
-    createNewGroup: Router(),
-    editGroup: Router(["id"]),
-  })
-);
+@AdminRouter.Route("acl")
+export class ACL_AdminRouter extends Router {
+  @Route()
+  users!: Router;
+
+  @Route()
+  groups!: Router;
+
+  @Route()
+  createNewUser!: Router;
+
+  @Route(() => Router, [String])
+  editUser!: (userKey: string) => Router;
+
+  @Route(() => Router, [String])
+  editGroup!: (groupKey: string) => Router;
+}

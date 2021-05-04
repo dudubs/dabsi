@@ -1,6 +1,6 @@
 import "@dabsi/common/register";
 import { getGlobal } from "@dabsi/common/getGlobal";
-import "@dabsi/lang";
+import "@dabsi/view/lang";
 
 getGlobal().setImmediate ||= <any>((callback, ...args): any => {
   return setTimeout(callback, 0, ...args);

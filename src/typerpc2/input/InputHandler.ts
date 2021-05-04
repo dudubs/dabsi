@@ -34,15 +34,15 @@ export const inputConfig = Symbol("inputConfig");
 
 // inputValueConfig
 
-declare module "./Input" {
-  interface AnyInput
-    extends RpcWithHandler<
-      // BaseRpcConfigHandler<any, any> &
-      BaseWidgetHandler<any> & BaseInputHandler<AnyInput, any, any>
-    > {
-    //
-  }
-}
+// declare module "./Input" {
+//   interface AnyInput
+//     extends RpcWithHandler<
+//       // BaseRpcConfigHandler<any, any> &
+//       BaseWidgetHandler<any> & BaseInputHandler<AnyInput, any, any>
+//     > {
+//     //
+//   }
+// }
 export type InferredInputConfig<
   T extends AnyInputWithConfig
 > = InferredRpcConfig<T> extends InputConfig<any, infer Config, any, any>

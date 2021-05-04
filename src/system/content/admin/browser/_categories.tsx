@@ -1,7 +1,7 @@
 import MuiGrid from "@dabsi/browser/mui/components/MuiGrid";
-import { MuiTextInputView } from "@dabsi/browser/mui/input/TextInput";
+import { MuiTextInputView } from "@dabsi/browser/mui/input/MuiTextInput";
 import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
-import { MuiFormView } from "@dabsi/browser/mui/form/view";
+import { MuiFormView } from "@dabsi/browser/mui/form/MuiFormView";
 import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 import {
   ContentAdminConnection,

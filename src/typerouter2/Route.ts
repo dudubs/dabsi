@@ -1,4 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import Lazy from "@dabsi/common/patterns/Lazy";
+import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { RouterParamType } from "@dabsi/typerouter2/getRouterChildren";
@@ -125,12 +127,20 @@ export function Route(...args) {
       paramTypes = [],
     ] = args;
 
+    const createRouteType = SingleCall(() => {
+      const routeType = getRouteType();
+      if (routeType === Router) {
+        return class extends Router {};
+      }
+      return routeType;
+    });
+
     const route: Route = {
       routerType,
       propertyName,
       name: routeName,
       get type() {
-        return getRouteType();
+        return createRouteType();
       },
       paramTypes,
     };

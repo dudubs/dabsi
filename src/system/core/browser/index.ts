@@ -8,12 +8,10 @@ import axios from "axios";
 
 SystemCommand.handle(async payloads => {
   return await (
-    await fetch(SYSTEM_RPC_PATH, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payloads }),
+    await axios.post(SYSTEM_RPC_PATH, {
+      payloads,
     })
-  ).json();
+  ).data.responses;
 });
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -21,5 +19,3 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.append(container);
   ReactDOM.render(React.createElement(MuiSystemRoot), container);
 });
-
-console.log("??");

@@ -1,3 +1,4 @@
+// TODO: use tsconfig-paths module.
 import fs from "fs";
 import { entries } from "@dabsi/common/object/entries";
 import { touchObject } from "@dabsi/common/object/touchObject";

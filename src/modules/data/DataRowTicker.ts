@@ -85,6 +85,11 @@ export class DataRowTicker<T = any> {
     this._callbacks.push(callback);
   }
 
+  fetch2!: <T, S extends DataSelection<T>>(
+    this: DataRowTicker<T>,
+    selection: S
+  ) => S;
+
   fetch<
     T,
     K extends DataPickableKeys<T>,

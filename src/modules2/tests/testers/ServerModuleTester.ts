@@ -1,4 +1,3 @@
-import Lazy from "@dabsi/common/patterns/Lazy";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
@@ -14,15 +13,14 @@ export function ServerModuleTester(t: ModuleTester) {
 
     const serverModule = await t.getAndWait(ServerModule2);
 
-    await serverModule.start({
-      disablePid: true,
-      port,
-    });
-
     return {
       moduleTester: t,
       serverModule,
       axios: axios.create({ baseURL: `http://localhost:` + port }),
+      start: () =>
+        serverModule.start({
+          port,
+        }),
     };
   });
 }

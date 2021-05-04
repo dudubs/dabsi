@@ -15,6 +15,7 @@ Resolver.define = function (target, resolve, check) {
     enumerable: false,
     value: resolve,
   });
+
   Object.defineProperty(target, Resolver.checkSymbol, {
     enumerable: false,
     value: check,

@@ -19,7 +19,8 @@ const rb = new RpcResolverBuilder();
 rb.add(RpcResolver(R1, "testFn", [], () => $ => $(() => "works")));
 
 beforeAll(async () => {
-  NS1.command = createRpcCommandFromHandler(
+  NS1.nsGetPath = () => [];
+  NS1.nsCommand = createRpcCommandFromHandler(
     NS1,
     await createRpcHandler(NS1, Resolver.resolve(rb.getResolver(NS1), {}))
   );

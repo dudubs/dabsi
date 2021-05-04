@@ -1,4 +1,5 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { defined } from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
@@ -27,14 +28,11 @@ export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
     switch (RpcMembers.getMemberType(rpcType, memberKey)) {
       // case
       case RpcMemberType.Contextual:
+      case RpcMemberType.Parametrial:
         contextualKeys.push(memberKey);
         childTypeMap[memberKey] = propertyType as RpcType;
         break;
-      case RpcMemberType.Parametrial:
-        parametrialKeys.push(memberKey);
 
-        childTypeMap[memberKey] = propertyType as RpcType;
-        break;
       case RpcMemberType.Functional:
         functionalKeys.add(memberKey);
         break;
@@ -53,3 +51,19 @@ export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
     functionalKeys,
   };
 });
+
+export function getRpcChildType(
+  rpcType: RpcType,
+  childKeys: string[] | string
+): RpcType {
+  if (typeof childKeys === "string") {
+    childKeys = [childKeys];
+  }
+  for (const childKey of childKeys) {
+    rpcType = defined(
+      getRpcMetadata(rpcType).childTypeMap[childKey],
+      () => `No child key like "${rpcType.name}.${childKey}".`
+    );
+  }
+  return rpcType;
+}

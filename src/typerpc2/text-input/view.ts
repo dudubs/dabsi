@@ -1,0 +1,40 @@
+// TODO: text validation in view side.
+import { Debounce2 } from "@dabsi/common/async/Debounce";
+import { InputValueElement } from "@dabsi/typerpc2/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
+import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
+
+export type TextInputViewProps<T extends TextInput> = InputViewProps<T>;
+
+export class TextInputView<T extends TextInput> extends InputView<
+  T,
+  TextInputViewProps<T> & {
+    children?(view: TextInputView<T>);
+  }
+> {
+  @ViewState() protected _text!: string;
+
+  get text(): string {
+    return this._text;
+  }
+
+  protected _debounce = new Debounce2(300);
+
+  inputWillValidate() {
+    this._debounce.resolve?.();
+  }
+
+  updateValue(value: InputValueElement<T> | undefined) {
+    this._text == value || "";
+  }
+
+  async setText(text: string) {
+    if (this._text === text) return;
+    this._text = text;
+    this.setError(undefined);
+
+    if (!(await this._debounce.wait())) return;
+    await this.setValue(text);
+  }
+}

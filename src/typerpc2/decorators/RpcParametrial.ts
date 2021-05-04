@@ -1,14 +1,11 @@
 import { Forward } from "@dabsi/common/reflection/Forward";
-import {
-  getRpcArgs,
-  Rpc,
-  RpcParametrialMember,
-  RpcType,
-} from "@dabsi/typerpc2/Rpc";
-import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
+import { getRpcChildType } from "@dabsi/typerpc2/getRpcMetadata";
+import { RpcParametrialMember, RpcType } from "@dabsi/typerpc2/Rpc";
+import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 
 export function RpcParametrial<T extends RpcType>(
-  getConnectionType: () => T
+  getRpcType: () => T
 ): {
   <K extends string>(
     target: Record<K, RpcParametrialMember<InstanceType<T>>>,
@@ -16,10 +13,10 @@ export function RpcParametrial<T extends RpcType>(
   ): void;
 } {
   return (target, propertyName: string) => {
-    Forward(getConnectionType)(target, propertyName);
+    Forward(getRpcType)(target, propertyName);
 
     RpcMembers.define(
-      target.constructor,
+      <any>target.constructor,
       propertyName,
       RpcMemberType.Parametrial
     );
@@ -27,9 +24,13 @@ export function RpcParametrial<T extends RpcType>(
     Object.defineProperty(target, propertyName, {
       configurable: false,
       get() {
-        const { payload, command } = getRpcArgs(this);
+        const { getPath, command, getRootRpcType } = RpcArgs.get(this);
         return (...args) =>
-          new (getConnectionType())([...payload, propertyName, args], command);
+          new (getRpcChildType(this.constructor, propertyName))(
+            () => [...getPath(), propertyName, args],
+            command,
+            getRootRpcType
+          );
       },
     });
   };

@@ -24,15 +24,15 @@ export type InputErrorViewMap<T extends AnyInput> = {
   };
 
 export interface InputViewProps<T extends AnyInput> extends WidgetViewProps<T> {
-  onValue: undefined | ((view: InputView<T>) => void);
+  onInputValue: undefined | ((view: InputView<T>) => void);
 
   inputRef: undefined | React.Ref<InputView<T>>;
 
-  onError: undefined | ((view: InputView<T>) => void);
-
-  errorMap?: InputErrorViewMap<T>;
+  onInputError: undefined | ((view: InputView<T>) => void);
 
   value: undefined | InputValueElement<T>;
+
+  errorMap?: InputErrorViewMap<T>;
 
   renderError?(error: InputError<T>): React.ReactElement;
 }
@@ -95,11 +95,11 @@ export abstract class InputView<
       this.isChecking = false;
     }
     if (this._error != null) {
-      this.props.onError?.(this);
+      this.props.onInputError?.(this);
       return;
     }
     this._isValidValue = true;
-    this.props.onValue?.(this);
+    this.props.onInputValue?.(this);
   }
 
   setError(error: InputError<T> | undefined): void {
@@ -110,7 +110,7 @@ export abstract class InputView<
     //
     this._error = undefined;
     this._isValidValue = false;
-    this._data = this.widget[inputValueElementToData](this._value);
+    this._data = this.connection[inputValueElementToData](this._value);
     this.updateValue?.(this._value);
   }
 

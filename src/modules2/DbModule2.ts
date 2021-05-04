@@ -2,17 +2,20 @@ import { defined } from "@dabsi/common/object/defined";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { ServerRequestBuilder } from "@dabsi/modules2/ServerModule2";
-import { CliCommand } from "@dabsi/typecli";
+import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
+import { CliArgument, CliCommand } from "@dabsi/typecli";
+import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
-import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
+import {
+  ModuleRunner,
+  ModuleRunnerContext,
+} from "@dabsi/typemodule/ModuleRunner";
 import { join } from "path";
 import {
   Connection,
   ConnectionOptions,
   createConnection,
-  getMetadataArgsStorage,
   QueryRunner,
 } from "typeorm";
 import { findEntityTypes } from "./findEntityTypes";
@@ -39,12 +42,11 @@ export class DbModule2 {
 
   installContext(
     @Plugin()
-    context: ModuleRunnerContext
+    moduleRunner: ModuleRunner
   ) {
     Resolver.Context.assign(
-      context,
+      moduleRunner.context,
       Resolver(DbConnectionRef, () => {
-        !this._connection && this.loadAndConnect();
         return () => defined(this._connection, () => "No DB connection");
       }),
       Resolver(DbQueryRunnerRef, [DbConnectionRef], getConnection => () =>
@@ -57,11 +59,10 @@ export class DbModule2 {
     return findEntityTypes([...this._maybeEntityTypes, ...this.entityTypes]);
   }
 
-  installRequest(
-    @Plugin()
-    request: ServerRequestBuilder
-  ) {
-    request.initializers.push(
+  installServer(@Plugin() server: ServerModule2) {
+    server.starters.push(() => this.loadAndConnect());
+
+    server.request.initializers.push(
       Resolver(
         [c => c, DbConnectionRef],
         (context, getConnection) => async () => {
@@ -76,18 +77,20 @@ export class DbModule2 {
       )
     );
 
-    request.finalizers.push(
+    server.request.finalizers.push(
       Resolver([DbQueryRunnerRef], getQueryRunner => async () => {
         await getQueryRunner().release();
       })
     );
   }
 
+  protected _didLoad = false;
+  protected _didConnect = false;
+
   @Once()
-  loadAndConnect() {
-    this.loaderModule.pushLoader(
-      () => this.constructor.name,
-      async dir => {
+  async load() {
+    await Promise.all(
+      this.loaderModule.getLoadedDirectories().map(async dir => {
         if (this._connection) {
           throw new Error(`Can't load module entities after connection.`);
         }
@@ -102,20 +105,28 @@ export class DbModule2 {
             this._maybeEntityTypes.add(value);
           }
         }
-      },
-      async () => {
-        Object.seal(this.entityTypes);
-        this._connection = await createConnection({
-          logging: ["schema"],
-          ...(this.connectionOptions || {
-            type: "sqlite",
-            database: "./bundle/db.sqlite3",
-          }),
-          name: "default",
-          entities: this.findEntityTypes(),
-        });
-      }
+      })
     );
+    Object.seal(this.entityTypes);
+  }
+
+  @Once()
+  async connect() {
+    this._connection = await createConnection({
+      logging: ["schema"],
+      ...(this.connectionOptions || {
+        type: "sqlite",
+        database: "./bundle/db.sqlite3",
+      }),
+      name: "default",
+      entities: this.findEntityTypes(),
+    });
+  }
+
+  @CliArgument()
+  async loadAndConnect() {
+    await this.load();
+    await this.connect();
   }
 
   @CliCommand("sync", y =>

@@ -20,7 +20,7 @@ declare module "./rpc" {
         }
       | undefined,
       string,
-      string
+      string | undefined
     > {}
 }
 

@@ -1,82 +1,79 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
-
-import Lazy from "@dabsi/common/patterns/Lazy";
+import { Once } from "@dabsi/common/patterns/Once";
+import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
 import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
-import { CliArgument, CliCommand } from "@dabsi/typecli";
+import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
-import { AsyncJsonFile } from "./AsyncJsonFile";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
+import { join } from "path";
 
 export interface StartArgs {
-  force: boolean;
-  f: boolean;
-  disablePid?: boolean;
   port?: number;
 }
 export interface StopArgs {}
 
-const PID_FILENAME = "ts-server.pid";
-
-class RequestProcess extends AsyncProcess2 {}
-
 @Module({})
 export class ServerModule2 {
-  readonly starters: ((args: Partial<StartArgs>) => Promise<void>)[] = [
-    async args => {},
-  ];
-  readonly stoppers: ((args: Partial<StopArgs>) => Promise<void>)[] = [];
+  readonly starters: ((args: Partial<StartArgs>) => Promise<void>)[] = [];
 
-  protected _pidFilename = PID_FILENAME;
+  readonly stoppers: ((args: Partial<StopArgs>) => Promise<void>)[] = [];
 
   readonly request = new RequestBuilder();
 
-  @Lazy() protected get _pidFile() {
-    return new AsyncJsonFile<{ pid: number }>(this._pidFilename);
+  constructor(
+    protected loaderModule: LoaderModule2,
+    protected moduleRunner: ModuleRunner
+  ) {}
+
+  @Once() async load() {
+    console.log("loading server");
+
+    const loadObject = async o => {
+      if (!o) return;
+      if (Array.isArray(o)) {
+        return Promise.all(o.toSeq().map(o => loadObject(o)));
+      }
+
+      if (!o[getServerLoaderSymbol]) return;
+
+      const resolver = o[getServerLoaderSymbol]();
+
+      await Resolver.resolve(resolver, this.moduleRunner.context);
+    };
+
+    await Promise.all(
+      this.loaderModule.getLoadedDirectories().map(async dir => {
+        for (const baseName of await this.loaderModule.readDir(dir)) {
+          if (!baseName.startsWith("_")) continue;
+
+          const path = join(dir, baseName);
+          if (!(await this.loaderModule.isFile(path))) continue;
+
+          loadObject(require(path)?.default);
+        }
+      })
+    );
+
+    console.log("server is loaded.");
   }
 
-  @CliArgument(y => y.option("pidfile", { type: "string" }))
-  configure({ pidfile: pidFilename = this._pidFilename }) {
-    this._pidFilename = pidFilename;
+  @CliCommand("check")
+  async check() {
+    await this.load();
   }
 
   @CliCommand("start", y =>
-    y
-      .option("disable-pid", { type: "boolean", default: true })
-      .option("port", { type: "number", alias: "p", default: 7777 })
+    y.option("port", { type: "number", alias: "p", default: 7777 })
   )
   async start(args: Partial<StartArgs> = {}) {
-    if (!args.disablePid) {
-      const runningPid = (await this._pidFile.read())?.pid;
-      if (runningPid) {
-        if (!(args.f || args.force)) {
-          log.error(`Server is already started (pid ${runningPid})`);
-          return;
-        }
-        tryToKill(runningPid);
-      }
-
-      process.on("exit", async () => {
-        await this._pidFile.update(value => {
-          if (value?.pid === process.pid) {
-            return null;
-          }
-          return value;
-        });
-      });
-    }
-
-    await Promise.all([
-      args.disablePid ? null : this._pidFile.write({ pid: process.pid }),
-      Promise.all(this.starters.map(starter => starter(args))),
-    ]);
+    await this.load();
+    await Promise.all(this.starters.toSeq().map(starter => starter(args)));
   }
 
   @CliCommand("stop")
   async stop(args: Partial<StopArgs> = {}) {
-    const runningPid = (await this._pidFile.read())?.pid;
-    if (!runningPid) return;
-    tryToKill(runningPid);
-
+    await this.load();
     await Promise.all(this.stoppers.map(stopper => stopper(args)));
   }
 
@@ -95,15 +92,20 @@ export class ServerModule2 {
   }
 }
 
-function tryToKill(pid: number) {
-  try {
-    process.kill(pid);
-  } catch {
-    //
-  }
-}
-
 export class ServerRequestBuilder extends Resolver(
   [ServerModule2],
   x => x.request
 ) {}
+
+const getServerLoaderSymbol = Symbol("getServerLoader");
+
+export namespace ServerModule2 {
+  export function defineServerLoader<T>(
+    type: T,
+    getResolver: (value: T) => Resolver<void>
+  ) {
+    type[getServerLoaderSymbol] = function () {
+      return getResolver(this);
+    };
+  }
+}

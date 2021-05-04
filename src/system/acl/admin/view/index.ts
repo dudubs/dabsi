@@ -1,1 +1,1 @@
-import "@dabsi/lang";
+import "@dabsi/view/lang";

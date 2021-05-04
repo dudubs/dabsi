@@ -27,6 +27,7 @@ export class LoaderModule2 {
           return;
         }
         const dir = dirname(metadata.anchor.path);
+
         if (!this._loadedDirs.touch(dir)) return;
 
         await Promise.all(this._loaderCallbacks.map(loader => loader(dir)));
@@ -36,6 +37,7 @@ export class LoaderModule2 {
   }
 
   getLoadedDirectories(): Seq.Indexed<string> {
+    this.moduleRunner.lock();
     return this._loadedDirs.toSeq();
   }
 

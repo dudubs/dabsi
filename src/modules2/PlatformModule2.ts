@@ -41,10 +41,14 @@ export class PlatformModule2 {
   // TODO: Once() getViewPlatform
 
   async generateCode(outDir: string, platformName: string, sharedCode = "") {
+    const platform = this.getPlatform(platformName);
+
+    platform.includeInternalFiles = true;
+
     const platforms: Platform2[] = [
       this.getPlatform("common"),
       this.getPlatform("view"),
-      this.getPlatform(platformName),
+      platform,
     ];
 
     await Promise.all(platforms.toSeq().map(p => p.load()));
@@ -93,7 +97,7 @@ export class PlatformModule2 {
   }
 
   @CliCommand("make")
-  async make({}, process: AsyncProcess2) {
+  async make() {
     const platforms: Platform2[] = await Promise.all([
       this.getPlatform("common"),
       this.getPlatform("view"),

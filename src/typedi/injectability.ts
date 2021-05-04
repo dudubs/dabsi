@@ -50,7 +50,9 @@ namespace ResolverInjectability {
     paramType?: Function
   ): Resolver<any> {
     return (
-      parameterResolverMap.get(target)?.get(index) ||
+      parameterResolverMap
+        .get(propertyName ? target.prototype[propertyName] : target)
+        ?.get(index) ||
       <Resolver>paramType ||
       <Resolver>Reflector.getParamType(target, index, propertyName)
     );

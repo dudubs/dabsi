@@ -7,5 +7,6 @@ export const AclStatsEvent = Emittable<AclStats>();
 setTimeout(() => {
   AclRpc.instance.getStats().then(stats => {
     emit(AclStatsEvent, stats);
+    console.log({ stats });
   });
 });

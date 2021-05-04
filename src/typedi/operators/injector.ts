@@ -2,13 +2,13 @@ import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { TokenResolver } from "@dabsi/typedi";
+import { TypeResolver } from "@dabsi/typedi";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Consumer, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
-    function injector<T extends Record<string, TokenResolver<any>>, U>(
+    function injector<T extends Record<string, TypeResolver<any>>, U>(
       providableMap: T,
       resolver: Resolver<U>
     ): ConsumeResolver<

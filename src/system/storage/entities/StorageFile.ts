@@ -1,5 +1,5 @@
 import { Session } from "@dabsi/modules/session/entities/Session";
-import { BaseResource } from "@dabsi/modules/session/resource";
+import { BaseResource } from "@dabsi/modules/session/BaseResource";
 import { DataRelation } from "@dabsi/typedata/relation";
 import {
   Column,

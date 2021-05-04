@@ -6,7 +6,12 @@ import {
   GenericConfig2,
 } from "@dabsi/typerpc2/GenericConfig";
 import { isHandlerSide } from "@dabsi/typerpc2/isHandlerSide";
-import { RpcHandler, RpcWithHandler } from "@dabsi/typerpc2/RpcHandler";
+import { RpcContextualMember } from "@dabsi/typerpc2/Rpc";
+import {
+  RpcHandler,
+  RpcMemberHandler,
+  RpcWithHandler,
+} from "@dabsi/typerpc2/RpcHandler";
 
 export const RpcWithConfigSymbol = Symbol("RpcWithConfigSymbol");
 
@@ -33,17 +38,8 @@ export type AnyRpcWithConfig<C = any, R extends Rpc = Rpc> = R &
 export type AnyRpcTypeWithConfig<T = any, R extends Rpc = Rpc> = RpcType<
   R & RpcWithConfig<T>
 >;
-
-export const RpcConfigMetadataMap = new WeakMap<
-  RpcType,
-  {
-    anchor: CallStackAnchor;
-  }
->();
-
+export const RpcAnchorSymbol = Symbol("RpcAnchor");
 export function RpcWithConfig(): { (rpcType: RpcType): void } {
-  // TOOD: lock rpc for new members by bases.
-
   if (!isHandlerSide()) {
     return () => {};
   }
@@ -53,7 +49,9 @@ export function RpcWithConfig(): { (rpcType: RpcType): void } {
       value: true,
       enumerable: false,
     });
-    RpcConfigMetadataMap.set(rpcType, { anchor });
+    Object.defineProperty(rpcType, RpcAnchorSymbol, {
+      value: anchor,
+    });
   };
 }
 
@@ -61,8 +59,12 @@ export type RpcConfigurator<T extends Rpc> = T extends AnyRpcWithConfig
   ? Configurator<InferredRpcConfig<T>>
   : ConfigFactory<RpcHandler<T>, [RpcType<T>]> | RpcHandler<T>;
 
+export type RpcMemberConfigurator<T> = T extends RpcContextualMember<infer U>
+  ? RpcConfigurator<U>
+  : ConfigFactory<RpcMemberHandler<T>>;
+
 export function isRpcTypeWithConfig(
   rpcType: RpcType
 ): rpcType is RpcType<AnyRpcWithConfig> {
-  return rpcType[RpcWithConfigSymbol] === true;
+  return rpcType[RpcWithConfigSymbol] !== undefined;
 }

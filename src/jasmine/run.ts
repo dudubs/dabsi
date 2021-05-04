@@ -55,7 +55,7 @@ function searchTests(dir: string) {
   readdirSync(dir).forEach(baseName => {
     const fileName = path.join(dir, baseName);
 
-    if (/^(browser|native)$/.test(baseName)) return;
+    if (/^(browser|native|typerpc)$/.test(baseName)) return;
 
     if (/tester.tsx?$/i.test(baseName)) {
       requireBeforeTests.push(getModuleName(fileName));

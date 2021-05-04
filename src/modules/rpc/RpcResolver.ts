@@ -1,45 +1,37 @@
-import { SingleCall } from "@dabsi/common/patterns/SingleCall";
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
-import { ConsumeResolver, Resolver, ResolverLike } from "@dabsi/typedi";
+import { ConsumeResolver, Resolver } from "@dabsi/typedi";
 import { ConsumeFactory, ResolverDeps } from "@dabsi/typedi/consume";
+import { Rpc, RpcType } from "@dabsi/typerpc2";
 import {
-  Rpc,
-  RpcContextualMember,
-  RpcParametrialMember,
-  RpcType,
-} from "@dabsi/typerpc2";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
-import {
-  AnyRpcWithConfig,
-  isRpcTypeWithConfig,
   RpcConfigurator,
+  RpcMemberConfigurator,
 } from "@dabsi/typerpc2/RpcConfig";
-import {
-  RpcHandler,
-  RpcMemberHandler,
-  RpcMemberKey,
-} from "@dabsi/typerpc2/RpcHandler";
+import { RpcMemberKey } from "@dabsi/typerpc2/RpcHandler";
 
-const __isRpcResolver = Symbol("__isRpcResolver");
 // TODO: RpcResolver() -> Resolve handler by configurator. RpcConfigurator: || Handler..
 
 export interface RpcResolver<T extends Rpc>
   extends ConsumeResolver<RpcConfigurator<T>> {
-  rpcType: RpcType<T>;
+  rpcType: RpcType;
 }
 
-export interface RpcMemberResolver<T extends Rpc, K extends RpcMemberKey<T>>
-  extends ConsumeResolver<RpcMemberFactory<T[K]>> {
-  rpcType: RpcType<T>;
-  rpcMemberKey: K;
+export interface RpcMemberResolver<T>
+  extends ConsumeResolver<RpcMemberConfigurator<T>> {
+  rpcType: RpcType;
+  rpcMemberKey: string;
 }
-
-export type RpcMemberFactory<T> = ConfigFactory<RpcMemberHandler<T>>;
 
 export function RpcResolver<T extends Rpc>(
   rpcType: RpcType<T>
-): ResolverLike<RpcResolver<T>>;
+): Resolver<RpcConfigurator<T>>;
+
+export function RpcResolver<T extends Rpc>(
+  rpcType: RpcType<T>,
+  memberConfiguratorResolverMap: {
+    [K in RpcMemberKey<T>]?: Resolver<RpcMemberConfigurator<T[K]>>;
+  }
+): any[];
 
 export function RpcResolver<
   T extends Rpc,
@@ -49,13 +41,13 @@ export function RpcResolver<
   rpcType: RpcType<T>,
   rpcMemberKey: K,
   deps: U,
-  factory: ConsumeFactory<RpcMemberFactory<T[K]>, U>
-): RpcMemberResolver<T, K>;
+  memberConfiguratorFactory: ConsumeFactory<RpcMemberConfigurator<T[K]>, U>
+): RpcMemberResolver<T[K]>;
 
 export function RpcResolver<T extends Rpc, K extends RpcMemberKey<T>>(
   rpcType: RpcType<T>,
   rpcMemberKey: K
-): ResolverLike<RpcMemberResolver<T, K>>;
+): Resolver<RpcMemberConfigurator<T[K]>>;
 
 export function RpcResolver<T extends Rpc, U extends ResolverDeps>(
   rpcType: RpcType<T>,
@@ -65,9 +57,23 @@ export function RpcResolver<T extends Rpc, U extends ResolverDeps>(
 
 export function RpcResolver<T extends Rpc>(
   rpcType: RpcType<T>
-): ResolverLike<RpcResolver<T>>;
+): Resolver<RpcConfigurator<T>>;
 
-export function RpcResolver(rpcType: RpcType, memberKeyOrDeps?, ...args) {
+export function RpcResolver(rpcType: RpcType, memberKeyOrDeps?, ...args): any {
+  if (args.length === 0 && typeof memberKeyOrDeps === "object") {
+    return mapObjectToArray(memberKeyOrDeps, (resolver, memberKey) => {
+      if (typeof resolver.rpcType === "function") {
+        throw new Error(`Can't override rpc-resolver type.`);
+      }
+
+      resolver.rpcType = rpcType;
+      resolver.rpcMemberKey = memberKey;
+
+      Object.setPrototypeOf(resolver, RpcResolver);
+      return resolver;
+    });
+  }
+
   let memberKey: string | undefined = undefined;
   let deps: any[];
   let factory;
@@ -94,18 +100,20 @@ export function RpcResolver(rpcType: RpcType, memberKeyOrDeps?, ...args) {
     );
   }
 
-  const resolver = Resolver.consume(deps as [], factory) as RpcResolver<any>;
+  const resolver = Resolver(deps as [], factory) as RpcResolver<any>;
+
+  Object.setPrototypeOf(resolver, RpcResolver);
 
   resolver.rpcType = rpcType;
-  resolver[__isRpcResolver] = true;
+
   if (memberKey) {
-    ((resolver as any) as RpcMemberResolver<any, any>).rpcMemberKey = memberKey;
+    ((resolver as any) as RpcMemberResolver<any>).rpcMemberKey = memberKey;
   }
   return resolver;
 }
 
 export function isRpcResolver(
   o
-): o is RpcResolver<any> | RpcMemberResolver<any, any> {
-  return o?.[__isRpcResolver] === true;
+): o is RpcResolver<any> | RpcMemberResolver<any> {
+  return typeof o === "function" && o.isPrototypeOf(RpcResolver);
 }

@@ -16,7 +16,10 @@ export class LocalStorageModule {
   constructor(protected projectModule: ProjectModule2) {}
 
   get directory(): string {
-    return path.join(this.projectModule.directory, "bundle/local-storage");
+    return path.join(
+      this.projectModule.settings.directory,
+      "bundle/local-storage"
+    );
   }
 
   installContext(@Plugin() context: ModuleRunnerContext) {

@@ -34,9 +34,13 @@ declare module "./rpc" {
       {
         [K in keyof T]: InputValue<T[K]>;
       },
-      {
-        [K in keyof T]: InputValueConfig<T[K]>;
-      }
+      UndefinedIfEmptyObject<
+        PartialUndefinedKeys<
+          {
+            [K in keyof T]: InputValueConfig<T[K]>;
+          }
+        >
+      >
     > {}
 }
 
@@ -68,7 +72,9 @@ export default InputHandler(
 
         for (const childInputKey of getRpcMetadata(this.rpcType)
           .contextualKeys) {
-          if (!Input.isInputType(metadata[childInputKey])) continue;
+          if (!Input.isInputType(metadata.childTypeMap[childInputKey]))
+            continue;
+
           promises.push(
             this.getContextualHandler<any, any>(childInputKey).then(
               async (childHandler: RpcHandler<AnyInputWithConfig>) => {
@@ -86,7 +92,13 @@ export default InputHandler(
   },
   {
     getElement(state): Promise<Record<string, any>> {
-      return this.mapInput((handler, key) => handler.getElement(state?.[key]));
+      console.log({ getElement: this.rpcType.name });
+
+      return this.mapInput((handler, key) => {
+        console.log({ key });
+
+        return handler.getElement(state?.[key]);
+      });
     },
     getValueElement(value): Promise<Record<string, any>> {
       return this.mapInput((handler, key) =>

@@ -4,7 +4,8 @@ import {
   DABSI_WORKSPACE_DIR,
   getPackageConfig,
 } from "@dabsi/env";
-import { ProjectDirectory } from "@dabsi/modules2/ProjectModule2";
+import { ProjectSettings } from "@dabsi/modules2/ProjectModule2";
+
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
@@ -53,10 +54,9 @@ export default function typestackCli(): boolean {
 
   const moduleRunner = new ModuleRunner();
 
-  Resolver.Context.assign(
-    moduleRunner.context,
-    Resolver(ProjectDirectory, () => projectDir)
-  );
+  Resolver.Context.assign(moduleRunner.context, [
+    new ProjectSettings(projectDir),
+  ]);
 
   moduleRunner.get(moduleTarget);
   const cliModule = moduleRunner.get(CliModule2);

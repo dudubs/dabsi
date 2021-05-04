@@ -1,4 +1,5 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   CliBuilder,
   CliExtenderFn,
@@ -81,9 +82,7 @@ export class CliModule2 {
           targetBuilder,
           cliCommandMetadata.name
         );
-
         commandBuilder.declarations.push(...cliCommandMetadata.declarations);
-
         commandBuilder.extenders.push(y => {
           for (const builders of [
             cliMetadata.argumentBuilders,
@@ -93,7 +92,6 @@ export class CliModule2 {
               y = builder(y);
             }
           }
-
           return y;
         });
 
@@ -110,6 +108,8 @@ export class CliModule2 {
                 Resolver.Context.create(this.moduleRunner.context, [args]),
                 propertyName
               );
+
+              //
               this.moduleRunner.process.waitAndPush(
                 () => `CliCommand<${target.name}.${propertyName}>`,
                 async () => invoke()
@@ -127,6 +127,8 @@ export class CliModule2 {
   }
 
   run(args: any[]) {
+    this.moduleRunner.lock();
+
     this.build()
       //
       .build(yargs(args))

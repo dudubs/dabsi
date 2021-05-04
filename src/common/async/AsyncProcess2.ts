@@ -11,6 +11,17 @@ export class AsyncProcess2 {
 
   protected _countRunningTasks = 0;
 
+  catch(callback: () => any) {
+    let result;
+    try {
+      result = callback();
+    } catch (error) {
+      this.push(() => Promise.reject(error));
+      return;
+    }
+    this.push(() => Promise.resolve(result));
+  }
+
   push(descriptor: () => string, task: (tick: number) => void): void;
   push(task: (tick: number) => Promise<any>);
   push(descriptorOrTask, maybeTask?) {

@@ -1,11 +1,8 @@
-import Lazy from "@dabsi/common/patterns/Lazy";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Tester } from "@dabsi/jasmine/Tester";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import axios from "axios";
-
-let portCounter = 7776;
 
 export function ExpressModuleTester(t: ModuleTester) {
   return Tester.beforeAll(async () => {

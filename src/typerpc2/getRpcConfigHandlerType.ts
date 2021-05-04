@@ -5,7 +5,11 @@ import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
-import { AnyRpcWithConfig, RpcConfigMetadataMap } from "./RpcConfig";
+import {
+  AnyRpcWithConfig,
+  RpcAnchorSymbol,
+  RpcWithConfigSymbol,
+} from "./RpcConfig";
 import {
   RpcConfigHandlerType,
   RpcConfigHandlerTypeSymbol,
@@ -72,11 +76,11 @@ export function getRpcConfigHandlerType(rpcType: RpcType) {
     if (handlerType) {
       return handlerType;
     }
-    const metadata = defined(
-      RpcConfigMetadataMap.get(rpcType),
+    const anchor = defined(
+      rpcType[RpcAnchorSymbol] as any,
       () => `No rpc config metadata for "${rpcType.name}".`
     );
-    const pathWithoutBaseName = metadata.anchor.path.replace(/[^\\\/]+$/, "");
+    const pathWithoutBaseName = anchor.path.replace(/[^\\\/]+$/, "");
 
     require(pathWithoutBaseName + "handler.ts");
 

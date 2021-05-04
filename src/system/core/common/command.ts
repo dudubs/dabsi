@@ -31,22 +31,22 @@ export namespace SystemCommand {
     }
   }
 
-  SystemRpc.command = async payload => {
+  SystemRpc.nsCommand = async payload => {
     return multiplexer.send(payload);
   };
 
   export function capture<T>(callback: () => T): [T, RpcQueueRequest] {
     let req: RpcQueueRequest | null = null;
-    const lastCommand = SystemRpc.command;
-    SystemRpc.command = payload => {
-      SystemRpc.command = lastCommand;
+    const lastCommand = SystemRpc.nsCommand;
+    SystemRpc.nsCommand = payload => {
+      SystemRpc.nsCommand = lastCommand;
       return new Promise((resolve, reject) => {
         req = { payload, resolve, reject };
       });
     };
     const result = callback();
     if (!req) {
-      SystemRpc.command = lastCommand;
+      SystemRpc.nsCommand = lastCommand;
       throw new Error(`No captured any rpc-req.`);
     }
     return [result, req];

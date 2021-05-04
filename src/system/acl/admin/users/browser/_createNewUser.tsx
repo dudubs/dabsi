@@ -1,4 +1,4 @@
-import { MuiFormView } from "@dabsi/browser/mui/form/view";
+import { MuiFormView } from "@dabsi/browser/mui/form/MuiFormView";
 import { ACL_Admin_Browser_Breadcrumbs } from "@dabsi/system/acl/admin/browser/breadcrumbs";
 import { ACL_Admin_Connection } from "@dabsi/system/acl/admin/common/rpc";
 import { MuiGridMapView } from "@dabsi/system/core/old-browser/MuiGridMapView";

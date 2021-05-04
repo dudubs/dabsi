@@ -9,6 +9,7 @@ import { Resolver } from "@dabsi/typedi";
 import { ResolverDeps } from "@dabsi/typedi/consume";
 import { Rpc, RpcMemberKey, RpcType } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
+import { getRpcChildType } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
 import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
@@ -25,7 +26,7 @@ export function DataParameterResolver<
     filter?: DataExp<R>;
     check?(ticker: DataRowTicker<R>): void;
   }>
-): RpcMemberResolver<T, K>;
+): RpcMemberResolver<T[K]>;
 export function DataParameterResolver(
   rpcType,
   parametrialKey,
@@ -42,7 +43,7 @@ export function DataParameterResolver(
         },
         RpcResolver(
           //
-          RpcMembers.getValidRpcType(rpcType, parametrialKey)
+          <any>getRpcChildType(rpcType, parametrialKey)
         )
       ),
       DataTicker,

@@ -9,7 +9,7 @@ it("sanity", done => {
   @Injectable()
   class A {
     constructor(
-      @Inject(B) public b1: B,
+      public b1: B,
       @Forward(() => B) @Inject() public b2,
       @Inject(() => 1) one: number
     ) {
@@ -23,4 +23,28 @@ it("sanity", done => {
   Resolver.checkAndResolve(A, {
     ...Resolver(B, () => new B()),
   });
+});
+
+@Injectable()
+class A {}
+
+@Injectable()
+class B {
+  constructor(readonly a: A) {}
+}
+
+it("expect to be injectability", () => {
+  expect(Resolver.resolve(B, {}).a).toBeInstanceOf(A);
+  expect(Resolver.resolve(B, {})).not.toBe(Resolver.resolve(B, {}));
+});
+
+it("expect to be providability before injectability", () => {
+  const a = new A();
+
+  expect(
+    Resolver.resolve(
+      B,
+      Resolver(A, () => a)
+    ).a
+  ).toBe(a);
 });

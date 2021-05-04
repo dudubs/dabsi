@@ -1,4 +1,4 @@
-import LangKey from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/view/lang/LangKey";
 import { Field, Struct } from "@dabsi/struct";
 import {
   AnySystemMapConnection,

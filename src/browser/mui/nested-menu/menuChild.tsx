@@ -11,7 +11,7 @@ import React, { ReactElement } from "react";
 import { flat } from "@dabsi/common/iterator/flat";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import LangKey from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/view/lang/LangKey";
 
 import { Store } from "@dabsi/store";
 import { MuiIcon } from "@dabsi/browser/mui/components/MuiIcon";

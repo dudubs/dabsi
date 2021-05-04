@@ -16,24 +16,25 @@ export type ResolvedMap<T extends ResolverMap<any>> = {
   [K in keyof T]: Resolved<T[K]>;
 };
 
-// TokenResolver, FunctionalResolver, Consumeabial
+// TypeResolver, FunctionalResolver, Consumeabial
 export const checkSymbol = Symbol("checkResolve");
 
 export const resolveSymbol = Symbol("resolve");
 
-export const tokenableSymbol = Symbol("providable");
+export const providableSymbol = Symbol("providable");
 
 export type ArrowResolver<T> = (context: ResolverMap<any>) => T;
 
-export type TokenResolver<T> = Constructor<T> & {
-  [tokenableSymbol]?: true;
+export type TypeResolver<T> = Constructor<T> & {
+  [providableSymbol]?: true;
 };
+
 export type ResolverLike<T extends Resolver> = Resolver<Resolved<T>>;
 
 // TokenableResolver
 export type ConsumeResolver<T> = {
   new (context: ResolverMap): T;
-  [tokenableSymbol]: false;
+  [providableSymbol]: false;
 };
 
 export type Resolver<T = any> = ArrowResolver<T> | Constructor<T>;
@@ -44,17 +45,17 @@ export type Resolved<T extends Resolver> = T extends Resolver<infer U>
 
 export interface IResolver {
   checkSymbol: typeof checkSymbol;
-  tokenableSymbol: typeof tokenableSymbol;
+  providableSymbol: typeof providableSymbol;
   resolveSymbol: typeof resolveSymbol;
 
   <T extends object = {}>(): new (context: ResolverMap) => T;
 
-  <T extends TokenResolver<any>>(
+  <T extends TypeResolver<any>>(
     provider: T,
     resolver?: Resolver<InstanceType<T>>
   ): ResolverMap<any>;
 
-  <T extends TokenResolver<any>, U extends ResolverDeps>(
+  <T extends TypeResolver<any>, U extends ResolverDeps>(
     provider: T,
     deps: U,
     factory?: ConsumeFactory<InstanceType<T>, U>
@@ -68,12 +69,12 @@ export interface IResolver {
 
 export function Resolver<T = {}>(): new (context: ResolverMap) => T;
 
-export function Resolver<T extends TokenResolver<any>>(
+export function Resolver<T extends TypeResolver<any>>(
   provider: T,
   resolver?: Resolver<InstanceType<T>>
 ): ResolverMap<any>;
 
-export function Resolver<T extends TokenResolver<any>, U extends ResolverDeps>(
+export function Resolver<T extends TypeResolver<any>, U extends ResolverDeps>(
   provider: T,
   deps: U,
   resolver?: ConsumeFactory<InstanceType<T>, U>
@@ -124,7 +125,7 @@ export function Resolver(...args) {
 
   if (args.length) {
     const [type, resolver] = args;
-    if (type[Resolver.tokenableSymbol] === false) {
+    if (type[Resolver.providableSymbol] === false) {
       throw new Error(`"${type.name}" is not providable.`);
     }
 
@@ -147,4 +148,4 @@ class Providable {
 
 Resolver.checkSymbol = checkSymbol;
 Resolver.resolveSymbol = resolveSymbol;
-Resolver.tokenableSymbol = tokenableSymbol;
+Resolver.providableSymbol = providableSymbol;

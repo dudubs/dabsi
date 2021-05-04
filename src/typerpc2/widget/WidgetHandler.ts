@@ -26,13 +26,13 @@ export type BaseWidgetHandler<T extends AnyWidget> = {
   getElement(state: WidgetState<T> | undefined): Awaitable<WidgetElement<T>>;
 };
 
-declare module "./Widget" {
-  interface AnyWidget
-    extends RpcWithHandler<
-      // BaseRpcConfigHandler<any, any> &
-      BaseWidgetHandler<any>
-    > {}
-}
+// declare module "./Widget" {
+//   interface AnyWidget
+//     extends RpcWithHandler<
+//       // BaseRpcConfigHandler<any, any> &
+//       BaseWidgetHandler<any>
+//     > {}
+// }
 export type WidgetHandler<
   T extends AnyWidgetWithConfig,
   C

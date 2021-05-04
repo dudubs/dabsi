@@ -10,7 +10,7 @@
     "../src/**/common",
     "../src/**/view",
     "../src/**/browser",
-    "../src/old-typerpc/*view.ts",
-    "../src/old-typerpc/*view.tsx"
+    "../src/typerpc2/**/*view.ts",
+    "../src/typerpc2/**/*view.tsx"
   ]
 }

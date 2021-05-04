@@ -62,7 +62,7 @@ Resolver.consume = function (deps: any, factory: any): any {
 declare module "./Resolver" {
   namespace Resolver {
     export function consume<
-      T extends TokenResolver<any>,
+      T extends TypeResolver<any>,
       U extends ResolverDeps
     >(
       provider: T,

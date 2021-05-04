@@ -28,3 +28,5 @@ it("expect to error because max-length", async () => {
     ).loadAndCheck("hello")
   ).toEqual({ error: "TOO_LONG" });
 });
+
+describe("view", () => {});

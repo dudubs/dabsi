@@ -19,7 +19,7 @@ import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { WeakId } from "@dabsi/common/WeakId";
-import LangKey from "@dabsi/lang/LangKey";
+import LangKey from "@dabsi/view/lang/LangKey";
 import {
   AnyDataTable,
   DataTable,

@@ -1,17 +1,11 @@
-import { defined } from "@dabsi/common/object/defined";
-import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Forward } from "@dabsi/common/reflection/Forward";
-import { Reflector } from "@dabsi/common/reflection/Reflector";
-import {
-  getRpcArgs,
-  Rpc,
-  RpcContextualMember,
-  RpcType,
-} from "@dabsi/typerpc2/Rpc";
-import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
+import { getRpcChildType } from "@dabsi/typerpc2/getRpcMetadata";
+import { Rpc, RpcContextualMember, RpcType } from "@dabsi/typerpc2/Rpc";
+import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 
 export function RpcContextual<T extends Rpc>(
-  getConnectionType?: () => RpcType<T>
+  getRpcType?: () => RpcType<T>
 ): {
   <K extends string>(
     target: Rpc & Record<K, RpcContextualMember<T>>,
@@ -19,7 +13,7 @@ export function RpcContextual<T extends Rpc>(
   ): void;
 } {
   return (target, propertyName: string) => {
-    getConnectionType && Forward(getConnectionType)(target, propertyName);
+    getRpcType && Forward(getRpcType)(target, propertyName);
 
     RpcMembers.define(
       <any>target.constructor,
@@ -27,23 +21,15 @@ export function RpcContextual<T extends Rpc>(
       RpcMemberType.Contextual
     );
 
-    const getConnectionClass = SingleCall(() => {
-      return defined(
-        getConnectionType?.() ||
-          (Reflector.getPropertyDesignType(
-            target.constructor,
-            propertyName
-          ) as RpcType),
-        () =>
-          `No forward or design type for ${target.constructor.name}.${propertyName}`
-      );
-    });
-
     Object.defineProperty(target, propertyName, {
       configurable: false,
       get() {
-        const { payload, command } = getRpcArgs(this);
-        return new (getConnectionClass())([...payload, propertyName], command);
+        const { getPath, command, getRootRpcType } = RpcArgs.get(this);
+        return new (getRpcChildType(this.constructor, propertyName) as RpcType)(
+          () => [...getPath(), propertyName],
+          command,
+          getRootRpcType
+        );
       },
     });
   };

@@ -7,7 +7,18 @@ let currentWrappers: ReactWrapper[] | null = null;
 
 let currentContext: Map<any, any> | null = null;
 
-export function ReactWrapper(callback: () => React.ReactElement) {
+export function ReactWrapper(
+  callback: () => React.ReactElement
+): React.ReactElement;
+
+export function ReactWrapper(props: {
+  children(): React.ReactElement;
+}): React.ReactElement;
+
+export function ReactWrapper(callback): React.ReactElement {
+  if (typeof callback === "object") {
+    return ReactWrapper(callback.children);
+  }
   begin();
   let element;
   try {

@@ -1,6 +1,6 @@
 import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
 import { MuiSearchField } from "@dabsi/browser/mui/widget/searchField";
-import useLangService from "@dabsi/lang/useLangService";
+import useLangService from "@dabsi/view/lang/useLangService";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import Grid from "@material-ui/core/Grid";

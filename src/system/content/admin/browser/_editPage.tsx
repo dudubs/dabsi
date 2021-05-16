@@ -1,4 +1,4 @@
-import { MuiFormView } from "@dabsi/browser/mui/form/MuiFormView";
+import { MuiFormView } from "@dabsi/browser/mui/views/MuiFormView";
 import { ContentAdminConnection } from "@dabsi/system/content/admin/common/rpc";
 import { ContentAdminRouter } from "@dabsi/system/content/admin/view/router";
 

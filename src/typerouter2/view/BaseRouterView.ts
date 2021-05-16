@@ -1,22 +1,30 @@
 import { reversed } from "@dabsi/common/array/reversed";
 import { Router, RouterType } from "@dabsi/typerouter2/Router";
 import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
+import { buildRouterViews } from "@dabsi/typerouter2/view/buildRouterViews";
 import { getRouterViewRenderers } from "@dabsi/typerouter2/view/getRouterViewRenderers";
 import { RouterViewRenderer } from "@dabsi/typerouter2/view/RouterView";
+import { ReactContext } from "@dabsi/view/react/ReactContext";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import React from "react";
-import { render } from "react-dom";
+import { RouterHistory } from "./RouterHistory";
 
 // BrowserRouterView...
 export type BaseRouterViewProps = {
   routerType: RouterType;
   path: string;
+  setPath?(path: string): void;
 };
 
 export function BaseRouterView(p: BaseRouterViewProps) {
-  const wrappers = React.useMemo(() => {
+  buildRouterViews();
+
+  const [path, setPath] = React.useState(() => {
+    return RouterLocation.parse(p.routerType, p.path);
+  });
+
+  const [wrappers] = React.useMemo(() => {
     const wrappers: ((element, stack) => React.ReactElement)[] = [];
-    const path = RouterLocation.parse(p.routerType, p.path);
 
     let depth = 0;
 
@@ -24,7 +32,7 @@ export function BaseRouterView(p: BaseRouterViewProps) {
       const locationDepth = depth++;
 
       wrappers.push((element, stack) => {
-        if (location.route) {
+        if (location.route?.propertyName) {
           stack[location.route.propertyName] = new Router(location);
         }
         const thisStack = { ...stack };
@@ -68,8 +76,8 @@ export function BaseRouterView(p: BaseRouterViewProps) {
         return element;
       });
     }
-    return wrappers;
-  }, [p.routerType, p.path]);
+    return [wrappers, path];
+  }, [p.routerType, path]);
 
   let element: React.ReactElement = EmptyFragment;
   let stack = {};
@@ -77,5 +85,18 @@ export function BaseRouterView(p: BaseRouterViewProps) {
   for (const wrapper of wrappers) {
     element = wrapper(element, stack);
   }
-  return element;
+  return React.createElement(ReactContext.Provider, {
+    deps: [path],
+    entries: [
+      [RouterLocation, path.location],
+      [
+        RouterHistory,
+        new RouterHistory(location => {
+          setPath({ type: "index", location });
+          p.setPath?.(location.path);
+        }),
+      ],
+    ],
+    children: element,
+  });
 }

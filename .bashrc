@@ -10,3 +10,6 @@ export PATH=$DABSI_DIR/../node_modules/.bin:$PATH
 cd $DABSI_DIR/..
 
 
+
+
+alias mount-dabsi-vscode='sudo mount --bind $DABSI_DIR/packages/vscode ~/.vscode-server/extensions/dabsi.vscode'

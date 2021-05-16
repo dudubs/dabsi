@@ -1,5 +1,5 @@
 import { MuiAdminView } from "@dabsi/system/admin/browser/MuiAdminView";
-import { AdminInfo, AdminRouter } from "@dabsi/system/admin/common";
+import { AdminInfo, AdminRouter } from "@dabsi/system/admin/common/rpc";
 import { RouterView } from "@dabsi/typerouter/view";
 import { Emittable } from "@dabsi/view/react/reactor/Reactor";
 import React from "react";

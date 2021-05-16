@@ -92,11 +92,7 @@ export default InputHandler(
   },
   {
     getElement(state): Promise<Record<string, any>> {
-      console.log({ getElement: this.rpcType.name });
-
       return this.mapInput((handler, key) => {
-        console.log({ key });
-
         return handler.getElement(state?.[key]);
       });
     },

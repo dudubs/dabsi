@@ -1,4 +1,4 @@
-import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
+import { MuiDataTableView } from "@dabsi/browser/mui/widget/OldDataTable";
 import { DataInputView } from "@dabsi/old-typerpc/input/data-input/DataInputView";
 import { AnyDataInput } from "@dabsi/old-typerpc/input/data-input/rpc";
 import { InputViewProps } from "@dabsi/old-typerpc/input/InputView";

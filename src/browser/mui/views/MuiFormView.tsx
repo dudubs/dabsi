@@ -1,9 +1,11 @@
-import { MuiForm, MuiFormProps } from "@dabsi/browser/mui/form";
+import { MuiForm, MuiFormProps } from "@dabsi/browser/mui/components/MuiForm";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { AnyForm } from "@dabsi/typerpc2/form/rpc";
 import { FormView, FormViewProps } from "@dabsi/typerpc2/form/view";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
+import { ButtonProps } from "@material-ui/core";
 import React, { ReactElement } from "react";
 
 export type MuiFormViewProps<T extends AnyForm> = Override<
@@ -13,6 +15,8 @@ export type MuiFormViewProps<T extends AnyForm> = Override<
     // noDisableButtons?: boolean
     MuiFormProps?: Omit<MuiFormProps, "children">;
     variant?: "save" | "submit";
+
+    renderHeader?(view: FormView<T>): React.ReactElement | undefined;
   }
 >;
 
@@ -21,6 +25,7 @@ export const MuiFormView = <T extends AnyForm>({
   disableResetButton,
   MuiFormProps,
   variant = "submit",
+  renderHeader,
   ...FormViewProps
 }: MuiFormViewProps<T>): ReactElement => {
   // mixing
@@ -54,6 +59,7 @@ export const MuiFormView = <T extends AnyForm>({
         });
         return (
           <MuiForm
+            header={renderHeader?.(view)}
             {...mergeProps(MuiFormProps, {
               submitButtonProps: {
                 $merge: { disabled: { $override: disabled } },
@@ -73,10 +79,11 @@ export const MuiFormView = <T extends AnyForm>({
                   },
             })}
           >
-            {
-              children ? children(inputProps, view) : null
-              // <SystemView {...(inputProps as InputViewProps<any>)} />
-            }
+            {children ? (
+              children(inputProps, view)
+            ) : (
+              <SystemView {...inputProps} />
+            )}
           </MuiForm>
         );
       }}

@@ -1,12 +1,12 @@
-import { AclRpc, AclStats } from "@dabsi/system/acl/common/rpc";
-import { Emittable } from "@dabsi/view/react/reactor/Reactor";
-import { emit } from "@dabsi/view/react/reactor/useEmitter";
+import { AclRpc, AclCurrentUser } from "@dabsi/system/acl/common/rpc";
+import { Reactor } from "@dabsi/view/Reactor";
 
-export const AclStatsEvent = Emittable<AclStats>();
+export const AclCurrentUserReactor = new Reactor<AclCurrentUser | null>();
 
 setTimeout(() => {
-  AclRpc.instance.getStats().then(stats => {
-    emit(AclStatsEvent, stats);
-    console.log({ stats });
+  AclRpc.instance.getCurrentUser().then(status => {
+    AclCurrentUserReactor.emit(status);
   });
 });
+
+// AclCurrentUserReactor.emit(...) AclCurrentUserReactor.use()

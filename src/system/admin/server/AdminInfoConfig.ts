@@ -1,7 +1,7 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RequestSession, RequestUser } from "@dabsi/modules/session";
 import AclModule from "@dabsi/system/acl";
-import { AdminInfoRpc } from "@dabsi/system/admin/common";
+import { AdminInfoRpc } from "@dabsi/system/admin/common/rpc";
 
 export default RpcResolver(
   AdminInfoRpc,

@@ -17,39 +17,38 @@ class C extends Rpc {
   b!: B;
 }
 
-const test = ([da, db, dc], s: string) => {
-  const a = s.charAt(0);
-  const b = s.charAt(1);
-  const c = s.charAt(2);
+describe("get-and-map sanity", () => {
+  const test = (d: string, s: string) => {
+    const a = s.charAt(0);
+    const b = s.charAt(1);
+    const c = s.charAt(2);
 
-  it(`expect ${da ? "a" : "x"}-${db ? "b" : "x"}-${
-    dc ? "c" : "x"
-  } to be ${a}-${b}-${c}`, () => {
-    const m = new RpcChildMap();
-    da && m.set(A, [], "a");
-    db && m.set(B, ["a"], "b");
-    dc && m.set(C, ["b", "a"], "c");
+    it(`expect ${d} to be ${a}-${b}-${c}`, () => {
+      const m = new RpcChildMap();
+      /a/.test(d) && m.set(A, [], "a");
+      /b/.test(d) && m.set(B, ["a"], "b");
+      /c/.test(d) && m.set(C, ["b", "a"], "c");
 
-    expect({
-      a: m.get(A, []) || "x",
-      b: m.get(B, ["a"]) || "x",
-      c: m.get(C, ["b", "a"]) || "x",
-    }).toEqual({
-      a,
-      b,
-      c,
+      expect({
+        a: m.get(A, []) || "x",
+        b: m.get(B, ["a"]) || "x",
+        c: m.get(C, ["b", "a"]) || "x",
+      }).toEqual({
+        a,
+        b,
+        c,
+      });
     });
-  });
-};
+  };
 
-test([0, 0, 0], "xxx");
-test([0, 0, 1], "xxc");
+  test("", "xxx");
+  test("c", "xxc");
 
-test([0, 1, 0], "xbb");
-test([0, 1, 1], "xbc");
+  test("b", "xbb");
+  test("bc", "xbc");
 
-test([1, 0, 0], "aaa");
-test([1, 0, 1], "aac");
-
-test([1, 1, 0], "abb");
-test([1, 1, 1], "abc");
+  test("a", "aaa");
+  test("ab", "abb");
+  test("ac", "aac");
+  test("abc", "abc");
+});

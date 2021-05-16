@@ -1,1 +1,0 @@
-export { MuiNestedMenu } from "./menu";

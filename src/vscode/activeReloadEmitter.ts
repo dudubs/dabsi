@@ -4,6 +4,9 @@ import vscode from "vscode";
 
 export function activeReloadEmitter() {
   const workspacePath = vscode.workspace.workspaceFolders![0].uri.path;
+
+  vscode.window.showInformationMessage("dabsi for vscode is activate.");
+
   vscode.workspace.onDidSaveTextDocument(async e => {
     if (!/[\\\/]src[\\\/]/.test(e.fileName)) return;
 

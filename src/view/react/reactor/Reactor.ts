@@ -29,14 +29,28 @@ export class Reactor {
     Set<ReactorListener>
   >();
 
+  protected _children = new Set<Reactor>();
+
   constructor(
-    protected handle?: (event: any, emittable: Emittable<any>) => boolean | void
-  ) {}
+    protected handle?: (
+      event: any,
+      emittable: Emittable<any>
+    ) => boolean | void,
+    protected parent?: Reactor
+  ) {
+    this.parent?._children.add(this);
+  }
+
+  close() {
+    this.parent?._children.delete(this);
+  }
 
   getLast<T extends Emittable<any>>(
     emittable: T
   ): EmittableType<T> | undefined {
-    return this._emittableEventMap.get(emittable);
+    return (
+      this._emittableEventMap.get(emittable) ?? this.parent?.getLast(emittable)
+    );
   }
 
   emit<T extends Emittable<any>>(emittable: T, event: EmittableType<T>) {
@@ -44,6 +58,9 @@ export class Reactor {
     this._emittableEventMap.set(emittable, event);
     this._emittableCallbacksMap.get(emittable)?.forEach(callback => {
       callback(event, emittable);
+    });
+    this._children.forEach(child => {
+      child.emit(emittable, event);
     });
   }
 

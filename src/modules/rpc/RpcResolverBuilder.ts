@@ -14,7 +14,7 @@ import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
 import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
 import {
-  getRpcChildType,
+  getChildRpcType,
   getRpcMetadata,
 } from "@dabsi/typerpc2/getRpcMetadata";
 import {
@@ -135,7 +135,7 @@ export class RpcResolverBuilder {
     if (
       RpcMembers.getMemberType(rpcType, memberKey) === RpcMemberType.Contextual
     ) {
-      return this.getResolver(getRpcChildType(rpcType, memberKey));
+      return this.getResolver(getChildRpcType(rpcType, memberKey));
     }
 
     throw new Error(

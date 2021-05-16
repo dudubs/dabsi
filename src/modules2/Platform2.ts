@@ -1,4 +1,5 @@
 import { callAndWaitAll } from "@dabsi/common/async/callAndWaitAll";
+import { Timeout } from "@dabsi/common/async/Timeout";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
@@ -20,9 +21,10 @@ export class Platform2 {
 
   readonly directories = new Set<string>();
 
-  includeInternalFiles = false;
-
-  includeTestsFiles = true;
+  readonly settings = {
+    includeInternalFiles: false,
+    includeTestsFiles: true,
+  };
 
   constructor(readonly name: string, readonly loaderModule: LoaderModule2) {}
 
@@ -32,7 +34,7 @@ export class Platform2 {
   };
 
   internalFilesLoader: PlatformLoader = ({ baseName, stats, fileName }) => {
-    if (!this.includeInternalFiles) return;
+    if (!this.settings.includeInternalFiles) return;
     if (!baseName.startsWith("_")) return;
     if (!stats.isFile()) return;
     if (!/\.tsx?/.test(baseName)) return;
@@ -41,7 +43,7 @@ export class Platform2 {
   };
 
   testsFilesLoader: PlatformLoader = async ({ baseName, stats, fileName }) => {
-    if (!this.includeTestsFiles) return;
+    if (!this.settings.includeTestsFiles) return;
     if (stats.isDirectory() && baseName === "tests") {
       for (const baseName of await this.loaderModule.readDir(fileName)) {
         if (
@@ -62,7 +64,7 @@ export class Platform2 {
 
   @Once() async load() {
     Object.seal(this.loaders);
-    Object.seal(this);
+    Object.seal(this.settings);
 
     await Promise.all(
       this.loaderModule.getLoadedDirectories().map(async moduleDir => {

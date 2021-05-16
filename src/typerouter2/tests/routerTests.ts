@@ -1,11 +1,12 @@
 import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
 import { createTestRouters } from "@dabsi/typerouter2/tests/createTestRouters";
-import { inspect } from "util";
+import { isSubClassMatch } from "./isSubClassMatch";
 
 const { A, B, C } = createTestRouters();
 
-const locationContaining = ({ route = null as any, ...location }) =>
+const locationContaining = ({ route = null as any, routerType, ...location }) =>
   jasmine.objectContaining({
+    ...(routerType ? { routerType: isSubClassMatch(routerType) } : null),
     ...(<any>route && { route: jasmine.objectContaining(route) }),
     ...location,
   });

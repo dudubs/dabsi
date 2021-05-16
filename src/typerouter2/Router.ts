@@ -1,6 +1,6 @@
-import { ExcludeKeys } from "@dabsi/common/typings2/ExcludeKeys";
+import { defined } from "@dabsi/common/object/defined";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { ReactChild } from "react";
+import { Route } from "@dabsi/typerouter2/Route";
 import { RouterLocation } from "./RouterLocation";
 
 export type InferredRouterChildRouter<
@@ -36,8 +36,16 @@ export type RouterChildKey<T extends Router> = ExtractKeys<
   RouteWithoutParams | RouteWithParams
 >;
 
+const routerLocationMap = new WeakMap();
+
+export function getRouterLocation(router: Router): RouterLocation {
+  return defined(routerLocationMap.get(router), () => `No router location`);
+}
+
 export class Router {
-  constructor(readonly location: RouterLocation) {}
+  constructor(location: RouterLocation) {
+    routerLocationMap.set(this, location);
+  }
 }
 
 export type RouterType<T extends Router = Router> = {

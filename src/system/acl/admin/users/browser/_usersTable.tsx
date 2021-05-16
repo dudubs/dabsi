@@ -1,4 +1,4 @@
-import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
+import { MuiDataTableView } from "@dabsi/browser/mui/widget/OldDataTable";
 import { ACL_Admin_Connection } from "@dabsi/system/acl/admin/common/rpc";
 import { ACL_AdminRouter } from "@dabsi/system/acl/admin/view/router";
 import { RouterView } from "@dabsi/typerouter/view";

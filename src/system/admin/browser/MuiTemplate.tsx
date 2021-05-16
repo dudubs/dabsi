@@ -80,21 +80,16 @@ export const useStyles = makeStyles(theme => ({
   },
 }));
 
-export function MuiTemplate({
-  children,
-  toolbarMenu,
-  title,
-  drawerMenu,
-  ...props
-}: {
+export function MuiTemplate(p: {
   children;
   toolbarMenu?;
   title;
   drawerMenu?;
+  openDrawerMenu?: boolean;
 }) {
   const classes = useStyles();
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(p.openDrawerMenu || false);
   return (
     <div className={classes.root}>
       <AppBar
@@ -113,8 +108,8 @@ export function MuiTemplate({
           >
             <MenuIcon />
           </IconButton>
-          <Typography className={classes.title}>{title}</Typography>
-          {toolbarMenu}
+          <Typography className={classes.title}>{p.title}</Typography>
+          {p.toolbarMenu}
         </Toolbar>
       </AppBar>
       <Drawer
@@ -136,7 +131,7 @@ export function MuiTemplate({
           </IconButton>
         </div>
         <Divider />
-        {drawerMenu}
+        {p.drawerMenu}
       </Drawer>
       <main
         className={clsx(classes.content, {
@@ -144,7 +139,7 @@ export function MuiTemplate({
         })}
       >
         <div className={classes.drawerHeader} />
-        <div className={classes.container}>{children}</div>
+        <div className={classes.container}>{p.children}</div>
       </main>
     </div>
   );

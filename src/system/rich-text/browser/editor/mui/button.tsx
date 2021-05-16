@@ -3,7 +3,7 @@ import { Override } from "@dabsi/common/typings2/Override";
 import { RichTextEditor } from "@dabsi/system/rich-text/browser/editor/editor";
 import { RichTextStore } from "@dabsi/system/rich-text/browser/editor/store";
 import useEditorStore from "@dabsi/system/rich-text/browser/editor/useEditorStore";
-import { ReactContext } from "@dabsi/view/react/context";
+import { OldReactContext } from "@dabsi/view/react/context";
 import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import { ReactRef } from "@dabsi/view/react/ref";
 import Button, { ButtonProps } from "@material-ui/core/Button";
@@ -62,7 +62,7 @@ export const MuiEditorButton = withStyles(theme => ({
 
     const store = useCurrentStore
       ? useEditorStore()
-      : ReactContext.require(RichTextEditor).root.store;
+      : OldReactContext.require(RichTextEditor).root.store;
     if (typeof selected === "function") {
       selected = selected(store);
     }

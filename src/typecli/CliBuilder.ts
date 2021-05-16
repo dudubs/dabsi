@@ -76,7 +76,13 @@ export class CliBuilder {
           "",
           y => builder.build(y),
           args => {
-            this.runner(() => builder.execute(args));
+            this.runner(async () => {
+              try {
+                return await builder.execute(args);
+              } catch (error) {
+                console.log({ error });
+              }
+            });
           }
         );
       });

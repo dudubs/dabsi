@@ -1,4 +1,6 @@
 import { defined } from "@dabsi/common/object/defined";
+import { mapObject } from "@dabsi/common/object/mapObject";
+import Lazy from "@dabsi/common/patterns/Lazy";
 import { capitalize } from "@dabsi/common/string/capitalize";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { If, IsUndefined } from "@dabsi/common/typings2/boolean";
@@ -13,7 +15,7 @@ import {
   GenericConfig2,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
-import { getRpcChildType } from "@dabsi/typerpc2/getRpcMetadata";
+import { getChildRpcType } from "@dabsi/typerpc2/getRpcMetadata";
 import {
   Rpc,
   RpcContextualMember,
@@ -34,6 +36,10 @@ export type InferredRpcHandlerConfig<
   T extends AnyRpcWithConfig
 > = ConfiguratorType<InferredRpcConfig<T>>;
 
+type ExtractPrefix<P extends string, K> = K extends `${P}${infer K}`
+  ? K
+  : never;
+
 export class BaseRpcConfigHandler<T extends Rpc, C> {
   readonly rpcType!: RpcType<T>;
 
@@ -43,6 +49,14 @@ export class BaseRpcConfigHandler<T extends Rpc, C> {
   ) {}
 
   protected _getContextualHandlerCache = new Map();
+
+  // uses for get lazy properties.
+  get<T, K extends ExtractKeys<T, () => any>>(
+    this: T,
+    key: ExtractPrefix<"__", K>
+  ): ReturnType<T[K]> {
+    return (this[key + "Lazy"] ??= this["__" + key]());
+  }
 
   protected _getHandler<T extends AnyRpcWithConfig, K extends keyof T>(
     this: BaseRpcConfigHandler<T, any>,
@@ -63,7 +77,7 @@ export class BaseRpcConfigHandler<T extends Rpc, C> {
     memberKey: string & K
   ): Promise<RpcHandler<T[K]>> {
     return this._getContextualHandlerCache.touch(memberKey, async () =>
-      this._getHandler(memberKey)(getRpcChildType(this.rpcType, memberKey))
+      this._getHandler(memberKey)(getChildRpcType(this.rpcType, memberKey))
     );
   }
 
@@ -77,7 +91,7 @@ export class BaseRpcConfigHandler<T extends Rpc, C> {
   ): Promise<RpcHandler<ReturnType<T[K]>>> {
     return <any>(
       this._getHandler(memberKey)(
-        getRpcChildType(this.rpcType, memberKey),
+        getChildRpcType(this.rpcType, memberKey),
         ...params
       )
     );
@@ -142,7 +156,8 @@ export type RpcConfigHandlerOptions<
       : false | undefined;
   },
   RH & {
-    helpers?: E & ThisType<BaseRpcConfigHandler<R, C>>;
+    // TODO: rename to methods
+    helpers?: E & ThisType<BaseRpcConfigHandler<R, C> & E>;
 
     createMemberHandler?(
       this: RpcType<R>,
@@ -165,7 +180,7 @@ export function RpcConfigHandler<
   options: RpcConfigHandlerOptions<R, E>,
   handler: H &
     ThisType<BaseRpcConfigHandler<R, InferredRpcHandlerConfig<R>> & E>
-): RpcConfigHandlerType<R, H>;
+): RpcConfigHandlerType<R, H & E>;
 
 export function RpcConfigHandler(
   rpcType,

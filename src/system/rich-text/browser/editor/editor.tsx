@@ -1,18 +1,17 @@
-import { WeakId } from "@dabsi/common/WeakId";
 import { Hookable } from "@dabsi/modules/Hookable";
+import { RpcNamespace } from "@dabsi/old-typerpc/namespace/rpc";
+import { AnyRpc, RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import createEditorProps from "@dabsi/system/rich-text/browser/editor/createEditorProps";
 import { RichTextEditorBlock } from "@dabsi/system/rich-text/browser/editor/editorBlock";
 import { RichTextEditorGlobals } from "@dabsi/system/rich-text/browser/editor/globals";
 import { RichTextEditorRaw } from "@dabsi/system/rich-text/browser/editor/raw";
 import { RichTextStore } from "@dabsi/system/rich-text/browser/editor/store";
 import { RichTextEditorKeyCommand } from "@dabsi/system/rich-text/browser/editor/types";
-import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { RichTextBlock } from "@dabsi/system/rich-text/common/block";
-import { AnyRpc, RpcConnection } from "@dabsi/old-typerpc/Rpc";
-import { RpcNamespace } from "@dabsi/old-typerpc/namespace/rpc";
-import { ReactContext } from "@dabsi/view/react/context";
-import { View } from "@dabsi/view/react/component/View";
+import { RichTextContent } from "@dabsi/system/rich-text/common/content";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
+import { View } from "@dabsi/view/react/component/View";
+import { ReactContext } from "@dabsi/view/react/ReactContext";
 import clsx from "clsx";
 import { CompositeDecorator, Editor, EditorState } from "draft-js";
 import { List } from "immutable";
@@ -329,9 +328,9 @@ export class RichTextEditor extends View<RichTextEditorProps> {
   renderView() {
     return (
       // TODO: use React.Context
-      <ReactContext provide={[this.store, this]}>
+      <ReactContext.Provider value={[this.store, this]}>
         <this.Component />
-      </ReactContext>
+      </ReactContext.Provider>
     );
   }
 }

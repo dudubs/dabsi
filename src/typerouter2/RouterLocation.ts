@@ -1,9 +1,10 @@
 import { getNextPath } from "@dabsi/common/getNextPath";
+import { touchObject } from "@dabsi/common/object/touchObject";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { joinUrl } from "@dabsi/common/string/joinUrl";
-import { getRouterChildren } from "@dabsi/typerouter2/getRouterChildren";
+import { getRouterMetadata } from "@dabsi/typerouter2/getRouterMetadata";
 import { Route } from "@dabsi/typerouter2/Route";
-import { RouterType } from "./Router";
+import { getRouterLocation, Router, RouterType } from "./Router";
 
 export type RouterLocationPath =
   | {
@@ -24,7 +25,12 @@ export type RouterLocationPath =
       params: any[];
     };
 
+export type RouterPusher = (RouterLocation: RouterLocation) => void;
+
 export class RouterLocation {
+  static create(routerType: RouterType): RouterLocation {
+    return new RouterLocation(routerType, undefined, undefined, []);
+  }
   constructor(
     readonly routerType: RouterType,
     readonly parent: RouterLocation | undefined,
@@ -32,8 +38,72 @@ export class RouterLocation {
     readonly params: any[]
   ) {}
 
+  // find down, up, top, bottom
+
+  is(routerType: RouterType<any>): boolean {
+    return (
+      this.routerType === routerType ||
+      this.routerType.isPrototypeOf(routerType)
+    );
+  }
+
+  toRouter<T extends Router>(): T {
+    return <T>new this.routerType(this);
+  }
+
+  @Lazy() get staticLocations(): RouterLocation[] {
+    return getRouterMetadata(this.routerType).staticRoutes.map(
+      route => new RouterLocation(route.type, this, route, [])
+    );
+  }
+
+  *visit(): IterableIterator<RouterLocation> {
+    const visited = new Set<RouterLocation>();
+    const yielded = new Set<RouterLocation>();
+
+    for (const location of visit(this)) {
+      if (yielded.touch(location)) {
+        yield location;
+      }
+    }
+
+    function* visitDown(location: RouterLocation) {
+      for (const child of location.staticLocations) {
+        yield child;
+      }
+
+      for (const child of location.staticLocations) {
+        yield* visitDown(child);
+      }
+    }
+
+    function* visit(location: RouterLocation, skipParents = false) {
+      if (!visited.touch(location)) return;
+
+      if (!skipParents) {
+        for (let parent = location; parent; parent = parent.parent!) {
+          yield parent;
+        }
+      }
+
+      yield* visitDown(location);
+
+      if (location.parent) {
+        yield* visit(location.parent, true);
+      }
+    }
+  }
+
+  find<T extends Router>(routerType: RouterType<T>): T | undefined {
+    for (const location of this.visit()) {
+      if (location.is(routerType)) {
+        return location.toRouter<T>();
+      }
+    }
+  }
+
   @Lazy() get path() {
-    let path = this.parent?.path || "";
+    let path = this.parent?.path || "/";
 
     if (!this.route) return path;
 
@@ -63,9 +133,9 @@ export class RouterLocation {
 
       if (!routeName) break;
 
-      const children = getRouterChildren(location.routerType);
+      const children = getRouterMetadata(location.routerType);
 
-      const route = children.routeNameMap[routeName];
+      const route = children.routeMap[routeName];
 
       if (!route) {
         return {

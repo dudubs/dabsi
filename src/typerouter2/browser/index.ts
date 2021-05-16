@@ -6,16 +6,8 @@ import React from "react";
 const history = createBrowserHistory();
 
 export function RouterBrowserView(p: Omit<BaseRouterViewProps, "path">) {
-  const [path, setPath] = React.useState(() => history.location.pathname);
-
-  React.useEffect(() =>
-    history.listen(event => {
-      setPath(event.location.pathname);
-    })
-  );
-
   return React.createElement(RouterView, {
     ...p,
-    path,
+    history,
   });
 }

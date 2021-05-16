@@ -1,4 +1,4 @@
-import { AdminRouter } from "@dabsi/system/admin/common";
+import { AdminRouter } from "@dabsi/system/admin/common/rpc";
 import Router from "@dabsi/typerouter/router";
 
 export const ContentAdminRouter = AdminRouter.register(

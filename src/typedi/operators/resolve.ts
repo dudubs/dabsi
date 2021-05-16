@@ -14,7 +14,7 @@ Resolver.resolve = function (resolver, context) {
     return resolve.call(resolver, context);
   }
   if (typeof resolver === "function") {
-    if (!resolver.prototype) {
+    if (!resolver.prototype || !resolver.name) {
       return (resolver as ArrowResolver<any>)(context);
     }
     return Resolver.Providability.resolve(

@@ -31,9 +31,11 @@ export namespace SystemCommand {
     }
   }
 
-  SystemRpc.nsCommand = async payload => {
-    return multiplexer.send(payload);
-  };
+  SystemRpc.nsBind(
+    () => [],
+    payload => multiplexer.send(payload),
+    () => SystemRpc
+  );
 
   export function capture<T>(callback: () => T): [T, RpcQueueRequest] {
     let req: RpcQueueRequest | null = null;

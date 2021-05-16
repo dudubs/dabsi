@@ -1,5 +1,6 @@
 import { createTestRouters } from "@dabsi/typerouter2/tests/createTestRouters";
 import { BaseRouterView } from "@dabsi/typerouter2/view/BaseRouterView";
+import { buildRouterViews } from "@dabsi/typerouter2/view/buildRouterViews";
 import { RouterView } from "@dabsi/typerouter2/view/RouterView";
 import React from "react";
 import ReactTestRenderer from "react-test-renderer";
@@ -25,6 +26,9 @@ RouterView.define(r.C, [
   },
 ]);
 
+beforeEach(() => {
+  buildRouterViews();
+});
 const testPath = path =>
   ReactTestRenderer.create(
     <BaseRouterView routerType={r.C} path={path} />

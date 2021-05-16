@@ -3,6 +3,7 @@ import { Rpc, RpcType } from "@dabsi/typerpc2";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
 
 export type RpcArgs = {
+  // TODO: rootRpcTypeRef: {current:RpcType...}
   getRootRpcType: () => RpcType;
   getPath: () => any[];
   command: RpcCommand;

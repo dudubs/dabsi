@@ -1,13 +1,15 @@
-// import { ACL_Admin_GroupsRpc } from "@dabsi/system/acl/admin/common/groupsRpc";
-// import { ACL_Admin_UsersRpc } from "@dabsi/system/acl/admin/common/usersRpc";
+import AdminRpc from "@dabsi/system/admin/common/rpc";
+import { Rpc, RpcContextual } from "@dabsi/typerpc2";
+import { DataTable } from "@dabsi/typerpc2/data-table/rpc";
 
-// import { AdminRpc } from "@dabsi/system/admin/common";
-// import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+export class ACL_GroupsTable extends DataTable({
+  groupName: String,
+  countUsers: Number,
+}) {}
 
-// export const [ACL_AdminRpc, ACL_Admin_Connection] = AdminRpc.register(
-//   "acl",
-//   RpcMap({
-//     groups: ACL_Admin_GroupsRpc,
-//     users: ACL_Admin_UsersRpc,
-//   })
-// );
+export default class ACL_AdminRpc extends Rpc {
+  static instance = AdminRpc.register("acl", ACL_AdminRpc);
+
+  @RpcContextual()
+  groupsTable!: ACL_GroupsTable;
+}

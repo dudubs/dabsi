@@ -13,6 +13,6 @@ export const DataNullsSort: Record<DataNullsSort, DataNullsSort> = {
 
 export type DataOrder<T> = {
   by: DataExp<T>;
-  sort: DataSort;
+  sort?: DataSort;
   nulls?: DataNullsSort;
 };

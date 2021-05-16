@@ -1,7 +1,7 @@
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
 import { getRpcType, Rpc, RpcChild, RpcType } from "@dabsi/typerpc2";
-import { getRpcChildType } from "@dabsi/typerpc2/getRpcMetadata";
+import { getChildRpcType } from "@dabsi/typerpc2/getRpcMetadata";
 import { AnyInput } from "@dabsi/typerpc2/input/Input";
 import { InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
@@ -11,111 +11,158 @@ import { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
 import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import React from "react";
 
-type SystemViewComponentMap = RpcChildMap<SystemViewComponent<any>>;
+export type SystemViewComponentMap = RpcChildMap<SystemViewComponent<any>>;
 
-type SystemViewComponent<T extends AnyWidget> = React.ComponentType<
+export type SystemViewComponent<T extends AnyWidget> = React.ComponentType<
   SystemViewComponentProps<T>
 >;
 
-type OptionsForWidget<T> = T extends AnyWidget
-  ?
-      | SystemViewComponent<T>
-      | {
-          $wrapper: React.ComponentType<{
-            children: React.ReactElement<SystemViewComponentProps<T>>;
-          }>;
-        }
-  : never;
-
 const globalComponentMap = new RpcChildMap<SystemViewComponent<any>>();
 
-const ComponentMapContext = React.createContext(globalComponentMap);
+SystemView.ComponentMapContext = React.createContext(globalComponentMap);
 
-export type SystemViewOptions<T extends Rpc> =
-  | OptionsForWidget<T>
-  | OptionsForRpc<T>
-  | (OptionsForWidget<T> | OptionsForRpc<T>)[];
+export type SystemViewStylesheet<T extends Rpc> =
+  | SystemViewStylesheet.ForWidget<T>
+  | SystemViewStylesheet.ForRpc<T>
+  | (SystemViewStylesheet.ForWidget<T> | SystemViewStylesheet.ForRpc<T>)[];
 
-type OptionsForRpc<T extends Rpc> = {
-  [K in keyof T]?: T[K] extends RpcChild<infer U>
-    ? SystemViewOptions<U>
+export type SystemViewBuilderFn = <T extends Rpc>(
+  rpcType: RpcType<T>,
+  options: SystemViewStylesheet<T>
+) => void;
+
+export type SystemViewBuilder = (build: SystemViewBuilderFn) => void;
+
+export namespace SystemViewStylesheet {
+  export type Includer = {
+    $include(builder: SystemViewBuilderFn);
+  };
+
+  export type Wrapper<T extends AnyWidget> = {
+    $wrapper: React.ComponentType<{
+      children: React.ReactElement<SystemViewComponentProps<T>>;
+    }>;
+  };
+  export type ForRpc<T extends Rpc> = {
+    [K in keyof T]?: T[K] extends RpcChild<infer U>
+      ? SystemViewStylesheet<U>
+      : never;
+  };
+
+  export type ForWidget<T> = T extends AnyWidget
+    ? SystemViewComponent<T> | SystemViewStylesheet.Wrapper<T> | Includer
     : never;
-};
+}
+
 export type SystemViewComponentProps<T extends AnyWidget> = T extends AnyInput
   ? InputViewProps<T>
   : WidgetViewProps<T>;
 
-export type SystemViewProps<T extends AnyWidget> = WidgetViewProps<T> & {
-  children?(define: any);
-  options?: SystemViewOptions<T>;
+export type SystemViewProps<T extends Rpc, P> = P & {
+  build?: SystemViewBuilder;
+  stylesheet?: SystemViewStylesheet<T> | (() => SystemViewStylesheet<T>);
+  children?(props: P): React.ReactElement;
 };
 
-export function SystemView<T extends AnyWidget>({
+export function SystemView<T extends AnyInput>(
+  props: SystemViewProps<T, InputViewProps<T>>
+): React.ReactElement;
+
+export function SystemView<T extends AnyWidget>(
+  props: SystemViewProps<T, WidgetViewProps<T>>
+): React.ReactElement;
+
+export function SystemView(props: {
+  build: SystemViewBuilder;
+  children: React.ReactElement;
+}): React.ReactElement;
+
+export function SystemView({
   children,
-  options,
+  stylesheet,
+  build,
   ...componentProps
-}: SystemViewProps<T>): React.ReactElement {
-  const widgetType: RpcType<AnyWidget> = getRpcType(componentProps.connection);
+}: {
+  build?;
+  children?;
+  stylesheet?;
+  connection?;
+}): React.ReactElement {
+  return ReactWrapper(() => {
+    // connection & build? & children?
+    // build & children
 
-  const parentComponentMap = React.useContext(ComponentMapContext);
+    const widgetType =
+      componentProps.connection && getRpcType(componentProps.connection);
 
-  const componentMap = React.useMemo(() => {
-    if (!options) {
-      return parentComponentMap;
+    const parentComponentMap = React.useContext(SystemView.ComponentMapContext);
+
+    const componentMap = React.useMemo(() => {
+      const map = new RpcChildMap(parentComponentMap);
+      build?.((rpcType, options) => {
+        __defineStylesheet(map, rpcType, options);
+      });
+      stylesheet &&
+        widgetType &&
+        __defineStylesheet(
+          map,
+          widgetType,
+          typeof stylesheet === "function" ? stylesheet() : stylesheet
+        );
+
+      return map.isEmpty() ? parentComponentMap : map;
+    }, [parentComponentMap, typeof stylesheet, widgetType]);
+
+    if (componentMap !== parentComponentMap) {
+      ReactWrapper.push(children =>
+        React.createElement(SystemView.ComponentMapContext.Provider, {
+          value: componentMap,
+          children,
+        })
+      );
     }
-    const map = new RpcChildMap(parentComponentMap);
-    _defineComponent(parentComponentMap, widgetType, options);
-    return map;
-  }, [parentComponentMap, typeof options, widgetType]);
 
-  if (componentMap !== parentComponentMap) {
-    ReactWrapper.push(children =>
-      React.createElement(ComponentMapContext.Provider, {
-        value: componentMap,
-        children,
-      })
-    );
-  }
+    if (widgetType) {
+      if (typeof children === "function") {
+        return children(componentProps);
+      }
 
-  const component = React.useMemo(
-    () =>
-      componentMap.get(
-        widgetType,
-        RpcArgs.get(componentProps.connection)
-          .getPath()
-          .filter(item => typeof item === "string")
-      ),
-    [componentMap]
-  );
+      const component = React.useMemo(() => {
+        const args = RpcArgs.get(componentProps.connection);
+        const path = args.getPath().filter(item => typeof item === "string");
+        const rootRpcType = args.getRootRpcType();
+        return componentMap.get(rootRpcType, path);
+      }, [componentMap]);
 
-  if (!component) {
-    return React.createElement(
-      React.Fragment,
-      null,
-      `NO_SYSTEM_VIEW_FOR<${widgetType.name}>`
-    );
-  }
+      if (!component) {
+        return React.createElement(
+          React.Fragment,
+          null,
+          `NO_SYSTEM_VIEW_FOR<${widgetType.name}>`
+        );
+      }
+      return React.createElement(component, <any>componentProps);
+    }
 
-  return React.createElement(component, componentProps);
+    return children;
+  });
 }
 
 export namespace SystemView {
-  export function define<T extends Rpc>(
-    rpcType: RpcType<T>,
-    options: SystemViewOptions<T>
-  ) {
-    _defineComponent(globalComponentMap, rpcType, options);
+  export function build(builder: SystemViewBuilder) {
+    builder((rpcType, stylesheet) => {
+      __defineStylesheet(globalComponentMap, rpcType, <any>stylesheet);
+    });
   }
 }
 
-// <WidgetContainerView connection=[[]]
-
-function _defineComponent(
+// o +
+function __defineStylesheet(
   map: SystemViewComponentMap,
   rpcType: RpcType,
-  options: SystemViewOptions<any>
+  stylesheet: SystemViewStylesheet<any>
 ) {
-  define(rpcType, [], options);
+  define(rpcType, [], stylesheet);
 
   function define(rpcType: RpcType, childKeys: string[], options: any) {
     if (Array.isArray(options)) {
@@ -125,13 +172,13 @@ function _defineComponent(
       return;
     }
 
-    const wrapper = options.$wrapper;
+    const wrapper = (options as SystemViewStylesheet.Wrapper<any>).$wrapper;
     if (typeof wrapper === "function") {
       const component = defined(
         map.get(rpcType, childKeys),
         () =>
-          `Can't wrap ${childKeys.join(",")} because no have component for ${
-            getRpcChildType(rpcType, childKeys).name
+          `Can't wrap ${childKeys.join(".")} because no have component for ${
+            getChildRpcType(rpcType, childKeys).name
           }`
       );
       define(rpcType, childKeys, props => {
@@ -142,12 +189,16 @@ function _defineComponent(
       return;
     }
 
+    const includer = (options as SystemViewStylesheet.Includer).$include;
+    if (typeof includer === "function") {
+      includer((rpcType, options) => {
+        define(rpcType, [] /* no- childKeys, used only for rpc-type */, options);
+      });
+    }
+
     if (typeof options === "object") {
       for (const [childKey, childOptions] of entries(options as {})) {
-        define(getRpcChildType(rpcType, childKey), [
-          ...childKeys,
-          childKey,
-        ], childOptions);
+        define(rpcType, [...childKeys, childKey], childOptions);
       }
       return;
     }
@@ -159,3 +210,11 @@ function _defineComponent(
     map.set(rpcType, childKeys, (options as any) as SystemViewComponent<any>);
   }
 }
+
+export const defineSystemViewCompoent = __defineStylesheet as {
+  <T extends Rpc>(
+    map: SystemViewComponentMap,
+    rpcType: RpcType<T>,
+    options: SystemViewStylesheet<T>
+  ): void;
+};

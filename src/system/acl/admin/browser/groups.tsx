@@ -1,4 +1,4 @@
-// import { MuiForm } from "@dabsi/browser/mui/form";
+// import { MuiForm } from "@dabsi/browser/mui/components/MuiForm";
 // import { MuiFormView } from "@dabsi/browser/mui/form/view";
 // import { MuiSection, MuiSectionList } from "@dabsi/browser/mui/section";
 // import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";

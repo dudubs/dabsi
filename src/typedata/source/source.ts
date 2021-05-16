@@ -330,21 +330,37 @@ export abstract class DataSource<T> {
     return this.updateCursor({ skip: count });
   }
 
-  take(count: number): DataSource<T> {
-    return this.updateCursor({ take: count });
+  take(count: number, skip: number = this.cursor.skip): DataSource<T> {
+    return this.updateCursor({ take: count, skip });
+  }
+
+  addSort(order: DataOrder<T>[]): DataSource<T>;
+  addSort(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>;
+  addSort(...args) {
+    return this._sort(true, args);
   }
 
   sort(orders: DataOrder<T>[]): DataSource<T>;
   sort(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>;
-  sort(expOrOrders, sort?, nulls?) {
-    if (typeof sort === "string")
-      return this.updateCursor({
-        order: [
-          ...this.cursor.order,
-          { by: expOrOrders, sort: <DataSort>sort, nulls },
-        ],
-      });
-    return this.updateCursor({ order: expOrOrders });
+  sort(...args) {
+    return this._sort(false, args);
+  }
+
+  private _sort(add: boolean, args: any[]) {
+    if (args.length > 1) {
+      const [by, sort, nulls] = args;
+      args = [{ by, sort, nulls }];
+    }
+
+    const [order] = args;
+
+    if (add && !order.length) {
+      return this;
+    }
+
+    return this.updateCursor({
+      order: add ? [this.cursor.order, ...order] : order,
+    });
   }
 
   addFields<T, Fields extends DataFields<T>>(

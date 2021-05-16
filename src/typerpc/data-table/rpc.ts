@@ -47,7 +47,7 @@ export declare namespace DataTable {
         ? true
         : false
       : Column extends keyof RebaseType<T["Data"]>
-      ? Is<Row<T>[Column], RebaseType<T["Data"][Column]>>
+      ? Is<Row<T>[Column], RebaseType<T["Data"]>[Column]>
       : false;
 
   type ConfigColumns<T extends TDataTable> = UndefinedIfEmptyObject<
@@ -60,8 +60,6 @@ export declare namespace DataTable {
 
   type OptionalConfig<T extends TDataTable> = {
     columns: DataTable.ConfigColumns<T>;
-
-    loadIsChecked?: (row: Row<T>) => Awaitable<boolean>;
   };
 
   type RequiredConfig<T extends TDataTable> = {
@@ -69,6 +67,7 @@ export declare namespace DataTable {
     pageSize?: number;
     searchIn?: DataExp<T["Data"]>[];
     maxRows?: number;
+    loadIsChecked?: (row: Row<T>) => Awaitable<boolean>;
   };
 
   type Config<T extends TDataTable> = PartialUndefinedKeys<

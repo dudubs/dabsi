@@ -34,7 +34,7 @@ export function ReactorListener<T extends Emittable<any>>({
 }: ReactorListenerProps<T>): React.ReactElement {
   const parent = useReactor();
 
-  const child = React.useMemo(() => {
+  const child: Reactor = React.useMemo(() => {
     const map = new Map<
       Emittable<any>,
       (event: any, emiitable: Emittable<any>) => any
@@ -71,8 +71,14 @@ export function ReactorListener<T extends Emittable<any>>({
           parent.emit(event, emittable);
         }
       }
-    });
+    }, parent);
   }, [parent, typeof listen, ...deps]);
+
+  React.useEffect(() => {
+    return () => {
+      child.close();
+    };
+  }, [child]);
 
   return createElement(ReactorContext.Provider, {
     value: child,

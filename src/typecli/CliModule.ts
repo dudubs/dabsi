@@ -110,10 +110,7 @@ export class CliModule2 {
               );
 
               //
-              this.moduleRunner.process.waitAndPush(
-                () => `CliCommand<${target.name}.${propertyName}>`,
-                async () => invoke()
-              );
+              await invoke();
             }
           }
         });

@@ -1,10 +1,8 @@
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import {
   InferredHandlerConfig,
-  InferredRpcConfig,
   RpcWithConfig,
 } from "@dabsi/typerpc2/RpcConfig";
 import {
@@ -15,7 +13,7 @@ import {
   RpcConfigHandlerType,
   RpcHandlerProps,
 } from "@dabsi/typerpc2/RpcConfigHandler";
-import { RpcHandler, RpcWithHandler } from "@dabsi/typerpc2/RpcHandler";
+import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import {
   AnyWidget,
   WidgetElement,
@@ -71,8 +69,8 @@ export function WidgetHandler<
 >(
   rpcType: RpcType<T>,
   options: WidgetHandlerOptions<T, E>,
-  handler: H & ThisType<WidgetHandler<T, InferredRpcConfig<T>> & E>
-): RpcConfigHandlerType<T, H>;
+  handler: H & ThisType<WidgetHandler<T, InferredRpcHandlerConfig<T>> & E>
+): RpcConfigHandlerType<T, H & E>;
 
 export function WidgetHandler(
   rpcType: RpcType<AnyWidgetWithConfig>,

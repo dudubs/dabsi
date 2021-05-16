@@ -1,6 +1,19 @@
 import Lazy from "@dabsi/common/patterns/Lazy";
 
 let counter = 0;
+
+it("expect to be lazy static class member", () => {
+  class A {
+    @Lazy() static get x() {
+      return ++counter;
+    }
+  }
+  class B extends A {}
+
+  expect(A.x).toEqual(A.x);
+  expect(B.x).toEqual(B.x);
+  expect(A.x).not.toEqual(B.x);
+});
 it("expect to lazy symbol callback", () => {
   const x = Lazy(() => counter++);
   const a = { x };

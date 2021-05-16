@@ -52,18 +52,23 @@ export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
   };
 });
 
-export function getRpcChildType(
+export function getChildRpcType(
   rpcType: RpcType,
   childKeys: string[] | string
 ): RpcType {
   if (typeof childKeys === "string") {
     childKeys = [childKeys];
   }
+  const rootRpcType = rpcType;
   for (const childKey of childKeys) {
     rpcType = defined(
       getRpcMetadata(rpcType).childTypeMap[childKey],
-      () => `No child key like "${rpcType.name}.${childKey}".`
+      () =>
+        `No child key like "${rpcType.name}.${childKey}" (${
+          rootRpcType.name
+        }.${(childKeys as string[]).join(".")}).`
     );
   }
+
   return rpcType;
 }

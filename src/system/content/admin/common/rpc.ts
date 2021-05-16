@@ -1,5 +1,5 @@
 import { type } from "@dabsi/common/typings2/Typing";
-import { AdminRpc } from "@dabsi/system/admin/common";
+import { AdminRpc } from "@dabsi/system/admin/common/rpc";
 import { RichTextInput } from "@dabsi/system/rich-text/common/input";
 import { InputMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
 import { TextInput } from "@dabsi/old-typerpc/input/text-input/TextInput";

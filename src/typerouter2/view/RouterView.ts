@@ -1,7 +1,6 @@
-import { History } from "history";
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
-import { getRouterChildren } from "@dabsi/typerouter2/getRouterChildren";
+import { getRouterMetadata } from "@dabsi/typerouter2/getRouterMetadata";
 import {
   InferredRouterChildRouter,
   Router,
@@ -11,16 +10,17 @@ import {
   RouteWithParams,
 } from "@dabsi/typerouter2/Router";
 import { RouterLocationPath } from "@dabsi/typerouter2/RouterLocation";
-import { getRouterViewRenderers } from "@dabsi/typerouter2/view/getRouterViewRenderers";
 import {
   BaseRouterView,
   BaseRouterViewProps,
 } from "@dabsi/typerouter2/view/BaseRouterView";
+import { buildRouterViews } from "@dabsi/typerouter2/view/buildRouterViews";
+
+import { getRouterViewRenderers } from "@dabsi/typerouter2/view/getRouterViewRenderers";
 import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import { Renderer } from "@dabsi/view/react/renderer";
-import { ReactElement } from "react";
-import { Override } from "@dabsi/common/typings2/Override";
-import React from "react";
+import { History } from "history";
+import React, { ReactElement } from "react";
 
 export type RouterViewRendererProps<T extends Router, P extends any[], S> = {
   router: T;
@@ -83,7 +83,13 @@ export function RouterView({ history, ...props }: RouterViewProps) {
     [history]
   );
 
-  return BaseRouterView({ ...props, path });
+  return BaseRouterView({
+    ...props,
+    path,
+    setPath(path) {
+      history.push(path);
+    },
+  });
 }
 
 export namespace RouterView {
@@ -103,34 +109,40 @@ export namespace RouterView {
   );
 
   export function define(routerType, options) {
-    if (Array.isArray(options)) {
-      for (const arg of options) {
-        define(routerType, arg);
-      }
-      return;
-    }
+    buildRouterViews.builders.push(() => {
+      define(routerType, options);
 
-    const children = getRouterChildren(routerType);
+      function define(routerType, options) {
+        if (Array.isArray(options)) {
+          for (const arg of options) {
+            define(routerType, arg);
+          }
+          return;
+        }
 
-    if (typeof options.$wrapper === "function") {
-      getRouterViewRenderers(routerType).wrappers.push(options.$wrapper);
-      return;
-    }
+        const children = getRouterMetadata(routerType);
 
-    if (typeof options !== "function") {
-      for (const [childPropertyName, childOptions] of entries(options)) {
-        const childMetadata = defined(
-          children.propertyNameMap[childPropertyName],
-          () =>
-            `No router child like "${routerType.name}.${childPropertyName}".`
+        if (typeof options.$wrapper === "function") {
+          getRouterViewRenderers(routerType).wrappers.push(options.$wrapper);
+          return;
+        }
+
+        if (typeof options !== "function") {
+          for (const [childPropertyName, childOptions] of entries(options)) {
+            const childMetadata = defined(
+              children.routePropertyMap[childPropertyName],
+              () =>
+                `No router child like "${routerType.name}.${childPropertyName}".`
+            );
+            define(childMetadata.type, childOptions);
+          }
+          return;
+        }
+
+        getRouterViewRenderers(routerType).index.push(
+          createRendererComponent(options)
         );
-        define(childMetadata.type, childOptions);
       }
-      return;
-    }
-
-    getRouterViewRenderers(routerType).index.push(
-      createRendererComponent(options)
-    );
+    });
   }
 }

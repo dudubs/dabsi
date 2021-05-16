@@ -14,8 +14,17 @@ export default function Lazy(arg0, arg1?): any {
     return (weak ? lazyWeakCallback : lazySymbolCallback)(arg1);
   }
 
-  return (_, propertyName, desc) =>
-    weak ? lazyWeakProperty(desc) : lazySymbolProperty(propertyName, desc);
+  return (target, propertyName, desc) => {
+    if (typeof target === "function") {
+      if (weak === false) {
+        throw new Error("Lazy for static class member must to be a weak.");
+      }
+      return lazyWeakProperty(desc);
+    }
+    return weak
+      ? lazyWeakProperty(desc)
+      : lazySymbolProperty(propertyName, desc);
+  };
 }
 
 function lazySymbolCallback(callback) {

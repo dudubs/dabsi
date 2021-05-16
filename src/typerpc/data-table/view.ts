@@ -88,8 +88,7 @@ export class DataTableView<
     const checkMap = {};
     let allChecked = true;
     for (const row of this.rows) {
-      const checked = (checkMap[row.$key] =
-        this._checkMap[row.$key] ?? (row.$checked || false));
+      const checked = (checkMap[row.$key] ??= row.$checked || false);
       allChecked &&= checked;
     }
     return { checkMap, allChecked };

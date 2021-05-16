@@ -15,7 +15,7 @@ export class RpcNamespace extends Rpc {
     return this;
   };
 
-  static bind(
+  static nsBind(
     getPath: () => any[],
     command: RpcCommand,
     getRootRpcType: () => RpcType
@@ -25,9 +25,7 @@ export class RpcNamespace extends Rpc {
     this.nsGetRootRpcType = getRootRpcType;
   }
 
-  static register(
-    propertyName?: string
-  ): (childRpcType: typeof RpcNamespace) => void;
+  static register(propertyName?: string): (childRpcType: RpcType) => void;
 
   static register<T extends Rpc>(
     propertyName: string,
@@ -42,16 +40,19 @@ export class RpcNamespace extends Rpc {
     }
     if (!childRpcType) {
       // register(propertyName?): class-decorator
-      return (nsType: typeof RpcNamespace) => {
-        const nsKey = propertyName || nsType.name;
-        nsType.nsCommand = payload => this.nsCommand(payload);
-        nsType.nsGetPath = () => [...this.nsGetPath(), nsKey];
-        nsType.bind(
-          () => [...this.nsGetPath(), nsKey],
-          payload => this.nsCommand(payload),
-          () => this.nsGetRootRpcType()
-        );
-        this.register(nsKey, nsType);
+      return (childRpcType: RpcType) => {
+        const nsKey = propertyName || childRpcType.name;
+        if (RpcNamespace.isPrototypeOf(childRpcType)) {
+          const childNsType: typeof RpcNamespace = <any>childRpcType;
+          childNsType.nsCommand = payload => this.nsCommand(payload);
+          childNsType.nsGetPath = () => [...this.nsGetPath(), nsKey];
+          childNsType.nsBind(
+            () => [...this.nsGetPath(), nsKey],
+            payload => this.nsCommand(payload),
+            () => this.nsGetRootRpcType()
+          );
+        }
+        this.register(nsKey, childRpcType);
       };
     }
 
@@ -62,10 +63,11 @@ export class RpcNamespace extends Rpc {
     );
 
     // onBind(payload=> ...)
-    return new childRpcType(
+    const childRpc: Rpc = new childRpcType(
       () => [...this.nsGetPath(), propertyName],
       payload => this.nsCommand(payload),
       () => this.nsGetRootRpcType()
     );
+    return <any>childRpc;
   }
 }

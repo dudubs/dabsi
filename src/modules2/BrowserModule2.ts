@@ -62,6 +62,7 @@ export class BrowserModule2 {
 
     return webpack({
       mode: "development",
+      stats: { warnings: false },
       devtool: "inline-source-map",
       node: {
         __filename: true,
@@ -218,7 +219,8 @@ export class BrowserModule2 {
     });
 
     devModule.parentRunners.push(() => this._pack());
-    for (const platform of ["common", "view", "browser"]) {
+
+    for (const platform of ["common", "view", "browser", "server"]) {
       devModule.watch(platform, async () => {
         //
 

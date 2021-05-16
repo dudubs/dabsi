@@ -3,7 +3,7 @@ import Lazy from "@dabsi/common/patterns/Lazy";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { RouterParamType } from "@dabsi/typerouter2/getRouterChildren";
+import { RouterParamType } from "@dabsi/typerouter2/getRouterMetadata";
 import { getRouterProperty } from "./getRouterProperty";
 import {
   Router,
@@ -129,10 +129,13 @@ export function Route(...args) {
 
     const createRouteType = SingleCall(() => {
       const routeType = getRouteType();
-      if (routeType === Router) {
-        return class extends Router {};
-      }
-      return routeType;
+      class BoundRouteType extends routeType {}
+
+      Object.defineProperty(BoundRouteType, "name", {
+        value: `<Route ${routerType.name}.${propertyName}: ${routeType.name}>`,
+      });
+
+      return BoundRouteType;
     });
 
     const route: Route = {

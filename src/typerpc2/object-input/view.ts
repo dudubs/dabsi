@@ -1,18 +1,16 @@
-import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { AnyInput } from "@dabsi/typerpc2/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { AnyInputMap, ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { Renderer } from "@dabsi/view/react/renderer";
 import React from "react";
 
 export interface ObjectInputViewProps<T extends AnyInputMap>
-  extends InputViewProps<ObjectInput<T>> {
-  children?(view: ObjectInputView<T>): React.ReactNode;
-}
+  extends InputViewProps<ObjectInput<T>> {}
 
 export class ObjectInputView<T extends AnyInputMap> extends InputView<
   ObjectInput<T>,
-  ObjectInputViewProps<T>
+  ObjectInputViewProps<T> & {
+    children?(view: ObjectInputView<T>): React.ReactNode;
+  }
 > {
   protected _childViewMap: Record<string, InputView<AnyInput>> = {};
 
@@ -25,7 +23,7 @@ export class ObjectInputView<T extends AnyInputMap> extends InputView<
       key: childKey,
       state: this.props.state?.[childKey],
       connection: this.connection[childKey],
-      mapKey: childKey,
+      childKey: childKey,
       inputRef: childView => {
         if (childView) {
           this._childViewMap[childKey] = childView;

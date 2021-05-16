@@ -1,4 +1,4 @@
-import { MuiDataTableView } from "@dabsi/browser/mui/widget/DataTable";
+import { MuiDataTableView } from "@dabsi/browser/mui/widget/OldDataTable";
 import { ContentAdminConnection } from "@dabsi/system/content/admin/common/rpc";
 import { ContentAdminRouter } from "@dabsi/system/content/admin/view/router";
 

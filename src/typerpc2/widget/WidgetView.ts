@@ -6,13 +6,15 @@ import {
 } from "@dabsi/typerpc2/widget/Widget";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { View } from "@dabsi/view/react/component/View";
+import { ReactContext } from "@dabsi/view/react/ReactContext";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import { WSA_E_CANCELLED } from "node:constants";
 import React from "react";
 
 export interface WidgetViewProps<T extends AnyWidget> {
   key?: string | number;
-  mapKey?: undefined | string;
+
+  childKey?: undefined | string;
 
   connection: T;
 
@@ -32,6 +34,8 @@ export class WidgetView<
     | WidgetElement<T>
     | undefined = this.props.element;
 
+  private _elementCallbacks: ((element: any) => void)[] | null = null;
+
   get element(): WidgetElement<T> {
     return defined(this._element, () => `No widget element`);
   }
@@ -40,16 +44,32 @@ export class WidgetView<
     return this.props.connection;
   }
 
+  waitForElement(): Promise<WidgetElement<T>> {
+    return new Promise(resolve => {
+      if (this._element) {
+        return resolve(this._element);
+      }
+      (this._elementCallbacks ||= []).push(resolve);
+    });
+  }
+
   setElement(element: WidgetElement<T>): void {
     this._element = element;
   }
 
-  updateElement?(element: WidgetElement<T>): void;
+  updateElement?(): void;
 
   forceUpdateElement() {
     if (!this.isDidMount) return;
     if (!this._element) return;
-    this.updateElement?.(this._element);
+    this.updateElement?.();
+
+    const { _elementCallbacks } = this;
+    this._elementCallbacks = null;
+
+    _elementCallbacks?.forEach(callback => {
+      callback(this._element);
+    });
   }
 
   renderWidget(): React.ReactNode {
@@ -69,15 +89,15 @@ export class WidgetView<
       return EmptyFragment;
     }
 
-    return this.renderWidget();
+    return React.createElement(ReactContext.Provider, {
+      entries: [[WidgetView, this]],
+      children: this.renderWidget(),
+    });
   }
 
   updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
     super.updateViewProps?.(prevProps, nextProps);
-    console.log({
-      prevElement: nextProps.element,
-      thisType: this.constructor.name,
-    });
+
     if (nextProps.element !== prevProps.element) {
       console.log({
         nextElement: nextProps.element,
@@ -91,8 +111,6 @@ export class WidgetView<
     super.componentDidMount?.();
     if (!this.props.parent && !this.props.element) {
       this.connection.getElement().then(element => {
-        console.log({ element });
-
         this.setElement(element);
       });
     }

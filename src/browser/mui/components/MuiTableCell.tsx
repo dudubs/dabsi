@@ -1,31 +1,22 @@
+import withStyles from "@dabsi/browser/mui/withStyles";
 import { TableCellProps } from "@material-ui/core";
 import TableCell from "@material-ui/core/TableCell";
-import { makeStyles } from "@material-ui/core/styles";
-import { createElement } from "react";
-import { Override } from "@dabsi/common/typings2/Override";
-import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
 import clsx from "clsx";
 
-const useStyles = makeStyles({
+export type MuiTableCellProps = TableCellProps & {
+  fitToContent?: boolean;
+};
+
+export default withStyles({
   fitToContent: {
     width: "1%",
     whiteSpace: "nowrap",
   },
+})(({ fitToContent, ...props }: MuiTableCellProps, classes) => {
+  return (
+    <TableCell
+      {...props}
+      className={clsx(props.className, fitToContent && classes.fitToContent)}
+    />
+  );
 });
-
-export type MuiTableCellProps = Override<
-  TableCellProps,
-  {
-    fitToContent?: boolean;
-  }
->;
-
-export function MuiTableCell({ fitToContent, ...props }: MuiTableCellProps) {
-  const classes = useStyles();
-  return createElement(TableCell, {
-    ...props,
-    className: clsx({
-      [classes.fitToContent]: fitToContent,
-    }),
-  });
-}

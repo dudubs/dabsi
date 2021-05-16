@@ -1,5 +1,5 @@
 import { DbModule2 } from "@dabsi/modules2/DbModule2";
-import { CliCommand } from "@dabsi/typecli";
+import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
 import AclContext from "./context";
 
@@ -10,7 +10,11 @@ import AclContext from "./context";
 export class AclModule {
   log = log.get("ACL");
 
-  @CliCommand("show.groups")
+  @CliArgument() protected _init(dbModule: DbModule2) {
+    return dbModule.loadAndConnect();
+  }
+
+  @CliCommand("groups.show")
   async showGroups({}, { groups }: AclContext) {
     console.table(
       await groups
@@ -20,19 +24,19 @@ export class AclModule {
     );
   }
 
-  @CliCommand("add.group", "[name]", y => y.option("name", { type: "string" }))
+  @CliCommand("groups.add", "[name]", y => y.option("name", { type: "string" }))
   async addGroup({ name }, { groups: source }: AclContext) {
     console.log(`created new group #${await source.insertKey({ name })}.`);
   }
 
-  @CliCommand("add.user", "[loginName]", y =>
+  @CliCommand("users.add", "[loginName]", y =>
     y.option("loginName", { type: "string" })
   )
   async addUser({ loginName }, { users: source }: AclContext) {
     console.log(`created new user #${await source.insertKey({ loginName })}.`);
   }
 
-  @CliCommand("update.user", "[login-name-or-id]", y =>
+  @CliCommand("users.update", "[login-name-or-id]", y =>
     y.option("loginName", { type: "string" })
   )
   async updateUser(
@@ -55,7 +59,7 @@ export class AclModule {
     }
   }
 
-  @CliCommand("show.users") async showUsers({}, { users }: AclContext) {
+  @CliCommand("users.show") async showUsers({}, { users }: AclContext) {
     console.table(
       await users
         .take(20)

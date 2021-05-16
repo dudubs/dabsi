@@ -4,26 +4,25 @@ import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFro
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
 import { Rpc } from "@dabsi/typerpc2/Rpc";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
+
+class A extends RpcNamespace {}
+
+@A.register()
+class B extends RpcNamespace {}
+
+@B.register()
+class C extends RpcNamespace {}
+
+@C.register()
+class D extends RpcNamespace {}
+
+class R extends Rpc {
+  @RpcFuncational() testFn!: () => Promise<string>;
+}
+
+const r = D.register(R);
 
 it("", async () => {
-  class A extends RpcNamespace {}
-
-  @A.register()
-  class B extends RpcNamespace {}
-
-  @B.register()
-  class C extends RpcNamespace {}
-
-  @C.register()
-  class D extends RpcNamespace {}
-
-  class R extends Rpc {
-    @RpcFuncational() testFn!: () => Promise<string>;
-  }
-
-  const r = D.register(R);
-
   const rpcHandlerMap = new Map().set(
     R,
     createRpcHandler(R, {

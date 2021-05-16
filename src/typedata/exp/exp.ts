@@ -173,7 +173,6 @@ export type DataArrayExp<T> =
 export type DataStringExp<T> = DataNonRelationKeys<T>;
 
 export type DataExp<T> =
-  | undefined
   | boolean
   | number
   | null

@@ -43,7 +43,7 @@ export class PlatformModule2 {
   async generateCode(outDir: string, platformName: string, sharedCode = "") {
     const platform = this.getPlatform(platformName);
 
-    platform.includeInternalFiles = true;
+    platform.settings.includeInternalFiles = true;
 
     const platforms: Platform2[] = [
       this.getPlatform("common"),

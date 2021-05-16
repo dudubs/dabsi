@@ -16,7 +16,7 @@ import {
   BaseRpcConfigHandler,
   RpcConfigHandlerType,
 } from "@dabsi/typerpc2/RpcConfigHandler";
-import { RpcHandler, RpcWithHandler } from "@dabsi/typerpc2/RpcHandler";
+import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import {
   BaseWidgetHandler,
   WidgetHandler,
@@ -32,17 +32,6 @@ declare const inputValue: unique symbol;
 // TODO ic is object ? merge : fn ? nested
 export const inputConfig = Symbol("inputConfig");
 
-// inputValueConfig
-
-// declare module "./Input" {
-//   interface AnyInput
-//     extends RpcWithHandler<
-//       // BaseRpcConfigHandler<any, any> &
-//       BaseWidgetHandler<any> & BaseInputHandler<AnyInput, any, any>
-//     > {
-//     //
-//   }
-// }
 export type InferredInputConfig<
   T extends AnyInputWithConfig
 > = InferredRpcConfig<T> extends InputConfig<any, infer Config, any, any>
@@ -161,7 +150,7 @@ export function InputHandler<
         BaseInputHandler<T, InputValue<T>, InputValueConfig<T>> &
         E
     >
-): RpcConfigHandlerType<T, H>;
+): RpcConfigHandlerType<T, H & E>;
 
 export function InputHandler(
   inputType: RpcType<AnyInputWithConfig>,

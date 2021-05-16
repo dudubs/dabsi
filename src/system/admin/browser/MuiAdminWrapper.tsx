@@ -1,76 +1,45 @@
-import { MuiFormView } from "@dabsi/browser/mui/form/MuiFormView";
-import { MuiTextInputView } from "@dabsi/browser/mui/input/MuiTextInput";
-import { AclRpc } from "@dabsi/system/acl/common/rpc";
-import { AclStatsEvent } from "@dabsi/system/acl/view";
+import { AclCurrentUserReactor } from "@dabsi/system/acl/view";
+import MuiAdminMenu from "@dabsi/system/admin/browser/MuiAdminMenu";
 import { MuiTemplate } from "@dabsi/system/admin/browser/MuiTemplate";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { AnyForm } from "@dabsi/typerpc2/form/rpc";
-import { AnyObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { ObjectInputView } from "@dabsi/typerpc2/object-input/view";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
-import { useEmittedState } from "@dabsi/view/react/reactor/useEmittedState";
-import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
+import { SystemViewContext } from "@dabsi/system/core/view/SystemViewContext";
+import React from "react";
+import { MuiLoginFormView } from "./MuiLoginFormView";
+import { MuiNestedMenu } from "./MuiNestedMenu";
+import { MuiUserMenu } from "./MuiUserMenu";
 
 export default function MuiAdminWrapper({ children }) {
-  const stats = useEmittedState(AclStatsEvent);
+  const status = AclCurrentUserReactor.use();
 
-  if (!stats) return <>{lang`LOADING`}</>;
-  if (stats.type === "guest") {
+  if (status === null) {
     return (
-      <>
-        hello guestx
-        <ReactWrapper>
-          {() => {
-            return (
-              <SystemView
-                widget={AclRpc.instance.login}
-                define={[
-                  p => <></>,
-                  {
-                    input: {
-                      password: {
-                        //
-                      },
-                    },
-                  },
-                ]}
-              />
-            );
-          }}
-        </ReactWrapper>
-      </>
+      <MuiLoginFormView
+        onLogin={event => {
+          AclCurrentUserReactor.emit(event);
+        }}
+      />
     );
   }
 
-  return <MuiTemplate title={lang`SYSTEM_ADMIN`}>{children}</MuiTemplate>;
+  if (status === undefined) {
+    return <>{lang`LOADING`}</>;
+  }
+
+  return (
+    <MuiTemplate
+      openDrawerMenu
+      title={lang`SYSTEM_ADMIN`}
+      toolbarMenu={
+        <>
+          <MuiUserMenu userName={status.fullName || status.loginName} />
+        </>
+      }
+      drawerMenu={
+        <>
+          <MuiNestedMenu tree={MuiAdminMenu} contextType={SystemViewContext} />
+        </>
+      }
+    >
+      {children}
+    </MuiTemplate>
+  );
 }
-
-// AClRpc.at("login.password")
-
-SystemView.define(AclRpc, {
-  login: {
-    input: {
-      password: {},
-    },
-  },
-});
-
-// login ... password
-
-// SystemView
-
-SystemView.define(TextInput, props => <MuiTextInputView {...props} />);
-
-SystemView.define(AnyForm, props => (
-  <MuiFormView {...props}>{props => <SystemView {...props} />}</MuiFormView>
-));
-
-SystemView.define(AnyObjectInput, props => (
-  <ObjectInputView {...props}>
-    {view =>
-      Object.keys(view.element).map(childKeyy => (
-        <SystemView {...view.getChildProps(childKeyy)} />
-      ))
-    }
-  </ObjectInputView>
-));

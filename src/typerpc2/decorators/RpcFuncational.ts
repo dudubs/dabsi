@@ -14,12 +14,10 @@ export function RpcFuncational(): {
       propertyName,
       RpcMemberType.Functional
     );
-    Object.defineProperty(target, propertyName, {
-      configurable: false,
-      get() {
-        const { getPath, command } = RpcArgs.get(this);
-        return (...args) => command([...getPath(), propertyName, ...args]);
-      },
-    });
+
+    target[propertyName] = function (this: any, ...args) {
+      const { getPath, command } = RpcArgs.get(this);
+      return command([...getPath(), propertyName, ...args]);
+    };
   };
 }

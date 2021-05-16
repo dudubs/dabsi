@@ -74,12 +74,9 @@ export class DataQueryTranslatorToSqb
     for (const order of query.order || []) {
       qb.addOrderBy(
         translator.translate(order.by),
-        order.sort,
-        order.nulls === "FIRST"
-          ? "NULLS FIRST"
-          : order.nulls === "LAST"
-          ? "NULLS LAST"
-          : undefined
+        order.sort && ({ ASC: "ASC", DESC: "DESC" } as const)[order.sort],
+        order.nulls &&
+          ({ FIRST: "NULLS FIRST", LAST: "NULLS LAST" } as const)[order.nulls]
       );
     }
   }

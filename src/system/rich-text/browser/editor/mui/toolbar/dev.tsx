@@ -1,4 +1,4 @@
-import { Debounce } from "@dabsi/common/async/Debounce";
+import { Debounce, Debounce } from "@dabsi/common/async/Debounce";
 import { MuiEditorButton } from "@dabsi/system/rich-text/browser/editor/mui/button";
 import { RichTextEditorGlobals } from "@dabsi/system/rich-text/browser/editor/globals";
 import { useHistoryStateKey } from "@dabsi/system/rich-text/browser/editor/mui/useHistoryStateKey";
@@ -22,7 +22,7 @@ RichTextEditorGlobals.mui.builders.push(
   ({ editor, editor: { muiToolbarMap } }) => {
     if (editor.props.parent) return;
     const { store } = editor;
-    const debounce = Debounce(500);
+    const debounce = new Debounce(500);
 
     editor.defineAtomicBlock("test", {
       render: ({ block }) => (
@@ -48,7 +48,7 @@ RichTextEditorGlobals.mui.builders.push(
     });
 
     editor.onChange(async () => {
-      if (await debounce()) {
+      if (await debounce.wait()) {
         h.setState(editor.store.rawContent);
       }
     });

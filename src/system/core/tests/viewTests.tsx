@@ -140,7 +140,7 @@ const testBuilder = (builder: SystemViewBuilder) =>
     );
   });
 
-fit("expect to define with child-keys", async () => {
+it("expect to define with child-keys", async () => {
   const map: SystemViewComponentMap = new RpcChildMap();
   defineSystemViewCompoent(map, W3_2, {
     wx: { w1: () => EmptyFragment },

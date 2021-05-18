@@ -1,5 +1,5 @@
 // TODO: text validation in view side.
-import { Debounce2 } from "@dabsi/common/async/Debounce";
+import Debounce from "@dabsi/common/async/Debounce";
 import { InputValueElement } from "@dabsi/typerpc2/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
@@ -19,7 +19,7 @@ export class TextInputView<T extends TextInput> extends InputView<
     return this._text;
   }
 
-  protected _debounce = new Debounce2(300);
+  protected _debounce = new Debounce(300);
 
   inputWillValidate() {
     this._debounce.resolve?.();

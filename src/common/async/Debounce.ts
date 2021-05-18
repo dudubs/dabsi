@@ -1,28 +1,4 @@
-export function Debounce(
-  ms: number
-): {
-  (): Promise<boolean>;
-  accept();
-  cancel();
-} {
-  let timeout: any = null;
-  let counter = 0;
-
-  return <any>F;
-
-  async function F() {
-    let id = ++counter;
-    if (timeout) clearTimeout(timeout);
-    await new Promise<void>(resolve =>
-      setTimeout(() => {
-        resolve();
-      }, ms)
-    );
-    return id === counter;
-  }
-}
-
-export class Debounce2 {
+export default class Debounce {
   protected _counter = 0;
   constructor(protected ms: number = 500) {}
 

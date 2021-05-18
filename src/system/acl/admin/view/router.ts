@@ -13,7 +13,10 @@ export class ACL_AdminRouter extends Router {
   groups!: Router;
 
   @Route()
-  createNewUser!: Router;
+  addNewUser!: Router;
+
+  @Route()
+  addNewGroup!: Router;
 
   @Route(() => Router, [String])
   editUser!: (userKey: string) => Router;

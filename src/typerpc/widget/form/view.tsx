@@ -1,4 +1,4 @@
-import { Debounce2 } from "@dabsi/common/async/Debounce";
+import Debounce from "@dabsi/common/async/Debounce";
 import { Tick } from "@dabsi/common/async/Tick";
 import {
   InputError,

@@ -47,8 +47,8 @@ export class RouterLocation {
     );
   }
 
-  toRouter<T extends Router>(): T {
-    return <T>new this.routerType(this);
+  @Lazy(true) get router(): Router {
+    return new this.routerType(this);
   }
 
   @Lazy() get staticLocations(): RouterLocation[] {
@@ -97,7 +97,7 @@ export class RouterLocation {
   find<T extends Router>(routerType: RouterType<T>): T | undefined {
     for (const location of this.visit()) {
       if (location.is(routerType)) {
-        return location.toRouter<T>();
+        return location.router as any;
       }
     }
   }

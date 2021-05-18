@@ -1,6 +1,6 @@
 import MuiCheckboxInputView from "@dabsi/browser/mui/input/CheckboxInput";
 import { MuiDataInputMapView } from "@dabsi/browser/mui/input/DataInputMap";
-import { MuiTextInputView } from "@dabsi/browser/mui/views/MuiTextInput";
+import { MuiTextInputView } from "@dabsi/browser/mui/views/MuiTextInputView";
 import { MuiDataTableView } from "@dabsi/browser/mui/widget/OldDataTable";
 import { MuiFormView } from "@dabsi/browser/mui/form/view";
 import { MuiGridMapView } from "@dabsi/system/core/old-browser/MuiGridMapView";

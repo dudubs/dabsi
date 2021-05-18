@@ -1,6 +1,6 @@
-import { Debounce } from "@dabsi/common/async/Debounce";
-import watch from "@dabsi/filesystem/watch";
+import Debounce from "@dabsi/common/async/Debounce";
 import { DABSI_SRC_DIR } from "@dabsi/env";
+import watch from "@dabsi/filesystem/watch";
 import { spawn } from "child_process";
 
 export default function (): boolean {
@@ -8,7 +8,7 @@ export default function (): boolean {
   if (process.argv.length === argsWithoutMon.length) {
     return false;
   }
-  const debounce = Debounce(100);
+  const debounce = new Debounce(100);
   console.log("watching", DABSI_SRC_DIR);
   let p: { kill() } | null = null;
   reload();
@@ -17,7 +17,7 @@ export default function (): boolean {
     DABSI_SRC_DIR,
     { recursive: true },
     async (e, filename) => {
-      if (await debounce()) {
+      if (await debounce.wait()) {
         reload();
       }
     }

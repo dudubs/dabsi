@@ -1,5 +1,5 @@
 import CloseIcon from "@material-ui/icons/Close";
-import { Debounce2 } from "@dabsi/common/async/Debounce";
+
 import useLangService from "@dabsi/view/lang/useLangService";
 import { mergeProps } from "@dabsi/view/react/merging";
 import { Grid, InputAdornment, makeStyles, Tooltip } from "@material-ui/core";
@@ -7,6 +7,7 @@ import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";
 import clsx from "clsx";
 import React from "react";
+import Debounce from "@dabsi/common/async/Debounce";
 
 const useStyles = makeStyles({
   hidden: {
@@ -29,7 +30,7 @@ export function MuiSearchField({
   const [text, setText] = React.useState(TextFieldProps.defaultValue || "");
   const langService = useLangService();
   const classes = useStyles();
-  const debounce = React.useMemo(() => new Debounce2(searchDebounceMs), [
+  const debounce = React.useMemo(() => new Debounce(searchDebounceMs), [
     searchDebounceMs,
   ]);
 

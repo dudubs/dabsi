@@ -1,4 +1,4 @@
-import { callAndWaitAll } from "@dabsi/common/async/callAndWaitAll";
+import callAndWaitForAll from "@dabsi/common/async/callAndWaitForAll";
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
@@ -81,7 +81,7 @@ export class Platform2 {
         await Promise.all(
           platformFiles.toSeq().map(async baseName => {
             const fileName = path.join(platformDir, baseName);
-            return callAndWaitAll(this.loaders, {
+            return callAndWaitForAll(this.loaders, {
               baseName,
               fileName,
               platformDir,

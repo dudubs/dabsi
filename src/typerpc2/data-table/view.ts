@@ -1,5 +1,5 @@
-import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { Debounce2 } from "@dabsi/common/async/Debounce";
+import Debounce from "@dabsi/common/async/Debounce";
+import withDebounce from "@dabsi/common/async/withDebounce";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { omit } from "@dabsi/common/object/omit";
@@ -10,6 +10,7 @@ import {
   DataColumnType,
   DataTable,
   DataTableQuery,
+  DataTableQueryResult,
   DataTableRow,
   InferredDataTableRow,
 } from "@dabsi/typerpc2/data-table/rpc";
@@ -22,6 +23,7 @@ export type DataTableViewProps<
   ColumnProps
 > = WidgetViewProps<T> & {
   searchDebounceMs?: number;
+  onSelect?(view: DataTableView<T>): void;
   columns?: {
     [K in keyof T]?: ColumnProps;
   };
@@ -35,8 +37,7 @@ export type DataTableViewColumn<ColumnProps> = {
 export class DataTableView<
   T extends AnyDataTable,
   ColumnProps = {},
-  ColumnState = {},
-  U = InferredDataTableRow<T>
+  ColumnState = {}
 > extends WidgetView<
   T,
   DataTableViewProps<T, ColumnProps> & {
@@ -44,15 +45,13 @@ export class DataTableView<
     children?(view: DataTableView<T, ColumnProps, ColumnState>);
   }
 > {
-  protected _searchDebounce = new Debounce2(this.props.searchDebounceMs || 500);
+  protected _queryDebounce = new Debounce(0);
 
-  protected _queryDebounce = new Debounce2(0);
+  @ViewState("forceUpdateQuery") searchText: string = "";
 
-  @ViewState("forceUpdateSearchText") searchText: string = "";
+  @ViewState("forceUpdateQuery") protected _pageSize!: number;
 
-  @ViewState("forceUpdateQuery") pageSize!: number;
-
-  @ViewState("forceUpdateQuery") pageIndex!: number;
+  @ViewState("forceUpdateQuery") protected _pageIndex!: number;
 
   @ViewState("forceUpdateQuery") protected _orderMap: NonNullable<
     DataTableQuery<any>["order"]
@@ -60,33 +59,16 @@ export class DataTableView<
 
   @ViewState() protected _isLoading = false;
 
-  @ViewState() protected _rows!: DataTableRow<U>[];
+  @ViewState() protected _rows!: DataTableRow<InferredDataTableRow<T>>[];
 
   @ViewState() protected _count: number | undefined;
 
-  @ViewState() protected _queryId = 0;
-
-  @ViewState() protected _selectMap: Record<string, boolean> = {};
+  @ViewState() protected _selectedMap: Record<string, boolean> = {};
 
   @ViewState() protected _pick: string[] = Object.keys(this.columnTypeMap);
 
   @Lazy() get columnTypeMap() {
     return DataTable.getColumnTypeMap(getRpcType(this.connection));
-  }
-
-  updateElement() {
-    super.updateElement?.();
-
-    ({
-      pageIndex: this.pageIndex,
-      pageSize: this.pageSize,
-      rows: this._rows,
-      count: this._count = this._count,
-    } = this.element);
-  }
-
-  get queryId(): number {
-    return this._queryId;
   }
 
   get isLoading(): boolean {
@@ -97,12 +79,40 @@ export class DataTableView<
     return this._count;
   }
 
-  get rows(): DataTableRow<U>[] {
+  get rows(): DataTableRow<InferredDataTableRow<T>>[] {
     return this._rows;
   }
 
-  @ViewState() get isSelectAll() {
-    return !this._rows.find(row => !this.isSelectRow(row));
+  get pageIndex(): number {
+    return this._pageIndex;
+  }
+
+  get pageSize(): number {
+    return this._pageSize;
+  }
+
+  get maxPageIndex(): number | undefined {
+    if (this._count) {
+      return this._count / this._pageSize;
+    }
+  }
+
+  set pageSize(pageSize: number) {
+    this._pageSize = pageSize;
+    // update page index relative to max-page-index
+    this.pageIndex = this._pageIndex;
+  }
+
+  set pageIndex(pageIndex: number) {
+    this._pageIndex = Math.max(Math.min(pageIndex, this.maxPageIndex || 0), 0);
+  }
+
+  @ViewState() get isSelectedAll() {
+    return !this._rows.find(row => !this.isSelectedRow(row));
+  }
+
+  getSelectedMap(): Record<string, boolean> {
+    return { ...this._selectedMap };
   }
 
   @ViewState() get columns(): ({
@@ -126,50 +136,57 @@ export class DataTableView<
     });
   }
 
-  toggleColumn(columnKey, show = !this._selectMap[columnKey]) {}
+  toggleColumn(columnKey, show = !this._selectedMap[columnKey]) {}
 
-  toggleAll(select = !this.isSelectAll) {
-    const selectMap = (this._selectMap = { ...this._selectMap });
+  protected _emitSelect = withDebounce(0, () => this.props.onSelect?.(this));
+
+  selectAll(select = !this.isSelectedAll) {
+    const selectedMap = (this._selectedMap = { ...this._selectedMap });
     for (const row of this._rows) {
       if (!select === !row.$selected) {
-        delete selectMap[row.$key];
+        delete selectedMap[row.$key];
       } else {
-        selectMap[row.$key] = select;
+        selectedMap[row.$key] = select;
       }
     }
+    this._emitSelect();
   }
 
-  isSelectRow(row: DataTableRow<U>): boolean {
-    return Boolean(this._selectMap[row.$key] ?? row.$selected);
+  isSelectedRow(row: DataTableRow<InferredDataTableRow<T>>): boolean {
+    return Boolean(this._selectedMap[row.$key] ?? row.$selected);
   }
 
-  isSelectRowChanged(rowKey: string): boolean {
-    return rowKey in this._selectMap;
+  isSelectedRowChanged(rowKey: string): boolean {
+    return rowKey in this._selectedMap;
   }
 
-  toggleSelect(row: DataTableRow<U>, select: boolean = !this.isSelectRow(row)) {
+  selectRow(
+    row: DataTableRow<InferredDataTableRow<T>>,
+    select: boolean = !this.isSelectedRow(row)
+  ) {
     // select && selected: omit
     // select && !selected: set
     // !select && selected: set
     // !select && !selected: omit
 
     if (!select === !row.$selected) {
-      this._selectMap = omit(this._selectMap, row.$key);
+      this._selectedMap = omit(this._selectedMap, row.$key);
     } else {
-      this._selectMap = { ...this._selectMap, [row.$key]: select };
+      this._selectedMap = { ...this._selectedMap, [row.$key]: select };
     }
+    this._emitSelect();
   }
 
-  toggleSort(columnKey: string & keyof U) {
+  toggleSort(columnKey: string & keyof InferredDataTableRow<T>) {
     return this._toggleOrder(columnKey, "sort", ["ASC", "DESC"]);
   }
 
-  toggleNulls(columnKey: string & keyof U) {
+  toggleNulls(columnKey: string & keyof InferredDataTableRow<T>) {
     return this._toggleOrder(columnKey, "nulls", ["FIRST", "LAST"]);
   }
 
   getOrder(
-    columnKey: string & keyof U
+    columnKey: string & keyof InferredDataTableRow<T>
   ):
     | {
         sort?: DataSort;
@@ -197,47 +214,49 @@ export class DataTableView<
       : <any>omit(this._orderMap, columnKey);
   }
 
-  async forceUpdateSearchText() {
-    this._queryDebounce.cancel();
-    if (await this._searchDebounce.wait()) {
-      this.pageIndex = 0;
-      return this.forceUpdateQuery();
-    }
+  updateElement() {
+    super.updateElement?.();
+    this._setQueryResult(this.element);
+  }
+
+  protected _setQueryResult(result: DataTableQueryResult<any>) {
+    ({
+      pageIndex: this._pageIndex,
+      pageSize: this._pageSize,
+      count: this._count = this._count,
+    } = result);
+
+    const { columnTypeMap } = this;
+
+    this._rows = <any>result.rows.map(row => {
+      return mapObject(row, (value, key) => {
+        const type = columnTypeMap[key];
+        return type ? type(value) : value;
+      });
+    });
   }
 
   async forceUpdateQuery() {
+    if (this.isUpdatingElement) return;
     if (!(await this._queryDebounce.wait())) return;
 
-    const hasNewQueryPromise = this._queryDebounce.wait();
+    const isStillLastQueryPromise = this._queryDebounce.wait();
 
     if (this._isLoading) return;
     this._isLoading = true;
+
     try {
       const result = await this.connection.query({
-        pageIndex: this.pageIndex,
-        pageSize: this.pageSize,
+        pageIndex: this._pageIndex,
+        pageSize: this._pageSize,
         text: this.searchText,
         order: this._orderMap,
-        count: this.pageIndex === 0,
+        count: this._count === undefined,
       });
 
-      if (await hasNewQueryPromise) return;
+      if (!(await isStillLastQueryPromise)) return;
 
-      this._queryId++;
-
-      ({
-        pageIndex: this.pageIndex,
-        pageSize: this.pageSize,
-        count: this._count = this._count,
-      } = result);
-
-      const { columnTypeMap } = this;
-      this._rows = <any>result.rows.map(row => {
-        return mapObject(row, (value, key) => {
-          const type = columnTypeMap[key];
-          return type ? type(value) : value;
-        });
-      });
+      this._setQueryResult(result);
     } finally {
       this._isLoading = false;
     }

@@ -1,7 +1,7 @@
 import { Timeout } from "@dabsi/common/async/Timeout";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 
-export async function waitFor<T>(
+export default async function waitFor<T>(
   callback: () => Awaitable<T | undefined>,
   ms = 50
 ): Promise<T> {

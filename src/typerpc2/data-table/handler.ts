@@ -21,6 +21,7 @@ import {
   DataTable,
   DataTableQuery,
   DataTableQueryResult,
+  DataTableRow,
 } from "@dabsi/typerpc2/data-table/rpc";
 import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
@@ -106,7 +107,7 @@ export type DataTableConfig<T, D> = PartialUndefinedKeys<
 
     autoSortables?: boolean;
 
-    isSelected?(row: DataRow<D>): Awaitable<boolean>;
+    isSelectedRow?(row: DataRow<D>): Awaitable<boolean>;
   }
 >;
 
@@ -116,7 +117,12 @@ const getLoader = (
   config: DataTableConfig<any, any>,
   rpcType: RpcType<AnyDataTable>
 ) => {
-  const { autoSortables, columns: columnConfigMap = {}, source } = config;
+  const {
+    autoSortables,
+    columns: columnConfigMap = {},
+    source,
+    isSelectedRow,
+  } = config;
   const columnTypesMap = DataTable.getColumnTypeMap(rpcType);
 
   const selection = source.cursor.selection;
@@ -211,7 +217,10 @@ const getLoader = (
     source: source.addFields(fieldMap),
     sortableMap,
     loader: async dataRow => {
-      const tableRow = {};
+      const tableRow: DataTableRow<{}> = { $key: dataRow.$key };
+      if (isSelectedRow) {
+        tableRow.$selected = await isSelectedRow(dataRow);
+      }
       for (const loader of loaders) {
         await loader(tableRow, dataRow);
       }
@@ -235,7 +244,7 @@ export default WidgetHandler(
         query: DataTableQuery<any>
       ): Promise<DataTableQueryResult<any>> {
         const pageSize = Math.min(
-          query.pageSize || DEFAULT_PAGE_SIZE,
+          query.pageSize || this.config.pageSize || DEFAULT_PAGE_SIZE,
           this.config.maxPageSize ?? MAX_PAGE_SIZE
         );
         const pageIndex = Math.max(query.pageIndex || 0, 0);
@@ -303,7 +312,7 @@ export default WidgetHandler(
           }
         ),
         searchable: Boolean(this.config.searchIn?.length),
-        selectable: Boolean(this.config.isSelected),
+        selectable: Boolean(this.config.isSelectedRow),
       };
     },
     handleQuery(query) {

@@ -1,3 +1,5 @@
+import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
+import { Timeout } from "@dabsi/common/async/Timeout";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
@@ -12,7 +14,7 @@ import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import ReactTestRenderer from "react-test-renderer";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import { waitForSpyCall } from "./waitForSpyCall";
+import waitForSpyCall from "@dabsi/jasmine/waitForSpyCall";
 
 @Entity()
 class TestDataEntity {
@@ -143,17 +145,23 @@ const createRpcWithHooks = <T extends Rpc, K extends keyof T>(
     hookMap
   );
 };
+
 describe("view", () => {
   let view: DataTableView<dtWithTextColumn>;
 
-  let querySpy: jasmine.Spy;
+  let querySpy: jasmine.Spy<typeof view["connection"]["query"]>;
 
   beforeAll(async () => {
     ReactTestRenderer.create(
       <DataTableView
         ref={v => (view = v!)}
         connection={createRpc(dtWithTextColumn, $ =>
-          $({ source, columns: { text: { field: "xs" } } })
+          $({
+            source,
+            isSelectedRow: () => false,
+            pageSize: 2,
+            columns: { text: { field: "xs" } },
+          })
         )}
         searchDebounceMs={0}
       />
@@ -163,11 +171,34 @@ describe("view", () => {
     querySpy = spyOn(view.connection, "query").and.callThrough();
   });
 
+  it("expect to paging", async () => {
+    expect(view.pageSize).toEqual(2);
+    expect(view.count).toEqual(3);
+    view.pageIndex++;
+    await waitForSpyCall(querySpy, ci => ci.args[0].pageIndex === 1);
+    expect(view).toEqual(
+      jasmine.objectContaining({
+        rows: jasmine.objectContaining({ length: 1 }),
+        count: 3,
+      })
+    );
+  });
+
+  it("expect to select-all", async () => {
+    view.selectAll(true);
+    expect(view.getSelectedMap()).toEqual(
+      mapArrayToObject(view.rows, row => [row.$key, true])
+    );
+    expect(view.isSelectedAll).toBeTrue();
+    view.selectAll();
+    expect(view.getSelectedMap()).toEqual({});
+  });
+
   it("expect to toggle sort.", async () => {
     const expectToggleSortTo = async sort => {
       view.toggleSort("text");
       await expectAsync(
-        waitForSpyCall(querySpy, ci => ci.args[0].order.text?.sort === sort)
+        waitForSpyCall(querySpy, ci => ci.args[0].order?.text?.sort === sort)
       ).toBeResolved();
     };
     await expectToggleSortTo("ASC");

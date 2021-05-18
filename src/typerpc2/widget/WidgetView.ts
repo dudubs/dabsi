@@ -40,6 +40,10 @@ export class WidgetView<
     return defined(this._element, () => `No widget element`);
   }
 
+  get hasElement() {
+    return Boolean(this._element);
+  }
+
   get connection(): T {
     return this.props.connection;
   }
@@ -59,17 +63,31 @@ export class WidgetView<
 
   updateElement?(): void;
 
+  private _isUpdatingElement = false;
+
+  get isUpdatingElement(): boolean {
+    return this._isUpdatingElement;
+  }
+
+  @ViewState() protected _isDidUpdatingElement = false;
+
   forceUpdateElement() {
     if (!this.isDidMount) return;
     if (!this._element) return;
-    this.updateElement?.();
+    this._isUpdatingElement = true;
+    try {
+      this.updateElement?.();
 
-    const { _elementCallbacks } = this;
-    this._elementCallbacks = null;
+      const { _elementCallbacks } = this;
+      this._elementCallbacks = null;
 
-    _elementCallbacks?.forEach(callback => {
-      callback(this._element);
-    });
+      _elementCallbacks?.forEach(callback => {
+        callback(this._element);
+      });
+    } finally {
+      this._isUpdatingElement = false;
+      this._isDidUpdatingElement = true;
+    }
   }
 
   renderWidget(): React.ReactNode {
@@ -85,7 +103,7 @@ export class WidgetView<
   }
 
   renderView(): React.ReactNode {
-    if (!this._element) {
+    if (!this._element || !this._isDidUpdatingElement) {
       return EmptyFragment;
     }
 
@@ -99,10 +117,6 @@ export class WidgetView<
     super.updateViewProps?.(prevProps, nextProps);
 
     if (nextProps.element !== prevProps.element) {
-      console.log({
-        nextElement: nextProps.element,
-      });
-
       this._element = nextProps.element;
     }
   }
@@ -110,15 +124,6 @@ export class WidgetView<
   componentDidMount() {
     super.componentDidMount?.();
     if (!this.props.parent && !this.props.element) {
-      this.connection.getElement().then(element => {
-        this.setElement(element);
-      });
-    }
-  }
-
-  componentWillUnmount() {
-    super.componentWillUnmount?.();
-    if (!this.props.parent && !this._element) {
       this.reloadElement();
     }
   }

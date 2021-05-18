@@ -1,6 +1,6 @@
 import { MuiFormView } from "@dabsi/browser/mui/views/MuiFormView";
 import { MuiObjectInputView } from "@dabsi/browser/mui/views/MuiObjectInputView";
-import { MuiTextInputView } from "@dabsi/browser/mui/views/MuiTextInput";
+import { MuiTextInputView } from "@dabsi/browser/mui/views/MuiTextInputView";
 import {
   SystemView,
   SystemViewBuilder,

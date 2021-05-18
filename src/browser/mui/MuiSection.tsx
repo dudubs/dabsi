@@ -1,9 +1,9 @@
 import { Grid, Typography, TypographyProps } from "@material-ui/core";
-import React, { ReactElement } from "react";
+import React from "react";
 
 export type MuiSectionProps = {
   title: React.ReactNode;
-  titleTypograpyProps?: TypographyProps;
+  TitleTypograpyProps?: TypographyProps;
   sidebar?: React.ReactNode;
   children?: React.ReactNode;
   caption?: React.ReactNode;
@@ -11,7 +11,7 @@ export type MuiSectionProps = {
 
 export function MuiSection(p: MuiSectionProps): React.ReactElement {
   const title = (
-    <Typography variant="h5" {...p.titleTypograpyProps}>
+    <Typography variant="h5" {...p.TitleTypograpyProps}>
       {p.title}
     </Typography>
   );
@@ -34,20 +34,6 @@ export function MuiSection(p: MuiSectionProps): React.ReactElement {
         {p.caption && <Grid item>{p.caption}</Grid>}
       </Grid>
       <Grid item>{p.children}</Grid>
-    </Grid>
-  );
-}
-
-export function MuiSectionList(p: {
-  children?: ReactElement[];
-}): React.ReactElement {
-  return (
-    <Grid container direction="column" spacing={3}>
-      {React.Children.map(p.children, child => {
-        if (React.isValidElement(child)) {
-          return <Grid item>{child}</Grid>;
-        }
-      })}
     </Grid>
   );
 }

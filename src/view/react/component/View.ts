@@ -13,7 +13,6 @@ export abstract class View<P = {}> extends Component<P, object> {
   currentState = {};
 
   isDidSetState = false;
-
   componentDidMount() {
     this.isDidMount = true;
   }

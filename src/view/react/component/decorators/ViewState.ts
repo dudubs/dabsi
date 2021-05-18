@@ -1,5 +1,6 @@
 import { setViewStateKey } from "../../setViewStateKey";
 import { View } from "@dabsi/view/react/component/View";
+import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 
 export function ViewState(): { (target: View<any>, key): void };
 
@@ -32,7 +33,9 @@ export function ViewState(updateMethod?) {
       },
       set(this: View<any>, value) {
         if (setViewStateKey(this, key, value)) {
-          updateMethod && this[updateMethod]();
+          if (this.isDidMount && !this.isWillUnmount) {
+            updateMethod && this[updateMethod]();
+          }
         }
       },
     });

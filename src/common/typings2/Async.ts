@@ -8,3 +8,5 @@ export type Awaited<T extends Awaitable> = T extends Awaitable<infer U>
 export type ToAwaitable<T extends Fn> = (
   ...args: Parameters<T>
 ) => Awaitable<Awaited<ReturnType<T>>>;
+
+export type AwaitedReturnValue<T extends Fn> = Awaited<ReturnType<T>>;

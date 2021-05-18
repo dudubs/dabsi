@@ -1,5 +1,5 @@
-import { callAndWaitAll } from "@dabsi/common/async/callAndWaitAll";
-import { Debounce2 } from "@dabsi/common/async/Debounce";
+import callAndWaitForAll from "@dabsi/common/async/callAndWaitForAll";
+import Debounce from "@dabsi/common/async/Debounce";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
@@ -16,7 +16,7 @@ export class DevModule2 {
 
   readonly parentRunners: (() => Awaitable)[] = [];
 
-  protected _reloadDebounce = new Debounce2();
+  protected _reloadDebounce = new Debounce();
 
   protected _process!: ChildProcess;
 
@@ -54,12 +54,12 @@ export class DevModule2 {
           return execute();
         }
         if (process.env.DEV_CHILD) {
-          return Promise.all([callAndWaitAll(this.childRunners), execute()]);
+          return Promise.all([callAndWaitForAll(this.childRunners), execute()]);
         }
 
         this._run();
 
-        await callAndWaitAll(this.parentRunners);
+        await callAndWaitForAll(this.parentRunners);
       },
     });
   }
@@ -71,7 +71,7 @@ export class DevModule2 {
         `reload.${platform}.lock`
       );
 
-      const debounce = new Debounce2(200);
+      const debounce = new Debounce(200);
       if (
         !(await fs.promises
           .stat(watchPath)

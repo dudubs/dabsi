@@ -1,6 +1,6 @@
 import { Fn } from "@dabsi/common/typings2/Fn";
 
-export async function callAndWaitAll<T extends Fn>(
+export default async function callAndWaitForAll<T extends Fn>(
   callbacks: T[],
   ...args: Parameters<T>
 ): Promise<any[]> {

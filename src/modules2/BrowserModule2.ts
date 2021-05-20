@@ -1,11 +1,7 @@
 import { makeHtml } from "@dabsi/common/makeHtml";
 import { Once } from "@dabsi/common/patterns/Once";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
-import {
-  DABSI_WORKSPACE_DIR,
-  DABSI_SRC_DIR,
-  NODE_MODULES_DIR,
-} from "@dabsi/env";
+import { DABSI_WORKSPACE_DIR, DABSI_SRC_DIR, DABSI_NM_DIR } from "@dabsi/env";
 import { touchFile } from "@dabsi/filesystem/touchFile";
 import { DevModule2 } from "@dabsi/modules2/DevModule2";
 import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
@@ -234,9 +230,7 @@ export class BrowserModule2 {
     expressModule.preBuilders.push(app => {
       app.use(
         "/jasmine/lib",
-        express.static(
-          path.join(NODE_MODULES_DIR, "jasmine-core/lib/jasmine-core")
-        )
+        express.static(path.join(DABSI_NM_DIR, "jasmine-core/lib/jasmine-core"))
       );
       app.get("/jasmine", (req, res) => {
         res.contentType("text/html").send(

@@ -1,15 +1,16 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import { IfUndefined } from "@dabsi/common/typings2/boolean";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { AnyForm, BaseForm } from "@dabsi/typerpc2/form/rpc";
-import { AnyInput } from "@dabsi/typerpc2/input/Input";
+import { BaseForm, Form } from "@dabsi/typerpc2/form/rpc";
+import { ConfigOrFactory } from "@dabsi/typerpc2/GenericConfig";
 import {
+  AnyInputWithConfig,
   InputValue,
   InputValueConfig,
 } from "@dabsi/typerpc2/input/InputHandler";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import {
   WidgetHandler,
   WidgetWithConfig,
@@ -21,7 +22,9 @@ declare module "./rpc" {
       BaseForm<T, V>,
       PartialUndefinedKeys<
         {
-          valueConfig: InputValueConfig<T>;
+          valueConfig:
+            | ConfigOrFactory<InputValueConfig<T>>
+            | IfUndefined<InputValueConfig<T>, undefined>;
           inputConfig: RpcConfigurator<T>;
         },
         {
@@ -32,7 +35,7 @@ declare module "./rpc" {
 }
 
 export default WidgetHandler(
-  BaseForm as RpcType<AnyForm>,
+  BaseForm as RpcType<Form<AnyInputWithConfig, any>>,
   {},
   {
     handleInput(inputType) {
@@ -47,12 +50,12 @@ export default WidgetHandler(
       //
     },
     async getElement(state) {
-      const input: RpcHandler<AnyInput> = await this.getContextualHandler(
-        "input"
-      );
+      const input = await this.getContextualHandler("input");
       return {
         value: await input.getValueElement(
-          await input.getValueFromConfig(this.config.valueConfig)
+          await input.getValueFromConfig(
+            await ConfigOrFactory(this.config.valueConfig)
+          )
         ),
         input: await input.getElement(state),
       };

@@ -14,9 +14,5 @@ Object.setPrototypeOf(DataForm, Form);
 export function DataForm<Input extends AnyInput>(
   input: Input
 ): DataForm<Input> {
-  return map.touch(input, () => {
-    const form = Form({ input });
-    form.rpcType = DataForm;
-    return form;
-  });
+  return Form({ input });
 }

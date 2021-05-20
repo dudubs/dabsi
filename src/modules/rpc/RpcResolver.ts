@@ -3,11 +3,12 @@ import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { ConsumeResolver, Resolver } from "@dabsi/typedi";
 import { ConsumeFactory, ResolverDeps } from "@dabsi/typedi/consume";
 import { Rpc, RpcType } from "@dabsi/typerpc2";
+import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
 import {
   RpcConfigurator,
   RpcMemberConfigurator,
 } from "@dabsi/typerpc2/RpcConfig";
-import { RpcMemberKey } from "@dabsi/typerpc2/RpcHandler";
+import { RpcChildKey, RpcMemberKey } from "@dabsi/typerpc2/RpcHandler";
 
 // TODO: RpcResolver() -> Resolve handler by configurator. RpcConfigurator: || Handler..
 
@@ -22,6 +23,9 @@ export interface RpcMemberResolver<T>
   rpcMemberKey: string;
 }
 
+export type RpcResolverFactory<T extends Rpc> = {
+  $createRpcResolver(rpcType: RpcType<T>): RpcResolver<T>;
+};
 export function RpcResolver<T extends Rpc>(
   rpcType: RpcType<T>
 ): Resolver<RpcConfigurator<T>>;
@@ -29,7 +33,9 @@ export function RpcResolver<T extends Rpc>(
 export function RpcResolver<T extends Rpc>(
   rpcType: RpcType<T>,
   memberConfiguratorResolverMap: {
-    [K in RpcMemberKey<T>]?: Resolver<RpcMemberConfigurator<T[K]>>;
+    [K in RpcMemberKey<T>]?:
+      | Resolver<RpcMemberConfigurator<T[K]>>
+      | RpcResolverFactory<T[K]>;
   }
 ): any[];
 

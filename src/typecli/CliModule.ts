@@ -1,5 +1,4 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
-import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   CliBuilder,
   CliExtenderFn,
@@ -137,6 +136,6 @@ export class CliModule2 {
       .strict()
       .scriptName("ts").argv;
 
-    this.moduleRunner.process.waitToEnd();
+    this.moduleRunner.process.waitForLast();
   }
 }

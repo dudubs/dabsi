@@ -1,3 +1,4 @@
+// TODO: fix make when no have platofrm folders under src/ - expect to make tsconfigs
 import fs from "fs";
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Defined } from "@dabsi/common/patterns/Defined";
@@ -13,6 +14,7 @@ import {
 import path from "path";
 import { Platform2 } from "./Platform2";
 import { Record } from "immutable";
+import MakeModule from "@dabsi/modules2/MakeModule";
 
 @Module({
   cli: "platform",
@@ -21,10 +23,13 @@ export class PlatformModule2 {
   constructor(
     protected loaderModule: LoaderModule2,
     protected projectModule: ProjectModule2,
-    protected process: AsyncProcess2
+    protected process: AsyncProcess2,
+    protected makeModule: MakeModule
   ) {}
 
   readonly viewLibs = new Set<string>();
+
+  readonly serverLibs = new Set<string>();
 
   protected _map = new Map<string, Platform2>();
   protected _platformMap = new Map<string, Platform2>();
@@ -144,16 +149,6 @@ export class PlatformModule2 {
 
     const libConfigsDir = path.join(DABSI_DIR, "configs");
 
-    const makeJsonFile = (path: string, data: any) =>
-      makeFile(path, JSON.stringify(data, null, 2));
-
-    const makeFile = async (path: string, text: string) => {
-      console.log("write file " + path);
-      // console.log("  " + text.replace(/\n/g, "\n  "));
-
-      await fs.promises.writeFile(path, text);
-    };
-
     const makeProject = async (project: Project) => {
       project.paths = new TsConfigPaths2(cfs);
       await project.paths.load(path.join(project.dir, "tsconfig.json"));
@@ -165,19 +160,22 @@ export class PlatformModule2 {
       );
 
       await Promise.all([
-        makeJsonFile(path.join(project.configsDir, "tsconfig.server.json"), {
-          extends: path.join(
-            path.relative(project.configsDir, libConfigsDir),
-            `tsconfig.base.server.json`
-          ),
-          include: [
-            ...project.paths
-              .getFsPaths()
-              .toSeq()
-              .map(fsPath => path.relative(project.configsDir, fsPath)),
-          ],
-          exclude: ["**/view", ...viewPlatforms.toSeq().map(p => `**/${p}`)],
-        }),
+        this.makeModule.makeJsonFile(
+          path.join(project.configsDir, "tsconfig.server.json"),
+          {
+            extends: path.join(
+              path.relative(project.configsDir, libConfigsDir),
+              `tsconfig.base.server.json`
+            ),
+            include: [
+              ...project.paths
+                .getFsPaths()
+                .toSeq()
+                .map(fsPath => path.relative(project.configsDir, fsPath)),
+            ],
+            exclude: ["**/view", ...viewPlatforms.toSeq().map(p => `**/${p}`)],
+          }
+        ),
         Promise.all(
           project.platformMap.toSeq("values").map(p => makeProjectPlatform(p))
         ),
@@ -199,13 +197,13 @@ export class PlatformModule2 {
         compilerOptions: project.pathsWithBaseUrl,
       };
       return Promise.all([
-        makeJsonFile(prodConfigFileName, {
+        this.makeModule.makeJsonFile(prodConfigFileName, {
           ...baseConfig,
           include: directories.map(fsPath =>
             path.relative(project.configsDir, fsPath)
           ),
         }),
-        makeJsonFile(devConfigFileName, {
+        this.makeModule.makeJsonFile(devConfigFileName, {
           ...baseConfig,
           include: [
             ...project.paths
@@ -233,9 +231,12 @@ export class PlatformModule2 {
         }),
         Promise.all(
           directories.map(async dir => {
-            await makeJsonFile(path.join(dir, "tsconfig.json"), {
-              extends: path.posix.relative(dir, devConfigFileName),
-            });
+            await this.makeModule.makeJsonFile(
+              path.join(dir, "tsconfig.json"),
+              {
+                extends: path.posix.relative(dir, devConfigFileName),
+              }
+            );
           })
         ),
       ]);
@@ -245,6 +246,8 @@ export class PlatformModule2 {
 
     for (const platform of platforms) {
       for (const dir of platform.directories) {
+        console.log({ dir });
+
         const projectDir = dir.split(/[\\\/]+src[\\\/]+/, 1)[0];
 
         const project = projectMap.touch(
@@ -257,6 +260,7 @@ export class PlatformModule2 {
       }
     }
 
+    console.log("making", { projectMap });
     await Promise.all(
       projectMap.toSeq("values").map(project => makeProject(project))
     );

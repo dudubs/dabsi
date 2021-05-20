@@ -1,4 +1,3 @@
-import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
@@ -13,7 +12,7 @@ import {
   InputValueConfig,
   InputWithConfig,
 } from "@dabsi/typerpc2/input/InputHandler";
-import { BaseObjectInput } from "@dabsi/typerpc2/object-input/rpc";
+import { BaseObjectInput, ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
@@ -45,7 +44,7 @@ declare module "./rpc" {
 }
 
 export default InputHandler(
-  (BaseObjectInput as any) as RpcType<BaseObjectInput<AnyInputWithConfigMap>>,
+  (BaseObjectInput as any) as RpcType<ObjectInput<AnyInputWithConfigMap>>,
   {
     configCanBeUndefined: false,
     // handlerFactory: rpcType ...

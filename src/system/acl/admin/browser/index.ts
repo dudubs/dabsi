@@ -5,8 +5,8 @@ MuiAdminMenu.acl = {
   children: {
     users: {},
     groups: {
-      onClick(_, { push }) {
-        push(ACL_AdminRouter, r => r.groups);
+      onClick(_, { history }) {
+        history.push(ACL_AdminRouter, r => r.groups);
       },
     },
   },

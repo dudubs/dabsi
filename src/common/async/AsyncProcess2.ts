@@ -101,7 +101,7 @@ export class AsyncProcess2 {
     });
   }
 
-  async waitToEnd() {
+  async waitForLast() {
     while (true) {
       await this.wait();
       await new Promise(resolve => {
@@ -112,7 +112,7 @@ export class AsyncProcess2 {
   }
 
   waitFor<T>(callback: () => Promise<T>): Promise<T> {
-    return Promise.all([callback(), this.waitToEnd()]).then(
+    return Promise.all([callback(), this.waitForLast()]).then(
       ([result]) => result
     );
   }

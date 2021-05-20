@@ -10,5 +10,5 @@ export type If<C extends boolean, T, E = never> = C extends true ? T : E;
 export type IfNot<C extends boolean, T, E = never> = If<C, E, T>;
 export type IsUndefined<T> = undefined extends T ? true : false;
 
-export type IfUndefined<T, U, E = Defined<T>> = If<IsUndefined<T>, U, E>;
+export type IfUndefined<T, U, E = never> = If<IsUndefined<T>, U, E>;
 export type ExtractDefault<T, U, E> = T extends U ? T : E;

@@ -5,7 +5,7 @@ import MuiActions, {
   MuiAction,
   MuiActionsProps,
 } from "@dabsi/browser/mui/MuiActions";
-import { MuiSection } from "@dabsi/browser/mui/MuiSection";
+import MuiSection from "@dabsi/browser/mui/MuiSection";
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import {

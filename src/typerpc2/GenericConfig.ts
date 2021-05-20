@@ -18,15 +18,6 @@ export interface GenericConfig2<T extends Fn, U extends any[] = []> {
   [__GenericConfigSymbol]?: true;
 }
 
-declare let X: GenericConfig2<
-  <T extends Fn>(
-    type: T,
-    config: {
-      value: ReturnType<T>;
-    }
-  ) => number
->;
-
 export type AnyGenericConfig = GenericConfig2<Fn, any[]>;
 
 export type GenericConfigArgs<
@@ -107,3 +98,25 @@ export type ConfiguratorType<T> = If<
   ReturnType<GenericConfigFn<Extract<T, AnyGenericConfig>>>,
   T
 >;
+
+export type ConfigOrFactory<T, U extends any[] = []> = T | ConfigFactory<T, U>;
+
+export function ConfigOrFactory<T>(
+  config: ConfigOrFactory<T, []> | undefined
+): Promise<T | undefined>;
+export function ConfigOrFactory<T, U extends any[]>(
+  config: ConfigOrFactory<T, U> | undefined,
+  args: U | (() => Awaitable<U>)
+): Promise<T | undefined>;
+export async function ConfigOrFactory(
+  config,
+  args: any[] | (() => Awaitable<any[]>) = []
+) {
+  if (typeof config !== "function") {
+    return config;
+  }
+  return GenericConfig2(
+    config as ConfigFactory<any, [any]>,
+    (typeof args === "function" ? await args() : args) as [never]
+  );
+}

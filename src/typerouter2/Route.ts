@@ -127,15 +127,16 @@ export function Route(...args) {
       paramTypes = [],
     ] = args;
 
-    const createRouteType = SingleCall(() => {
+    const bindRouterType = SingleCall(() => {
       const routeType = getRouteType();
-      class BoundRouteType extends routeType {}
 
-      Object.defineProperty(BoundRouteType, "name", {
-        value: `<Route ${routerType.name}.${propertyName}: ${routeType.name}>`,
-      });
-
-      return BoundRouteType;
+      return class extends routeType {
+        static route = route;
+        // @ts-ignore
+        static get name() {
+          return `<BoundRouter ${routerType.name}.${propertyName}: ${routeType.name}>`;
+        }
+      };
     });
 
     const route: Route = {
@@ -143,7 +144,7 @@ export function Route(...args) {
       propertyName,
       name: routeName,
       get type() {
-        return createRouteType();
+        return bindRouterType();
       },
       paramTypes,
     };

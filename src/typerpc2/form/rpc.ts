@@ -13,6 +13,8 @@ import {
   WidgetState,
 } from "@dabsi/typerpc2/widget/Widget";
 
+export type Form<T extends AnyInput, V> = BaseForm<T, V>;
+
 @RpcWithConfig()
 export class BaseForm<T extends AnyInput, V> extends Widget<
   {
@@ -52,3 +54,10 @@ export type FormInput<T extends AnyForm> = InferredForm<T>["Input"];
 export type FormValue<T extends AnyForm> = InferredForm<T>["Value"];
 
 export const AnyForm = (BaseForm as any) as RpcType<AnyForm>;
+
+export declare function Form2<T extends AnyInput>(inputType: RpcType<T>);
+
+export declare class Form2<Input extends AnyInput, Value> extends BaseForm<
+  Input,
+  Value
+> {}

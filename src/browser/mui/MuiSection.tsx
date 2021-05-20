@@ -9,7 +9,7 @@ export type MuiSectionProps = {
   caption?: React.ReactNode;
 };
 
-export function MuiSection(p: MuiSectionProps): React.ReactElement {
+export default function MuiSection(p: MuiSectionProps): React.ReactElement {
   const title = (
     <Typography variant="h5" {...p.TitleTypograpyProps}>
       {p.title}

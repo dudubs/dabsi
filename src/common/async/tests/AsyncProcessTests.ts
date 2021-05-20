@@ -11,7 +11,7 @@ it("expect to pus and call", async done => {
   p.push(async () => {
     done();
   });
-  await p.waitToEnd();
+  await p.waitForLast();
 });
 
 it("expect to push and call deeper", async done => {
@@ -22,7 +22,7 @@ it("expect to push and call deeper", async done => {
       });
     });
   });
-  await p.waitToEnd();
+  await p.waitForLast();
 });
 
 it("expect to wait and push", async done => {
@@ -36,7 +36,7 @@ it("expect to wait and push", async done => {
       });
     });
   });
-  await p.waitToEnd();
+  await p.waitForLast();
 });
 
 it("expect to push and reject", async () => {
@@ -48,7 +48,7 @@ it("expect to push and reject", async () => {
       });
     });
   });
-  await expectAsync(p.waitToEnd()).toBeRejected();
+  await expectAsync(p.waitForLast()).toBeRejected();
 });
 
 it("expect to wait and push deepr", async () => {
@@ -59,5 +59,5 @@ it("expect to wait and push deepr", async () => {
       });
     });
   });
-  await expectAsync(p.waitToEnd()).toBeRejected();
+  await expectAsync(p.waitForLast()).toBeRejected();
 });

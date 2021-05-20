@@ -1,3 +1,4 @@
+import { IfUndefined } from "@dabsi/common/typings2/boolean";
 import {
   Resolved,
   ResolvedMap,
@@ -76,3 +77,7 @@ declare module "./Resolver" {
     ): ConsumeResolver<T>;
   }
 }
+
+export type ConsumeArgs<C, U extends ResolverDeps> =
+  | [deps: U, factory: ConsumeFactory<C, U>]
+  | IfUndefined<C, []>;

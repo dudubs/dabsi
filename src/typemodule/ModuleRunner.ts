@@ -23,7 +23,7 @@ export class ModuleRunner {
     const runner = new ModuleRunner();
     Object.assign(runner.context, context);
     runner.get(target);
-    await runner.process.waitToEnd();
+    await runner.process.waitForLast();
     return runner;
   }
 

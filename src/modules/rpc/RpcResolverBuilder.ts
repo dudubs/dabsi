@@ -1,5 +1,6 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { defined } from "@dabsi/common/object/defined";
+import { capitalize } from "@dabsi/common/string/capitalize";
 import { RpcMemberResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { Resolver, ResolverLike, ResolverMap } from "@dabsi/typedi";
 import {
@@ -29,7 +30,6 @@ import {
 } from "@dabsi/typerpc2/RpcConfig";
 import { RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
-import { capitalize } from "@material-ui/core";
 
 export class RpcResolverBuilder {
   protected _resolverMap = new Map<RpcType, ResolverLike<RpcResolver<any>>>();

@@ -2,7 +2,7 @@ import {
   DABSI_CURRENT_DIR,
   DABSI_NODE_OPTIONS,
   DABSI_SRC_DIR,
-  NODE_MODULES_DIR,
+  DABSI_NM_DIR,
 } from "@dabsi/env";
 import { spawnSync } from "child_process";
 import fs from "fs";
@@ -35,7 +35,7 @@ export default function testCli(args) {
       "--",
       relative(
         DABSI_CURRENT_DIR,
-        path.join(NODE_MODULES_DIR, "jasmine/bin/jasmine.js")
+        path.join(DABSI_NM_DIR, "jasmine/bin/jasmine.js")
       ),
       "--stop-on-failure=true",
       process.env.JASMINE_OPTIONS,

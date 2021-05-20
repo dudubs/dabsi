@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "noImplicitThis": true,
     "emitDecoratorMetadata": true,
+    "module": "commonjs",
     "moduleResolution": "node",
     "skipDefaultLibCheck": true,
     "target": "ES2017",

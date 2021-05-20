@@ -64,7 +64,11 @@ export class ServerModule2 {
   }
 
   @CliCommand("start", y =>
-    y.option("port", { type: "number", alias: "p", default: 7777 })
+    y.option("port", {
+      type: "number",
+      alias: "p",
+      default: process.env.PORT || 5000,
+    })
   )
   async start(args: Partial<StartArgs> = {}) {
     await this.load();

@@ -46,6 +46,8 @@ export class RpcModule2 {
     const viewFilePattern = path.join(DABSI_SRC_DIR, "typerpc2/**/*view.ts");
     platformModule2.viewLibs.add(viewFilePattern).add(viewFilePattern + "x");
 
+    platformModule2.serverLibs.add(path.join(DABSI_SRC_DIR, "typerpc"));
+
     platformModule2
       .getPlatform("common")
       .loaders.push(({ platform, baseName, fileName }) => {
@@ -55,9 +57,7 @@ export class RpcModule2 {
       });
   }
 
-  configure(
-    config: RpcResolver<any> | RpcMemberResolver<any, any> | undefined
-  ) {
+  configure(config: RpcResolver<any> | RpcMemberResolver<any> | undefined) {
     if (Array.isArray(config)) {
       for (const configItem of config) {
         this.configure(configItem);

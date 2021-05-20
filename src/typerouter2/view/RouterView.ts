@@ -141,7 +141,7 @@ export namespace RouterView {
       function define(routerType, options, depth) {
         if (Array.isArray(options)) {
           for (const arg of options) {
-            define(routerType, arg, 0);
+            define(routerType, arg, depth);
           }
           return;
         }

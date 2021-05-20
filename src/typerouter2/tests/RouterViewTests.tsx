@@ -7,6 +7,16 @@ import ReactTestRenderer from "react-test-renderer";
 
 const r = createTestRouters();
 
+let rootFromCToBWrapper;
+let rootFromCToBIndex;
+let rootFromBWrapper;
+
+RouterView.define(r.B, {
+  $wrapper: ({ root, children }) => {
+    rootFromBWrapper = root;
+    return children;
+  },
+});
 RouterView.define(r.C, [
   {
     $wrapper: ({ children }) => <>cw1{children}</>,
@@ -17,8 +27,16 @@ RouterView.define(r.C, [
   ({ children }) => <>ci{children}</>,
   {
     b: [
-      { $wrapper: ({ children }) => <>bw{children}</> },
-      ({ children }) => <>bi{children}</>,
+      {
+        $wrapper: ({ root, children }) => {
+          rootFromCToBWrapper = root;
+          return <>bw{children}</>;
+        },
+      },
+      ({ root, children }) => {
+        rootFromCToBIndex = root;
+        return <>bi{children}</>;
+      },
       {
         a: ({ children }) => <>ai{children}</>,
       },
@@ -29,6 +47,7 @@ RouterView.define(r.C, [
 beforeEach(() => {
   buildRouterViews();
 });
+
 const testPath = path =>
   ReactTestRenderer.create(
     <BaseRouterView routerType={r.C} path={path} />
@@ -44,4 +63,12 @@ it("expect to c & b wrappers with b-index", () => {
 
 it("expect to c & b wrappers with a-index", () => {
   expect(testPath("/b/a")).toEqual(["cw1", "cw2", "bw", "ai"]);
+});
+
+fit("expect to roots", () => {
+  ReactTestRenderer.create(<BaseRouterView routerType={r.C} path={"/b"} />);
+
+  expect(rootFromCToBWrapper).toBeInstanceOf(r.C);
+  expect(rootFromCToBIndex).toBeInstanceOf(r.C);
+  expect(rootFromBWrapper).toBeInstanceOf(r.B);
 });

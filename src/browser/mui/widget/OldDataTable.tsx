@@ -11,7 +11,7 @@
 //   MuiTableToolbar,
 //   MuiTableToolbarProps,
 // } from "@dabsi/browser/mui/components/MuiTableToolbar";
-// import { MuiSection } from "@dabsi/browser/mui/section";
+// import  MuiSection  from "@dabsi/browser/mui/section";
 // import { MuiSearchField } from "@dabsi/browser/mui/widget/searchField";
 // import { hasKeys } from "@dabsi/common/object/hasKeys";
 // import { mapObject } from "@dabsi/common/object/mapObject";

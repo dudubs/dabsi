@@ -14,6 +14,7 @@ import { RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
 
 export type AnyInputMap = Record<string, AnyInput>;
+
 @RpcWithConfig()
 export class BaseObjectInput<T extends AnyInputMap> extends Input<
   {

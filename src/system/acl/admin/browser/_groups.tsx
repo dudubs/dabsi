@@ -1,3 +1,4 @@
+import MuiSection from "@dabsi/browser/mui/MuiSection";
 import { MuiDataTableView } from "@dabsi/browser/mui/views/MuiDataTableView";
 import ACL_AdminRpc from "@dabsi/system/acl/admin/common/rpc";
 import { ACL_AdminRouter } from "@dabsi/system/acl/admin/view/router";
@@ -15,6 +16,6 @@ RouterView.define(ACL_AdminRouter, {
       />
     ),
   ],
-  editGroup: () => <>edit group</>,
-  addNewGroup: () => <>add new group</>,
+  editGroup: () => <MuiSection title={lang`EDIT_GROUP`}>asd</MuiSection>,
+  addNewGroup: () => <MuiSection title={lang`ADD_NEW_GROUP`}>asd</MuiSection>,
 });

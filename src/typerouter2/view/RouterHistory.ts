@@ -20,13 +20,11 @@ export class RouterHistory {
   push(location: Router);
   push(arg0, getRouter?) {
     let location: RouterLocation;
-
     if (typeof arg0 === "function") {
       location = defined(
         this.location.find(arg0),
         () => `No static route to ${arg0.name}`
       );
-
       if (getRouter) {
         location = getRouterLocation(getRouter(location));
       }

@@ -22,7 +22,6 @@ import {
   ConsumeFactory,
   ResolverDeps,
 } from "@dabsi/typedi/consume";
-import { InputValueConfig } from "@dabsi/typerpc/input/Input";
 import { DataForm } from "@dabsi/typerpc2/data-form/rpc";
 import {
   ConfigFactory,
@@ -30,7 +29,10 @@ import {
   GenericConfig2,
 } from "@dabsi/typerpc2/GenericConfig";
 import { AnyInput } from "@dabsi/typerpc2/input/Input";
-import { InputValue } from "@dabsi/typerpc2/input/InputHandler";
+import {
+  InputValue,
+  InputValueConfig,
+} from "@dabsi/typerpc2/input/InputHandler";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 
 export type DataFormConfig<

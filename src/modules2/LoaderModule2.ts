@@ -23,7 +23,7 @@ export class LoaderModule2 {
       async target => {
         const metadata = ModuleMetadata.get(target);
 
-        if (!/[\\\/](module|index)\.ts$/.test(metadata.anchor.path)) {
+        if (!/[\\\/](module|index|main)\.ts$/.test(metadata.anchor.path)) {
           return;
         }
         const dir = dirname(metadata.anchor.path);

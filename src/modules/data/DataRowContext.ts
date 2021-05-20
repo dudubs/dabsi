@@ -34,5 +34,5 @@ export function DataRowContext<T>(
 
 DataRowContext.assign = (rowType, rowKey?: string): ResolverMap => {
   const rowKeyContext = DataRowKeyContext(rowType);
-  return Resolver.Context([new rowKeyContext(rowKey || null)]);
+  return Resolver.Context.assign({}, [new rowKeyContext(rowKey || null)]);
 };

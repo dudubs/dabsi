@@ -1,5 +1,4 @@
 import callAndWaitForAll from "@dabsi/common/async/callAndWaitForAll";
-import { Timeout } from "@dabsi/common/async/Timeout";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";

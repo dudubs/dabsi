@@ -1,4 +1,3 @@
-import { Timeout } from "@dabsi/common/async/Timeout";
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
 import {
@@ -9,7 +8,7 @@ import {
 import { InputWithConfig } from "@dabsi/typerpc2/input/InputHandler";
 import { InputWithError } from "@dabsi/typerpc2/input/InputWithError";
 import { InputWithValue } from "@dabsi/typerpc2/input/InputWithValue";
-import { RpcConfig } from "@dabsi/typerpc2/RpcConfig";
+import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 
 export function typingTests() {
   class TestInput1 extends Input<

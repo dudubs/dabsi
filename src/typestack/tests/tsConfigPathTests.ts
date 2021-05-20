@@ -8,7 +8,7 @@ it("", async () => {
   const parser = new TsConfigPaths2({
     isFile,
     isDir: async path => !(await isFile(path)),
-    readFile: async () => "",
+    readJsonFile: async () => ({}),
   });
 
   parser.build(rootDir + "/my", {

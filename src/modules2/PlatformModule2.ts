@@ -245,6 +245,8 @@ export class PlatformModule2 {
     const projectMap = new Map<string, Project>();
 
     for (const platform of platforms) {
+      console.log({ platform });
+
       for (const dir of platform.directories) {
         console.log({ dir });
 

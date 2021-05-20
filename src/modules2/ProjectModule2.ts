@@ -9,7 +9,11 @@ import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
 import path from "path";
 
 export class ProjectSettings {
-  constructor(readonly directory: string, readonly prod = false) {}
+  constructor(
+    readonly directory: string,
+    //
+    readonly prod = false
+  ) {}
 
   readonly name = path.basename(this.directory).toLowerCase();
 }
@@ -30,17 +34,16 @@ export class ProjectModule2 {
 
   constructor(
     protected loaderModule: LoaderModule2,
-    process: AsyncProcess2,
 
-    public readonly settings: ProjectSettings
+    public readonly settings: ProjectSettings,
+    process: AsyncProcess2
   ) {
     // TODO: move to dev-module
-    !this.settings.prod &&
-      process.push(async () => {
-        await this.paths.load(
-          path.join(this.settings.directory, "tsconfig.json")
-        );
-      });
+    process.push(async () => {
+      await this.paths.load(
+        path.join(this.settings.directory, "tsconfig.json")
+      );
+    });
   }
 }
 

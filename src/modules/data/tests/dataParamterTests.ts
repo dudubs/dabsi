@@ -51,12 +51,15 @@ beforeAll(() => {
     CR,
     Resolver.resolve(
       builder.getResolver(CR),
-      Resolver.Context([builder, new X("ix")])
+      Resolver.Context.assign({}, [builder, new X("ix")])
     )
   );
   pr = createRpc(
     PR,
-    Resolver.resolve(builder.getResolver(PR), Resolver.Context([builder]))
+    Resolver.resolve(
+      builder.getResolver(PR),
+      Resolver.Context.assign({}, [builder])
+    )
   );
 });
 

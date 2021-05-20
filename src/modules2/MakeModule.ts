@@ -25,9 +25,9 @@ export default class MakeModule {
 
   async makeTextFile(path: string, text: string) {
     await this.touchDir(dirname(path));
-    console.log("write file " + path);
-    console.log("  " + text.replace(/\n/g, "\n  "));
+    console.log("make file " + path);
+    // console.log("  " + text.replace(/\n/g, "\n  "));
 
-    // await fs.promises.writeFile(path, text);
+    await fs.promises.writeFile(path, text);
   }
 }

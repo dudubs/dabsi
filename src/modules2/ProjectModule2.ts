@@ -30,6 +30,8 @@ export class ProjectModule2 {
 
   readonly configsDir = path.join(this.settings.directory, "configs");
 
+  readonly bundleDir = path.join(this.settings.directory, "bundle");
+
   readonly srcDir = path.join(this.settings.directory, "src");
 
   constructor(

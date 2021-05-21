@@ -12,6 +12,8 @@ if (require.main === module)
 
     const projectDir = fs.realpathSync(".");
 
+    console.log({ projectDir });
+
     const { default: mainModuleTarget } = require(path.join(
       projectDir,
       `dist/${projectName}/src/main.js`

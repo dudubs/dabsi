@@ -1,3 +1,4 @@
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   DABSI_DIR,
   DABSI_NM_DIR,
@@ -5,14 +6,16 @@ import {
   DABSI_WORKSPACE_DIR,
   getWorkspacePackage,
 } from "@dabsi/env";
-import { BrowserModule2 } from "@dabsi/modules2/BrowserModule2";
+import BrowserPlatformModule from "@dabsi/modules2/BrowserPlatformModule";
 import MakeModule from "@dabsi/modules2/MakeModule";
 import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
 import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
-import path from "path";
+import { spawn } from "child_process";
 import * as fs from "fs";
+import path from "path";
+import fsExtra from "fs-extra";
 @Module({
   cli: "heroku",
 })
@@ -24,30 +27,81 @@ export default class HerokuModule {
     "packages/heroku"
   );
 
+  protected _builders: (() => Awaitable)[] = [];
+
   constructor(
     protected projectModule: ProjectModule2,
     protected platformModule: PlatformModule2,
     protected makeModule: MakeModule
   ) {}
 
-  installBrowser(@Plugin() browserModule: BrowserModule2) {
-    //
-    console.log("instal hforb");
+  installBrowser(@Plugin() bpm: BrowserPlatformModule) {
+    this._builders.push(async () => {
+      await bpm.pack();
+      await fsExtra.copy(
+        path.join(this.projectModule.bundleDir, "browser"),
+        path.join(this.packageDir, "bundle/browser"),
+        {
+          recursive: true,
+          overwrite: true,
+        }
+      );
+    });
   }
 
   @CliCommand("build", y =>
-    y.option("clean", { alias: "c", type: "boolean", default: false })
+    y
+      .option("clean", { alias: "c", type: "boolean", default: false })
+      .option("make", { alias: "m", type: "boolean", default: false })
   )
-  async build({ clean }: { clean?: boolean } = {}) {
-    await this.clean();
+  async build({ clean, make }: { clean?: boolean; make?: boolean } = {}) {
+    clean && (await this.clean());
+
+    make && (await this.make());
+
+    console.log("building");
+
+    await Promise.all([
+      ...this._builders.map(builder => builder()),
+
+      new Promise<void>((resolve, reject) => {
+        spawn("tsc", ["-p", "configs/tsconfig.heroku.json"], {
+          cwd: this.projectModule.settings.directory,
+          stdio: "inherit",
+        })
+          .on("error", code => {
+            reject(code);
+          })
+          .on("close", () => {
+            resolve();
+          });
+      }),
+    ]);
+  }
+
+  @CliCommand("compile")
+  async compile() {
+    await new Promise<void>((resolve, reject) => {
+      spawn("tsc", ["-p", "configs/tsconfig.heroku.json"], {
+        cwd: this.projectModule.settings.directory,
+        stdio: "inherit",
+      })
+        .on("error", code => {
+          reject(code);
+        })
+        .on("close", () => {
+          resolve();
+        });
+    });
   }
 
   @CliCommand("clean")
   async clean() {
+    console.log("cleaning");
+
     await Promise.all(
       ["dist", "bundle"].map(name =>
-        fs.promises.rm(path.join(this.packageDir, name), {
-          force: true,
+        fs.promises.rmdir(path.join(this.packageDir, name), {
           recursive: true,
         })
       )
@@ -56,6 +110,8 @@ export default class HerokuModule {
 
   @CliCommand("make")
   async make() {
+    console.log("making");
+
     const worksapcePk = getWorkspacePackage();
 
     await Promise.all([

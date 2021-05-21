@@ -3,7 +3,7 @@ import "@dabsi/register";
 import path from "path";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import { Resolver } from "@dabsi/typedi";
-import { ProjectSettings } from "@dabsi/modules2/ProjectModule2";
+import { ProjectSettings } from "@dabsi/modules/ProjectModule2";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 if (require.main === module)
   (async () => {

@@ -1,7 +1,7 @@
 import { makeHtml } from "@dabsi/common/makeHtml";
-import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
-import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
-import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
+import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import { PlatformModule2 } from "@dabsi/modules/PlatformModule2";
+import { ProjectModule2 } from "@dabsi/modules/ProjectModule2";
 import { Module, Plugin } from "@dabsi/typemodule";
 import express from "express";
 import path from "path";

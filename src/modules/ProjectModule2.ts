@@ -1,8 +1,8 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
+import { ServerModule2 } from "@dabsi/modules/ServerModule2";
 import { Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
 import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";

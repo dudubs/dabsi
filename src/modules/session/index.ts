@@ -5,14 +5,14 @@ import { Session } from "@dabsi/modules/session/entities/Session";
 import { generateSessionToken } from "@dabsi/modules/session/generateSessionToken";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { ResourceManager } from "@dabsi/modules/session/ResourceManager";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
-import { DbConnectionRef, DbModule2 } from "@dabsi/modules2/DbModule2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
+import { DbConnectionRef, DbModule2 } from "@dabsi/modules/DbModule2";
 import {
   ExpressModule2,
   ExpressRequest,
   ExpressResponse,
-} from "@dabsi/modules2/ExpressModule2";
-import { ServerRequestBuilder } from "@dabsi/modules2/ServerModule2";
+} from "@dabsi/modules/ExpressModule2";
+import { ServerRequestBuilder } from "@dabsi/modules/ServerModule2";
 import { User } from "@dabsi/system/acl/entities/User";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Resolver } from "@dabsi/typedi";

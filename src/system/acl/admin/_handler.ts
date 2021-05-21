@@ -1,5 +1,5 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import ACL_AdminRpc, {
   ACL_GroupInput,
 } from "@dabsi/system/acl/admin/common/rpc";

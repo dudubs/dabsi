@@ -1,6 +1,6 @@
 import { RpcModule2 } from "@dabsi/modules/rpc";
 import { SessionModule } from "@dabsi/modules/session";
-import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
+import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import { ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import SystemRpc, { SYSTEM_RPC_PATH } from "./common/rpc";

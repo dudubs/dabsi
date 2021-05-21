@@ -1,4 +1,4 @@
-import { findEntityTypes } from "@dabsi/modules2/findEntityTypes";
+import { findEntityTypes } from "@dabsi/modules/findEntityTypes";
 import { ChildEntity, Entity, ManyToOne, TableInheritance } from "typeorm";
 
 @Entity()

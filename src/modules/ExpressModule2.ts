@@ -1,7 +1,7 @@
 //
 import CookieParser from "cookie-parser";
-import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
-import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
+import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
+import { ServerModule2 } from "@dabsi/modules/ServerModule2";
 import { Injectable, Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import express from "express";

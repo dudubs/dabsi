@@ -1,5 +1,5 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import { ContentAdminRpc } from "@dabsi/system/content/admin/common/rpc";
 import { ContentCategory } from "@dabsi/system/content/entities/Category";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";

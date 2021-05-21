@@ -4,7 +4,7 @@ import {
   DABSI_WORKSPACE_DIR,
   getWorkspacePackage,
 } from "@dabsi/env";
-import { ProjectSettings } from "@dabsi/modules2/ProjectModule2";
+import { ProjectSettings } from "@dabsi/modules/ProjectModule2";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";

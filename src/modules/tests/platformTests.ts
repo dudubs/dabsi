@@ -1,8 +1,8 @@
 import { RpcModule2 } from "@dabsi/modules/rpc";
-import BrowserModule2 from "@dabsi/modules2/BrowserModule2";
-import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
-import { ProjectSettings } from "@dabsi/modules2/ProjectModule2";
-import TestModule from "@dabsi/modules2/tests/test-module";
+import BrowserModule2 from "@dabsi/modules/BrowserModule2";
+import { PlatformModule2 } from "@dabsi/modules/PlatformModule2";
+import { ProjectSettings } from "@dabsi/modules/ProjectModule2";
+import TestModule from "@dabsi/modules/tests/test-module";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import path from "path";

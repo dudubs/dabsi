@@ -1,5 +1,5 @@
-import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
-import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
+import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import { ProjectModule2 } from "@dabsi/modules/ProjectModule2";
 import { LocalStorage } from "@dabsi/system/storage/LocalStorage";
 import StorageModule from "@dabsi/system/storage/module";
 import { Storage } from "@dabsi/system/storage/Storage";

@@ -3,8 +3,8 @@ import fs from "fs";
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Defined } from "@dabsi/common/patterns/Defined";
 import { DABSI_DIR } from "@dabsi/env";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
+import { ProjectModule2 } from "@dabsi/modules/ProjectModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
 import {
@@ -14,7 +14,7 @@ import {
 import path from "path";
 import { Platform2 } from "./Platform2";
 import { Record } from "immutable";
-import MakeModule from "@dabsi/modules2/MakeModule";
+import MakeModule from "@dabsi/modules/MakeModule";
 
 @Module({
   cli: "platform",

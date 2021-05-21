@@ -1,4 +1,4 @@
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
 import { SystemModule } from "@dabsi/system/core";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { SessionModule } from "../../modules/session";

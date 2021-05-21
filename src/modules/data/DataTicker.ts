@@ -1,7 +1,7 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 
 import { Injectable } from "@dabsi/typedi";
 import { DataRowTicker } from "./DataRowTicker";

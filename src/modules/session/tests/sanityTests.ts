@@ -5,9 +5,9 @@ import { Session } from "@dabsi/modules/session/entities/Session";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { SessionModule, SESSION_TIMEOUT } from "@dabsi/modules/session";
 import { BaseResource } from "@dabsi/modules/session/BaseResource";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
-import { DbConnectionRef } from "@dabsi/modules2/DbModule2";
-import { DbModuleTester } from "@dabsi/modules2/tests/testers/DbModuleTester";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
+import { DbConnectionRef } from "@dabsi/modules/DbModule2";
+import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import {

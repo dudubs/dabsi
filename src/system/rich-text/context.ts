@@ -6,7 +6,7 @@
 
 import RpcConfigFactoryResolver from "@dabsi/modules/rpc/configFactoryResolver";
 import { RequestSession } from "@dabsi/modules/session";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import { RpcModule2 } from "@dabsi/modules/rpc";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";

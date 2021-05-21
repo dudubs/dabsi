@@ -1,9 +1,9 @@
 import { RpcModule2 } from "@dabsi/modules/rpc";
-import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
-import { RpcModuleTester } from "@dabsi/modules2/tests/testers/RpcModuleTester";
-import { ServerModuleTester } from "@dabsi/modules2/tests/testers/ServerModuleTester";
-import TestModule from "@dabsi/modules2/tests/test-module";
-import { TestNS, TestRpc } from "@dabsi/modules2/tests/test-module/common/rpc";
+import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import { RpcModuleTester } from "@dabsi/modules/tests/testers/RpcModuleTester";
+import { ServerModuleTester } from "@dabsi/modules/tests/testers/ServerModuleTester";
+import TestModule from "@dabsi/modules/tests/test-module";
+import { TestNS, TestRpc } from "@dabsi/modules/tests/test-module/common/rpc";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 

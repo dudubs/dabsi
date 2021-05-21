@@ -7,7 +7,7 @@ import {
   RpcResolver,
   RpcResolverFactory,
 } from "@dabsi/modules/rpc/RpcResolver";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";

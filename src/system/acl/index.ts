@@ -1,4 +1,4 @@
-import { DbModule2 } from "@dabsi/modules2/DbModule2";
+import { DbModule2 } from "@dabsi/modules/DbModule2";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
 import AclContext from "./context";

@@ -1,7 +1,7 @@
 import callAndWaitForAll from "@dabsi/common/async/callAndWaitForAll";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
 import { Stats } from "fs";
 import path from "path";
 

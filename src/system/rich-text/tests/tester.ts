@@ -19,8 +19,8 @@ import { makeContentWithEntity } from "@dabsi/system/rich-text/tests/makeContent
 
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
-import { DbModuleTester } from "@dabsi/modules2/tests/testers/DbModuleTester";
-import { RpcModuleTester } from "@dabsi/modules2/tests/testers/RpcModuleTester";
+import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
+import { RpcModuleTester } from "@dabsi/modules/tests/testers/RpcModuleTester";
 import { Storage } from "@dabsi/system/storage/Storage";
 import { Tester } from "@dabsi/jasmine/Tester";
 

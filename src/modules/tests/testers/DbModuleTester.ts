@@ -1,7 +1,7 @@
 import { WeakId } from "@dabsi/common/WeakId";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
-import { DbModule2 } from "@dabsi/modules2/DbModule2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
+import { DbModule2 } from "@dabsi/modules/DbModule2";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 
 export type DbModuleTester = ReturnType<typeof DbModuleTester>;

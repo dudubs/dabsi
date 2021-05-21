@@ -2,7 +2,7 @@ import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Tester } from "@dabsi/jasmine/Tester";
 import { RpcModule2 } from "@dabsi/modules/rpc";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
+import { ServerModule2 } from "@dabsi/modules/ServerModule2";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import { Rpc, RpcType } from "@dabsi/typerpc2";

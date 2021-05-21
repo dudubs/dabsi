@@ -1,7 +1,7 @@
 import { RequestSession, SessionModule } from "@dabsi/modules/session";
-import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
-import { DbModuleTester } from "@dabsi/modules2/tests/testers/DbModuleTester";
-import { ServerModuleTester } from "@dabsi/modules2/tests/testers/ServerModuleTester";
+import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
+import { ServerModuleTester } from "@dabsi/modules/tests/testers/ServerModuleTester";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 

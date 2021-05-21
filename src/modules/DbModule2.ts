@@ -1,8 +1,8 @@
 import { defined } from "@dabsi/common/object/defined";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { ServerModule2 } from "@dabsi/modules2/ServerModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
+import { ServerModule2 } from "@dabsi/modules/ServerModule2";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver } from "@dabsi/typedi";

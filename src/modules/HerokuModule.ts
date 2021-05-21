@@ -6,10 +6,10 @@ import {
   DABSI_WORKSPACE_DIR,
   getWorkspacePackage,
 } from "@dabsi/env";
-import BrowserPlatformModule from "@dabsi/modules2/BrowserPlatformModule";
-import MakeModule from "@dabsi/modules2/MakeModule";
-import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
-import { ProjectModule2 } from "@dabsi/modules2/ProjectModule2";
+import BrowserPlatformModule from "@dabsi/modules/BrowserPlatformModule";
+import MakeModule from "@dabsi/modules/MakeModule";
+import { PlatformModule2 } from "@dabsi/modules/PlatformModule2";
+import { ProjectModule2 } from "@dabsi/modules/ProjectModule2";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { spawn } from "child_process";

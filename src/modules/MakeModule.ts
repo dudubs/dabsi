@@ -1,6 +1,6 @@
 import * as fs from "fs";
 import { Module } from "@dabsi/typemodule";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
 import { dirname } from "path";
 
 @Module()

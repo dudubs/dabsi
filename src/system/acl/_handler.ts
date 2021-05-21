@@ -1,6 +1,6 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RequestSession, RequestUser } from "@dabsi/modules/session";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { User } from "@dabsi/system/acl/entities/User";
 import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";

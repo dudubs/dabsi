@@ -1,6 +1,6 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import { RichTextImageRpc } from "@dabsi/system/rich-text-plugins/image/common/rpc";
 import { RichTextPlugin } from "@dabsi/system/rich-text/common/plugin";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";

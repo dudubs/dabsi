@@ -1,6 +1,6 @@
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
+import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import axios from "axios";
 

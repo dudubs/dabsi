@@ -1,7 +1,7 @@
 import { Type } from "@dabsi/common/typings2/Type";
 
 import { RequestSession } from "@dabsi/modules/session";
-import { DataSourceFactory2 } from "@dabsi/modules2/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
 import { Storage } from "@dabsi/system/storage/Storage";
 import { DataInsertRow } from "@dabsi/typedata/value";
 import { Injectable } from "@dabsi/typedi";

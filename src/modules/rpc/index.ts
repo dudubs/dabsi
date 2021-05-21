@@ -10,10 +10,10 @@ import {
   RpcResolver,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
-import { ExpressModule2 } from "@dabsi/modules2/ExpressModule2";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { PlatformModule2 } from "@dabsi/modules2/PlatformModule2";
-import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
+import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
+import { PlatformModule2 } from "@dabsi/modules/PlatformModule2";
+import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";

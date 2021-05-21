@@ -1,7 +1,7 @@
 import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { Once } from "@dabsi/common/patterns/Once";
-import { LoaderModule2 } from "@dabsi/modules2/LoaderModule2";
-import { RequestBuilder } from "@dabsi/modules2/RequestBuilder";
+import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
+import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";

@@ -4,14 +4,19 @@ import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { ConsumeResolver, Resolver } from "@dabsi/typedi";
 import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
 import { isRpcType, Rpc, RpcChild, RpcType } from "@dabsi/typerpc2";
-import {
-  RpcConfigurator,
-  RpcMemberConfigurator,
-} from "@dabsi/typerpc2/RpcConfig";
-import { RpcMemberKey } from "@dabsi/typerpc2/RpcHandler";
+import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
+import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
+import { RpcMemberHandler, RpcMemberKey } from "@dabsi/typerpc2/RpcHandler";
 import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
 
-export type RpcResolverLike<T> = Resolver<RpcMemberConfigurator<T>>;
+export type RpcResolverConfigurator<T> =
+  //
+  T extends Rpc
+    ? RpcConfigurator<T>
+    : // T
+      ConfigFactory<RpcMemberHandler<T>>;
+
+export type RpcResolverLike<T> = Resolver<RpcResolverConfigurator<T>>;
 
 export type RpcResolverMap<T extends Rpc> = {
   [K in RpcMemberKey<T>]?: ArrayOrItem<
@@ -21,7 +26,7 @@ export type RpcResolverMap<T extends Rpc> = {
 };
 
 export interface RpcResolver<T>
-  extends ConsumeResolver<RpcMemberConfigurator<T>> {
+  extends ConsumeResolver<RpcResolverConfigurator<T>> {
   rpcLocation: RpcLocation<any>;
 }
 
@@ -38,17 +43,17 @@ export function RpcResolver<T>(rpcLocation: RpcLocation<T>): RpcResolverLike<T>;
 
 export function RpcResolver<T extends Rpc, U extends ResolverDeps>(
   rpcType: RpcType<T>,
-  ...args: ConsumeArgs<RpcConfigurator<T>, U>
+  ...args: ConsumeArgs<RpcResolverConfigurator<T>, U>
 ): RpcResolver<T>;
 
 export function RpcResolver<T, U extends ResolverDeps>(
   rpcLocation: RpcLocation<T>,
-  ...args: ConsumeArgs<RpcMemberConfigurator<T>, U>
+  ...args: ConsumeArgs<RpcResolverConfigurator<T>, U>
 ): RpcResolver<T>;
 
 export function RpcResolver<T extends Rpc>(
   rpcType: RpcType<T>,
-  rpcResolverArg: RpcResolverMap<T>
+  rpcResolverMap: RpcResolverMap<T>
 ): any[];
 
 export function RpcResolver(rpcLocation, ...args): any {

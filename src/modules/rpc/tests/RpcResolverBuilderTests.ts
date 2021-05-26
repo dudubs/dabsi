@@ -9,15 +9,23 @@ import {
   RpcType,
 } from "@dabsi/typerpc2";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
+import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 
-let map: RpcResolverBuilder;
+let rb: RpcResolverBuilder;
 let context: ResolverMap;
 
 const testRpc = <T extends Rpc>(rpcType: RpcType<T>): T =>
-  createRpc(rpcType, Resolver.resolve(map.getResolver(rpcType), context));
+  createRpc(
+    rpcType,
+    Resolver.resolve(
+      rb.getResolver(rpcType) as RpcResolver<Rpc>,
+      context
+    ) as RpcConfigurator<T>
+  );
+
 beforeEach(() => {
-  map = new RpcResolverBuilder();
-  context = Resolver.Context.assign({}, [map]);
+  rb = new RpcResolverBuilder();
+  context = Resolver.Context.assign({}, [rb]);
 });
 
 class R1 extends Rpc {
@@ -31,7 +39,7 @@ class R2 extends Rpc {
 }
 
 it("expect to resolve rpc-configurator", async () => {
-  map.add(
+  rb.add(
     RpcResolver(R1, [], c => $ =>
       $({
         handleTestFn() {
@@ -48,8 +56,8 @@ it("expect to throw eroror because no member handler.", () => {
 });
 
 it("expect to build resolver from member resolvers.", async () => {
-  map.add(
-    RpcResolver([R1, "testFn"], [], c => $ =>
+  rb.add(
+    RpcResolver(R1.at("testFn"), [], c => $ =>
       $(() => {
         return "works";
       })
@@ -64,14 +72,14 @@ it("expect to throw error because no configurator for R1", () => {
 
 describe("build R1", () => {
   beforeEach(() => {
-    map.add(
-      RpcResolver([R1, "testFn"], [], c => $ =>
+    rb.add(
+      RpcResolver(R1.at("testFn"), [], c => $ =>
         $(text => {
           expect(text).toEqual("hello");
           return "works";
         })
       ),
-      RpcResolver([R2, "getR1"], [], c => $ =>
+      RpcResolver(R2.at("getR1"), [], c => $ =>
         $((rpcType, pText) => ({
           handleTestFn(aText) {
             expect(rpcType).toBe(R1);
@@ -83,8 +91,8 @@ describe("build R1", () => {
   });
 
   it("expect to resolve rpc-member-resolver before rpc-resolver", async () => {
-    map.add(
-      RpcResolver([R2, "r1"], [], c => $ =>
+    rb.add(
+      RpcResolver(R2.at("r1"), [], c => $ =>
         $({
           handleTestFn() {
             return "works-by-member";
@@ -97,7 +105,7 @@ describe("build R1", () => {
 
   it("expect to get functional handler", async () => {
     const testFnHandler = Resolver.resolve(
-      map.getHandlerMemberResolver(R1, "testFn"),
+      rb.getHandlerMemberResolver(R1.at("testFn")),
       {}
     );
 
@@ -115,60 +123,20 @@ describe("build R1", () => {
   });
 });
 
-it("expect to error because rpc-member-resolver override rpc-resolver", () => {
-  map.add(
-    RpcResolver(R1, [], c => $ =>
-      $({
-        handleTestFn() {
-          return "works";
-        },
-      })
-    )
-  );
-  expect(() => {
-    map.add(
-      RpcResolver([R1, "testFn"], [], c => $ =>
-        $(() => {
-          return "works";
-        })
-      )
-    );
-  }).toThrow();
-});
-
-it("expect to error because rpc-resolver override rpc-member-resolver", () => {
-  map.add(
-    RpcResolver([R1, "testFn"], [], c => $ =>
-      $(() => {
-        return "works";
-      })
-    )
-  );
-  expect(() => {
-    map.add(
-      RpcResolver(R1, [], c => $ =>
-        $({
-          handleTestFn() {
-            return "works";
-          },
-        })
-      )
-    );
-  }).toThrow();
-});
-
 describe("generate", () => {
   class R extends Rpc {
     @RpcFuncational() testFn!: () => Promise<string>;
   }
 
   class SR extends R {}
-  RpcResolverBuilder.defineGenerator(R, rpcType => () => $ =>
-    $({
-      handleTestFn() {
-        return "generated-for-" + rpcType.name;
-      },
-    })
+  RpcResolverBuilder.defineGenerator(R, rpcLocation =>
+    RpcResolver(rpcLocation, [], () => $ =>
+      $({
+        handleTestFn() {
+          return "generated-for-" + rpcLocation.rpcType.name;
+        },
+      })
+    )
   );
 
   it("expect to generate resolver for rpc", async () => {

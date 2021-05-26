@@ -3,17 +3,15 @@ import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import LoaderModule from "@dabsi/modules/LoaderModule";
+import ProjectModule, { ProjectSettings } from "@dabsi/modules/ProjectModule";
 import ServerModule from "@dabsi/modules/ServerModule";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
-import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { DataSource } from "@dabsi/typedata/source";
 import { Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
-import {
-  ModuleRunner,
-  ModuleRunnerContext,
-} from "@dabsi/typemodule/ModuleRunner";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
+import path from "path";
 import { join } from "path";
 import {
   Connection,
@@ -47,7 +45,10 @@ export default class DbModule {
 
   readonly entityTypes: Function[] = [];
 
-  constructor(protected loaderModule: LoaderModule) {}
+  constructor(
+    protected loaderModule: LoaderModule,
+    protected projectModule: ProjectModule
+  ) {}
 
   installContext(
     @Plugin()
@@ -125,7 +126,7 @@ export default class DbModule {
       logging: ["schema"],
       ...(this.connectionOptions || {
         type: "sqlite",
-        database: "./bundle/db.sqlite3",
+        database: path.join(this.projectModule.bundleDir, "db.sqlite3"),
       }),
       name: "default",
       entities: this.findEntityTypes(),

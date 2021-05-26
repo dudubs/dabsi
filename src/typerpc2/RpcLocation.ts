@@ -5,10 +5,13 @@ import { inspect } from "@dabsi/logging/inspect";
 import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
-import { Rpc, RpcMemberKey, RpcType } from "./Rpc";
+import type { Rpc, RpcMemberKey, RpcType } from "./Rpc";
 
 export class RpcLocation<T> {
-  constructor(readonly rpcRootType: RpcType, readonly path: string[]) {}
+  constructor(
+    readonly rpcRootType: RpcType,
+    readonly path: readonly string[]
+  ) {}
 
   get rpcType(): T extends Rpc
     ? RpcType<T>

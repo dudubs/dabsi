@@ -10,6 +10,7 @@ import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKey
 import { BaseRpc } from "@dabsi/old-typerpc/BaseRpc";
 import { ConfigFactory } from "@dabsi/old-typerpc/ConfigFactory";
 import { IsGenericConfig } from "@dabsi/old-typerpc/GenericConfig";
+import { RpcParametrialMember } from "@dabsi/typerpc2";
 
 export interface TRpc {
   Payload?: any;

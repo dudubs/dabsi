@@ -59,10 +59,6 @@ export type RpcConfigurator<T extends Rpc> = T extends AnyRpcWithConfig
   ? Configurator<InferredRpcConfig<T>>
   : ConfigFactory<RpcHandler<T>, [RpcType<T>]> | RpcHandler<T>;
 
-export type RpcMemberConfigurator<T> = T extends RpcContextualMember<infer U>
-  ? RpcConfigurator<U>
-  : ConfigFactory<RpcMemberHandler<T>>;
-
 export function isRpcTypeWithConfig(
   rpcType: any
 ): rpcType is RpcType<AnyRpcWithConfig> {

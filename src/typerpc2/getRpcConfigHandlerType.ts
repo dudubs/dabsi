@@ -36,7 +36,7 @@ export function getRpcConfigHandlerType(rpcType: RpcType) {
       handlerType.rpcType !== rpcType;
       rpcType = Object.getPrototypeOf(rpcType)
     ) {
-      for (const memberKey of RpcMembers.getKeys(rpcType)) {
+      for (const memberKey of getRpcMetadata(rpcType).memberKeys) {
         const memberHandlerKey = "handle" + capitalize(memberKey);
         if (memberHandlerKey in newHandlerType.prototype) continue;
         const memberType = RpcMembers.getMemberType(rpcType, memberKey);
@@ -51,7 +51,13 @@ export function getRpcConfigHandlerType(rpcType: RpcType) {
             memberType!,
             memberPropertyType!
           ),
-          () => `No member handler for "${rpcType.name}.${memberKey}".`
+          () => {
+            console.log({
+              x: newHandlerType.createRpcMemberHandler?.toString(),
+            });
+
+            return `No member handler for "${rpcType.name}.${memberKey}".`;
+          }
         );
       }
     }

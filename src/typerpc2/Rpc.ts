@@ -1,9 +1,7 @@
-import { Forward } from "@dabsi/common/reflection/Forward";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
 import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
-import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export type RpcMemberKey<T extends Rpc> = ExtractKeys<
   T,
@@ -46,16 +44,14 @@ export type RpcWithChild<P extends PropertyKey, T extends Rpc> = Record<
   RpcChild<T>
 >;
 
-export type RpcAt<T extends Rpc, P extends string> =
+export type RpcAt<T, P extends string> =
   //
-  T extends RpcWithChild<P, infer U>
+  T extends RpcParametrialMember<infer T, any>
+    ? RpcAt<T, P>
+    : T extends Record<P, infer U> //
     ? U
     : P extends `${infer K}.${infer P}`
-    ? T extends RpcWithChild<K, infer U>
-      ? RpcAt<U, P>
-      : never
-    : T extends Record<P, RpcFunctionalMember>
-    ? T[P]
+    ? RpcAt<RpcAt<T, K>, P>
     : never;
 
 export type RpcFunctionalMember<T = any, U extends any[] = any[]> = (

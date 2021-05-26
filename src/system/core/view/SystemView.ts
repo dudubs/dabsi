@@ -5,7 +5,7 @@ import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { AnyInput } from "@dabsi/typerpc2/input/Input";
 import { InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import PathPathMap from "@dabsi/typerpc2/RpcPathMap";
+import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 import { AnyWidget } from "@dabsi/typerpc2/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
 import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";

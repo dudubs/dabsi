@@ -6,6 +6,7 @@ import { Form } from "@dabsi/typerpc2/form/rpc";
 import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithError";
 import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { Reflector } from "@dabsi/common/reflection/Reflector";
 
 export class ACL_GroupsTable extends DataTable({
   groupName: String,

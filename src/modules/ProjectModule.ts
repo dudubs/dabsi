@@ -1,6 +1,4 @@
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import MakeModule from "@dabsi/modules/MakeModule";
-import Platform from "@dabsi/modules/Platform";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import ServerModule from "@dabsi/modules/ServerModule";
@@ -41,7 +39,6 @@ export default class ProjectModule {
   constructor(
     protected loaderModule: LoaderModule,
     public readonly settings: ProjectSettings,
-    protected makeModule: MakeModule,
     moduleRunner: ModuleRunner
   ) {
     moduleRunner.process.push(async () => {

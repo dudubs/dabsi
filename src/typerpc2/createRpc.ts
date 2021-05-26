@@ -16,6 +16,7 @@ export function createRpc<T extends Rpc>(
     () => [],
     async payload => {
       return (await getCommand())(payload);
-    }
+    },
+    null
   );
 }

@@ -1,13 +1,7 @@
 // TODO: use reflect.defineMetadata
 import "reflect-metadata";
-import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { Type } from "@dabsi/common/typings2/Type";
 
-const targetPropertyTypeMap = new WeakMap<
-  Function,
-  Map<string, () => Function>
->();
-
+const FORWARD_PREFIX = "forward:";
 const targetParameterTypeMap = new WeakMap<
   Function,
   Map<number, () => Function>
@@ -22,9 +16,10 @@ export function Forward(
         .touch(propertyName ? target[propertyName] : target, () => new Map())
         .set(indexOrDescriptor, getType);
     } else {
-      targetPropertyTypeMap
-        .touch(target, () => new Map())
-        .set(propertyName, getType);
+      if (typeof propertyName !== "string") {
+        throw new Error("expected to string");
+      }
+      Reflect.defineMetadata(FORWARD_PREFIX + propertyName, getType, target);
     }
   };
 }
@@ -40,7 +35,10 @@ export namespace Forward {
       ?.get(index)?.();
   }
 
-  export function getPropertyType(target: Function, propertyName) {
-    return targetPropertyTypeMap.get(target.prototype)?.get(propertyName)?.();
+  export function getPropertyType(target: Function, propertyName: string) {
+    return Reflect.getMetadata(
+      FORWARD_PREFIX + propertyName,
+      target.prototype
+    )?.();
   }
 }

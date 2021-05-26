@@ -2,7 +2,10 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import flat from "@dabsi/common/iterator/flat";
 import { defined } from "@dabsi/common/object/defined";
 import { capitalize } from "@dabsi/common/string/capitalize";
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import {
+  RpcResolver,
+  RpcResolverConfigurator,
+} from "@dabsi/modules/rpc/RpcResolver";
 import { Resolver } from "@dabsi/typedi";
 import {
   Rpc,
@@ -12,7 +15,7 @@ import {
   RpcType,
 } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
+import { ConfigFactory, GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
 import { getRpcMetadata, RpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import {
@@ -23,10 +26,8 @@ import {
 import {
   AnyRpcWithConfig,
   isRpcTypeWithConfig,
-  RpcMemberConfigurator,
-  RpcWithConfig,
 } from "@dabsi/typerpc2/RpcConfig";
-import { RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
+import { RpcHandlerMap, RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
 import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
@@ -63,17 +64,14 @@ export class RpcResolverBuilder {
     if (_rpcLocation.member?.type === RpcMemberType.Functional) {
       throw new Error(`Can't generate resolver for functional member.`);
     }
+
     return this._generetedResolverMap.touchByLocation(_rpcLocation, () => {
-      if ((rpcLocation as RpcLocation<any>).rpcType)
-        return (rpcLocation as RpcLocation<any>).rpcType[__generateSymbol]?.(
-          rpcLocation,
-          this
-        );
+      return _rpcLocation.rpcType[__generateSymbol]?.(_rpcLocation, this);
     });
   }
 
   buildResolver<T>(rpcLocation: RpcTypeOrLocation<T>): RpcResolver<T> {
-    const _rpcLocation = RpcTypeOrLocation(rpcLocation);
+    const _rpcLocation = RpcTypeOrLocation<any>(rpcLocation);
     if (isRpcTypeWithConfig(_rpcLocation.rpcType)) {
       const handlerType = getRpcConfigHandlerType(_rpcLocation.rpcType);
       if (handlerType.isRpcConfigCanBeUndefined) {
@@ -90,33 +88,39 @@ export class RpcResolverBuilder {
       );
     }
     return <any>(
-      this.buildHandlerResolver(_rpcLocation as RpcLocation<AnyRpcWithConfig>)
-    );
-  }
-
-  buildHandlerResolver<T extends Rpc>(
-    rpcLocation: RpcTypeOrLocation<T>,
-    getKeys?: (metadata: RpcMetadata) => string[]
-  ): RpcResolver<T> {
-    const _rpcLocation = RpcTypeOrLocation(rpcLocation);
-    const metadata = getRpcMetadata(_rpcLocation.rpcType as RpcType);
-    const handlerMemberResolverMap = mapArrayToObject(
-      getKeys ? getKeys(metadata) : metadata.memberKeys,
-      memberKey => [
-        "handle" + capitalize(memberKey),
-        this.getHandlerMemberResolver(<any>_rpcLocation.at(<any>memberKey)),
-      ]
-    );
-    return <any>(
       RpcResolver(
         _rpcLocation as RpcLocation<Rpc>,
-        handlerMemberResolverMap as {},
-        handler => $ => $(handler)
+        [this.buildHandlerMapResolver(_rpcLocation as RpcLocation<Rpc>)],
+        x => $ => $(x)
       )
     );
   }
 
-  getHandlerMemberResolver<T extends Rpc>(
+  buildHandlerMapResolver<T extends Rpc>(
+    rpcLocation: RpcTypeOrLocation<T>,
+    {
+      getKeys,
+      disableCapitalize = false,
+    }: {
+      getKeys?: (metadata: RpcMetadata) => string[];
+      disableCapitalize?: boolean;
+    } = {}
+  ): Resolver<RpcHandlerMap<T>> {
+    const _rpcLocation = RpcTypeOrLocation(rpcLocation);
+    const metadata = getRpcMetadata(_rpcLocation.rpcType as RpcType);
+
+    const handlerMemberResolverMap = mapArrayToObject(
+      getKeys ? getKeys(metadata) : metadata.memberKeys,
+      memberKey => [
+        disableCapitalize ? memberKey : "handle" + capitalize(memberKey),
+        this.getHandlerMemberResolver(<any>_rpcLocation.at(<any>memberKey)),
+      ]
+    );
+
+    return <any>Resolver.object(handlerMemberResolverMap as {});
+  }
+
+  getHandlerMemberResolver<T>(
     rpcLocation: RpcLocation<T>
   ): Resolver<RpcMemberHandler<T>> {
     return <any>Resolver([this.getResolver(rpcLocation)], factory => {
@@ -125,7 +129,7 @@ export class RpcResolverBuilder {
           return createRpcHandler(childRpcType!, factory as any);
         }
         const config = await GenericConfig(
-          factory as RpcMemberConfigurator<
+          factory as RpcResolverConfigurator<
             RpcFunctionalMember | RpcParametrialMember
           >
         );
@@ -155,17 +159,18 @@ export namespace RpcResolverBuilder {
 RpcResolverBuilder.defineGenerator(RpcNamespace, (rpcLocation, builder) =>
   RpcResolver(
     rpcLocation,
-    [builder.buildHandlerResolver(rpcLocation)],
-    handler => $ =>
-      $({
+    [builder.buildHandlerMapResolver(rpcLocation, { disableCapitalize: true })],
+    handlerMap => async $ => {
+      return $({
         getRpcMemberHandler(rpcType, memberKey, memberType, propertyType): any {
           return defined(
-            handler[<any>memberKey],
+            (<any>handlerMap)[memberKey],
             () =>
               `No rpc-namespace-key like "${rpcType.name}.${memberKey}":${propertyType.name}`
           );
         },
-      })
+      });
+    }
   )
 );
 
@@ -174,7 +179,11 @@ RpcResolverBuilder.defineGenerator(
   (rpcLocation, builder) =>
     RpcResolver(
       rpcLocation,
-      [builder.buildHandlerResolver(rpcLocation, md => md.contextualKeys)],
+      [
+        builder.buildHandlerMapResolver(rpcLocation, {
+          getKeys: md => md.contextualKeys,
+        }),
+      ],
       x => $ => $(x as {})
     )
 );

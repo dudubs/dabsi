@@ -25,3 +25,10 @@ it("expect to property types", () => {
   expect(Reflector.getPropertyType(A, "n")).toEqual(Number);
   expect(Reflector.getPropertyType(A, "a")).toEqual(A);
 });
+
+it("expect to sub-class reflector", () => {
+  class B extends A {}
+  expect(Reflector.getPropertyType(B, "s")).toEqual(String);
+  expect(Reflector.getPropertyType(B, "n")).toEqual(Number);
+  expect(Reflector.getPropertyType(B, "a")).toEqual(A);
+});

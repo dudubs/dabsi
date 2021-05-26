@@ -4,7 +4,7 @@ import { getRpcMetadata } from "./getRpcMetadata";
 
 export function getChildRpcType(
   rpcType: RpcType,
-  childKeys: string[] | string,
+  childKeys: readonly string[] | string,
   skipLast = false
 ): RpcType {
   if (typeof childKeys === "string") {

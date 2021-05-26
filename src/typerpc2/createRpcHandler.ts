@@ -29,5 +29,5 @@ export async function createRpcHandler<T extends Rpc>(
       [rpcType]
     );
   }
-  return <any>configurator;
+  return configurator as RpcHandler<T>;
 }

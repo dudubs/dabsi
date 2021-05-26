@@ -1,9 +1,14 @@
+import { inspect } from "@dabsi/logging/inspect";
 import { entries } from "./entries";
 
 const proxyContext = Symbol("proxyContext");
 
 export function createObjectProxy(object, getter) {
-  const proxy = {};
+  const proxy = {
+    [inspect.custom]() {
+      return `<ObjectProxy {${Object.keys(object).join(", ")}}>`;
+    },
+  };
   for (const [key, value] of entries(object)) {
     Object.defineProperty(proxy, key, {
       enumerable: true,

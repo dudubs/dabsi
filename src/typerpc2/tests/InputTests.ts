@@ -1,3 +1,5 @@
+import { createRpc } from "@dabsi/typerpc2/createRpc";
+import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { Input, inputValueElementToData } from "@dabsi/typerpc2/input/Input";
 import {
@@ -24,7 +26,7 @@ interface R
 
 InputHandler(
   R,
-  {},
+  { configCanBeUndefined: false },
   {
     getElement() {
       return {};
@@ -61,4 +63,17 @@ it("expect to reject by custom check", async () => {
       })
     ).loadAndCheck("hello")
   ).toEqual({ error: "ERR1" });
+});
+
+it("expect input config", async () => {
+  const config = await createRpcConfig(R, $ =>
+    $({
+      config: { cxs: "hello" },
+      [inputConfig]: {
+        check: value => {},
+      },
+    })
+  );
+
+  expect(config![inputConfig].check).toBeDefined();
 });

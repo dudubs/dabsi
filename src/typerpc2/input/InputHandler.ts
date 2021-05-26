@@ -1,6 +1,7 @@
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
 import {
   AnyInput,
   InputError,
@@ -44,6 +45,7 @@ export type BaseInputConfig<T extends AnyInput, Value, ValueConfig> = {
 };
 
 export type InputConfig<T extends AnyInput, Config, Value, ValueConfig> =
+  | Config
   | PartialUndefinedKeys<
       {
         config: Config;
@@ -51,8 +53,7 @@ export type InputConfig<T extends AnyInput, Config, Value, ValueConfig> =
       {
         [inputConfig]: BaseInputConfig<T, Value, ValueConfig>;
       }
-    >
-  | Config;
+    >;
 
 export type BaseInputHandler<T extends AnyInput, Value, ValueConfig> = {
   readonly inputConfig: BaseInputConfig<T, Value, ValueConfig> | undefined;
@@ -168,7 +169,7 @@ export function InputHandler(
   > &
     ThisType<InputHandler<AnyInputWithConfig>> = {
     get inputConfig() {
-      return this.configurator[inputConfig];
+      return this.config[inputConfig];
     },
     async loadAndCheck(data) {
       const result = await handler.loadAndCheck.call(this, data);
@@ -195,13 +196,13 @@ export function InputHandler(
     inputType,
     {
       ...options,
-      resolveHandlerConfig(config) {
-        if (config[inputConfig]) {
-          if (typeof config.config === "function") {
-            return config.config;
-          }
-          return { ...config, ...config.config };
+      async resolveHandlerConfig(rpcType, config: any) {
+        const { [inputConfig]: inputConfigValue } = config;
+        if (!inputConfigValue) {
+          return config;
         }
+        config = (await createRpcConfig(rpcType, config.config)) ?? {};
+        config[inputConfig] = inputConfigValue;
         return config;
       },
     },

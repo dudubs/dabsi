@@ -15,7 +15,11 @@ import {
   DataUpdateRow,
 } from "@dabsi/typedata/value";
 import { Resolver } from "@dabsi/typedi";
-import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
+import {
+  ConsumeArgs,
+  ConsumeOptionalArgs,
+  ResolverDeps,
+} from "@dabsi/typedi/consume";
 import { RpcType } from "@dabsi/typerpc2";
 import {
   ConfigFactory,
@@ -27,7 +31,8 @@ import {
   InputValue,
   InputValueConfig,
 } from "@dabsi/typerpc2/input/InputHandler";
-import { RpcLocation, RpcTypeOrLocation } from "@dabsi/typerpc2/RpcLocation";
+import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
+import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
 
 export type DataFormConfig<
   Input extends AnyInputWithConfig,
@@ -65,7 +70,7 @@ export function DataFormResolver<
 >(
   rpcType: RpcTypeOrLocation<DataForm<T>>,
   rowType: Constructor<Data>,
-  ...args: ConsumeArgs<ConfigFactory<C> | UndefinedIfEmptyObject<C>, U>
+  ...args: ConsumeOptionalArgs<ConfigFactory<C> | UndefinedIfEmptyObject<C>, U>
 ): RpcResolver<DataForm<T>>;
 
 export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {

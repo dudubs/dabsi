@@ -58,6 +58,9 @@ export function ObjectInput(inputTypeMap: AnyInputTypeMap) {
   class ObjectInput extends BaseObjectInput<AnyInputMap> {}
 
   for (const [key, inputType] of entries(inputTypeMap)) {
+    if (!inputType) {
+      throw new Error(`No input-type for object-input-key "${key}".`);
+    }
     Reflect.decorate(
       [RpcContextual(() => inputType)],
       ObjectInput.prototype,

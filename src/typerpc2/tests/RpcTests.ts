@@ -1,3 +1,5 @@
+import { Is } from "@dabsi/common/typings2/boolean/Is";
+import { Expect } from "@dabsi/common/typings2/Expect";
 import {
   Rpc,
   RpcContextual,
@@ -6,6 +8,7 @@ import {
   RpcType,
 } from "@dabsi/typerpc2";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
+import { RpcAt } from "@dabsi/typerpc2/Rpc";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
@@ -14,9 +17,29 @@ class A extends Rpc {
 }
 
 class B extends Rpc {
-  @RpcParametrial(() => A) px!: (xs: string, xb: boolean) => A;
+  @RpcParametrial(() => A) getA!: (xs: string, xb: boolean) => A;
 
   @RpcContextual() a!: A;
+}
+class C extends Rpc {
+  getB!: () => B;
+  b!: B;
+}
+
+{
+  type _ = [
+    Expect<true, Is<A["fx"], RpcAt<A, "fx">>>,
+    Expect<true, Is<A["fx"], RpcAt<B, "a.fx">>>,
+    Expect<true, Is<A["fx"], RpcAt<B, "getA.fx">>>,
+
+    Expect<true, Is<B["getA"], RpcAt<B, "getA">>>,
+    Expect<true, Is<B["a"], RpcAt<B, "a">>>,
+
+    Expect<true, Is<B["getA"], RpcAt<C, "getB.getA">>>,
+    Expect<true, Is<A["fx"], RpcAt<C, "getB.getA.fx">>>
+
+    //
+  ];
 }
 
 function test<T extends RpcType>(
@@ -52,7 +75,7 @@ const bHandler: RpcHandler<B> = {
     return aHandler;
   },
 
-  handlePx(target, xs, xb) {
+  handleGetA(target, xs, xb) {
     pxs = xs;
     pxb = xb;
     return aHandler;
@@ -74,7 +97,7 @@ it("expect to create command for contextual member", async () => {
 });
 
 it("expect to create command for parametrial member", async () => {
-  expect(await b.px("Hello", true).fx("World", 11)).toEqual(
+  expect(await b.getA("Hello", true).fx("World", 11)).toEqual(
     "xs: World, xi: 11"
   );
   expect(pxs).toEqual("Hello");
@@ -90,7 +113,9 @@ it("expect member type will be contextual", () => {
 });
 
 it("expect member type will be parametrial", () => {
-  expect(RpcMembers.getMemberType(B, "px")).toEqual(RpcMemberType.Parametrial);
+  expect(RpcMembers.getMemberType(B, "getA")).toEqual(
+    RpcMemberType.Parametrial
+  );
 });
 
 it("expect to functional payload", async () => {
@@ -106,7 +131,7 @@ it("expect to contextual payload", async () => {
 });
 
 it("expect to parametrial payload", async () => {
-  expect(await test(B, [], b => b.px("hello", true).fx("world", 10))).toEqual(
-    jasmine.objectContaining(["px", ["hello", true], "fx", "world", 10])
+  expect(await test(B, [], b => b.getA("hello", true).fx("world", 10))).toEqual(
+    jasmine.objectContaining(["getA", ["hello", true], "fx", "world", 10])
   );
 });

@@ -43,10 +43,7 @@ type ExtractPrefix<P extends string, K> = K extends `${P}${infer K}`
 export class BaseRpcConfigHandler<T extends Rpc, C> {
   readonly rpcType!: RpcType<T>;
 
-  constructor(
-    readonly config: NonNullable<C>,
-    readonly configurator: RpcConfigurator<T>
-  ) {}
+  constructor(readonly config: NonNullable<C>) {}
 
   protected _getContextualHandlerCache = new Map();
 
@@ -115,7 +112,7 @@ export interface RpcConfigHandlerType<T extends AnyRpcWithConfig, H> {
 
   readonly resolveRpcGenericConfig: RpcGenericConfigResolver<T>;
 
-  readonly resolveRpcHandlerConfig: any;
+  resolveRpcHandlerConfig?(rpcType: RpcType, config: any): Awaitable;
 
   readonly isRpcConfigCanBeUndefined: boolean;
 
@@ -125,7 +122,7 @@ export interface RpcConfigHandlerType<T extends AnyRpcWithConfig, H> {
     propertyType: Function
   ): Function;
 
-  new (config: any, configurator: RpcConfigurator<T>): H;
+  new (config: any): H;
 }
 
 export type RpcConfigType<
@@ -142,7 +139,7 @@ export type RpcGenericConfigResolver<
   : undefined;
 
 export type RpcHandlerConfigResolver<R extends AnyRpcWithConfig, C> =
-  | ((config: InferredRpcHandlerConfig<R>) => Awaitable<C>)
+  | ((config: InferredRpcHandlerConfig<R>, rpcType: RpcType<R>) => Awaitable<C>)
   | If<Is<C, InferredRpcHandlerConfig<R>>, undefined>;
 
 export type RpcConfigHandlerOptions<

@@ -37,7 +37,10 @@ export default class AclModule {
   }
 
   @CliCommand("users.update", "[login-name-or-id]", y =>
-    y.option("loginName", { type: "string" })
+    y
+      .option("password", { type: "string" })
+      .option("firstName", { type: "string" })
+      .option("lastName", { type: "string" })
   )
   async updateUser(
     { loginNameOrId, firstName, lastName, password },

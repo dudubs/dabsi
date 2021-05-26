@@ -77,12 +77,17 @@ Resolver.consume = function (deps: any, factory: any): any {
   );
 };
 
-export type ConsumeArgs<C, U extends ResolverDeps> =
-  | [deps: U, factory: ConsumeFactory<C, U>]
+export type ConsumeArgs<C, U extends ResolverDeps> = [
+  deps: U,
+  factory: ConsumeFactory<C, U>
+];
+
+export type ConsumeOptionalArgs<C, U extends ResolverDeps> =
+  | ConsumeArgs<C, U>
   | IfUndefined<C, []>;
 
 export function ConsumeArgs<T, U>(
-  args: ConsumeArgs<T, any> | undefined
+  args: ConsumeOptionalArgs<T, any> | undefined
 ): Resolver<T> | undefined {
   if (!args?.length) {
     return;

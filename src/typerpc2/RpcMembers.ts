@@ -35,20 +35,6 @@ export namespace RpcMembers {
     return typeMembersMap.get(rpcType) || [];
   }
 
-  export function* findKeys(
-    rpcType: RpcType
-  ): IterableIterator<[string, RpcMemberType]> {
-    for (
-      ;
-      typeof rpcType === "function" && rpcType !== Rpc;
-      rpcType = Object.getPrototypeOf(rpcType)
-    ) {
-      for (const key of typeMembersMap.get(rpcType) || []) {
-        yield [key, getMemberType(rpcType, key)!];
-      }
-    }
-  }
-
   export function define(
     rpcType: RpcType,
     memberKey: string,

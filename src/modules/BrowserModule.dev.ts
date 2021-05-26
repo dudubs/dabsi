@@ -205,8 +205,8 @@ export default class BrowserDevModule {
   }
 
   packAndWatch() {
+    this._pack();
     watchOnPlatform(["common", "view", "browser", "server"], async () => {
-      console.log("pack and reload");
       await this._pack();
       await touchFile(RELOAD_FILENAME);
       // reload?.();
@@ -214,7 +214,12 @@ export default class BrowserDevModule {
   }
   @CliCommand("start-dev")
   startDev() {
-    return Promise.all([this.serverDevModule.startDev(), this.packAndWatch()]);
+    return Promise.all([
+      //
+      this.serverDevModule.startDev(),
+      //
+      this.packAndWatch(),
+    ]);
   }
 }
 

@@ -24,15 +24,6 @@ export function RpcAtTypingTests() {
     a: A;
     getA(): A;
   };
-
-  type _ = [
-    ///
-    Expect<C, RpcAt<A, "b.c">>,
-    Expect<never, RpcAt<A, "b.x">>,
-    Expect<A, RpcAt<A, "b.c.a">>,
-    Expect<A, RpcAt<A, "b.c.getA">>,
-    Expect<never, RpcAt<A, "b.c.getA.x">>
-  ];
 }
 export async function ConfigTypingsTests() {
   let GC1: GenericConfig<

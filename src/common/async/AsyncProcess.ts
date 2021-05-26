@@ -1,67 +1,111 @@
-import { locateError } from "@dabsi/typemodule/locateError";
+type Task = (tick: number) => Promise<void>;
 
-export class AsyncProcess {
-  protected _callbacks: (() => void)[] = [];
+export default class AsyncProcess {
+  protected _tasks: Task[] = [];
 
-  protected _descriptors = new Set<() => string>();
+  protected _ticks = 0;
 
-  protected _errors: any[] = [];
+  protected _errors = new Set<any>();
 
-  protected wait(): Promise<void> {
-    if (!this._descriptors.size) return Promise.resolve();
+  protected _callbacks: ((tick: number) => void)[] = [];
 
-    return new Promise<void>((resolve, reject) => {
-      this._callbacks.push(() => {
-        this._errors.length ? reject(this._errors[0]) : resolve();
-      });
-    });
-  }
+  protected _countRunningTasks = 0;
 
-  protected _emit() {
-    if (!this._callbacks.length) {
-      if (this._errors[0]) {
-        throw this._errors[0];
-      }
+  catch(callback: () => any) {
+    let result;
+    try {
+      result = callback();
+    } catch (error) {
+      this.push(() => Promise.reject(error));
       return;
     }
-    const { _callbacks } = this;
+    this.push(() => Promise.resolve(result));
+  }
 
+  push(task: Task) {
+    const isFirstTask = this._tasks.length === 0;
+    this._tasks.push(task);
+
+    isFirstTask &&
+      setImmediate(() => {
+        this._run();
+      });
+  }
+
+  protected _emit(tick: number) {
+    const { _callbacks } = this;
     this._callbacks = [];
     for (const callback of _callbacks) {
-      callback();
+      callback(tick);
     }
   }
 
-  log() {
-    for (const descriptor of this._descriptors) {
-      console.log(`- ${descriptor()}`);
-    }
+  protected _run(): Promise<number> {
+    const tick = this._ticks++;
+    const { _tasks } = this;
+    this._tasks = [];
+
+    return Promise.all(
+      _tasks.toSeq().map(task => {
+        this._countRunningTasks++;
+        return task(tick).finally(() => {
+          this._countRunningTasks--;
+        });
+      })
+    )
+      .then(() => {
+        if (this._countRunningTasks) return;
+        if (this._tasks.length) return;
+        this._emit(tick);
+      })
+      .catch(error => {
+        this._errors.add(error);
+        this._emit(tick);
+      })
+      .then(() => tick);
   }
 
-  waitAndPush(descriptor: () => string, getPromise: () => Promise<any>) {
-    return this.wait().then(() => {
-      this.push(descriptor, getPromise);
+  reset() {
+    this._errors.clear();
+  }
+
+  wait(): Promise<number> {
+    for (const error of this._errors) {
+      return Promise.reject(error);
+    }
+
+    if (!this._tasks.length && !this._countRunningTasks)
+      return Promise.resolve(this._ticks);
+
+    return new Promise<number>((resolve, reject) => {
+      this._callbacks.push(tick => {
+        for (const error of this._errors) {
+          return reject(error);
+        }
+        resolve(tick);
+      });
     });
   }
 
-  push(descriptor: () => string, getPromise: () => Promise<any>) {
-    if (this._errors.length) {
-      return;
-    }
+  waitAndPush(task: Task) {
+    return this.wait().then(() => {
+      this.push(task);
+    });
+  }
 
-    this._descriptors.add(descriptor);
-
-    getPromise()
-      .catch(error => {
-        // TODO: locate error by descriptor.
-        this._errors.push(locateError(error, descriptor()));
-        this._emit();
-      })
-      .finally(() => {
-        this._descriptors.delete(descriptor);
-        if (!this._descriptors.size) {
-          this._emit();
-        }
+  async waitForLast() {
+    while (true) {
+      await this.wait();
+      await new Promise(resolve => {
+        setImmediate(resolve);
       });
+      if (!this._tasks.length && !this._countRunningTasks) break;
+    }
+  }
+
+  waitFor<T>(callback: () => Promise<T>): Promise<T> {
+    return Promise.all([callback(), this.waitForLast()]).then(
+      ([result]) => result
+    );
   }
 }

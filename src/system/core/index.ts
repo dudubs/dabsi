@@ -4,11 +4,12 @@ import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import { ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import SystemRpc, { SYSTEM_RPC_PATH } from "./common/rpc";
+import ServerDevModule from "@dabsi/modules/ServerModule.dev";
 
 @Module({
   dependencies: [SessionModule],
 })
-export class SystemModule {
+export default class SystemModule {
   readonly log = log.get("SYSTEM");
 
   readonly request = new RequestBuilder();

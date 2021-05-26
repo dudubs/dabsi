@@ -12,25 +12,25 @@ export type IsGenericConfig<T> = Is<
   }
 >;
 
-export interface GenericConfig2<T extends Fn, U extends any[] = []> {
+export interface GenericConfig<T extends Fn, U extends any[] = []> {
   ($: T, ...args: U): Awaitable<ReturnType<T>>;
 
   [__GenericConfigSymbol]?: true;
 }
 
-export type AnyGenericConfig = GenericConfig2<Fn, any[]>;
+export type AnyGenericConfig = GenericConfig<Fn, any[]>;
 
 export type GenericConfigArgs<
   T extends AnyGenericConfig
-> = T extends GenericConfig2<any, infer U> ? U : never;
+> = T extends GenericConfig<any, infer U> ? U : never;
 
 export type GenericConfigFn<
   T extends AnyGenericConfig
-> = T extends GenericConfig2<infer U, any[]> ? U : never;
+> = T extends GenericConfig<infer U, any[]> ? U : never;
 
 type IsWithoutArgs<T extends AnyGenericConfig> = Is<GenericConfigArgs<T>, []>;
 
-export namespace GenericConfig2 {
+export namespace GenericConfig {
   export type IsWithoutResolveFn<T extends AnyGenericConfig> = Is<
     Parameters<GenericConfigFn<T>>,
     [ReturnType<GenericConfigFn<T>>]
@@ -41,23 +41,25 @@ export namespace GenericConfig2 {
   ) => ReturnType<GenericConfigFn<T>>;
 }
 //
-export function GenericConfig2<T extends AnyGenericConfig>(
+export function GenericConfig<T extends AnyGenericConfig>(
   genericConfig: T,
   ...[]: [
     ...If<IsWithoutArgs<T>, [], [configArgs: GenericConfigArgs<T>]>,
     ...If<
-      GenericConfig2.IsWithoutResolveFn<T>,
+      GenericConfig.IsWithoutResolveFn<T>,
       [],
-      [resolve: GenericConfig2.ResolveFn<T>]
+      [resolve: GenericConfig.ResolveFn<T>]
     >
   ]
 ): Promise<ReturnType<T>>;
 
-export async function GenericConfig2(
+export async function GenericConfig(
   genericConfig,
   resolveOrArgs?,
   maybeResolve?
 ) {
+  if (genericConfig === undefined) return;
+
   let resolve;
   let args;
 
@@ -84,7 +86,7 @@ export async function GenericConfig2(
   return result;
 }
 
-export type ConfigFactory<T, U extends any[] = []> = GenericConfig2<
+export type ConfigFactory<T, U extends any[] = []> = GenericConfig<
   (config: T) => T,
   U
 >;
@@ -115,7 +117,7 @@ export async function ConfigOrFactory(
   if (typeof config !== "function") {
     return config;
   }
-  return GenericConfig2(
+  return GenericConfig(
     config as ConfigFactory<any, [any]>,
     (typeof args === "function" ? await args() : args) as [never]
   );

@@ -1,12 +1,12 @@
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import axios from "axios";
 
 export function ExpressModuleTester(t: ModuleTester) {
   return Tester.beforeAll(async () => {
-    const module = await t.getAndWait(ExpressModule2);
+    const module = await t.getAndWait(ExpressModule);
     const app = module.createApplication();
 
     const server: ReturnType<typeof app.listen> = await new Promise(resolve => {

@@ -1,23 +1,23 @@
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
 import { getRpcType, Rpc, RpcChild, RpcType } from "@dabsi/typerpc2";
-import { getChildRpcType } from "@dabsi/typerpc2/getRpcMetadata";
+import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { AnyInput } from "@dabsi/typerpc2/input/Input";
 import { InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import { RpcChildMap } from "@dabsi/typerpc2/RpcChildMap";
+import PathPathMap from "@dabsi/typerpc2/RpcPathMap";
 import { AnyWidget } from "@dabsi/typerpc2/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
 import { ReactWrapper } from "@dabsi/view/react/ReactWrapper";
 import React from "react";
 
-export type SystemViewComponentMap = RpcChildMap<SystemViewComponent<any>>;
+export type SystemViewComponentMap = RpcPathMap<SystemViewComponent<any>>;
 
 export type SystemViewComponent<T extends AnyWidget> = React.ComponentType<
   SystemViewComponentProps<T>
 >;
 
-const globalComponentMap = new RpcChildMap<SystemViewComponent<any>>();
+const globalComponentMap = new RpcPathMap<SystemViewComponent<any>>();
 
 SystemView.ComponentMapContext = React.createContext(globalComponentMap);
 
@@ -98,7 +98,7 @@ export function SystemView({
     const parentComponentMap = React.useContext(SystemView.ComponentMapContext);
 
     const componentMap = React.useMemo(() => {
-      const map = new RpcChildMap(parentComponentMap);
+      const map = new RpcPathMap(parentComponentMap);
       build?.((rpcType, options) => {
         __defineStylesheet(map, rpcType, options);
       });

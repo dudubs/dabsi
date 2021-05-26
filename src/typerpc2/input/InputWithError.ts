@@ -27,7 +27,7 @@ export type InputWithError<T extends AnyInput, Error> = BaseInput<T> &
     InputElement<T>
   >;
 
-export declare function InputWithError<CustomError>(): {
+export function InputWithError<CustomError>(): {
   <T extends AnyInputWithConfig>(inputType: RpcType<T>): RpcType<
     InputWithError<T, CustomError> &
       (T extends InputWithConfig<
@@ -46,4 +46,8 @@ export declare function InputWithError<CustomError>(): {
           >
         : never)
   >;
-};
+} {
+  return inputType => <any>inputType;
+}
+
+export const InputWithAlreadyInUseError = InputWithError<"ALREADY_IN_USE">();

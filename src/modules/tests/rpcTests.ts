@@ -1,5 +1,5 @@
 import { RpcModule2 } from "@dabsi/modules/rpc";
-import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import { RpcModuleTester } from "@dabsi/modules/tests/testers/RpcModuleTester";
 import { ServerModuleTester } from "@dabsi/modules/tests/testers/ServerModuleTester";
 import TestModule from "@dabsi/modules/tests/test-module";
@@ -9,7 +9,7 @@ import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 
 const mt = ModuleTester([
   TestModule,
-  ExpressModule2,
+  ExpressModule,
   Resolver([RpcModule2], rpcModule => {
     rpcModule.serve("/test", TestNS);
   }),

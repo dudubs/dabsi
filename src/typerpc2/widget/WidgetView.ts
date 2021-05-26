@@ -1,4 +1,6 @@
 import { defined } from "@dabsi/common/object/defined";
+import { pick } from "@dabsi/common/object/pick";
+import { WeakId } from "@dabsi/common/WeakId";
 import {
   AnyWidget,
   WidgetElement,
@@ -8,7 +10,6 @@ import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { View } from "@dabsi/view/react/component/View";
 import { ReactContext } from "@dabsi/view/react/ReactContext";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
-import { WSA_E_CANCELLED } from "node:constants";
 import React from "react";
 
 export interface WidgetViewProps<T extends AnyWidget> {
@@ -29,7 +30,8 @@ export class WidgetView<
   T extends AnyWidget,
   P extends WidgetViewProps<T> = WidgetViewProps<T>
 > extends View<P & { renderWidget?(view: WidgetView<T>): React.ReactElement }> {
-  //
+  @ViewState() protected _isDidUpdateElement = false;
+
   @ViewState("forceUpdateElement") private _element:
     | WidgetElement<T>
     | undefined = this.props.element;
@@ -63,18 +65,13 @@ export class WidgetView<
 
   updateElement?(): void;
 
-  private _isUpdatingElement = false;
-
-  get isUpdatingElement(): boolean {
-    return this._isUpdatingElement;
+  get isDidUpdateElement(): boolean {
+    return this._isDidUpdateElement;
   }
 
-  @ViewState() protected _isDidUpdatingElement = false;
-
   forceUpdateElement() {
-    if (!this.isDidMount) return;
     if (!this._element) return;
-    this._isUpdatingElement = true;
+
     try {
       this.updateElement?.();
 
@@ -85,8 +82,7 @@ export class WidgetView<
         callback(this._element);
       });
     } finally {
-      this._isUpdatingElement = false;
-      this._isDidUpdatingElement = true;
+      this._isDidUpdateElement = true;
     }
   }
 
@@ -103,7 +99,7 @@ export class WidgetView<
   }
 
   renderView(): React.ReactNode {
-    if (!this._element || !this._isDidUpdatingElement) {
+    if (!this._element || !this._isDidUpdateElement) {
       return EmptyFragment;
     }
 

@@ -1,5 +1,5 @@
 import { Forward } from "@dabsi/common/reflection/Forward";
-import { getChildRpcType } from "@dabsi/typerpc2/getRpcMetadata";
+import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { RpcParametrialMember, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";

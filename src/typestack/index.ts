@@ -3,16 +3,15 @@ import "@dabsi/register";
 import path from "path";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import { Resolver } from "@dabsi/typedi";
-import { ProjectSettings } from "@dabsi/modules/ProjectModule2";
+import { ProjectSettings } from "@dabsi/modules/ProjectModule";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
+
 if (require.main === module)
   (async () => {
     //
     const [, , projectName, ...argv] = process.argv;
 
     const projectDir = fs.realpathSync(".");
-
-    console.log({ projectDir });
 
     const { default: mainModuleTarget } = require(path.join(
       projectDir,

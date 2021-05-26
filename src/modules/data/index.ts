@@ -1,7 +1,7 @@
-import { DbModule2 } from "@dabsi/modules/DbModule2";
+import DbModule from "@dabsi/modules/DbModule";
 import { Module } from "@dabsi/typemodule";
 
 @Module({
-  dependencies: [DbModule2],
+  dependencies: [DbModule],
 })
 export class DataModule2 {}

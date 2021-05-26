@@ -4,7 +4,7 @@ import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
 import { ACL_Admin_GroupsTable } from "@dabsi/system/acl/admin/common/groupsTable";
 import { ACL_Admin_UsersTable } from "@dabsi/system/acl/admin/common/usersTable";
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 
 export default [
   RpcResolver(

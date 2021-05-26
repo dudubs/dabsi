@@ -1,4 +1,5 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
+import { defined } from "@dabsi/common/object/defined";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
@@ -123,7 +124,10 @@ export function Route(...args) {
 
     const [
       getRouteType = () =>
-        Reflector.getPropertyType(target.constructor, propertyName),
+        defined(
+          Reflector.getPropertyType(target.constructor, propertyName),
+          () => `No routeType for "${target.constructor.name}.${propertyName}"`
+        ),
       paramTypes = [],
     ] = args;
 

@@ -237,7 +237,8 @@ export class DataTableView<
   }
 
   async forceUpdateQuery() {
-    if (this.isUpdatingElement) return;
+    if (!this.isDidUpdateElement) return;
+
     if (!(await this._queryDebounce.wait())) return;
 
     const isStillLastQueryPromise = this._queryDebounce.wait();

@@ -1,6 +1,6 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { DataParameter } from "@dabsi/modules/data/DataParameter";
+import { DataParameter } from "@dabsi/modules/data/common/DataParameter";
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { RpcMemberResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
@@ -9,9 +9,8 @@ import { Resolver } from "@dabsi/typedi";
 import { ResolverDeps } from "@dabsi/typedi/consume";
 import { Rpc, RpcMemberKey, RpcType } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { getChildRpcType } from "@dabsi/typerpc2/getRpcMetadata";
+import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export function DataParameterResolver<
   T extends Rpc,

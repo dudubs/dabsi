@@ -372,9 +372,12 @@ export abstract class DataSource<T> {
     });
   }
 
-  filter<T>(this: DataSource<T>, ...exps: DataExp<T>[]): DataSource<T> {
-    const filter = DataExp({ $and: exps });
-    if (typeof filter === "undefined") return this;
+  filter<T>(
+    this: DataSource<T>,
+    ...exps: (DataExp<T> | undefined)[]
+  ): DataSource<T> {
+    const filter = DataExp({ $and: exps as any });
+    if (filter === undefined) return this;
     return this.updateCursor({
       filter: DataExp(this.cursor.filter, filter),
     });

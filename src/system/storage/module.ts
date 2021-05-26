@@ -1,12 +1,12 @@
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
-import { DbModule2 } from "@dabsi/modules/DbModule2";
+import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
+import DbModule from "@dabsi/modules/DbModule";
 import { StorageFile } from "@dabsi/system/storage/entities/StorageFile";
 import { Storage, StorageDeleteResult } from "@dabsi/system/storage/Storage";
 import { CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
 
 @Module({
-  dependencies: [DbModule2],
+  dependencies: [DbModule],
 })
 export default class StorageModule {
   @CliCommand("storage.clean")

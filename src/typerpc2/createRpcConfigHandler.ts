@@ -1,4 +1,4 @@
-import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
+import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { BaseRpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
@@ -14,7 +14,7 @@ export async function createRpcConfigHandler<T extends AnyRpcWithConfig>(
 
 export async function createRpcConfigHandler(
   rpcType:
-    | RpcType<Rpc & RpcWithConfig<Rpc, GenericConfig2<(...args) => any>>>
+    | RpcType<Rpc & RpcWithConfig<Rpc, GenericConfig<(...args) => any>>>
     | RpcType<AnyRpcWithConfig>,
   rpcConfigurator: RpcConfigurator<AnyRpcWithConfig>
 ) {
@@ -38,8 +38,8 @@ export async function createRpcConfigHandler(
     case "REGULAR":
       {
         if (typeof rpcConfigurator === "function") {
-          rpcConfig = await GenericConfig2(
-            rpcConfigurator as GenericConfig2<(config: any) => any>
+          rpcConfig = await GenericConfig(
+            rpcConfigurator as GenericConfig<(config: any) => any>
           );
         } else {
           rpcConfig = rpcConfigurator;
@@ -50,8 +50,8 @@ export async function createRpcConfigHandler(
       rpcConfig = rpcConfigurator;
       break;
     case "GENERIC":
-      rpcConfig = await GenericConfig2(
-        rpcConfigurator as GenericConfig2<(...args) => any>,
+      rpcConfig = await GenericConfig(
+        rpcConfigurator as GenericConfig<(...args) => any>,
         rpcConfigHandlerType.resolveRpcGenericConfig!
       );
       break;

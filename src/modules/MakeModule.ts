@@ -1,13 +1,15 @@
-import * as fs from "fs";
+import LoaderModule from "@dabsi/modules/LoaderModule";
 import { Module } from "@dabsi/typemodule";
-import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
-import { dirname } from "path";
+import * as fs from "fs";
+import path, { dirname } from "path";
+
+const DEBUG = false;
 
 @Module()
 export default class MakeModule {
   protected _touchedDirs = new Map();
 
-  constructor(protected loaderModule: LoaderModule2) {}
+  constructor(protected loaderModule: LoaderModule) {}
 
   async touchDir(dir: string) {
     return this._touchedDirs.touch(dir, async () => {
@@ -26,8 +28,39 @@ export default class MakeModule {
   async makeTextFile(path: string, text: string) {
     await this.touchDir(dirname(path));
     console.log("make file " + path);
-    // console.log("  " + text.replace(/\n/g, "\n  "));
+    if (DEBUG) {
+      console.log("  " + text.replace(/\n/g, "\n  "));
+    } else {
+      await fs.promises.writeFile(path, text);
+    }
+  }
 
-    await fs.promises.writeFile(path, text);
+  async makeTsconfigFile<
+    C extends { extends?: string; compilerOptions?: {}; include?: string[] }
+  >(outFileName: string, c: C) {
+    const outDir = path.dirname(outFileName);
+    const relative = (p: string) =>
+      /\.\.?([\\\/]|$)/.test(p) ? p : path.posix.relative(outDir, p);
+
+    const relativeProp = (o, p) =>
+      typeof o[p] === "string" ? { [p]: relative(o[p] as any) } : null;
+
+    const co = c.compilerOptions;
+
+    return this.makeJsonFile(outFileName, {
+      ...c,
+      ...relativeProp(c, "extends"),
+
+      ...(co
+        ? {
+            compilerOptions: {
+              ...co,
+              ...relativeProp(co, "baseUrl"),
+            },
+          }
+        : null),
+
+      ...(c.include ? { include: c.include.map(relative).sort() } : {}),
+    });
   }
 }

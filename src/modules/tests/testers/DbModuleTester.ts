@@ -1,14 +1,14 @@
 import { WeakId } from "@dabsi/common/WeakId";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
-import { DbModule2 } from "@dabsi/modules/DbModule2";
+import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
+import DbModule from "@dabsi/modules/DbModule";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 
 export type DbModuleTester = ReturnType<typeof DbModuleTester>;
 
 export function DbModuleTester(mt: ModuleTester) {
   return Tester.beforeAll(async t => {
-    const dbModule = await mt.getAndWait(DbModule2);
+    const dbModule = await mt.getAndWait(DbModule);
     dbModule.connectionOptions = {
       type: "sqlite",
       database: ":memory:",

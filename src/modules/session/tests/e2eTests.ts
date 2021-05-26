@@ -1,5 +1,5 @@
 import { RequestSession, SessionModule } from "@dabsi/modules/session";
-import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
 import { ServerModuleTester } from "@dabsi/modules/tests/testers/ServerModuleTester";
 import { Resolver } from "@dabsi/typedi";
@@ -7,7 +7,7 @@ import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 
 const mt = ModuleTester([
   SessionModule,
-  Resolver([ExpressModule2], em => {
+  Resolver([ExpressModule], em => {
     em.builders.push(app => {
       app.get(
         "/test",

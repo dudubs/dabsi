@@ -6,7 +6,6 @@ import {
   InputValueElement,
   inputValueElementToData,
 } from "@dabsi/typerpc2/input/Input";
-import { WidgetElement } from "@dabsi/typerpc2/widget/Widget";
 import { WidgetView, WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 import { updateRef } from "@dabsi/view/react/HookRef";

@@ -47,8 +47,8 @@ export function MuiObjectInputView<T extends AnyInputMap>({
   return (
     <Grid direction="column" spacing={1} container {...ContainerGridProps}>
       <ObjectInputView {...props}>
-        {view => {
-          return mapObjectToArray(
+        {view =>
+          mapObjectToArray(
             sortObject(view.element as any, firstItems || [], lastItems || []),
             (_, childKey) => (
               <Grid
@@ -60,8 +60,8 @@ export function MuiObjectInputView<T extends AnyInputMap>({
                 <SystemView {...view.getChildProps(childKey)} />
               </Grid>
             )
-          );
-        }}
+          )
+        }
       </ObjectInputView>
     </Grid>
   );

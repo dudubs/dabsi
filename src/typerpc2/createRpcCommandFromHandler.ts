@@ -1,6 +1,6 @@
 import { capitalize } from "@dabsi/common/string/capitalize";
 import { RpcType } from "@dabsi/typerpc2";
-import { ConfigFactory, GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
+import { ConfigFactory, GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { Rpc } from "@dabsi/typerpc2/Rpc";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";

@@ -2,8 +2,8 @@ import { defined } from "@dabsi/common/object/defined";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Type } from "@dabsi/common/typings2/Type";
 import { Hookable } from "@dabsi/modules/Hookable";
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
-import { DbModule2 } from "@dabsi/modules/DbModule2";
+import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
+import DbModule from "@dabsi/modules/DbModule";
 import {
   RichTextBlockHandler,
   RichTextBlockOptions,
@@ -35,7 +35,7 @@ import "reflect-metadata";
 import { ManyToOne, RelationOptions } from "typeorm";
 
 @Module({
-  dependencies: [DbModule2],
+  dependencies: [DbModule],
 })
 export default class RichTextModule {
   styleTypes = new Set<string>();

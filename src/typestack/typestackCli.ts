@@ -4,10 +4,12 @@ import {
   DABSI_WORKSPACE_DIR,
   getWorkspacePackage,
 } from "@dabsi/env";
-import { ProjectSettings } from "@dabsi/modules/ProjectModule2";
+import DevModule from "@dabsi/modules/DevModule";
+import { ProjectSettings } from "@dabsi/modules/ProjectModule";
 import { CliModule2 } from "@dabsi/typecli/CliModule";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
+import { TYPESTACK_CLI_ARG } from "@dabsi/typestack/getTypestackCliArgs";
 import * as fs from "fs";
 import path from "path";
 import { register as registerTsConfigPaths } from "tsconfig-paths";
@@ -30,7 +32,7 @@ const getProjectDir = async (): Promise<string> => {
 };
 
 export default async function typestackCli(): Promise<boolean> {
-  if (process.argv[2] !== "typestack") return false;
+  if (process.argv[2] !== TYPESTACK_CLI_ARG) return false;
 
   const tsArgs = process.argv.slice(3);
   const projectDir: string = await getProjectDir();
@@ -49,8 +51,6 @@ export default async function typestackCli(): Promise<boolean> {
       });
   }
 
-  console.log({ projectDir });
-
   const moduleRunner = new ModuleRunner();
 
   Resolver.Context.assign(moduleRunner.context, [
@@ -58,7 +58,7 @@ export default async function typestackCli(): Promise<boolean> {
   ]);
 
   await Promise.all(
-    ["project", "main"].map(async moduleBaseName => {
+    ["main", "main.dev"].map(async moduleBaseName => {
       const modulePath = path.join(projectDir, "src", moduleBaseName + ".ts");
 
       if (
@@ -76,6 +76,7 @@ export default async function typestackCli(): Promise<boolean> {
       if (typeof moduleTarget !== "function") {
         throw new Error(`No module target for ${moduleBaseName}`);
       }
+      moduleRunner.get(DevModule);
       moduleRunner.get(moduleTarget);
     })
   );

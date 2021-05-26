@@ -8,7 +8,7 @@ import {
 } from "@dabsi/system/core/view/SystemView";
 import { RpcContextual, RpcType } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { RpcChildMap } from "@dabsi/typerpc2/RpcChildMap";
+import PathPathMap from "@dabsi/typerpc2/RpcPathMap";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import {
   AnyWidget,
@@ -141,7 +141,7 @@ const testBuilder = (builder: SystemViewBuilder) =>
   });
 
 it("expect to define with child-keys", async () => {
-  const map: SystemViewComponentMap = new RpcChildMap();
+  const map: SystemViewComponentMap = new RpcPathMap();
   defineSystemViewCompoent(map, W3_2, {
     wx: { w1: () => EmptyFragment },
   });

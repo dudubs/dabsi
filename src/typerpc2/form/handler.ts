@@ -25,6 +25,7 @@ declare module "./rpc" {
           valueConfig:
             | ConfigOrFactory<InputValueConfig<T>>
             | IfUndefined<InputValueConfig<T>, undefined>;
+
           inputConfig: RpcConfigurator<T>;
         },
         {

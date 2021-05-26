@@ -40,13 +40,10 @@ export const getConstructorParamsResolver = WeakMapFactory(
     return Resolver.array(
       getParamsResolvers(
         Reflect.getMetadata("design:paramtypes", target) || [],
-
         parameterResolverMap.get(target),
         index => Forward.getParameterType(target, index)
       ),
-      index => {
-        return getParameterName(target, index);
-      }
+      index => `${target.name}:${getParameterName(target, index)}`
     );
   }
 );

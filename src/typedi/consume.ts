@@ -40,6 +40,23 @@ export type ConsumeFactory<T, U extends ResolverDeps> = U extends ResolverArray
   ? (...deps: ResolvedArray<U>) => T
   : (depMap: ResolvedMap<Extract<U, ResolverMap<any>>>) => T;
 
+declare module "./Resolver" {
+  namespace Resolver {
+    export function consume<
+      T extends TypeResolver<any>,
+      U extends ResolverDeps
+    >(
+      provider: T,
+      deps: U,
+      resolver?: ConsumeFactory<InstanceType<T>, U>
+    ): ResolverMap<any>;
+
+    export function consume<T, U extends ResolverDeps>(
+      deps: U,
+      factory: ConsumeFactory<T, U>
+    ): ConsumeResolver<T>;
+  }
+}
 Resolver.consume = function (deps: any, factory: any): any {
   // TODO: locate error
   if (Array.isArray(deps)) {
@@ -60,24 +77,15 @@ Resolver.consume = function (deps: any, factory: any): any {
   );
 };
 
-declare module "./Resolver" {
-  namespace Resolver {
-    export function consume<
-      T extends TypeResolver<any>,
-      U extends ResolverDeps
-    >(
-      provider: T,
-      deps: U,
-      resolver?: ConsumeFactory<InstanceType<T>, U>
-    ): ResolverMap<any>;
-
-    export function consume<T, U extends ResolverDeps>(
-      deps: U,
-      factory: ConsumeFactory<T, U>
-    ): ConsumeResolver<T>;
-  }
-}
-
 export type ConsumeArgs<C, U extends ResolverDeps> =
   | [deps: U, factory: ConsumeFactory<C, U>]
   | IfUndefined<C, []>;
+
+export function ConsumeArgs<T, U>(
+  args: ConsumeArgs<T, any> | undefined
+): Resolver<T> | undefined {
+  if (!args?.length) {
+    return;
+  }
+  return Resolver.consume(...args);
+}

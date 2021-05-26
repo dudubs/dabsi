@@ -52,12 +52,9 @@ it("expect to load modules", async () => {
   class A {
     constructor(moduleRunner: ModuleRunner) {
       //
-      moduleRunner.pushLoader(
-        () => ``,
-        target => {
-          events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
-        }
-      );
+      moduleRunner.pushLoader(target => {
+        events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
+      });
     }
   }
   @Module({
@@ -66,12 +63,9 @@ it("expect to load modules", async () => {
   class B {
     constructor(moduleRunner: ModuleRunner) {
       //
-      moduleRunner.pushLoader(
-        () => ``,
-        target => {
-          events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
-        }
-      );
+      moduleRunner.pushLoader(target => {
+        events.push(`LOAD_${target.name}_BY_${this.constructor.name}`);
+      });
     }
   }
   await ModuleRunner.run(B);
@@ -172,4 +166,25 @@ it("expect to install context", () => {
 
   const mr = new ModuleRunner();
   expect(mr.get(B).x.n).toEqual(123);
+});
+
+it("expect to optional plugin", async () => {
+  //
+
+  @Module()
+  class A {}
+
+  @Module()
+  class B {
+    @Plugin() a?: A;
+  }
+
+  const mr = new ModuleRunner();
+  const b = mr.get(B);
+  expect(b.a).toBeUndefined();
+  await mr.process.wait();
+
+  const a = mr.get(A);
+  await mr.process.wait();
+  expect(b.a).toBe(a);
 });

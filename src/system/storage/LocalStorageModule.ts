@@ -1,5 +1,5 @@
-import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
-import { ProjectModule2 } from "@dabsi/modules/ProjectModule2";
+import ExpressModule from "@dabsi/modules/ExpressModule";
+import ProjectModule from "@dabsi/modules/ProjectModule";
 import { LocalStorage } from "@dabsi/system/storage/LocalStorage";
 import StorageModule from "@dabsi/system/storage/module";
 import { Storage } from "@dabsi/system/storage/Storage";
@@ -13,7 +13,7 @@ const LOCAL_STORAGE_URL = "/bundle/local-storage";
 
 @Module({ dependencies: [StorageModule] })
 export class LocalStorageModule {
-  constructor(protected projectModule: ProjectModule2) {}
+  constructor(protected projectModule: ProjectModule) {}
 
   get directory(): string {
     return path.join(
@@ -31,7 +31,7 @@ export class LocalStorageModule {
     );
   }
 
-  installExpress(@Plugin() expressModule: ExpressModule2) {
+  installExpress(@Plugin() expressModule: ExpressModule) {
     expressModule.preBuilders.push(app => {
       app.use(LOCAL_STORAGE_URL, express.static(this.directory), (req, res) => {
         res.status(404).send("File not found.");

@@ -20,13 +20,10 @@ export function Once(weakOrCallback, maybeCallback?) {
       if (!weak) {
         const symbol = Symbol(`${propertyName}Once`);
         desc.value = function (this: object) {
-          if (!this.hasOwnProperty(symbol)) {
-            Object.defineProperty(this, symbol, {
-              enumerable: false,
-              value: origValue.call(this, arguments),
-            });
+          if (symbol in this) {
+            return this[symbol];
           }
-          return this[symbol];
+          return (this[symbol] = origValue.call(this, arguments));
         };
         return;
       }
@@ -40,13 +37,10 @@ export function Once(weakOrCallback, maybeCallback?) {
   if (!weak) {
     const symbol = Symbol();
     return function (this: object) {
-      if (!this.hasOwnProperty(symbol)) {
-        Object.defineProperty(this, symbol, {
-          enumerable: false,
-          value: callback!.call(this, arguments),
-        });
+      if (symbol in this) {
+        return this[symbol];
       }
-      return this[symbol];
+      return (this[symbol] = callback!.call(this, arguments));
     };
   }
 

@@ -3,7 +3,7 @@ import { Expect } from "@dabsi/common/typings2/Expect";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { Rpc } from "@dabsi/typerpc2";
 import {
-  GenericConfig2,
+  GenericConfig,
   Configurator,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
@@ -35,14 +35,14 @@ export function RpcAtTypingTests() {
   ];
 }
 export async function ConfigTypingsTests() {
-  let GC1: GenericConfig2<
+  let GC1: GenericConfig<
     <T extends Fn>(o: {
       type: T;
       value: ReturnType<T>;
     }) => { type: Fn; value: any }
   >;
 
-  let GC1WithArgs: GenericConfig2<
+  let GC1WithArgs: GenericConfig<
     <T extends Fn>(o: {
       type: T;
       value: ReturnType<T>;
@@ -50,14 +50,14 @@ export async function ConfigTypingsTests() {
     [{ xs: string; xi: number }]
   >;
 
-  let GC2: GenericConfig2<
+  let GC2: GenericConfig<
     <T extends Fn>(o: {
       type: T;
       value: ReturnType<T>;
     }) => { typeAndValue: [Fn, any] }
   >;
 
-  let GC2WithArgs: GenericConfig2<
+  let GC2WithArgs: GenericConfig<
     <T extends Fn>(o: {
       type: T;
       value: ReturnType<T>;
@@ -90,28 +90,28 @@ export async function ConfigTypingsTests() {
     // @ts-expect-error
     GC2 = $ => $({ type: String, value: 123 });
 
-    (await GenericConfig2(GC1)).type;
+    (await GenericConfig(GC1)).type;
 
-    (await GenericConfig2(GC1WithArgs, [{ xs: "", xi: 0 }])).type;
+    (await GenericConfig(GC1WithArgs, [{ xs: "", xi: 0 }])).type;
 
     // @ts-expect-error
-    (await GenericConfig2(GC1)).x;
+    (await GenericConfig(GC1)).x;
 
     (
-      await GenericConfig2(GC2, ({ type, value }) => ({
+      await GenericConfig(GC2, ({ type, value }) => ({
         typeAndValue: [type, value],
       }))
     ).typeAndValue;
 
     (
-      await GenericConfig2(GC2, ({ type, value }) => ({
+      await GenericConfig(GC2, ({ type, value }) => ({
         // @ts-expect-error
         typeAndValue: [type],
       }))
     ).typeAndValue;
 
     (
-      await GenericConfig2(
+      await GenericConfig(
         GC2WithArgs!,
         [{ xs: "", xi: 1 }],
         ({ type, value }) => ({
@@ -121,13 +121,13 @@ export async function ConfigTypingsTests() {
     ).typeAndValue;
 
     // @ts-expect-error
-    await GenericConfig2(GC2WithArgs!, ({ type, value }) => ({
+    await GenericConfig(GC2WithArgs!, ({ type, value }) => ({
       typeAndValue: [type, value],
     }));
 
     {
       // @ts-expect-error
-      const { x } = await GenericConfig2(
+      const { x } = await GenericConfig(
         GC2WithArgs!,
         [{ xs: "", xi: 1 }],
         ({ type, value }) => ({
@@ -143,7 +143,7 @@ export async function ConfigTypingsTests() {
 
     type _ = [
       //
-      Expect<true, Is<() => any, GenericConfig2<any>>>,
+      Expect<true, Is<() => any, GenericConfig<any>>>,
       Expect<false, IsGenericConfig<() => any>>
     ];
 

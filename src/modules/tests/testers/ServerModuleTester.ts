@@ -1,5 +1,5 @@
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
-import { ServerModule2 } from "@dabsi/modules/ServerModule2";
+import ServerModule from "@dabsi/modules/ServerModule";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import axios from "axios";
 
@@ -11,7 +11,7 @@ export function ServerModuleTester(t: ModuleTester) {
   return t.beforeAll(async t => {
     const port = portCounter++;
 
-    const serverModule = await t.getAndWait(ServerModule2);
+    const serverModule = await t.getAndWait(ServerModule);
 
     return {
       moduleTester: t,

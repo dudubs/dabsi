@@ -1,16 +1,16 @@
-import { DbModule2 } from "@dabsi/modules/DbModule2";
+import DbModule from "@dabsi/modules/DbModule";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
 import AclContext from "./context";
 
 @Module({
-  dependencies: [DbModule2],
+  dependencies: [DbModule],
   cli: "acl",
 })
-export class AclModule {
+export default class AclModule {
   log = log.get("ACL");
 
-  @CliArgument() protected _init(dbModule: DbModule2) {
+  @CliArgument() protected _init(dbModule: DbModule) {
     return dbModule.loadAndConnect();
   }
 

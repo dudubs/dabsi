@@ -2,6 +2,7 @@ import { Forward } from "@dabsi/common/reflection/Forward";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
+import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
 import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
 export type RpcMemberKey<T extends Rpc> = ExtractKeys<
@@ -32,24 +33,7 @@ export class Rpc {
   }
 
   static at: RpcType<Rpc>["at"] = function (path) {
-    const memberType = RpcMembers.getMemberType(this, path);
-    if (typeof memberType === "number") {
-      switch (memberType) {
-        case RpcMemberType.Contextual:
-        case RpcMemberType.Parametrial:
-          return <any>Forward.getPropertyType(this, path);
-        default:
-          throw new Error(`No rpc child like "${path}"`);
-      }
-    }
-
-    const dotPos = path.indexOf(".");
-    if (dotPos === -1) {
-      throw new Error(`No rpc member like "${path}".`);
-    }
-    const memberKey = path.substr(0, dotPos);
-    const memberPath = path.substr(dotPos + 1);
-    return <any>this.at(memberKey).at(memberPath);
+    return new RpcLocation(this, path.split("."));
   };
 }
 
@@ -70,6 +54,8 @@ export type RpcAt<T extends Rpc, P extends string> =
     ? T extends RpcWithChild<K, infer U>
       ? RpcAt<U, P>
       : never
+    : T extends Record<P, RpcFunctionalMember>
+    ? T[P]
     : never;
 
 export type RpcFunctionalMember<T = any, U extends any[] = any[]> = (
@@ -96,7 +82,7 @@ export type RpcType<T = any> = {
   at<T extends Rpc, P extends string>(
     this: RpcType<T>,
     path: P
-  ): RpcType<RpcAt<T, P>>;
+  ): RpcLocation<RpcAt<T, P>>;
 };
 
 export function isRpcType(o) {

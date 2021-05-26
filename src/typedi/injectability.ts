@@ -38,7 +38,7 @@ const _getParametersResolver = (
         propertyName
       );
 
-      return `${paramName}: ${paramType.name}`;
+      return `${target.name}(...${paramName}: ${paramType.name})`;
     }
   );
 

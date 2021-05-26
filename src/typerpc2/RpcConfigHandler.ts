@@ -6,13 +6,14 @@ import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
+import catchAndLocateError from "@dabsi/typemodule/catchAndLocateError";
 import {
   AnyGenericConfig,
   ConfiguratorType,
-  GenericConfig2,
+  GenericConfig,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
-import { getChildRpcType } from "@dabsi/typerpc2/getRpcMetadata";
+import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import {
   Rpc,
   RpcContextualMember,
@@ -28,6 +29,8 @@ import {
   RpcConfigurator,
   RpcWithConfigSymbol,
 } from "./RpcConfig";
+
+const DEBUG = true;
 
 export type InferredRpcHandlerConfig<
   T extends AnyRpcWithConfig
@@ -59,11 +62,21 @@ export class BaseRpcConfigHandler<T extends Rpc, C> {
     this: BaseRpcConfigHandler<T, any>,
     memberKey: string & K
   ): RpcMemberHandler<T[K]> {
-    return defined(
+    const handler = defined(
       this["handle" + capitalize(memberKey)],
       () =>
         `No handle function for "${this.rpcType.name}.${memberKey}" in ${this.constructor.name}`
     ).bind(this);
+
+    if (DEBUG) {
+      return <any>function (this: any) {
+        return catchAndLocateError.async(
+          () => handler.apply(this, arguments),
+          () => `ConfigHandler<${this.rpcType.name}.${memberKey}>`
+        );
+      };
+    }
+    return handler;
   }
 
   getContextualHandler<
@@ -124,8 +137,8 @@ export type RpcGenericConfigResolver<
   R extends AnyRpcWithConfig
 > = InferredRpcConfig<R> extends AnyGenericConfig
   ?
-      | GenericConfig2.ResolveFn<InferredRpcConfig<R>>
-      | If<GenericConfig2.IsWithoutResolveFn<InferredRpcConfig<R>>, undefined>
+      | GenericConfig.ResolveFn<InferredRpcConfig<R>>
+      | If<GenericConfig.IsWithoutResolveFn<InferredRpcConfig<R>>, undefined>
   : undefined;
 
 export type RpcHandlerConfigResolver<R extends AnyRpcWithConfig, C> =

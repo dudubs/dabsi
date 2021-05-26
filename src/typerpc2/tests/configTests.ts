@@ -1,7 +1,7 @@
 import { Fn } from "@dabsi/common/typings2/Fn";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
+import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { Rpc } from "@dabsi/typerpc2/Rpc";
 import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
 import { RpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
@@ -37,7 +37,7 @@ it("expect to resolve GENERIC config with resolve-fn", async () => {
   }
   interface R
     extends RpcWithConfig<
-      GenericConfig2<
+      GenericConfig<
         <T extends Fn>(
           type: T,
           value: ReturnType<T>
@@ -70,7 +70,7 @@ it("expect to resolve GENERIC config without resolve-fn", async () => {
   }
   interface R
     extends RpcWithConfig<
-      GenericConfig2<
+      GenericConfig<
         <T extends Fn>(c: {
           type: T;
           value: ReturnType<T>;

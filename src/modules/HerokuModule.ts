@@ -6,16 +6,17 @@ import {
   DABSI_WORKSPACE_DIR,
   getWorkspacePackage,
 } from "@dabsi/env";
-import BrowserPlatformModule from "@dabsi/modules/BrowserPlatformModule";
+import BrowserDevModule from "@dabsi/modules/BrowserModule.dev";
 import MakeModule from "@dabsi/modules/MakeModule";
-import { PlatformModule2 } from "@dabsi/modules/PlatformModule2";
-import { ProjectModule2 } from "@dabsi/modules/ProjectModule2";
+import PlatformModule from "@dabsi/modules/PlatformModule";
+import ProjectModule from "@dabsi/modules/ProjectModule";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { spawn } from "child_process";
 import * as fs from "fs";
 import path from "path";
 import fsExtra from "fs-extra";
+import { waitForChildProcess } from "@dabsi/modules/waitForChildProcess";
 @Module({
   cli: "heroku",
 })
@@ -30,12 +31,12 @@ export default class HerokuModule {
   protected _builders: (() => Awaitable)[] = [];
 
   constructor(
-    protected projectModule: ProjectModule2,
-    protected platformModule: PlatformModule2,
+    protected projectModule: ProjectModule,
+    protected platformModule: PlatformModule,
     protected makeModule: MakeModule
   ) {}
 
-  installBrowser(@Plugin() bpm: BrowserPlatformModule) {
+  installBrowserPlatform(@Plugin() bpm: BrowserDevModule) {
     this._builders.push(async () => {
       await bpm.pack();
       await fsExtra.copy(
@@ -64,18 +65,12 @@ export default class HerokuModule {
     await Promise.all([
       ...this._builders.map(builder => builder()),
 
-      new Promise<void>((resolve, reject) => {
+      waitForChildProcess(
         spawn("tsc", ["-p", "configs/tsconfig.heroku.json"], {
           cwd: this.projectModule.settings.directory,
           stdio: "inherit",
         })
-          .on("error", code => {
-            reject(code);
-          })
-          .on("close", () => {
-            resolve();
-          });
-      }),
+      ),
     ]);
   }
 
@@ -110,8 +105,6 @@ export default class HerokuModule {
 
   @CliCommand("make")
   async make() {
-    console.log("making");
-
     const worksapcePk = getWorkspacePackage();
 
     await Promise.all([

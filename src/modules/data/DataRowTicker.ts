@@ -2,7 +2,7 @@ import { defined } from "@dabsi/common/object/defined";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 
 import { DataRowLoader } from "@dabsi/modules/data/DataRowLoader";
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";

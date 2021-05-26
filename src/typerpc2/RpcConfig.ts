@@ -3,7 +3,7 @@ import { Rpc, RpcType } from "@dabsi/typerpc2";
 import {
   ConfigFactory,
   Configurator,
-  GenericConfig2,
+  GenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
 import { isHandlerSide } from "@dabsi/typerpc2/isHandlerSide";
 import { RpcContextualMember } from "@dabsi/typerpc2/Rpc";
@@ -15,7 +15,7 @@ import {
 
 export const RpcWithConfigSymbol = Symbol("RpcWithConfigSymbol");
 
-export type InferredHandlerConfig<C> = C extends GenericConfig2<
+export type InferredHandlerConfig<C> = C extends GenericConfig<
   (...args) => infer U,
   any
 >
@@ -64,7 +64,7 @@ export type RpcMemberConfigurator<T> = T extends RpcContextualMember<infer U>
   : ConfigFactory<RpcMemberHandler<T>>;
 
 export function isRpcTypeWithConfig(
-  rpcType: RpcType
+  rpcType: any
 ): rpcType is RpcType<AnyRpcWithConfig> {
   return rpcType[RpcWithConfigSymbol] !== undefined;
 }

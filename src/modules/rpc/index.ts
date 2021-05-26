@@ -1,8 +1,10 @@
-import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
 import { entries } from "@dabsi/common/object/entries";
-import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { DABSI_SRC_DIR } from "@dabsi/env";
+import ExpressModule from "@dabsi/modules/ExpressModule";
+import LoaderModule from "@dabsi/modules/LoaderModule";
+import PlatformModule from "@dabsi/modules/PlatformModule";
+import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import {
   isRpcResolver,
@@ -10,10 +12,6 @@ import {
   RpcResolver,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
-import { ExpressModule2 } from "@dabsi/modules/ExpressModule2";
-import { LoaderModule2 } from "@dabsi/modules/LoaderModule2";
-import { PlatformModule2 } from "@dabsi/modules/PlatformModule2";
-import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
@@ -33,16 +31,13 @@ export class RpcModule2 {
 
   readonly request = new RequestBuilder();
 
-  constructor(
-    protected loaderModule: LoaderModule2,
-    protected process: AsyncProcess2
-  ) {}
+  constructor(protected loaderModule: LoaderModule) {}
 
   installContext(@Plugin() context: ModuleRunnerContext) {
     Resolver.Context.assign(context, [this.resolverBuilder]);
   }
 
-  async installPlatform(@Plugin() platformModule2: PlatformModule2) {
+  async installPlatform(@Plugin() platformModule2: PlatformModule) {
     const libPath = path.join(DABSI_SRC_DIR, "typerpc2");
 
     const viewFilePattern = path.join(libPath, "**/*view.ts");
@@ -58,7 +53,7 @@ export class RpcModule2 {
       .getPlatform("common")
       .loaders.push(({ platform, baseName, fileName }) => {
         if (baseName === "rpc.ts") {
-          platform.indexFileNames.add(fileName);
+          platform.indexFileNames.push(fileName);
         }
       });
   }
@@ -79,16 +74,13 @@ export class RpcModule2 {
   @Once()
   protected _loadConfigs() {
     //
-    this.loaderModule.pushLoader(
-      () => this.constructor.name,
-      async dir => {
-        for (const baseName of await this.loaderModule.readDir(dir)) {
-          if (!/config\.ts$/i.test(baseName)) continue;
-          const configFileName = path.join(dir, baseName);
-          this.configure(require(configFileName).default);
-        }
+    this.loaderModule.pushDirectoryLoader(async dir => {
+      for (const baseName of await this.loaderModule.readDir(dir)) {
+        if (!/config\.ts$/i.test(baseName)) continue;
+        const configFileName = path.join(dir, baseName);
+        this.configure(require(configFileName).default);
       }
-    );
+    });
   }
 
   @CliCommand("check") check(rpc: RpcType, context: ResolverMap) {
@@ -143,7 +135,7 @@ export class RpcModule2 {
   }
 
   installExpress(
-    @Plugin() expressModule: ExpressModule2,
+    @Plugin() expressModule: ExpressModule,
     context: ModuleRunnerContext
   ) {
     expressModule.builders.push(app => {

@@ -1,4 +1,3 @@
-import { ModuleTarget } from "@dabsi/typemodule/ModuleRunner";
 import yargs from "yargs";
 
 export class CliCommandMetadata {

@@ -33,7 +33,7 @@ export function ViewState(updateMethod?) {
       },
       set(this: View<any>, value) {
         if (setViewStateKey(this, key, value)) {
-          if (this.isDidMount && !this.isWillUnmount) {
+          if (!this.isWillUnmount) {
             updateMethod && this[updateMethod]();
           }
         }

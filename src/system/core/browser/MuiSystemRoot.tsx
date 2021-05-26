@@ -9,8 +9,6 @@ import React from "react";
 
 const history = createBrowserHistory();
 
-export const MuiSystemHooks: (() => void)[] = [];
-
 export function MuiSystemRoot(): React.ReactElement {
   return ReactWrapper(() => {
     ReactWrapper.push(
@@ -19,10 +17,6 @@ export function MuiSystemRoot(): React.ReactElement {
         <SystemView build={MuiSystemViewBuilder}>{children}</SystemView>
       )
     );
-
-    for (const hook of MuiSystemHooks) {
-      hook();
-    }
 
     return <RouterView routerType={SystemRouter} history={history} />;
   });

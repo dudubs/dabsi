@@ -1,4 +1,4 @@
-import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
+import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import {
   CliBuilder,
   CliExtenderFn,
@@ -8,7 +8,7 @@ import {
 import { CliMetadata } from "@dabsi/typecli/CliMetadata";
 import { Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
-import { ModuleMetadata } from "@dabsi/typemodule/ModuleMetadata";
+import ModuleMetadata from "@dabsi/typemodule/ModuleMetadata";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import yargs from "yargs";
 
@@ -48,10 +48,10 @@ export class CliModule2 {
   }
 
   build(): CliBuilder {
-    const process = new AsyncProcess2();
+    const process = new AsyncProcess();
 
     const rootBuilder = new CliBuilder(getPromise => {
-      process.push(() => `${this.constructor.name}.Runner`, getPromise);
+      process.push(() => getPromise());
     });
 
     const locateBuilder = (
@@ -72,46 +72,36 @@ export class CliModule2 {
 
       const targetBuilder = locateBuilder(
         rootBuilder,
-        moduleMetadata.options.cli
+        moduleMetadata.args.options.cli
       );
 
       const instance = this.moduleRunner.get(target);
-      for (const cliCommandMetadata of cliMetadata.commandMap.values()) {
+
+      targetBuilder.extenders.push(...cliMetadata.argumentBuilders);
+      targetBuilder.runners.push(args =>
+        run(args, cliMetadata.argumentPropertyNames)
+      );
+
+      const run = async (args, propertyNames: Set<string>) => {
+        for (const propertyName of propertyNames) {
+          await Resolver.Injectability.invoke(
+            instance,
+            Resolver.Context.create(this.moduleRunner.context, [args]),
+            propertyName
+          );
+        }
+      };
+
+      for (const commandMetadata of cliMetadata.commandMap.values()) {
         const commandBuilder = locateBuilder(
           targetBuilder,
-          cliCommandMetadata.name
+          commandMetadata.name
         );
-        commandBuilder.declarations.push(...cliCommandMetadata.declarations);
-        commandBuilder.extenders.push(y => {
-          for (const builders of [
-            cliMetadata.argumentBuilders,
-            cliCommandMetadata.builders,
-          ]) {
-            for (const builder of builders) {
-              y = builder(y);
-            }
-          }
-          return y;
-        });
-
+        commandBuilder.declarations.push(...commandMetadata.declarations);
+        commandBuilder.extenders.push(...commandMetadata.builders);
         commandBuilder.runners.push(async args => {
-          for (const propertyNames of [
-            // first - invoke arguments
-            cliMetadata.argumentPropertyNames,
-            // after - invoke commands
-            cliCommandMetadata.propertyNames,
-          ]) {
-            for (const propertyName of propertyNames) {
-              const { invoke } = Resolver.Injectability.resolve(
-                instance,
-                Resolver.Context.create(this.moduleRunner.context, [args]),
-                propertyName
-              );
-
-              //
-              await invoke();
-            }
-          }
+          await run(args, cliMetadata.argumentPropertyNames);
+          await run(args, commandMetadata.propertyNames);
         });
       }
     }
@@ -135,7 +125,5 @@ export class CliModule2 {
       .exitProcess(false)
       .strict()
       .scriptName("ts").argv;
-
-    this.moduleRunner.process.waitForLast();
   }
 }

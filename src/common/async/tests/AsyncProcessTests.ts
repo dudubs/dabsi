@@ -1,10 +1,10 @@
 import { Timeout } from "@dabsi/common/async/Timeout";
-import { AsyncProcess2 } from "../AsyncProcess2";
+import AsyncProcess from "../AsyncProcess";
 
-let p: AsyncProcess2;
+let p: AsyncProcess;
 
 beforeEach(() => {
-  p = new AsyncProcess2();
+  p = new AsyncProcess();
 });
 
 it("expect to pus and call", async done => {

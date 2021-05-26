@@ -23,7 +23,7 @@ import {
   DataTableQueryResult,
   DataTableRow,
 } from "@dabsi/typerpc2/data-table/rpc";
-import { GenericConfig2 } from "@dabsi/typerpc2/GenericConfig";
+import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
 import { WidgetElement } from "@dabsi/typerpc2/widget/Widget";
@@ -41,7 +41,7 @@ declare module "./rpc" {
   interface BaseDataTable<T>
     extends WidgetWithConfig<
       DataTable<T>,
-      GenericConfig2<
+      GenericConfig<
         <D>(config: DataTableConfig<T, D>) => DataTableConfig<T, any>
       >
     > {}

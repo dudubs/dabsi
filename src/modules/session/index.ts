@@ -1,18 +1,16 @@
 // TODO: ResourcesManager { define,clean ... }
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
+import DbModule, { DataSourceFactory2 } from "@dabsi/modules/DbModule";
+import ExpressModule, {
+  ExpressRequest,
+  ExpressResponse,
+} from "@dabsi/modules/ExpressModule";
+import ServerModule from "@dabsi/modules/ServerModule";
 import { Session } from "@dabsi/modules/session/entities/Session";
 import { generateSessionToken } from "@dabsi/modules/session/generateSessionToken";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { ResourceManager } from "@dabsi/modules/session/ResourceManager";
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
-import { DbConnectionRef, DbModule2 } from "@dabsi/modules/DbModule2";
-import {
-  ExpressModule2,
-  ExpressRequest,
-  ExpressResponse,
-} from "@dabsi/modules/ExpressModule2";
-import { ServerRequestBuilder } from "@dabsi/modules/ServerModule2";
 import { User } from "@dabsi/system/acl/entities/User";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Resolver } from "@dabsi/typedi";
@@ -26,14 +24,9 @@ export class RequestUser extends Resolver<DataRowTicker<User>>() {}
 
 export class RequestSession extends Resolver<DataRowTicker<Session>>() {}
 
-class CleanContext extends Resolver({
-  getDataSource: DataSourceFactory2,
-  getConnection: DbConnectionRef,
-}) {}
-
 @Module({
   cli: "session",
-  dependencies: [DbModule2],
+  dependencies: [DbModule],
 })
 export class SessionModule {
   cookieName = "session-k";
@@ -47,7 +40,7 @@ export class SessionModule {
     Resolver.Context.assign(context, [this.resourceMananger]);
   }
 
-  @CliArgument() protected _init(dbModule: DbModule2) {
+  @CliArgument() protected _init(dbModule: DbModule) {
     return dbModule.loadAndConnect();
   }
 
@@ -66,7 +59,7 @@ export class SessionModule {
       .delete();
   }
 
-  installExpress(@Plugin() expressModule: ExpressModule2) {
+  installExpress(@Plugin() expressModule: ExpressModule) {
     expressModule.useRequest(() => CookieParser());
 
     Resolver.Context.assign(
@@ -83,16 +76,16 @@ export class SessionModule {
   }
 
   installRequest(
-    @Plugin() request: ServerRequestBuilder,
+    @Plugin() serverModule: ServerModule,
     getDataSource: DataSourceFactory2
   ) {
-    request.finalizers.push(
+    serverModule.request.finalizers.push(
       Resolver([RequestSession], session => async () => {
         await session.update({ timeout: getCurrentTime() });
       })
     );
 
-    request.initializers.push(
+    serverModule.request.initializers.push(
       Resolver(
         [SessionCookie, DataTicker, c => c],
         (cookie, dataTicker, context) => async () => {

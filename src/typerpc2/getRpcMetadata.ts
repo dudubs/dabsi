@@ -1,16 +1,23 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { defined } from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
+import { isRpcType, Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 
-export type RpcMetadata = ReturnType<typeof getRpcMetadata>;
+export type RpcMetadata = NonNullable<ReturnType<typeof getRpcMetadata>>;
 
 export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
+  if (!isRpcType(rpcType)) {
+    throw new Error(`Invalid rpc-type ${rpcType.name}.`);
+  }
+  const parentRpcType = Object.getPrototypeOf(rpcType);
   const parent: Partial<RpcMetadata> =
-    rpcType === Rpc ? {} : getRpcMetadata(Object.getPrototypeOf(rpcType));
+    parentRpcType === Rpc ? {} : getRpcMetadata(parentRpcType);
 
   RpcMembers.freeze(rpcType);
+
+  const memberTypeMap: Record<string, RpcMemberType> = {
+    ...parent.memberTypeMap,
+  };
 
   const memberKeys: string[] = [...(parent.memberKeys || [])];
   const contextualKeys: string[] = [...(parent.contextualKeys || [])];
@@ -22,8 +29,11 @@ export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
   };
 
   for (const memberKey of RpcMembers.getKeys(rpcType)) {
-    memberKeys.push(memberKey);
+    const memberType = RpcMembers.getMemberType(rpcType, memberKey)!;
     const propertyType = Reflector.getPropertyType(rpcType, memberKey)!;
+
+    memberKeys.push(memberKey);
+    memberTypeMap[memberKey] = memberType;
 
     switch (RpcMembers.getMemberType(rpcType, memberKey)) {
       // case
@@ -45,30 +55,10 @@ export const getRpcMetadata = WeakMapFactory((rpcType: RpcType) => {
 
   return {
     memberKeys,
+    memberTypeMap,
     childTypeMap,
     parametrialKeys,
     contextualKeys,
     functionalKeys,
   };
 });
-
-export function getChildRpcType(
-  rpcType: RpcType,
-  childKeys: string[] | string
-): RpcType {
-  if (typeof childKeys === "string") {
-    childKeys = [childKeys];
-  }
-  const rootRpcType = rpcType;
-  for (const childKey of childKeys) {
-    rpcType = defined(
-      getRpcMetadata(rpcType).childTypeMap[childKey],
-      () =>
-        `No child key like "${rpcType.name}.${childKey}" (${
-          rootRpcType.name
-        }.${(childKeys as string[]).join(".")}).`
-    );
-  }
-
-  return rpcType;
-}

@@ -1,8 +1,9 @@
 import AdminRpc from "@dabsi/system/admin/common/rpc";
 import { Rpc, RpcContextual } from "@dabsi/typerpc2";
-import { DataForm } from "@dabsi/typerpc2/data-form/rpc";
+import { DataForm } from "@dabsi/modules/data/common/DataForm";
 import { DataTable } from "@dabsi/typerpc2/data-table/rpc";
 import { Form } from "@dabsi/typerpc2/form/rpc";
+import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithError";
 import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 
@@ -12,7 +13,7 @@ export class ACL_GroupsTable extends DataTable({
 }) {}
 
 export class ACL_GroupInput extends ObjectInput({
-  groupName: TextInput,
+  groupName: InputWithAlreadyInUseError(TextInput),
 }) {}
 
 export class ACL_AddNewGroupForm extends Form(ACL_GroupInput) {}

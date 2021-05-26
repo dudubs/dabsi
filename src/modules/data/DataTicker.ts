@@ -1,7 +1,7 @@
-import { AsyncProcess2 } from "@dabsi/common/async/AsyncProcess2";
+import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { DataSourceFactory2 } from "@dabsi/modules/DataSourceFactory2";
+import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 
 import { Injectable } from "@dabsi/typedi";
 import { DataRowTicker } from "./DataRowTicker";
@@ -11,7 +11,7 @@ import { DataRowTicker } from "./DataRowTicker";
 export type DataRowTickerMap = Map<Function, Map<string, DataRowTicker>>;
 
 const getRowTickerMap = WeakMapFactory(
-  (prcoess: AsyncProcess2): DataRowTickerMap => {
+  (prcoess: AsyncProcess): DataRowTickerMap => {
     const map: DataRowTickerMap = new Map();
     prcoess.push(tick =>
       Promise.all(
@@ -29,7 +29,7 @@ const getRowTickerMap = WeakMapFactory(
 export class DataTicker {
   constructor(
     //
-    protected process: AsyncProcess2,
+    protected process: AsyncProcess,
     protected getDataSource: DataSourceFactory2
   ) {}
 

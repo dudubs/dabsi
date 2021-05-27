@@ -1,4 +1,4 @@
-import { createRpcConfigHandler } from "@dabsi/typerpc2/createRpcConfigHandler";
+import createRpcConfigHandler from "@dabsi/typerpc2/createRpcConfigHandler";
 import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import {

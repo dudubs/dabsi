@@ -6,33 +6,27 @@ import ACL_AdminRpc, {
   ACL_GroupInput,
 } from "@dabsi/system/acl/admin/common/rpc";
 import { Group } from "@dabsi/system/acl/entities/Group";
-import { inputConfig } from "@dabsi/typerpc2/input/InputHandler";
+import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
 
 const context = { getSource: DataSourceFactory2 } as const;
 
 export default [
   RpcResolver(ACL_GroupInput, {
     groupName: $ =>
-      RpcResolver($, [DataUniqueChecker(Group)], check => $ =>
+      RpcResolver($, { checkUniqueGroup: DataUniqueChecker(Group) }, c => $ =>
         $({
           config: { minLength: 2 },
-          [inputConfig]: {
-            check: v => {
-              console.log({ check: v });
-              return check({ name: v });
-            },
+          [inputBaseConfig]: {
+            check: v => c.checkUniqueGroup({ name: v }),
           },
         })
       ),
   }),
   RpcResolver(ACL_AdminRpc, {
     addNewGroupForm: $ =>
-      DataFormResolver($, Group, [], c => $ =>
+      DataFormResolver($, Group, {}, c => $ =>
         $({
-          commitConfig: ($, { groupName }) => {
-            console.log({ groupName });
-            return $({ name: groupName });
-          },
+          commitConfig: ($, { groupName }) => $({ name: groupName }),
         })
       ),
 

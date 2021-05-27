@@ -15,9 +15,10 @@ import {
   RpcType,
 } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { ConfigFactory, GenericConfig } from "@dabsi/typerpc2/GenericConfig";
+import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
 import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
 import { getRpcMetadata, RpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
+import { Input } from "@dabsi/typerpc2/input/Input";
 import {
   AnyInputMap,
   BaseObjectInput,
@@ -100,10 +101,8 @@ export class RpcResolverBuilder {
     rpcLocation: RpcTypeOrLocation<T>,
     {
       getKeys,
-      disableCapitalize = false,
     }: {
       getKeys?: (metadata: RpcMetadata) => string[];
-      disableCapitalize?: boolean;
     } = {}
   ): Resolver<RpcHandlerMap<T>> {
     const _rpcLocation = RpcTypeOrLocation(rpcLocation);
@@ -112,7 +111,7 @@ export class RpcResolverBuilder {
     const handlerMemberResolverMap = mapArrayToObject(
       getKeys ? getKeys(metadata) : metadata.memberKeys,
       memberKey => [
-        disableCapitalize ? memberKey : "handle" + capitalize(memberKey),
+        "handle" + capitalize(memberKey),
         this.getHandlerMemberResolver(<any>_rpcLocation.at(<any>memberKey)),
       ]
     );
@@ -159,12 +158,12 @@ export namespace RpcResolverBuilder {
 RpcResolverBuilder.defineGenerator(RpcNamespace, (rpcLocation, builder) =>
   RpcResolver(
     rpcLocation,
-    [builder.buildHandlerMapResolver(rpcLocation, { disableCapitalize: true })],
+    [builder.buildHandlerMapResolver(rpcLocation)],
     handlerMap => async $ => {
       return $({
         getRpcMemberHandler(rpcType, memberKey, memberType, propertyType): any {
           return defined(
-            (<any>handlerMap)[memberKey],
+            (<any>handlerMap)["handle" + capitalize(memberKey)],
             () =>
               `No rpc-namespace-key like "${rpcType.name}.${memberKey}":${propertyType.name}`
           );
@@ -176,14 +175,23 @@ RpcResolverBuilder.defineGenerator(RpcNamespace, (rpcLocation, builder) =>
 
 RpcResolverBuilder.defineGenerator(
   (BaseObjectInput as any) as RpcType<ObjectInput<AnyInputMap>>,
-  (rpcLocation, builder) =>
-    RpcResolver(
+  (rpcLocation, builder) => {
+    const metadata = getRpcMetadata(rpcLocation.rpcType);
+    return RpcResolver(
       rpcLocation,
       [
-        builder.buildHandlerMapResolver(rpcLocation, {
-          getKeys: md => md.contextualKeys,
-        }),
+        Resolver.object(
+          metadata.contextualKeys
+            .toSeq()
+            .filter(childKey =>
+              Input.isInputType(metadata.childTypeMap[childKey])
+            )
+            .map(childKey => [childKey, RpcResolver(rpcLocation.at(childKey))])
+            .fromEntrySeq()
+            .toObject()
+        ),
       ],
       x => $ => $(x as {})
-    )
+    );
+  }
 );

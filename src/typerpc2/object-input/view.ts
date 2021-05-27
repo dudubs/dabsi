@@ -1,6 +1,7 @@
-import { AnyInput } from "@dabsi/typerpc2/input/Input";
+import { AnyInput, InputError } from "@dabsi/typerpc2/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { AnyInputMap, ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
+import { entries } from "lodash";
 import React from "react";
 
 export interface ObjectInputViewProps<T extends AnyInputMap>
@@ -13,6 +14,17 @@ export class ObjectInputView<T extends AnyInputMap> extends InputView<
   }
 > {
   protected _childViewMap: Record<string, InputView<AnyInput>> = {};
+
+  setError(error: InputError<ObjectInput<T>> | undefined) {
+    super.setError(error);
+
+    const errorMap = error?.["map"];
+    if (errorMap) {
+      for (const [childKey, childInput] of entries(this._childViewMap)) {
+        childInput.setError(errorMap[childKey]);
+      }
+    }
+  }
 
   getChildProps<T extends AnyInputMap, K extends keyof T>(
     this: ObjectInputView<T>,

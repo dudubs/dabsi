@@ -1,6 +1,4 @@
-import { createRpcConfigHandler } from "@dabsi/typerpc2/createRpcConfigHandler";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 
 it("expect to load text", async () => {

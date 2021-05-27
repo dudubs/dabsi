@@ -20,8 +20,6 @@ export default class ServerDevModule {
 
   reload() {
     this._devProcess?.kill();
-    console.log([process.argv[0], getTypestackCliArgs(["server", "start"])]);
-
     this._devProcess = spawn(
       process.argv[0],
       getTypestackCliArgs(["server", "start"]),

@@ -7,12 +7,14 @@ import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { AnyRpcWithConfig, RpcConfigurator, RpcWithConfig } from "./RpcConfig";
 
 // TODO: make async
-export async function createRpcConfigHandler<T extends AnyRpcWithConfig>(
+export default async function createRpcConfigHandler<
+  T extends AnyRpcWithConfig
+>(
   rpcType: RpcType<T>,
   rpcConfigurator: RpcConfigurator<T>
 ): Promise<RpcHandler<T>>;
 
-export async function createRpcConfigHandler(
+export default async function createRpcConfigHandler(
   rpcType:
     | RpcType<Rpc & RpcWithConfig<Rpc, GenericConfig<(...args) => any>>>
     | RpcType<AnyRpcWithConfig>,
@@ -21,10 +23,11 @@ export async function createRpcConfigHandler(
   const rpcConfigHandlerType = getRpcConfigHandlerType(rpcType);
 
   if (rpcConfigurator == null) {
-    return new rpcConfigHandlerType({});
+    return new rpcConfigHandlerType(rpcType, {});
   }
 
   return new rpcConfigHandlerType(
+    rpcType,
     (await createRpcConfig(rpcType, rpcConfigurator)) ?? {}
   );
 }

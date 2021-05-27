@@ -7,8 +7,7 @@ import { AnyRpcWithConfig, RpcConfigurator } from "./RpcConfig";
 
 export default function createRpcConfig<T extends AnyRpcWithConfig>(
   rpcType: RpcType<T>,
-  rpcConfigurator: RpcConfigurator<T>,
-  disableHandlerResolving = false
+  rpcConfigurator: RpcConfigurator<T>
 ): Promise<InferredRpcConfig<T>>;
 export default async function createRpcConfig(rpcType, rpcConfigurator) {
   const rpcConfigHandlerType = getRpcConfigHandlerType(rpcType);

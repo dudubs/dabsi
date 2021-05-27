@@ -9,7 +9,12 @@ import {
   RpcType,
 } from "@dabsi/typerpc2";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
+import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
+import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
+import { Form } from "@dabsi/typerpc2/form/rpc";
+import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
+import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 
 let rb: RpcResolverBuilder;
 let context: ResolverMap;
@@ -146,4 +151,28 @@ describe("generate", () => {
   it("expect to generate resolver for sub-rpc", async () => {
     expect(await testRpc(SR).testFn()).toEqual("generated-for-SR");
   });
+});
+
+it("", async () => {
+  const i = ObjectInput({ xs: TextInput });
+  class F extends Form(i) {}
+  class R extends Rpc {
+    @RpcContextual()
+    f!: F;
+  }
+  rb.add([
+    //
+    RpcResolver(i, {
+      xs: $ =>
+        RpcResolver($, [], $ => ({
+          minLength: 2,
+        })),
+    }),
+  ]);
+
+  const c: any = await createRpcConfig(
+    i,
+    Resolver.resolve(RpcResolver(R.at("f.input")), context)
+  );
+  expect(c.xs).toEqual(jasmine.objectContaining({ minLength: 2 }));
 });

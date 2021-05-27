@@ -47,7 +47,7 @@ export class DataTableView<
 > {
   protected _queryDebounce = new Debounce(0);
 
-  @ViewState("forceUpdateQuery") searchText: string = "";
+  @ViewState("forceUpdateSearchText") searchText: string = "";
 
   @ViewState("forceUpdateQuery") protected _pageSize!: number;
 
@@ -234,6 +234,10 @@ export class DataTableView<
         return type ? type(value) : value;
       });
     });
+  }
+
+  forceUpdateSearchText() {
+    this.pageIndex = 0;
   }
 
   async forceUpdateQuery() {

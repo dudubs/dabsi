@@ -1,5 +1,5 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { Timeout } from "@dabsi/common/async/Timeout";
+import waitForSpyCall from "@dabsi/jasmine/waitForSpyCall";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
@@ -7,14 +7,12 @@ import {
   DataTable,
   DataTableQuery,
   DataTableQueryResult,
-  InferredDataTableRow,
 } from "@dabsi/typerpc2/data-table/rpc";
 import { DataTableView } from "@dabsi/typerpc2/data-table/view";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import ReactTestRenderer from "react-test-renderer";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-import waitForSpyCall from "@dabsi/jasmine/waitForSpyCall";
 
 @Entity()
 class TestDataEntity {
@@ -132,20 +130,6 @@ describe("handler", () => {
     });
   });
 });
-const createRpcWithHooks = <T extends Rpc, K extends keyof T>(
-  rpcType: RpcType<T>,
-  hookMap: Pick<T, K>
-): T => {
-  return Object.setPrototypeOf(
-    new rpcType(
-      () => [],
-      () => Promise.reject(),
-      null
-    ),
-    hookMap
-  );
-};
-
 describe("view", () => {
   let view: DataTableView<dtWithTextColumn>;
 

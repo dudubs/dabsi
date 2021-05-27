@@ -41,9 +41,7 @@ type ExtractPrefix<P extends string, K> = K extends `${P}${infer K}`
   : never;
 
 export class BaseRpcConfigHandler<T extends Rpc, C> {
-  readonly rpcType!: RpcType<T>;
-
-  constructor(readonly config: NonNullable<C>) {}
+  constructor(readonly rpcType: RpcType<T>, readonly config: NonNullable<C>) {}
 
   protected _getContextualHandlerCache = new Map();
 
@@ -122,7 +120,7 @@ export interface RpcConfigHandlerType<T extends AnyRpcWithConfig, H> {
     propertyType: Function
   ): Function;
 
-  new (config: any): H;
+  new (rpcType: RpcType<T>, config: any): H;
 }
 
 export type RpcConfigType<

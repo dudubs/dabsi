@@ -8,10 +8,7 @@ import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 import type { Rpc, RpcMemberKey, RpcType } from "./Rpc";
 
 export class RpcLocation<T> {
-  constructor(
-    readonly rpcRootType: RpcType,
-    readonly path: readonly string[]
-  ) {}
+  constructor(readonly rpcRootType: RpcType, readonly path: string[]) {}
 
   get rpcType(): T extends Rpc
     ? RpcType<T>

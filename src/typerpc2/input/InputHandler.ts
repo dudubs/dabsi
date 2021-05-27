@@ -31,7 +31,7 @@ declare const inputValueConfig: unique symbol;
 declare const inputValue: unique symbol;
 
 // TODO ic is object ? merge : fn ? nested
-export const inputConfig = Symbol("inputConfig");
+export const inputBaseConfig = Symbol("inputConfig");
 
 export type InferredInputConfig<
   T extends AnyInputWithConfig
@@ -51,7 +51,7 @@ export type InputConfig<T extends AnyInput, Config, Value, ValueConfig> =
         config: Config;
       },
       {
-        [inputConfig]: BaseInputConfig<T, Value, ValueConfig>;
+        [inputBaseConfig]: BaseInputConfig<T, Value, ValueConfig>;
       }
     >;
 
@@ -169,23 +169,21 @@ export function InputHandler(
   > &
     ThisType<InputHandler<AnyInputWithConfig>> = {
     get inputConfig() {
-      return this.config[inputConfig];
+      return this.config[inputBaseConfig];
     },
     async loadAndCheck(data) {
       const result = await handler.loadAndCheck.call(this, data);
       if ("error" in result) {
         return result;
       }
-      if (this.inputConfig) {
-        if (this.inputConfig.check) {
-          const error = await this.inputConfig.check(result.value);
-          if (result != null) return { error };
-        }
+      if (this.inputConfig?.check) {
+        const error = await this.inputConfig.check(result.value);
+        if (error != null) return { error };
       }
       return result;
     },
-    handleCheck(data) {
-      const result = this.loadAndCheck(data);
+    async handleCheck(data) {
+      const result = await this.loadAndCheck(data);
       if ("error" in result) {
         return result.error;
       }
@@ -197,12 +195,12 @@ export function InputHandler(
     {
       ...options,
       async resolveHandlerConfig(rpcType, config: any) {
-        const { [inputConfig]: inputConfigValue } = config;
+        const { [inputBaseConfig]: inputConfigValue } = config;
         if (!inputConfigValue) {
           return config;
         }
         config = (await createRpcConfig(rpcType, config.config)) ?? {};
-        config[inputConfig] = inputConfigValue;
+        config[inputBaseConfig] = inputConfigValue;
         return config;
       },
     },

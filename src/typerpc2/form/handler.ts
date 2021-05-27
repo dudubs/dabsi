@@ -46,6 +46,7 @@ export default WidgetHandler(
       const result = await (
         await this.getContextualHandler("input")
       ).loadAndCheck(data);
+
       if ("error" in result) return result;
       return { value: await this.config.submit(result.value) };
       //

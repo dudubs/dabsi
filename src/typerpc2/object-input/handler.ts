@@ -110,12 +110,15 @@ export default InputHandler(
       const value: Record<string, any> = await this.mapInput(
         async (handler, key) => {
           const result = await handler.loadAndCheck(data?.[key]);
+
           if ("error" in result) {
+            error[key] = result.error;
             return;
           }
           return result.value;
         }
       );
+
       if (hasKeys(error)) {
         return { error: { map: error } };
       }

@@ -2,12 +2,14 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import flat from "@dabsi/common/iterator/flat";
 import { defined } from "@dabsi/common/object/defined";
 import { capitalize } from "@dabsi/common/string/capitalize";
+import { inspect } from "@dabsi/logging/inspect";
 import {
   RpcResolver,
   RpcResolverConfigurator,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { Resolver } from "@dabsi/typedi";
 import {
+  isRpcType,
   Rpc,
   RpcFunctionalMember,
   RpcNamespace,
@@ -52,6 +54,18 @@ export class RpcResolverBuilder {
   getResolver<T>(rpcLocation: RpcTypeOrLocation<T>): RpcResolver<T> {
     const _rpcLocation = RpcTypeOrLocation(rpcLocation);
     return this._resolverMap.touchByLocation(_rpcLocation, () => {
+      // _rpcLocation
+
+      if (
+        _rpcLocation.member &&
+        _rpcLocation.member.type !== RpcMemberType.Contextual
+      ) {
+        throw new Error(
+          `Can't build/generate resolver for ${
+            RpcMemberType[_rpcLocation.member.type!]
+          }: ${inspect(_rpcLocation)}`
+        );
+      }
       return (
         this.generateResolver(rpcLocation) ?? this.buildResolver(_rpcLocation)
       );
@@ -62,12 +76,12 @@ export class RpcResolverBuilder {
     rpcLocation: RpcTypeOrLocation<T>
   ): RpcResolver<T> | undefined {
     const _rpcLocation = RpcTypeOrLocation(rpcLocation);
-    if (_rpcLocation.member?.type === RpcMemberType.Functional) {
-      throw new Error(`Can't generate resolver for functional member.`);
+    if (!_rpcLocation.rpcType) {
+      return;
     }
 
     return this._generetedResolverMap.touchByLocation(_rpcLocation, () => {
-      return _rpcLocation.rpcType[__generateSymbol]?.(_rpcLocation, this);
+      return _rpcLocation.rpcType![__generateSymbol]?.(_rpcLocation, this);
     });
   }
 
@@ -132,6 +146,7 @@ export class RpcResolverBuilder {
             RpcFunctionalMember | RpcParametrialMember
           >
         );
+
         return config.apply(this, <any>arguments);
       };
     });

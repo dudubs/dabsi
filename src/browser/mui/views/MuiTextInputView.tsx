@@ -48,6 +48,7 @@ export function MuiTextInputView<T extends TextInput>({
             },
             onKeyPress: event => {
               if (event.key === "Enter") {
+                // TODO c.form?.nextAfter(thisview)
                 c.form?.submit();
               }
             },

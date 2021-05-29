@@ -65,7 +65,7 @@ it("expect to c & b wrappers with a-index", () => {
   expect(testPath("/b/a")).toEqual(["cw1", "cw2", "bw", "ai"]);
 });
 
-fit("expect to roots", () => {
+it("expect to roots", () => {
   ReactTestRenderer.create(<BaseRouterView routerType={r.C} path={"/b"} />);
 
   expect(rootFromCToBWrapper).toBeInstanceOf(r.C);

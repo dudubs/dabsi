@@ -1,9 +1,9 @@
+import DevModule from "@dabsi/modules/DevModule";
 import ProjectModule from "@dabsi/modules/ProjectModule";
-import ServerModule from "@dabsi/modules/ServerModule";
 import watchOnPlatform from "@dabsi/modules/watchOnPlatform";
 import { CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
-import { ModuleRunner, ModuleTarget } from "@dabsi/typemodule/ModuleRunner";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import getTypestackCliArgs from "@dabsi/typestack/getTypestackCliArgs";
 import { ChildProcess, spawn } from "child_process";
 
@@ -12,6 +12,8 @@ import { ChildProcess, spawn } from "child_process";
 })
 export default class ServerDevModule {
   protected _devProcess: ChildProcess | null = null;
+
+  readonly log = log.get("SERVER.DEV");
 
   constructor(
     protected projectModule: ProjectModule,
@@ -33,7 +35,8 @@ export default class ServerDevModule {
   @CliCommand("start-dev") startDev() {
     this.reload();
     watchOnPlatform(["common", "server"], () => {
-      this.reload();
+      this.log("reloading..");
+      this.reload(); //
     });
   }
 }

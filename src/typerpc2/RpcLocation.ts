@@ -1,20 +1,17 @@
 import { defined } from "@dabsi/common/object/defined";
 import Lazy from "@dabsi/common/patterns/Lazy";
-import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { inspect } from "@dabsi/logging/inspect";
 import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
-import type { Rpc, RpcMemberKey, RpcType } from "./Rpc";
+import type { Rpc, RpcChild, RpcMemberKey, RpcType } from "./Rpc";
 
 export class RpcLocation<T> {
   constructor(readonly rpcRootType: RpcType, readonly path: string[]) {}
 
-  get rpcType(): T extends Rpc
-    ? RpcType<T>
-    : /* Only for typings */ Constructor<T> {
+  get rpcType(): T extends RpcChild<infer U> ? RpcType<U> : undefined {
     if (!this.path.length) return <any>this.rpcRootType;
-    return <any>this.member!.childType || Function;
+    return <any>this.member!.childType;
   }
 
   @Lazy() get member() {
@@ -48,6 +45,9 @@ export class RpcLocation<T> {
   }
 
   [inspect.custom]() {
+    if (!this.path.length) {
+      return `<RpcLocation ${this.rpcRootType.name}>`;
+    }
     return `<RpcLocation ${this.rpcRootType.name}: ${this.path.join(".")}>`;
   }
 }

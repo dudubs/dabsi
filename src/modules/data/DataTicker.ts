@@ -1,3 +1,4 @@
+// TODO: rename to DataRowFetcher
 import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";

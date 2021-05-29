@@ -8,8 +8,8 @@ import {
 } from "@dabsi/system/core/view/SystemView";
 import { RpcContextual, RpcType } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import PathPathMap from "@dabsi/typerpc2/RpcPathMap";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
+import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 import {
   AnyWidget,
   Widget,

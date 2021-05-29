@@ -1,4 +1,4 @@
-type Task = (tick: number) => Promise<void>;
+type Task = (tick: number) => Promise<any>;
 
 export default class AsyncProcess {
   protected _tasks: Task[] = [];

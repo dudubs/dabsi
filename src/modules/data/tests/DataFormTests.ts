@@ -73,12 +73,3 @@ const test = async () => {
 it("expect to insert", async () => {
   expect(await test()).toBeDefined();
 });
-
-it("expect to insert", async () => {
-  const k = await testSource.insertKey({ text: "world" });
-  Resolver.Context.assign(context, DataRowContext.assign(TestEntity, k));
-
-  expect(await test()).toEqual(
-    jasmine.objectContaining({ $key: k, text: "hello" })
-  );
-});

@@ -5,13 +5,8 @@ import {
   Configurator,
   GenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
-import { isHandlerSide } from "@dabsi/typerpc2/isHandlerSide";
-import { RpcContextualMember } from "@dabsi/typerpc2/Rpc";
-import {
-  RpcHandler,
-  RpcMemberHandler,
-  RpcWithHandler,
-} from "@dabsi/typerpc2/RpcHandler";
+import isHandlingSide from "@dabsi/typerpc2/isHandlingSide";
+import { RpcHandler, RpcWithHandler } from "@dabsi/typerpc2/RpcHandler";
 
 export const RpcWithConfigSymbol = Symbol("RpcWithConfigSymbol");
 
@@ -40,7 +35,7 @@ export type AnyRpcTypeWithConfig<T = any, R extends Rpc = Rpc> = RpcType<
 >;
 export const RpcAnchorSymbol = Symbol("RpcAnchor");
 export function RpcWithConfig(): { (rpcType: RpcType): void } {
-  if (!isHandlerSide()) {
+  if (!isHandlingSide()) {
     return () => {};
   }
   const anchor = CallStackAnchor.capture(RpcWithConfig);

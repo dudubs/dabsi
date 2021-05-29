@@ -20,7 +20,7 @@ export default class ExpressModule {
 
   readonly postBuilders: ExpressBuilderFn[] = [];
 
-  readonly log = log.get("Express");
+  readonly log = log.get("EXPRESS");
 
   readonly request = new RequestBuilder();
 

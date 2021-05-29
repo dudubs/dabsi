@@ -14,13 +14,26 @@ RouterView.define(ACL_AdminRouter, {
         connection={ACL_AdminRpc.instance.groupsTable}
         staticActions={{ add: { tooltip: lang`ADD_NEW_GROUP` } }}
         onAddRow={() => history.push(root.addNewGroup)}
+        onEditRow={(_, row) => history.push(root.editGroup(row.$key))}
       />
     ),
   ],
-  editGroup: () => <MuiSection title={lang`EDIT_GROUP`}>asd</MuiSection>,
-  addNewGroup: () => (
+  editGroup: ({ useParams }) => {
+    const form = useParams(id => ACL_AdminRpc.instance.editGroupForm(id));
+    return (
+      <MuiSection title={lang`EDIT_GROUP`}>
+        <MuiFormView connection={form} />
+      </MuiSection>
+    );
+  },
+  addNewGroup: ({ root, history }) => (
     <MuiSection title={lang`ADD_NEW_GROUP`}>
-      <MuiFormView connection={ACL_AdminRpc.instance.addNewGroupForm} />
+      <MuiFormView
+        connection={ACL_AdminRpc.instance.addNewGroupForm}
+        onSubmit={() => history.push(root.groups)}
+      />
     </MuiSection>
   ),
 });
+
+// xxx

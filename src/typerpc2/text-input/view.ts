@@ -25,8 +25,9 @@ export class TextInputView<T extends TextInput> extends InputView<
     this._debounce.resolve?.();
   }
 
-  updateValue(value: InputValueElement<T> | undefined) {
-    this._text == value || "";
+  updateValue(value: InputValueElement<T>) {
+    super.updateValue?.(value);
+    this._text = value;
   }
 
   async setText(text: string) {

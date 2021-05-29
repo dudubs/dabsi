@@ -1,49 +1,35 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { DataParameter } from "@dabsi/modules/data/common/DataParameter";
+import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
+
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
-import { RpcMemberResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { Resolver } from "@dabsi/typedi";
 import { ResolverDeps } from "@dabsi/typedi/consume";
-import { Rpc, RpcMemberKey, RpcType } from "@dabsi/typerpc2";
+import { Rpc } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { RpcError } from "@dabsi/typerpc2/RpcError";
+import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
 
-export function DataParameterResolver<
-  T extends Rpc,
-  U extends ResolverDeps,
-  K extends RpcMemberKey<T>,
-  R
->(
-  rpcType: RpcType<T>,
-  parametrialKey: K & ExtractKeys<T, DataParameter<any>>,
+export function DataParameterResolver<T extends Rpc, U extends ResolverDeps, R>(
+  rpcLocation: RpcLocation<DataParameter<T>>,
   rowType: Constructor<R>,
   optionsResolver?: Resolver<{
     filter?: DataExp<R>;
     check?(ticker: DataRowTicker<R>): void;
   }>
-): RpcMemberResolver<T[K]>;
-export function DataParameterResolver(
-  rpcType,
-  parametrialKey,
-  rowType,
-  optionsResolver
-) {
+): RpcResolver<DataParameter<T>>;
+export function DataParameterResolver(rpcLocation, rowType, optionsResolver) {
   return RpcResolver(
-    rpcType as RpcType<Rpc & Record<string, DataParameter<any>>>,
-    parametrialKey,
+    rpcLocation as RpcLocation<DataParameter<any>>,
     [
       Resolver.injector(
         {
-          ticker: DataRowTicker,
+          rowKey: DataRowContext.Key(rowType),
         },
-        RpcResolver(
-          //
-          <any>getChildRpcType(rpcType, parametrialKey)
-        )
+        RpcResolver(rpcLocation.rpcType)
       ),
       DataTicker,
       optionsResolver || (() => null),
@@ -54,12 +40,12 @@ export function DataParameterResolver(
       options: { check?(ticker: DataRowTicker); filter? } | null
     ) => $ =>
       $((rpcType, rowKey) => {
-        const ticker = dataTicker.getRowTicker(rowType, rowKey);
+        const rowTicker = dataTicker.getRowTicker(rowType, rowKey);
 
         if (options?.filter !== undefined) {
-          ticker.filter = { $and: [ticker.filter, options.filter] };
+          rowTicker.filter = { $and: [rowTicker.filter, options.filter] };
         }
-        ticker.push(async row => {
+        rowTicker.push(async row => {
           if (!row?.$key) {
             throw new RpcError(
               `Invalid data parameter ${rowType.name} #${rowKey}.`
@@ -67,12 +53,12 @@ export function DataParameterResolver(
           }
         });
 
-        options?.check?.(ticker);
+        options?.check?.(rowTicker);
 
         return createRpcHandler(
           rpcType,
           getConfigurator({
-            ticker,
+            rowKey: new (DataRowContext.Key(rowType))(rowKey),
           })
         );
       })

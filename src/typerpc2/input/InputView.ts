@@ -40,9 +40,9 @@ export abstract class InputView<
   T extends AnyInput,
   P extends InputViewProps<T> = InputViewProps<T>
 > extends WidgetView<T, P> {
-  @ViewState("forceUpdateValue") private _value!:
+  @ViewState("forceUpdateValue") private _value:
     | InputValueElement<T>
-    | undefined;
+    | undefined = this.props.value;
 
   @ViewState("forceUpdateError") private _error!: InputError<T>;
 
@@ -146,6 +146,8 @@ export abstract class InputView<
   }
 
   updateViewProps(prevProps: Readonly<P>, nextProps: Readonly<P>) {
+    super.updateViewProps?.(prevProps, nextProps);
+
     if (nextProps.value !== prevProps.value) {
       this._value = nextProps.value;
     }

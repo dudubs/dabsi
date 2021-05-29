@@ -30,13 +30,15 @@ export default class ServerModule {
 
   readonly request = new RequestBuilder();
 
+  readonly log = log.get("SERVER");
+
   constructor(
     protected loaderModule: LoaderModule,
     protected moduleRunner: ModuleRunner
   ) {}
 
   @Once() async load() {
-    console.log("loading server");
+    this.log("loading..");
 
     const loadObject = async o => {
       if (!o) return;
@@ -62,7 +64,7 @@ export default class ServerModule {
       })
     );
 
-    console.log("server is loaded.");
+    this.log("loaded.");
   }
 
   @CliCommand("check")

@@ -3,7 +3,6 @@ import { Once } from "@dabsi/common/patterns/Once";
 import { DABSI_NM_DIR, DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import { touchFile } from "@dabsi/filesystem/touchFile";
 import BrowserModule from "@dabsi/modules/BrowserModule";
-import DevModule from "@dabsi/modules/DevModule";
 import ExpressModule from "@dabsi/modules/ExpressModule";
 import MakeModule from "@dabsi/modules/MakeModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
@@ -19,6 +18,11 @@ import ReloadServer from "reload";
 import TsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
 import webpack from "webpack";
 
+const RELOAD_FILENAME = path.join(
+  DABSI_WORKSPACE_DIR,
+  `reload.packed-browser.lock`
+);
+
 @Module({
   cli: "browser",
 })
@@ -26,6 +30,8 @@ export default class BrowserDevModule {
   readonly platform = this.platformModule.getPlatform("browser");
 
   readonly generatedDir = path.join(this.projectModule.generatedDir, "browser");
+
+  readonly log = log.get("BROWSER.DEV");
 
   readonly platforms = [
     this.platformModule.commonPlatform,
@@ -166,9 +172,9 @@ export default class BrowserDevModule {
 
     expressModule.preBuilders.push(app => {
       ReloadServer(app).then(server => {
-        expressModule.log.info(() => `reload server is ready.`);
+        this.log.info(() => `reload server is ready.`);
         reload = () => {
-          expressModule.log.info(() => `reloading..`);
+          this.log.info(() => `reloading..`);
           server.reload();
         };
       });
@@ -206,10 +212,11 @@ export default class BrowserDevModule {
 
   packAndWatch() {
     this._pack();
+    //
     watchOnPlatform(["common", "view", "browser", "server"], async () => {
+      this.log("reloading");
       await this._pack();
       await touchFile(RELOAD_FILENAME);
-      // reload?.();
     });
   }
   @CliCommand("start-dev")
@@ -222,8 +229,3 @@ export default class BrowserDevModule {
     ]);
   }
 }
-
-const RELOAD_FILENAME = path.join(
-  DABSI_WORKSPACE_DIR,
-  `reload.packed-browser.lock`
-);

@@ -135,14 +135,14 @@ export function MuiDataTableView<T extends AnyDataTable>({
   onDeleteRows,
   onEditRow,
   onAddRow,
-  actions,
+  actions: _actionMap,
   renderSelectColumn,
   ...DataTableViewProps
 }: MuiDataTableViewProps<T>): React.ReactElement {
   staticActionMap = { ...staticActionMap };
   const viewRef = React.useRef<DataTableView<any, any>>(null);
 
-  const actionMap = { ...actions };
+  const actionMap = { ..._actionMap };
 
   const multipleActionMap: Record<string, MuiDataTableAction<any>> = {};
 
@@ -178,7 +178,7 @@ export function MuiDataTableView<T extends AnyDataTable>({
       },
     });
 
-  for (const [key, action] of entries(actions)) {
+  for (const [key, action] of entries(actionMap)) {
     action.onActionForMultiple && (multipleActionMap[key] = action);
     action.onActionForSingle && (singleActionMap[key] = action);
   }
@@ -246,16 +246,13 @@ export function MuiDataTableView<T extends AnyDataTable>({
                 key={column.key}
                 fitToContent={column.fitToContent}
               >
-                <LangKey token={column.key}>
-                  {column.renderRow
-                    ? column.renderRow(row[column.key], row, view)
-                    : row[column.key]}
-                </LangKey>
+                {row[column.key]}
               </MuiTableCell>
             ))}
             {hasActionsColumn && (
               <MuiTableCell fitToContent>
                 <MuiActions
+                  IconButtonProps={{ size: "small" }}
                   actions={singleActionMap}
                   onAction={(event, actionKey) => {
                     singleActionMap[actionKey].onActionForSingle!(

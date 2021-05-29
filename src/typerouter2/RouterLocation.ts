@@ -42,8 +42,8 @@ export class RouterLocation {
 
   is(routerType: RouterType<any>): boolean {
     return (
-      this.routerType === routerType ||
-      this.routerType.isPrototypeOf(routerType)
+      routerType === this.routerType ||
+      routerType.isPrototypeOf(this.routerType)
     );
   }
 

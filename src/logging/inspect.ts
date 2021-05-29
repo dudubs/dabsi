@@ -1,16 +1,9 @@
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
+import tryToRequire from "@dabsi/common/tryToRequest";
 
 // trying to require "util" module.
 
-const util:
-  | undefined
-  | {
-      inspect;
-    } = ((r, m) => {
-  try {
-    return r(m);
-  } catch (error) {}
-})(require, "util");
+const util: any = tryToRequire("util");
 
 inspect.custom = util?.inspect.custom ?? Symbol();
 export function inspect(...args): string {

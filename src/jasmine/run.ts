@@ -1,70 +1,71 @@
 import { touchSet } from "@dabsi/common/set/touchSet";
-import { DABSI_CURRENT_DIR, DABSI_SRC_DIR } from "@dabsi/env";
-import globalTester from "@dabsi/jasmine/globalTester";
-import "./specFilter";
+import { DABSI_SRC_DIR } from "@dabsi/env";
 import { LogLevel } from "@dabsi/logging/Logger";
-import { readdirSync, statSync } from "fs";
+import fs from "fs";
 import "jasmine";
 import path from "path";
+import "./specFilter";
 
 log.setLevel(l => l ^ LogLevel.INFO);
 
-const requireBeforeTests: string[] = [];
-const tests: string[] = [];
-
 const searchedDirs = new Set<string>();
-const where = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
+const srcArgs = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
 
-if (!where.length) {
-  searchTests(DABSI_SRC_DIR);
-} else {
-  where.forEach(dir => {
-    searchTests(path.resolve(DABSI_CURRENT_DIR, dir));
-  });
-}
+{
+  const srcPaths = !srcArgs.length
+    ? [DABSI_SRC_DIR]
+    : srcArgs.map(arg => fs.realpathSync(arg));
 
-for (const callback of globalTester.callbacks) {
-  callback();
-}
+  const requireBeforeTests: string[] = [];
+  const tests: string[] = [];
 
-console.log({ requireBeforeTests });
+  for (const srcPath of srcPaths) {
+    for (const testsDir of findTestsDirs(srcPath)) {
+      for (const baseName of fs.readdirSync(testsDir)) {
+        const fileName = path.join(testsDir, baseName);
 
-requireBeforeTests.forEach(moduleName => {
-  require(moduleName);
-});
-console.log({ tests });
+        if (/tester\.tsx?$/i.test(fileName)) {
+          requireBeforeTests.push(fileName);
+        } else if (/tests\.tsx?$/i.test(fileName)) {
+          tests.push(fileName);
+        }
+      }
+    }
+  }
+  console.log({ srcPaths, requireBeforeTests, tests });
 
-tests.forEach(moduleName => {
-  describe(moduleName, () => {
+  requireBeforeTests.forEach(moduleName => {
     require(moduleName);
   });
-});
 
-function getModuleName(fileName) {
-  return "@dabsi/" + path.posix.relative(DABSI_SRC_DIR, fileName);
+  tests.forEach(moduleName => {
+    describe(moduleName, () => {
+      require(moduleName);
+    });
+  });
 }
 
-function searchTests(dir: string) {
-  if (!touchSet(searchedDirs, dir)) return;
+function* findTestsDirs(dir: string) {
+  if (!searchedDirs.touch(dir)) return;
 
-  if (!statSync(dir).isDirectory()) {
-    tests.push(getModuleName(dir));
+  const testsDir = path.join(dir, "tests");
+  if (tryStatSync(testsDir)?.isDirectory()) {
+    yield testsDir;
     return;
   }
 
-  readdirSync(dir).forEach(baseName => {
+  for (const baseName of fs.readdirSync(dir)) {
+    if ([/^old-/i, /^(browser|native)$/].find(p => p.test(baseName))) continue;
     const fileName = path.join(dir, baseName);
 
-    if (/^(browser|native|typerpc)$/.test(baseName)) return;
+    if (fs.statSync(fileName).isDirectory()) {
+      yield* findTestsDirs(fileName);
+    }
+  }
+}
 
-    if (/tester.tsx?$/i.test(baseName)) {
-      requireBeforeTests.push(getModuleName(fileName));
-      return;
-    }
-    if (/tests.tsx?$/i.test(baseName)) {
-      tests.push(getModuleName(fileName));
-    } else if (statSync(fileName).isDirectory()) {
-      searchTests(fileName);
-    }
-  });
+function tryStatSync(path: string) {
+  try {
+    return fs.statSync(path);
+  } catch {}
 }

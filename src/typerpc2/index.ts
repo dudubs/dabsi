@@ -1,9 +1,10 @@
-import { isHandlerSide } from "@dabsi/typerpc2/isHandlerSide";
+import tryToRequire from "@dabsi/common/tryToRequest";
+import isHandlingSide from "@dabsi/typerpc2/isHandlingSide";
 
 export * from "./decorators";
 export * from "./Rpc";
 export * from "./RpcNamespace";
 
-if (isHandlerSide()) {
-  eval("require")("./RpcNamespaceHandler");
+if (isHandlingSide()) {
+  tryToRequire("./RpcNamespaceHandler");
 }

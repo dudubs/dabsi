@@ -4,7 +4,6 @@ import {
   InputWithConfig,
 } from "@dabsi/typerpc2/input/InputHandler";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
-import { WidgetElement } from "@dabsi/typerpc2/widget/Widget";
 
 declare module "./rpc" {
   interface TextInput
@@ -12,11 +11,16 @@ declare module "./rpc" {
       TextInput,
       | {
           pattern?: RegExp;
+
           minLength?: number;
+
           maxLength?: number;
 
           load?: (text: string) => Awaitable<string>;
+
           trim?: string;
+
+          titleCase?: boolean;
         }
       | undefined,
       string,
@@ -44,6 +48,13 @@ export default InputHandler(
       let value = String(data || "");
       if (this.config.trim) {
         value = value.trim();
+      }
+
+      if (this.config.titleCase) {
+        value.replace(
+          /\w+/g,
+          word => word.charAt(0).toUpperCase() + word.slice(1)
+        );
       }
 
       if (this.config.pattern && this.config.pattern.test(value)) {

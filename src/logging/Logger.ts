@@ -1,6 +1,7 @@
 import { values } from "@dabsi/common/object/values";
 import { inspect } from "@dabsi/logging/inspect";
 import colors from "colors/safe";
+import moment from "moment";
 
 export type LogFn = {
   (callback): void;
@@ -123,18 +124,35 @@ const levelNameToColor: Record<LevelName, (text: string) => string> = {
 handlers.add(log => {
   if (!Logger.logToConsole) return;
 
-  const prefix = `[${log.loggerName ? `${log.loggerName} ` : ""}${
-    log.levelName
-  }]: `;
+  const levelColor = levelNameToColor[log.levelName];
 
-  const styledPrefix = levelNameToColor[log.levelName](colors.bold(prefix));
+  const d = new Date();
 
-  const prefixPadding = "...".padEnd(prefix.length - 1, " ");
+  const padZero = x => x.toString().padStart(2, "0");
 
-  console.log(
-    log.message
-      .split("\n")
-      .map((line, index) => `${index ? prefixPadding : styledPrefix}${line}`)
-      .join("\n")
+  const formatedDate = [
+    d.getFullYear().toString().slice(2),
+    "/",
+    padZero(d.getMonth() + 1),
+    "/",
+    padZero(d.getDay()),
+    " ",
+    padZero(d.getHours()),
+    ":",
+    padZero(d.getMinutes()),
+    ":",
+    padZero(d.getSeconds()),
+    // " 0.",
+    // d.getMilliseconds(),
+  ].join("");
+
+  const loggerNameWithLevel = levelColor(
+    colors.bold(
+      `[${log.loggerName ? `${log.loggerName} ` : ""}${log.levelName}]`
+    )
   );
+
+  const prefix = `${colors.green(formatedDate)} ${loggerNameWithLevel} `;
+
+  console.log(prefix + log.message);
 });

@@ -91,6 +91,7 @@ export class TsConfigPaths2 {
         tsPath
       )) {
         const basePath = prefix + path + suffix;
+
         //
         if (await this.fs.isDir(basePath)) {
           for (const extension of [".ts", ".tsx"]) {
@@ -157,7 +158,11 @@ export class TsConfigPaths2 {
         allFsPaths.add(path.resolve(baseUrl, fsPath));
 
         const [fsPrefix, fsSuffix] = _splitWillcard(fsPath);
-        const fsResolvedPrefix = path.resolve(baseUrl, fsPrefix);
+        let fsResolvedPrefix = path.resolve(baseUrl, fsPrefix);
+
+        if (/[\\\/]$/.test(fsPrefix) && !/[\\\/]$/.test(fsResolvedPrefix)) {
+          fsResolvedPrefix += fsPrefix.charAt(fsPrefix.length - 1);
+        }
 
         _touchPathTable(this._tsPathTable, tsPrefix, tsSuffix).push([
           fsResolvedPrefix,
@@ -192,7 +197,8 @@ function* _findPath(table: PathTable, path: string) {
   //
   for (const [prefix, suffixMap] of entries(table)) {
     if (!path.startsWith(prefix)) continue;
-    const pathLessPrefix = path.substr(prefix.length);
+    let pathLessPrefix = path.substr(prefix.length);
+
     for (const [suffix, paths] of entries(suffixMap)) {
       if (!pathLessPrefix.endsWith(suffix)) continue;
       const pathLessSuffix = pathLessPrefix.substr(

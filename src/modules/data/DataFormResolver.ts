@@ -2,6 +2,7 @@ import { IfUndefined } from "@dabsi/common/typings2/boolean";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
+import { inspect } from "@dabsi/logging/inspect";
 import { DataForm } from "@dabsi/modules/data/common/DataForm";
 import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
@@ -87,18 +88,21 @@ export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
       configFactory: configFactoryResolver,
       inputConfig: RpcResolver(rpcTypeOrLocation.at("input")),
       row: DataRowContext(rowType),
+      rowKey: DataRowContext.Key(rowType),
       getSource: DataSourceFactory2,
     },
     c => async $ => {
       const config =
-        (await GenericConfig(c.configFactory as ConfigFactory<any>)) || {};
+        (await GenericConfig(
+          c.configFactory as ConfigFactory<DataFormConfig<any, any, any>>
+        )) || {};
 
       return $({
         inputConfig: c.inputConfig,
         valueConfig: async $ =>
           $(
-            await ConfigOrFactory(config.valueConfig, () => [
-              c.row.fetch(config.selection || {}),
+            await ConfigOrFactory(config.valueConfig, async () => [
+              await c.row.fetch(config.selection || {}),
             ])
           ),
         async submit(value) {

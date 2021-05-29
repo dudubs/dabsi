@@ -3,13 +3,10 @@ import { defined } from "@dabsi/common/object/defined";
 import { keys } from "@dabsi/common/object/keys";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { touchObject } from "@dabsi/common/object/touchObject";
-import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { If } from "@dabsi/common/typings2/boolean";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { RequireOptionalKeys } from "@dabsi/common/typings2/RequireOptionalKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
 import { RebaseType } from "@dabsi/typedata/BaseType";
 import { DataExp } from "@dabsi/typedata/exp/exp";
@@ -31,7 +28,6 @@ import {
   WidgetHandler,
   WidgetWithConfig,
 } from "@dabsi/typerpc2/widget/WidgetHandler";
-import { entries } from "lodash";
 
 const MAX_PAGE_SIZE = 100;
 
@@ -163,17 +159,16 @@ const getLoader = (
       tableRow[columnKey] = await columnLoader(dataRow);
     });
 
-    const config: DataTableColumnConfig.Config<any, any, any> = <any>(
+    const columnConfig: DataTableColumnConfig.Config<any, any, any> = <any>(
       (columnConfigMap[columnKey] || columnKey)
     );
-
-    switch (typeof config) {
+    switch (typeof columnConfig) {
       case "function":
-        columnLoader = data => config(data);
+        columnLoader = data => columnConfig(data);
         break;
 
       case "string":
-        columnLoader = getFieldLoader(columnKey, config);
+        columnLoader = getFieldLoader(columnKey, columnConfig);
 
         if (autoSortables !== false) {
           sortableMap[columnKey] = {
@@ -186,11 +181,11 @@ const getLoader = (
 
       case "object": {
         const {
-          load: configLoader,
+          load: columnConfigLoader,
           field = columnKey as any,
           sortable,
           order,
-        } = config;
+        } = columnConfig;
         const fieldLoader = (columnLoader = getFieldLoader(columnKey, field));
 
         if (sortable !== false) {
@@ -201,15 +196,17 @@ const getLoader = (
           };
         }
 
-        if (configLoader) {
+        if (columnConfigLoader) {
           columnLoader = async data =>
-            configLoader(await fieldLoader(data), data);
+            columnConfigLoader(await fieldLoader(data), data);
           break;
         }
         break;
       }
       default:
-        throw new RpcError(`Unknown column config type "${typeof config}".`);
+        throw new RpcError(
+          `Unknown column config type "${typeof columnConfig}".`
+        );
     }
   }
 

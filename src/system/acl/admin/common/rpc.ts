@@ -1,5 +1,10 @@
 import AdminRpc from "@dabsi/system/admin/common/rpc";
-import { Rpc, RpcContextual } from "@dabsi/typerpc2";
+import {
+  Rpc,
+  RpcContextual,
+  RpcFuncational,
+  RpcParametrial,
+} from "@dabsi/typerpc2";
 import { DataForm } from "@dabsi/modules/data/common/DataForm";
 import { DataTable } from "@dabsi/typerpc2/data-table/rpc";
 import { Form } from "@dabsi/typerpc2/form/rpc";
@@ -7,6 +12,7 @@ import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithError
 import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
+import { DataParameter } from "@dabsi/modules/data/common/DataParameter";
 
 export class ACL_GroupsTable extends DataTable({
   groupName: String,
@@ -27,4 +33,7 @@ export default class ACL_AdminRpc extends Rpc {
 
   @RpcContextual(() => DataForm(ACL_GroupInput))
   addNewGroupForm!: DataForm<ACL_GroupInput>;
+
+  @RpcParametrial(() => DataForm(ACL_GroupInput))
+  editGroupForm!: DataParameter<DataForm<ACL_GroupInput>>;
 }

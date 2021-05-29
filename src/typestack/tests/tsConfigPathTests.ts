@@ -1,11 +1,13 @@
 import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
 
-it("", async () => {
-  const rootDir = "/worksacpe/projects";
+const rootDir = "/worksacpe/projects";
 
+let parser: TsConfigPaths2;
+
+beforeAll(() => {
   const isFile = async fileName => !/[\\\/]folder(|\.tsx?)$/.test(fileName);
 
-  const parser = new TsConfigPaths2({
+  parser = new TsConfigPaths2({
     isFile,
     isDir: async path => !(await isFile(path)),
     readJsonFile: async () => ({}),
@@ -16,26 +18,26 @@ it("", async () => {
     "@sub-project/*": ["../sub/src/*"],
     "@my-project/*": ["src/*"],
   });
+});
 
-  expect(parser.resolveTsPath(rootDir + "/my/src/hello.ts")).toEqual(
-    "@my-project/hello"
-  );
+describe("fs-to-ts-path", () => {
+  const test = (fsPath, tsPath) => {
+    it(`expect resolve ${fsPath} to ${tsPath}`, async () => {
+      expect(await parser.resolveTsPath(rootDir + fsPath)).toEqual(tsPath);
+    });
+  };
+  test("/my/src/hello.ts", "@my-project/hello");
+  test("/my/src/hello/index.tsx", "@my-project/hello");
+});
 
-  expect(parser.resolveTsPath(rootDir + "/my/src/hello/index.tsx")).toEqual(
-    "@my-project/hello"
-  );
-
-  expect(await parser.resolveFsPath("@my-project/folder")).toEqual(
-    rootDir + "/my/src/folder/index.ts"
-  );
-  expect(await parser.resolveFsPath("@my-project/file")).toEqual(
-    rootDir + "/my/src/file.ts"
-  );
-
-  expect(await parser.resolveFsPath("@sub-project/folder")).toEqual(
-    rootDir + "/sub/src/folder/index.ts"
-  );
-  expect(await parser.resolveFsPath("@sub-project/file")).toEqual(
-    rootDir + "/sub/src/file.ts"
-  );
+describe("ts-to-fs-path", () => {
+  const test = (tsPath, fsPath) => {
+    it(`expect resolve ${tsPath} to ${fsPath}`, async () => {
+      expect(await parser.resolveFsPath(tsPath)).toEqual(rootDir + fsPath);
+    });
+  };
+  test("@my-project/folder", "/my/src/folder/index.ts");
+  test("@my-project/file", "/my/src/file.ts");
+  test("@sub-project/folder", "/sub/src/folder/index.ts");
+  test("@sub-project/file", "/sub/src/file.ts");
 });

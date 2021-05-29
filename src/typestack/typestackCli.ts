@@ -4,6 +4,7 @@ import {
   DABSI_WORKSPACE_DIR,
   getWorkspacePackage,
 } from "@dabsi/env";
+import { inspect } from "@dabsi/logging/inspect";
 import DevModule from "@dabsi/modules/DevModule";
 import { ProjectSettings } from "@dabsi/modules/ProjectModule";
 import { CliModule2 } from "@dabsi/typecli/CliModule";

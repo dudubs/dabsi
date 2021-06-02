@@ -10,7 +10,6 @@ import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
 import { Group } from "@dabsi/system/acl/entities/Group";
-import { Permission } from "@dabsi/system-old/server/acl/Permission";
 
 @Entity({ name: "acl/users" })
 export class User {
@@ -52,7 +51,4 @@ export class User {
 
   @ManyToMany(() => Group, group => group.users)
   groups!: DataRelation<Group>[];
-
-  @ManyToOne(() => Permission, p => p.user)
-  permissions!: DataRelation<Permission>[];
 }

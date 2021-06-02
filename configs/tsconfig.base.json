@@ -22,9 +22,9 @@
     "strictPropertyInitialization": true,
     "preserveWatchOutput": true,
     "jsx": "react-jsx",
-    "baseUrl": "..",
+    "baseUrl": ".",
     "paths": {
-      "@dabsi/*": ["src/*"]
+      "@dabsi/*": ["../src/*"]
     }
   }
 }

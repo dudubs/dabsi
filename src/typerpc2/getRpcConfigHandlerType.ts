@@ -36,26 +36,22 @@ export function getRpcConfigHandlerType(rpcType: RpcType) {
       handlerType.rpcType !== rpcType;
       rpcType = Object.getPrototypeOf(rpcType)
     ) {
-      for (const memberKey of getRpcMetadata(rpcType).memberKeys) {
+      const metadata = getRpcMetadata(rpcType);
+      for (const memberKey of metadata.memberKeys) {
         const memberHandlerKey = "handle" + capitalize(memberKey);
         if (memberHandlerKey in newHandlerType.prototype) continue;
-        const memberType = RpcMembers.getMemberType(rpcType, memberKey);
-        const memberPropertyType = Reflector.getPropertyType(
-          rpcType,
-          memberKey
-        );
 
         newHandlerType.prototype[memberHandlerKey] = defined(
-          newHandlerType.createRpcMemberHandler?.(
-            memberKey,
-            memberType!,
-            memberPropertyType!
-          ),
+          newHandlerType.createRpcMemberHandler?.({
+            rpcType: rpcType,
+            type: metadata.memberTypeMap[memberKey],
+            key: memberKey,
+            propertyType: defined(
+              Reflector.getPropertyType(rpcType, memberKey),
+              () => `No propertyType for "${rpcType.name}.${memberKey}".`
+            ),
+          }),
           () => {
-            console.log({
-              x: newHandlerType.createRpcMemberHandler?.toString(),
-            });
-
             return `No member handler for "${rpcType.name}.${memberKey}".`;
           }
         );
@@ -86,9 +82,22 @@ export function getRpcConfigHandlerType(rpcType: RpcType) {
       rpcType[RpcAnchorSymbol] as any,
       () => `No rpc config metadata for "${rpcType.name}".`
     );
-    const pathWithoutBaseName = anchor.path.replace(/[^\\\/]+$/, "");
 
-    require(pathWithoutBaseName + "handler.ts");
+    let handlerModulePath;
+    if (/[\\\/]rpc.ts$/.test(anchor.path)) {
+      const pathWithoutBaseName = anchor.path.replace(/[^\\\/]+$/, "");
+      handlerModulePath = pathWithoutBaseName + "handler.ts";
+    } else {
+      handlerModulePath = anchor.path.replace(
+        /(?<name>[^\\\/])\.(?<ext>ts|js)$/,
+        (...args) => {
+          const { name, ext } = args[args.length - 1];
+          return name + "Handler." + ext;
+        }
+      );
+    }
+
+    require(handlerModulePath);
 
     return defined(
       rpcType[RpcConfigHandlerTypeSymbol],

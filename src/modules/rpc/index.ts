@@ -6,11 +6,7 @@ import LoaderModule from "@dabsi/modules/LoaderModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import {
-  isRpcResolver,
-  RpcMemberResolver,
-  RpcResolver,
-} from "@dabsi/modules/rpc/RpcResolver";
+import { isRpcResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -58,7 +54,7 @@ export class RpcModule2 {
       });
   }
 
-  configure(config: RpcResolver<any> | RpcMemberResolver<any> | undefined) {
+  configure(config: RpcResolver<any> | RpcResolver<any> | undefined) {
     if (Array.isArray(config)) {
       for (const configItem of config) {
         this.configure(configItem);

@@ -1,5 +1,5 @@
 // import { RpcResolver } from "@dabsi/modules/rpc/configResolver";
-// import { checkUniqueName } from "@dabsi/system-old/server/acl/checkUniqueName";
+// import { checkUniqueName } from "@dabsi/old-system/server/acl/checkUniqueName";
 // import AclContext  from "@dabsi/system/acl/context";
 // import { User } from "@dabsi/system/acl/entities/User";
 // import { ACL_Admin_UserBaiscInfoInput } from "@dabsi/system/acl/admin/users/common/basicInfoInput";

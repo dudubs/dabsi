@@ -49,12 +49,12 @@ export default InputHandler(
     configCanBeUndefined: false,
     // handlerFactory: rpcType ...
 
-    createMemberHandler(memberKey, memberType, propertyType) {
-      if (memberType !== RpcMemberType.Contextual) return;
-      if (!Input.isInputType(propertyType)) return;
+    createMemberHandler(member) {
+      if (member.type !== RpcMemberType.Contextual) return;
+      if (!Input.isInputType(member.propertyType)) return;
 
       return function (inputType) {
-        return createRpcHandler(inputType, this.config?.[memberKey]);
+        return createRpcHandler(inputType, this.config?.[member.key]);
       };
     },
     helpers: {

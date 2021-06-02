@@ -19,14 +19,19 @@ const srcArgs = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
   const requireBeforeTests: string[] = [];
   const tests: string[] = [];
 
-  for (const srcPath of srcPaths) {
+  for (let srcPath of srcPaths) {
+    const srcPathIsFile = fs.statSync(srcPath).isFile();
+    if (srcPathIsFile) {
+      tests.push(srcPath);
+      srcPath = path.dirname(srcPath);
+    }
     for (const testsDir of findTestsDirs(srcPath)) {
       for (const baseName of fs.readdirSync(testsDir)) {
         const fileName = path.join(testsDir, baseName);
 
         if (/tester\.tsx?$/i.test(fileName)) {
           requireBeforeTests.push(fileName);
-        } else if (/tests\.tsx?$/i.test(fileName)) {
+        } else if (!srcPathIsFile && /tests\.tsx?$/i.test(fileName)) {
           tests.push(fileName);
         }
       }

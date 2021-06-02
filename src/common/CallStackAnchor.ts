@@ -5,6 +5,9 @@ import path from "path";
 // callstacksymbol
 export class CallStackAnchor {
   static capture(lastCalled: Function): CallStackAnchor {
+    if (typeof Error.captureStackTrace !== "function") {
+      throw new Error("CallStackAnchor is not supported.");
+    }
     const o: { stack?: string } = {};
     const limit = Error.stackTraceLimit;
     Error.stackTraceLimit = 1;

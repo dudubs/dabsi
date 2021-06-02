@@ -6,13 +6,13 @@ import React from "react";
 import ReactDOM from "react-dom";
 import axios from "axios";
 
-SystemCommand.handle(async payloads => {
-  return await (
-    await axios.post(SYSTEM_RPC_PATH, {
+SystemCommand.handle(payloads =>
+  axios
+    .post(SYSTEM_RPC_PATH, {
       payloads,
     })
-  ).data.responses;
-});
+    .then(result => result.data.responses)
+);
 
 window.addEventListener("DOMContentLoaded", () => {
   const container = document.createElement("div");

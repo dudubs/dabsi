@@ -21,7 +21,7 @@ import {
   ConsumeOptionalArgs,
   ResolverDeps,
 } from "@dabsi/typedi/consume";
-import { RpcType } from "@dabsi/typerpc2";
+import { Rpc, RpcType } from "@dabsi/typerpc2";
 import {
   ConfigFactory,
   ConfigOrFactory,
@@ -62,6 +62,7 @@ export type DataFormConfig<
     commitConfig?: ConfigFactory<DataCommitRow<Data>, [InputValue<Input>]>;
   }
 >;
+
 export function DataFormResolver<
   T extends AnyInputWithConfig,
   U extends ResolverDeps,

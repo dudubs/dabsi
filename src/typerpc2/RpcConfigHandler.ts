@@ -114,11 +114,7 @@ export interface RpcConfigHandlerType<T extends AnyRpcWithConfig, H> {
 
   readonly isRpcConfigCanBeUndefined: boolean;
 
-  createRpcMemberHandler?(
-    memberKey: string,
-    memberType: RpcMemberType,
-    propertyType: Function
-  ): Function;
+  createRpcMemberHandler?(member: RpcConfigHandlerMember): Function;
 
   new (rpcType: RpcType<T>, config: any): H;
 }
@@ -166,12 +162,18 @@ export type RpcConfigHandlerOptions<
 
     createMemberHandler?(
       this: RpcType<R>,
-      memberKey: string,
-      memberType: RpcMemberType,
-      propertyType: Function
+      member: RpcConfigHandlerMember
     ): undefined | ((this: BaseRpcConfigHandler<R, C>, ...args: any[]) => any);
   }
 >;
+
+export type RpcConfigHandlerMember = {
+  rpcType: RpcType;
+  key: string;
+  type: RpcMemberType;
+  propertyType: Function;
+};
+
 export const RpcConfigHandlerTypeSymbol = Symbol("RpcConfigHandlerTypeSymbol");
 
 export type RpcHandlerProps<T extends Rpc> = Omit<RpcHandler<T>, "config">;

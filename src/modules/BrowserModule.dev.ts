@@ -1,6 +1,6 @@
 import { makeHtml } from "@dabsi/common/makeHtml";
 import { Once } from "@dabsi/common/patterns/Once";
-import { DABSI_NM_DIR, DABSI_WORKSPACE_DIR } from "@dabsi/env";
+import { DABSI_DIR, DABSI_NM_DIR, DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import { touchFile } from "@dabsi/filesystem/touchFile";
 import BrowserModule from "@dabsi/modules/BrowserModule";
 import ExpressModule from "@dabsi/modules/ExpressModule";
@@ -12,7 +12,8 @@ import watchOnPlatform from "@dabsi/modules/watchOnPlatform";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
 import express from "express";
-import { realpathSync, watch } from "fs";
+import { watch } from "fs";
+import { values } from "lodash";
 import path from "path";
 import ReloadServer from "reload";
 import TsConfigPathsWebpackPlugin from "tsconfig-paths-webpack-plugin";
@@ -34,8 +35,8 @@ export default class BrowserDevModule {
   readonly log = log.get("BROWSER.DEV");
 
   readonly platforms = [
-    this.platformModule.commonPlatform,
-    this.platformModule.viewPlatform,
+    this.platformModule.getPlatform("common"),
+    this.platformModule.getPlatform("view"),
     this.platform,
   ];
 
@@ -49,8 +50,12 @@ export default class BrowserDevModule {
     this.platform.settings.includeInternalFiles = true;
   }
 
-  @CliCommand("make") async make() {
+  @Once() async load() {
     await Promise.all(this.platforms.map(p => p.load()));
+  }
+
+  @CliCommand("make") async make() {
+    await this.load();
 
     return this.platformModule.makeFiles(
       this.generatedDir,
@@ -58,15 +63,24 @@ export default class BrowserDevModule {
       'import "@dabsi/browser/register";\n'
     );
   }
+
   @Once() async getWebpackCompiler() {
     const platformFiles = await this.make();
 
-    const tsConfigFile = realpathSync(
-      path.resolve(
-        this.projectModule.settings.directory,
-        `configs/tsconfig.prod.browser.json`
-      )
+    const tsconfigPath = path.join(
+      this.projectModule.configsDir,
+      `tsconfig.browser.webpack.json`
     );
+
+    await this.makeModule.makeTsconfigFile(tsconfigPath, {
+      extends: path.join(DABSI_DIR, "configs/tsconfig.browser.base.json"),
+      compilerOptions: {
+        ...(await this.projectModule.getPaths()).createPathsWithBaseUrl(
+          this.projectModule.configsDir
+        ),
+      },
+      include: [...values(platformFiles)],
+    });
 
     // Fixing bug: TsconfigPaths preffer TS_NODE_PORJECY instead configFile.
     delete process.env["TS_NODE_PROJECT"];
@@ -109,7 +123,6 @@ export default class BrowserDevModule {
             extensions: [".ts", ".tsx"],
           }),
         ],
-
         extensions: [".ts", ".tsx", ".js"],
       },
       module: {
@@ -118,7 +131,7 @@ export default class BrowserDevModule {
             test: /\.tsx?$/,
             loader: "ts-loader",
             options: {
-              configFile: tsConfigFile,
+              configFile: tsconfigPath,
               transpileOnly: true,
               compilerOptions: {
                 noEmit: false,
@@ -162,15 +175,18 @@ export default class BrowserDevModule {
     await this._pack();
   }
 
-  installDevWithExpress(
+  installExpressForBrowser(
+    @Plugin() sdm: ServerDevModule,
     @Plugin()
     expressModule: ExpressModule,
     @Plugin() browserModule: BrowserModule
   ) {
+    if (!sdm.isDevChild) return;
     let reload: null | (() => void) = null;
-    browserModule.scripts.push("/reload/reload.js");
 
     expressModule.preBuilders.push(app => {
+      browserModule.scripts.push("/reload/reload.js");
+
       ReloadServer(app).then(server => {
         this.log.info(() => `reload server is ready.`);
         reload = () => {
@@ -184,9 +200,8 @@ export default class BrowserDevModule {
           reload?.();
         });
       });
-    });
 
-    expressModule.preBuilders.push(app => {
+      // jasmine
       app.use(
         "/jasmine/lib",
         express.static(path.join(DABSI_NM_DIR, "jasmine-core/lib/jasmine-core"))
@@ -219,6 +234,7 @@ export default class BrowserDevModule {
       await touchFile(RELOAD_FILENAME);
     });
   }
+
   @CliCommand("start-dev")
   startDev() {
     return Promise.all([

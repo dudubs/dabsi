@@ -34,7 +34,6 @@ export default RpcResolver(AclRpc, {
               .pick({ fullName: User.FullName })
               .get();
             if (!user) return { type: "failed" };
-
             await session.update({ user });
             return {
               type: "success",

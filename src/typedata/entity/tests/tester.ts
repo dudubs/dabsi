@@ -1,6 +1,6 @@
 import { defined } from "@dabsi/common/object/defined";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
-import { formatSql } from "@dabsi/system-old/server/acl/formatSql";
+import { formatSql } from "@dabsi/old-system/server/acl/formatSql";
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { AEntity, CEntity } from "@dabsi/typeorm/relations/tests/TestEntities";

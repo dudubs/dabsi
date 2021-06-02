@@ -34,10 +34,12 @@ export type AnyRpcTypeWithConfig<T = any, R extends Rpc = Rpc> = RpcType<
   R & RpcWithConfig<T>
 >;
 export const RpcAnchorSymbol = Symbol("RpcAnchor");
+
 export function RpcWithConfig(): { (rpcType: RpcType): void } {
   if (!isHandlingSide()) {
     return () => {};
   }
+
   const anchor = CallStackAnchor.capture(RpcWithConfig);
   return function (rpcType: RpcType) {
     Object.defineProperty(rpcType, RpcWithConfigSymbol, {
@@ -46,6 +48,7 @@ export function RpcWithConfig(): { (rpcType: RpcType): void } {
     });
     Object.defineProperty(rpcType, RpcAnchorSymbol, {
       value: anchor,
+      enumerable: false,
     });
   };
 }

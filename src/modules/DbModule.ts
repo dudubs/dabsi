@@ -31,6 +31,7 @@ export class DataSourceFactory2 extends Resolver(
     DataEntitySource.create(entityType, getQueryRunner)
 ) {}
 
+export const DataContext = { getSource: DataSourceFactory2 };
 @Module({
   cli: "db",
 })

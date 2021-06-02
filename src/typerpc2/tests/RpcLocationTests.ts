@@ -24,9 +24,9 @@ it("expect to rpc-location without pathKeys", () => {
   expect(l.rpcType).toBe(A);
 });
 it("expect to functional member location", () => {
-  expect(A.at("testFn").rpcType).toEqual(Function);
-  expect(B.at("a.testFn").rpcType).toEqual(Function);
-  expect(B.at("getA.testFn").rpcType).toEqual(Function);
+  expect(A.at("testFn").rpcType).toBeUndefined();
+  expect(B.at("a.testFn").rpcType).toBeUndefined();
+  expect(B.at("getA.testFn").rpcType).toBeUndefined();
 });
 
 it("expect to contextual member location", () => {

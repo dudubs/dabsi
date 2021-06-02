@@ -31,7 +31,8 @@ export class FormView<T extends AnyForm> extends WidgetView<
 
   async submit() {
     this.value = undefined;
-    if (!(await this.input.validate())) return;
+    await this.input.validate();
+    if (this.input.error != null) return;
 
     this.isSubmiting = true;
     try {

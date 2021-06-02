@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.view.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@dabsi/*": [
+        "../src/*"
+      ]
+    }
+  },
+  "include": [
+    "../src/**/common",
+    "../src/**/view",
+    "../src/typerpc2/**/*view.ts",
+    "../src/typerpc2/**/*view.tsx"
+  ]
+}

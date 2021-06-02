@@ -53,6 +53,7 @@ export class RpcResolverBuilder {
 
   getResolver<T>(rpcLocation: RpcTypeOrLocation<T>): RpcResolver<T> {
     const _rpcLocation = RpcTypeOrLocation(rpcLocation);
+
     return this._resolverMap.touchByLocation(_rpcLocation, () => {
       // _rpcLocation
 
@@ -176,11 +177,11 @@ RpcResolverBuilder.defineGenerator(RpcNamespace, (rpcLocation, builder) =>
     [builder.buildHandlerMapResolver(rpcLocation)],
     handlerMap => async $ => {
       return $({
-        getRpcMemberHandler(rpcType, memberKey, memberType, propertyType): any {
+        getRpcMemberHandler(member): any {
           return defined(
-            (<any>handlerMap)["handle" + capitalize(memberKey)],
+            (<any>handlerMap)["handle" + capitalize(member.key)],
             () =>
-              `No rpc-namespace-key like "${rpcType.name}.${memberKey}":${propertyType.name}`
+              `No rpc-namespace-key like "${member.rpcType.name}.${member.key}":${member.propertyType.name}`
           );
         },
       });

@@ -1,5 +1,10 @@
+// useful when you want to make dynamic require.
 export default function tryToRequire(name: string) {
   try {
-    return eval("require")?.(name);
+    return (() => {
+      try {
+        return require;
+      } catch {}
+    })()?.(name);
   } catch {}
 }

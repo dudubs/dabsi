@@ -1,7 +1,12 @@
+import tryToRequire from "@dabsi/common/tryToRequest";
 import { RpcContextual } from "@dabsi/typerpc2/decorators";
+import isHandlingSide from "@dabsi/typerpc2/isHandlingSide";
 import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
+import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
 
+@RpcWithConfig()
+// "RpcNamespaceHandler"
 export class RpcNamespace extends Rpc {
   static nsCommand: RpcCommand = function (this: Function) {
     throw new Error(`No ns-command for ${this.name}.`);
@@ -70,4 +75,8 @@ export class RpcNamespace extends Rpc {
     );
     return <any>childRpc;
   }
+}
+
+if (isHandlingSide()) {
+  tryToRequire("./RpcNamespaceHandler");
 }

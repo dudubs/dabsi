@@ -68,10 +68,10 @@ export const MuiFormView = <T extends AnyForm>({
                 $merge: { disabled: { $override: disabled } },
               },
               submitTitle: isVariant.save && lang`SAVE_CHANGES`,
-              onSubmitClick: () => {
+              onSubmit: () => {
                 view.submit();
               },
-              onResetClick: disableResetButton
+              onReset: disableResetButton
                 ? undefined
                 : () => {
                     view.reset();

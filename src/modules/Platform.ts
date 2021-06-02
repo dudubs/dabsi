@@ -24,6 +24,9 @@ export default class Platform {
   @Defined()
   directories!: string[];
 
+  @Defined()
+  projectDirectoriesMap!: Map<string, string[]>;
+
   readonly settings = {
     includeInternalFiles: false,
     includeTestsFiles: true,
@@ -75,7 +78,12 @@ export default class Platform {
   constructor(readonly name: string, readonly loaderModule: LoaderModule) {}
 
   @Once() async load() {
-    [this.directories, this.testsFileNames, this.indexFileNames] = [[], [], []];
+    [
+      this.directories,
+      this.testsFileNames,
+      this.indexFileNames,
+      this.projectDirectoriesMap,
+    ] = [[], [], [], new Map()];
 
     for (const o of [this.loaders, this.settings]) {
       Object.seal(o);
@@ -90,6 +98,13 @@ export default class Platform {
           .catch(() => null);
 
         if (!platformFiles) return;
+
+        const projectDir = platformDir.split(/[\\\/]+src[\\\/]+/, 1)[0];
+        if (projectDir !== platformDir) {
+          this.projectDirectoriesMap
+            .touch(projectDir, () => [])
+            .push(platformDir);
+        }
 
         this.directories.push(platformDir);
 
@@ -112,6 +127,7 @@ export default class Platform {
       this.directories,
       this.testsFileNames,
       this.indexFileNames,
+      this.projectDirectoriesMap,
     ]) {
       Object.seal(o);
     }

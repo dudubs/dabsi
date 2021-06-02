@@ -21,15 +21,19 @@ export function DataParameterResolver<T extends Rpc, U extends ResolverDeps, R>(
     check?(ticker: DataRowTicker<R>): void;
   }>
 ): RpcResolver<DataParameter<T>>;
-export function DataParameterResolver(rpcLocation, rowType, optionsResolver) {
+export function DataParameterResolver(
+  rpcLocation: RpcLocation<DataParameter<any>>,
+  rowType,
+  optionsResolver
+) {
   return RpcResolver(
-    rpcLocation as RpcLocation<DataParameter<any>>,
+    rpcLocation,
     [
       Resolver.injector(
         {
           rowKey: DataRowContext.Key(rowType),
         },
-        RpcResolver(rpcLocation.rpcType)
+        RpcResolver(rpcLocation.toChildLocation())
       ),
       DataTicker,
       optionsResolver || (() => null),

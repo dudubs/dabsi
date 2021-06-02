@@ -18,14 +18,17 @@ export function DataRowContext<T>(
     }
   );
 }
+const map = new WeakMap();
 
-DataRowContext.Key = function (rowType: Function) {
-  class _ {
-    static rowType = rowType;
-    constructor(public $key: string | null) {}
-  }
-  Object.defineProperty(_, "name", {
-    value: `<DataRowContext.Key ${rowType.name}>`,
+DataRowContext.Key = function (rowType: Function): DataRowContextKeyType {
+  return map.touch(rowType, () => {
+    class _ {
+      static rowType = rowType;
+      constructor(public $key: string | null) {}
+    }
+    Object.defineProperty(_, "name", {
+      value: `<DataRowContext.Key ${rowType.name}>`,
+    });
+    return _;
   });
-  return _;
 };

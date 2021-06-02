@@ -1,4 +1,4 @@
 {
-  "extends": "../../../configs/tsconfig.base.view.json",
+  "extends": "../../../configs/tsconfig.view.dev.json",
   "include": ["../../view", ".", ".."]
 }

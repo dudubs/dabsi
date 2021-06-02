@@ -13,6 +13,8 @@ export function activeReloadEmitter() {
     let platform: string;
     if (/[\\\/]browser[\\\/]/.test(e.fileName)) {
       platform = "browser";
+    } else if (/[\\\/]native[\\\/]/.test(e.fileName)) {
+      platform = "native";
     } else if (/([\\\/]view[\\\/]|view\.)/i.test(e.fileName)) {
       platform = "view";
     } else if (/[\\\/]common[\\\/]/.test(e.fileName)) {

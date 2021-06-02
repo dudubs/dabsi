@@ -3,7 +3,7 @@ import { Module } from "@dabsi/typemodule";
 import * as fs from "fs";
 import path, { dirname } from "path";
 
-const DEBUG = false;
+const DEBUG_MAKE = false;
 
 @Module()
 export default class MakeModule {
@@ -28,7 +28,7 @@ export default class MakeModule {
   async makeTextFile(path: string, text: string) {
     await this.touchDir(dirname(path));
     log("make file " + path);
-    if (DEBUG) {
+    if (DEBUG_MAKE) {
       console.log("  " + text.replace(/\n/g, "\n  "));
     } else {
       await fs.promises.writeFile(path, text);
@@ -39,8 +39,12 @@ export default class MakeModule {
     C extends { extends?: string; compilerOptions?: {}; include?: string[] }
   >(outFileName: string, c: C) {
     const outDir = path.dirname(outFileName);
-    const relative = (p: string) =>
-      /\.\.?([\\\/]|$)/.test(p) ? p : path.posix.relative(outDir, p);
+    const relative = (p: string) => {
+      if (/\.\.?([\\\/]|$)/.test(p)) return p;
+      const relP = path.posix.relative(outDir, p);
+      if (relP.startsWith(".")) return relP;
+      return "./" + relP;
+    };
 
     const relativeProp = (o, p) =>
       typeof o[p] === "string" ? { [p]: relative(o[p] as any) } : null;
@@ -60,7 +64,9 @@ export default class MakeModule {
           }
         : null),
 
-      ...(c.include ? { include: c.include.map(relative).sort() } : {}),
+      ...(c.include
+        ? { include: c.include.toSeq().map(relative).sort().toSet().toArray() }
+        : {}),
     });
   }
 }

@@ -1,8 +1,10 @@
+import Lazy from "@dabsi/common/patterns/Lazy";
 import DevModule from "@dabsi/modules/DevModule";
+import ExpressModule from "@dabsi/modules/ExpressModule";
 import ProjectModule from "@dabsi/modules/ProjectModule";
 import watchOnPlatform from "@dabsi/modules/watchOnPlatform";
 import { CliCommand } from "@dabsi/typecli";
-import { Module } from "@dabsi/typemodule";
+import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import getTypestackCliArgs from "@dabsi/typestack/getTypestackCliArgs";
 import { ChildProcess, spawn } from "child_process";
@@ -19,7 +21,9 @@ export default class ServerDevModule {
     protected projectModule: ProjectModule,
     protected moduleRunner: ModuleRunner
   ) {}
-
+  @Lazy() get isDevChild() {
+    return process.env.TS_DEV_CHILD === "true";
+  }
   reload() {
     this._devProcess?.kill();
     this._devProcess = spawn(
@@ -28,6 +32,7 @@ export default class ServerDevModule {
       {
         stdio: "inherit",
         cwd: this.projectModule.settings.directory,
+        env: { ...process.env, TS_DEV_CHILD: "true" },
       }
     );
   }
@@ -37,6 +42,15 @@ export default class ServerDevModule {
     watchOnPlatform(["common", "server"], () => {
       this.log("reloading..");
       this.reload(); //
+    });
+  }
+
+  installExpress(@Plugin() em: ExpressModule) {
+    em.preBuilders.push(app => {
+      app.use((req, res, next) => {
+        this.log(`HTTP ${req.method} ${req.path}`);
+        next();
+      });
     });
   }
 }

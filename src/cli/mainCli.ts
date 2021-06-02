@@ -1,6 +1,4 @@
-import make from "@dabsi/cli/make";
 import testCli from "@dabsi/cli/testCli";
-import { realpathSync } from "fs";
 import yargs from "yargs";
 
 export default function mainCli(): boolean {
@@ -29,14 +27,6 @@ export default function mainCli(): boolean {
       async ({ _: args, moduleName }) => {
         const scriptModule = require(`@dabsi/${moduleName}/cli`);
         await scriptModule.default(process.argv.slice(2));
-      }
-    )
-    .command(
-      "make [project-dir]",
-      "",
-      y => y.string("projectDir").boolean(["f", "force"]),
-      ({ f, force = f, ...args }) => {
-        make({ force, ...args });
       }
     )
     .help(false).argv;

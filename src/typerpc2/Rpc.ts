@@ -44,7 +44,13 @@ export type RpcWithChild<P extends PropertyKey, T extends Rpc> = Record<
   RpcChild<T>
 >;
 
-export type RpcAt<T, P extends string> =
+export type RpcAt<T, P extends string> = P extends `${infer P}!`
+  ? _RpcAt<T, P> extends RpcParametrialMember<infer U>
+    ? U
+    : never
+  : _RpcAt<T, P>;
+
+export type _RpcAt<T, P extends string> =
   //
   T extends RpcParametrialMember<infer T, any>
     ? RpcAt<T, P>

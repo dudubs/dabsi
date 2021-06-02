@@ -33,7 +33,7 @@ export function RpcModuleTester(t: ModuleTester) {
       rpcModule,
       createRpcCommand,
       createRpc<T extends Rpc>(rpcType: RpcType<T>): T {
-        return new rpcType([], createRpcCommand(rpcType));
+        return new rpcType(() => [], createRpcCommand(rpcType), null);
       },
     };
   });

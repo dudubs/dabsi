@@ -9,9 +9,9 @@ export type MuiFormProps = {
 
   disableReset?: boolean;
 
-  onSubmitClick?(event: React.SyntheticEvent<any>);
+  onSubmit?(event: React.SyntheticEvent<any>);
 
-  onResetClick?(event: React.SyntheticEvent<any>);
+  onReset?(event: React.SyntheticEvent<any>);
 
   baseButtonProps?: ButtonProps;
 
@@ -41,27 +41,27 @@ export function MuiForm(p: MuiFormProps): React.ReactElement {
           direction="row"
           {...p.buttonsGridProps}
         >
-          {p.onSubmitClick && (
+          {p.onSubmit && (
             <Grid item>
               <Button
                 variant="contained"
                 color="primary"
                 {...p.baseButtonProps}
                 {...p.submitButtonProps}
-                onClick={p.onSubmitClick}
+                onClick={p.onSubmit}
               >
                 {p.submitTitle || lang`SUBMIT`}
               </Button>
             </Grid>
           )}
-          {!p.disableReset && p.onResetClick && (
+          {!p.disableReset && p.onReset && (
             <Grid item>
               <Button
                 variant="contained"
                 color="primary"
                 {...p.baseButtonProps}
                 {...p.resetButtonProps}
-                onClick={p.onResetClick}
+                onClick={p.onReset}
               >{lang`RESET`}</Button>
             </Grid>
           )}

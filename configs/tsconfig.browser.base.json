@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.view.base.json",
+  "compilerOptions": {
+    "lib": ["DOM", "ES2020"]
+  }
+}

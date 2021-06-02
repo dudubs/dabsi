@@ -36,3 +36,25 @@ export class RouterHistory {
     this.pusher(location);
   }
 }
+
+declare module "../Router" {
+  namespace Router {
+    function locate(): RouterHistoryLocator;
+    function locate<T extends Router>(
+      this: RouterType<T>,
+      callback: (router: T) => Router
+    ): RouterHistoryLocator;
+  }
+}
+
+export type RouterHistoryLocator = {
+  (history: RouterHistory): void;
+  (event: any, props: { history: RouterHistory }): void;
+};
+
+Router.locate = function (callback?): any {
+  return (arg0, arg1?) => {
+    const history: RouterHistory = arg1?.history || arg0;
+    history.push(this, callback);
+  };
+};

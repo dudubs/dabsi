@@ -8,5 +8,3 @@ setTimeout(() => {
     ACL_CurrentUserReactor.emit(status);
   });
 });
-
-// ACL_CurrentUserReactor.emit(...) ACL_CurrentUserReactor.use()

@@ -1,4 +1,5 @@
 import { DABSI_DIR } from "@dabsi/env";
+import { inspect } from "@dabsi/logging/inspect";
 import MakeModule from "@dabsi/modules/MakeModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import ProjectModule from "@dabsi/modules/ProjectModule";
@@ -25,8 +26,8 @@ export default class NativeDevModule {
   readonly platform = this.platformModule.getPlatform("native");
 
   readonly platforms = [
-    this.platformModule.commonPlatform,
-    this.platformModule.viewPlatform,
+    this.platformModule.getPlatform("common"),
+    this.platformModule.getPlatform("view"),
     this.platform,
   ];
 
@@ -49,10 +50,23 @@ export default class NativeDevModule {
       .option("make", { type: "boolean", default: false, alias: "m" })
       .option("compile", { type: "boolean", default: false, alias: "c" })
   )
-  protected async _command({ all, clean, make, compile }) {
+  protected async _command({ all, clean, make, compile, $args: args }) {
     (all || clean) && (await this.clean());
     (all || make) && (await this.make());
     (all || compile) && (await this.compile());
+
+    const pos = (args as string[]).indexOf("--");
+    if (pos > -1) {
+      const [cmd, ...cmdArgs] = args.slice(pos + 1);
+      if (!cmd) return;
+      await waitForChildProcess(
+        spawn(cmd, cmdArgs, {
+          stdio: "inherit",
+          cwd: this.packageDir,
+        })
+      );
+      console.log("OK");
+    }
   }
 
   async clean() {
@@ -67,6 +81,20 @@ export default class NativeDevModule {
     await Promise.all(this.platforms.map(p => p.load()));
     await this.makeSourceFiles();
     await this.makeTsConfigs();
+    await this.makeIndexSource();
+  }
+
+  async makeIndexSource() {
+    return this.makeModule.makeTextFile(
+      path.join(this.packageDir, "index.js"),
+      `import {getNativeAppCompnent} from '@dabsi/native';
+import {AppRegistry} from 'react-native';
+import './app-dist/${this.projectModule.settings.name}/generated/native';
+import {name as appName} from './app.json';
+
+AppRegistry.registerComponent(appName, getNativeAppCompnent);
+`
+    );
   }
 
   async makeSourceFiles() {
@@ -81,29 +109,31 @@ export default class NativeDevModule {
     );
   }
 
+  readonly buildConfigPath = path.join(
+    this.projectModule.configsDir,
+    "tsconfig.build.native.json"
+  );
+
   async makeTsConfigs() {
-    return this.makeModule.makeTsconfigFile(
-      path.join(this.projectModule.configsDir, "tsconfig.dev.native.json"),
-      {
-        extends: path.join(DABSI_DIR, "configs/tsconfig.base.native.json"),
-        compilerOptions: {
-          ...this.projectModule.paths.createPathsWithBaseUrl(
-            this.projectModule.configsDir
-          ),
-          module: "esnext",
-          sourceMap: false,
-          esModuleInterop: true,
-          noEmit: false,
-          target: "esnext",
-          baseUrl: ".",
-          outDir: "../packages/native/app-dist",
-        },
-        include: [
-          path.join(this.generatedDir, "index.ts"),
-          ...this.platforms.toSeq().flatMap(p => p.directories),
-        ],
-      }
-    );
+    return this.makeModule.makeTsconfigFile(this.buildConfigPath, {
+      extends: path.join(DABSI_DIR, "configs/tsconfig.native.base.json"),
+      compilerOptions: {
+        ...(await this.projectModule.getPaths()).createPathsWithBaseUrl(
+          this.projectModule.configsDir
+        ),
+        module: "esnext",
+        sourceMap: true, // debug
+        esModuleInterop: true,
+        noEmit: false,
+        target: "esnext",
+        baseUrl: ".",
+        outDir: "../packages/native/app-dist",
+      },
+      include: [
+        path.join(this.generatedDir, "index.ts"),
+        ...this.platforms.toSeq().flatMap(p => p.directories),
+      ],
+    });
   }
 
   @CliCommand("compile", y =>
@@ -114,7 +144,14 @@ export default class NativeDevModule {
     await waitForChildProcess(
       spawn(
         "tsc",
-        ["-p", "configs/tsconfig.dev.native.json", ...(watch ? ["-w"] : [])],
+        [
+          "-p",
+          path.relative(
+            this.projectModule.settings.directory,
+            this.debugConfigPath
+          ),
+          ...(watch ? ["-w"] : []),
+        ],
         {
           stdio: "inherit",
           cwd: this.projectModule.settings.directory,
@@ -129,17 +166,12 @@ export default class NativeDevModule {
       //
       this._serverDevModule?.startDev(),
       this.compile({ watch: true }),
-      this.startMeteor(),
+      waitForChildProcess(
+        spawn("yarn", ["start"], {
+          stdio: "inherit",
+          cwd: this.packageDir,
+        })
+      ),
     ]);
-  }
-
-  @CliCommand("meteor")
-  startMeteor() {
-    return waitForChildProcess(
-      spawn("yarn", ["start"], {
-        stdio: "inherit",
-        cwd: this.packageDir,
-      })
-    );
   }
 }

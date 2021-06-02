@@ -36,9 +36,9 @@ export default class HerokuModule {
     protected makeModule: MakeModule
   ) {}
 
-  installBrowserPlatform(@Plugin() bpm: BrowserDevModule) {
+  installBrowserPlatform(@Plugin() bdm: BrowserDevModule) {
     this._builders.push(async () => {
-      await bpm.pack();
+      await bdm.pack();
       await fsExtra.copy(
         path.join(this.projectModule.bundleDir, "browser"),
         path.join(this.packageDir, "bundle/browser"),
@@ -129,7 +129,7 @@ export default class HerokuModule {
             path.join(DABSI_DIR, "configs/tsconfig.server.json")
           ),
           compilerOptions: {
-            ...this.projectModule.paths.createPathsWithBaseUrl(
+            ...(await this.projectModule.getPaths()).createPathsWithBaseUrl(
               this.projectModule.configsDir
             ),
             // prod mod
@@ -153,7 +153,7 @@ export default class HerokuModule {
         path.join(this.packageDir, "tsconfig.json"),
         {
           compilerOptions: {
-            ...this.projectModule.paths.createPathsWithBaseUrl(
+            ...(await this.projectModule.getPaths()).createPathsWithBaseUrl(
               DABSI_WORKSPACE_DIR
             ),
             baseUrl: "dist",

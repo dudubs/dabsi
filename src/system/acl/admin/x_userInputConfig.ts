@@ -5,7 +5,7 @@ import { User } from "@dabsi/system/acl/entities/User";
 import {
   ACL_Admin_User_BasicInfoInput,
   ACL_Admin_User_ContactInfoInput,
-} from "@dabsi/system/acl/admin/common/usersRpc";
+} from "@dabsi/system/acl/admin/old-common/usersRpc";
 import { DataFormConfigResolver } from "@dabsi/old-typerpc/data-form/handler";
 
 export default [

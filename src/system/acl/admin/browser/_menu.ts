@@ -3,11 +3,11 @@ import MuiAdminMenu from "@dabsi/system/admin/browser/MuiAdminMenu";
 
 MuiAdminMenu.acl = {
   children: {
-    users: {},
+    users: {
+      onClick: ACL_AdminRouter.locate(r => r.users),
+    },
     groups: {
-      onClick(_, { history }) {
-        history.push(ACL_AdminRouter, r => r.groups);
-      },
+      onClick: ACL_AdminRouter.locate(r => r.groups),
     },
   },
 };

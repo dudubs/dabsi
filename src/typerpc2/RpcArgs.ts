@@ -1,4 +1,5 @@
 import { defined } from "@dabsi/common/object/defined";
+import { inspect } from "@dabsi/logging/inspect";
 import { Rpc, RpcType } from "@dabsi/typerpc2";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
 

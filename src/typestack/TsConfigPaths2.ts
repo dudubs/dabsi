@@ -58,7 +58,7 @@ export class TsConfigPaths2 {
   }
 
   constructor(
-    protected fs: {
+    readonly fs: {
       isDir(path: string): Promise<boolean>;
       isFile(path: string): Promise<boolean>;
       // TODO: change to readFile

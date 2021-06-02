@@ -3,7 +3,7 @@ import { TestRpc } from "@dabsi/modules/tests/test-module/common/rpc";
 
 export default [
   //
-  RpcResolver(TestRpc, "testFn", [], () => $ =>
+  RpcResolver(TestRpc.at("testFn"), [], () => $ =>
     $(() => {
       return "works";
     })

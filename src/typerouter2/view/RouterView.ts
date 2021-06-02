@@ -120,7 +120,7 @@ export namespace RouterView {
   function createRendererComponent(
     renderer: RouterViewRenderer<any, any, any>
   ) {
-    return props => ReactWrapper(() => renderer(props));
+    return props => React.createElement(renderer, props);
   }
 
   export function define<T extends Router>(

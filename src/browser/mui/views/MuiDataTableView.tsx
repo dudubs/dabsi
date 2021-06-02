@@ -1,4 +1,3 @@
-import AddIcon from "@material-ui/icons/Add";
 import MuiSearchField from "@dabsi/browser/mui/components/MuiSearchField";
 import MuiTableCell from "@dabsi/browser/mui/components/MuiTableCell";
 import MuiActions, {
@@ -8,6 +7,7 @@ import MuiActions, {
 import MuiSection from "@dabsi/browser/mui/MuiSection";
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import {
   AnyDataTable,
   DataTableRow,
@@ -18,6 +18,7 @@ import {
   DataTableViewProps,
 } from "@dabsi/typerpc2/data-table/view";
 import LangKey from "@dabsi/view/lang/LangKey";
+import { mergeProps } from "@dabsi/view/react/merging";
 import { ReactRef } from "@dabsi/view/react/ref";
 import {
   Checkbox,
@@ -32,6 +33,7 @@ import {
   TableProps,
   TableRow,
 } from "@material-ui/core";
+import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import EditIcon from "@material-ui/icons/Edit";
 import React from "react";
@@ -72,13 +74,15 @@ export type MuiDataTableViewProps<
 
   selectable?: boolean;
 
-  disableMultipleDelete?: boolean;
-
-  disableSingleDelete?: boolean;
-
   onDeleteRows?(
     event: React.SyntheticEvent,
     rowKeys: string[],
+    view: DataTableView<T>
+  ): void;
+
+  onDeleteRow?(
+    event: React.SyntheticEvent,
+    row: DataTableRow<U>,
     view: DataTableView<T>
   ): void;
 
@@ -107,17 +111,19 @@ export type MuiDataTableAction<
   T extends AnyDataTable = AnyDataTable,
   U = any
 > = Omit<MuiAction, "handle"> & {
+  reload?: boolean;
+
   onActionForMultiple?(
     event: React.SyntheticEvent,
     rowKeys: string[],
     view: DataTableView<T>
-  ): void;
+  ): Awaitable;
 
   onActionForSingle?(
     event: React.SyntheticEvent,
     row: U,
     view: DataTableView<T>
-  ): void;
+  ): Awaitable;
 };
 
 export function MuiDataTableView<T extends AnyDataTable>({
@@ -127,12 +133,11 @@ export function MuiDataTableView<T extends AnyDataTable>({
   selectable = false,
   loadingElement,
   noHaveResultElement,
-  disableMultipleDelete,
-  disableSingleDelete,
   staticActions: staticActionMap,
   StaticActionsProps,
   RowActionsProps,
   onDeleteRows,
+  onDeleteRow,
   onEditRow,
   onAddRow,
   actions: _actionMap,
@@ -148,18 +153,19 @@ export function MuiDataTableView<T extends AnyDataTable>({
 
   const singleActionMap: Record<string, MuiDataTableAction<any>> = {};
 
-  if (onDeleteRows) {
-    actionMap.delete = {
-      icon: <DeleteIcon />,
-      ...actionMap.delete,
-      ...(disableMultipleDelete ? null : { onActionForMultiple: onDeleteRows }),
-      ...(disableSingleDelete
-        ? null
-        : {
-            onActionForSingle: (event, row, view) =>
-              onDeleteRows(event, [row.$key], view),
-          }),
-    };
+  if (onDeleteRows || onDeleteRow) {
+    actionMap.delete = mergeProps(
+      {
+        reload: true,
+        icon: <DeleteIcon />,
+        ...actionMap.delete,
+      },
+      {
+        IconButtonProps: { $merge: { color: { $default: "secondary" } } },
+        onActionForMultiple: onDeleteRows,
+        onActionForSingle: onDeleteRow,
+      }
+    );
   }
 
   onEditRow &&
@@ -193,6 +199,16 @@ export function MuiDataTableView<T extends AnyDataTable>({
       {view => {
         const hasSelectColumn = selectable || view.element.selectable;
 
+        const executeAction = async (
+          action: MuiDataTableAction<any, any>,
+          execute: () => Awaitable
+        ) => {
+          await execute();
+          if (action.reload) {
+            view.reloadElement();
+          }
+        };
+
         const tableHead = (
           <TableHead>
             <TableRow>
@@ -220,7 +236,7 @@ export function MuiDataTableView<T extends AnyDataTable>({
                   </LangKey>
                 </MuiTableCell>
               ))}
-              {hasActionsColumn && <MuiTableCell fitToContent />}
+              {hasActionsColumn && <MuiTableCell />}
             </TableRow>
           </TableHead>
         );
@@ -250,15 +266,15 @@ export function MuiDataTableView<T extends AnyDataTable>({
               </MuiTableCell>
             ))}
             {hasActionsColumn && (
-              <MuiTableCell fitToContent>
+              <MuiTableCell>
                 <MuiActions
+                  ContainerProps={{ justify: "flex-end" }}
                   IconButtonProps={{ size: "small" }}
                   actions={singleActionMap}
                   onAction={(event, actionKey) => {
-                    singleActionMap[actionKey].onActionForSingle!(
-                      event,
-                      row,
-                      view
+                    const action = singleActionMap[actionKey];
+                    return executeAction(action, () =>
+                      action.onActionForSingle!(event, row, view)
                     );
                   }}
                 />

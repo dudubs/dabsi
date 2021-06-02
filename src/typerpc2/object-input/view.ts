@@ -1,3 +1,4 @@
+import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { AnyInput, InputError } from "@dabsi/typerpc2/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { AnyInputMap, ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
@@ -24,6 +25,13 @@ export class ObjectInputView<T extends AnyInputMap> extends InputView<
         childInput.setError(errorMap[childKey]);
       }
     }
+  }
+
+  async validate() {
+    await Promise.all([
+      super.validate(),
+      mapObjectToArray(this._childViewMap, childView => childView.validate()),
+    ]);
   }
 
   getChildProps<T extends AnyInputMap, K extends keyof T>(

@@ -46,7 +46,7 @@ export class ModuleRunner {
 
   protected _errors: any[] = [];
 
-  log = log.get("runner");
+  log = log.get("RUNNER");
 
   get isLocked() {
     return this._locked;
@@ -80,6 +80,8 @@ export class ModuleRunner {
     this._currentLoadingModules.add(target);
 
     const metadata = ModuleMetadata.get(target);
+
+    // console.log("get module " + target.name);
 
     for (const [
       index,

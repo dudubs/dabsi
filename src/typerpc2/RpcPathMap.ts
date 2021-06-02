@@ -1,6 +1,7 @@
+import { inspect } from "@dabsi/logging/inspect";
+import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
 import { Rpc, RpcType } from ".";
-import { getChildRpcType } from "./getChildRpcType";
 
 type Node<V> = { value?: V; nodeMap?: Record<string, Node<V>> };
 
@@ -17,10 +18,6 @@ export default class RpcPathMap<V> {
     this.set(rpcLocation.rpcRootType, rpcLocation.path, value);
   }
 
-  getByLocation(rpcLocation: RpcLocation<any>) {
-    return this.get(rpcLocation.rpcRootType, rpcLocation.path);
-  }
-
   touchByLocation(rpcLocation: RpcLocation<any>, callback: () => V): V {
     return this.touch(rpcLocation.rpcRootType, rpcLocation.path, callback);
   }
@@ -32,7 +29,7 @@ export default class RpcPathMap<V> {
     return value;
   }
 
-  set(rpcType: RpcType, path: string[], value: V): void {
+  set(rpcType: RpcType, path: string[], value: V): this {
     let node = this._map
       .touch(rpcType, () => new Map())
       .touch(path.length, () => ({}));
@@ -40,6 +37,7 @@ export default class RpcPathMap<V> {
       node = (node.nodeMap ||= {})[memberKey] = {};
     }
     node.value = value;
+    return this;
   }
 
   protected *_findPathsWithItems(): IterableIterator<RpcPathMap<V>> {
@@ -49,15 +47,23 @@ export default class RpcPathMap<V> {
       }
     }
   }
-
-  get(rpcType: RpcType, path: string[]): V | undefined {
+  getByLocation(rpcLocation: RpcLocation<any>) {
     for (const map of this._findPathsWithItems()) {
-      for (const value of map._findByChildKeys(rpcType, path)) {
+      for (const value of map._findByChildKeys(
+        rpcLocation.rpcRootType,
+        rpcLocation.path
+      )) {
         return value;
       }
     }
-    rpcType = getChildRpcType(rpcType, path);
-    return this._getByBase(Object.getPrototypeOf(rpcType));
+
+    if (rpcLocation.rpcType) {
+      return this._getByBase(Object.getPrototypeOf(rpcLocation.rpcType));
+    }
+  }
+
+  get(rpcType: RpcType, path: string[]): V | undefined {
+    return this.getByLocation(new RpcLocation(rpcType, path));
   }
 
   protected _getByBase(rpcType: RpcType): V | undefined {
@@ -99,8 +105,14 @@ export default class RpcPathMap<V> {
     yield* this._findByChildKeysWithOffset(rpcType, path, 0);
 
     for (const [index, memberKey] of path.entries()) {
-      rpcType = getChildRpcType(rpcType, memberKey);
-
+      const metadata = getRpcMetadata(rpcType);
+      rpcType = metadata.childTypeMap[memberKey];
+      if (!rpcType) {
+        if (path.length > index + 1) {
+          throw new Error(`Invalid rpc-path ${inspect({ rpcType, path })}`);
+        }
+        return;
+      }
       yield* this._findByChildKeysWithOffset(rpcType, path, index + 1);
     }
   }

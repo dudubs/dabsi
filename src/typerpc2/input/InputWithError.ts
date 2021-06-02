@@ -28,7 +28,7 @@ export type InputWithError<T extends AnyInput, Error> = BaseInput<T> &
   >;
 
 export function InputWithError<CustomError>(): {
-  <T extends AnyInputWithConfig>(inputType: RpcType<T>): RpcType<
+  <T extends AnyInput>(inputType: RpcType<T>): RpcType<
     InputWithError<T, CustomError> &
       (T extends InputWithConfig<
         any,

@@ -36,9 +36,12 @@ it("", async () => {
     rpcHandlerMap.set(
       x,
       createRpcHandler(x, {
-        getRpcMemberHandler(rpcType, memberKey, memberType, propertyType): any {
+        getRpcMemberHandler(member): any {
           return () =>
-            defined(rpcHandlerMap.get(propertyType), () => `No ${memberKey}`);
+            defined(
+              rpcHandlerMap.get(member.propertyType),
+              () => `No ${member.key}`
+            );
         },
       })
     );

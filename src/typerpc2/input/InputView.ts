@@ -153,9 +153,8 @@ export abstract class InputView<
     }
   }
 
-  async validate(): Promise<boolean> {
+  async validate(): Promise<void> {
     this._error = await this.inputWillValidate?.();
-    return this._error == null;
   }
 
   renderError(): React.ReactElement | undefined {

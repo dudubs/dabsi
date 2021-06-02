@@ -40,7 +40,7 @@ export function Form<T extends AnyInput, V = void>(
   return Form;
 }
 
-export interface AnyForm extends BaseForm<AnyInput, any> {}
+export interface AnyForm extends BaseForm<any, any> {}
 
 export type InferredForm<T extends AnyForm> = T extends BaseForm<
   infer Input,

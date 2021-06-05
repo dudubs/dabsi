@@ -1,3 +1,4 @@
+import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -5,6 +6,7 @@ import {
   Rpc,
   RpcContextual,
   RpcFuncational,
+  RpcLocation,
   RpcParametrial,
   RpcType,
 } from "@dabsi/typerpc2";
@@ -156,7 +158,7 @@ describe("generate", () => {
   });
 });
 
-describe("", () => {
+describe("sanity", () => {
   const i = ObjectInput({ xs: InputWithError<"BAD_VALUE">()(TextInput) });
   class F extends Form(i) {}
   class R extends Rpc {
@@ -169,28 +171,28 @@ describe("", () => {
   class X {
     constructor(readonly value) {}
   }
+
   beforeEach(() => {
     rb.add([
       //
-      RpcResolver(i, {
-        xs: $ =>
-          RpcResolver($, [Resolver.optional(X)], x => $ =>
-            $({
-              config: { minLength: 2 },
-              [inputBaseConfig]: {
-                check(value) {
-                  if (value === x?.value) {
-                    return "BAD_VALUE";
-                  }
-                },
+      RpcResolver(i, $ => [
+        $.configure("xs", [Resolver.optional(X)], x => $ => {
+          return $({
+            config: { minLength: 2 },
+            [inputBaseConfig]: {
+              check(value) {
+                if (value === x?.value) {
+                  return "BAD_VALUE";
+                }
               },
-            })
-          ),
-      }),
+            },
+          });
+        }),
+      ]),
     ]);
   });
 
-  it("", () => {
+  it("exect to resolve getF config", () => {
     expect(() => rb.getResolver(R.at("getF"))).toThrowError();
 
     rb.add([
@@ -211,11 +213,29 @@ describe("", () => {
 
     expect(() => rb.getResolver(R.at("getF"))).not.toThrowError();
   });
-  it("", async () => {
-    const c: any = await createRpcConfig(
-      i,
-      Resolver.resolve(RpcResolver(R.at("f.input")), context)
+
+  const testGetConfigurator = (rpcLocation: RpcLocation<any>) =>
+    Resolver.resolve(RpcResolver(rpcLocation), context);
+
+  const testCreateConfig = async (rpcLocation: RpcLocation<any>) =>
+    createRpcConfig(
+      rpcLocation.rpcType,
+      await testGetConfigurator(rpcLocation)
     );
+
+  it("expect to resolve i config", async () => {
+    const c: any = await testCreateConfig(new RpcLocation(i, []));
+    expect(c).toEqual(jasmine.objectContaining({ xs: jasmine.anything() }));
+  });
+
+  it("expect to resolve f.input.xs config", async () => {
+    expect(await testCreateConfig(R.at("f.input.xs"))).toEqual(
+      jasmine.objectContaining({ minLength: 2 })
+    );
+  });
+
+  it("expect to resolve f.input config", async () => {
+    const c: any = await testCreateConfig(R.at("f.input"));
     const xsc = await createRpcConfig(i, c.xs);
     expect(xsc).toEqual(jasmine.objectContaining({ minLength: 2 }));
   });

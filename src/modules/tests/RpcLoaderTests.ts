@@ -25,6 +25,8 @@ beforeAll(() => {
   TestNS.nsGetPath = () => [];
   TestNS.nsCommand = rpct.createRpcCommand(TestNS);
 });
+
+// Error.stackTraceLimit = 30;
 it("expect to load rpc-resolver internal-file.", async () => {
   expect(await rpct.createRpc(TestRpc).testFn("hello")).toEqual("works");
 });

@@ -148,7 +148,7 @@ AppRegistry.registerComponent(appName, getNativeAppCompnent);
           "-p",
           path.relative(
             this.projectModule.settings.directory,
-            this.debugConfigPath
+            this.buildConfigPath
           ),
           ...(watch ? ["-w"] : []),
         ],

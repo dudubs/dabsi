@@ -1,13 +1,13 @@
 // TODO:  better tests.
 
 import { Tester } from "@dabsi/jasmine/Tester";
-import { Session } from "@dabsi/modules/session/entities/Session";
-import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
+import { DbConnectionRef } from "@dabsi/modules/DbModule";
 import { SessionModule, SESSION_TIMEOUT } from "@dabsi/modules/session";
 import { BaseResource } from "@dabsi/modules/session/BaseResource";
-import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
-import { DbConnectionRef } from "@dabsi/modules/DbModule";
+import { Session } from "@dabsi/modules/session/entities/Session";
+import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
+import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import {
@@ -19,7 +19,6 @@ import {
   ManyToOne,
   TableInheritance,
 } from "typeorm";
-import TestIdColumn from "@dabsi/typedata/entity/tests/TestIdColumn";
 
 @Entity()
 class TestRes1 extends BaseResource {

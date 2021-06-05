@@ -7,7 +7,36 @@ import { inspect } from "@dabsi/logging/inspect";
 import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
 import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
-import type { Rpc, RpcAt, RpcChild, RpcMemberKey, RpcType } from "./Rpc";
+
+import { Rpc, RpcChild, RpcParametrialMember, RpcType } from "./Rpc";
+
+export type RpcInvalidPath<T, P extends string> = Union<
+  {
+    [K in P]: IsNever<RpcAt<T, K>> extends true ? K : never;
+  }
+>;
+export type RpcValidatePath<
+  T,
+  P extends string,
+  U,
+  InvalidPath = RpcInvalidPath<T, P>
+> = IsNever<InvalidPath> extends true ? U : { InvalidPath: InvalidPath };
+
+export type RpcAt<T, P extends string> = P extends `${infer P}!`
+  ? _RpcAt<T, P> extends RpcParametrialMember<infer U>
+    ? U
+    : never
+  : _RpcAt<T, P>;
+
+export type _RpcAt<T, P extends string> =
+  //
+  T extends RpcParametrialMember<infer T, any>
+    ? RpcAt<T, P>
+    : T extends Record<P, infer U> //
+    ? U
+    : P extends `${infer K}.${infer P}`
+    ? RpcAt<RpcAt<T, K>, P>
+    : never;
 
 export class RpcLocation<T> {
   constructor(readonly rpcRootType: RpcType, readonly path: string[]) {}
@@ -21,11 +50,7 @@ export class RpcLocation<T> {
     if (!this.path.length) {
       return;
     }
-    const memberKey: string = this.path[this.path.length - 1].replace(
-      /\!$/,
-      ""
-    );
-
+    const memberKey: string = this._lastMemberKey!;
     const parentRpcType = getChildRpcType(this.rpcRootType, this.path, true);
 
     const parentMetdata = getRpcMetadata(parentRpcType);
@@ -44,38 +69,42 @@ export class RpcLocation<T> {
     };
   }
 
-  at<T, K extends string>(
-    this: RpcLocation<T>,
-    path: K
-  ): RpcLocation<RpcAt<T, K>> {
-    return new RpcLocation(this.rpcRootType, [
-      ...this.path,
-      ...path.split("."),
-    ]);
+  innerInspect() {
+    return this.path.length
+      ? `${this.rpcRootType.name}.${this.path.join(".")}`
+      : this.rpcRootType.name;
   }
 
   [inspect.custom]() {
-    if (!this.path.length) {
-      return `<RpcLocation ${this.rpcRootType.name}>`;
-    }
-    return `<RpcLocation ${this.rpcRootType.name}: ${this.path.join(".")}>`;
+    return `<RpcLocation ${this.innerInspect()}>`;
   }
 
-  toChildLocation<T>(
+  toParameterialLocation<T>(
     this: RpcLocation<T>
-  ): T extends RpcChild<infer U> ? RpcLocation<U> : RpcLocation<T> {
+  ): T extends RpcParametrialMember<infer U> ? RpcLocation<U> : RpcLocation<T> {
     if (this.member?.memberType !== RpcMemberType.Parametrial) {
       return <any>this;
     }
     return new RpcLocation(this.rpcRootType, [
-      ...this.path.slice(0, this.path.length - 2),
+      ...this._pathWithoutLastKey,
       this.path[this.path.length - 1] + "!",
     ]) as any;
   }
 
-  at2!: <
+  protected get _lastPathKey(): string | undefined {
+    return this.path[this.path.length - 1];
+  }
+  protected get _lastMemberKey() {
+    return this._lastPathKey?.replace(/!$/, "");
+  }
+  protected get _pathWithoutLastKey() {
+    return this.path.slice(0, this.path.length - 2);
+  }
+
+  at<
     T,
     K extends string,
+    U,
     InvalidPaths = ExtractKeys<
       {
         [P in K]: IsNever<RpcAt<T, P>>;
@@ -93,22 +122,36 @@ export class RpcLocation<T> {
               [P in K]: RpcLocation<RpcAt<T, P>>;
             }
           >
-        ) => void
-  ) => void;
+        ) => U
+  ): U[];
+
+  at<T, K extends string>(
+    this: RpcLocation<T>,
+    path: K
+  ): RpcLocation<RpcAt<T, K>>;
+
+  at(arg0, callback?) {
+    if (Array.isArray(arg0)) {
+      return arg0.map(path => callback!(this.at(path)));
+    }
+    return new RpcLocation(this.rpcRootType, [
+      ...(this._lastPathKey?.endsWith("!")
+        ? [...this._pathWithoutLastKey, this._lastMemberKey!]
+        : this.path),
+      ...arg0.split("."),
+    ]);
+  }
 }
 
-type WhiteSpace = "\n" | "\r" | "\t" | " ";
-type TrimLeft<T, U extends string = WhiteSpace> = T extends `${U}${infer T}`
-  ? TrimLeft<T, U>
-  : T;
-type TrimRight<T, U extends string = WhiteSpace> = T extends `${infer T}${U}`
-  ? TrimRight<T, U>
-  : T;
-type Trim<T, U extends string = WhiteSpace> = TrimLeft<TrimRight<T, U>, U>;
+declare module "./Rpc" {
+  namespace Rpc {
+    function at<T extends Rpc, P extends string>(
+      this: RpcType<T>,
+      path: P
+    ): RpcLocation<RpcAt<T, P>>;
+  }
+}
 
-type SplitAndTrim<
-  T,
-  Sep extends string = ","
-> = T extends `${infer I}${Sep}${infer T}`
-  ? Trim<I> | SplitAndTrim<T, Sep>
-  : Trim<T>;
+Rpc.at = function (path) {
+  return new RpcLocation(this, path.split("."));
+};

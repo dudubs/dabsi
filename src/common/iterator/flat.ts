@@ -1,4 +1,4 @@
-type Flattable<T> = T | Flattable<T>[];
+export type Flattable<T> = T | Flattable<T>[];
 
 export default function* flat<T>(o: Flattable<T>): IterableIterator<T> {
   if (Array.isArray(o)) {

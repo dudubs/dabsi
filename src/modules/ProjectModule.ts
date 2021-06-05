@@ -1,13 +1,10 @@
 import { Once } from "@dabsi/common/patterns/Once";
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import Platform from "@dabsi/modules/Platform";
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { BaseRpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import ServerModule from "@dabsi/modules/ServerModule";
-import { CliCommand } from "@dabsi/typecli";
 import { Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
-import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
 import path from "path";
 import { ProjectDependency } from "./ProjectDependency";
@@ -57,11 +54,8 @@ export default class ProjectModule {
   }
 }
 
-ServerModule.defineServerLoader(
-  (RpcResolver as any) as RpcResolver<any>,
-  rpcResolver => {
-    return Resolver([RpcResolverBuilder], rb => {
-      rb.add(rpcResolver);
-    });
-  }
-);
+ServerModule.defineServerLoader(BaseRpcResolver, rpcResolver => {
+  return Resolver([RpcResolverBuilder], rb => {
+    rb.add(rpcResolver);
+  });
+});

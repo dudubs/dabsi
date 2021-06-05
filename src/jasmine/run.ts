@@ -53,9 +53,8 @@ const srcArgs = process.argv.slice(process.argv.findIndex(x => x === "--") + 1);
 function* findTestsDirs(dir: string) {
   if (!searchedDirs.touch(dir)) return;
 
-  const testsDir = path.join(dir, "tests");
-  if (tryStatSync(testsDir)?.isDirectory()) {
-    yield testsDir;
+  if (/[\\\/]tests$/.test(dir)) {
+    yield dir;
     return;
   }
 
@@ -67,10 +66,4 @@ function* findTestsDirs(dir: string) {
       yield* findTestsDirs(fileName);
     }
   }
-}
-
-function tryStatSync(path: string) {
-  try {
-    return fs.statSync(path);
-  } catch {}
 }

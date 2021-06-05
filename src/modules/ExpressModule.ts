@@ -1,8 +1,7 @@
 //
-import CookieParser from "cookie-parser";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import ServerModule from "@dabsi/modules/ServerModule";
-import { Injectable, Resolver, ResolverMap } from "@dabsi/typedi";
+import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import express from "express";
 
@@ -61,25 +60,19 @@ export default class ExpressModule {
     );
   }
 
-  processRequest(
+  async processRequest(
     context: ResolverMap,
-    callback: (
-      req: express.Request,
-      res: express.Response,
-      context: ResolverMap
-    ) => Promise<void>
-  ): express.Handler {
-    return async (req, res) => {
-      context = Resolver.Context.create(
-        context,
-        Resolver(ExpressRequest, () => req),
-        Resolver(ExpressResponse, () => res)
-      );
-      await this.request.process(context, context =>
-        this.serverModule.processRequest(context, context => {
-          return callback(req, res, context);
-        })
-      );
-    };
+    req: express.Request,
+    res: express.Response,
+    callback: (context: ResolverMap) => Promise<void>
+  ): Promise<void> {
+    context = Resolver.Context.create(
+      context,
+      Resolver(ExpressRequest, () => req),
+      Resolver(ExpressResponse, () => res)
+    );
+    await this.request.process(context, context =>
+      this.serverModule.processRequest(context, callback)
+    );
   }
 }

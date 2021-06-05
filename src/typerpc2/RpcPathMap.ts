@@ -102,6 +102,7 @@ export default class RpcPathMap<V> {
     rpcType: RpcType,
     path: string[]
   ): IterableIterator<V> {
+    const rootRpcType = rpcType;
     yield* this._findByChildKeysWithOffset(rpcType, path, 0);
 
     for (const [index, memberKey] of path.entries()) {
@@ -109,7 +110,12 @@ export default class RpcPathMap<V> {
       rpcType = metadata.childTypeMap[memberKey];
       if (!rpcType) {
         if (path.length > index + 1) {
-          throw new Error(`Invalid rpc-path ${inspect({ rpcType, path })}`);
+          throw new Error(
+            `Invalid rpc-path ${inspect({
+              rpcType: rootRpcType,
+              path: path.slice(index),
+            })}`
+          );
         }
         return;
       }

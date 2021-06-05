@@ -8,7 +8,7 @@ import {
   RpcType,
 } from "@dabsi/typerpc2";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { RpcAt } from "@dabsi/typerpc2/Rpc";
+import { RpcAt } from "@dabsi/typerpc2/RpcLocation";
 import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
 import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 

@@ -1,15 +1,14 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import flat from "@dabsi/common/iterator/flat";
+import flat, { Flattable } from "@dabsi/common/iterator/flat";
 import { defined } from "@dabsi/common/object/defined";
 import { capitalize } from "@dabsi/common/string/capitalize";
 import { inspect } from "@dabsi/logging/inspect";
 import {
+  RpcLocationConfigurator,
   RpcResolver,
-  RpcResolverConfigurator,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { Resolver } from "@dabsi/typedi";
 import {
-  isRpcType,
   Rpc,
   RpcFunctionalMember,
   RpcNamespace,
@@ -36,18 +35,14 @@ import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
 
-type RpcResolversTree = RpcResolver<any> | RpcResolversTree[];
-
 export class RpcResolverBuilder {
+  // Later RpcPathMap<Resolver<any>>
   protected _resolverMap = new RpcPathMap<RpcResolver<any>>();
   protected _generetedResolverMap = new RpcPathMap<RpcResolver<any>>();
 
-  add(...args: RpcResolversTree[]) {
+  add(...args: Flattable<RpcResolver<any>>[]) {
     for (const resolver of flat(args)) {
-      const {
-        rpcLocation: { rpcRootType, path },
-      } = resolver;
-      this._resolverMap.set(rpcRootType, path, resolver);
+      this._resolverMap.setByLocation(resolver.rpcLocation, resolver);
     }
   }
 
@@ -88,9 +83,11 @@ export class RpcResolverBuilder {
 
   buildResolver<T>(rpcLocation: RpcTypeOrLocation<T>): RpcResolver<T> {
     const _rpcLocation = RpcTypeOrLocation<any>(rpcLocation);
+
     if (isRpcTypeWithConfig(_rpcLocation.rpcType)) {
       const handlerType = getRpcConfigHandlerType(_rpcLocation.rpcType);
       if (handlerType.isRpcConfigCanBeUndefined) {
+        console.log({ buildResolver: _rpcLocation });
         return <any>(
           RpcResolver(
             _rpcLocation as RpcLocation<AnyRpcWithConfig>,
@@ -143,7 +140,7 @@ export class RpcResolverBuilder {
           return createRpcHandler(childRpcType!, factory as any);
         }
         const config = await GenericConfig(
-          factory as RpcResolverConfigurator<
+          factory as RpcLocationConfigurator<
             RpcFunctionalMember | RpcParametrialMember
           >
         );

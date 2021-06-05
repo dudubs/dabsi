@@ -7,7 +7,6 @@ import {
   Configurator,
   IsGenericConfig,
 } from "@dabsi/typerpc2/GenericConfig";
-import { RpcAt } from "@dabsi/typerpc2/Rpc";
 
 //
 

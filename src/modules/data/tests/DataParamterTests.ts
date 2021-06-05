@@ -28,28 +28,26 @@ let pr: PR;
 
 beforeAll(() => {
   builder.add(
-    RpcResolver(CR, {
-      testFn: $ =>
-        RpcResolver($, [X], x => $ =>
-          $(xsByArg => {
-            return { xsByArg, xsByParam: x.value };
+    RpcResolver(CR, $ =>
+      $.configure("testFn", [X], x => $ =>
+        $(xsByArg => {
+          return { xsByArg, xsByParam: x.value };
+        })
+      )
+    ),
+    RpcResolver(PR, $ => [
+      $.configure(
+        "getChild",
+        [Resolver.injector({ X }, RpcResolver(CR))],
+        childConfigurator => $ =>
+          $((rpcType, xsByParam) => {
+            return createRpcHandler(
+              rpcType,
+              childConfigurator({ X: new X(xsByParam) })
+            );
           })
-        ),
-    }),
-    RpcResolver(PR, {
-      getChild: $ =>
-        RpcResolver(
-          $,
-          [Resolver.injector({ X }, RpcResolver(CR))],
-          childConfigurator => $ =>
-            $((rpcType, xsByParam) => {
-              return createRpcHandler(
-                rpcType,
-                childConfigurator({ X: new X(xsByParam) })
-              );
-            })
-        ),
-    })
+      ),
+    ])
   );
 
   cr = createRpc(

@@ -1,7 +1,6 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataParameter } from "@dabsi/modules/data/common/DataParameter";
 import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
-
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
@@ -33,7 +32,7 @@ export function DataParameterResolver(
         {
           rowKey: DataRowContext.Key(rowType),
         },
-        RpcResolver(rpcLocation.toChildLocation())
+        RpcResolver(rpcLocation.toParameterialLocation())
       ),
       DataTicker,
       optionsResolver || (() => null),

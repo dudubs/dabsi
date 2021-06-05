@@ -11,8 +11,7 @@ import { DataSource } from "@dabsi/typedata/source";
 import { Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
-import path from "path";
-import { join } from "path";
+import path, { join } from "path";
 import {
   Connection,
   ConnectionOptions,
@@ -46,10 +45,7 @@ export default class DbModule {
 
   readonly entityTypes: Function[] = [];
 
-  constructor(
-    protected loaderModule: LoaderModule,
-    protected projectModule: ProjectModule
-  ) {}
+  constructor(protected loaderModule: LoaderModule) {}
 
   installContext(
     @Plugin()
@@ -121,15 +117,28 @@ export default class DbModule {
     Object.seal(this.entityTypes);
   }
 
+  @Plugin()
+  protected _projectModule?: ProjectModule;
+
   @Once()
   async connect() {
+    if (!this.connectionOptions) {
+      if (this._projectModule) {
+        this.connectionOptions = {
+          type: "sqlite",
+          database: path.join(this._projectModule.bundleDir, "db.sqlite3"),
+        };
+      }
+    }
+
+    if (!this.connectionOptions) {
+      throw new Error("No connection options.");
+    }
+
     this._connection = await createConnection({
       logging: ["schema"],
-      ...(this.connectionOptions || {
-        type: "sqlite",
-        database: path.join(this.projectModule.bundleDir, "db.sqlite3"),
-      }),
       name: "default",
+      ...this.connectionOptions!,
       entities: this.findEntityTypes(),
     });
   }

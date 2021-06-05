@@ -3,10 +3,10 @@ import { Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
-    let catchOnCheck: <T>(
+    function catchOnCheck<T>(
       resolver: Resolver<T>,
       callback: (error: ResolveError) => any
-    ) => ConsumeResolver<T>;
+    ): ConsumeResolver<T>;
   }
 }
 

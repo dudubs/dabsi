@@ -1,6 +1,5 @@
-import catchError from "@dabsi/common/async/catchError";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
+import { Resolver } from "@dabsi/typedi/Resolver";
 import { locateError } from "@dabsi/typemodule/locateError";
 
 declare module "../Resolver" {

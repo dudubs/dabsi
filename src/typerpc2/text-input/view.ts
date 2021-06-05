@@ -22,8 +22,6 @@ export class TextInputView<T extends TextInput> extends InputView<
   protected _debounce = new Debounce(300);
 
   async inputWillValidate() {
-    console.log("text will validate");
-
     this._debounce.cancel?.();
     if (this._text !== this.value) {
       await this.setValue(this._text);

@@ -4,33 +4,33 @@ import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
 import { ServerModuleTester } from "@dabsi/modules/tests/testers/ServerModuleTester";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
+import { resolveModuleName } from "typescript";
 
 const mt = ModuleTester([
   SessionModule,
   Resolver([ExpressModule], em => {
     em.builders.push(app => {
-      app.get(
-        "/test",
-        em.processRequest(
-          mt.moduleRunner.context,
-          async (req, res, context) => {
-            const session = await Resolver.resolve(
-              RequestSession,
-              context
-            ).fetch(["timeout"]);
-            res.json({
-              sessionKey: session.$key,
-              sessionTimeout: session.timeout,
-            });
-          }
-        )
+      app.get("/test", (req, res) =>
+        em.processRequest(mt.moduleRunner.context, req, res, async context => {
+          const session = await Resolver.resolve(
+            RequestSession,
+            context
+          ).fetch(["timeout"]);
+          res.json({
+            sessionKey: session.$key,
+            sessionTimeout: session.timeout,
+          });
+        })
       );
     });
   }),
 ]);
+
 const dbt = DbModuleTester(mt);
 
 const st = ServerModuleTester(mt);
+
+beforeAll(() => st.start());
 
 it("expect to use exists session", async () => {
   const res = await st.axios.get("/test");

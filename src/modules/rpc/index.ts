@@ -1,3 +1,4 @@
+import { Flattable } from "@dabsi/common/iterator/flat";
 import { entries } from "@dabsi/common/object/entries";
 import { Once } from "@dabsi/common/patterns/Once";
 import { DABSI_SRC_DIR } from "@dabsi/env";
@@ -6,7 +7,7 @@ import LoaderModule from "@dabsi/modules/LoaderModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { isRpcResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -54,17 +55,12 @@ export class RpcModule2 {
       });
   }
 
-  configure(config: RpcResolver<any> | RpcResolver<any> | undefined) {
-    if (Array.isArray(config)) {
-      for (const configItem of config) {
-        this.configure(configItem);
-      }
-      return;
-    }
-    if (isRpcResolver(config)) {
-      this.resolverBuilder.add(config);
-      return;
-    }
+  /**
+   *
+   * @deprecated
+   */
+  configure(resolvers: Flattable<RpcResolver<any>>) {
+    this.resolverBuilder.add(resolvers);
   }
 
   @Once()
@@ -141,7 +137,7 @@ export class RpcModule2 {
           express.json(),
           express.urlencoded({ extended: true }),
           multer().any(),
-          expressModule.processRequest(context, async (req, res, context) => {
+          (req, res) => {
             const body = { ...req.body };
             if (Array.isArray(req.files)) {
               for (const { fieldname, buffer } of req.files) {
@@ -153,15 +149,22 @@ export class RpcModule2 {
                 ? JSON.parse(body.payloads)
                 : body.payloads;
 
-            res.json({
-              responses: await this.processMultipleRequests(
-                rpcType,
-                payloads,
-                body,
-                context
-              ),
-            });
-          })
+            return expressModule.processRequest(
+              context,
+              req,
+              res,
+              async context => {
+                res.json({
+                  responses: await this.processMultipleRequests(
+                    rpcType,
+                    payloads,
+                    body,
+                    context
+                  ),
+                });
+              }
+            );
+          }
         );
       }
     });

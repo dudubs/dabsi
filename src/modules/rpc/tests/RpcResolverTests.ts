@@ -1,4 +1,3 @@
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { Rpc, RpcFuncational } from "@dabsi/typerpc2";
 
 class A extends Rpc {

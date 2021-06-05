@@ -11,3 +11,4 @@ import "./forward";
 import "./object";
 import "./injector";
 import "./resolve";
+import "./buildAndUse";

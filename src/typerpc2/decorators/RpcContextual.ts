@@ -11,7 +11,9 @@ export function RpcContextual<T extends Rpc>(
     target: Rpc & Record<K, RpcContextualMember<T>>,
     propertyName: K
   ): void;
-} {
+};
+
+export function RpcContextual(getRpcType) {
   return (target, propertyName: string) => {
     getRpcType && Forward(getRpcType)(target, propertyName);
 

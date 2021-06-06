@@ -60,7 +60,7 @@ export function RpcResolver(rpcTypeOrLocation, ...args): any {
   }
 
   if (args.length === 2) {
-    return RpcResolver.create(
+    return RpcResolver.bindToLocation(
       rpcLocation,
       ConsumeArgs(args as [{}, () => any])!
     );
@@ -81,11 +81,16 @@ export const BaseRpcResolver: RpcResolver<any> = Object.setPrototypeOf(
 ) as any;
 
 export namespace RpcResolver {
-  export function create<T>(
+  export function bindToLocation<T>(
     rpcTypeOrLocation: RpcTypeOrLocation<T>,
     resolver: Resolver<RpcLocationConfigurator<T>>
   ): RpcResolver<T>;
-  export function create(rpcTypeOrLocation, resolver) {
+
+  export function bindToLocation(rpcTypeOrLocation, resolver) {
+    if ((<RpcResolver<any>>resolver).rpcLocation === rpcTypeOrLocation) {
+      return resolver;
+    }
+
     const rpcLocation = RpcTypeOrLocation(rpcTypeOrLocation);
     const originalResolver = resolver.rpcOriginalResolver || resolver;
     const boundResolver = Resolver.forward(

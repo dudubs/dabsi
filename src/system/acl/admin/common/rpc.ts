@@ -47,6 +47,8 @@ export class ACL_EditUser extends Rpc {
 
   @RpcContextual(() => DataForm(ACL_UserContactInput))
   contactForm!: DataForm<ACL_UserContactInput>;
+
+  // @RpcParameterial(()=> [ ...]) : DataParamter<>
 }
 
 export default class ACL_AdminRpc extends Rpc {

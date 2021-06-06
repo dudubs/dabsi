@@ -87,7 +87,6 @@ export class RpcResolverBuilder {
     if (isRpcTypeWithConfig(_rpcLocation.rpcType)) {
       const handlerType = getRpcConfigHandlerType(_rpcLocation.rpcType);
       if (handlerType.isRpcConfigCanBeUndefined) {
-        console.log({ buildResolver: _rpcLocation });
         return <any>(
           RpcResolver(
             _rpcLocation as RpcLocation<AnyRpcWithConfig>,

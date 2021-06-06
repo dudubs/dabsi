@@ -9,8 +9,8 @@ export default RpcResolver(AclRpc, $ =>
   $
     //
     .with({ ...DataContext, user: RequestUser, session: RequestSession })
-    .configure("getCurrentUser", [
-      c => $ =>
+    .at("getCurrentUser", $ =>
+      $.configure(c => $ =>
         $(async () => {
           if (!c.user.$key) {
             return null;
@@ -19,10 +19,11 @@ export default RpcResolver(AclRpc, $ =>
             fields: { fullName: User.FullName },
           });
           return { loginName, fullName };
-        }),
-    ])
-    .configure("login", [
-      c => $ =>
+        })
+      )
+    )
+    .at("login", $ =>
+      $.configure(c => $ =>
         $({
           async submit({ loginName, password }) {
             const user = await c
@@ -40,6 +41,7 @@ export default RpcResolver(AclRpc, $ =>
               fullName: user.fullName,
             };
           },
-        }),
-    ])
+        })
+      )
+    )
 );

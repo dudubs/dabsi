@@ -176,18 +176,25 @@ describe("sanity", () => {
     rb.add([
       //
       RpcResolver(i, $ => [
-        $.configure("xs", [Resolver.optional(X)], x => $ => {
-          return $({
-            config: { minLength: 2 },
-            [inputBaseConfig]: {
-              check(value) {
-                if (value === x?.value) {
-                  return "BAD_VALUE";
-                }
-              },
-            },
-          });
-        }),
+        $
+          //
+          .at("xs", $ =>
+            $
+              //
+              .with({ x: Resolver.optional(X) })
+              .configure(c => $ =>
+                $({
+                  config: { minLength: 2 },
+                  [inputBaseConfig]: {
+                    check(value) {
+                      if (value === c.x?.value) {
+                        return "BAD_VALUE";
+                      }
+                    },
+                  },
+                })
+              )
+          ),
       ]),
     ]);
   });

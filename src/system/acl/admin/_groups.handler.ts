@@ -11,35 +11,38 @@ export default RpcResolver(ACL_AdminRpc, $ =>
   $
     //
     .with({ ...DataContext, checkUniqueGroup: DataUniqueChecker(Group) })
-    .configure("editGroupForm", $ => DataParameterResolver($, Group))
-    .configure("deleteGroup", [
-      c => $ =>
+    .at("editGroupForm", $ => $.resolve($ => DataParameterResolver($, Group)))
+    .at("deleteGroup", $ =>
+      $.configure(c => $ =>
         $(async key => {
           await c.getSource(Group).delete(key);
-        }),
-    ])
-    .configure("groupsTable", [
-      c => $ =>
+        })
+      )
+    )
+    .at("groupsTable", $ =>
+      $.configure(c => $ =>
         $({
           source: c.getSource(Group),
           columns: {
             groupName: { field: "name" },
             countUsers: { field: { $count: "users" } },
           },
-        }),
-    ])
+        })
+      )
+    )
     .at(["addNewGroupForm", "editGroupForm!"], $ =>
       $
         //
-        .configure($ => DataFormResolver($, Group))
-        .configure("input.groupName", [
-          c => $ =>
+        .resolve($ => DataFormResolver($, Group))
+        .at("input.groupName", $ =>
+          $.configure(c => $ =>
             $({
               config: { minLength: 4, titleCase: true },
               [inputBaseConfig]: {
                 check: name => c.checkUniqueGroup({ name }),
               },
-            }),
-        ])
+            })
+          )
+        )
     )
 );

@@ -1,8 +1,7 @@
 import DataFormResolver from "@dabsi/modules/data/DataFormResolver";
 import { DataParameterResolver } from "@dabsi/modules/data/DataParameterResolver";
-import { DataUniqueChecker } from "@dabsi/modules/data/DataUniqueChecker";
-import { DataContext } from "@dabsi/modules/DbModule";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import AclAdminContext from "@dabsi/system/acl/admin/AclAdminContext";
 import ACL_AdminRpc from "@dabsi/system/acl/admin/common/rpc";
 import { User } from "@dabsi/system/acl/entities/User";
 import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
@@ -10,14 +9,11 @@ import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
 export default RpcResolver(ACL_AdminRpc, $ =>
   $
     //
-    .with({
-      ...DataContext,
-      checkUniqueUser: DataUniqueChecker(User),
-    })
+    .with(AclAdminContext)
     .at(["addNewUserForm", "editUser.basicForm"], $ =>
       $
         //
-        .configure($ =>
+        .resolve($ =>
           DataFormResolver($, User, {}, c => $ =>
             $({
               commitConfig: ($, v) => $(v),
@@ -27,13 +23,15 @@ export default RpcResolver(ACL_AdminRpc, $ =>
         .at("input", $ =>
           $
             //
-            .configure(["firstName", "lastName"], [], c => $ =>
-              $({
-                minLength: 2,
-              })
+            .at(["firstName", "lastName"], $ =>
+              $.configure(c => $ =>
+                $({
+                  minLength: 2,
+                })
+              )
             )
-            .configure("loginName", [
-              c => $ =>
+            .at("loginName", $ =>
+              $.configure(c => $ =>
                 $({
                   config: { minLength: 5 },
                   [inputBaseConfig]: {
@@ -42,32 +40,48 @@ export default RpcResolver(ACL_AdminRpc, $ =>
                         loginName: value,
                       }),
                   },
-                }),
-            ])
+                })
+              )
+            )
+            .at("loginName", $ =>
+              $.configure(c => $ =>
+                $({
+                  config: { minLength: 5 },
+                  [inputBaseConfig]: {
+                    check: value =>
+                      c.checkUniqueUser({
+                        loginName: value,
+                      }),
+                  },
+                })
+              )
+            )
         )
     )
-    .configure("usersTable", [
-      c => $ =>
+    // at usersTable, editGroup.users
+    .at(["usersTable"], $ =>
+      $.configure(c => $ =>
         $({
           source: c.getSource(User),
-        }),
-    ])
+        })
+      )
+    )
     .at("editUser", $ =>
       $
         //
-        .configure($ => DataParameterResolver($, User))
+        .resolve($ => DataParameterResolver($, User))
         .at("contactForm", $ =>
           $
             //
-            .configure($ =>
+            .resolve($ =>
               DataFormResolver($, User, {}, c => $ =>
                 $({
                   commitConfig: ($, v) => $(v),
                 })
               )
             )
-            .configure("input.email", [
-              c => $ =>
+            .at("input.email", $ =>
+              $.configure(c => $ =>
                 $({
                   config: {
                     // TODO: pattern
@@ -75,8 +89,9 @@ export default RpcResolver(ACL_AdminRpc, $ =>
                   [inputBaseConfig]: {
                     check: email => c.checkUniqueUser({ email }),
                   },
-                }),
-            ])
+                })
+              )
+            )
         )
     )
 );

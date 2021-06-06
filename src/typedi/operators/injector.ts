@@ -1,6 +1,6 @@
 import { entries } from "@dabsi/common/object/entries";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { Resolver } from "@dabsi/typedi/Resolver";
+import { ConsumeResolver, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {

@@ -3,8 +3,8 @@ import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
 import { DataForm } from "@dabsi/modules/data/common/DataForm";
-import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
-import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
+import DataContext from "@dabsi/modules/data/DataContext";
+
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
@@ -86,9 +86,7 @@ export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
       //
       configFactory: configFactoryResolver,
       inputConfig: RpcResolver(rpcTypeOrLocation.at("input")),
-      row: DataRowContext(rowType),
-      rowKey: DataRowContext.Key(rowType),
-      getSource: DataSourceFactory2,
+      data: DataContext,
     },
     c => async $ => {
       const config =
@@ -96,12 +94,14 @@ export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
           c.configFactory as ConfigFactory<DataFormConfig<any, any, any>>
         )) || {};
 
+      const row = c.data.getParameter(rowType);
+
       return $({
         inputConfig: c.inputConfig,
         valueConfig: async $ =>
           $(
             await ConfigOrFactory(config.valueConfig, async () => [
-              await c.row.fetch(config.selection || {}),
+              await row.fetch(config.selection || {}),
             ])
           ),
         async submit(value) {
@@ -111,18 +111,18 @@ export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
             {},
             ...(await Promise.all([
               GenericConfig(config.commitConfig as RowConfig, [value]),
-              c.row.$key
+              row.$key
                 ? GenericConfig(config.updateConfig as RowConfig, [value])
                 : GenericConfig(config.insertConfig as RowConfig, [value]),
             ]))
           );
 
-          if (c.row.$key) {
-            await c.row.update(commitRow);
-            return c.row.$key;
+          if (row.$key) {
+            await row.update(commitRow);
+            return row.$key;
           }
 
-          return c.getSource(rowType).insertKey(commitRow);
+          return c.data.getSource(rowType).insertKey(commitRow);
         },
       });
     }

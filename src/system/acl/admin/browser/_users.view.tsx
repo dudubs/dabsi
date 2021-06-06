@@ -10,7 +10,7 @@ RouterView.define(ACL_AdminRouter, {
     <MuiDataTableView
       connection={ACL_AdminRpc.instance.usersTable}
       title={lang`ACL_USERS`}
-      onEditRow={(_, row) => history.push(root.editGroup(row.$key))}
+      onEditRow={(_, row) => history.push(root.editUser(row.$key))}
       onAddRow={() => history.push(root.addNewUser)}
     />
   ),

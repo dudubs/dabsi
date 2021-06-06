@@ -68,6 +68,7 @@ type RendererOrObject<R extends Renderer<any>, O> = R | O | (R | O)[];
 export type RouterViewProps = Omit<BaseRouterViewProps, "path"> & {
   history: History;
 };
+
 export function RouterView({ history, ...props }: RouterViewProps) {
   const [path, setPath] = React.useState(() => history.location.pathname);
 

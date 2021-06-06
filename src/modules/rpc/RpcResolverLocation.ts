@@ -1,3 +1,4 @@
+import { pick } from "@dabsi/common/object/pick";
 import { inspect } from "@dabsi/logging/inspect";
 import {
   RpcLocationConfigurator,
@@ -30,6 +31,7 @@ export default class RpcResolverLocation<T, C> {
       >
     ) => any
   ): this;
+
   with<U extends ResolverMap>(
     context: U
   ): RpcResolverLocation<
@@ -39,7 +41,30 @@ export default class RpcResolverLocation<T, C> {
         [K in keyof U]: Resolved<U[K]>;
       }
   >;
-  with(context, callback?): any {
+
+  with<K extends keyof C>(
+    keys: K[],
+    callback: (location: RpcResolverLocation<T, Pick<C, K>>) => any
+  ): this;
+
+  with<K extends keyof C>(keys: K[]): RpcResolverLocation<T, Pick<C, K>>;
+
+  with(keysOrContext, callback?): any {
+    if (Array.isArray(keysOrContext)) {
+      const keys = keysOrContext;
+      if (callback) {
+        callback(
+          new RpcResolverLocation(
+            this._location,
+            pick(this._context, keys),
+            this._resolvers
+          )
+        );
+        return this;
+      }
+    }
+
+    const context = keysOrContext;
     if (callback) {
       callback(
         new RpcResolverLocation(

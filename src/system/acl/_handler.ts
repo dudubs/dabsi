@@ -1,4 +1,4 @@
-import { DataContext } from "@dabsi/modules/DbModule";
+import DataContext from "@dabsi/modules/data/DataContext";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RequestSession, RequestUser } from "@dabsi/modules/session";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
@@ -8,7 +8,11 @@ import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
 export default RpcResolver(AclRpc, $ =>
   $
     //
-    .with({ ...DataContext, user: RequestUser, session: RequestSession })
+    .with({
+      data: DataContext,
+      user: RequestUser,
+      session: RequestSession,
+    })
     .at("getCurrentUser", $ =>
       $.configure(c => $ =>
         $(async () => {
@@ -26,7 +30,7 @@ export default RpcResolver(AclRpc, $ =>
       $.configure(c => $ =>
         $({
           async submit({ loginName, password }) {
-            const user = await c
+            const user = await c.data
               .getSource(User)
               .filter({
                 loginName,

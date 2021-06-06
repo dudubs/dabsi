@@ -1,10 +1,9 @@
-import { RequestSession, SessionModule } from "@dabsi/modules/session";
 import ExpressModule from "@dabsi/modules/ExpressModule";
+import { RequestSession, SessionModule } from "@dabsi/modules/session";
 import { DbModuleTester } from "@dabsi/modules/tests/testers/DbModuleTester";
 import { ServerModuleTester } from "@dabsi/modules/tests/testers/ServerModuleTester";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
-import { resolveModuleName } from "typescript";
 
 const mt = ModuleTester([
   SessionModule,

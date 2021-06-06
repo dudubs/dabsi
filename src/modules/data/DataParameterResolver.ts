@@ -1,6 +1,6 @@
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataParameter } from "@dabsi/modules/data/common/DataParameter";
-import { DataRowContext } from "@dabsi/modules/data/DataRowContext";
+import { getRowKeyAsParameter } from "@dabsi/modules/data/DataContext";
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
@@ -25,12 +25,13 @@ export function DataParameterResolver(
   rowType,
   optionsResolver
 ) {
+  const RowKeyAsParameter = getRowKeyAsParameter(rowType);
   return RpcResolver(
     rpcLocation,
     [
       Resolver.injector(
         {
-          rowKey: DataRowContext.Key(rowType),
+          rowKey: RowKeyAsParameter,
         },
         RpcResolver(rpcLocation.toParameterialLocation())
       ),
@@ -61,7 +62,7 @@ export function DataParameterResolver(
         return createRpcHandler(
           rpcType,
           getConfigurator({
-            rowKey: new (DataRowContext.Key(rowType))(rowKey),
+            rowKey: new RowKeyAsParameter(rowKey),
           })
         );
       })

@@ -22,21 +22,20 @@ export default function NtSystemRoot() {
   );
 }
 
-RouterView.define(SystemRouter, () => (
-  <Text>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</Text>
-));
-
-RouterView.define(SystemRouter, {
-  $wrapper: ({ children }) => (
-    <View>
-      <Appbar.Header>
-        <Appbar.BackAction />
-        <Appbar.Content title="Title" subtitle="Subtitle" />
-        <Appbar.Action icon="email-open" />
-      </Appbar.Header>
-      <Button mode="contained">asdasd</Button>
-      {children}
-      <Text>33</Text>
-    </View>
-  ),
-});
+RouterView(SystemRouter, $ =>
+  $
+    //
+    .index(() => <Text>xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</Text>)
+    .wrap(({ children }) => (
+      <View>
+        <Appbar.Header>
+          <Appbar.BackAction />
+          <Appbar.Content title="Title" subtitle="Subtitle" />
+          <Appbar.Action icon="email-open" />
+        </Appbar.Header>
+        <Button mode="contained">asdasd</Button>
+        {children}
+        <Text>33</Text>
+      </View>
+    ))
+);

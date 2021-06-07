@@ -1,17 +1,15 @@
 import { reversed } from "@dabsi/common/array/reversed";
 import { defined } from "@dabsi/common/object/defined";
-import {
-  getRouterLocation,
-  Router,
-  RouterType,
-} from "@dabsi/typerouter2/Router";
+import { Router, RouterType } from "@dabsi/typerouter2/Router";
 import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
-import { buildRouterViews } from "@dabsi/typerouter2/view/buildRouterViews";
 import {
   getRouterViewRenderers,
   RouterViewRendererWithDepth,
 } from "@dabsi/typerouter2/view/getRouterViewRenderers";
-import { RouterViewRenderer } from "@dabsi/typerouter2/view/RouterView";
+import {
+  getRouterViewMetadata,
+  RouterViewMatadata,
+} from "@dabsi/typerouter2/view/RouterViewMetadata";
 import { ReactContext } from "@dabsi/view/react/ReactContext";
 import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
 import React from "react";
@@ -25,9 +23,7 @@ export type BaseRouterViewProps = {
 };
 
 export function BaseRouterView(p: BaseRouterViewProps) {
-  buildRouterViews();
-
-  const [path, setPath] = React.useState(() => {
+  const [locationPath, setLocationPath] = React.useState(() => {
     return RouterLocation.parse(p.routerType, p.path);
   });
 
@@ -35,13 +31,17 @@ export function BaseRouterView(p: BaseRouterViewProps) {
     const wrappers: ((element, stack) => React.ReactElement)[] = [];
 
     const history = new RouterHistory(location => {
-      setPath({ type: "index", location });
+      setLocationPath({ type: "index", location });
       p.setPath?.(location.path);
-    }, path.location);
+    }, locationPath.location);
 
     let locationDepthCounter = 0;
 
-    for (let location = path.location; location; location = location.parent!) {
+    for (
+      let location = locationPath.location;
+      location;
+      location = location.parent!
+    ) {
       const locationDepth = locationDepthCounter++;
 
       const useParams = (callback: any) => {
@@ -70,7 +70,7 @@ export function BaseRouterView(p: BaseRouterViewProps) {
             return renderer({
               children: element,
               router: location.router,
-              path,
+              path: locationPath,
               root: rootLocation.router,
               stack,
               history,
@@ -85,19 +85,19 @@ export function BaseRouterView(p: BaseRouterViewProps) {
         routerType !== Router;
         routerType = Object.getPrototypeOf(routerType)
       ) {
-        const renderers = getRouterViewRenderers(routerType, true);
+        const metadata = getRouterViewMetadata(routerType, true);
 
-        if (!renderers) continue;
+        if (!metadata) continue;
 
-        if (!locationDepth && path.type === "index") {
-          applyRenderers(renderers.index);
+        if (!locationDepth && locationPath.type === "index") {
+          metadata.indexRenderer && applyRenderers([metadata.indexRenderer]);
         }
 
-        applyRenderers(renderers.wrappers);
+        applyRenderers(metadata.wrappers);
       }
     }
     return { wrappers, history };
-  }, [p.routerType, path]);
+  }, [p.routerType, locationPath]);
 
   let element: React.ReactElement = EmptyFragment;
   let stack = {};
@@ -106,9 +106,9 @@ export function BaseRouterView(p: BaseRouterViewProps) {
     element = wrapper(element, stack);
   }
   return React.createElement(ReactContext.Provider, {
-    deps: [path, history],
+    deps: [locationPath, history],
     entries: [
-      [RouterLocation, path.location],
+      [RouterLocation, locationPath.location],
       [RouterHistory, history],
     ],
     children: element,

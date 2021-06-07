@@ -1,7 +1,7 @@
 import { Once } from "@dabsi/common/patterns/Once";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import { BaseRpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
+import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import ServerModule from "@dabsi/modules/ServerModule";
 import { Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
@@ -55,7 +55,7 @@ export default class ProjectModule {
 }
 
 ServerModule.defineServerLoader(BaseRpcResolver, rpcResolver => {
-  return Resolver([RpcResolverBuilder], rb => {
+  return Resolver([RpcResolverGenerator], rb => {
     rb.add(rpcResolver);
   });
 });

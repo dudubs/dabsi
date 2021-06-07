@@ -1,5 +1,5 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
+import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
 import { Rpc, RpcFuncational, RpcNamespace } from "@dabsi/typerpc2";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
@@ -13,7 +13,7 @@ class NS1 extends RpcNamespace {}
 
 const r1 = NS1.register("r1", R1);
 
-const rb = new RpcResolverBuilder();
+const rb = new RpcResolverGenerator();
 
 const context = Resolver.Context.assign({}, [rb]);
 

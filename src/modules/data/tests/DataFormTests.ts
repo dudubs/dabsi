@@ -2,7 +2,7 @@ import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import DataForm from "@dabsi/modules/data/common/DataForm";
 import DataFormResolver from "@dabsi/modules/data/DataFormResolver";
 import { DbQueryRunnerRef } from "@dabsi/modules/DbModule";
-import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
+import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -29,7 +29,7 @@ beforeAll(async () => {
   await testSource.remove();
 });
 
-let rb: RpcResolverBuilder;
+let rb: RpcResolverGenerator;
 let context: ResolverMap;
 
 const dft = DataForm(
@@ -39,7 +39,7 @@ const dft = DataForm(
 );
 
 beforeEach(() => {
-  rb = new RpcResolverBuilder();
+  rb = new RpcResolverGenerator();
   context = Resolver.Context.assign(
     {},
     [rb, new AsyncProcess()],

@@ -7,9 +7,7 @@ import { User } from "@dabsi/system/acl/entities/User";
 import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
 
 export default RpcResolver(ACL_AdminRpc, $ =>
-  $
-    //
-    .with({ data: DataContext })
+  $.with({ data: DataContext })
     .at(["addNewUserForm", "editUser.basicForm"], $ =>
       $
         //
@@ -34,6 +32,7 @@ export default RpcResolver(ACL_AdminRpc, $ =>
               $.configure(c => $ =>
                 $({
                   config: { minLength: 5 },
+
                   [inputBaseConfig]: {
                     check: value =>
                       c.data.checkUnique(User, {
@@ -70,27 +69,24 @@ export default RpcResolver(ACL_AdminRpc, $ =>
         //
         .resolve($ => DataParameterResolver($, User))
         .at("contactForm", $ =>
-          $
-            //
-            .resolve($ =>
-              DataFormResolver($, User, {}, c => $ =>
-                $({
-                  commitConfig: ($, v) => $(v),
-                })
-              )
+          $.resolve($ =>
+            DataFormResolver($, User, {}, c => $ =>
+              $({
+                commitConfig: ($, v) => $(v),
+              })
             )
-            .at("input.email", $ =>
-              $.configure(c => $ =>
-                $({
-                  config: {
-                    // TODO: pattern
-                  },
-                  [inputBaseConfig]: {
-                    check: email => c.data.checkUnique(User, { email }),
-                  },
-                })
-              )
+          ).at("input.email", $ =>
+            $.configure(c => $ =>
+              $({
+                config: {
+                  // TODO: pattern
+                },
+                [inputBaseConfig]: {
+                  check: email => c.data.checkUnique(User, { email }),
+                },
+              })
             )
+          )
         )
     )
 );

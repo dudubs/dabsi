@@ -1,6 +1,6 @@
 import { createTestRouters } from "@dabsi/typerouter2/tests/createTestRouters";
 import { BaseRouterView } from "@dabsi/typerouter2/view/BaseRouterView";
-import { buildRouterViews } from "@dabsi/typerouter2/view/buildRouterViews";
+
 import { RouterView } from "@dabsi/typerouter2/view/RouterView";
 import React from "react";
 import ReactTestRenderer from "react-test-renderer";
@@ -11,41 +11,35 @@ let rootFromCToBWrapper;
 let rootFromCToBIndex;
 let rootFromBWrapper;
 
-RouterView.define(r.B, {
-  $wrapper: ({ root, children }) => {
+RouterView(r.B, $ =>
+  $.wrap(({ root, children }) => {
     rootFromBWrapper = root;
     return children;
-  },
-});
-RouterView.define(r.C, [
-  {
-    $wrapper: ({ children }) => <>cw1{children}</>,
-  },
-  {
-    $wrapper: ({ children }) => <>cw2{children}</>,
-  },
-  ({ children }) => <>ci{children}</>,
-  {
-    b: [
-      {
-        $wrapper: ({ root, children }) => {
+  })
+);
+RouterView(r.C, $ =>
+  $
+    //
+    .wrap(({ children }) => <>cw1{children}</>)
+    .wrap(({ children }) => <>cw2{children}</>)
+    .index(({ children }) => <>ci{children}</>)
+    .at("b", $ =>
+      $
+        //
+        .wrap(({ root, children }) => {
           rootFromCToBWrapper = root;
           return <>bw{children}</>;
-        },
-      },
-      ({ root, children }) => {
-        rootFromCToBIndex = root;
-        return <>bi{children}</>;
-      },
-      {
-        a: ({ children }) => <>ai{children}</>,
-      },
-    ],
-  },
-]);
+        })
+        .index(({ root, children }) => {
+          rootFromCToBIndex = root;
+          return <>bi{children}</>;
+        })
+        .at("a", $ => $.index(({ children }) => <>ai{children}</>))
+    )
+);
 
 beforeEach(() => {
-  buildRouterViews();
+  RouterView.build();
 });
 
 const testPath = path =>

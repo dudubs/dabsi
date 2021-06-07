@@ -24,6 +24,7 @@ declare module "./Router" {
 }
 export type Route = {
   readonly type: RouterType;
+  // rename to target
   routerType: RouterType;
   propertyName?: string;
   name: string;

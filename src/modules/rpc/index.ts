@@ -8,7 +8,7 @@ import PlatformModule from "@dabsi/modules/PlatformModule";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
+import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
@@ -24,7 +24,7 @@ import path from "path";
 export class RpcModule2 {
   log = log.get("RPC");
 
-  protected resolverBuilder = new RpcResolverBuilder();
+  protected resolverBuilder = new RpcResolverGenerator();
 
   readonly request = new RequestBuilder();
 

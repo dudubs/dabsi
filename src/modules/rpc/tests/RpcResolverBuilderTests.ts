@@ -1,6 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
+import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import {
   Rpc,
@@ -20,7 +20,7 @@ import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 
-let rb: RpcResolverBuilder;
+let rb: RpcResolverGenerator;
 let context: ResolverMap;
 
 const testRpc = <T extends Rpc>(rpcType: RpcType<T>): T =>
@@ -33,7 +33,7 @@ const testRpc = <T extends Rpc>(rpcType: RpcType<T>): T =>
   );
 
 beforeEach(() => {
-  rb = new RpcResolverBuilder();
+  rb = new RpcResolverGenerator();
   context = Resolver.Context.assign({}, [rb]);
 });
 
@@ -139,7 +139,7 @@ describe("generate", () => {
 
   class SR extends R {}
 
-  RpcResolverBuilder.defineGenerator(R, rpcLocation =>
+  RpcResolverGenerator.defineGenerator(R, rpcLocation =>
     RpcResolver(rpcLocation, [], () => $ =>
       $({
         handleTestFn() {

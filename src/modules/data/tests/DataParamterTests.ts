@@ -1,5 +1,5 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverBuilder } from "@dabsi/modules/rpc/RpcResolverBuilder";
+import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
 import { Rpc, RpcFuncational, RpcParametrial } from "@dabsi/typerpc2";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
@@ -21,7 +21,7 @@ class CR extends Rpc {
 class X {
   constructor(readonly value: string) {}
 }
-const builder = new RpcResolverBuilder();
+const builder = new RpcResolverGenerator();
 
 let cr: CR;
 let pr: PR;

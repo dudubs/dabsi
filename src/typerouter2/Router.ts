@@ -1,5 +1,9 @@
 import { defined } from "@dabsi/common/object/defined";
+import { If } from "@dabsi/common/typings2/boolean";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
+import { Union } from "@dabsi/common/typings2/Union";
+import { getRouterMetadata } from "@dabsi/typerouter2/getRouterMetadata";
 import { Route } from "@dabsi/typerouter2/Route";
 import { RouterLocation } from "./RouterLocation";
 
@@ -46,8 +50,55 @@ export class Router {
   constructor(location: RouterLocation) {
     routerLocationMap.set(this, location);
   }
+
+  static at: RouterType["at"] = function (path): any {
+    let routerType: RouterType<any> = this;
+    for (const pathKey of typeof path === "string" ? path.split(".") : path) {
+      routerType = defined(
+        getRouterMetadata(routerType).routePropertyMap[pathKey].type,
+        () => `No route like "${routerType.name}.${path}".`
+      );
+    }
+    return routerType;
+  };
 }
 
 export type RouterType<T extends Router = Router> = {
   new (location: RouterLocation): T;
+
+  at<T extends Router, K extends string>(
+    this: RouterType<T>,
+    path: K | string[]
+  ): RouterAt<T, K> extends RouterChild<infer T> ? RouterType<T> : never;
 };
+
+export type RouterAt<T, P extends string> = T extends Record<
+  P,
+  RouterChild<infer T>
+>
+  ? T
+  : P extends `${infer K}.${infer P}`
+  ? RouterAt<RouterAt<T, K>, P>
+  : never;
+
+export type RouterInvalidPath<T, P extends string> = Union<
+  {
+    [K in P]: If<IsNever<RouterAt<T, K>>, K>;
+  }
+>;
+
+export type RouterValidatePath<
+  T,
+  P extends string,
+  U,
+  InvalidPath = RouterInvalidPath<T, P>
+> = IsNever<InvalidPath> extends true ? U : { InvalidPath: InvalidPath };
+
+export type RouterStackAt<T, P extends string> = T extends Record<
+  P,
+  RouterChild<infer T>
+>
+  ? Record<P, T>
+  : P extends `${infer K}.${infer P}`
+  ? RouterStackAt<T, K> & RouterStackAt<T, P>
+  : {};

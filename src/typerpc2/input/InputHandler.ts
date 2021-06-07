@@ -31,6 +31,7 @@ declare const inputValueConfig: unique symbol;
 declare const inputValue: unique symbol;
 
 // TODO ic is object ? merge : fn ? nested
+
 export const inputBaseConfig = Symbol("inputConfig");
 
 export type InferredInputConfig<

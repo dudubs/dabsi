@@ -41,21 +41,21 @@ export class DataRowTicker<T = any> {
     this: DataRowTicker<T>,
     relationPropertyName: K
   ): DataSource.At<T, K> {
-    return this.getSource().at(relationPropertyName, this._key);
+    return this.getSource().at(relationPropertyName, this._definedKey);
   }
 
   // TODO: updateBeforeFetch, updateAfterFetch
   async update<T>(this: DataRowTicker<T>, row: DataUpdateRow<T>) {
     // TODO: update on tick: runUpdate(), runFetch()
-    await this.getSource().update(this._key, row);
+    await this.getSource().update(this._definedKey, row);
   }
 
-  protected get _key(): string {
+  protected get _definedKey(): string {
     return defined(this.$key, () => `No "${this.rowType.name}" key`);
   }
 
   async delete() {
-    return this.getSource().delete(this._key);
+    return this.getSource().delete(this._definedKey);
   }
 
   async run(tick: number) {
@@ -64,7 +64,7 @@ export class DataRowTicker<T = any> {
     this._callbacks = [];
 
     const row = await this.getSource()
-      .of(this._key)
+      .of(this._definedKey)
       .filter(this.filter)
       .select(this._selection as {})
       .get();
@@ -85,18 +85,13 @@ export class DataRowTicker<T = any> {
     this._callbacks.push(callback);
   }
 
-  fetch2!: <T, S extends DataSelection<T>>(
-    this: DataRowTicker<T>,
-    selection: S
-  ) => S;
-
   fetch<
     T,
     K extends DataPickableKeys<T>,
     S extends Omit<DataSelection<T>, "pick"> = {}
   >(
     this: DataRowTicker<T>,
-    keys: K[],
+    keys: readonly K[],
     selection?: S
   ): Promise<DataRow<DataSelectionRow<T, S & { pick: K[] }>>>;
 

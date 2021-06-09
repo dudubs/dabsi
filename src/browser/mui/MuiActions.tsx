@@ -1,6 +1,8 @@
 import { entries } from "@dabsi/common/object/entries";
 import LangKey from "@dabsi/view/lang/LangKey";
 import {
+  Button,
+  ButtonProps,
   Grid,
   GridProps,
   IconButton,
@@ -21,12 +23,15 @@ import React from "react";
 export type MuiAction = {
   title?: React.ReactNode;
   icon?: React.ReactElement;
-  menu?: boolean;
+
+  type?: "menu" | "button";
+
   tooltip?: false | React.ReactNode;
 
   onAction?(event: React.SyntheticEvent): void;
 
   IconButtonProps?: Partial<IconButtonProps>;
+  ButtonProps?: Partial<ButtonProps>;
   TooltipProps?: Partial<TooltipProps>;
 };
 
@@ -38,6 +43,7 @@ export type MuiActionsProps = {
   onAction?(event: React.SyntheticEvent, actionKey: string): void;
 
   IconButtonProps?: IconButtonProps;
+  ButtonProps?: ButtonProps;
   ContainerProps?: GridProps;
   ItemProps?: GridProps;
   MenuProps?: Partial<MenuProps>;
@@ -49,18 +55,30 @@ export type MuiActionsProps = {
 export default function MuiActions(p: MuiActionsProps): React.ReactElement {
   type Action = MuiAction & { key: string };
   const menuActions: Action[] = [];
+  const iconButtonActions: Action[] = [];
   const buttonActions: Action[] = [];
 
   for (const [key, action] of entries(p.actions)) {
-    (action.menu || !action.icon ? menuActions : buttonActions).push({
+    const isButton = action.type === "button";
+    const isMenu = !isButton && action.type === "menu";
+
+    const isIconButton = !!action.icon && !isMenu && !isButton;
+
+    (isMenu
+      ? menuActions
+      : isIconButton
+      ? iconButtonActions
+      : buttonActions
+    ).push({
       key,
       ...action,
       title: <LangKey token={key}>{action.title}</LangKey>,
+      tooltip: isButton && !action.tooltip ? false : action.tooltip,
     });
   }
 
   if (menuActions.length) {
-    buttonActions.push({
+    iconButtonActions.push({
       tooltip: false,
       icon: <MoreVertIcon />,
       ...p.actions.menu,
@@ -78,6 +96,21 @@ export default function MuiActions(p: MuiActionsProps): React.ReactElement {
     p.onAction?.(event, action.key);
   };
 
+  const buttonItem = (action: Action, button: React.ReactElement) => (
+    <Grid {...p.ItemProps} item key={action.key}>
+      {action.tooltip !== false ? (
+        <Tooltip
+          {...p.TooltipProps}
+          {...action.TooltipProps}
+          title={action.tooltip ?? action.title!}
+        >
+          {button}
+        </Tooltip>
+      ) : (
+        button
+      )}
+    </Grid>
+  );
   return (
     <>
       {menuAnchorEl && (
@@ -107,8 +140,9 @@ export default function MuiActions(p: MuiActionsProps): React.ReactElement {
         </Menu>
       )}
       <Grid {...p.ContainerProps} container>
-        {buttonActions.map(action => {
-          const button = (
+        {iconButtonActions.map(action =>
+          buttonItem(
+            action,
             <IconButton
               {...p.IconButtonProps}
               {...action.IconButtonProps}
@@ -118,23 +152,22 @@ export default function MuiActions(p: MuiActionsProps): React.ReactElement {
             >
               {action.icon}
             </IconButton>
-          );
-          return (
-            <Grid {...p.ItemProps} item key={action.key}>
-              {action.tooltip !== false ? (
-                <Tooltip
-                  {...p.TooltipProps}
-                  {...action.TooltipProps}
-                  title={action.tooltip ?? action.title!}
-                >
-                  {button}
-                </Tooltip>
-              ) : (
-                button
-              )}
-            </Grid>
-          );
-        })}
+          )
+        )}
+        {buttonActions.map(action =>
+          buttonItem(
+            action,
+            <Button
+              {...p.ButtonProps}
+              {...action.ButtonProps}
+              onClick={event => {
+                handleAction(event, action);
+              }}
+            >
+              {action.title}
+            </Button>
+          )
+        )}
       </Grid>
     </>
   );

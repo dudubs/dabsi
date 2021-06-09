@@ -5,11 +5,12 @@ import {
   Rpc,
   RpcContextual,
   RpcFuncational,
+  RpcLocation,
   RpcParametrial,
 } from "@dabsi/typerpc2";
 import { DataTable } from "@dabsi/typerpc2/data-table/rpc";
 import { Form } from "@dabsi/typerpc2/form/rpc";
-import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithError";
+import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithCustomError";
 import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 
@@ -48,7 +49,26 @@ export class ACL_EditUser extends Rpc {
   @RpcContextual(() => DataForm(ACL_UserContactInput))
   contactForm!: DataForm<ACL_UserContactInput>;
 
-  // @RpcParameterial(()=> [ ...]) : DataParamter<>
+  @RpcFuncational()
+  updateGroups!: (groups: Record<string, boolean>) => Promise<void>;
+
+  @RpcFuncational()
+  getBasicInfo!: () => Promise<{
+    loginName: string;
+    firstName?: string;
+    lastName?: string;
+  }>;
+}
+
+export class ACL_EditGroup extends Rpc {
+  @RpcContextual(() => DataForm(ACL_GroupInput))
+  form!: DataForm<ACL_GroupInput>;
+
+  @RpcContextual()
+  usersTable!: ACL_UsersTable;
+
+  @RpcFuncational()
+  updateUsers!: (users: Record<string, boolean>) => Promise<void>;
 }
 
 export default class ACL_AdminRpc extends Rpc {
@@ -62,8 +82,8 @@ export default class ACL_AdminRpc extends Rpc {
   @RpcContextual(() => DataForm(ACL_GroupInput))
   addNewGroupForm!: DataForm<ACL_GroupInput>;
 
-  @RpcParametrial(() => DataForm(ACL_GroupInput))
-  editGroupForm!: DataParameter<DataForm<ACL_GroupInput>>;
+  @RpcParametrial(() => ACL_EditGroup)
+  editGroup!: DataParameter<ACL_EditGroup>;
 
   @RpcFuncational()
   deleteGroup!: (key: string) => Promise<void>;

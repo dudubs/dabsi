@@ -1,3 +1,4 @@
+import { WeakId } from "@dabsi/common/WeakId";
 import { reversed } from "@dabsi/common/array/reversed";
 import { defined } from "@dabsi/common/object/defined";
 import { Router, RouterType } from "@dabsi/typerouter2/Router";
@@ -27,7 +28,7 @@ export function BaseRouterView(p: BaseRouterViewProps) {
     return RouterLocation.parse(p.routerType, p.path);
   });
 
-  const { wrappers, history } = React.useMemo(() => {
+  const { component, history } = React.useMemo(() => {
     const wrappers: ((element, stack) => React.ReactElement)[] = [];
 
     const history = new RouterHistory(location => {
@@ -96,21 +97,25 @@ export function BaseRouterView(p: BaseRouterViewProps) {
         applyRenderers(metadata.wrappers);
       }
     }
-    return { wrappers, history };
+    return {
+      history,
+      component: () => {
+        const stack = {};
+        let element: React.ReactElement = EmptyFragment;
+        for (const wrapper of wrappers) {
+          element = wrapper(element, stack);
+        }
+        return element;
+      },
+    };
   }, [p.routerType, locationPath]);
 
-  let element: React.ReactElement = EmptyFragment;
-  let stack = {};
-
-  for (const wrapper of wrappers) {
-    element = wrapper(element, stack);
-  }
   return React.createElement(ReactContext.Provider, {
     deps: [locationPath, history],
     entries: [
       [RouterLocation, locationPath.location],
       [RouterHistory, history],
     ],
-    children: element,
+    children: React.createElement(component),
   });
 }

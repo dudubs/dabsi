@@ -5,17 +5,17 @@ import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataPickableKeys } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source/source";
 
-const operator = "pick";
-
 declare module "../source" {
   interface DataSource<T> {
-    [operator]: typeof method;
+    pick: typeof pickKeys &
+      typeof pickKeysFromRelation &
+      typeof pickKeysAndFields &
+      typeof pickFields &
+      typeof pickFieldsFromRelation;
   }
 }
 
-DataSource.prototype[operator] = method;
-
-function method<
+declare function pickFieldsFromRelation<
   T,
   Relation extends DataRelationKeys<T>,
   Fields extends DataFields<DataRelationType<T[Relation]>>
@@ -30,7 +30,7 @@ function method<
   >
 >;
 
-function method<
+declare function pickKeysFromRelation<
   T,
   Relation extends DataRelationKeys<T>,
   Keys extends DataPickableKeys<DataRelationType<T[Relation]>>
@@ -47,7 +47,7 @@ function method<
   >
 >;
 
-function method<
+declare function pickKeysAndFieldsFromRelation<
   T,
   Relation extends DataRelationKeys<T>,
   Keys extends DataPickableKeys<DataRelationType<T[Relation]>>,
@@ -65,17 +65,17 @@ function method<
 >;
 
 ///
-function method<T, Fields extends DataFields<T>>(
+declare function pickFields<T, Fields extends DataFields<T>>(
   this: DataSource<T>,
   fields: Fields
 ): DataSource<DataSelectionRow<T, { pick: readonly never[]; fields: Fields }>>;
 
-function method<T, Keys extends DataPickableKeys<T>>(
+declare function pickKeys<T, Keys extends DataPickableKeys<T>>(
   this: DataSource<T>,
   keys: readonly Keys[]
 ): DataSource<DataSelectionRow<T, { pick: Keys[] }>>;
 
-function method<
+declare function pickKeysAndFields<
   T,
   Keys extends DataPickableKeys<T>,
   Fields extends DataFields<T>
@@ -85,29 +85,31 @@ function method<
   fields: Fields
 ): DataSource<DataSelectionRow<T, { pick: Keys[]; fields: Fields }>>;
 
-function method(this: DataSource<any>, ...args): any {
-  let selection: any | null = null;
+DataSource.prototype.pick = <any>function (this: DataSource<any>, ...args) {
   let relation: string | null = null;
-  if (typeof args[0] === "string") {
-    [relation, ...args] = args;
-  }
-  let [keysOrFields, maybeFields] = args;
+  let keys: string[] | null = null;
   let fields;
-  let keys;
 
-  if (maybeFields) {
-    [keys, fields] = [keysOrFields, maybeFields];
-  } else if (Array.isArray(keysOrFields)) {
-    [keys, fields] = [keysOrFields, {}];
+  let keysOrFields;
+  let maybeFields;
+
+  if (typeof args[0] === "string") {
+    [relation, keysOrFields, maybeFields] = args;
   } else {
-    [keys, fields] = [[], keysOrFields];
+    [keysOrFields, maybeFields] = args;
+  }
+
+  if (Array.isArray(keysOrFields)) {
+    [keys, fields] = [keysOrFields, maybeFields];
+  } else {
+    fields = keysOrFields;
   }
 
   if (!keys && !hasKeys(fields)) return this;
 
-  selection = { pick: keys, fields };
+  let selection: any = { pick: keys, fields };
   if (relation) {
     selection = { relations: { [relation]: selection } };
   }
   return this.select(selection);
-}
+};

@@ -4,23 +4,24 @@ import { Widget } from "@dabsi/typerpc2/widget/Widget";
 
 const __isInput = Symbol("__isInput");
 
+// TODO: make function Input.getDataFromElement
 export const inputValueElementToData = Symbol("inputValueElementToData");
 
-export declare const inputCustomError: unique symbol;
+export interface BaseInput<ValueData, ValueElement, Error, Element>
+  extends Widget<Element> {
+  [__isInput]: true;
 
-export abstract class Input<
-  ValueData,
-  ValueElement,
-  Error,
-  Element
-> extends Widget<Element> {
+  check: (data: ValueData) => Promise<null | Error>;
+
+  [inputValueElementToData](element: ValueElement): ValueData;
+}
+
+export abstract class Input<ValueData, ValueElement, Error, Element>
+  extends Widget<Element>
+  implements BaseInput<ValueData, ValueElement, Error, Element> {
   [__isInput]: true = true;
 
   static [__isInput]: true = true;
-
-  @RpcFuncational() check!: (data: ValueData) => Promise<null | Error>;
-
-  abstract [inputValueElementToData](element: ValueElement): ValueData;
 
   static isInputType(o): o is RpcType<AnyInput> {
     return typeof o === "function" && o[__isInput];
@@ -29,6 +30,10 @@ export abstract class Input<
   static isInput(o): o is AnyInput {
     return typeof o === "object" && o[__isInput];
   }
+
+  @RpcFuncational() check!: (data: ValueData) => Promise<null | Error>;
+
+  abstract [inputValueElementToData](element: ValueElement): ValueData;
 }
 
 export type InferredInput<T extends AnyInput> = T extends Input<
@@ -45,7 +50,7 @@ export type InferredInput<T extends AnyInput> = T extends Input<
     }
   : never;
 
-export interface AnyInput extends Input<any, any, any, any> {}
+export interface AnyInput extends BaseInput<any, any, any, any> {}
 
 export type InputValueData<T extends AnyInput> = InferredInput<T>["ValueData"];
 
@@ -54,6 +59,4 @@ export type InputValueElement<
 > = InferredInput<T>["ValueElement"];
 export type InputElement<T extends AnyInput> = InferredInput<T>["Element"];
 
-export type InputError<T extends AnyInput> =
-  | InferredInput<T>["Error"]
-  | (T extends { [inputCustomError]: infer U } ? U : never);
+export type InputError<T extends AnyInput> = InferredInput<T>["Error"];

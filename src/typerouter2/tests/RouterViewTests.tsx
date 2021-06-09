@@ -4,7 +4,7 @@ import { BaseRouterView } from "@dabsi/typerouter2/view/BaseRouterView";
 import { RouterView } from "@dabsi/typerouter2/view/RouterView";
 import React from "react";
 import ReactTestRenderer from "react-test-renderer";
-
+import "..";
 const r = createTestRouters();
 
 let rootFromCToBWrapper;

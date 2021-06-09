@@ -15,7 +15,7 @@ import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { Form } from "@dabsi/typerpc2/form/rpc";
 import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
-import { InputWithError } from "@dabsi/typerpc2/input/InputWithError";
+import { InputWithCustomError } from "@dabsi/typerpc2/input/InputWithCustomError";
 import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
@@ -159,7 +159,7 @@ describe("generate", () => {
 });
 
 describe("sanity", () => {
-  const i = ObjectInput({ xs: InputWithError<"BAD_VALUE">()(TextInput) });
+  const i = ObjectInput({ xs: InputWithCustomError<"BAD_VALUE">()(TextInput) });
   class F extends Form(i) {}
   class R extends Rpc {
     @RpcContextual()

@@ -1,3 +1,4 @@
+import { pick } from "@dabsi/common/object/pick";
 import DataContext from "@dabsi/modules/data/DataContext";
 import DataFormResolver from "@dabsi/modules/data/DataFormResolver";
 import { DataParameterResolver } from "@dabsi/modules/data/DataParameterResolver";
@@ -14,6 +15,7 @@ export default RpcResolver(ACL_AdminRpc, $ =>
         .resolve($ =>
           DataFormResolver($, User, {}, c => $ =>
             $({
+              valueConfig: ($, row) => $(row),
               commitConfig: ($, v) => $(v),
             })
           )
@@ -25,20 +27,7 @@ export default RpcResolver(ACL_AdminRpc, $ =>
               $.configure(c => $ =>
                 $({
                   minLength: 2,
-                })
-              )
-            )
-            .at("loginName", $ =>
-              $.configure(c => $ =>
-                $({
-                  config: { minLength: 5 },
-
-                  [inputBaseConfig]: {
-                    check: value =>
-                      c.data.checkUnique(User, {
-                        loginName: value,
-                      }),
-                  },
+                  nullable: true,
                 })
               )
             )
@@ -57,21 +46,36 @@ export default RpcResolver(ACL_AdminRpc, $ =>
             )
         )
     )
-    .at(["usersTable"], $ =>
-      $.configure(c => $ =>
-        $({
-          source: c.data.getSource(User),
-        })
-      )
-    )
     .at("editUser", $ =>
       $
         //
         .resolve($ => DataParameterResolver($, User))
+        .at("getBasicInfo", $ =>
+          $.configure(c => $ =>
+            $(async () => {
+              const fields = ["loginName", "firstName", "lastName"] as const;
+              return pick(
+                await c.data.getParameter(User).fetch(fields),
+                fields
+              );
+            })
+          )
+        )
+        .at("updateGroups", $ =>
+          $.configure(c => $ =>
+            $(async groups => {
+              await c.data //
+                .getParameter(User)
+                .at("groups")
+                .updateRelations(groups);
+            })
+          )
+        )
         .at("contactForm", $ =>
           $.resolve($ =>
             DataFormResolver($, User, {}, c => $ =>
               $({
+                valueConfig: ($, row) => $(row),
                 commitConfig: ($, v) => $(v),
               })
             )

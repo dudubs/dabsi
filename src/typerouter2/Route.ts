@@ -134,13 +134,13 @@ export function Route(...args) {
     const bindRouterType = SingleCall(() => {
       const routeType = getRouteType();
 
-      return class extends routeType {
+      return <RouterType>(<any>class extends routeType {
         static route = route;
         // @ts-ignore
         static get name() {
           return `<BoundRouter ${routerType.name}.${propertyName}: ${routeType.name}>`;
         }
-      };
+      });
     });
 
     const route: Route = {

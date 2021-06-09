@@ -1,11 +1,9 @@
 import { Override } from "@dabsi/common/typings2/Override";
-import { Renderer } from "@dabsi/view/react/renderer";
-import { ReactRendererOrProps } from "@dabsi/view/react/patterns/ReactRendererOrProps";
-import { SystemView } from "@dabsi/system/core/old-view/SystemView";
 import { InputMap } from "@dabsi/old-typerpc/input/input-map/InputMap";
 import { InputMapView } from "@dabsi/old-typerpc/input/input-map/InputMapView";
 import { RpcConnection } from "@dabsi/old-typerpc/Rpc";
 import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
+import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
 import { TWidget, Widget } from "@dabsi/old-typerpc/widget/Widget";
 import {
   AnyWidgetRecord,
@@ -15,7 +13,9 @@ import {
   MapView,
   WidgetMapView,
 } from "@dabsi/old-typerpc/widget/widget-map/view";
-import { WidgetViewProps } from "@dabsi/old-typerpc/widget/view/component";
+import { SystemView } from "@dabsi/system/core/old-view/SystemView";
+import { ReactRendererOrProps } from "@dabsi/view/react/patterns/ReactRendererOrProps";
+import { Renderer } from "@dabsi/view/react/renderer";
 import {
   ComponentType,
   createElement,

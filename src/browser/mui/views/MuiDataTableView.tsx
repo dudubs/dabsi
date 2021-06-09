@@ -67,6 +67,16 @@ export type MuiDataTableViewProps<
   loadingElement?: React.ReactElement;
   noHaveResultElement?: React.ReactElement;
 
+  tableWrapper?(
+    children: React.ReactElement,
+    view: DataTableView<T>
+  ): React.ReactElement;
+
+  sectionWrapper?(
+    children: React.ReactElement,
+    view: DataTableView<T>
+  ): React.ReactElement;
+
   renderSelectColumn?(
     row: DataTableRow<U> | null, // null for head
     view: DataTableView<T>
@@ -96,7 +106,13 @@ export type MuiDataTableViewProps<
 
   staticActions?: Record<string | "add", MuiAction>;
 
+  selectActions?: Record<string, MuiAction>;
+
   StaticActionsProps?: Partial<MuiActionsProps>;
+
+  SelectActionsProps?: Partial<MuiActionsProps>;
+
+  SectionActionsProps?: Partial<MuiActionsProps>;
 
   RowActionsProps?: Partial<MuiActionsProps>;
 
@@ -134,7 +150,10 @@ export function MuiDataTableView<T extends AnyDataTable>({
   loadingElement,
   noHaveResultElement,
   staticActions: staticActionMap,
+  selectActions: selectActionMap,
   StaticActionsProps,
+  SelectActionsProps,
+  SectionActionsProps = { ButtonProps: { size: "small" } },
   RowActionsProps,
   onDeleteRows,
   onDeleteRow,
@@ -142,6 +161,8 @@ export function MuiDataTableView<T extends AnyDataTable>({
   onAddRow,
   actions: _actionMap,
   renderSelectColumn,
+  tableWrapper,
+  sectionWrapper,
   ...DataTableViewProps
 }: MuiDataTableViewProps<T>): React.ReactElement {
   staticActionMap = { ...staticActionMap };
@@ -326,25 +347,39 @@ export function MuiDataTableView<T extends AnyDataTable>({
           />
         );
 
-        const staticActions = hasKeys(staticActionMap) && (
-          <MuiActions {...StaticActionsProps} actions={staticActionMap!} />
-        );
+        const sectionActions =
+          view.hasSelectionChanges && hasKeys(selectActionMap) ? (
+            <MuiActions
+              {...SectionActionsProps}
+              {...SelectActionsProps}
+              actions={selectActionMap!}
+            />
+          ) : (
+            hasKeys(staticActionMap) && (
+              <MuiActions
+                {...SectionActionsProps}
+                {...StaticActionsProps}
+                actions={staticActionMap!}
+              />
+            )
+          );
 
-        return (
+        const section = (
           <MuiSection
             title={title}
             sidebar={
-              (staticActions || searchField) && (
+              (sectionActions || searchField) && (
                 <Grid container spacing={2} alignItems="center">
-                  {staticActions && <Grid item>{staticActions}</Grid>}
+                  {sectionActions && <Grid item>{sectionActions}</Grid>}
                   {searchField && <Grid item>{searchField}</Grid>}
                 </Grid>
               )
             }
           >
-            {table}
+            {tableWrapper ? tableWrapper(table, view) : table}
           </MuiSection>
         );
+        return sectionWrapper ? sectionWrapper(section, view) : section;
       }}
     </DataTableView>
   );

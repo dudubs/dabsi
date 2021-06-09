@@ -89,7 +89,7 @@ export function DataTable<T extends Record<string, DataColumnType>>(
   return R;
 }
 
-DataTable.getColumnTypeMap = function (dataTableType: typeof BaseDataTable) {
+DataTable.getColumnTypeMap = function (dataTableType: RpcType<AnyDataTable>) {
   return defined(
     dataTableType[ColumnTypeMapSymbol],
     () => `No column-type-map for ${dataTableType.name}`

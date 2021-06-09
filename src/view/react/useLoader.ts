@@ -21,13 +21,14 @@ export function useLoader<T>(
   callback: () => Promise<T>,
   deps: any[] = [],
   onLoad?: (value: T) => void
-): T | null {
+): [T | null, (value: T) => void] {
   const emit = useEmitter();
 
   const [state, setState] = React.useState<{ result: T } | { error } | null>(
     null
   );
 
+  const setValue = value => setState({ result: value });
   useEffect(() => {
     const id = ++counter;
 
@@ -47,7 +48,7 @@ export function useLoader<T>(
 
   if (state) {
     if ("error" in state) return state.error;
-    return state.result;
+    return [state.result, setValue];
   }
-  return null;
+  return [null, setValue];
 }

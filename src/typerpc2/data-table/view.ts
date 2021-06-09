@@ -111,6 +111,10 @@ export class DataTableView<
     return !this._rows.find(row => !this.isSelectedRow(row));
   }
 
+  @ViewState() get hasSelectionChanges() {
+    return hasKeys(this._selectedMap);
+  }
+
   getSelectedMap(): Record<string, boolean> {
     return { ...this._selectedMap };
   }

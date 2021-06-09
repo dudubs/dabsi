@@ -1,15 +1,8 @@
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
-import {
-  defineSystemViewCompoent,
-  SystemView,
-  SystemViewBuilder,
-  SystemViewComponentMap,
-} from "@dabsi/system/core/view/SystemView";
 import { RpcContextual, RpcType } from "@dabsi/typerpc2";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
-import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 import {
   AnyWidget,
   Widget,
@@ -20,9 +13,6 @@ import {
   WidgetHandler,
   WidgetWithConfig,
 } from "@dabsi/typerpc2/widget/WidgetHandler";
-import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
-import React from "react";
-import ReactTestRenderer from "react-test-renderer";
 
 class W1 extends Widget<{ type: "w1" }> {}
 
@@ -109,41 +99,3 @@ WidgetHandler(
     },
   }
 );
-
-// it("", () => {
-//   //
-
-//   ReactTesterRenderer.create(
-//     <SystemView
-//       build={$ => {
-//         $(R, {
-//           w3_1: () => EmptyFragment,
-//         });
-//       }}
-//     >
-//       <></>
-//     </SystemView>
-//   );
-// });
-
-const testBuilder = (builder: SystemViewBuilder) =>
-  new Promise<SystemViewComponentMap>(resolve => {
-    ReactTestRenderer.create(
-      <SystemView build={builder}>
-        <SystemView.ComponentMapContext.Consumer>
-          {map => {
-            resolve(map);
-            return EmptyFragment;
-          }}
-        </SystemView.ComponentMapContext.Consumer>
-      </SystemView>
-    );
-  });
-
-it("expect to define with child-keys", async () => {
-  const map: SystemViewComponentMap = new RpcPathMap();
-  defineSystemViewCompoent(map, W3_2, {
-    wx: { w1: () => EmptyFragment },
-  });
-  expect(map.get(W4, ["w3_2", "wx", "w1"])).toBeDefined();
-});

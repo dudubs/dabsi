@@ -8,6 +8,7 @@ import { If } from "@dabsi/common/typings2/boolean";
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
+import { inspect } from "@dabsi/logging/inspect";
 import { RebaseType } from "@dabsi/typedata/BaseType";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataOrder } from "@dabsi/typedata/order";
@@ -143,7 +144,10 @@ const getLoader = (
     const isSelectionField = selection.fields?.[field] !== undefined;
     const isPickedField = picked?.has(field);
 
-    if (!picked || isPickedField || isSelectionField) {
+    if (
+      typeof field === "string" &&
+      (!picked || isPickedField || isSelectionField)
+    ) {
       return data => data[field];
     }
 
@@ -162,6 +166,7 @@ const getLoader = (
     const columnConfig: DataTableColumnConfig.Config<any, any, any> = <any>(
       (columnConfigMap[columnKey] || columnKey)
     );
+
     switch (typeof columnConfig) {
       case "function":
         columnLoader = data => columnConfig(data);
@@ -226,15 +231,13 @@ const getLoader = (
   };
 };
 
-const loaderSymbol = Symbol();
-
 export default WidgetHandler(
   AnyDataTable,
   {
     configType: "GENERIC",
     helpers: {
       __loader(): ReturnType<typeof getLoader> {
-        return (this[loaderSymbol] ||= getLoader(this.config, this.rpcType));
+        return getLoader(this.config, this.rpcType);
       },
 
       async query(

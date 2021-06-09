@@ -1,3 +1,4 @@
+import { MuiForm } from "@dabsi/browser/mui/components/MuiForm";
 import MuiSection from "@dabsi/browser/mui/MuiSection";
 import { MuiDataTableView } from "@dabsi/browser/mui/views/MuiDataTableView";
 import { MuiFormView } from "@dabsi/browser/mui/views/MuiFormView";
@@ -21,14 +22,35 @@ export default RouterView(ACL_AdminRouter, $ =>
   )
     .at("editGroup", $ =>
       $.index(({ useParams, history, root }) => {
-        const form = useParams(id => ACL_AdminRpc.instance.editGroupForm(id));
+        const connection = useParams(id => ACL_AdminRpc.instance.editGroup(id));
         return (
-          <MuiSection title={lang`EDIT_GROUP`}>
-            <MuiFormView
-              connection={form}
-              onSubmit={() => history.push(root.groups)}
+          <>
+            <MuiSection title={lang`EDIT_GROUP`}>
+              <MuiFormView
+                connection={connection.form}
+                onSubmit={() => history.push(root.groups)}
+              />
+            </MuiSection>
+            <MuiDataTableView
+              title={lang`USERS_IN_GROUP`}
+              connection={connection.usersTable}
+              onSelect={async view => {
+                await connection.updateUsers(view.getSelectedMap());
+                // await view.reloadElement();
+              }}
+              tableWrapper={(table, view) => (
+                <MuiForm
+                  onSubmit={() => {}}
+                  submitButtonProps={{
+                    disabled: !view.hasSelectionChanges,
+                  }}
+                  submitTitle={lang`SAVE_CHANGES`}
+                >
+                  {table}
+                </MuiForm>
+              )}
             />
-          </MuiSection>
+          </>
         );
       })
     )

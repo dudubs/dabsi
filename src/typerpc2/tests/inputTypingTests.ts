@@ -6,8 +6,8 @@ import {
   inputValueElementToData,
 } from "@dabsi/typerpc2/input/Input";
 import { InputWithConfig } from "@dabsi/typerpc2/input/InputHandler";
-import { InputWithError } from "@dabsi/typerpc2/input/InputWithError";
-import { InputWithValue } from "@dabsi/typerpc2/input/InputWithValue";
+import { InputWithCustomError } from "@dabsi/typerpc2/input/InputWithCustomError";
+import { InputWithValue } from "@dabsi/typerpc2/input/InputWithCustomValue";
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 
 export function typingTests() {
@@ -29,7 +29,7 @@ export function typingTests() {
   interface TestInput1
     extends InputWithConfig<TestInput1, {}, string, string> {}
 
-  class TestInput1WithExtraErr extends InputWithError<"EXTRA_ERR">()(
+  class TestInput1WithExtraErr extends InputWithCustomError<"EXTRA_ERR">()(
     TestInput1
   ) {}
 

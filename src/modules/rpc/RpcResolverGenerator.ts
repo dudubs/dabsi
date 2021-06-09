@@ -56,6 +56,9 @@ export class RpcResolverGenerator {
         _rpcLocation.member &&
         _rpcLocation.member.type !== RpcMemberType.Contextual
       ) {
+        if (_rpcLocation.isParameterialLocation) {
+          return this.buildResolver(_rpcLocation);
+        }
         throw new Error(
           `Can't build/generate resolver for ${
             RpcMemberType[_rpcLocation.member.type!]

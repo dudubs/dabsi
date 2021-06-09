@@ -1,11 +1,11 @@
 import Lazy from "@dabsi/common/patterns/Lazy";
+import { Router } from "@dabsi/typerouter2";
+import { RouterType } from "@dabsi/typerouter2/Router";
 import {
-  Router,
   RouterAt,
   RouterStackAt,
-  RouterType,
   RouterValidatePath,
-} from "@dabsi/typerouter2/Router";
+} from "@dabsi/typerouter2/RouterPath";
 import {
   getRouterViewMetadata,
   RouterViewMatadata,

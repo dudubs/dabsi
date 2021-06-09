@@ -7,6 +7,7 @@ export class Reactor<T> {
   protected _callbacks = new Set<ReactorCallback<T>>();
 
   emit(value: T) {
+    this._lastValue = value;
     for (const callback of this._callbacks) {
       callback(value);
     }

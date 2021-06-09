@@ -1,7 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Router, RouterChild, RouterType } from "@dabsi/typerouter2/Router";
 import { RouterLocationPath } from "@dabsi/typerouter2/RouterLocation";
-import RouterPathMap from "@dabsi/typerouter2/RouterPathMap";
 import { RouterHistory } from "@dabsi/typerouter2/view/RouterHistory";
 import { Renderer } from "@dabsi/view/react/renderer";
 import React from "react";

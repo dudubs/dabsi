@@ -18,7 +18,7 @@ export type RpcInvalidPath<T, P extends string> = Union<
 export type RpcValidatePath<
   T,
   P extends string,
-  U,
+  U = RpcAt<T, P>,
   InvalidPath = RpcInvalidPath<T, P>
 > = IsNever<InvalidPath> extends true ? U : { InvalidPath: InvalidPath };
 
@@ -32,9 +32,13 @@ export type _RpcAt<T, P extends string> =
   //
   T extends RpcParametrialMember<infer T, any>
     ? RpcAt<T, P>
-    : T extends Record<P, infer U> //
+    : //
+    //
+    T extends Record<P, infer U>
     ? U
-    : P extends `${infer K}.${infer P}`
+    : //
+    //
+    P extends `${infer K}.${infer P}`
     ? RpcAt<RpcAt<T, K>, P>
     : never;
 
@@ -70,14 +74,29 @@ export class RpcLocation<T> {
   }
 
   innerInspect() {
-    return this.path.length
-      ? `${this.rpcRootType.name}.${this.path.join(".")}`
-      : this.rpcRootType.name;
+    let text = this.rpcRootType.name;
+
+    if (this.path.length) {
+      text += `.` + this.path.join(".");
+    }
+    let rpcType: Function | undefined;
+    try {
+      ({ rpcType } = this);
+    } catch {
+      rpcType = undefined;
+    }
+
+    text += `: ${rpcType ? rpcType.name : `unknown`}`;
+
+    return text;
   }
 
   [inspect.custom]() {
     return `<RpcLocation ${this.innerInspect()}>`;
   }
+
+  readonly isParameterialLocation =
+    this.path[this.path.length - 1]?.endsWith("!") || false;
 
   toParameterialLocation<T>(
     this: RpcLocation<T>

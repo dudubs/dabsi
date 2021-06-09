@@ -8,9 +8,9 @@ import { MuiNestedMenu } from "./MuiNestedMenu";
 import { MuiUserMenu } from "./MuiUserMenu";
 
 export default function MuiAdminWrapper({ children }) {
-  const status = ACL_CurrentUserReactor.use();
+  const currentUser = ACL_CurrentUserReactor.use();
 
-  if (status === null) {
+  if (currentUser === null) {
     return (
       <MuiLoginFormView
         onLogin={event => {
@@ -20,7 +20,7 @@ export default function MuiAdminWrapper({ children }) {
     );
   }
 
-  if (status === undefined) {
+  if (currentUser === undefined) {
     return <>{lang`LOADING`}</>;
   }
 
@@ -29,7 +29,7 @@ export default function MuiAdminWrapper({ children }) {
       openDrawerMenu
       title={lang`SYSTEM_ADMIN`}
       toolbarMenu={
-        <MuiUserMenu userName={status.fullName || status.loginName} />
+        <MuiUserMenu userName={currentUser.fullName || currentUser.loginName} />
       }
       drawerMenu={
         <MuiNestedMenu tree={MuiAdminMenu} contextType={SystemViewContext} />

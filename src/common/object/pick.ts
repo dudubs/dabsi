@@ -1,6 +1,6 @@
 export function pick<T, K extends keyof T>(
   obj: T,
-  ...args: K[] | K[][]
+  ...args: (K | readonly K[])[]
 ): Pick<T, K> {
   const out: any = {};
   for (const arg of args) {

@@ -8,7 +8,21 @@ import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
 
 export default RpcResolver(ACL_AdminRpc, $ =>
   $.with({ data: DataContext })
-    .at("editGroupForm", $ => $.resolve($ => DataParameterResolver($, Group)))
+    .at("editGroup", $ =>
+      $
+        //
+        .resolve($ => DataParameterResolver($, Group))
+        .at("updateUsers", $ =>
+          $.configure(c => $ =>
+            $(async users => {
+              await c.data //
+                .getParameter(Group)
+                .at("users")
+                .updateRelations(users);
+            })
+          )
+        )
+    )
     .at("deleteGroup", $ =>
       $.configure(c => $ =>
         $(async key => {
@@ -16,21 +30,23 @@ export default RpcResolver(ACL_AdminRpc, $ =>
         })
       )
     )
-    .at("groupsTable", $ =>
-      $.configure(c => $ =>
-        $({
-          source: c.data.getSource(Group),
-          columns: {
-            groupName: { field: "name" },
-            countUsers: { field: { $count: "users" } },
-          },
-        })
-      )
-    )
-    .at(["addNewGroupForm", "editGroupForm!"], $ =>
+    .at(["addNewGroupForm", "editGroup.form"], $ =>
       $
         //
-        .resolve($ => DataFormResolver($, Group))
+        .resolve($ =>
+          DataFormResolver($, Group, {}, c => $ =>
+            $({
+              valueConfig: ($, row) =>
+                $({
+                  groupName: row.name,
+                }),
+              commitConfig: ($, value) =>
+                $({
+                  name: value.groupName,
+                }),
+            })
+          )
+        )
         .at("input.groupName", $ =>
           $.configure(c => $ =>
             $({

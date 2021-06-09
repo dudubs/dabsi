@@ -22,16 +22,23 @@ export function RpcContextual(getRpcType) {
       propertyName,
       RpcMemberType.Contextual
     );
+    const map = new WeakMap();
 
     Object.defineProperty(target, propertyName, {
       configurable: false,
+
       get() {
-        const { getPath, command, getRootRpcType } = RpcArgs.get(this);
-        return new (getChildRpcType(this.constructor, propertyName) as RpcType)(
-          () => [...getPath(), propertyName],
-          command,
-          getRootRpcType
-        );
+        return map.touch(this, () => {
+          const { getPath, command, getRootRpcType } = RpcArgs.get(this);
+          return new (getChildRpcType(
+            this.constructor,
+            propertyName
+          ) as RpcType)(
+            () => [...getPath(), propertyName],
+            command,
+            getRootRpcType
+          );
+        });
       },
     });
   };

@@ -14,7 +14,6 @@ import {
 const history = createMemoryHistory({ initialEntries: ["/"] });
 
 export default function NtSystemRoot() {
-  useLoader(async () => {});
   return (
     <PaperProvider theme={DarkTheme}>
       <RouterView routerType={SystemRouter} history={history} />

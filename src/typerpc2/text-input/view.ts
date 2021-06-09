@@ -2,12 +2,15 @@
 import Debounce from "@dabsi/common/async/Debounce";
 import { InputValueElement } from "@dabsi/typerpc2/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
+import { InputWithAnyError } from "@dabsi/typerpc2/input/InputWithCustomError";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
 
 export type TextInputViewProps<T extends TextInput> = InputViewProps<T>;
 
-export class TextInputView<T extends TextInput> extends InputView<
+export class TextInputView<
+  T extends InputWithAnyError<TextInput>
+> extends InputView<
   T,
   TextInputViewProps<T> & {
     children?(view: TextInputView<T>);

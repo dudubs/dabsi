@@ -17,18 +17,18 @@ export function MuiLoginFormView({
       <Typography variant="h5" gutterBottom>{lang`LOGIN_TO_SYSTEM`}</Typography>
       <SystemView
         connection={AclRpc.instance.login}
-        stylesheet={{
-          input: [
-            props => (
+        build={$ =>
+          $.at("input", $ =>
+            $.render(props => (
               <MuiObjectInputView
                 {...props}
                 item={{
                   loginName: { xs: true },
                 }}
               />
-            ),
-          ],
-        }}
+            ))
+          )
+        }
       >
         {props => (
           <MuiFormView

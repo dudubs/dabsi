@@ -1,5 +1,6 @@
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
 import {
@@ -26,9 +27,16 @@ import {
   WidgetWithConfig,
 } from "@dabsi/typerpc2/widget/WidgetHandler";
 
-declare const inputValueConfig: unique symbol;
+declare const __inputValueConfigSymbol: unique symbol;
 
-declare const inputValue: unique symbol;
+declare const __inputValueSymbol: unique symbol;
+
+export declare const __inputCustomValueSymbol: unique symbol;
+
+export type OverrideInputCustomValue<T extends AnyInput, V> = Override<
+  T,
+  { [__inputCustomValueSymbol]: V }
+>;
 
 // TODO ic is object ? merge : fn ? nested
 
@@ -42,22 +50,48 @@ export type InferredInputConfig<
 
 export type BaseInputConfig<T extends AnyInput, Value, ValueConfig> = {
   valueConfig?: ValueConfig;
-  check?(value: Value): Awaitable<InputError<T> | undefined | void>;
+  check?(
+    value: NonNullable<Value>
+  ): Awaitable<InputError<T> | undefined | void>;
 };
 
-export type InputConfig<T extends AnyInput, Config, Value, ValueConfig> =
-  | Config
-  | PartialUndefinedKeys<
+export type InputConfig<
+  T extends AnyInput,
+  Config,
+  Value,
+  ValueConfig
+> = T extends {
+  [__inputCustomValueSymbol]: infer CustomValue;
+}
+  ? PartialUndefinedKeys<
       {
         config: Config;
       },
       {
-        [inputBaseConfig]: BaseInputConfig<T, Value, ValueConfig>;
+        [inputBaseConfig]: BaseInputConfig<T, Value, ValueConfig> & {
+          load(
+            value: NonNullable<Value>
+          ): Awaitable<{ value: CustomValue } | { error: InputError<T> }>;
+        };
       }
-    >;
+    >
+  :
+      | Config
+      | PartialUndefinedKeys<
+          {
+            config: Config;
+          },
+          {
+            [inputBaseConfig]: BaseInputConfig<T, Value, ValueConfig>;
+          }
+        >;
 
 export type BaseInputHandler<T extends AnyInput, Value, ValueConfig> = {
-  readonly inputConfig: BaseInputConfig<T, Value, ValueConfig> | undefined;
+  readonly inputConfig:
+    | (BaseInputConfig<T, Value, ValueConfig> & {
+        load?(value): Awaitable<{ error } | { value }>;
+      })
+    | undefined;
 
   getValueFromConfig(valueConfig: ValueConfig | undefined): Awaitable<Value>;
 
@@ -87,8 +121,8 @@ export type InputWithConfig<
   H = {},
   HC = InferredHandlerConfig<C>
 > = {
-  [inputValueConfig]: VC;
-  [inputValue]: V;
+  [__inputValueConfigSymbol]: VC;
+  [__inputValueSymbol]: V;
 } & WidgetWithConfig<
   T,
   InputConfig<T, C, V, VC>,
@@ -115,12 +149,14 @@ export type InferredInputWithConfig<
   ? { Config: Config; Value: Value; ValueConfig: ValueConfig }
   : never;
 
-export type InputValue<T extends AnyInput> = T extends { [inputValue]: infer U }
+export type InputValue<T extends AnyInput> = T extends {
+  [__inputValueSymbol]: infer U;
+}
   ? U
   : unknown;
 
 export type InputValueConfig<T extends AnyInput> = T extends {
-  [inputValueConfig]: infer U;
+  [__inputValueConfigSymbol]: infer U;
 }
   ? U
   : undefined;
@@ -173,14 +209,19 @@ export function InputHandler(
       return this.config[inputBaseConfig];
     },
     async loadAndCheck(data) {
-      const result = await handler.loadAndCheck.call(this, data);
+      let result = await handler.loadAndCheck.call(this, data);
       if ("error" in result) {
         return result;
       }
-      if (this.inputConfig?.check) {
+      if (this.inputConfig?.check && result.value != null) {
         const error = await this.inputConfig.check(result.value);
         if (error != null) return { error };
       }
+
+      if (this.inputConfig?.load) {
+        result = await this.inputConfig.load(result.value);
+      }
+
       return result;
     },
     async handleCheck(data) {

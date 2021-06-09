@@ -1,4 +1,6 @@
+import { WeakId } from "@dabsi/common/WeakId";
 import { FormView } from "@dabsi/typerpc2/form/view";
+import { InputWithAnyError } from "@dabsi/typerpc2/input/InputWithCustomError";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
 import {
   TextInputView,
@@ -19,7 +21,7 @@ export type MuiTextInputViewProps<
   TextFieldProps?: Partial<TextFieldProps>;
 };
 
-export function MuiTextInputView<T extends TextInput>({
+export function MuiTextInputView<T extends InputWithAnyError<TextInput>>({
   title,
   TextFieldProps,
   disableLangKey,
@@ -43,6 +45,8 @@ export function MuiTextInputView<T extends TextInput>({
               }
             },
             onChange(event) {
+              console.log({ tiId: WeakId(view) });
+
               isChanged.current = true;
               return view.setText(event.target.value);
             },

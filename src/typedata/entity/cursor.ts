@@ -26,7 +26,7 @@ import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 export type BaseDataEntityCursor = {
   typeInfo: DataTypeInfo;
 
-  filter: DataExp<any>;
+  filter: DataExp<any> | undefined;
 
   parent: DataEntityCursorParent | undefined;
 

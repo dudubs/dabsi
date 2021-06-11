@@ -6,8 +6,8 @@ export function makeHtml({
   return `<!DOCTYPE html>
 <html>
 <head>
-${scripts.map(src => `<script src="${src}"></script>`).join("\n")}
 ${head}
+${scripts.map(src => `<script src="${src}"></script>`).join("\n")}
 </head>
 <body>
 ${body}

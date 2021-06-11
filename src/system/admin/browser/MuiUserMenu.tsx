@@ -8,10 +8,16 @@ import {
   Typography,
 } from "@material-ui/core";
 import React from "react";
+import { RouterHistory } from "@dabsi/typerouter2/view/RouterHistory";
+import { ReactContext } from "@dabsi/view/react/ReactContext";
+import { AclRpc } from "@dabsi/system/acl/common/rpc";
+import { AclCurrentUserReactor } from "@dabsi/system/acl/view";
 
 export function MuiUserMenu(p: { userName: string }) {
   const anchorElRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
+
+  const c = ReactContext.use({ history: RouterHistory });
 
   const closeOnClick = callback => ({
     onClick: () => {
@@ -38,8 +44,9 @@ export function MuiUserMenu(p: { userName: string }) {
         onClose={() => setOpen(false)}
       >
         <MenuItem
-          {...closeOnClick(() => {
-            //
+          {...closeOnClick(async () => {
+            await AclRpc.instance.logout();
+            AclCurrentUserReactor.emit(null);
           })}
         >
           <ListItemIcon>

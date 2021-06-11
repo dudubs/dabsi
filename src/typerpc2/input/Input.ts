@@ -7,6 +7,8 @@ const __isInput = Symbol("__isInput");
 // TODO: make function Input.getDataFromElement
 export const inputValueElementToData = Symbol("inputValueElementToData");
 
+export const inputNullableValueSymbol = Symbol("inputNullableValue");
+
 export interface BaseInput<ValueData, ValueElement, Error, Element>
   extends Widget<Element> {
   [__isInput]: true;

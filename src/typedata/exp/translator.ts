@@ -256,11 +256,11 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
     return this.translateLength(this.translate(exp));
   }
 
-  $and(exps: O["$and"]): U {
-    if (exps.find(x => x === false) === false) {
+  $and(exp: O["$and"]): U {
+    if (exp.find(x => x === false) === false) {
       return this.translate(false);
     }
-    return this.translateAnd(exps.map(exp => this.translate(exp)));
+    return this.translateAnd(exp.map(exp => this.translate(exp)));
   }
 
   $or(exp: O["$or"]): U {

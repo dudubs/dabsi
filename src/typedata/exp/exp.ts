@@ -56,9 +56,9 @@ export interface DataExpTypes<T> {
 
   $isNot: string[] | string;
 
-  $and: DataExp<T>[];
+  $and: (DataExp<T> | undefined)[];
 
-  $or: DataExp<T>[];
+  $or: (DataExp<T> | undefined)[];
 
   $param: DataParameterExp;
 
@@ -179,7 +179,9 @@ export type DataExp<T> =
   | DataStringExp<T>
   | DataObjectExp<T>;
 
-export function DataExp<T>(...exps: Array<DataExp<T>>): DataExp<T> {
+export function DataExp<T>(
+  ...exps: Array<DataExp<T> | undefined>
+): DataExp<T> | undefined {
   exps = [...flat({ $and: exps })];
   return exps.length > 1 ? { $and: exps } : exps[0];
 

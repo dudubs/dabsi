@@ -11,6 +11,14 @@ import { DataRelation } from "@dabsi/typedata/relation";
 import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
 import { Group } from "@dabsi/system/acl/entities/Group";
 
+declare global {
+  namespace Server {
+    interface UserEntity {}
+  }
+}
+
+export interface User extends Server.UserEntity {}
+
 @Entity({ name: "acl/users" })
 export class User {
   static FullName: DataExp<User> = {

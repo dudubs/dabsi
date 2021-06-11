@@ -14,4 +14,6 @@ export class AclRpc extends Rpc {
   @RpcContextual(() => AclLoginForm) login!: AclLoginForm;
 
   @RpcFuncational() getCurrentUser!: () => Promise<AclCurrentUser | null>;
+
+  @RpcFuncational() logout!: () => Promise<void>;
 }

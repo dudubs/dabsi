@@ -22,6 +22,7 @@ export default (source: DataEntitySource<any>, data: DataInsertRow<any>) => {
   parentEntityCursor &&
     buildRelation(parentEntityCursor.relation, parentEntityCursor.relationKey);
 
+  // build plan from cursor
   for (const { relation, key: relationKey } of entityCursor.relationKeys) {
     if (relation.propertyName in data) {
       throw new Error(`Can't override relation ${relation.propertyName}.`);
@@ -30,6 +31,7 @@ export default (source: DataEntitySource<any>, data: DataInsertRow<any>) => {
     buildRelation(relation, relationKey);
   }
 
+  // reject override column-keys by cursor
   for (const {
     metadata: { propertyName },
     key,
@@ -40,6 +42,7 @@ export default (source: DataEntitySource<any>, data: DataInsertRow<any>) => {
     entity[propertyName] = key;
   }
 
+  // build plan from data
   for (let [propertyName, propertyValue] of entries(data)) {
     if (propertyValue == null) continue;
     const relation = entityCursor.entityInfo.propertyRelationMap[propertyName];
@@ -66,6 +69,14 @@ export default (source: DataEntitySource<any>, data: DataInsertRow<any>) => {
       entityCursor.entityInfo.propertyColumnMetadataMap[propertyName];
     if (!column) throw new Error(`Invalid property ${propertyName}`);
     entity[propertyName] = propertyValue;
+  }
+
+  // set discriminator column if discriminator is also primary
+  const {
+    entityMetadata: { discriminatorColumn, discriminatorValue },
+  } = entityCursor;
+  if (discriminatorColumn?.isPrimary && discriminatorValue?.length) {
+    entity[discriminatorColumn.propertyName] = discriminatorValue;
   }
 
   return {

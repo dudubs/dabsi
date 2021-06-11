@@ -30,7 +30,13 @@ export default class BrowserModule {
 
         res.contentType("text/html").send(
           makeHtml({
-            head: `<meta charset="utf-8">`,
+            head: `<meta charset="utf-8">${
+              res.messages.length
+                ? `<script>window.GLOBAL_MESSAGES=${JSON.stringify(
+                    res.messages
+                  )}</script>`
+                : ""
+            }`,
             scripts: [
               ...this.scripts,
               ...["vendor", "index", "runtime"].map(

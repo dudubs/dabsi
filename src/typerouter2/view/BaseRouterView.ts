@@ -24,9 +24,9 @@ export type BaseRouterViewProps = {
 };
 
 export function BaseRouterView(p: BaseRouterViewProps) {
-  const [locationPath, setLocationPath] = React.useState(() => {
-    return RouterLocation.parse(p.routerType, p.path);
-  });
+  const [locationPath, setLocationPath] = React.useState(() =>
+    RouterLocation.parse(p.routerType, p.path)
+  );
 
   const { component, history } = React.useMemo(() => {
     const wrappers: ((element, stack) => React.ReactElement)[] = [];
@@ -36,14 +36,14 @@ export function BaseRouterView(p: BaseRouterViewProps) {
       p.setPath?.(location.path);
     }, locationPath.location);
 
-    let locationDepthCounter = 0;
+    let locationStepsCounter = 0;
 
     for (
       let location = locationPath.location;
       location;
       location = location.parent!
     ) {
-      const locationDepth = locationDepthCounter++;
+      const locationSteps = locationStepsCounter++;
 
       const useParams = (callback: any) => {
         return React.useMemo(
@@ -52,15 +52,18 @@ export function BaseRouterView(p: BaseRouterViewProps) {
         );
       };
 
+      const getLocationRoot = (location: RouterLocation, depth: number) => {
+        for (let index = 0; depth > index; index++)
+          location = defined(
+            location.parent,
+            () => `Invalid depth ${depth}, ${index}`
+          );
+        return location;
+      };
+
       const applyRenderers = (renderers: RouterViewRendererWithDepth[]) => {
         for (const { depth, renderer } of reversed(renderers)) {
-          let rootLocation: RouterLocation = location;
-
-          for (let index = 0; depth > index; index++)
-            rootLocation = defined(
-              rootLocation.parent,
-              () => `Invalid depth ${depth}, ${index}`
-            );
+          const rootLocation: RouterLocation = getLocationRoot(location, depth);
 
           wrappers.push((element, stack) => {
             stack = { ...stack };
@@ -86,12 +89,20 @@ export function BaseRouterView(p: BaseRouterViewProps) {
         routerType !== Router;
         routerType = Object.getPrototypeOf(routerType)
       ) {
-        const metadata = getRouterViewMetadata(routerType, true);
-
+        const metadata = getRouterViewMetadata.map.get(routerType);
         if (!metadata) continue;
 
-        if (!locationDepth && locationPath.type === "index") {
-          metadata.indexRenderer && applyRenderers([metadata.indexRenderer]);
+        if (!locationSteps) {
+          switch (locationPath.type) {
+            case "index":
+              metadata.indexRenderer &&
+                applyRenderers([metadata.indexRenderer]);
+              break;
+            case "default":
+              metadata.defaultRenderer &&
+                applyRenderers([metadata.defaultRenderer]);
+              break;
+          }
         }
 
         applyRenderers(metadata.wrappers);

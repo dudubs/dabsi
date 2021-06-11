@@ -8,7 +8,7 @@ import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";
 import { DataEntityTranslator } from "@dabsi/typedata/entity/translator";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataFieldsTranslator } from "@dabsi/typedata/fieldsTranslator";
-import { KeyObject } from "@dabsi/typedata/KeyObject";
+
 import { DataOrder } from "@dabsi/typedata/order";
 import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
 import { DataQuery } from "@dabsi/typedata/query/exp";
@@ -22,6 +22,7 @@ import { DataSourceRow } from "@dabsi/typedata/sourceRow";
 import { DataTypeInfo } from "@dabsi/typedata/typeInfo";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
 import { Connection, EntityMetadata } from "typeorm";
+import { DataEntityKey } from "@dabsi/typedata/entity/key";
 
 type RowLoader = (context: RowContext) => Awaitable;
 const defaultChildKey = "";
@@ -404,7 +405,7 @@ export class DataEntityLoader {
 
     const keyText = this._singlePrimaryColumn
       ? String(keyObject[this._singlePrimaryColumn.propertyName])
-      : KeyObject.stringify(keyObject);
+      : DataEntityKey.stringify(this.entityMetadata, keyObject);
 
     const row: any = {};
     row.$key = keyText;

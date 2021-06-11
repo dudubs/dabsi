@@ -3,7 +3,13 @@ import {
   RpcResolver,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { Resolved, Resolver, ResolverMap } from "@dabsi/typedi";
-import { RpcAt, RpcLocation, RpcValidatePath } from "@dabsi/typerpc2";
+import {
+  Rpc,
+  RpcAt,
+  RpcLocation,
+  RpcType,
+  RpcValidatePath,
+} from "@dabsi/typerpc2";
 
 export default class RpcResolverBuilder<T, C> {
   constructor(

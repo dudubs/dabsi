@@ -1,5 +1,6 @@
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
@@ -59,11 +60,14 @@ export type InputConfig<
   T extends AnyInput,
   Config,
   Value,
-  ValueConfig
-> = T extends {
-  [__inputCustomValueSymbol]: infer CustomValue;
-}
-  ? PartialUndefinedKeys<
+  ValueConfig,
+  CustomValue = never
+> = IsNever<CustomValue> extends false
+  ? //
+    // T extends {
+    //   [__inputCustomValueSymbol]: infer CustomValue;
+    // }
+    PartialUndefinedKeys<
       {
         config: Config;
       },
@@ -119,13 +123,15 @@ export type InputWithConfig<
   V,
   VC,
   H = {},
-  HC = InferredHandlerConfig<C>
+  HC = InferredHandlerConfig<C>,
+  CustomValue = never
 > = {
   [__inputValueConfigSymbol]: VC;
   [__inputValueSymbol]: V;
+  [__inputCustomValueSymbol]: CustomValue;
 } & WidgetWithConfig<
   T,
-  InputConfig<T, C, V, VC>,
+  InputConfig<T, C, V, VC, CustomValue>,
   BaseInputHandler<T, V, VC> & H,
   HC
 >;
@@ -144,6 +150,8 @@ export type InferredInputWithConfig<
   infer Config,
   infer Value,
   infer ValueConfig,
+  any,
+  any,
   any
 >
   ? { Config: Config; Value: Value; ValueConfig: ValueConfig }

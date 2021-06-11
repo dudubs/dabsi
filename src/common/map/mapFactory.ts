@@ -8,7 +8,7 @@ export type MapFactory<T extends BaseMap<any, any>> = BaseMap<
 > & {
   map: T;
   (key: MapKey<T>): Defined<MapValue<T>>;
-  (key: MapKey<T>, getOnly: true): Defined<MapValue<T>> | undefined;
+  // (key: MapKey<T>, getOnly: true): Defined<MapValue<T>> | undefined;
 };
 
 function mapFactory<K, V>(

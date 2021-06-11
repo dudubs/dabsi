@@ -1,3 +1,4 @@
+// TODO: Fix mark row only if selection changed.
 import MuiSearchField from "@dabsi/browser/mui/components/MuiSearchField";
 import MuiTableCell from "@dabsi/browser/mui/components/MuiTableCell";
 import MuiActions, {

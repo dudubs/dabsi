@@ -61,10 +61,10 @@ export const MuiFormView = <T extends AnyForm>({
           <MuiForm
             header={renderHeader?.(view)}
             {...mergeProps(MuiFormProps, {
-              submitButtonProps: {
+              SubmitButtonProps: {
                 $merge: { disabled: { $override: disabled } },
               },
-              resetButtonProps: {
+              ResetButtonProps: {
                 $merge: { disabled: { $override: disabled } },
               },
               submitTitle: isVariant.save && lang`SAVE_CHANGES`,

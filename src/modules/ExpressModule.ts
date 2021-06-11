@@ -1,8 +1,11 @@
 //
+import { GlobalMessage } from "@dabsi/common/globalMessages";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import ServerModule from "@dabsi/modules/ServerModule";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
+import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
 import { Module, Plugin } from "@dabsi/typemodule";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import express from "express";
 
 export type ExpressBuilderFn = (app: express.Application) => void;
@@ -10,6 +13,14 @@ export type ExpressBuilderFn = (app: express.Application) => void;
 export class ExpressRequest extends Resolver<express.Request>() {}
 
 export class ExpressResponse extends Resolver<express.Response>() {}
+
+declare global {
+  namespace Express {
+    interface Response {
+      messages: GlobalMessage[];
+    }
+  }
+}
 
 @Module({})
 export default class ExpressModule {
@@ -23,10 +34,17 @@ export default class ExpressModule {
 
   readonly request = new RequestBuilder();
 
-  constructor(protected serverModule: ServerModule) {}
+  constructor(
+    protected serverModule: ServerModule,
+    protected moduleRunner: ModuleRunner
+  ) {}
 
   createApplication(): express.Application {
     const app = express();
+    app.use((req, res, next) => {
+      res.messages = [];
+      next();
+    });
     for (const builders of [
       this.preBuilders,
       this.builders,
@@ -74,5 +92,22 @@ export default class ExpressModule {
     await this.request.process(context, context =>
       this.serverModule.processRequest(context, callback)
     );
+  }
+
+  resolveHandler<U extends ResolverDeps>(
+    ...args: ConsumeArgs<express.Handler, U>
+  ): express.Handler {
+    const resolver = ConsumeArgs(args)!;
+    return (req, res, next) => {
+      this.processRequest(
+        Resolver.Context.create(this.moduleRunner.context),
+        req,
+        res,
+        async context => {
+          const handler = Resolver.resolve(resolver, context);
+          handler(req, res, next);
+        }
+      );
+    };
   }
 }

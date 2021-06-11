@@ -1,38 +1,48 @@
+import FacebookIcon from "@material-ui/icons/Facebook";
 import { MuiFormView } from "@dabsi/browser/mui/views/MuiFormView";
-import { MuiObjectInputView } from "@dabsi/browser/mui/views/MuiObjectInputView";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
-import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { Typography } from "@material-ui/core";
+import { Button, Divider, Grid, Paper, Typography } from "@material-ui/core";
 import ExitToAppIcon from "@material-ui/icons/ExitToApp";
 import Alert from "@material-ui/lab/Alert";
 import React from "react";
+import styled from "styled-components";
 
+const StyledPapaer = styled(Paper)`
+  ${p => p.theme.breakpoints.up("sm")} {
+    padding: ${p => p.theme.spacing(4)}px ${p => p.theme.spacing(8)}px;
+
+    margin: auto;
+    margin-top: 10%;
+    max-width: 500px;
+  }
+
+  ${p => p.theme.breakpoints.only("xs")} {
+    padding: ${p => p.theme.spacing(2)}px ${p => p.theme.spacing(4)}px;
+  }
+`;
 export function MuiLoginFormView({
   onLogin,
 }: {
   onLogin(p: { fullName?: string; loginName: string });
 }) {
   return (
-    <>
-      <Typography variant="h5" gutterBottom>{lang`LOGIN_TO_SYSTEM`}</Typography>
-      <SystemView
-        connection={AclRpc.instance.login}
-        build={$ =>
-          $.at("input", $ =>
-            $.render(props => (
-              <MuiObjectInputView
-                {...props}
-                item={{
-                  loginName: { xs: true },
-                }}
-              />
-            ))
-          )
-        }
+    <StyledPapaer>
+      <Typography
+        variant="h5"
+        gutterBottom
+        align="center"
+        color="textSecondary"
+      >{lang`LOGIN_TO_SYSTEM`}</Typography>
+      <Grid
+        container
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        justify="center"
       >
-        {props => (
+        <Grid item xs>
           <MuiFormView
-            {...props}
+            connection={AclRpc.instance.login}
             renderHeader={({ value, input }) => {
               switch (value?.type) {
                 case "failed":
@@ -53,9 +63,9 @@ export function MuiLoginFormView({
             MuiFormProps={{
               disableReset: true,
               submitTitle: lang`LOGIN`,
-              baseButtonProps: { color: "primary", variant: "text" },
-              buttonsGridProps: { justify: "center" },
-              submitButtonProps: { endIcon: <ExitToAppIcon /> },
+              ButtonProps: { color: "primary", variant: "contained" },
+              ButtonsContainerProps: { justify: "flex-start" },
+              SubmitButtonProps: { endIcon: <ExitToAppIcon /> },
             }}
             onSubmit={(result, { input }) => {
               if (result.type === "success") {
@@ -68,8 +78,20 @@ export function MuiLoginFormView({
               }
             }}
           />
-        )}
-      </SystemView>
-    </>
+        </Grid>
+        <Grid item>
+          <LoginWithGoogleButton startIcon={<FacebookIcon />}>
+            LOGIN_WITH_GOOGLE
+          </LoginWithGoogleButton>
+        </Grid>
+      </Grid>
+    </StyledPapaer>
   );
 }
+
+const LoginWithGoogleButton = styled(Button)`
+  &&& {
+    background-color: red;
+    color: white;
+  }
+`;

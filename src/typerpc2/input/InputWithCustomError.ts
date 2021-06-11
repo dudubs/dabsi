@@ -27,10 +27,11 @@ export type InputWithConfigAndCustomError<
   infer V,
   infer VC,
   infer H,
-  infer HC
+  infer HC,
+  infer CV
 >
   ? InputWithCustomError<T, CustomError> &
-      InputWithConfig<InputWithCustomError<T, CustomError>, C, V, VC, H, HC>
+      InputWithConfig<InputWithCustomError<T, CustomError>, C, V, VC, H, HC, CV>
   : InputWithCustomError<T, CustomError>;
 
 export function InputWithCustomError<CustomError>(): {

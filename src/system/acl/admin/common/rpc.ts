@@ -8,22 +8,12 @@ import {
   RpcLocation,
   RpcParametrial,
 } from "@dabsi/typerpc2";
-import { DataTable } from "@dabsi/typerpc2/data-table/rpc";
 import { Form } from "@dabsi/typerpc2/form/rpc";
 import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithCustomError";
 import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
-
-export class ACL_GroupsTable extends DataTable({
-  groupName: String,
-  countUsers: Number,
-}) {}
-
-export class ACL_UsersTable extends DataTable({
-  loginName: String,
-  firstName: String,
-  lastName: String,
-}) {}
+import AclGroupsTable from "../../common/AclGroupsTable";
+import AclUsersTable from "../../common/AclUsersTable";
 
 export class ACL_GroupInput extends ObjectInput({
   groupName: InputWithAlreadyInUseError(TextInput),
@@ -65,7 +55,7 @@ export class ACL_EditGroup extends Rpc {
   form!: DataForm<ACL_GroupInput>;
 
   @RpcContextual()
-  usersTable!: ACL_UsersTable;
+  usersTable!: AclUsersTable;
 
   @RpcFuncational()
   updateUsers!: (users: Record<string, boolean>) => Promise<void>;
@@ -77,7 +67,7 @@ export default class ACL_AdminRpc extends Rpc {
   // groups management
 
   @RpcContextual()
-  groupsTable!: ACL_GroupsTable;
+  groupsTable!: AclGroupsTable;
 
   @RpcContextual(() => DataForm(ACL_GroupInput))
   addNewGroupForm!: DataForm<ACL_GroupInput>;
@@ -91,7 +81,7 @@ export default class ACL_AdminRpc extends Rpc {
   // users managemnt
 
   @RpcContextual()
-  usersTable!: ACL_UsersTable;
+  usersTable!: AclUsersTable;
 
   @RpcContextual(() => DataForm(ACL_UserBasicInput))
   addNewUserForm!: DataForm<ACL_UserBasicInput>;

@@ -1,6 +1,7 @@
 import DataContext from "@dabsi/modules/data/DataContext";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RequestSession, RequestUser } from "@dabsi/modules/session";
+import AclAuthenticator from "@dabsi/system/acl/AclAuthenticator";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { User } from "@dabsi/system/acl/entities/User";
 import { getPasswordHash } from "@dabsi/system/acl/getPasswordHash";
@@ -11,7 +12,7 @@ export default RpcResolver(AclRpc, $ =>
     .with({
       data: DataContext,
       user: RequestUser,
-      session: RequestSession,
+      authenticator: AclAuthenticator,
     })
     .at("getCurrentUser", $ =>
       $.configure(c => $ =>
@@ -26,6 +27,13 @@ export default RpcResolver(AclRpc, $ =>
         })
       )
     )
+    .at("logout", $ =>
+      $.configure(c => $ =>
+        $(async () => {
+          await c.authenticator.logout();
+        })
+      )
+    )
     .at("login", $ =>
       $.configure(c => $ =>
         $({
@@ -33,13 +41,13 @@ export default RpcResolver(AclRpc, $ =>
             const user = await c.data
               .getSource(User)
               .filter({
-                loginName,
-                password: getPasswordHash(password),
+                loginName: loginName!,
+                password: getPasswordHash(password!),
               })
               .pick({ fullName: User.FullName })
               .get();
             if (!user) return { type: "failed" };
-            await c.session.update({ user });
+            await c.authenticator.loginAs(user);
             return {
               type: "success",
               fullName: user.fullName,
@@ -49,3 +57,5 @@ export default RpcResolver(AclRpc, $ =>
       )
     )
 );
+
+// authenenticator.loginAs({})

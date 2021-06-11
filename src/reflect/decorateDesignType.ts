@@ -1,8 +1,10 @@
+import { Defined } from "@dabsi/common/typings2/Defined";
 import { Type } from "@dabsi/common/typings2/Type";
-export function decorateDesignType<T, K extends string>(
-  target: Type<Record<K, T>>,
-  key: K,
-  type: Function & Type<T>,
+import "reflect-metadata";
+export function decorateDesignType<T, K extends keyof T>(
+  target: Type<T>,
+  key: string & K,
+  type: Type<Defined<T[K]>> | ((value: any) => Defined<T[K]>),
   decorators: Function[]
 ) {
   Reflect.decorate(

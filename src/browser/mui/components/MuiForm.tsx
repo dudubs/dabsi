@@ -13,24 +13,32 @@ export type MuiFormProps = {
 
   onReset?(event: React.SyntheticEvent<any>);
 
-  baseButtonProps?: ButtonProps;
+  ButtonProps?: ButtonProps;
 
-  submitButtonProps?: ButtonProps;
+  ContainerProps?: GridProps;
 
-  resetButtonProps?: ButtonProps;
+  SubmitButtonProps?: ButtonProps;
+
+  ResetButtonProps?: ButtonProps;
 
   submitTitle?: React.ReactNode;
   // toolbar?
 
-  buttonsGridProps?: GridProps;
+  ButtonsContainerProps?: GridProps;
 
   header?: React.ReactChild;
+
+  beforeSubmitButton?: React.ReactNode;
+  afterSubmitButton?: React.ReactNode;
+
+  beforeResetButton?: React.ReactNode;
+  afterResetButton?: React.ReactNode;
 };
 
 export function MuiForm(p: MuiFormProps): React.ReactElement {
   return (
     <MuiThemeProvider theme={MuiFormTheme}>
-      <Grid container direction="column" spacing={1}>
+      <Grid container direction="column" spacing={2} {...p.ContainerProps}>
         {p.header && <Grid item>{p.header}</Grid>}
         <Grid item>{p.children}</Grid>
         <Grid
@@ -39,32 +47,36 @@ export function MuiForm(p: MuiFormProps): React.ReactElement {
           spacing={1}
           justify="flex-end"
           direction="row"
-          {...p.buttonsGridProps}
+          {...p.ButtonsContainerProps}
         >
+          {p.beforeSubmitButton}
           {p.onSubmit && (
             <Grid item>
               <Button
                 variant="contained"
                 color="primary"
-                {...p.baseButtonProps}
-                {...p.submitButtonProps}
+                {...p.ButtonProps}
+                {...p.SubmitButtonProps}
                 onClick={p.onSubmit}
               >
                 {p.submitTitle || lang`SUBMIT`}
               </Button>
             </Grid>
           )}
+          {p.afterSubmitButton}
+          {p.beforeSubmitButton}
           {!p.disableReset && p.onReset && (
             <Grid item>
               <Button
                 variant="contained"
                 color="primary"
-                {...p.baseButtonProps}
-                {...p.resetButtonProps}
+                {...p.ButtonProps}
+                {...p.ResetButtonProps}
                 onClick={p.onReset}
               >{lang`RESET`}</Button>
             </Grid>
           )}
+          {p.afterResetButton}
         </Grid>
       </Grid>
     </MuiThemeProvider>

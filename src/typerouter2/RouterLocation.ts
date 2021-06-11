@@ -46,6 +46,10 @@ export class RouterLocation {
     );
   }
 
+  get root(): RouterLocation {
+    return this.parent?.root || this;
+  }
+
   @Lazy(true) get router(): Router {
     return new this.routerType(this);
   }

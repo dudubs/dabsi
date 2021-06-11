@@ -251,20 +251,18 @@ export class DataEntityTranslator extends DataTranslator<DataQueryExp> {
       const column = entityMetadata.primaryColumns[0];
       return [column.databaseName, { [inverse ? "$notIn" : "$in"]: keys }];
     }
-    const exp = {
-      $or: this.translateOr(
-        keys.map(textKey => {
-          const key = DataEntityKey.parseObject(entityMetadata, textKey);
-          return {
-            $and: entityMetadata.primaryColumns.map(column => [
-              column.databaseName,
-              "=",
-              [key[column.referencedColumn!.propertyName]],
-            ]),
-          };
-        })
-      ),
-    };
+    const exp = this.translateOr(
+      keys.map(textKey => {
+        const key = DataEntityKey.parseObject(entityMetadata, textKey);
+        return {
+          $and: entityMetadata.primaryColumns.map(column => [
+            column.databaseName,
+            "=",
+            [key[column.propertyName]],
+          ]),
+        };
+      })
+    );
     return inverse ? { $not: exp } : exp;
   }
 

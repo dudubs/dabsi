@@ -1,9 +1,8 @@
-import { RebaseType } from "./BaseType";
 import {
   DataRelationKeys,
   DataRelationToOneKeys,
-  DataRelationType,
 } from "@dabsi/typedata/relation";
+import { RebaseType } from "./BaseType";
 
 //
 /*

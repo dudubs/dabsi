@@ -41,7 +41,7 @@ export default RouterView(ACL_AdminRouter, $ =>
               tableWrapper={(table, view) => (
                 <MuiForm
                   onSubmit={() => {}}
-                  submitButtonProps={{
+                  SubmitButtonProps={{
                     disabled: !view.hasSelectionChanges,
                   }}
                   submitTitle={lang`SAVE_CHANGES`}

@@ -28,56 +28,53 @@ export type MuiFormProps = {
 
   header?: React.ReactChild;
 
-  beforeSubmitButton?: React.ReactNode;
-  afterSubmitButton?: React.ReactNode;
-
-  beforeResetButton?: React.ReactNode;
-  afterResetButton?: React.ReactNode;
+  renderButtons?: (props: {
+    submitButton?: React.ReactElement;
+    resetButton?: React.ReactElement;
+  }) => React.ReactNode;
 };
 
 export function MuiForm(p: MuiFormProps): React.ReactElement {
+  const submitButton = !p.onSubmit ? undefined : (
+    <Button
+      variant="contained"
+      color="primary"
+      {...p.ButtonProps}
+      {...p.SubmitButtonProps}
+      onClick={p.onSubmit}
+    >
+      {p.submitTitle || lang`SUBMIT`}
+    </Button>
+  );
+  const resetButton = !(!p.disableReset && p.onReset) ? undefined : (
+    <Button
+      variant="contained"
+      color="primary"
+      {...p.ButtonProps}
+      {...p.ResetButtonProps}
+      onClick={p.onReset}
+    >{lang`RESET`}</Button>
+  );
   return (
     <MuiThemeProvider theme={MuiFormTheme}>
       <Grid container direction="column" spacing={2} {...p.ContainerProps}>
         {p.header && <Grid item>{p.header}</Grid>}
         <Grid item>{p.children}</Grid>
-        <Grid
-          item
-          container
-          spacing={1}
-          justify="flex-end"
-          direction="row"
-          {...p.ButtonsContainerProps}
-        >
-          {p.beforeSubmitButton}
-          {p.onSubmit && (
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                {...p.ButtonProps}
-                {...p.SubmitButtonProps}
-                onClick={p.onSubmit}
-              >
-                {p.submitTitle || lang`SUBMIT`}
-              </Button>
-            </Grid>
-          )}
-          {p.afterSubmitButton}
-          {p.beforeSubmitButton}
-          {!p.disableReset && p.onReset && (
-            <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                {...p.ButtonProps}
-                {...p.ResetButtonProps}
-                onClick={p.onReset}
-              >{lang`RESET`}</Button>
-            </Grid>
-          )}
-          {p.afterResetButton}
-        </Grid>
+        {p.renderButtons ? (
+          <Grid item>{p.renderButtons({ submitButton, resetButton })}</Grid>
+        ) : (
+          <Grid
+            item
+            container
+            spacing={1}
+            justify="flex-end"
+            direction="row"
+            {...p.ButtonsContainerProps}
+          >
+            {submitButton && <Grid item>{submitButton}</Grid>}
+            {resetButton && <Grid item>{resetButton}</Grid>}
+          </Grid>
+        )}
       </Grid>
     </MuiThemeProvider>
   );

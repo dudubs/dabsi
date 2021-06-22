@@ -27,6 +27,7 @@ export function RouterView<T extends Router>(
   routerType: RouterType<T>,
   callback: (builder: RouterViewBuilder<T, T, {}>) => any
 ): void;
+
 export function RouterView(props: RouterViewProps): React.ReactElement;
 
 export function RouterView(rotuerTypeOrProps, callback?): any {
@@ -37,6 +38,7 @@ export function RouterView(rotuerTypeOrProps, callback?): any {
     });
     return;
   }
+
   RouterView.build();
 
   const { history, ...props } = rotuerTypeOrProps as RouterViewProps;

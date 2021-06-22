@@ -1,8 +1,8 @@
 // import { MuiTheme } from "@dabsi/browser/mui/MuiSystem";
 // import { MuiSearchField } from "@dabsi/browser/mui/widget/searchField";
 // import useLangService from "@dabsi/view/lang/useLangService";
-// import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
-// import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
+// import mergeProps from "@dabsi/view/react/mergeProps";
+// import EmptyFragment from "@dabsi/view/react/EmptyFragment";
 // import Grid from "@material-ui/core/Grid";
 // import InputAdornment from "@material-ui/core/InputAdornment";
 // import { makeStyles, MuiThemeProvider } from "@material-ui/core/styles";

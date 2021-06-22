@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.server.base.json",
+
+  "include": ["../src"],
+  "exclude": [
+    "../src/**/native",
+    "../src/**/browser",
+    "../src/**/old-*",
+    "../src/**/tests"
+  ]
+}

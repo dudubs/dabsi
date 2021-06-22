@@ -1,7 +1,6 @@
-import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { WeakId } from "@dabsi/common/WeakId";
+import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { TypeResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
+import { Provider, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 declare module "./Resolver" {
   namespace Resolver {
@@ -10,43 +9,33 @@ declare module "./Resolver" {
 }
 
 namespace ResolverProvidability {
-  export function resolve<T>(
-    providable: TypeResolver<T>,
-    context: ResolverMap
-  ) {
+  export function resolve<T>(providable: Provider<T>, context: ResolverMap) {
     return Resolver.resolve(check(providable, context), context);
   }
 
-  export const token = WeakMapFactory((target: Function) => {
-    if (typeof target !== "function") {
-      throw new TypeError(`Expected to function.`);
-    }
-    return `${target.name}:${WeakId(target)}`;
-  });
-
   export function get<T>(
-    type: TypeResolver<T>,
+    type: Provider<T>,
     context: ResolverMap
   ): Resolver<T> | undefined {
-    return context[token(type)];
+    return context[getProviderToken(type)];
   }
 
   export function define<T>(
-    type: TypeResolver<T>,
+    type: Provider<T>,
     context: ResolverMap,
     resolver: Resolver<T>
   ): void {
-    context[token(type)] = resolver;
+    context[getProviderToken(type)] = resolver;
   }
 
-  export function tryToCheck(type: TypeResolver<any>, context: ResolverMap) {
+  export function tryToCheck(type: Provider<any>, context: ResolverMap) {
     const resolver = get(type, context);
     resolver && Resolver.check(resolver, context);
     return resolver;
   }
 
   export function check<T>(
-    type: TypeResolver<T>,
+    type: Provider<T>,
     context: ResolverMap
   ): Resolver<T> {
     const resolver = get(type, context);

@@ -1,5 +1,5 @@
-import { DABSI_DIR } from "@dabsi/env";
-import { inspect } from "@dabsi/logging/inspect";
+import { Once } from "@dabsi/common/patterns/Once";
+import { DABSI_DIR, DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import MakeModule from "@dabsi/modules/MakeModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import ProjectModule from "@dabsi/modules/ProjectModule";
@@ -102,7 +102,7 @@ AppRegistry.registerComponent(appName, getNativeAppCompnent);
       .map(p => `import "${p}";\n`)
       .join("");
 
-    await this.platformModule.makeFiles(
+    return await this.platformModule.makeFiles(
       this.generatedDir,
       this.platforms,
       commonCode
@@ -111,7 +111,7 @@ AppRegistry.registerComponent(appName, getNativeAppCompnent);
 
   readonly buildConfigPath = path.join(
     this.projectModule.configsDir,
-    "tsconfig.build.native.json"
+    "tsconfig.native.build.json"
   );
 
   async makeTsConfigs() {
@@ -125,7 +125,8 @@ AppRegistry.registerComponent(appName, getNativeAppCompnent);
         sourceMap: true, // debug
         esModuleInterop: true,
         noEmit: false,
-        target: "esnext",
+        jsx: "react-native",
+        target: "es6",
         baseUrl: ".",
         outDir: "../packages/native/app-dist",
       },
@@ -141,37 +142,64 @@ AppRegistry.registerComponent(appName, getNativeAppCompnent);
   )
   async compile({ watch = false } = {}) {
     await this.make();
+
     await waitForChildProcess(
       spawn(
         "tsc",
         [
           "-p",
-          path.relative(
-            this.projectModule.settings.directory,
-            this.buildConfigPath
-          ),
+          path.relative(DABSI_WORKSPACE_DIR, this.buildConfigPath),
           ...(watch ? ["-w"] : []),
         ],
         {
           stdio: "inherit",
-          cwd: this.projectModule.settings.directory,
+          cwd: DABSI_WORKSPACE_DIR,
         }
       )
     );
   }
 
+  @Once() protected _startMetro() {
+    return waitForChildProcess(
+      spawn("yarn", ["start"], {
+        stdio: "inherit",
+        cwd: this.packageDir,
+      })
+    );
+  }
+
+  @CliCommand("watch")
+  @Once()
+  protected async _startCompiler() {
+    await this.make();
+    return new Promise<void>(resolve => {
+      const p = spawn(
+        "tsc",
+        ["-w", "-p", path.relative(DABSI_WORKSPACE_DIR, this.buildConfigPath)],
+        {
+          stdio: ["inherit", "pipe", "inherit"],
+          cwd: DABSI_WORKSPACE_DIR,
+        }
+      ).on("close", () => {
+        resolve();
+      });
+
+      p.stdout!.on("data", data => {
+        process.stdout.write(data);
+
+        if (/\s+Found\s+\d+\s+errors?/.test(data)) {
+          this._startMetro();
+        }
+      });
+    });
+  }
+
   @CliCommand("start-dev")
-  startDev() {
+  async startDev() {
     return Promise.all([
       //
       this._serverDevModule?.startDev(),
-      this.compile({ watch: true }),
-      waitForChildProcess(
-        spawn("yarn", ["start"], {
-          stdio: "inherit",
-          cwd: this.packageDir,
-        })
-      ),
+      this._startCompiler(),
     ]);
   }
 }

@@ -1,12 +1,13 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
-import { Rpc, RpcFuncational, RpcNamespace } from "@dabsi/typerpc2";
+import { Rpc, RpcFuncational, RpcMethod, RpcNamespace } from "@dabsi/typerpc2";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 
 class R1 extends Rpc {
-  @RpcFuncational() testFn!: () => Promise<string>;
+  @RpcFuncational() testFn!: RpcMethod<[], string>;
 }
 
 class NS1 extends RpcNamespace {}
@@ -17,7 +18,14 @@ const rb = new RpcResolverGenerator();
 
 const context = Resolver.Context.assign({}, [rb]);
 
-rb.add(RpcResolver(R1.at("testFn"), [], () => $ => $(() => "works")));
+rb.add(
+  RpcResolverBuilder({
+    //
+    for: R1,
+    at: "testFn",
+    configure: () => $ => $(() => "works"),
+  })
+);
 
 beforeAll(async () => {
   NS1.nsCommand = createRpcCommandFromHandler(

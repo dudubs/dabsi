@@ -42,10 +42,7 @@ export type ConsumeFactory<T, U extends ResolverDeps> = U extends ResolverArray
 
 declare module "./Resolver" {
   namespace Resolver {
-    export function consume<
-      T extends TypeResolver<any>,
-      U extends ResolverDeps
-    >(
+    export function consume<T extends Provider<any>, U extends ResolverDeps>(
       provider: T,
       deps: U,
       resolver?: ConsumeFactory<InstanceType<T>, U>
@@ -54,7 +51,7 @@ declare module "./Resolver" {
     export function consume<T, U extends ResolverDeps>(
       deps: U,
       factory: ConsumeFactory<T, U>
-    ): ConsumeResolver<T>;
+    ): Consumer<T>;
   }
 }
 Resolver.consume = function (deps: any, factory: any): any {

@@ -1,5 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import {
@@ -7,6 +8,7 @@ import {
   RpcContextual,
   RpcFuncational,
   RpcLocation,
+  RpcMethod,
   RpcParametrial,
   RpcType,
 } from "@dabsi/typerpc2";
@@ -38,7 +40,7 @@ beforeEach(() => {
 });
 
 class R1 extends Rpc {
-  @RpcFuncational() testFn!: (xs?: string) => Promise<string>;
+  @RpcFuncational() testFn!: RpcMethod<[xs?: string], string>;
 }
 
 class R2 extends Rpc {
@@ -49,13 +51,15 @@ class R2 extends Rpc {
 
 it("expect to resolve rpc-configurator", async () => {
   rb.add(
-    RpcResolver(R1, [], c => $ =>
-      $({
-        handleTestFn() {
-          return "works";
-        },
-      })
-    )
+    RpcResolverBuilder({
+      for: R1,
+      configure: c => $ =>
+        $({
+          handleTestFn() {
+            return "works";
+          },
+        }),
+    })
   );
   expect(await testRpc(R1).testFn()).toEqual("works");
 });
@@ -66,11 +70,14 @@ it("expect to throw eroror because no member handler.", () => {
 
 it("expect to build resolver from member resolvers.", async () => {
   rb.add(
-    RpcResolver(R1.at("testFn"), [], c => $ =>
-      $(() => {
-        return "works";
-      })
-    )
+    RpcResolverBuilder({
+      for: R1,
+      at: "testFn",
+      configure: c => $ =>
+        $(() => {
+          return "works";
+        }),
+    })
   );
   expect(await testRpc(R1).testFn()).toEqual("works");
 });
@@ -82,32 +89,41 @@ it("expect to throw error because no configurator for R1", () => {
 describe("build R1", () => {
   beforeEach(() => {
     rb.add(
-      RpcResolver(R1.at("testFn"), [], c => $ =>
-        $(text => {
-          expect(text).toEqual("hello");
-          return "works";
-        })
-      ),
-      RpcResolver(R2.at("getR1"), [], c => $ =>
-        $((rpcType, pText) => ({
-          handleTestFn(aText) {
-            expect(rpcType).toBe(R1);
-            return `x-${pText}-${aText}`;
-          },
-        }))
-      )
+      RpcResolverBuilder({
+        for: R1,
+        at: "testFn",
+        configure: c => $ =>
+          $(text => {
+            expect(text).toEqual("hello");
+            return "works";
+          }),
+      }),
+      RpcResolverBuilder({
+        for: R2,
+        at: "getR1",
+        configure: c => $ =>
+          $((rpcType, pText) => ({
+            handleTestFn(aText) {
+              expect(rpcType).toBe(R1);
+              return `x-${pText}-${aText}`;
+            },
+          })),
+      })
     );
   });
 
   it("expect to resolve rpc-member-resolver before rpc-resolver", async () => {
     rb.add(
-      RpcResolver(R2.at("r1"), [], c => $ =>
-        $({
-          handleTestFn() {
-            return "works-by-member";
-          },
-        })
-      )
+      RpcResolverBuilder({
+        for: R2,
+        at: "r1",
+        configure: c => $ =>
+          $({
+            handleTestFn() {
+              return "works-by-member";
+            },
+          }),
+      })
     );
     expect(await testRpc(R2).r1.testFn()).toEqual("works-by-member");
   });
@@ -134,7 +150,7 @@ describe("build R1", () => {
 
 describe("generate", () => {
   class R extends Rpc {
-    @RpcFuncational() testFn!: () => Promise<string>;
+    @RpcFuncational() testFn!: RpcMethod<[], string>;
   }
 
   class SR extends R {}
@@ -175,27 +191,22 @@ describe("sanity", () => {
   beforeEach(() => {
     rb.add([
       //
-      RpcResolver(i, $ => [
-        $
-          //
-          .at("xs", $ =>
-            $
-              //
-              .with({ x: Resolver.optional(X) })
-              .configure(c => $ =>
-                $({
-                  config: { minLength: 2 },
-                  [inputBaseConfig]: {
-                    check(value) {
-                      if (value === c.x?.value) {
-                        return "BAD_VALUE";
-                      }
-                    },
-                  },
-                })
-              )
-          ),
-      ]),
+      RpcResolverBuilder({
+        with: { x: Resolver.optional(X) },
+        for: i,
+        at: "xs",
+        configure: c => $ =>
+          $({
+            config: { minLength: 2 },
+            [inputBaseConfig]: {
+              check(value) {
+                if (value === c.x?.value) {
+                  return "BAD_VALUE";
+                }
+              },
+            },
+          }),
+      }),
     ]);
   });
 

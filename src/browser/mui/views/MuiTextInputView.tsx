@@ -7,9 +7,8 @@ import {
   TextInputViewProps,
 } from "@dabsi/typerpc2/text-input/view";
 import LangKey from "@dabsi/view/lang/LangKey";
-import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
-import { ReactContext } from "@dabsi/view/react/ReactContext";
-import { useEmitter } from "@dabsi/view/react/reactor/useEmitter";
+import mergeProps from "@dabsi/view/react/mergeProps";
+import ViewContext from "@dabsi/view/react/ViewContext";
 import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import React, { ReactNode, useRef } from "react";
 
@@ -21,16 +20,17 @@ export type MuiTextInputViewProps<
   TextFieldProps?: Partial<TextFieldProps>;
 };
 
-export function MuiTextInputView<T extends InputWithAnyError<TextInput>>({
+export default function MuiTextInputView<
+  T extends InputWithAnyError<TextInput>
+>({
   title,
   TextFieldProps,
   disableLangKey,
   ...props
 }: MuiTextInputViewProps<T>) {
-  const emit = useEmitter();
   const isChanged = useRef(false);
 
-  const c = ReactContext.use({ form: FormView });
+  const c = ViewContext.use({ form: FormView });
 
   return (
     <TextInputView {...props}>
@@ -62,7 +62,7 @@ export function MuiTextInputView<T extends InputWithAnyError<TextInput>>({
             (disableLangKey
               ? undefined
               : props.childKey && (
-                  <LangKey token={props.childKey}>{title}</LangKey>
+                  <LangKey for={props.childKey}>{title}</LangKey>
                 ))
           }
           error={view.error != null}

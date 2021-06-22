@@ -3,8 +3,6 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { Fn } from "@dabsi/common/typings2/Fn";
-import { inspect } from "@dabsi/logging/inspect";
 import { BaseType, RebaseType } from "@dabsi/typedata/BaseType";
 import { chunks } from "@dabsi/typedata/chunks";
 import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";
@@ -18,10 +16,13 @@ import {
   DataRelationType,
 } from "@dabsi/typedata/relation";
 import { DataRow, DataTreeRow } from "@dabsi/typedata/row";
+import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataSourceRow } from "@dabsi/typedata/sourceRow";
 import { WithDataUnionMetaChildren } from "@dabsi/typedata/union";
 import { DataInsertRow, DataUpdateRow } from "@dabsi/typedata/value";
+
+export type SelectedDataSource<T, S> = DataSource<DataSelectionRow<T, S>>;
 
 export declare namespace DataSource {
   export type At<T, K extends DataRelationKeys<T>> = DataSource<
@@ -372,10 +373,7 @@ export abstract class DataSource<T> {
     });
   }
 
-  filter<T>(
-    this: DataSource<T>,
-    ...exps: (DataExp<T> | undefined)[]
-  ): DataSource<T> {
+  filter<T>(this: DataSource<T>, ...exps: DataExp<T>[]): DataSource<T> {
     const filter = DataExp({ $and: exps as any });
     if (filter === undefined) return this;
     return this.updateCursor({

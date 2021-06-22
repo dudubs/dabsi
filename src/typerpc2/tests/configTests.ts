@@ -2,7 +2,7 @@ import { Fn } from "@dabsi/common/typings2/Fn";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcFuncational } from "@dabsi/typerpc2/decorators";
 import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { Rpc } from "@dabsi/typerpc2/Rpc";
+import { Rpc, RpcMethod } from "@dabsi/typerpc2/Rpc";
 import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
 import { RpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
 
@@ -10,8 +10,9 @@ it("expect to resolve FUNCTION config.", async () => {
   ///
 
   class R extends Rpc {
-    @RpcFuncational() testFn!: (xs: string) => Promise<string>;
+    @RpcFuncational() testFn!: RpcMethod<[xs: string], string>;
   }
+
   interface R extends RpcWithConfig<(xs: string) => string> {}
 
   RpcConfigHandler(
@@ -33,7 +34,7 @@ it("expect to resolve FUNCTION config.", async () => {
 
 it("expect to resolve GENERIC config with resolve-fn", async () => {
   class R extends Rpc {
-    @RpcFuncational() testFn!: (xs: string) => Promise<any>;
+    @RpcFuncational() testFn!: RpcMethod<[xs: string]>;
   }
   interface R
     extends RpcWithConfig<
@@ -66,7 +67,7 @@ it("expect to resolve GENERIC config with resolve-fn", async () => {
 
 it("expect to resolve GENERIC config without resolve-fn", async () => {
   class R extends Rpc {
-    @RpcFuncational() testFn!: (xs: string) => Promise<any>;
+    @RpcFuncational() testFn!: RpcMethod<[xs: string]>;
   }
   interface R
     extends RpcWithConfig<

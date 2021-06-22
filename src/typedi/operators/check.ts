@@ -1,6 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { TypeResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { Provider, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
@@ -19,7 +19,7 @@ Resolver.check = function (resolver, context) {
       // is arrow fn
       return;
     }
-    Resolver.Providability.check(resolver as TypeResolver<any>, context);
+    Resolver.Providability.check(resolver as Provider<any>, context);
     return;
   }
   throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);

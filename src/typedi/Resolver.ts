@@ -4,7 +4,9 @@ import {
   ResolvedDeps,
   ResolverDeps,
 } from "@dabsi/typedi/consume";
+import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
+import { ResolverOrConsumeArgs } from "@dabsi/typedi/ResolverOrConsumeArgs";
 
 export type ResolverMap<T = any> = Record<string, Resolver<T>>;
 
@@ -16,82 +18,51 @@ export type ResolvedMap<T extends ResolverMap<any>> = {
   [K in keyof T]: Resolved<T[K]>;
 };
 
-// TypeResolver, FunctionalResolver, Consumeabial
-export const checkSymbol = Symbol("checkResolve");
+// Provider, FunctionalResolver, Consumeabial
+export const checkSymbol = Symbol("check");
 
 export const resolveSymbol = Symbol("resolve");
 
 export const providableSymbol = Symbol("providable");
 
-export type ArrowResolver<T> = (context: ResolverMap<any>) => T;
+// Customer
+export type Factory<T> = (context: ResolverMap<any>) => T;
 
-export type TypeResolver<T> = Constructor<T> & {
+export type Provider<T> = Constructor<T> & {
   [providableSymbol]?: true;
 };
 
-export type ResolverLike<T extends Resolver> = Resolver<Resolved<T>>;
-
 // TokenableResolver
-export type ConsumeResolver<T> = {
+export type Consumer<T> = {
   new (context: ResolverMap): T;
   [providableSymbol]: false;
 };
 
-export type Resolver<T = any> = ArrowResolver<T> | Constructor<T>;
+export type Resolver<T = any> = Factory<T> | Provider<T> | Consumer<T>;
 
 export type Resolved<T extends Resolver> = T extends Resolver<infer U>
   ? U
   : never;
 
-export interface IResolver {
-  checkSymbol: typeof checkSymbol;
-  providableSymbol: typeof providableSymbol;
-  resolveSymbol: typeof resolveSymbol;
-
-  <T extends object = {}>(): new (context: ResolverMap) => T;
-
-  <T extends TypeResolver<any>>(
-    provider: T,
-    resolver?: Resolver<InstanceType<T>>
-  ): ResolverMap<any>;
-
-  <T extends TypeResolver<any>, U extends ResolverDeps>(
-    provider: T,
-    deps: U,
-    factory?: ConsumeFactory<InstanceType<T>, U>
-  ): ResolverMap<any>;
-
-  <T, U extends ResolverDeps>(
-    deps: U,
-    factory: ConsumeFactory<T, U>
-  ): ConsumeResolver<T>;
-}
-
 export function Resolver<T = {}>(): new (context: ResolverMap) => T;
 
-export function Resolver<T extends TypeResolver<any>>(
-  provider: T,
-  resolver?: Resolver<InstanceType<T>>
-): ResolverMap<any>;
-
-export function Resolver<T extends TypeResolver<any>, U extends ResolverDeps>(
-  provider: T,
-  deps: U,
-  resolver?: ConsumeFactory<InstanceType<T>, U>
-): ResolverMap<any>;
+export function Resolver<P extends Provider<T>, T, Deps extends ResolverDeps>(
+  provider: P,
+  ...args: ResolverOrConsumeArgs<T, Deps>
+): ResolverMap;
 
 export function Resolver<T, U extends ResolverDeps>(
   deps: U,
   factory: ConsumeFactory<T, U>
-): ConsumeResolver<T>;
+): Consumer<T>;
 
 export function Resolver<T extends ResolverDeps>(
   deps: T
-): ConsumeResolver<ResolvedDeps<T>>;
+): Consumer<ResolvedDeps<T>>;
 
 export function Resolver(...args) {
   //
-  if (!args.length) return Providable;
+  if (!args.length) return _Provider;
 
   const [arg0] = args;
   if (
@@ -105,8 +76,6 @@ export function Resolver(...args) {
       return Resolver.object(arg0);
     }
   }
-
-  // TODO: Resolver.locate(resolver, anchor)
 
   if (args.length === 3) {
     const [provider, deps, resolver] = args;
@@ -130,7 +99,7 @@ export function Resolver(...args) {
     }
 
     return {
-      [Resolver.Providability.token(type)]:
+      [getProviderToken(type)]:
         resolver ??
         (() => {
           throw new ResolveError(`No resolve for ${type.name}.`);
@@ -140,7 +109,7 @@ export function Resolver(...args) {
 
   throw new TypeError("No overload.");
 }
-class Providable {
+class _Provider {
   constructor(context: ResolverMap) {
     return Resolver.resolve(this.constructor as any, context);
   }

@@ -101,7 +101,7 @@ export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
         valueConfig: async $ =>
           $(
             await ConfigOrFactory(config.valueConfig, async () => [
-              await row.fetch(config.selection || {}),
+              await row.select(config.selection || {}),
             ])
           ),
         async submit(value) {

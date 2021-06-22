@@ -1,6 +1,6 @@
-// import { ACL_Admin_UserRpc } from "./userRpc";
+// import { AclAdmin_UserRpc } from "./userRpc";
 // import { DataManager } from "@dabsi/old-typerpc/data-manager";
-// import { ACL_Admin_UserBaiscInfoInput } from "@dabsi/system/acl/admin/users/common/basicInfoInput";
+// import { AclAdmin_UserBaiscInfoInput } from "@dabsi/system/acl/admin/users/common/basicInfoInput";
 // import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
 // import { WidgetNamespace } from "@dabsi/old-typerpc/widget/widget-namespace/WidgetNamspace";
 
@@ -10,6 +10,6 @@
 //     firstName: String,
 //     lastName: String,
 //   }),
-//   addInput: ACL_Admin_UserBaiscInfoInput,
-//   edit: WidgetNamespace(ACL_Admin_UserRpc),
+//   addInput: AclAdmin_UserBaiscInfoInput,
+//   edit: WidgetNamespace(AclAdmin_UserRpc),
 // });

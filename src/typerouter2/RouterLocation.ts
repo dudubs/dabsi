@@ -105,7 +105,7 @@ export class RouterLocation {
     }
   }
 
-  @Lazy() get path() {
+  @Lazy() get path(): string {
     let path = this.parent?.path || "/";
 
     if (!this.route) return path;

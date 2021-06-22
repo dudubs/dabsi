@@ -72,7 +72,7 @@ export default function MuiActions(p: MuiActionsProps): React.ReactElement {
     ).push({
       key,
       ...action,
-      title: <LangKey token={key}>{action.title}</LangKey>,
+      title: <LangKey for={key}>{action.title}</LangKey>,
       tooltip: isButton && !action.tooltip ? false : action.tooltip,
     });
   }

@@ -1,7 +1,7 @@
-import { Rpc, RpcFuncational } from "@dabsi/typerpc2";
+import { Rpc, RpcFuncational, RpcMethod } from "@dabsi/typerpc2";
 
 class A extends Rpc {
-  @RpcFuncational() testFn!: (text?: string) => Promise<string[]>;
+  @RpcFuncational() testFn!: RpcMethod<[text?: string], string>;
 }
 
 it("", () => {

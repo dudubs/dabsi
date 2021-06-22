@@ -1,7 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
-import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
-import { ConsumeResolver, Resolver } from "@dabsi/typedi";
+import { Consumer, Resolver } from "@dabsi/typedi";
 import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
 import { Rpc, RpcLocation } from "@dabsi/typerpc2";
 import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
@@ -16,8 +15,7 @@ export type RpcLocationConfigurator<T> =
     : // T
       ConfigFactory<RpcMemberHandler<T>>;
 
-export interface RpcResolver<T>
-  extends ConsumeResolver<RpcLocationConfigurator<T>> {
+export interface RpcResolver<T> extends Consumer<RpcLocationConfigurator<T>> {
   rpcLocation: RpcLocation<T>;
   rpcOriginalResolver: Resolver<T>;
 }
@@ -28,17 +26,12 @@ export function RpcResolver<T, U extends ResolverDeps>(
   rpcTypeOrLocation: RpcTypeOrLocation<T>
 ): Resolver<RpcLocationConfigurator<T>>;
 
-export function RpcResolver<T extends Rpc>(
-  rpcTypeOrLocation: RpcTypeOrLocation<T>,
-  callback: ($: RpcResolverBuilder<T, {}>) => void
-): any[];
-
 export function RpcResolver<T, U extends ResolverDeps>(
   rpcTypeOrLocation: RpcTypeOrLocation<T>,
   ...args: ConsumeArgs<RpcLocationConfigurator<T>, U>
 ): RpcResolver<T>;
 
-export function RpcResolver(rpcTypeOrLocation, ...args): any {
+export function RpcResolver(rpcTypeOrLocation?, ...args): any {
   const rpcLocation = RpcTypeOrLocation(rpcTypeOrLocation);
 
   if (args.length === 0) {
@@ -51,12 +44,7 @@ export function RpcResolver(rpcTypeOrLocation, ...args): any {
   }
 
   if (args.length === 1) {
-    const [callback] = args as [
-      (RpcResolverBuilder: RpcResolverBuilder<any, any>) => void
-    ];
-    const resolvers = [];
-    callback(new RpcResolverBuilder(rpcLocation, {}, resolvers));
-    return resolvers;
+    throw new Error("use RpcResolverBuilder()");
   }
 
   if (args.length === 2) {

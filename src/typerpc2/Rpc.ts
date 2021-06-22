@@ -1,3 +1,4 @@
+import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
@@ -64,3 +65,9 @@ export interface RpcType<T = any> {
 export function isRpcType(o) {
   return typeof o === "function" && Rpc.isPrototypeOf(o);
 }
+
+export type RpcMethod<P extends any[] = [], R = never> = IsNever<R> extends true
+  ? (...args: P) => Promise<void>
+  : R extends Rpc
+  ? (...args: P) => R
+  : (...args: P) => Promise<R>;

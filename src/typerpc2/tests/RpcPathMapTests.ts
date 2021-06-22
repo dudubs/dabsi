@@ -1,10 +1,11 @@
 import { Rpc } from "@dabsi/typerpc2";
 import { RpcContextual, RpcFuncational } from "@dabsi/typerpc2/decorators";
+import { RpcMethod } from "@dabsi/typerpc2/Rpc";
 import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 
 class A extends Rpc {
   @RpcFuncational()
-  testFn!: () => Promise<void>;
+  testFn!: RpcMethod;
 }
 
 class B extends Rpc {

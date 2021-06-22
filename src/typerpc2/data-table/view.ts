@@ -15,8 +15,8 @@ import {
   InferredDataTableRow,
 } from "@dabsi/typerpc2/data-table/rpc";
 import { getRpcType } from "@dabsi/typerpc2/Rpc";
-import { WidgetView, WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
-import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
+import WidgetView, { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
+import ViewState from "@dabsi/view/react/ViewState";
 
 export type DataTableViewProps<
   T extends AnyDataTable,

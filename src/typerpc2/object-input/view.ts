@@ -7,11 +7,14 @@ import React from "react";
 
 export interface ObjectInputViewProps<T extends AnyInputMap>
   extends InputViewProps<ObjectInput<T>> {}
-
+//
 export class ObjectInputView<T extends AnyInputMap> extends InputView<
   ObjectInput<T>,
   ObjectInputViewProps<T> & {
-    children?(view: ObjectInputView<T>): React.ReactNode;
+    children(
+      props: InputViewProps<any>,
+      view: ObjectInputView<T>
+    ): React.ReactElement;
   }
 > {
   protected _childViewMap: Record<string, InputView<AnyInput>> = {};
@@ -34,9 +37,27 @@ export class ObjectInputView<T extends AnyInputMap> extends InputView<
     ]);
   }
 
+  renderWidget() {
+    return Object.keys(this.element).map((childKey, index) => {
+      let element = this.props.children(
+        this.getChildProps(childKey, index),
+        this
+      );
+      if (!element.key) {
+        element = React.createElement(
+          React.Fragment,
+          { key: childKey },
+          element
+        );
+      }
+      return element;
+    });
+  }
+
   getChildProps<T extends AnyInputMap, K extends keyof T>(
     this: ObjectInputView<T>,
-    childKey: string & K
+    childKey: string & K,
+    index?: number
   ): InputViewProps<T[K]> {
     return {
       parent: this,
@@ -44,6 +65,7 @@ export class ObjectInputView<T extends AnyInputMap> extends InputView<
       state: this.props.state?.[childKey],
       connection: this.connection[childKey],
       childKey: childKey,
+      index,
       inputRef: childView => {
         if (childView) {
           this._childViewMap[childKey] = childView;

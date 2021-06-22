@@ -221,7 +221,7 @@
 //               {column.props.renderHeadColumn ? (
 //                 column.props.renderHeadColumn({ table })
 //               ) : (
-//                 <LangKey token={column.key}>{column.props.title}</LangKey>
+//                 <LangKey for={column.key}>{column.props.title}</LangKey>
 //               )}
 //             </>
 //           );

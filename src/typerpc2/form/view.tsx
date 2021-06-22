@@ -1,11 +1,23 @@
-import { AnyForm, FormInput, FormValue } from "@dabsi/typerpc2/form/rpc";
+import { If } from "@dabsi/common/typings2/boolean";
+import { AnyForm, Form, FormInput, FormValue } from "@dabsi/typerpc2/form/rpc";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
-import { WidgetView, WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
-import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
-import { Emittable } from "@dabsi/view/react/reactor/Reactor";
+import WidgetView, { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
+import ViewState from "@dabsi/view/react/ViewState";
 
 export interface FormViewProps<T extends AnyForm> extends WidgetViewProps<T> {
   onSubmit?(value: FormValue<T>, view: FormView<T>): void;
+
+  onSuccess?: If<
+    FormValue<T>,
+    { type: "success" },
+    (result: Extract<FormValue<T>, { type: "success" }>) => void
+  >;
+
+  onFailed?: If<
+    FormValue<T>,
+    { type: "success" },
+    (result: Extract<FormValue<T>, { type: "failed" }>) => void
+  >;
 
   onInputError?(view: FormView<T>): void;
 
@@ -37,11 +49,23 @@ export class FormView<T extends AnyForm> extends WidgetView<
     this.isSubmiting = true;
     try {
       const result = await this.connection.submit(this.input.data);
+      console.log({ formResultView: result }, this.props.onSubmit);
+
       if ("error" in result) {
         this.input.setError(result.error);
         return;
       }
+
       this.props.onSubmit?.(result.value, this);
+
+      switch (result.value?.type) {
+        case "success":
+          (this as FormView<any>).props.onSuccess?.(result.value as never);
+          break;
+        case "failed":
+          (this as FormView<any>).props.onFailed?.(result.value as never);
+          break;
+      }
       this.value = result.value;
     } finally {
       this.isSubmiting = false;
@@ -50,7 +74,7 @@ export class FormView<T extends AnyForm> extends WidgetView<
 
   async reset() {
     this.props.onReset?.(this);
-    await this.reloadElement();
+    await this.loadElement();
   }
 
   renderWidget() {

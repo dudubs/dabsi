@@ -104,7 +104,7 @@ const t = Tester.beforeAll(async t => {
   handle(TestRes3Child1Child1, {
     pick: [],
     fields: { subChild1CustomField: ["hello"] },
-    relataions: { session: { pick: [] } },
+    relations: { session: { pick: [] } },
   });
 
   const sessions = dbt.getDataSource(Session);

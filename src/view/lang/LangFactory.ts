@@ -1,4 +1,6 @@
-import LangComponent from "./LangComponent";
+import getTemplateToken from "@dabsi/view/lang/getTemplateToken";
+import LangTemplate from "@dabsi/view/lang/LangTemplate";
+import LangToken from "@dabsi/view/lang/LangToken";
 import { createElement, ReactElement, ReactNode } from "react";
 
 export interface LangTemplate<P extends string> {
@@ -7,6 +9,7 @@ export interface LangTemplate<P extends string> {
 
 export interface LangFactory {
   (strings: TemplateStringsArray): ReactElement;
+
   <P extends string>(
     strings: TemplateStringsArray,
     ...params: P[]
@@ -16,19 +19,17 @@ export interface LangFactory {
 export default <LangFactory>(
   (<any>function (strings: TemplateStringsArray, ...params) {
     if (!params.length) {
-      return createElement(LangComponent, {
-        token: strings[0]!,
-      });
-    } else {
-      return props => {
-        return createElement(LangComponent, {
-          template: {
-            strings: strings.raw as string[],
-            params,
-            props,
-          },
-        });
-      };
+      return createElement(LangToken, null, strings[0]!);
     }
+
+    const token = getTemplateToken(strings.raw, params);
+
+    return props =>
+      createElement(LangTemplate, {
+        token,
+        strings: strings.raw as string[],
+        params,
+        props,
+      });
   })
 );

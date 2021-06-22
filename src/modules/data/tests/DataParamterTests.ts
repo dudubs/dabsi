@@ -1,7 +1,13 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
-import { Rpc, RpcFuncational, RpcParametrial } from "@dabsi/typerpc2";
+import {
+  Rpc,
+  RpcFuncational,
+  RpcMethod,
+  RpcParametrial,
+} from "@dabsi/typerpc2";
 import { createRpc } from "@dabsi/typerpc2/createRpc";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 
@@ -10,12 +16,13 @@ class PR extends Rpc {
 }
 
 class CR extends Rpc {
-  @RpcFuncational() testFn!: (
-    xsByChild: string
-  ) => Promise<{
-    xsByArg: string;
-    xsByParam: string;
-  }>;
+  @RpcFuncational() testFn!: RpcMethod<
+    [xsByChild: string],
+    {
+      xsByArg: string;
+      xsByParam: string;
+    }
+  >;
 }
 
 class X {
@@ -28,29 +35,27 @@ let pr: PR;
 
 beforeAll(() => {
   builder.add(
-    RpcResolver(CR, $ =>
-      $.at("testFn", $ =>
-        $.with({ x: X }).configure(c => $ =>
-          $(xsByArg => {
-            return { xsByArg, xsByParam: c.x.value };
-          })
-        )
-      )
-    ),
-    RpcResolver(PR, $ =>
-      $.at("getChild", $ =>
-        $.with({
-          childConfigurator: Resolver.injector({ X }, RpcResolver(CR)),
-        }).configure(c => $ =>
-          $((rpcType, xsByParam) =>
-            createRpcHandler(
-              rpcType,
-              c.childConfigurator({ X: new X(xsByParam) })
-            )
+    RpcResolverBuilder({
+      with: { x: X },
+      for: CR,
+      at: "testFn",
+      configure: c => $ =>
+        $(xsByArg => {
+          return { xsByArg, xsByParam: c.x.value };
+        }),
+    }),
+    RpcResolverBuilder({
+      with: { childConfigurator: Resolver.injector({ X }, RpcResolver(CR)) },
+      for: PR,
+      at: "getChild",
+      configure: c => $ =>
+        $((rpcType, xsByParam) =>
+          createRpcHandler(
+            rpcType,
+            c.childConfigurator({ X: new X(xsByParam) })
           )
-        )
-      )
-    )
+        ),
+    })
   );
 
   cr = createRpc(

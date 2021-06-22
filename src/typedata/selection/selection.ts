@@ -1,3 +1,4 @@
+import { entries } from "@dabsi/common/object/entries";
 import { mergeObject } from "@dabsi/common/object/mergeObject";
 import { omit } from "@dabsi/common/object/omit";
 import { HasKeys, If } from "@dabsi/common/typings2/boolean";
@@ -14,6 +15,7 @@ import {
   DataUnionMetaChildrenKey,
   WithDataUnionMetaChildren,
 } from "@dabsi/typedata/union";
+import { values } from "lodash";
 
 export type DataPickableKeys<T> = Exclude<
   DataNonRelationKeys<T>,
@@ -86,6 +88,26 @@ export declare namespace AnyDataSelection {
 }
 
 export namespace DataSelection {
+  export function assert(selection: AnyDataSelection) {
+    for (const [key, value] of entries(selection)) {
+      switch (key) {
+        case "relations":
+        case "children":
+          for (const selection of values(value)) {
+            assert(selection as any);
+          }
+          break;
+
+        case "pick":
+        case "fields":
+          break;
+
+        default:
+          throw new Error(`Invalid selection key "${key}".`);
+      }
+    }
+  }
+
   export function atChild(
     selection: AnyDataSelection,
     childKey: string

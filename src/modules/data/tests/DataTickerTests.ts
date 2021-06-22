@@ -1,5 +1,6 @@
 import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { Tester } from "@dabsi/jasmine/Tester";
+import { inspect } from "@dabsi/logging/inspect";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { getTestConnection } from "@dabsi/typedata/entity/tests/tester";
@@ -7,6 +8,7 @@ import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
 
 const t = Tester.beforeAll(async () => {
+  // @ts-ignore
   const a1 = await ASource.insert({
     aText: "a-text",
     oneAToOneB: await BSource.insertKey({
@@ -34,7 +36,7 @@ it("expect to fetch relation fields to one", async () => {
   // resolveAsyncObject
 
   const test = (side: string) =>
-    t.a1Fetcher.fetch({
+    t.a1Fetcher.select({
       relations: {
         oneAToOneB: {
           pick: ["bId"],
@@ -75,13 +77,16 @@ it("expect to fetch relation fields to one", async () => {
 
 it("expect to fetch fields", async () => {
   const test = side =>
-    t.a1Fetcher.fetch(["aId"], {
-      fields: {
-        common: "aText",
-        side: [side],
-      },
+    t.a1Fetcher.pick(["aId"], {
+      common: "aText",
+      side: [side],
     });
-  const [left, right] = await Promise.all([test("left"), test("right")]);
+  const [left, right] = await Promise.all([
+    //
+    test("left"),
+    test("right"),
+  ]);
+
   expect([left, right]).not.toEqual(
     jasmine.arrayContaining([
       jasmine.objectContaining({

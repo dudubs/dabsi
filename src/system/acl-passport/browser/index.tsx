@@ -10,17 +10,17 @@ const message = globalMessages.find(
 
 export default RouterView(AclPassportRouter, $ =>
   $.at("callback", $ =>
-    $.default(({ history, path }) => {
+    $.default(p => {
       React.useEffect(() => {
         switch (message?.type) {
           case "AUTH_CALLBACK":
             const parsedLocation = RouterLocation.parse(
-              path.location.root.routerType,
+              p.path.location.root.routerType,
               message.backToPath
             );
 
             if (parsedLocation.type === "index") {
-              history.push(parsedLocation.location);
+              p.navigator.push(parsedLocation.location);
             }
 
             break;

@@ -1,4 +1,4 @@
-// import { ACL_AdminRouter } from "@dabsi/system/acl/admin/view/router";
+// import { AclAdminRouter } from "@dabsi/system/acl/admin/view/router";
 // import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
 // import { Breadcrumbs, Divider } from "@material-ui/core";
 // import Typography from "@material-ui/core/Typography";
@@ -9,8 +9,8 @@
 //   margin-top: ${p => p.theme.spacing(1)}px !important;
 //   margin-bottom: ${p => p.theme.spacing(2)}px !important;
 // `;
-// // ACL_Admin_Browser_Breadcrumbs
-// export function ACL_Admin_Browser_Breadcrumbs({
+// // AclAdmin_Browser_Breadcrumbs
+// export function AclAdmin_Browser_Breadcrumbs({
 //   children = null as React.ReactNode,
 // }) {
 //   return (
@@ -24,26 +24,26 @@
 //   );
 // }
 
-// ACL_Admin_Browser_Breadcrumbs.Groups = ({
+// AclAdmin_Browser_Breadcrumbs.Groups = ({
 //   children = null as React.ReactNode,
 // }) => (
-//   <ACL_Admin_Browser_Breadcrumbs>
+//   <AclAdmin_Browser_Breadcrumbs>
 //     <MuiRouterLink
-//       to={() => ACL_AdminRouter.at("groups")}
+//       to={() => AclAdminRouter.at("groups")}
 //     >{lang`GROUPS`}</MuiRouterLink>
 //     {children}
-//   </ACL_Admin_Browser_Breadcrumbs>
+//   </AclAdmin_Browser_Breadcrumbs>
 // );
 
-// ACL_Admin_Browser_Breadcrumbs.Users = ({
+// AclAdmin_Browser_Breadcrumbs.Users = ({
 //   children = null as React.ReactNode,
 // }) => (
-//   <ACL_Admin_Browser_Breadcrumbs>
+//   <AclAdmin_Browser_Breadcrumbs>
 //     <MuiRouterLink
-//       to={() => ACL_AdminRouter.at("users")}
+//       to={() => AclAdminRouter.at("users")}
 //     >{lang`USERS`}</MuiRouterLink>
 //     {children}
-//   </ACL_Admin_Browser_Breadcrumbs>
+//   </AclAdmin_Browser_Breadcrumbs>
 // );
 
-// // ACL_AdminRouter
+// // AclAdminRouter

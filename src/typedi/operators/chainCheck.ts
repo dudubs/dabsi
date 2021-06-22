@@ -1,11 +1,11 @@
-import { ConsumeResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { Consumer, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
     function chainCheck<T>(
       resolver: Resolver<T>,
       check: (context) => void
-    ): ConsumeResolver<T>;
+    ): Consumer<T>;
   }
 }
 

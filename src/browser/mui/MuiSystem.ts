@@ -1,4 +1,3 @@
-import toReactElement from "@dabsi/view/react/utils/toReactElement";
 import {
   createMuiTheme,
   jssPreset,
@@ -7,7 +6,7 @@ import {
   ThemeProvider as MuiThemeProvider,
 } from "@material-ui/core/styles";
 import { create } from "jss";
-import { createElement, ReactNode } from "react";
+import React, { createElement } from "react";
 import { ThemeProvider as JssThemeProvider } from "styled-components";
 
 export { MuiTheme, MuiThemeProvider };
@@ -50,7 +49,11 @@ export const MuiDefaultTheme = createMuiTheme({
   },
 });
 
-export function MuiProvider({ children }: { children: ReactNode }) {
+export function MuiProvider({
+  children,
+}: {
+  children: React.ReactElement;
+}): React.ReactElement {
   children = createElement(MuiThemeProvider, {
     children,
     theme: MuiDefaultTheme,
@@ -66,5 +69,5 @@ export function MuiProvider({ children }: { children: ReactNode }) {
     jss,
   });
 
-  return toReactElement(children);
+  return children;
 }

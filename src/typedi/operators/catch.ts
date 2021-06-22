@@ -6,7 +6,7 @@ declare module "../Resolver" {
     function catchOnCheck<T>(
       resolver: Resolver<T>,
       callback: (error: ResolveError) => any
-    ): ConsumeResolver<T>;
+    ): Consumer<T>;
   }
 }
 

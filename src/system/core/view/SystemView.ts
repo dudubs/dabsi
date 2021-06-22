@@ -13,7 +13,10 @@ import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 import { AnyWidget } from "@dabsi/typerpc2/widget/Widget";
 import { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
-import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
+import createFragment from "@dabsi/view/react/createFragment";
+
+import EmptyFragment from "@dabsi/view/react/EmptyFragment";
+import RegularText from "@dabsi/view/RegularText";
 import React from "react";
 
 export type SystemViewComponent<T extends AnyWidget> = React.ComponentType<
@@ -138,13 +141,17 @@ export function SystemView(rpcTypeOrProps, callback?): any {
     return React.createElement(
       React.Fragment,
       null,
-      `NO_SYSTEM_VIEW_FOR_${inspect(widgetLocation)}`
+      React.createElement(
+        RegularText,
+        { variant: "error" },
+        `NO_SYSTEM_VIEW_FOR_${inspect(widgetLocation)}`
+      )
     );
   }
 
   return withProvider(
     typeof children === "object"
-      ? React.createElement(React.Fragment, null, children)
+      ? createFragment(children)
       : null || EmptyFragment
   );
 }

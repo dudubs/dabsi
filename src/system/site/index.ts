@@ -1,4 +1,6 @@
-import { Module } from "@dabsi/typedi";
+import { Module } from "@dabsi/typemodule";
 
 @Module()
-export default class SiteModule {}
+export default class SiteModule {
+  //
+}

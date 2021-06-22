@@ -18,14 +18,15 @@ declare module "./Router" {
   }
 }
 
-export type RouterAt<T, P extends string> = T extends Record<
-  P,
-  RouterChild<infer T>
->
-  ? T
-  : P extends `${infer K}.${infer P}`
-  ? RouterAt<RouterAt<T, K>, P>
-  : never;
+export type RouterAt<T, P extends string> =
+  //
+  IsNever<P> extends true
+    ? T
+    : T extends Record<P, RouterChild<infer T>>
+    ? T
+    : P extends `${infer K}.${infer P}`
+    ? RouterAt<RouterAt<T, K>, P>
+    : never;
 
 export type RouterInvalidPath<T, P extends string> = Union<
   {

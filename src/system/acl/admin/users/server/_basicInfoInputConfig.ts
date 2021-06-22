@@ -2,12 +2,12 @@
 // import { checkUniqueName } from "@dabsi/old-system/server/acl/checkUniqueName";
 // import AclContext  from "@dabsi/system/acl/context";
 // import { User } from "@dabsi/system/acl/entities/User";
-// import { ACL_Admin_UserBaiscInfoInput } from "@dabsi/system/acl/admin/users/common/basicInfoInput";
+// import { AclAdmin_UserBaiscInfoInput } from "@dabsi/system/acl/admin/users/common/basicInfoInput";
 // import { DataRow } from "@dabsi/typedata/row";
 // import { Resolver } from "@dabsi/typedi";
 
 // export default RpcResolver(
-//   ACL_Admin_UserBaiscInfoInput,
+//   AclAdmin_UserBaiscInfoInput,
 //   {
 //     acl: AclContext,
 //     user: Resolver.try(DataRow(User)),

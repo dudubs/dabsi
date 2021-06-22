@@ -5,17 +5,31 @@ import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { Inject, Injectable, Resolver, ResolverMap } from "@dabsi/typedi";
+import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
+import { ResolverOrConsumeArgs } from "@dabsi/typedi/ResolverOrConsumeArgs";
 
-export const getRowKeyAsParameter = WeakMapFactory(
+export const getRowKeyParameter = WeakMapFactory(
   (rowType: Function) =>
     class {
       // @ts-ignore
       static get name() {
-        return `<DataRowKeyAsParameter ${rowType.name}>`;
+        return `<DataRowKeyParameter ${rowType.name}>`;
       }
       constructor(readonly key: string) {}
     }
 );
+
+export function RowKeyParameterResolver(
+  rowType: Function,
+  rowKeyResolver: Resolver<string>
+): ResolverMap {
+  const RowKeyAsPararameter = getRowKeyParameter(rowType);
+  return Resolver(
+    RowKeyAsPararameter,
+    [rowKeyResolver],
+    rowKey => new RowKeyAsPararameter(rowKey)
+  );
+}
 
 @Injectable()
 export default class DataContext {
@@ -29,7 +43,7 @@ export default class DataContext {
   getParameterKey(rowType: Function): string | null {
     return (
       Resolver.resolve(
-        Resolver.optional(getRowKeyAsParameter(rowType)),
+        Resolver.optional(getRowKeyParameter(rowType)),
         this.context
       )?.key || null
     );

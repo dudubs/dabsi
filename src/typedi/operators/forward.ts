@@ -5,7 +5,7 @@ declare module "../Resolver" {
   namespace Resolver {
     function forward<T>(
       getResolver: (context: ResolverMap) => Resolver<T>
-    ): ConsumeResolver<T>;
+    ): Consumer<T>;
   }
 }
 

@@ -1,15 +1,14 @@
 import { entries } from "@dabsi/common/object/entries";
+import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { ConsumeResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { Consumer, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
-    function injector<T extends Record<string, TypeResolver<any>>, U>(
+    function injector<T extends Record<string, Provider<any>>, U>(
       providableMap: T,
       resolver: Resolver<U>
-    ): ConsumeResolver<
-      (resolvedMap: { [K in keyof T]: InstanceType<T[K]> }) => U
-    >;
+    ): Consumer<(resolvedMap: { [K in keyof T]: InstanceType<T[K]> }) => U>;
   }
 }
 
@@ -23,7 +22,7 @@ Resolver.injector = function (providableMap, resolver) {
           if (resolved == null) {
             throw new ResolveError(`No resolve for ${key}`);
           }
-          subContext[Resolver.Providability.token(providable)] = () => resolved;
+          subContext[getProviderToken(providable)] = () => resolved;
         }
         return Resolver.resolve(resolver, subContext);
       };
@@ -31,7 +30,7 @@ Resolver.injector = function (providableMap, resolver) {
     context => {
       context = Object.create(context);
       for (const [key, providable] of entries(providableMap)) {
-        context[Resolver.Providability.token(providable)] = () => {
+        context[getProviderToken(providable)] = () => {
           throw new ResolveError(`No resolve for "${key}"`);
         };
       }

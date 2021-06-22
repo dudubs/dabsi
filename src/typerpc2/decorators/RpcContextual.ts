@@ -43,3 +43,5 @@ export function RpcContextual(getRpcType) {
     });
   };
 }
+
+export default RpcContextual;

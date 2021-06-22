@@ -111,6 +111,7 @@ export default class BrowserDevModule {
         ),
       },
       resolve: {
+        extensions: [".ts", ".tsx", ".js"],
         plugins: [
           new TsConfigPathsWebpackPlugin({
             configFile: path.resolve(
@@ -123,7 +124,6 @@ export default class BrowserDevModule {
             extensions: [".ts", ".tsx"],
           }),
         ],
-        extensions: [".ts", ".tsx", ".js"],
       },
       module: {
         rules: [

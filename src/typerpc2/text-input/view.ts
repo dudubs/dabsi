@@ -4,7 +4,7 @@ import { InputValueElement } from "@dabsi/typerpc2/input/Input";
 import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
 import { InputWithAnyError } from "@dabsi/typerpc2/input/InputWithCustomError";
 import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
-import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
+import ViewState from "@dabsi/view/react/ViewState";
 
 export type TextInputViewProps<T extends TextInput> = InputViewProps<T>;
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { ComponentClass, createElement, ReactElement } from "react";
-import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
+import EmptyFragment from "@dabsi/view/react/EmptyFragment";
 
 const MuiIconMap: Record<string, string> = {
   submit: "send",

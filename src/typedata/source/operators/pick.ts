@@ -3,7 +3,7 @@ import { DataFields } from "@dabsi/typedata/fields";
 import { DataRelationKeys, DataRelationType } from "@dabsi/typedata/relation";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataPickableKeys } from "@dabsi/typedata/selection/selection";
-import { DataSource } from "@dabsi/typedata/source/source";
+import { DataSource, SelectedDataSource } from "@dabsi/typedata/source/source";
 
 declare module "../source" {
   interface DataSource<T> {
@@ -18,72 +18,66 @@ declare module "../source" {
 declare function pickFieldsFromRelation<
   T,
   Relation extends DataRelationKeys<T>,
-  Fields extends DataFields<DataRelationType<T[Relation]>>
+  F extends DataFields<DataRelationType<T[Relation]>>
 >(
   this: DataSource<T>,
   relation: Relation,
-  fields: Fields
-): DataSource<
-  DataSelectionRow<
-    T,
-    { pick: readonly never[]; relations: Record<Relation, { fields: Fields }> }
-  >
+  fields: F
+): SelectedDataSource<
+  T,
+  { pick: readonly never[]; relations: Record<Relation, { fields: F }> }
 >;
 
 declare function pickKeysFromRelation<
   T,
   Relation extends DataRelationKeys<T>,
-  Keys extends DataPickableKeys<DataRelationType<T[Relation]>>
+  K extends DataPickableKeys<DataRelationType<T[Relation]>>
 >(
   this: DataSource<T>,
   relation: Relation,
-  keys: readonly Keys[]
-): DataSource<
-  DataSelectionRow<
-    T,
-    {
-      relations: Record<Relation, { pick: Keys[] }>;
-    }
-  >
+  keys: readonly K[]
+): SelectedDataSource<
+  T,
+  {
+    relations: Record<Relation, { pick: K[] }>;
+  }
 >;
 
 declare function pickKeysAndFieldsFromRelation<
   T,
   Relation extends DataRelationKeys<T>,
-  Keys extends DataPickableKeys<DataRelationType<T[Relation]>>,
-  Fields extends DataFields<DataRelationType<T[Relation]>>
+  K extends DataPickableKeys<DataRelationType<T[Relation]>>,
+  F extends DataFields<DataRelationType<T[Relation]>>
 >(
   this: DataSource<T>,
   relation: Relation,
-  keys: readonly Keys[],
-  fields: Fields
-): DataSource<
-  DataSelectionRow<
-    T,
-    { relations: Record<Relation, { pick: Keys[]; fields: Fields }> }
-  >
+  keys: readonly K[],
+  fields: F
+): SelectedDataSource<
+  T,
+  { relations: Record<Relation, { pick: K[]; fields: F }> }
 >;
 
 ///
-declare function pickFields<T, Fields extends DataFields<T>>(
+declare function pickFields<T, F extends DataFields<T>>(
   this: DataSource<T>,
-  fields: Fields
-): DataSource<DataSelectionRow<T, { pick: readonly never[]; fields: Fields }>>;
+  fields: F
+): SelectedDataSource<T, { pick: readonly never[]; fields: F }>;
 
-declare function pickKeys<T, Keys extends DataPickableKeys<T>>(
+declare function pickKeys<T, K extends DataPickableKeys<T>>(
   this: DataSource<T>,
-  keys: readonly Keys[]
-): DataSource<DataSelectionRow<T, { pick: Keys[] }>>;
+  keys: readonly K[]
+): SelectedDataSource<T, { pick: K[] }>;
 
 declare function pickKeysAndFields<
   T,
-  Keys extends DataPickableKeys<T>,
-  Fields extends DataFields<T>
+  K extends DataPickableKeys<T>,
+  F extends DataFields<T>
 >(
   this: DataSource<T>,
-  keys: readonly Keys[],
-  fields: Fields
-): DataSource<DataSelectionRow<T, { pick: Keys[]; fields: Fields }>>;
+  keys: readonly K[],
+  fields: F
+): SelectedDataSource<T, { pick: K[]; fields: F }>;
 
 DataSource.prototype.pick = <any>function (this: DataSource<any>, ...args) {
   let relation: string | null = null;

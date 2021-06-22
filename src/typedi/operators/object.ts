@@ -7,7 +7,7 @@ declare module "../Resolver" {
   namespace Resolver {
     function object<T extends ResolverMap>(
       resolverMap: T
-    ): ConsumeResolver<
+    ): Consumer<
       {
         [K in keyof T]: Resolved<T[K]>;
       }

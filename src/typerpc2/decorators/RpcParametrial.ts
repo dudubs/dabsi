@@ -4,7 +4,7 @@ import { RpcParametrialMember, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
 
-export function RpcParametrial<T extends RpcType>(
+export default function RpcParametrial<T extends RpcType>(
   getRpcType: () => T
 ): {
   <K extends string>(

@@ -2,8 +2,7 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import LangKey from "@dabsi/view/lang/LangKey";
-import { ReactContext, ReactContextType } from "@dabsi/view/react/ReactContext";
-import { Emitter, useEmitter } from "@dabsi/view/react/reactor/useEmitter";
+import { ViewContextMap } from "@dabsi/view/react/ViewContext";
 import {
   Collapse,
   List,
@@ -27,7 +26,7 @@ export type MuiNestedMenuItem = {
   ListItemTextProps?: ListItemTextProps;
 };
 
-export type MuiNestedMenu<C extends ReactContext = ReactContext> = {
+export type MuiNestedMenu<C = {}> = {
   [K in string]: MuiNestedMenuItem & {
     title?: React.ReactNode;
     icon?: React.ReactNode;
@@ -57,15 +56,18 @@ const useStyles = makeStyles(theme => ({
 }));
 
 //x
-export function MuiNestedMenu<C extends ReactContext = ReactContext>(
+export function MuiNestedMenu<C>(
   p: MuiNestedMenuItem & {
     tree: MuiNestedMenu<C>;
     onItemClick?(item: MuiNestedMenuItem);
-    contextType?: ReactContextType<C>;
+    createContext?: (map: ViewContextMap) => C;
   }
 ): React.ReactElement {
   const classes = useStyles();
-  const context: C = new (p.contextType || ReactContext)() as any;
+
+  const contextMap = React.useContext(ViewContextMap);
+
+  const context: C = (p.createContext?.(contextMap) || {}) as C;
 
   const [openMap, setOpenMap] = React.useState({} as Record<string, boolean>);
 
@@ -121,7 +123,7 @@ export function MuiNestedMenu<C extends ReactContext = ReactContext>(
                 classes.text
               )}
             >
-              <LangKey token={key}>{item.title}</LangKey>
+              <LangKey for={key}>{item.title}</LangKey>
             </Typography>
           </ListItemText>
           {children && depth > 0 && (

@@ -2,7 +2,9 @@ import { RpcFunctionalMember, RpcType } from "@dabsi/typerpc2/Rpc";
 import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
 
-export function RpcFuncational(): {
+RpcFuncational.handler = null as null | ((payload: any[]) => Promise<any>);
+
+export default function RpcFuncational(): {
   <K extends string>(
     target: Record<K, RpcFunctionalMember>,
     propertyName: K
@@ -17,7 +19,12 @@ export function RpcFuncational(): {
 
     target[propertyName] = function (this: any, ...args) {
       const { getPath, command } = RpcArgs.get(this);
-      return command([...getPath(), propertyName, ...args]);
+      const payload = [...getPath(), propertyName, ...args];
+
+      if (RpcFuncational.handler) {
+        return RpcFuncational.handler(payload);
+      }
+      return command(payload);
     };
   };
 }

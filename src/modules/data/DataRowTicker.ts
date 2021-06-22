@@ -1,9 +1,10 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
-
 import { DataRowLoader } from "@dabsi/modules/data/DataRowLoader";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
+import { User } from "@dabsi/system/acl/entities/User";
 import { DataExp } from "@dabsi/typedata/exp/exp";
+import { DataFields } from "@dabsi/typedata/fields";
 import { DataRelationKeys } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
@@ -16,7 +17,7 @@ import { DataSource } from "@dabsi/typedata/source";
 import { DataUpdateRow } from "@dabsi/typedata/value";
 
 export class DataRowTicker<T = any> {
-  filter: DataExp<T> | undefined = undefined;
+  filter: DataExp<T> = undefined;
 
   protected _selection: AnyDataSelection = { pick: [] };
 
@@ -41,7 +42,7 @@ export class DataRowTicker<T = any> {
     this: DataRowTicker<T>,
     relationPropertyName: K
   ): DataSource.At<T, K> {
-    return this.getSource().at(relationPropertyName, this._definedKey);
+    return <any>this.getSource().at(relationPropertyName, this._definedKey);
   }
 
   // TODO: updateBeforeFetch, updateAfterFetch
@@ -85,40 +86,54 @@ export class DataRowTicker<T = any> {
     this._callbacks.push(callback);
   }
 
-  fetch<
-    T,
-    K extends DataPickableKeys<T>,
-    S extends Omit<DataSelection<T>, "pick"> = {}
-  >(
-    this: DataRowTicker<T>,
-    keys: readonly K[],
-    selection?: S
-  ): Promise<DataRow<DataSelectionRow<T, S & { pick: K[] }>>>;
-
-  fetch<T, S extends DataSelection<T>>(
+  select<T, S extends DataSelection<T>>(
     this: DataRowTicker<T>,
     selection: S
-  ): Promise<DataRow<DataSelectionRow<T, S>>>;
-
-  fetch(keysOrSel, maybeSel?) {
-    if (!this.$key) return Promise.resolve({});
-
-    const selection: AnyDataSelection = Array.isArray(keysOrSel)
-      ? {
-          ...maybeSel,
-          pick: keysOrSel,
-        }
-      : keysOrSel;
-
-    const selLoader = DataRowLoader(
+  ): Promise<DataRow<DataSelectionRow<T, S>>> {
+    const loader = DataRowLoader(
       this._selection,
       selection as AnyDataSelection
     );
-
     return new Promise(resolve => {
-      this.push(async (row, tick) => {
-        resolve(row ? selLoader(row) : {});
+      this.push(async row => {
+        resolve(row ? loader(row) : {});
       });
     });
   }
+
+  pick2!: <T, K extends DataPickableKeys<T>>(
+    this: DataRowTicker<T>,
+    keys: readonly K[]
+  ) => any;
+
+  pick<T, F extends DataFields<T>>(
+    this: DataRowTicker<T>,
+    fields: F
+  ): PromisedDataRow<T, { fields: F }>;
+
+  pick<T, K extends DataPickableKeys<T>>(
+    this: DataRowTicker<T>,
+    keys: readonly K[]
+  ): PromisedDataRow<T, { pick: K[] }>;
+
+  pick<T, K extends DataPickableKeys<T>, F extends DataFields<T>>(
+    this: DataRowTicker<T>,
+    keys: readonly K[],
+    fields: F
+  ): PromisedDataRow<T, { pick: K[]; fields: F }>;
+
+  pick(keysOrFields, maybeFields?) {
+    let keys;
+    let fields;
+
+    if (Array.isArray(keysOrFields)) {
+      [keys, fields] = [keysOrFields, maybeFields || {}];
+    } else {
+      [keys, fields] = [undefined, keysOrFields];
+    }
+
+    return this.select({ pick: keys, fields });
+  }
 }
+
+type PromisedDataRow<T, S> = Promise<DataRow<DataSelectionRow<T, S>>>;

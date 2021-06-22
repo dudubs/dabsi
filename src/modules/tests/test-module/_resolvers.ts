@@ -1,11 +1,15 @@
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { TestRpc } from "@dabsi/modules/tests/test-module/common/rpc";
 
 export default [
   //
-  RpcResolver(TestRpc.at("testFn"), [], () => $ =>
-    $(() => {
-      return "works";
-    })
-  ),
+
+  RpcResolverBuilder({
+    for: TestRpc,
+    at: "testFn",
+    configure: () => $ =>
+      $(() => {
+        return "works";
+      }),
+  }),
 ];

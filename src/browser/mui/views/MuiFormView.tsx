@@ -5,7 +5,7 @@ import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
 import { AnyForm } from "@dabsi/typerpc2/form/rpc";
 import { FormView, FormViewProps } from "@dabsi/typerpc2/form/view";
-import { mergeProps } from "@dabsi/view/react/merging/mergeProps";
+import mergeProps from "@dabsi/view/react/mergeProps";
 import React, { ReactElement } from "react";
 
 export type MuiFormViewProps<T extends AnyForm> = Override<
@@ -20,14 +20,14 @@ export type MuiFormViewProps<T extends AnyForm> = Override<
   }
 >;
 
-export const MuiFormView = <T extends AnyForm>({
+export default function MuiFormView<T extends AnyForm>({
   children,
   disableResetButton,
   MuiFormProps,
   variant = "submit",
   renderHeader,
   ...FormViewProps
-}: MuiFormViewProps<T>): ReactElement => {
+}: MuiFormViewProps<T>): ReactElement {
   // mixing
 
   const isVariant: { [K in typeof variant]?: true } = {
@@ -89,4 +89,4 @@ export const MuiFormView = <T extends AnyForm>({
       }}
     </FormView>
   );
-};
+}

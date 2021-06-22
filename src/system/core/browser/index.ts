@@ -1,12 +1,12 @@
 import { MuiSystemRoot } from "@dabsi/system/core/browser/MuiSystemRoot";
-import { SystemCommand } from "@dabsi/system/core/common/command";
 import { SYSTEM_RPC_PATH } from "@dabsi/system/core/common/rpc";
+import axios from "axios";
 //
 import React from "react";
 import ReactDOM from "react-dom";
-import axios from "axios";
+import SystemViewCommand from "../view/SystemViewCommand";
 
-SystemCommand.handle(payloads =>
+SystemViewCommand.handle(payloads =>
   axios
     .post(SYSTEM_RPC_PATH, {
       payloads,

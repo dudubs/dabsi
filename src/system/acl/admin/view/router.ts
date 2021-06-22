@@ -5,7 +5,7 @@ import AdminRouter from "@dabsi/system/admin/view/AdminRouter";
 import { Router, Route } from "@dabsi/typerouter2";
 
 @AdminRouter.Route("acl")
-export class ACL_AdminRouter extends Router {
+export class AclAdminRouter extends Router {
   @Route()
   users!: Router;
 

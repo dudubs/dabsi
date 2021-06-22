@@ -11,10 +11,9 @@ const mt = ModuleTester([
     em.builders.push(app => {
       app.get("/test", (req, res) =>
         em.processRequest(mt.moduleRunner.context, req, res, async context => {
-          const session = await Resolver.resolve(
-            RequestSession,
-            context
-          ).fetch(["timeout"]);
+          const session = await Resolver.resolve(RequestSession, context).pick([
+            "timeout",
+          ]);
           res.json({
             sessionKey: session.$key,
             sessionTimeout: session.timeout,

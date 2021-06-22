@@ -19,7 +19,7 @@ import {
   DataTableViewProps,
 } from "@dabsi/typerpc2/data-table/view";
 import LangKey from "@dabsi/view/lang/LangKey";
-import { mergeProps } from "@dabsi/view/react/merging";
+import mergeProps from "@dabsi/view/react/mergeProps";
 import { ReactRef } from "@dabsi/view/react/ref";
 import {
   Checkbox,
@@ -227,7 +227,7 @@ export function MuiDataTableView<T extends AnyDataTable>({
         ) => {
           await execute();
           if (action.reload) {
-            view.reloadElement();
+            view.loadElement();
           }
         };
 
@@ -253,7 +253,7 @@ export function MuiDataTableView<T extends AnyDataTable>({
                   key={column.key}
                   fitToContent={column.fitToContent}
                 >
-                  <LangKey token={column.key}>
+                  <LangKey for={column.key}>
                     {column.renderHead ? column.renderHead(view) : column.title}
                   </LangKey>
                 </MuiTableCell>

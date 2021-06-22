@@ -1,3 +1,3 @@
-import { Rpc } from "@dabsi/typerpc2";
+import { Rpc, RpcMethod } from "@dabsi/typerpc2";
 
-export type DataParameter<T extends Rpc> = (key: string) => T;
+export type DataParameter<T extends Rpc> = RpcMethod<[key: string], T>;

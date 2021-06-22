@@ -1,6 +1,5 @@
 import { SYSTEM_RPC_PATH } from "@dabsi/system/core/common/rpc";
-import { SystemCommand } from "@dabsi/system/core/common/SystemCommand";
-
+import captureRpcCommand from "@dabsi/typerpc2/captureRpcCommand";
 export default async function processRpcWithFormData<T>(
   buildFormData: (formData: FormData) => void,
   callback: () => Promise<T>
@@ -13,7 +12,7 @@ export default async function processRpcWithFormData<T>(
     throw new Error();
   }
 
-  const [result, { payload, resolve }] = SystemCommand.capture(callback);
+  const [result, { payload, resolve }] = captureRpcCommand(callback);
 
   formData.set("command", JSON.stringify({ payload }));
 

@@ -20,8 +20,6 @@ declare module "./rpc" {
 
           maxLength?: number;
 
-          nullable?: boolean;
-
           load?: (text: string) => Awaitable<string>;
 
           trim?: string;
@@ -29,7 +27,7 @@ declare module "./rpc" {
           titleCase?: boolean;
         }
       | undefined,
-      string | null,
+      string,
       string | undefined
     > {}
 }
@@ -62,12 +60,6 @@ export default InputHandler(
           /\w+/g,
           word => word.charAt(0).toUpperCase() + word.slice(1)
         );
-      }
-
-      if (!value) {
-        if (this.config.nullable) {
-          return { value: null };
-        }
       }
 
       if (this.config.pattern && this.config.pattern.test(value)) {

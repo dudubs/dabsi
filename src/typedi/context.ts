@@ -1,19 +1,23 @@
 import { reversed } from "@dabsi/common/array/reversed";
 import { objectBases } from "@dabsi/common/object/objectBases";
+import getProviderToken from "@dabsi/typedi/getProviderToken";
+import { Provider, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
-import { TypeResolver, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
 declare module "./Resolver" {
   namespace Resolver {
     namespace Context {
       export function assign(
         context: ResolverMap,
-        ...args: Provider[]
+        ...args: ProviderArg[]
       ): ResolverMap;
 
-      function create(context: ResolverMap, ...args: Provider[]): ResolverMap;
+      function create(
+        context: ResolverMap,
+        ...args: ProviderArg[]
+      ): ResolverMap;
 
-      function flat(context: ResolverMap, ...args: Provider[]): ResolverMap;
+      function flat(context: ResolverMap, ...args: ProviderArg[]): ResolverMap;
     }
     class ThisContext {}
     class BaseContext {}
@@ -21,15 +25,12 @@ declare module "./Resolver" {
   }
 }
 
-type Provider = ResolverMap | any[];
+type ProviderArg = ResolverMap | any[];
 
-function _assign(context, args: Provider[]): ResolverMap {
+function _assign(context, args: ProviderArg[]): ResolverMap {
   for (const arg of args) {
     if (!arg) continue;
-    if (typeof arg === "function") {
-      _assginNoResolve(arg);
-      continue;
-    }
+
     if (arg.constructor === Object) {
       Object.assign(context, arg);
     } else if (Array.isArray(arg)) {
@@ -37,23 +38,23 @@ function _assign(context, args: Provider[]): ResolverMap {
         if (typeof item === "function") {
           _assginNoResolve(item);
         } else {
-          context[Resolver.Providability.token(item.constructor)] = () => item;
+          context[getProviderToken(item.constructor)] = () => item;
         }
       }
     } else {
-      context[Resolver.Providability.token(arg.constructor)] = () => arg;
+      context[getProviderToken(arg.constructor)] = () => arg;
     }
   }
   return context;
 
-  function _assginNoResolve(resolver: TypeResolver<any>) {
-    const token = Resolver.Providability.token(resolver);
+  function _assginNoResolve(resolver: Provider<any>) {
+    const token = getProviderToken(resolver);
     context[token] = context => {
       throw new Error(`No resolve for "${token}".`);
     };
   }
 }
-export function ResolverContext(...args: Provider[]): ResolverMap {
+export function ResolverContext(...args: ProviderArg[]): ResolverMap {
   return _assign({}, args);
 }
 

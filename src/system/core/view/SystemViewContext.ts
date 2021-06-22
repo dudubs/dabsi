@@ -1,8 +1,10 @@
-import { RouterHistory } from "@dabsi/typerouter2/view/RouterHistory";
-import { ReactContext } from "@dabsi/view/react/ReactContext";
+import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+import { ViewContext, ViewContextMap } from "@dabsi/view/react/ViewContext";
 
-export class SystemViewContext extends ReactContext {
-  get history(): RouterHistory {
-    return this.require(RouterHistory);
+export default class SystemViewContext {
+  constructor(readonly map: ViewContextMap) {}
+
+  get navigator(): RouterViewNavigator {
+    return ViewContext.get(this.map, RouterViewNavigator);
   }
 }

@@ -3,12 +3,12 @@ import {
   RpcFuncational,
   RpcParametrial,
 } from "@dabsi/typerpc2/decorators";
-import { Rpc } from "@dabsi/typerpc2/Rpc";
+import { Rpc, RpcMethod } from "@dabsi/typerpc2/Rpc";
 import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
 
 class A extends Rpc {
   @RpcFuncational()
-  testFn!: () => Promise<void>;
+  testFn!: RpcMethod;
 }
 
 class B extends Rpc {

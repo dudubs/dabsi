@@ -2,7 +2,7 @@ import withStyles from "@dabsi/browser/mui/withStyles";
 import Debounce from "@dabsi/common/async/Debounce";
 import { Override } from "@dabsi/common/typings2/Override";
 import useLangService from "@dabsi/view/lang/useLangService";
-import { mergeProps } from "@dabsi/view/react/merging";
+import mergeProps from "@dabsi/view/react/mergeProps";
 import {
   InputAdornment,
   InputAdornmentProps,

@@ -54,7 +54,6 @@ export function DataRowLoader(
       throw new Error("no support yet.");
     }
   }
-
   return raw => {
     if (!raw) return;
     const row: any = Object.setPrototypeOf({}, raw);

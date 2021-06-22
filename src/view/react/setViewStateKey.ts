@@ -1,4 +1,4 @@
-export function setViewStateKey(
+export default function setViewStateKey(
   view: {
     currentState: any;
     isDidMount: boolean;

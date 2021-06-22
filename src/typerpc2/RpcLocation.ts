@@ -22,7 +22,9 @@ export type RpcValidatePath<
   InvalidPath = RpcInvalidPath<T, P>
 > = IsNever<InvalidPath> extends true ? U : { InvalidPath: InvalidPath };
 
-export type RpcAt<T, P extends string> = P extends `${infer P}!`
+export type RpcAt<T, P extends string> = IsNever<P> extends true
+  ? T
+  : P extends `${infer P}!`
   ? _RpcAt<T, P> extends RpcParametrialMember<infer U>
     ? U
     : never

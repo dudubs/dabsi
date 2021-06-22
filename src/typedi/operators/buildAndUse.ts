@@ -4,7 +4,7 @@ import { ResolverMap } from "@dabsi/typedi/Resolver";
 declare module "../Resolver" {
   namespace Resolver {
     function use<T>(resolver: Resolver<T>): T;
-    function build<T>(builder: () => T): ConsumeResolver<T>;
+    function build<T>(builder: () => T): Consumer<T>;
   }
 }
 

@@ -5,9 +5,14 @@ import {
   InputError,
   inputValueElementToData,
 } from "@dabsi/typerpc2/input/Input";
-import { InputWithConfig } from "@dabsi/typerpc2/input/InputHandler";
+import {
+  inputBaseConfig,
+  InputWithConfig,
+} from "@dabsi/typerpc2/input/InputHandler";
 import { InputWithCustomError } from "@dabsi/typerpc2/input/InputWithCustomError";
-import { InputWithValue } from "@dabsi/typerpc2/input/InputWithCustomValue";
+import { InputWithCustomValue } from "@dabsi/typerpc2/input/InputWithCustomValue";
+import { RpcMethod } from "@dabsi/typerpc2/Rpc";
+
 import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
 
 export function typingTests() {
@@ -23,7 +28,7 @@ export function typingTests() {
       throw new Error("Method not implemented.");
     }
 
-    @RpcFuncational() testFn!: () => Promise<void>;
+    @RpcFuncational() testFn!: RpcMethod;
   }
 
   interface TestInput1
@@ -33,7 +38,9 @@ export function typingTests() {
     TestInput1
   ) {}
 
-  class TestInput1WithValue1 extends InputWithValue<"VALUE1">()(TestInput1) {}
+  class TestInput1WithValue1 extends InputWithCustomValue<"VALUE1">()(
+    TestInput1
+  ) {}
 
   let t1: TestInput1;
   let t2: TestInput1WithExtraErr;
@@ -59,7 +66,8 @@ export function typingTests() {
       RpcConfigurator<TestInput1WithValue1>,
       {
         config: "";
-        load: () => { value: "VALUE1" };
+
+        [inputBaseConfig]: { load: () => { value: "VALUE1" } };
       }
     >,
     Expect<

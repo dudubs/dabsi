@@ -1,21 +1,23 @@
 import { defined } from "@dabsi/common/object/defined";
-import { pick } from "@dabsi/common/object/pick";
-import { WeakId } from "@dabsi/common/WeakId";
+import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
 import {
   AnyWidget,
   WidgetElement,
   WidgetState,
 } from "@dabsi/typerpc2/widget/Widget";
-import { ViewState } from "@dabsi/view/react/component/decorators/ViewState";
-import { View } from "@dabsi/view/react/component/View";
-import { ReactContext } from "@dabsi/view/react/ReactContext";
-import EmptyFragment from "@dabsi/view/react/utils/EmptyFragment";
+import EmptyFragment from "@dabsi/view/react/EmptyFragment";
+import ViewLoader from "@dabsi/view/ViewLoader";
+import { View } from "@dabsi/view/react/View";
+import ViewContext from "@dabsi/view/react/ViewContext";
+import ViewState from "@dabsi/view/react/ViewState";
 import React from "react";
 
 export interface WidgetViewProps<T extends AnyWidget> {
   key?: string | number;
 
   childKey?: undefined | string;
+
+  index?: number;
 
   connection: T;
 
@@ -103,7 +105,7 @@ export class WidgetView<
       return EmptyFragment;
     }
 
-    return React.createElement(ReactContext.Provider, {
+    return React.createElement(ViewContext.Provider, {
       entries: [[WidgetView, this]],
       children: this.renderWidget(),
     });
@@ -120,11 +122,13 @@ export class WidgetView<
   componentDidMount() {
     super.componentDidMount?.();
     if (!this.props.parent && !this.props.element) {
-      this.reloadElement();
+      this.loadElement();
     }
   }
 
-  async reloadElement() {
+  async loadElement(): Promise<void> {
     this._element = await this.connection.getElement();
   }
 }
+
+export default WidgetView;

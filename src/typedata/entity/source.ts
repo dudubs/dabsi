@@ -14,6 +14,7 @@ import { DataEntityLoader } from "@dabsi/typedata/entity/loader";
 import { DataEntityTreeLoader } from "@dabsi/typedata/entity/treeLoader";
 import { DataQueryRunner } from "@dabsi/typedata/query/runner";
 import { DataRow, DataTreeRow } from "@dabsi/typedata/row";
+import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source";
 import { DataInsertRow, DataUpdateRow } from "@dabsi/typedata/value";
 import { Connection, QueryRunner } from "typeorm";
@@ -73,6 +74,9 @@ export class DataEntitySource<T> extends DataSource<T> {
   }
 
   @Lazy() get entityLoader(): DataEntityLoader {
+    // TODO later: DataCursor.assert
+    DataSelection.assert(this.cursor.selection);
+
     return new DataEntityLoader(
       this.getQueryRunner().connection,
       this.getDataQueryRunner(),

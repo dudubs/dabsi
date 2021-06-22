@@ -1,6 +1,6 @@
 import { inspect } from "@dabsi/logging/inspect";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { ArrowResolver, TypeResolver, Resolver } from "@dabsi/typedi/Resolver";
+import { Factory, Provider, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
@@ -15,12 +15,9 @@ Resolver.resolve = function (resolver, context) {
   }
   if (typeof resolver === "function") {
     if (!resolver.prototype || !resolver.name) {
-      return (resolver as ArrowResolver<any>)(context);
+      return (resolver as Factory<any>)(context);
     }
-    return Resolver.Providability.resolve(
-      resolver as TypeResolver<any>,
-      context
-    );
+    return Resolver.Providability.resolve(resolver as any, context);
   }
   throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);
 };

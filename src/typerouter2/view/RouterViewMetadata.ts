@@ -1,7 +1,7 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Router, RouterChild, RouterType } from "@dabsi/typerouter2/Router";
 import { RouterLocationPath } from "@dabsi/typerouter2/RouterLocation";
-import { RouterHistory } from "@dabsi/typerouter2/view/RouterHistory";
+import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
 import { Renderer } from "@dabsi/view/react/renderer";
 import React from "react";
 
@@ -13,7 +13,7 @@ export type BaseRouterViewRendererProps<
   E
 > = {
   root: R;
-  history: RouterHistory;
+  navigator: RouterViewNavigator;
   router: T;
   stack: S;
   path: RouterLocationPath;

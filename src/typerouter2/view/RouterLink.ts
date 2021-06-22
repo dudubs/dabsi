@@ -1,8 +1,8 @@
 import { Router } from "@dabsi/typerouter2";
 import { getRouterLocation, RouterType } from "@dabsi/typerouter2/Router";
 import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
-import { RouterHistory } from "@dabsi/typerouter2/view/RouterHistory";
-import { ReactContext } from "@dabsi/view/react/ReactContext";
+import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+import ViewContext from "@dabsi/view/react/ViewContext";
 import React from "react";
 
 export type RouterLinkProps<T extends Router> = {
@@ -11,8 +11,8 @@ export type RouterLinkProps<T extends Router> = {
 };
 
 export default function RouterLink<T extends Router>(p: RouterLinkProps<T>) {
-  const c = ReactContext.use({
-    history: RouterHistory,
+  const c = ViewContext.use({
+    history: RouterViewNavigator,
     location: RouterLocation,
   });
 

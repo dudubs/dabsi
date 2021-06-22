@@ -2,18 +2,18 @@
 // import { DataTable } from "@dabsi/old-typerpc/data-table/rpc";
 // import { RpcMap } from "@dabsi/old-typerpc/rpc-map/RpcMap";
 
-// export const xACL_Admin_UsersTable = DataTable({
+// export const xAclAdmin_UsersTable = DataTable({
 //   firstName: String,
 //   lastName: String,
 //   loginName: String,
 // });
 
-// // ACL_Admin_UsersTable.row.fullName = String;
+// // AclAdmin_UsersTable.row.fullName = String;
 
-// export const [ACL_Admin_UsersRpc, AclAdminUsersConnection] = AdminRpc.register(
+// export const [AclAdmin_UsersRpc, AclAdminUsersConnection] = AdminRpc.register(
 //   "users2",
 //   RpcMap({
-//     // table: ACL_Admin_UsersTable,
+//     // table: AclAdmin_UsersTable,
 //   })
 // );
 

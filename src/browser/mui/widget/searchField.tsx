@@ -1,7 +1,7 @@
 import CloseIcon from "@material-ui/icons/Close";
 
 import useLangService from "@dabsi/view/lang/useLangService";
-import { mergeProps } from "@dabsi/view/react/merging";
+import mergeProps from "@dabsi/view/react/mergeProps";
 import { Grid, InputAdornment, makeStyles, Tooltip } from "@material-ui/core";
 import TextField, { TextFieldProps } from "@material-ui/core/TextField";
 import SearchIcon from "@material-ui/icons/Search";

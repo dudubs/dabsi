@@ -39,7 +39,7 @@ export function createRpcCommandFromHandler<T extends RpcType>(
 
       switch (memberType) {
         case RpcMemberType.Functional:
-          return await memberHandler(...payload.slice(index + 1));
+          return await memberHandler(...(payload[index + 1] || []));
 
         case RpcMemberType.Parametrial:
           cursor.type = RpcMembers.getRpcType(cursor.type, memberKey);

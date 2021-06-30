@@ -18,7 +18,7 @@ import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source";
 import { DataInsertRow, DataUpdateRow } from "@dabsi/typedata/value";
 import { Connection, QueryRunner } from "typeorm";
-
+//
 export class DataEntitySource<T> extends DataSource<T> {
   static createFromConnection<T>(
     entityType: Constructor<T>,
@@ -49,8 +49,8 @@ export class DataEntitySource<T> extends DataSource<T> {
     super();
   }
 
-  withCursor<U = T>(cursor: DataCursor): DataEntitySource<U> {
-    return new DataEntitySource<U>(
+  withCursor(cursor: DataCursor): DataEntitySource<any> {
+    return new DataEntitySource(
       <any>this.entityType,
       this.getQueryRunner,
       cursor
@@ -121,14 +121,19 @@ export class DataEntitySource<T> extends DataSource<T> {
     return keys;
   }
 
-  async handleUpdate(keys: string[], value: DataUpdateRow<T>): Promise<number> {
+  async handleUpdate<T>(
+    this: DataEntitySource<T>,
+    keys: string[],
+    value: DataUpdateRow<T>
+  ): Promise<number> {
     if (!hasKeys(value)) return 0;
     const plan = getUpdatePlan(this, value);
     await plan.updateMany(keys);
     return 0;
   }
 
-  protected async handleUpdateRelations(
+  protected async handleUpdateRelations<T>(
+    this: DataEntitySource<T>,
     keysToAdd: string[],
     keysToRemove: string[]
   ): Promise<void> {
@@ -165,7 +170,8 @@ export class DataEntitySource<T> extends DataSource<T> {
     await plan.deleteMany(textKeys);
   }
 
-  protected handleGetTree(
+  protected handleGetTree<T>(
+    this: DataEntitySource<T>,
     inverse: boolean,
     relationPropertyName: string
   ): Promise<DataTreeRow<T>[]> {

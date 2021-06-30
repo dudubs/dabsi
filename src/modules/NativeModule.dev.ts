@@ -39,8 +39,8 @@ export default class NativeDevModule {
     protected platformModule: PlatformModule,
     protected makeModule: MakeModule
   ) {
-    this.platform.settings.isViewPlatform = true;
-    this.platform.settings.includeInternalFiles = true;
+    this.platform.options.isViewPlatform = true;
+    this.platform.options.includeInternalFiles = true;
   }
 
   @CliArgument(y =>

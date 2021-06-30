@@ -1,10 +1,14 @@
+import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { inspect } from "@dabsi/logging/inspect";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { Factory, Provider, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
-    function resolve<T>(resolver: Resolver<T>, context: ResolverMap): T;
+    function resolve<T extends Resolver<any>>(
+      resolver: T,
+      context: ResolverMap
+    ): Resolved<T>;
   }
 }
 

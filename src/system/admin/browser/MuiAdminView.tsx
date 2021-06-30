@@ -6,7 +6,7 @@
 // import { AclConnection } from "@dabsi/system/acl/old-common/rpc";
 // import { MuiAdminMenu } from "@dabsi/system/admin/browser/menu";
 // import MuiRouterLink from "@dabsi/system/admin/browser/MuiRouterLink";
-// import { MuiTemplate } from "@dabsi/system/admin/browser/MuiTemplate";
+// import MuiTemplate from "@dabsi/system/admin/browser/MuiTemplate";
 // import { PaperInCenter } from "@dabsi/system/admin/browser/PaperInCenter";
 // import { AdminInfoEvent } from "@dabsi/system/admin/browser/router";
 // import { getAdminInfo } from "@dabsi/system/admin/common";

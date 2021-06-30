@@ -88,7 +88,7 @@ export class RpcLocation<T> {
       rpcType = undefined;
     }
 
-    text += `: ${rpcType ? rpcType.name : `unknown`}`;
+    text += `${rpcType ? ": " + rpcType.name : `()`}`;
 
     return text;
   }

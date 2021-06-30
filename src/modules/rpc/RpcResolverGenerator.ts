@@ -7,7 +7,7 @@ import {
   RpcLocationConfigurator,
   RpcResolver,
 } from "@dabsi/modules/rpc/RpcResolver";
-import { Resolver } from "@dabsi/typedi";
+import { Resolver, ResolverMap } from "@dabsi/typedi";
 import {
   Rpc,
   RpcFunctionalMember,
@@ -38,6 +38,9 @@ import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
 export class RpcResolverGenerator {
   // Later RpcPathMap<Resolver<any>>
   protected _resolverMap = new RpcPathMap<RpcResolver<any>>();
+
+  protected _contextMaFp = new RpcPathMap<ResolverMap>();
+
   protected _generetedResolverMap = new RpcPathMap<RpcResolver<any>>();
 
   add(...args: Flattable<RpcResolver<any>>[]) {
@@ -170,43 +173,48 @@ export namespace RpcResolverGenerator {
   }
 }
 
-RpcResolverGenerator.defineGenerator(RpcNamespace, (rpcLocation, builder) =>
-  RpcResolver(
-    rpcLocation,
-    [builder.buildHandlerMapResolver(rpcLocation)],
-    handlerMap => async $ => {
-      return $({
-        getRpcMemberHandler(member): any {
-          return defined(
-            (<any>handlerMap)["handle" + capitalize(member.key)],
-            () =>
-              `No rpc-namespace-key like "${member.rpcType.name}.${member.key}":${member.propertyType.name}`
-          );
-        },
-      });
-    }
-  )
-);
-
-RpcResolverGenerator.defineGenerator(
-  (BaseObjectInput as any) as RpcType<ObjectInput<AnyInputMap>>,
-  (rpcLocation, builder) => {
-    const metadata = getRpcMetadata(rpcLocation.rpcType);
-    return RpcResolver(
+{
+  RpcResolverGenerator.defineGenerator(RpcNamespace, (rpcLocation, builder) =>
+    RpcResolver(
       rpcLocation,
-      [
-        Resolver.object(
-          metadata.contextualKeys
-            .toSeq()
-            .filter(childKey =>
-              Input.isInputType(metadata.childTypeMap[childKey])
-            )
-            .map(childKey => [childKey, RpcResolver(rpcLocation.at(childKey))])
-            .fromEntrySeq()
-            .toObject()
-        ),
-      ],
-      x => $ => $(x as {})
-    );
-  }
-);
+      [builder.buildHandlerMapResolver(rpcLocation)],
+      handlerMap => async $ => {
+        return $({
+          getRpcMemberHandler(member): any {
+            return defined(
+              (<any>handlerMap)["handle" + capitalize(member.key)],
+              () =>
+                `No rpc-namespace-key like "${member.rpcType.name}.${member.key}":${member.propertyType.name}`
+            );
+          },
+        });
+      }
+    )
+  );
+
+  RpcResolverGenerator.defineGenerator(
+    (BaseObjectInput as any) as RpcType<ObjectInput<AnyInputMap>>,
+    (rpcLocation, builder) => {
+      const metadata = getRpcMetadata(rpcLocation.rpcType);
+      return RpcResolver(
+        rpcLocation,
+        [
+          Resolver.object(
+            metadata.contextualKeys
+              .toSeq()
+              .filter(childKey =>
+                Input.isInputType(metadata.childTypeMap[childKey])
+              )
+              .map(childKey => [
+                childKey,
+                RpcResolver(rpcLocation.at(childKey)),
+              ])
+              .fromEntrySeq()
+              .toObject()
+          ),
+        ],
+        x => $ => $(x as {})
+      );
+    }
+  );
+}

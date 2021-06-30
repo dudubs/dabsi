@@ -44,14 +44,16 @@ export namespace ViewContext {
     rootMap.set(type, value);
   }
 
+  export function use(): ViewContextMap;
   export function use<T>(type: Type<T>): T;
 
   export function use<T extends Record<string, Type<any>>>(
     typeMap: T
   ): { readonly [K in keyof T]: T[K]["prototype"] | undefined };
 
-  export function use(type) {
+  export function use(type?) {
     const map = React.useContext(ViewContextMap);
+    if (!type) return map;
     if (typeof type === "object") {
       return <any>(
         mapObject(type as Record<string, Type<any>>, type => map.get(type))

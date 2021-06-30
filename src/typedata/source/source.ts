@@ -24,6 +24,11 @@ import { DataInsertRow, DataUpdateRow } from "@dabsi/typedata/value";
 
 export type SelectedDataSource<T, S> = DataSource<DataSelectionRow<T, S>>;
 
+declare global {
+  namespace TypeData {
+    interface IDataSource<T> {}
+  }
+}
 export declare namespace DataSource {
   export type At<T, K extends DataRelationKeys<T>> = DataSource<
     DataRelationType<Required<T>[K]>
@@ -31,6 +36,9 @@ export declare namespace DataSource {
 
   export type Based<T> = DataSource<BaseType<T>>;
 }
+
+export interface DataSource<T> extends TypeData.IDataSource<T> {}
+
 export abstract class DataSource<T> {
   // $debugType!: T;
 
@@ -44,16 +52,18 @@ export abstract class DataSource<T> {
 
   abstract cursor: DataCursor;
 
-  abstract withCursor<T>(cursor: DataCursor): DataSource<T>;
+  abstract withCursor(cursor: DataCursor): DataSource<any>;
 
   protected abstract handleDelete(keys: string[]): Promise<void>;
 
-  protected abstract handleGetTree(
+  protected abstract handleGetTree<T>(
+    this: DataSource<T>,
     inverse: boolean,
     relationPropertyName: string
   ): Promise<DataTreeRow<T>[]>;
 
-  protected abstract handleUpdate(
+  protected abstract handleUpdate<T>(
+    this: DataSource<T>,
     keys: string[],
     value: DataUpdateRow<T>
   ): Promise<number>;
@@ -64,7 +74,9 @@ export abstract class DataSource<T> {
   ): Promise<void>;
 
   // countAndFetch
-  async getCountAndRows(): Promise<[number, DataRow<T>[]]> {
+  async getCountAndRows<T>(
+    this: DataSource<T>
+  ): Promise<[number, DataRow<T>[]]> {
     // TODO: Optimizing
     return [await this.getCountRows(), await this.getRows()];
   }
@@ -87,7 +99,7 @@ export abstract class DataSource<T> {
     });
   }
 
-  protected _selectKeys(): DataSource<T> {
+  protected _selectKeys<T>(this: DataSource<T>): DataSource<T> {
     return this.updateCursor({
       selection: {
         pick: [],
@@ -258,8 +270,8 @@ export abstract class DataSource<T> {
   // asMutable()
   // asImmutable()
 
-  updateCursor<U = T>(callbackOrCursor: Partial<DataCursor>): DataSource<U> {
-    return this.withCursor<U>({ ...this.cursor, ...callbackOrCursor });
+  updateCursor<U = any>(callbackOrCursor: Partial<DataCursor>): DataSource<U> {
+    return <any>this.withCursor({ ...this.cursor, ...callbackOrCursor });
   }
 
   as<K extends keyof Children, Children>(
@@ -322,8 +334,8 @@ export abstract class DataSource<T> {
     if (!key) {
       throw new Error("No data-key for location.");
     }
-    return this.withCursor(
-      DataCursor.at(this.cursor, propertyName, DataKey(key))
+    return <any>(
+      this.withCursor(DataCursor.at(this.cursor, propertyName, DataKey(key)))
     );
   }
 
@@ -385,7 +397,7 @@ export abstract class DataSource<T> {
     this: DataSource<T>,
     key: K
   ): DataSource<DataRelationType<T[K]>> {
-    return this.withCursor({
+    return <any>this.withCursor({
       ...this.cursor,
       ...EMPTY_DATA_CURSOR,
       root: [

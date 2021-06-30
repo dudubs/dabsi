@@ -12,9 +12,11 @@ import ModuleMetadata from "@dabsi/typemodule/ModuleMetadata";
 import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import yargs from "yargs";
 
-declare module "@dabsi/typemodule/ModuleMetadata" {
-  interface ModuleOptions {
-    cli?: string;
+declare global {
+  namespace TypeModule {
+    interface IModuleOptions {
+      cli?: string;
+    }
   }
 }
 @Module()
@@ -65,7 +67,7 @@ export class CliModule2 {
       return builder;
     };
 
-    for (const target of this.moduleRunner.loadedModules) {
+    for (const target of this.moduleRunner.getLoadedModules()) {
       const cliMetadata = CliMetadata.map.get(target);
       if (!cliMetadata) continue;
       const moduleMetadata = ModuleMetadata.get(target);

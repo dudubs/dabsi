@@ -40,7 +40,11 @@ export type MuiActionsProps = {
     [K in string]: MuiAction;
   };
 
+  menuAction?: MuiAction;
+
   onAction?(event: React.SyntheticEvent, actionKey: string): void;
+
+  defaultAction?: MuiAction;
 
   IconButtonProps?: IconButtonProps;
   ButtonProps?: ButtonProps;
@@ -58,7 +62,10 @@ export default function MuiActions(p: MuiActionsProps): React.ReactElement {
   const iconButtonActions: Action[] = [];
   const buttonActions: Action[] = [];
 
-  for (const [key, action] of entries(p.actions)) {
+  for (let [key, action] of entries(p.actions)) {
+    if (p.defaultAction) {
+      action = { ...p.defaultAction, ...action };
+    }
     const isButton = action.type === "button";
     const isMenu = !isButton && action.type === "menu";
 
@@ -78,10 +85,10 @@ export default function MuiActions(p: MuiActionsProps): React.ReactElement {
   }
 
   if (menuActions.length) {
-    iconButtonActions.push({
+    iconButtonActions.unshift({
       tooltip: false,
       icon: <MoreVertIcon />,
-      ...p.actions.menu,
+      ...p.menuAction,
       key: "menu",
       onAction: event => {
         setMenuAnchorEl(event.target);

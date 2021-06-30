@@ -5,13 +5,15 @@ import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataPickableKeys } from "@dabsi/typedata/selection/selection";
 import { DataSource, SelectedDataSource } from "@dabsi/typedata/source/source";
 
-declare module "../source" {
-  interface DataSource<T> {
-    pick: typeof pickKeys &
-      typeof pickKeysFromRelation &
-      typeof pickKeysAndFields &
-      typeof pickFields &
-      typeof pickFieldsFromRelation;
+declare global {
+  namespace TypeData {
+    interface IDataSource<T> {
+      pick: typeof pickKeys &
+        typeof pickKeysFromRelation &
+        typeof pickKeysAndFields &
+        typeof pickFields &
+        typeof pickFieldsFromRelation;
+    }
   }
 }
 

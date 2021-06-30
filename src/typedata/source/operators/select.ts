@@ -6,22 +6,21 @@ import {
 } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source/source";
 
-const operator = "select";
-
-declare module "../source" {
-  interface DataSource<T> {
-    [operator]: typeof method;
+declare global {
+  namespace TypeData {
+    interface IDataSource<T> {
+      select: //
+      typeof selectRelation & typeof selectThis;
+    }
   }
 }
 
-DataSource.prototype[operator] = method;
-
-function method<T, Selection extends DataSelection<T> = {}>(
+declare function selectRelation<T, Selection extends DataSelection<T> = {}>(
   this: DataSource<T>,
   selection: Selection | undefined
 ): DataSource<DataSelectionRow<T, Selection>>;
 
-function method<
+declare function selectThis<
   T,
   Relation extends DataRelationKeys<T>,
   RelationSelection extends DataSelection.Relations<T>[Relation] = true
@@ -38,7 +37,7 @@ function method<
   >
 >;
 
-function method(this: DataSource<any>, ...args): any {
+DataSource.prototype.select = function (this: DataSource<any>, ...args): any {
   let selection: AnyDataSelection | null = null;
 
   if (args.length === 1) {
@@ -54,4 +53,4 @@ function method(this: DataSource<any>, ...args): any {
   return this.updateCursor({
     selection: DataSelection.merge(this.cursor.selection, selection),
   });
-}
+};

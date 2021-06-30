@@ -1,5 +1,7 @@
 import SystemRouter from "@dabsi/system/core/view/SystemRouter";
-import { Router } from "@dabsi/typerouter2";
+import { Route, Router } from "@dabsi/typerouter2";
 
 @SystemRouter.Route("personal")
-export default class AclPersonalRouter extends Router {}
+export default class AclPersonalRouter extends Router {
+  @Route() editProfile!: Router;
+}

@@ -1,5 +1,6 @@
 import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { Once } from "@dabsi/common/patterns/Once";
+import { Awaitable } from "@dabsi/common/typings2/Async";
 import { DABSI_SRC_DIR } from "@dabsi/env";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import MakeModule from "@dabsi/modules/MakeModule";
@@ -13,7 +14,7 @@ import { ChildProcess } from "node:child_process";
 import path from "path";
 import { join } from "path";
 
-const __ServerLoaderSymbol = Symbol("ServerLoader");
+const __serverLoaderSymbol = Symbol("ServerLoader");
 
 export interface StartArgs {
   port?: number;
@@ -46,8 +47,8 @@ export default class ServerModule {
         return Promise.all(o.toSeq().map(o => loadObject(o)));
       }
 
-      if (!o[__ServerLoaderSymbol]) return;
-      const resolver = o[__ServerLoaderSymbol]();
+      if (!o[__serverLoaderSymbol]) return;
+      const resolver = o[__serverLoaderSymbol]();
       await Resolver.resolve(resolver, this.moduleRunner.context);
     };
 
@@ -90,25 +91,20 @@ export default class ServerModule {
     await Promise.all(this.stoppers.map(stopper => stopper(args)));
   }
 
-  processRequest(
+  processRequest<T>(
     context: ResolverMap,
-    callback: (context: ResolverMap) => Promise<void>
-  ): Promise<void> {
+    callback: (context: ResolverMap) => Awaitable<T>
+  ): Promise<T | undefined> {
     const process = new AsyncProcess();
 
     return this.request.process(
       Resolver.Context.assign(context, [process]),
-      async context => {
-        await process.waitFor(() => callback(context));
-      }
+      context => process.waitFor(async () => callback(context))
     );
   }
 
-  static defineServerLoader<T>(
-    type: T,
-    getResolver: (value: T) => Resolver<void>
-  ) {
-    type[__ServerLoaderSymbol] = function () {
+  static defineLoader<T>(type: T, getResolver: (value: T) => Resolver<void>) {
+    type[__serverLoaderSymbol] = function () {
       return getResolver(this);
     };
   }

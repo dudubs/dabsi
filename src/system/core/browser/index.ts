@@ -4,9 +4,9 @@ import axios from "axios";
 //
 import React from "react";
 import ReactDOM from "react-dom";
-import SystemViewCommand from "../view/SystemViewCommand";
+import SystemCommand from "../common/SystemCommand";
 
-SystemViewCommand.handle(payloads =>
+SystemCommand.handle(payloads =>
   axios
     .post(SYSTEM_RPC_PATH, {
       payloads,

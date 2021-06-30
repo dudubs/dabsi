@@ -1,15 +1,17 @@
 // TODO: fix make when no have platofrm folders under src/ - expect to make tsconfigs
+import Touch from "@dabsi/common/patterns/Touch";
 import { DABSI_DIR } from "@dabsi/env";
-import LoaderModule from "@dabsi/modules/LoaderModule";
 import MakeModule from "@dabsi/modules/MakeModule";
 import { ProjectDependency } from "@dabsi/modules/ProjectDependency";
 import ProjectModule from "@dabsi/modules/ProjectModule";
 import { CliCommand } from "@dabsi/typecli";
 import { Module } from "@dabsi/typemodule";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import { Seq } from "immutable4";
 import { entries } from "lodash";
 import path from "path";
 import Platform from "./Platform";
+import PlatformContext from "./PlatformContext";
 
 const DISABLE_SRC_CONFIGS = false;
 
@@ -30,177 +32,25 @@ for (const [k, v] of entries({
 })
 export default class PlatformModule {
   constructor(
-    protected loaderModule: LoaderModule,
     protected projectModule: ProjectModule,
-    protected makeModule: MakeModule
+    protected moduleRunner: ModuleRunner,
+    protected makeModule: MakeModule,
+    protected platformContext: PlatformContext
   ) {}
+
+  readonly log = log.get("PLATFORM");
 
   readonly viewLibs = new Set<string>();
 
   readonly serverLibs = new Set<string>();
 
-  protected _platformMap = new Map<string, Platform>();
-
   readonly commonPlatform = this.getPlatform("common");
 
   readonly viewPlatform = this.getPlatform("view");
 
-  getPlatform(name: string) {
-    return this._platformMap.touch(
-      name,
-      () => new Platform(name, this.loaderModule)
-    );
+  @Touch() getPlatform(name: string) {
+    return new Platform(this.platformContext, name);
   }
-
-  // @CliCommand("make")
-  // async makeOld() {
-  //   const platforms: Platform[] = Object.values(this._platformMap);
-
-  //   await Promise.all(platforms.toSeq().map(p => p.load()));
-
-  //   const cfs = TsConfigPaths2.createFs();
-
-  //   class Project {
-  //     platformMap = new Map<Platform, ProjectPlatform>();
-  //     configsDir = path.join(this.dir, "configs");
-
-  //     @Defined() paths!: TsConfigPaths2;
-  //     @Defined() pathsWithBaseUrl!: TsPathsWithBaseUrl;
-
-  //     constructor(public dir: string) {}
-  //   }
-
-  //   class ProjectPlatform {
-  //     directories: string[] = [];
-
-  //     devConfigFileName = path.join(
-  //       this.project.configsDir,
-  //       `tsconfig.${this.platform.name}.dev.json`
-  //     );
-
-  //     constructor(public project: Project, public platform: Platform) {}
-  //   }
-
-  //   const libConfigsDir = path.join(DABSI_DIR, "configs");
-
-  //   const makeProject = async (project: Project) => {
-  //     project.paths = new TsConfigPaths2(cfs);
-  //     await project.paths.load(path.join(project.dir, "tsconfig.json"));
-
-  //     await fs.promises.mkdir(project.configsDir, { recursive: true });
-
-  //     project.pathsWithBaseUrl = project.paths.createPathsWithBaseUrl(
-  //       project.configsDir
-  //     );
-
-  //     await Promise.all([
-  //       this.makeModule.makeJsonFile(
-  //         path.join(project.configsDir, "tsconfig.server.json"),
-  //         {
-  //           extends: path.join(
-  //             path.relative(project.configsDir, libConfigsDir),
-  //             `tsconfig.server.base.json`
-  //           ),
-  //           include: [
-  //             ...project.paths
-  //               .getFsPaths()
-  //               .toSeq()
-  //               .map(fsPath => path.relative(project.configsDir, fsPath)),
-  //           ],
-  //           exclude: [
-  //             "**/view",
-  //             //
-  //             ...platforms
-  //               .filter(p => p.settings.isViewPlatform)
-  //               .toSeq()
-  //               .map(p => `**/${p.name}`),
-  //           ],
-  //         }
-  //       ),
-  //       Promise.all(
-  //         project.platformMap.toSeq("values").map(p => makeProjectPlatform(p))
-  //       ),
-  //     ]);
-  //   };
-
-  //   const makeProjectPlatform = ({
-  //     project,
-  //     platform,
-  //     devConfigFileName,
-  //     directories,
-  //   }: ProjectPlatform) => {
-  //     const baseConfig = {
-  //       extends: path.join(
-  //         path.relative(project.configsDir, libConfigsDir),
-  //         `tsconfig.base.${platform.name}.json`
-  //       ),
-  //       compilerOptions: project.pathsWithBaseUrl,
-  //     };
-
-  //     return Promise.all([
-  //       this.makeModule.makeJsonFile(devConfigFileName, {
-  //         ...baseConfig,
-  //         include: [
-  //           ...project.paths
-  //             .getFsPaths()
-  //             .toSeq()
-  //             .map(fsPath => path.posix.relative(project.configsDir, fsPath))
-  //             .flatMap(fsPath =>
-  //               [
-  //                 ...(platform.name !== "common" ? ["**/common"] : []),
-
-  //                 ...(platform.settings.isViewPlatform ? ["**/view"] : []),
-
-  //                 `**/${platform.name}`,
-  //               ]
-  //                 .toSeq()
-  //                 .map(x => path.posix.join(fsPath, x))
-  //             )
-  //             .toSet(),
-  //           ...(platform.settings.isViewPlatform
-  //             ? this.viewLibs
-  //                 .toSeq()
-  //                 .map(fsPath => path.relative(project.configsDir, fsPath))
-  //             : []),
-  //         ],
-  //       }),
-  //       Promise.all(
-  //         directories.map(async dir => {
-  //           await this.makeModule.makeJsonFile(
-  //             path.join(dir, "tsconfig.json"),
-  //             {
-  //               extends: path.posix.relative(dir, devConfigFileName),
-  //             }
-  //           );
-  //         })
-  //       ),
-  //     ]);
-  //   };
-
-  //   const projectDependencyMap = new Map<string, Project>();
-
-  //   for (const platform of platforms) {
-  //     console.log({ platform });
-
-  //     for (const dir of platform.directories) {
-  //       console.log({ dir });
-
-  //       const projectDir = dir.split(/[\\\/]+src[\\\/]+/, 1)[0];
-
-  //       const project = projectDependencyMap.touch(
-  //         projectDir,
-  //         () => new Project(projectDir)
-  //       );
-  //       project.platformMap
-  //         .touch(platform, () => new ProjectPlatform(project, platform))
-  //         .directories.push(dir);
-  //     }
-  //   }
-
-  //   await Promise.all(
-  //     projectDependencyMap.toSeq("values").map(project => makeProject(project))
-  //   );
-  // }
 
   @CliCommand("make")
   async make() {
@@ -209,18 +59,12 @@ export default class PlatformModule {
       this.makePlatformConfigs("common", []),
       this.makePlatformConfigs("view", ["common"]),
       Promise.all(
-        this._platformMap
+        Touch.getMap(this, "getPlatform")!
           .toSeq("values")
-          .filter(p => p.settings.isViewPlatform)
+          .filter(p => p.options.isViewPlatform)
           .map(p => this.makePlatformConfigs(p.name, ["common", "view"]))
       ),
     ]);
-  }
-
-  getViewPlatforms(): Seq.Indexed<Platform> {
-    return this._platformMap
-      .toSeq("values")
-      .filter(p => p.settings.isViewPlatform);
   }
 
   async makeServerConfigs() {
@@ -320,7 +164,7 @@ export default class PlatformModule {
                         .map(pd => path.join(pd.dir, "src/**/" + platform.name))
                         .toArray()
                         .concat(
-                          platform.settings.isViewPlatform ||
+                          platform.options.isViewPlatform ||
                             platform.name === "view"
                             ? [...this.viewLibs]
                             : []
@@ -370,14 +214,10 @@ export default class PlatformModule {
     );
   }
 
-  async makeTestsFile(
-    outFileName: string,
-    testsFileNames: string[],
-    code = ""
-  ) {
+  async makeTestsFile(outFileName: string, testsFiles: string[], code = "") {
     return this.makeSourceFile(
       outFileName,
-      testsFileNames,
+      testsFiles,
       escapedTsPath =>
         `describe(${escapedTsPath},()=> { require(${escapedTsPath}); });`,
       code
@@ -391,7 +231,7 @@ export default class PlatformModule {
     await Promise.all([
       this.makeTestsFile(
         testsFileName,
-        platforms.flatMap(p => p.testsFileNames),
+        platforms.flatMap(p => p.testsFiles),
         commonCode
       ),
       this.makeIndexFile(

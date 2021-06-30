@@ -8,7 +8,15 @@ export interface BaseModuleOptions {
   dependencies?: ModuleTarget[];
 }
 
-export interface ModuleOptions extends BaseModuleOptions {}
+declare global {
+  namespace TypeModule {
+    interface IModuleOptions {}
+  }
+}
+
+export interface ModuleOptions
+  extends BaseModuleOptions,
+    TypeModule.IModuleOptions {}
 
 const map = new WeakMap();
 

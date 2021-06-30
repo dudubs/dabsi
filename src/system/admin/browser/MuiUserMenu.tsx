@@ -13,7 +13,7 @@ import ViewContext from "@dabsi/view/react/ViewContext";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { AclCurrentUserReactor } from "@dabsi/system/acl/view";
 
-export function MuiUserMenu(p: { userName: string }) {
+export default function MuiUserMenu(p: { userName: string }) {
   const anchorElRef = React.useRef(null);
   const [open, setOpen] = React.useState(false);
 

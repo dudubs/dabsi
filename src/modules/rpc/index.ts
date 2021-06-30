@@ -1,14 +1,16 @@
-import { Flattable } from "@dabsi/common/iterator/flat";
 import { entries } from "@dabsi/common/object/entries";
 import { Once } from "@dabsi/common/patterns/Once";
+import TableMap from "@dabsi/common/TableMap";
 import { DABSI_SRC_DIR } from "@dabsi/env";
 import ExpressModule from "@dabsi/modules/ExpressModule";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
+import RpcLocationContext from "@dabsi/modules/rpc/RpcLocationContext";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { BaseRpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
+import ServerModule from "@dabsi/modules/ServerModule";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
@@ -16,51 +18,53 @@ import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
 import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
 import { RpcType } from "@dabsi/typerpc2/Rpc";
+import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
 import express from "express";
 import multer from "multer";
 import path from "path";
 
 @Module({ cli: "rpc" })
-export class RpcModule2 {
+export default class RpcModule {
   log = log.get("RPC");
 
-  protected resolverBuilder = new RpcResolverGenerator();
+  protected _resolverGenerator = new RpcResolverGenerator();
+
+  readonly _locationContextMap = new RpcPathMap<ResolverMap>();
+
+  protected _locationContextMapCache = new Map<
+    RpcType<any>,
+    TableMap<ResolverMap>
+  >();
+
+  protected _serveMap: Record<string, RpcType> = {};
 
   readonly request = new RequestBuilder();
 
   constructor(protected loaderModule: LoaderModule) {}
 
   installContext(@Plugin() context: ModuleRunnerContext) {
-    Resolver.Context.assign(context, [this.resolverBuilder]);
+    Resolver.Context.assign(context, [this._resolverGenerator]);
   }
 
-  async installPlatform(@Plugin() platformModule2: PlatformModule) {
+  async installPlatform(@Plugin() platformModule: PlatformModule) {
     const libPath = path.join(DABSI_SRC_DIR, "typerpc2");
 
     const viewFilePattern = path.join(libPath, "**/*view.ts");
 
-    platformModule2.viewLibs.add(viewFilePattern).add(viewFilePattern + "x");
+    platformModule.viewLibs.add(viewFilePattern).add(viewFilePattern + "x");
 
-    platformModule2.serverLibs.addAll([
+    platformModule.serverLibs.addAll([
       path.join(libPath, "**/*handler.ts"),
       path.join(libPath, "**/*Handler.ts"),
     ]);
 
-    platformModule2
+    platformModule
       .getPlatform("common")
       .loaders.push(({ platform, baseName, fileName }) => {
         if (baseName === "rpc.ts") {
           platform.indexFileNames.push(fileName);
         }
       });
-  }
-
-  /**
-   *
-   * @deprecated
-   */
-  configure(resolvers: Flattable<RpcResolver<any>>) {
-    this.resolverBuilder.add(resolvers);
   }
 
   @Once()
@@ -70,14 +74,30 @@ export class RpcModule2 {
       for (const baseName of await this.loaderModule.readDir(dir)) {
         if (!/config\.ts$/i.test(baseName)) continue;
         const configFileName = path.join(dir, baseName);
-        this.configure(require(configFileName).default);
+        this._resolverGenerator.add(require(configFileName).default);
       }
     });
   }
 
   @CliCommand("check") check(rpc: RpcType, context: ResolverMap) {
     context = Resolver.Context.create(context, [RpcRequest]);
-    Resolver.check(this.resolverBuilder.getResolver(rpc), context);
+    Resolver.check(this._resolverGenerator.getResolver(rpc), context);
+  }
+
+  getLocationContext(rpcType: RpcType, path: string[]): ResolverMap {
+    return this._locationContextMapCache
+      .touch(rpcType, () => new TableMap())
+      .touch(path, () => {
+        const context = {};
+        for (const childContext of this._locationContextMap.findPrefix(
+          rpcType,
+          path
+        )) {
+          Object.assign(context, childContext);
+        }
+
+        return context;
+      });
   }
 
   async processRequest(
@@ -85,16 +105,27 @@ export class RpcModule2 {
     rpcRequest: RpcRequest,
     context: ResolverMap
   ): Promise<any> {
-    context = Resolver.Context.assign(context, [rpcRequest]);
-    let result: any;
-    await this.request.process(context, async () => {
-      const configuratorResolver = this.resolverBuilder.getResolver(rpcType);
-      const configurator = Resolver.resolve(configuratorResolver, context);
-      const handler = await createRpcHandler(rpcType, configurator);
-      const command = createRpcCommandFromHandler(rpcType, handler);
-      result = await command(rpcRequest.payload);
-    });
-    return result;
+    context = Resolver.Context.create(
+      context,
+      this.getLocationContext(
+        rpcType,
+        rpcRequest.payload.filter(item => typeof item === "string")
+      )
+    );
+
+    return this.request.process(
+      Resolver.Context.assign(context, [rpcRequest]),
+      async () => {
+        const configuratorResolver = this._resolverGenerator.getResolver(
+          rpcType
+        );
+
+        const configurator = Resolver.resolve(configuratorResolver, context);
+        const handler = await createRpcHandler(rpcType, configurator);
+        const command = createRpcCommandFromHandler(rpcType, handler);
+        return await command(rpcRequest.payload);
+      }
+    );
   }
 
   processMultipleRequests(
@@ -106,19 +137,15 @@ export class RpcModule2 {
     this.log.info(() => `process ${payloads.length} payloads.`);
 
     return Promise.all(
-      payloads
-        .toSeq()
-        .map(async payload =>
-          this.processRequest(
-            rpcType,
-            new RpcRequest(payload, body),
-            Resolver.Context.create(context)
-          )
+      payloads.map(async payload =>
+        this.processRequest(
+          rpcType,
+          new RpcRequest(payload, body),
+          Resolver.Context.create(context)
         )
+      )
     );
   }
-
-  protected _serveMap: Record<string, RpcType> = {};
 
   serve(path: string, rpcType: RpcType) {
     if (this._serveMap[path])
@@ -170,3 +197,19 @@ export class RpcModule2 {
     });
   }
 }
+
+ServerModule.defineLoader(BaseRpcResolver, rpcResolver =>
+  Resolver([RpcResolverGenerator], rb => {
+    rb.add(rpcResolver);
+  })
+);
+
+ServerModule.defineLoader(RpcLocationContext.prototype, rpcLocationContext =>
+  Resolver([RpcModule], rpcModule => {
+    rpcModule._locationContextMap.update(
+      rpcLocationContext.location.rpcRootType,
+      rpcLocationContext.location.path,
+      context => ({ ...context, ...rpcLocationContext.context })
+    );
+  })
+);

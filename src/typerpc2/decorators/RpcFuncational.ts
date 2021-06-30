@@ -19,7 +19,11 @@ export default function RpcFuncational(): {
 
     target[propertyName] = function (this: any, ...args) {
       const { getPath, command } = RpcArgs.get(this);
-      const payload = [...getPath(), propertyName, ...args];
+      const payload = [
+        ...getPath(),
+        propertyName,
+        ...(args.length ? [args] : []),
+      ];
 
       if (RpcFuncational.handler) {
         return RpcFuncational.handler(payload);

@@ -2,24 +2,32 @@ import callAndWaitForAll from "@dabsi/common/async/callAndWaitForAll";
 import { Defined } from "@dabsi/common/patterns/Defined";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import LoaderModule from "@dabsi/modules/LoaderModule";
+import { ModuleTarget } from "@dabsi/typemodule/ModuleRunner";
+import { Badge } from "@material-ui/core";
 import { Stats } from "fs";
 import path from "path";
+import PlatformContext from "./PlatformContext";
 
-export type PlatformLoader = (event: {
+export type PlatformLoaderEvent = {
   baseName: string;
   fileName: string;
+  dirName: string;
   stats: Stats;
-  platformDir: string;
   platform: Platform;
-}) => Awaitable;
+};
+
+export type PlatformLoaderFn = (event: PlatformLoaderEvent) => Awaitable;
+
+export type ModuleDirectorieMap = Map<string, undefined | ModuleTarget>;
 
 export default class Platform {
+  constructor(readonly context: PlatformContext, readonly name: string) {}
+
   @Defined()
   indexFileNames!: string[];
 
   @Defined()
-  testsFileNames!: string[];
+  testsFiles!: string[];
 
   @Defined()
   directories!: string[];
@@ -27,96 +35,79 @@ export default class Platform {
   @Defined()
   projectDirectoriesMap!: Map<string, string[]>;
 
-  readonly settings = {
+  readonly options = {
     includeInternalFiles: false,
     includeTestsFiles: true,
     isViewPlatform: false,
   };
 
-  private _indexFilesLoader: PlatformLoader = ({ baseName, fileName }) => {
-    if (!/^index.tsx?$/.test(baseName)) return;
-    this.indexFileNames.push(fileName);
-  };
+  readonly loaders: PlatformLoaderFn[] = [
+    event => this._loadIndexFiles(event),
 
-  private _internalFilesLoader: PlatformLoader = ({
-    baseName,
-    stats,
-    fileName,
-  }) => {
-    if (!this.settings.includeInternalFiles) return;
+    event =>
+      this.options.includeInternalFiles && //
+      this._loadInternalFiles(event),
 
-    if (!baseName.startsWith("_")) return;
-    if (!stats.isFile()) return;
-    if (!/\.tsx?$/.test(baseName)) return;
-    this.indexFileNames.push(fileName);
-  };
-
-  private _testsFilesLoader: PlatformLoader = async ({
-    baseName,
-    stats,
-    fileName,
-  }) => {
-    if (!this.settings.includeTestsFiles) return;
-    if (stats.isDirectory() && baseName === "tests") {
-      for (const baseName of await this.loaderModule.readDir(fileName)) {
-        if (
-          /tests\.tsx?$/i.test(baseName) ||
-          /[\\\/]index\.tsx?$/i.test(baseName)
-        ) {
-          this.testsFileNames.push(path.join(fileName, baseName));
-        }
-      }
-    }
-  };
-
-  readonly loaders: PlatformLoader[] = [
-    this._indexFilesLoader,
-    this._internalFilesLoader,
-    this._testsFilesLoader,
+    event =>
+      this.options.includeTestsFiles && //
+      this._loadTestsFiles(event),
   ];
 
-  constructor(readonly name: string, readonly loaderModule: LoaderModule) {}
+  protected _loadIndexFiles({ baseName, fileName }: PlatformLoaderEvent) {
+    if (!/^index.tsx?$/.test(baseName)) return;
+    this.indexFileNames.push(fileName);
+  }
+
+  protected async _loadInternalFiles(event: PlatformLoaderEvent) {
+    for await (const sourceFileName of this.context.findInternalFiles(event)) {
+      this.indexFileNames.push(sourceFileName);
+    }
+  }
+
+  protected async _loadTestsFiles(event: PlatformLoaderEvent) {
+    for await (const testsFile of this.context.getTestsFiles(event)) {
+      this.testsFiles.push(testsFile);
+    }
+  }
 
   @Once() async load() {
     [
       this.directories,
-      this.testsFileNames,
+      this.testsFiles,
       this.indexFileNames,
       this.projectDirectoriesMap,
     ] = [[], [], [], new Map()];
 
-    for (const o of [this.loaders, this.settings]) {
+    for (const o of [this.loaders, this.options]) {
       Object.seal(o);
     }
 
     await Promise.all(
-      this.loaderModule.getLoadedDirectories().map(async moduleDir => {
-        const platformDir = path.join(moduleDir, this.name);
+      this.context.loaderModule.getLoadedDirectories().map(async moduleDir => {
+        const dirName = path.join(moduleDir, this.name);
 
-        const platformFiles = await this.loaderModule
-          .readDir(platformDir)
+        const platformFiles = await this.context.loaderModule
+          .readDir(dirName)
           .catch(() => null);
 
         if (!platformFiles) return;
 
-        const projectDir = platformDir.split(/[\\\/]+src[\\\/]+/, 1)[0];
-        if (projectDir !== platformDir) {
-          this.projectDirectoriesMap
-            .touch(projectDir, () => [])
-            .push(platformDir);
+        const projectDir = dirName.split(/[\\\/]+src[\\\/]+/, 1)[0];
+        if (projectDir !== dirName) {
+          this.projectDirectoriesMap.touch(projectDir, () => []).push(dirName);
         }
 
-        this.directories.push(platformDir);
+        this.directories.push(dirName);
 
         await Promise.all(
           platformFiles.toSeq().map(async baseName => {
-            const fileName = path.join(platformDir, baseName);
+            const fileName = path.join(dirName, baseName);
             return callAndWaitForAll(this.loaders, {
               baseName,
+              dirName,
               fileName,
-              platformDir,
               platform: this,
-              stats: await this.loaderModule.stat(fileName),
+              stats: await this.context.loaderModule.stat(fileName),
             });
           })
         );
@@ -125,7 +116,7 @@ export default class Platform {
 
     for (const o of [
       this.directories,
-      this.testsFileNames,
+      this.testsFiles,
       this.indexFileNames,
       this.projectDirectoriesMap,
     ]) {

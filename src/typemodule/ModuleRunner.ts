@@ -1,4 +1,5 @@
 import AsyncProcess from "@dabsi/common/async/AsyncProcess";
+import repeatDiff from "@dabsi/common/iterator/reapetDiff";
 import { defined } from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { Awaitable } from "@dabsi/common/typings2/Async";
@@ -6,6 +7,8 @@ import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import ModuleMetadata from "@dabsi/typemodule/ModuleMetadata";
 import { Seq } from "immutable4";
+import path from "path";
+import { ModuleOptions } from "webpack";
 import { catchAndLocateError } from "./catchAndLocateError";
 import { InstanceEmitter } from "./InstanceEmitter";
 
@@ -14,7 +17,7 @@ const DEBUG_LOADED_MODULES = false;
 export type ModuleTarget = Function;
 
 export interface ModuleLoaderFn {
-  (target: ModuleTarget): Awaitable;
+  (target: ModuleTarget, metadata: ModuleMetadata): Awaitable;
 }
 
 export class ModuleRunner {
@@ -52,8 +55,12 @@ export class ModuleRunner {
     return this._locked;
   }
 
-  get loadedModules(): ModuleTarget[] {
-    return [...this._moduleInstanceMap.keys()];
+  getLoadedModules(): Iterable<ModuleTarget> {
+    return this._moduleInstanceMap.keys();
+  }
+
+  hasInstance(target: ModuleTarget) {
+    return this._moduleInstanceMap.has(target);
   }
 
   protected _currentLoadingModules = new Set<ModuleTarget>();
@@ -102,7 +109,7 @@ export class ModuleRunner {
 
     this._loadModulePlugins(target);
     for (const loader of this._loaders) {
-      this.process.push(async () => loader(target));
+      this.process.push(async () => loader(target, metadata));
     }
 
     for (const propertyName of metadata.args.propertyPlugins) {
@@ -134,7 +141,8 @@ export class ModuleRunner {
     this._loaders.push(callback);
 
     for (const target of this._moduleInstanceMap.keys()) {
-      this.process.push(async () => callback(target));
+      const metadata = ModuleMetadata.get(target);
+      this.process.push(async () => callback(target, metadata));
     }
   }
 

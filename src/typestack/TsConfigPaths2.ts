@@ -82,7 +82,20 @@ export class TsConfigPaths2 {
     };
   }
 
-  resolveFsPath(tsPath: string) {
+  async resolveFsPath(tsPath: string, dir?: string) {
+    if (dir) {
+      const fsPath = await this.resolveFsPath(tsPath);
+      if (fsPath) return fsPath;
+
+      for (const prefix of [path.sep + "index", ""]) {
+        for (const suffix of ["tsx", "ts"]) {
+          const fileName = dir + prefix + "." + suffix;
+          if (await this.fs.isFile(fileName)) {
+            return fileName;
+          }
+        }
+      }
+    }
     return touchObject(this._resolveFsCache, tsPath, async () => {
       //
 

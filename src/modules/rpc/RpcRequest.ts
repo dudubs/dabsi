@@ -1,3 +1,3 @@
 export default class RpcRequest {
-  constructor(public payload: any[], public body: Record<string, any>) {}
+  constructor(readonly payload: any[], readonly body: Record<string, any>) {}
 }

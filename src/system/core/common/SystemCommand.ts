@@ -5,7 +5,7 @@ import {
 } from "@dabsi/typerpc2/RpcMultiplexer";
 import ViewLoader from "@dabsi/view/ViewLoader";
 
-namespace SystemViewCommand {
+namespace SystemCommand {
   //
 
   let _currentHandler: RpcMultiplexerHandler | null = null;
@@ -40,4 +40,4 @@ namespace SystemViewCommand {
   );
 }
 
-export default SystemViewCommand;
+export default SystemCommand;

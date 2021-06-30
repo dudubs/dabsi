@@ -3,7 +3,7 @@ import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import ProjectModule, { ProjectSettings } from "@dabsi/modules/ProjectModule";
+import ProjectModule from "@dabsi/modules/ProjectModule";
 import ServerModule from "@dabsi/modules/ServerModule";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
@@ -26,8 +26,12 @@ export class DbConnectionRef extends Resolver<() => Connection>() {}
 
 export class DataSourceFactory2 extends Resolver(
   [DbQueryRunnerRef],
-  getQueryRunner => <T>(entityType: Constructor<T>): DataSource<T> =>
-    DataEntitySource.create(entityType, getQueryRunner)
+  getQueryRunner =>
+    //
+    (entityType =>
+      DataEntitySource.create<any>(entityType, getQueryRunner)) as {
+      <T>(entityType: Constructor<T>): DataSource<T>;
+    }
 ) {}
 
 @Module({
@@ -151,11 +155,10 @@ export default class DbModule {
   @CliCommand("sync", y =>
     y.option("force", { type: "boolean", default: false, alias: "f" })
   )
-  async sync({ force }, getConnection: DbConnectionRef) {
-    const connection = getConnection();
+  async sync({ force = false } = {}) {
     if (force) {
-      await connection.query(`PRAGMA foreign_keys = OFF;`);
+      await this._connection!.query(`PRAGMA foreign_keys = OFF;`);
     }
-    await connection.synchronize();
+    await this._connection!.synchronize();
   }
 }

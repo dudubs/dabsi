@@ -1,6 +1,4 @@
 import { Module } from "@dabsi/typemodule";
 
-@Module()
-export default class SiteModule {
-  //
-}
+@Module({})
+export default class SiteModule {}

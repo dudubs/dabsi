@@ -12,10 +12,10 @@ export class RequestBuilder {
   // called to cleaners only if callback completed without errors
   readonly cleaners: Resolver<() => Promise<void>>[] = [];
 
-  async process(
+  async process<T>(
     context: ResolverMap,
-    callback: (context: ResolverMap) => Promise<void>
-  ) {
+    callback: (context: ResolverMap) => Promise<T>
+  ): Promise<T | undefined> {
     context = Resolver.Context.assign(context, this.context);
 
     for (const initializer of this.initializers) {
@@ -23,10 +23,11 @@ export class RequestBuilder {
     }
 
     try {
-      await callback(context);
+      const result = await callback(context);
       for (const cleaner of this.cleaners) {
         await Resolver.resolve(cleaner, context)();
       }
+      return result;
     } catch (error) {
       let handledError = false;
       for (const catcher of this.catchers) {

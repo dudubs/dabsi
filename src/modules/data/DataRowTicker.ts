@@ -101,11 +101,6 @@ export class DataRowTicker<T = any> {
     });
   }
 
-  pick2!: <T, K extends DataPickableKeys<T>>(
-    this: DataRowTicker<T>,
-    keys: readonly K[]
-  ) => any;
-
   pick<T, F extends DataFields<T>>(
     this: DataRowTicker<T>,
     fields: F

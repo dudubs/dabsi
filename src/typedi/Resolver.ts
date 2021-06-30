@@ -7,6 +7,7 @@ import {
 import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { ResolverOrConsumeArgs } from "@dabsi/typedi/ResolverOrConsumeArgs";
+import { ContextType } from "react";
 
 export type ResolverMap<T = any> = Record<string, Resolver<T>>;
 
@@ -28,8 +29,16 @@ export const providableSymbol = Symbol("providable");
 // Customer
 export type Factory<T> = (context: ResolverMap<any>) => T;
 
-export type Provider<T> = Constructor<T> & {
-  [providableSymbol]?: true;
+export type Providable<T> =
+  | Provider<T>
+  | (Constructor & {
+      [providableSymbol]?: true;
+    });
+
+export type Provider<T> = {
+  new (context: ResolverMap): T;
+  //
+  providerType: T;
 };
 
 // TokenableResolver
@@ -38,17 +47,30 @@ export type Consumer<T> = {
   [providableSymbol]: false;
 };
 
-export type Resolver<T = any> = Factory<T> | Provider<T> | Consumer<T>;
+export type Resolver<T = any> =
+  | Provider<T>
+  | Factory<T>
+  | Constructor<T>
+  | Consumer<T>;
 
-export type Resolved<T extends Resolver> = T extends Resolver<infer U>
-  ? U
-  : never;
+export type ProviderOnly<T> = {
+  providableType: T;
+};
 
-export function Resolver<T = {}>(): new (context: ResolverMap) => T;
+export type Resolved<T extends Resolver> =
+  //
+  T extends Provider<infer U>
+    ? U
+    : //
+    T extends Resolver<infer U>
+    ? U
+    : never;
 
-export function Resolver<P extends Provider<T>, T, Deps extends ResolverDeps>(
+export function Resolver<T = {}>(): Provider<T>;
+
+export function Resolver<P extends Providable<any>, Deps extends ResolverDeps>(
   provider: P,
-  ...args: ResolverOrConsumeArgs<T, Deps>
+  ...args: ResolverOrConsumeArgs<Resolved<P>, Deps>
 ): ResolverMap;
 
 export function Resolver<T, U extends ResolverDeps>(
@@ -111,7 +133,7 @@ export function Resolver(...args) {
 }
 class _Provider {
   constructor(context: ResolverMap) {
-    return Resolver.resolve(this.constructor as any, context);
+    return <any>Resolver.resolve(this.constructor as any, context);
   }
 }
 

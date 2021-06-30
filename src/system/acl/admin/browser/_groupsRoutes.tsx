@@ -7,17 +7,6 @@ import { AclAdminRouter } from "@dabsi/system/acl/admin/view/router";
 import { RouterView } from "@dabsi/typerouter2/view/RouterView";
 import React from "react";
 
-const x = {
-  for: AclAdminRouter,
-  let: $ => {
-    $({
-      at: "groups",
-      index: 1,
-    });
-  },
-};
-
-// SystemView
 export default RouterView(AclAdminRouter, $ =>
   $.at("groups", $ =>
     $.index(p => (

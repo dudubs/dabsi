@@ -53,9 +53,9 @@ export default class LoaderModule {
     ///
   }
 
-  getLoadedDirectories(): Seq.Indexed<string> {
+  getLoadedDirectories(): readonly string[] {
     this.moduleRunner.lock();
-    return this._loadedDirectories.toSeq();
+    return [...this._loadedDirectories];
   }
 
   tryToLoad(paths: string[], dir?: string) {

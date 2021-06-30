@@ -1,12 +1,8 @@
-import {
-  getRowKeyParameter,
-  RowKeyParameterResolver,
-} from "@dabsi/modules/data/DataContext";
-import { DataParameterResolver } from "@dabsi/modules/data/DataParameterResolver";
+import { RowKeyParameterResolver } from "@dabsi/modules/data/DataContext";
 import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RequestUser } from "@dabsi/modules/session";
-import { User } from "@dabsi/system/acl/entities/User";
 import AclPersonalRpc from "@dabsi/system/acl-personal/common/AclPersonalRpc";
+import { User } from "@dabsi/system/acl/entities/User";
 import { Resolver } from "@dabsi/typedi";
 
 export default RpcResolverBuilder({

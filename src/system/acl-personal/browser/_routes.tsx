@@ -1,5 +1,7 @@
-import MuiUserAreaView from "@dabsi/system/acl/admin/browser/MuiUserAreaView";
 import AclPersonalRouter from "@dabsi/system/acl-personal/view/AclPersonalRouter";
 import { RouterView } from "@dabsi/typerouter2/view";
+import React from "react";
 
-export default RouterView(AclPersonalRouter, $ => $);
+export default RouterView(AclPersonalRouter, $ =>
+  $.at("editProfile", $ => $.index(p => <>asd</>))
+);

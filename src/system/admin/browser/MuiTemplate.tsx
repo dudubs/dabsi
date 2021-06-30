@@ -1,3 +1,4 @@
+import { Grid } from "@material-ui/core";
 import AppBar from "@material-ui/core/AppBar";
 import Divider from "@material-ui/core/Divider";
 import Drawer from "@material-ui/core/Drawer";
@@ -80,11 +81,11 @@ export const useStyles = makeStyles(theme => ({
   },
 }));
 
-export function MuiTemplate(p: {
-  children;
-  toolbarMenu?;
-  title;
-  drawerMenu?;
+export default function MuiTemplate(p: {
+  children: React.ReactNode;
+  toolbarMenu?: React.ReactNode;
+  title?: React.ReactNode;
+  drawerMenu?: React.ReactNode;
   openDrawerMenu?: boolean;
 }) {
   const classes = useStyles();
@@ -108,8 +109,12 @@ export function MuiTemplate(p: {
           >
             <MenuIcon />
           </IconButton>
-          <Typography className={classes.title}>{p.title}</Typography>
-          {p.toolbarMenu}
+          <Grid container justify="space-between" alignItems="center">
+            <Grid item>
+              <Typography className={classes.title}>{p.title}</Typography>
+            </Grid>
+            <Grid item>{p.toolbarMenu}</Grid>
+          </Grid>
         </Toolbar>
       </AppBar>
       <Drawer

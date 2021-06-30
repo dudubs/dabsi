@@ -4,9 +4,9 @@ import React from "react";
 
 export default (p: {
   renderLoading?(): React.ReactElement;
-  renderForGuest?(): React.ReactElement;
+  renderLogin?(): React.ReactElement;
   children:
-    | React.ReactElement
+    | React.ReactNode
     | ((currentUser: AclCurrentUser) => React.ReactElement);
 }): React.ReactElement => {
   const currentUser = AclCurrentUserReactor.use();
@@ -16,11 +16,11 @@ export default (p: {
   }
 
   if (currentUser === null) {
-    return p.renderForGuest?.() || <>{lang`NO_ACCESS`}</>;
+    return p.renderLogin?.() || <>{lang`NO_ACCESS`}</>;
   }
 
   if (typeof p.children === "function") {
     return p.children(currentUser);
   }
-  return p.children;
+  return <>{p.children}</>;
 };

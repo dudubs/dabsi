@@ -1,6 +1,7 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { IfNever } from "@dabsi/common/typings2/IfNever";
 import { inspect } from "@dabsi/logging/inspect";
+import RpcLocationContext from "@dabsi/modules/rpc/RpcLocationContext";
 import {
   RpcLocationConfigurator,
   RpcResolver,
@@ -72,17 +73,17 @@ export const RpcResolverBuilder: RpcResolverConfigBuilder<never, {}> = (
 ) => {
   const resolvers: any[] = [];
 
-  configure(config, {}, {});
+  configure(config, {});
 
   if (!resolvers.length) {
-    console.log({ config });
+    throw new Error("No built resolvers.");
   }
+
   return resolvers;
 
   function configure(
     config: AnyRpcResolverConfig,
-    consumedContext: ResolverMap,
-    providedContext: ResolverMap
+    consumedContext: ResolverMap
   ) {
     const location = config.for && RpcTypeOrLocation(config.for);
 
@@ -105,8 +106,7 @@ export const RpcResolverBuilder: RpcResolverConfigBuilder<never, {}> = (
         path => {
           configure(
             { ...config, for: location!.at(path), at: undefined },
-            consumedContext,
-            providedContext
+            consumedContext
           );
         }
       );
@@ -114,32 +114,22 @@ export const RpcResolverBuilder: RpcResolverConfigBuilder<never, {}> = (
     }
 
     config.let?.(config =>
-      configure(
-        { for: location, ...config } as any,
-        consumedContext,
-        providedContext
-      )
+      configure({ for: location, ...config } as any, consumedContext)
     );
 
-    const pushResolver = resolver => {
-      if (hasKeys(providedContext)) {
-        resolver = RpcResolver.bindToLocation(
-          location!,
-          Resolver.withContext(resolver, providedContext)
-        );
-      }
-      resolvers.push(resolver);
-    };
+    if (config.provide) {
+      assertLocation("provide");
+      resolvers.push(new RpcLocationContext(location!, config.provide));
+    }
 
     if (config.resolve) {
       assertLocation("resolve");
-
-      pushResolver(config.resolve(location!));
+      resolvers.push(config.resolve(location!));
     }
 
     if (config.configure) {
       assertLocation("configure");
-      pushResolver(RpcResolver(location!, consumedContext, config.configure));
+      resolvers.push(RpcResolver(location!, consumedContext, config.configure));
     }
   }
 };

@@ -4,6 +4,7 @@ import { DABSI_DIR, DABSI_NM_DIR, DABSI_WORKSPACE_DIR } from "@dabsi/env";
 import { touchFile } from "@dabsi/filesystem/touchFile";
 import BrowserModule from "@dabsi/modules/BrowserModule";
 import ExpressModule from "@dabsi/modules/ExpressModule";
+import LoaderModule from "@dabsi/modules/LoaderModule";
 import MakeModule from "@dabsi/modules/MakeModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import ProjectModule from "@dabsi/modules/ProjectModule";
@@ -11,6 +12,7 @@ import ServerDevModule from "@dabsi/modules/ServerModule.dev";
 import watchOnPlatform from "@dabsi/modules/watchOnPlatform";
 import { CliCommand } from "@dabsi/typecli";
 import { Module, Plugin } from "@dabsi/typemodule";
+import { ModuleRunner } from "@dabsi/typemodule/ModuleRunner";
 import express from "express";
 import { watch } from "fs";
 import { values } from "lodash";
@@ -44,10 +46,11 @@ export default class BrowserDevModule {
     protected projectModule: ProjectModule,
     protected platformModule: PlatformModule,
     protected makeModule: MakeModule,
-    protected serverDevModule: ServerDevModule
+    protected serverDevModule: ServerDevModule,
+    protected loaderModule: LoaderModule
   ) {
-    this.platform.settings.isViewPlatform = true;
-    this.platform.settings.includeInternalFiles = true;
+    this.platform.options.isViewPlatform = true;
+    this.platform.options.includeInternalFiles = true;
   }
 
   @Once() async load() {

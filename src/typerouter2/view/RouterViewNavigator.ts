@@ -54,8 +54,8 @@ declare module "../Router" {
 }
 
 export type RouterViewNavigatorLocator = {
-  (history: RouterViewNavigator): void;
-  (event: any, props: { history: RouterViewNavigator }): void;
+  (navigator: RouterViewNavigator): void;
+  (event: any, props: { navigator: RouterViewNavigator }): void;
 };
 
 Router.locate = function (callback?): any {

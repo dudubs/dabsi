@@ -1,5 +1,24 @@
 import { Fn } from "@dabsi/common/typings2/Fn";
-import { WeakId } from "@dabsi/common/WeakId";
+
+function createMethodDecorator(weak: boolean): MethodDecorator {
+  return (target, propertyName: string, desc: PropertyDescriptor) => {
+    const { value: origValue } = desc;
+    if (!weak) {
+      const symbol = Symbol(`${propertyName}Once`);
+      desc.value = function (this: object) {
+        if (symbol in this) {
+          return this[symbol];
+        }
+        return (this[symbol] = origValue.call(this, arguments));
+      };
+      return;
+    }
+    const map = new WeakMap();
+    desc.value = function () {
+      return map.touch(this, () => origValue.call(this, arguments));
+    };
+  };
+}
 
 export function Once(weak?: boolean): MethodDecorator;
 export function Once<T extends Fn>(weak: boolean, callback: T): T;
@@ -15,23 +34,8 @@ export function Once(weakOrCallback, maybeCallback?) {
   }
 
   if (!callback) {
-    return (target, propertyName: string, desc: PropertyDescriptor) => {
-      const { value: origValue } = desc;
-      if (!weak) {
-        const symbol = Symbol(`${propertyName}Once`);
-        desc.value = function (this: object) {
-          if (symbol in this) {
-            return this[symbol];
-          }
-          return (this[symbol] = origValue.call(this, arguments));
-        };
-        return;
-      }
-      const map = new WeakMap();
-      desc.value = function () {
-        return map.touch(this, () => origValue.call(this, arguments));
-      };
-    };
+    // MethodDecoator
+    return createMethodDecorator(weak);
   }
 
   if (!weak) {
@@ -49,3 +53,5 @@ export function Once(weakOrCallback, maybeCallback?) {
     return map.touch(this, () => callback?.call(this, arguments));
   };
 }
+
+export default Once;

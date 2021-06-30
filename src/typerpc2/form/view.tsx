@@ -7,18 +7,6 @@ import ViewState from "@dabsi/view/react/ViewState";
 export interface FormViewProps<T extends AnyForm> extends WidgetViewProps<T> {
   onSubmit?(value: FormValue<T>, view: FormView<T>): void;
 
-  onSuccess?: If<
-    FormValue<T>,
-    { type: "success" },
-    (result: Extract<FormValue<T>, { type: "success" }>) => void
-  >;
-
-  onFailed?: If<
-    FormValue<T>,
-    { type: "success" },
-    (result: Extract<FormValue<T>, { type: "failed" }>) => void
-  >;
-
   onInputError?(view: FormView<T>): void;
 
   onReset?(view: FormView<T>): void;
@@ -58,14 +46,6 @@ export class FormView<T extends AnyForm> extends WidgetView<
 
       this.props.onSubmit?.(result.value, this);
 
-      switch (result.value?.type) {
-        case "success":
-          (this as FormView<any>).props.onSuccess?.(result.value as never);
-          break;
-        case "failed":
-          (this as FormView<any>).props.onFailed?.(result.value as never);
-          break;
-      }
       this.value = result.value;
     } finally {
       this.isSubmiting = false;

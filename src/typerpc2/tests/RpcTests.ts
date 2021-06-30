@@ -120,18 +120,18 @@ it("expect member type will be parametrial", () => {
 
 it("expect to functional payload", async () => {
   expect(await test(A, [], a => a.fx("hello", 10))).toEqual(
-    jasmine.objectContaining(["fx", "hello", 10])
+    jasmine.objectContaining(["fx", ["hello", 10]])
   );
 });
 
 it("expect to contextual payload", async () => {
   expect(await test(B, [], b => b.a.fx("hello", 10))).toEqual(
-    jasmine.objectContaining(["a", "fx", "hello", 10])
+    jasmine.objectContaining(["a", "fx", ["hello", 10]])
   );
 });
 
 it("expect to parametrial payload", async () => {
   expect(await test(B, [], b => b.getA("hello", true).fx("world", 10))).toEqual(
-    jasmine.objectContaining(["getA", ["hello", true], "fx", "world", 10])
+    jasmine.objectContaining(["getA", ["hello", true], "fx", ["world", 10]])
   );
 });

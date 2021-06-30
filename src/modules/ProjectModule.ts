@@ -53,9 +53,3 @@ export default class ProjectModule {
     );
   }
 }
-
-ServerModule.defineServerLoader(BaseRpcResolver, rpcResolver => {
-  return Resolver([RpcResolverGenerator], rb => {
-    rb.add(rpcResolver);
-  });
-});

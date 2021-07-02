@@ -1,12 +1,12 @@
-import createRpcConfigHandler from "@dabsi/typerpc2/createRpcConfigHandler";
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
+import createRpcConfigHandler from "@dabsi/typerpc/createRpcConfigHandler";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { Rpc, RpcType } from "@dabsi/typerpc/Rpc";
 import {
   AnyRpcWithConfig,
   isRpcTypeWithConfig,
   RpcConfigurator,
-} from "@dabsi/typerpc2/RpcConfig";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
+} from "@dabsi/typerpc/RpcConfig";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
 
 export async function createRpcHandler<T extends Rpc>(
   rpcType: RpcType<T>,

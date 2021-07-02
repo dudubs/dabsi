@@ -1,10 +1,10 @@
 import { defined } from "@dabsi/common/object/defined";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import Lazy from "@dabsi/common/patterns/Lazy";
-import { RpcType } from "@dabsi/typerpc2";
-import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
-import { Widget } from "@dabsi/typerpc2/widget/Widget";
+import { RpcType } from "@dabsi/typerpc";
+import { RpcFuncational } from "@dabsi/typerpc/decorators";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
+import { Widget } from "@dabsi/typerpc/widget/Widget";
 
 const ColumnTypeMapSymbol = Symbol("ColumnTypeMap");
 

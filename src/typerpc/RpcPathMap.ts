@@ -1,7 +1,7 @@
 import { defined } from "@dabsi/common/object/defined";
 import PathMap from "@dabsi/common/PathMap";
-import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
-import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
+import { getRpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
+import { RpcLocation } from "@dabsi/typerpc/RpcLocation";
 import { Rpc, RpcType } from ".";
 
 export default class RpcPathMap<V> extends PathMap<RpcType, V> {

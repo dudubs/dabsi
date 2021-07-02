@@ -1,10 +1,10 @@
 import { Fn } from "@dabsi/common/typings2/Fn";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { Rpc, RpcMethod } from "@dabsi/typerpc2/Rpc";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
-import { RpcConfigHandler } from "@dabsi/typerpc2/RpcConfigHandler";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { RpcFuncational } from "@dabsi/typerpc/decorators";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { Rpc, RpcMethod } from "@dabsi/typerpc/Rpc";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
+import { RpcConfigHandler } from "@dabsi/typerpc/RpcConfigHandler";
 
 it("expect to resolve FUNCTION config.", async () => {
   ///

@@ -1,10 +1,10 @@
 import { defined } from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { capitalize } from "@dabsi/common/string/capitalize";
-import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcMembers } from "@dabsi/typerpc2/RpcMembers";
+import { getRpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcMembers } from "@dabsi/typerpc/RpcMembers";
 import {
   AnyRpcWithConfig,
   RpcAnchorSymbol,

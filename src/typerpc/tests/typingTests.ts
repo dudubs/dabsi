@@ -1,12 +1,12 @@
 import { Is } from "@dabsi/common/typings2/boolean/Is";
 import { Expect } from "@dabsi/common/typings2/Expect";
 import { Fn } from "@dabsi/common/typings2/Fn";
-import { Rpc } from "@dabsi/typerpc2";
+import { Rpc } from "@dabsi/typerpc";
 import {
   GenericConfig,
   Configurator,
   IsGenericConfig,
-} from "@dabsi/typerpc2/GenericConfig";
+} from "@dabsi/typerpc/GenericConfig";
 
 //
 

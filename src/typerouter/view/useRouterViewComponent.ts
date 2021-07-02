@@ -1,16 +1,16 @@
 import { reversed } from "@dabsi/common/array/reversed";
 import { defined } from "@dabsi/common/object/defined";
-import { Router } from "@dabsi/typerouter2";
-import { RouterType } from "@dabsi/typerouter2/Router";
+import { Router } from "@dabsi/typerouter";
+import { RouterType } from "@dabsi/typerouter/Router";
 import {
   RouterLocation,
   RouterLocationPath,
-} from "@dabsi/typerouter2/RouterLocation";
+} from "@dabsi/typerouter/RouterLocation";
 import {
   AnyRouterViewRendererWithDepth,
   getRouterViewMetadata,
-} from "@dabsi/typerouter2/view/RouterViewMetadata";
-import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+} from "@dabsi/typerouter/view/RouterViewMetadata";
+import RouterViewNavigator from "@dabsi/typerouter/view/RouterViewNavigator";
 import EmptyFragment from "@dabsi/view/react/EmptyFragment";
 import React from "react";
 

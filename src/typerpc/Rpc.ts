@@ -1,7 +1,7 @@
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
+import { RpcCommand } from "@dabsi/typerpc/RpcCommand";
 
 export type RpcMemberKey<T extends Rpc> = ExtractKeys<
   T,

@@ -1,7 +1,7 @@
-import { createRpc } from "@dabsi/typerpc2/createRpc";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { createRpc } from "@dabsi/typerpc/createRpc";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { ObjectInput } from "@dabsi/typerpc/object-input/rpc";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 const R = ObjectInput({
   ti: TextInput,
 });

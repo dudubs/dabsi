@@ -3,8 +3,8 @@ import {
   getRouterLocation,
   Router,
   RouterType,
-} from "@dabsi/typerouter2/Router";
-import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
+} from "@dabsi/typerouter/Router";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 export default class RouterViewNavigator {
   constructor(

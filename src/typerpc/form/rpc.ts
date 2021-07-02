@@ -1,17 +1,17 @@
-import { RpcContextual, RpcFuncational } from "@dabsi/typerpc2/decorators";
+import { RpcContextual, RpcFuncational } from "@dabsi/typerpc/decorators";
 import {
   AnyInput,
   InputError,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc2/input/Input";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
+} from "@dabsi/typerpc/input/Input";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
 import {
   Widget,
   WidgetElement,
   WidgetState,
-} from "@dabsi/typerpc2/widget/Widget";
+} from "@dabsi/typerpc/widget/Widget";
 
 export type Form<T extends AnyInput, V> = BaseForm<T, V>;
 

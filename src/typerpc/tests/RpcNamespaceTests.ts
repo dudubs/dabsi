@@ -1,9 +1,9 @@
 import { defined } from "@dabsi/common/object/defined";
-import { RpcNamespace } from "@dabsi/typerpc2";
-import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { Rpc, RpcMethod } from "@dabsi/typerpc2/Rpc";
+import { RpcNamespace } from "@dabsi/typerpc";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc/createRpcCommandFromHandler";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { RpcFuncational } from "@dabsi/typerpc/decorators";
+import { Rpc, RpcMethod } from "@dabsi/typerpc/Rpc";
 
 class A extends RpcNamespace {}
 

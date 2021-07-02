@@ -13,9 +13,9 @@ import {
   DataTableQueryResult,
   DataTableRow,
   InferredDataTableRow,
-} from "@dabsi/typerpc2/data-table/rpc";
-import { getRpcType } from "@dabsi/typerpc2/Rpc";
-import WidgetView, { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
+} from "@dabsi/typerpc/data-table/rpc";
+import { getRpcType } from "@dabsi/typerpc/Rpc";
+import WidgetView, { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import ViewState from "@dabsi/view/react/ViewState";
 
 export type DataTableViewProps<

@@ -3,7 +3,7 @@ import { defined } from "@dabsi/common/object/defined";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { RouterParamType } from "@dabsi/typerouter2/getRouterMetadata";
+import { RouterParamType } from "@dabsi/typerouter/getRouterMetadata";
 import { getRouterProperty } from "./getRouterProperty";
 import {
   Router,

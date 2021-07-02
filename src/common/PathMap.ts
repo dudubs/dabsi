@@ -29,7 +29,7 @@ export default class PathMap<K, V> {
   protected _atValidPathKey(key: K, pathKey: string): K {
     return defined(
       this.atPathKey!(key, pathKey),
-      () => `Invalid atPathKey ${pathKey} at ${inspect(key)}`
+      () => `Invalid atPathKey ${inspect({ key, pathKey })}`
     );
   }
 
@@ -52,9 +52,23 @@ export default class PathMap<K, V> {
     }
   }
 
-  getChildKey([key, path]: PathMapKey<K>): K {
-    for (const pathKey of path) {
-      key = this._atValidPathKey!(key, pathKey)!;
+  getChildKey([key, path]: PathMapKey<K>): K | undefined {
+    for (const [index, pathKey] of path.entries()) {
+      key = this.atPathKey!(key, pathKey)!;
+      if (key === undefined) {
+        //
+        if (path.length - index === 1) {
+          return undefined;
+        }
+        throw new Error(
+          `Invalid getChildKey ${inspect({
+            key,
+            path,
+            index,
+            pathKey,
+          })}`
+        );
+      }
     }
     return key;
   }
@@ -101,11 +115,13 @@ export default class PathMap<K, V> {
 
     const childKey = this.getChildKey([key, path]);
 
-    yield* this._lookUp([childKey, []], rootKeys);
+    if (childKey !== undefined) {
+      yield* this._lookUp([childKey, []], rootKeys);
 
-    const baseKey = this.getBaseKey!(childKey);
-    if (baseKey) {
-      yield* this._lookUp([baseKey, []], rootKeys);
+      const baseKey = this.getBaseKey!(childKey);
+      if (baseKey) {
+        yield* this._lookUp([baseKey, []], rootKeys);
+      }
     }
   }
 
@@ -154,19 +170,20 @@ export default class PathMap<K, V> {
     yield [key, path];
 
     const childKey = this.getChildKey([key, path]);
+    if (childKey !== undefined) {
+      if (cycleKeys.has(childKey)) return;
 
-    if (cycleKeys.has(childKey)) return;
+      for (const pathKey of this.getPathKeys!(childKey)) {
+        yield* this._lookDown(
+          [key, [...path, pathKey]],
+          rootKeys,
+          new Set(cycleKeys).add(childKey)
+        );
+      }
 
-    for (const pathKey of this.getPathKeys!(childKey)) {
-      yield* this._lookDown(
-        [key, [...path, pathKey]],
-        rootKeys,
-        new Set(cycleKeys).add(childKey)
-      );
-    }
-
-    if (path.length) {
-      yield* this._lookDown([childKey, []], rootKeys, new Set());
+      if (path.length) {
+        yield* this._lookDown([childKey, []], rootKeys, new Set());
+      }
     }
 
     if (!path.length) {
@@ -209,7 +226,10 @@ export default class PathMap<K, V> {
       return value;
     }
   }
+
   touch(key: PathMapKey<K>, callback: () => V): V {
+    const value = this.get(key);
+    if (value !== undefined) return value;
     const node = this._touchNode(key);
     if (node.value === undefined) {
       node.value = callback();

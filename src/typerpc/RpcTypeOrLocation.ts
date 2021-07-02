@@ -1,5 +1,5 @@
-import { isRpcType, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
+import { isRpcType, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcLocation } from "@dabsi/typerpc/RpcLocation";
 
 export type RpcTypeOrLocation<T> = RpcType<T> | RpcLocation<T>;
 

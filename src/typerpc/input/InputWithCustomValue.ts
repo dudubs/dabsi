@@ -1,6 +1,6 @@
-import { AnyInput } from "@dabsi/typerpc2/input/Input";
-import { InputWithConfig } from "@dabsi/typerpc2/input/InputHandler";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
+import { InputWithConfig } from "@dabsi/typerpc/input/InputHandler";
+import { RpcType } from "@dabsi/typerpc/Rpc";
 
 export type InputWithCustomValue<
   T extends AnyInput,

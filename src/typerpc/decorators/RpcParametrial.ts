@@ -1,8 +1,8 @@
 import { Forward } from "@dabsi/common/reflection/Forward";
-import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
-import { RpcParametrialMember, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { getChildRpcType } from "@dabsi/typerpc/getChildRpcType";
+import { RpcParametrialMember, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 
 export default function RpcParametrial<T extends RpcType>(
   getRpcType: () => T

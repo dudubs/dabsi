@@ -1,6 +1,6 @@
-import { RpcFunctionalMember, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
+import { RpcFunctionalMember, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
+import { RpcMemberType, RpcMembers } from "@dabsi/typerpc/RpcMembers";
 
 RpcFuncational.handler = null as null | ((payload: any[]) => Promise<any>);
 

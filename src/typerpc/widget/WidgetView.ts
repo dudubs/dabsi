@@ -1,10 +1,10 @@
 import { defined } from "@dabsi/common/object/defined";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
 import {
   AnyWidget,
   WidgetElement,
   WidgetState,
-} from "@dabsi/typerpc2/widget/Widget";
+} from "@dabsi/typerpc/widget/Widget";
 import EmptyFragment from "@dabsi/view/react/EmptyFragment";
 import ViewLoader from "@dabsi/view/ViewLoader";
 import { View } from "@dabsi/view/react/View";

@@ -1,7 +1,7 @@
-import { createTestRouters } from "@dabsi/typerouter2/tests/createTestRouters";
-import { BaseRouterView } from "@dabsi/typerouter2/view/BaseRouterView";
+import { createTestRouters } from "@dabsi/typerouter/tests/createTestRouters";
+import { BaseRouterView } from "@dabsi/typerouter/view/BaseRouterView";
 
-import { RouterView } from "@dabsi/typerouter2/view/RouterView";
+import { RouterView } from "@dabsi/typerouter/view/RouterView";
 import React from "react";
 import ReactTestRenderer from "react-test-renderer";
 import "..";

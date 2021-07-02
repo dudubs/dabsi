@@ -1,7 +1,7 @@
 import { If } from "@dabsi/common/typings2/boolean";
-import { AnyForm, Form, FormInput, FormValue } from "@dabsi/typerpc2/form/rpc";
-import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
-import WidgetView, { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
+import { AnyForm, Form, FormInput, FormValue } from "@dabsi/typerpc/form/rpc";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import WidgetView, { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import ViewState from "@dabsi/view/react/ViewState";
 
 export interface FormViewProps<T extends AnyForm> extends WidgetViewProps<T> {

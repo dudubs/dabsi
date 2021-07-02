@@ -1,5 +1,5 @@
-import { Input, inputValueElementToData } from "@dabsi/typerpc2/input/Input";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
+import { Input, inputValueElementToData } from "@dabsi/typerpc/input/Input";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
 
 @RpcWithConfig()
 export class TextInput extends Input<

@@ -5,8 +5,8 @@ import {
   InputValueData,
   InputValueElement,
   inputValueElementToData,
-} from "@dabsi/typerpc2/input/Input";
-import WidgetView, { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
+} from "@dabsi/typerpc/input/Input";
+import WidgetView, { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import ViewState from "@dabsi/view/react/ViewState";
 import updateRef from "@dabsi/view/react/updateRef";
 import React from "react";

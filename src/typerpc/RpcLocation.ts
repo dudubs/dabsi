@@ -5,9 +5,9 @@ import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Union } from "@dabsi/common/typings2/Union";
 import { inspect } from "@dabsi/logging/inspect";
-import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
-import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
-import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { getChildRpcType } from "@dabsi/typerpc/getChildRpcType";
+import { getRpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 
 import { Rpc, RpcChild, RpcParametrialMember, RpcType } from "./Rpc";
 

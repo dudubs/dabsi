@@ -1,8 +1,8 @@
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { InferredRpcConfig } from "@dabsi/typerpc2/RpcConfig";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { getRpcConfigHandlerType } from "@dabsi/typerpc/getRpcConfigHandlerType";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { InferredRpcConfig } from "@dabsi/typerpc/RpcConfig";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import { AnyRpcWithConfig, RpcConfigurator } from "./RpcConfig";
 
 export default function createRpcConfig<T extends AnyRpcWithConfig>(

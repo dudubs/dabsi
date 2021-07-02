@@ -2,7 +2,7 @@ import NativeHistory from "@dabsi/native/NativeHistory";
 import RnpSystemBuilder from "@dabsi/system/core/native/RnpSystemBuilder";
 import SystemRouter from "@dabsi/system/core/view/SystemRouter";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { RouterView } from "@dabsi/typerouter2/view/RouterView";
+import { RouterView } from "@dabsi/typerouter/view/RouterView";
 import React from "react";
 import { Provider as PaperProvider } from "react-native-paper";
 

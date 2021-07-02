@@ -6,8 +6,8 @@ import {
   RpcFunctionalMember,
   RpcParametrialMember,
   RpcType,
-} from "@dabsi/typerpc2";
-import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
+} from "@dabsi/typerpc";
+import { ConfigFactory } from "@dabsi/typerpc/GenericConfig";
 
 export declare const RpcHandlerSymbol: unique symbol;
 

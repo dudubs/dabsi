@@ -1,5 +1,5 @@
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 
 it("expect to load text", async () => {
   expect(

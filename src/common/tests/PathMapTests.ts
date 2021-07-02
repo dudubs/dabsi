@@ -58,7 +58,7 @@ const testLook = (direction: "UP" | "DOWN" | "SUFFIX", path: string[]) => {
 
   return expect(x);
 };
-fit("expect to look SUFFIX", () => {
+it("expect to look SUFFIX", () => {
   testLook("SUFFIX", ["b", "^c", "^d"]).toEqual([
     "A.b.^c.^d",
     "B.^c.^d",
@@ -67,7 +67,7 @@ fit("expect to look SUFFIX", () => {
     "D",
   ]);
 });
-fit("expect to look UP", () => {
+it("expect to look UP", () => {
   testLook("UP", ["b", "^c", "^d"]).toEqual([
     "A.b.^c.^d",
     "A.b.^c",
@@ -80,7 +80,7 @@ fit("expect to look UP", () => {
     "D",
   ]);
 });
-fit("expect to look DOWN", () => {
+it("expect to look DOWN", () => {
   testLook("DOWN", ["b", "^c"]).toEqual([
     "A.b.^c",
     "A.b.^c.^d",

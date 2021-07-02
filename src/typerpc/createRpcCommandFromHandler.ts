@@ -1,9 +1,9 @@
 import { capitalize } from "@dabsi/common/string/capitalize";
-import { RpcType } from "@dabsi/typerpc2";
-import { ConfigFactory, GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { Rpc } from "@dabsi/typerpc2/Rpc";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { RpcType } from "@dabsi/typerpc";
+import { ConfigFactory, GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { Rpc } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 import { RpcHandler } from "./RpcHandler";
 
 export function createRpcCommandFromHandler<T extends RpcType>(

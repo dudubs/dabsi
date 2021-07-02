@@ -1,7 +1,7 @@
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
-import { AnyInput, InputError } from "@dabsi/typerpc2/input/Input";
-import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
-import { AnyInputMap, ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
+import { AnyInput, InputError } from "@dabsi/typerpc/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { AnyInputMap, ObjectInput } from "@dabsi/typerpc/object-input/rpc";
 import { entries } from "lodash";
 import React from "react";
 

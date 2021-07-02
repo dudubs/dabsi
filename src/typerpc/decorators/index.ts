@@ -1,4 +1,4 @@
-export { default as RpcFuncational } from "@dabsi/typerpc2/decorators/RpcFuncational";
+export { default as RpcFuncational } from "@dabsi/typerpc/decorators/RpcFuncational";
 
 export { default as RpcContextual } from "./RpcContextual";
 

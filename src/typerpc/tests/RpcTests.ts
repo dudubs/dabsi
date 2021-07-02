@@ -6,11 +6,11 @@ import {
   RpcFuncational,
   RpcParametrial,
   RpcType,
-} from "@dabsi/typerpc2";
-import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { RpcAt } from "@dabsi/typerpc2/RpcLocation";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcMemberType, RpcMembers } from "@dabsi/typerpc2/RpcMembers";
+} from "@dabsi/typerpc";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc/createRpcCommandFromHandler";
+import { RpcAt } from "@dabsi/typerpc/RpcLocation";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcMemberType, RpcMembers } from "@dabsi/typerpc/RpcMembers";
 
 class A extends Rpc {
   @RpcFuncational() fx!: (xs: string, xi: number) => Promise<string>;

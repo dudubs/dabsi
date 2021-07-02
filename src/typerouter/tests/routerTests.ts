@@ -1,5 +1,5 @@
-import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
-import { createTestRouters } from "@dabsi/typerouter2/tests/createTestRouters";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
+import { createTestRouters } from "@dabsi/typerouter/tests/createTestRouters";
 import { isSubClassMatch } from "./isSubClassMatch";
 
 const { A, B, C } = createTestRouters();

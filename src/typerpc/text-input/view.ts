@@ -1,9 +1,9 @@
 // TODO: text validation in view side.
 import Debounce from "@dabsi/common/async/Debounce";
-import { InputValueElement } from "@dabsi/typerpc2/input/Input";
-import { InputView, InputViewProps } from "@dabsi/typerpc2/input/InputView";
-import { InputWithAnyError } from "@dabsi/typerpc2/input/InputWithCustomError";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { InputValueElement } from "@dabsi/typerpc/input/Input";
+import { InputView, InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { InputWithAnyError } from "@dabsi/typerpc/input/InputWithCustomError";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 import ViewState from "@dabsi/view/react/ViewState";
 
 export type TextInputViewProps<T extends TextInput> = InputViewProps<T>;

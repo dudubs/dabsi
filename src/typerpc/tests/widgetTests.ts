@@ -1,9 +1,9 @@
-import { createRpc } from "@dabsi/typerpc2/createRpc";
-import { Widget } from "@dabsi/typerpc2/widget/Widget";
+import { createRpc } from "@dabsi/typerpc/createRpc";
+import { Widget } from "@dabsi/typerpc/widget/Widget";
 import {
   WidgetHandler,
   WidgetWithConfig,
-} from "@dabsi/typerpc2/widget/WidgetHandler";
+} from "@dabsi/typerpc/widget/WidgetHandler";
 
 it("expect to widget element", async () => {
   class R extends Widget<{ exs: string }> {}

@@ -1,7 +1,7 @@
-import { Rpc } from "@dabsi/typerpc2";
-import { RpcContextual, RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { RpcMethod } from "@dabsi/typerpc2/Rpc";
-import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
+import { Rpc } from "@dabsi/typerpc";
+import { RpcContextual, RpcFuncational } from "@dabsi/typerpc/decorators";
+import { RpcMethod } from "@dabsi/typerpc/Rpc";
+import RpcPathMap from "@dabsi/typerpc/RpcPathMap";
 
 class A extends Rpc {
   @RpcFuncational()

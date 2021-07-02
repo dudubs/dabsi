@@ -1,5 +1,5 @@
 import { pushHook } from "@dabsi/common/pushHook";
-import RpcFuncational from "@dabsi/typerpc2/decorators/RpcFuncational";
+import RpcFuncational from "@dabsi/typerpc/decorators/RpcFuncational";
 
 export default function captureRpcPayload(callback: () => Promise<any>) {
   let payload = null as null | any[];

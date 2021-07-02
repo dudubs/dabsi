@@ -1,7 +1,7 @@
 import globalMessages from "@dabsi/common/globalMessages";
 import AclPassportRouter from "@dabsi/system/acl-passport/browser/router";
-import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
-import { RouterView } from "@dabsi/typerouter2/view";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
+import { RouterView } from "@dabsi/typerouter/view";
 import React from "react";
 
 const message = globalMessages.find(

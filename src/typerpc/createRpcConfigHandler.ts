@@ -1,9 +1,9 @@
-import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
+import createRpcConfig from "@dabsi/typerpc/createRpcConfig";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { getRpcConfigHandlerType } from "@dabsi/typerpc/getRpcConfigHandlerType";
+import { Rpc, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
 import { AnyRpcWithConfig, RpcConfigurator, RpcWithConfig } from "./RpcConfig";
 
 // TODO: make async

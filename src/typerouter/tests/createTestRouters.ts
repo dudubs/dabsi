@@ -1,5 +1,5 @@
-import { Route } from "@dabsi/typerouter2/Route";
-import { Router } from "@dabsi/typerouter2/Router";
+import { Route } from "@dabsi/typerouter/Route";
+import { Router } from "@dabsi/typerouter/Router";
 
 export const createTestRouters = () => {
   class A extends Router {}

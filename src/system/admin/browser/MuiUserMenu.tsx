@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import React from "react";
-import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+import RouterViewNavigator from "@dabsi/typerouter/view/RouterViewNavigator";
 import ViewContext from "@dabsi/view/react/ViewContext";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { AclCurrentUserReactor } from "@dabsi/system/acl/view";

@@ -1,10 +1,7 @@
 import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import {
-  InferredHandlerConfig,
-  RpcWithConfig,
-} from "@dabsi/typerpc2/RpcConfig";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { InferredHandlerConfig, RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
 import {
   BaseRpcConfigHandler,
   InferredRpcHandlerConfig,
@@ -12,13 +9,13 @@ import {
   RpcConfigHandlerOptions,
   RpcConfigHandlerType,
   RpcHandlerProps,
-} from "@dabsi/typerpc2/RpcConfigHandler";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
+} from "@dabsi/typerpc/RpcConfigHandler";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
 import {
   AnyWidget,
   WidgetElement,
   WidgetState,
-} from "@dabsi/typerpc2/widget/Widget";
+} from "@dabsi/typerpc/widget/Widget";
 
 export type BaseWidgetHandler<T extends AnyWidget> = {
   getElement(state: WidgetState<T> | undefined): Awaitable<WidgetElement<T>>;

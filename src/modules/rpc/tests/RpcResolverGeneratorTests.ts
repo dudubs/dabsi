@@ -18,16 +18,16 @@ const rb = new RpcResolverGenerator();
 
 const context = Resolver.Context.assign({}, [rb]);
 
-rb.add(
-  RpcResolverBuilder({
-    //
-    for: R1,
-    at: "testFn",
-    configure: () => $ => $(() => "works"),
-  })
-);
-
 beforeAll(async () => {
+  rb.add(
+    RpcResolverBuilder({
+      //
+      for: R1,
+      at: "testFn",
+      configure: () => $ => $(() => "works"),
+    })
+  );
+
   NS1.nsCommand = createRpcCommandFromHandler(
     NS1,
     await createRpcHandler(NS1, Resolver.resolve(rb.getResolver(NS1), context))

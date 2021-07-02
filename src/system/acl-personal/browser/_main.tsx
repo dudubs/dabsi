@@ -1,6 +1,6 @@
 import MuiPersonalSiteWrapper from "@dabsi/system/acl-personal/browser/MuiPersonalSiteWrapper";
 import AclPersonalRouter from "@dabsi/system/acl-personal/view/AclPersonalRouter";
-import { RouterView } from "@dabsi/typerouter2/view";
+import { RouterView } from "@dabsi/typerouter/view";
 import React from "react";
 
 export default RouterView(AclPersonalRouter, $ =>

@@ -1,3 +1,3 @@
-import { Router } from "@dabsi/typerouter2/Router";
+import { Router } from "@dabsi/typerouter/Router";
 
 export default class SystemRouter extends Router {}

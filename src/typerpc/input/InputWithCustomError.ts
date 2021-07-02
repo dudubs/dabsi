@@ -1,7 +1,7 @@
 import { Override } from "@dabsi/common/typings2/Override";
-import { AnyInput, BaseInput, Input } from "@dabsi/typerpc2/input/Input";
-import { InputWithConfig } from "@dabsi/typerpc2/input/InputHandler";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
+import { AnyInput, BaseInput, Input } from "@dabsi/typerpc/input/Input";
+import { InputWithConfig } from "@dabsi/typerpc/input/InputHandler";
+import { RpcType } from "@dabsi/typerpc/Rpc";
 
 export type InputWithCustomError<
   T extends AnyInput,

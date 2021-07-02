@@ -1,5 +1,5 @@
 import { MuiAction } from "@dabsi/browser/mui/MuiActions";
-import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+import RouterViewNavigator from "@dabsi/typerouter/view/RouterViewNavigator";
 import { ViewContextMap } from "@dabsi/view/react/ViewContext";
 
 export default {

@@ -1,12 +1,12 @@
-import { createRpc } from "@dabsi/typerpc2/createRpc";
-import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { Input, inputValueElementToData } from "@dabsi/typerpc2/input/Input";
+import { createRpc } from "@dabsi/typerpc/createRpc";
+import createRpcConfig from "@dabsi/typerpc/createRpcConfig";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { Input, inputValueElementToData } from "@dabsi/typerpc/input/Input";
 import {
   inputBaseConfig,
   InputHandler,
   InputWithConfig,
-} from "@dabsi/typerpc2/input/InputHandler";
+} from "@dabsi/typerpc/input/InputHandler";
 
 class R extends Input<string, string, "ERR1" | "ERR2", { x? }> {
   [inputValueElementToData](element: string): string {

@@ -1,6 +1,6 @@
 import { Reflector } from "@dabsi/common/reflection/Reflector";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
+import { Rpc, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 import { Menu } from "@material-ui/core";
 
 export enum RpcMemberType {

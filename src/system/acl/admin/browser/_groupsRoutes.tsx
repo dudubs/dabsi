@@ -4,7 +4,7 @@ import { MuiDataTableView } from "@dabsi/browser/mui/views/MuiDataTableView";
 import MuiFormView from "@dabsi/browser/mui/views/MuiFormView";
 import AclAdminRpc from "@dabsi/system/acl/admin/common/AclRpc";
 import { AclAdminRouter } from "@dabsi/system/acl/admin/view/router";
-import { RouterView } from "@dabsi/typerouter2/view/RouterView";
+import { RouterView } from "@dabsi/typerouter/view/RouterView";
 import React from "react";
 
 export default RouterView(AclAdminRouter, $ =>

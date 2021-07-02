@@ -1,6 +1,6 @@
 import { entries } from "@dabsi/common/object/entries";
-import { RpcContextual } from "@dabsi/typerpc2/decorators";
-import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
+import { RpcContextual } from "@dabsi/typerpc/decorators";
+import { getRpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
 import {
   AnyInput,
   Input,
@@ -9,9 +9,9 @@ import {
   InputValueData,
   InputValueElement,
   inputValueElementToData,
-} from "@dabsi/typerpc2/input/Input";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
+} from "@dabsi/typerpc/input/Input";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
 
 export type AnyInputMap = Record<string, AnyInput>;
 

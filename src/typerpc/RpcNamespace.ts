@@ -1,9 +1,9 @@
 import tryToRequire from "@dabsi/common/tryToRequest";
-import { RpcContextual } from "@dabsi/typerpc2/decorators";
-import isHandlingSide from "@dabsi/typerpc2/isHandlingSide";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
+import { RpcContextual } from "@dabsi/typerpc/decorators";
+import isHandlingSide from "@dabsi/typerpc/isHandlingSide";
+import { Rpc, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcCommand } from "@dabsi/typerpc/RpcCommand";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
 
 @RpcWithConfig()
 // "RpcNamespaceHandler"

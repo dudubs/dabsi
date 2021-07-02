@@ -5,7 +5,7 @@ import MuiFormView from "@dabsi/browser/mui/views/MuiFormView";
 import AclAdminRpc from "@dabsi/system/acl/admin/common/AclRpc";
 import { AclAdminRouter } from "@dabsi/system/acl/admin/view/router";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { RouterView } from "@dabsi/typerouter2/view";
+import { RouterView } from "@dabsi/typerouter/view";
 import mergeProps from "@dabsi/view/react/mergeProps";
 import { useLoader } from "@dabsi/view/react/useLoader";
 import { Breadcrumbs, Typography } from "@material-ui/core";

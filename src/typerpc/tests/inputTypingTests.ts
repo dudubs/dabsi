@@ -1,19 +1,19 @@
 import { Expect } from "@dabsi/common/typings2/Expect";
-import { RpcFuncational } from "@dabsi/typerpc2/decorators";
+import { RpcFuncational } from "@dabsi/typerpc/decorators";
 import {
   Input,
   InputError,
   inputValueElementToData,
-} from "@dabsi/typerpc2/input/Input";
+} from "@dabsi/typerpc/input/Input";
 import {
   inputBaseConfig,
   InputWithConfig,
-} from "@dabsi/typerpc2/input/InputHandler";
-import { InputWithCustomError } from "@dabsi/typerpc2/input/InputWithCustomError";
-import { InputWithCustomValue } from "@dabsi/typerpc2/input/InputWithCustomValue";
-import { RpcMethod } from "@dabsi/typerpc2/Rpc";
+} from "@dabsi/typerpc/input/InputHandler";
+import { InputWithCustomError } from "@dabsi/typerpc/input/InputWithCustomError";
+import { InputWithCustomValue } from "@dabsi/typerpc/input/InputWithCustomValue";
+import { RpcMethod } from "@dabsi/typerpc/Rpc";
 
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
+import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
 
 export function typingTests() {
   class TestInput1 extends Input<

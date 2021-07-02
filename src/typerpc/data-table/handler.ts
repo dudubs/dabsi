@@ -20,15 +20,15 @@ import {
   DataTableQuery,
   DataTableQueryResult,
   DataTableRow,
-} from "@dabsi/typerpc2/data-table/rpc";
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { WidgetElement } from "@dabsi/typerpc2/widget/Widget";
+} from "@dabsi/typerpc/data-table/rpc";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcError } from "@dabsi/typerpc/RpcError";
+import { WidgetElement } from "@dabsi/typerpc/widget/Widget";
 import {
   WidgetHandler,
   WidgetWithConfig,
-} from "@dabsi/typerpc2/widget/WidgetHandler";
+} from "@dabsi/typerpc/widget/WidgetHandler";
 
 const MAX_PAGE_SIZE = 100;
 

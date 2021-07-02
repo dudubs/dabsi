@@ -2,15 +2,15 @@ import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import waitForSpyCall from "@dabsi/jasmine/waitForSpyCall";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { createRpc } from "@dabsi/typerpc2/createRpc";
+import { createRpc } from "@dabsi/typerpc/createRpc";
 import {
   DataTable,
   DataTableQuery,
   DataTableQueryResult,
-} from "@dabsi/typerpc2/data-table/rpc";
-import { DataTableView } from "@dabsi/typerpc2/data-table/view";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
+} from "@dabsi/typerpc/data-table/rpc";
+import { DataTableView } from "@dabsi/typerpc/data-table/view";
+import { Rpc, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
 import ReactTestRenderer from "react-test-renderer";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 

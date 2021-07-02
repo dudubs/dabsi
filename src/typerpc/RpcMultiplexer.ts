@@ -1,5 +1,5 @@
-import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
+import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
 
 export type RpcQueueRequest = {
   resolve(result: any);

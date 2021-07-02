@@ -1,11 +1,11 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
-import { RpcType } from "@dabsi/typerpc2";
+import { RpcType } from "@dabsi/typerpc";
 import {
   AnyInputWithConfig,
   InputHandler,
   InputWithConfig,
-} from "@dabsi/typerpc2/input/InputHandler";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+} from "@dabsi/typerpc/input/InputHandler";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 
 const X: RpcType<AnyInputWithConfig> = TextInput;
 

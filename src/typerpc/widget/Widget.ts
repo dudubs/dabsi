@@ -1,5 +1,5 @@
-import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { Rpc } from "@dabsi/typerpc2/Rpc";
+import { RpcFuncational } from "@dabsi/typerpc/decorators";
+import { Rpc } from "@dabsi/typerpc/Rpc";
 
 export class Widget<Element, State = null> extends Rpc {
   @RpcFuncational()

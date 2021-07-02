@@ -1,3 +1,4 @@
+import { focusNextTest } from "@dabsi/jasmine/focusNextTest";
 import { RpcPermissionReason } from "@dabsi/modules/rpc/RpcPermission";
 import RpcPermissionQuery, {
   RpcPermissionMap,
@@ -50,7 +51,7 @@ for (const expectedAReason of [false, true]) {
     it(JSON.stringify({ expectedAReason, expectedATest1Reason }), async () => {
       AReason = expectedAReason;
       ATest1Reason = expectedATest1Reason;
-      const result = await permsMgr.askAll(context, ATest1Loc);
+      const result = await permsMgr.askAll(context, ATest1Loc.asPathMapKey());
 
       expectedAReason
         ? expect(result)

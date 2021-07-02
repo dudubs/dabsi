@@ -12,16 +12,16 @@ import {
   ConfiguratorType,
   GenericConfig,
   IsGenericConfig,
-} from "@dabsi/typerpc2/GenericConfig";
-import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
+} from "@dabsi/typerpc/GenericConfig";
+import { getChildRpcType } from "@dabsi/typerpc/getChildRpcType";
 import {
   Rpc,
   RpcContextualMember,
   RpcParametrialMember,
   RpcType,
-} from "@dabsi/typerpc2/Rpc";
-import { RpcHandler, RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+} from "@dabsi/typerpc/Rpc";
+import { RpcHandler, RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 import { assignDescriptors } from "../common/object/assignDescriptors";
 import {
   AnyRpcWithConfig,

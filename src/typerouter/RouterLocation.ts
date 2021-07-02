@@ -1,8 +1,8 @@
 import { getNextPath } from "@dabsi/common/getNextPath";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { joinUrl } from "@dabsi/common/string/joinUrl";
-import { getRouterMetadata } from "@dabsi/typerouter2/getRouterMetadata";
-import { Route } from "@dabsi/typerouter2/Route";
+import { getRouterMetadata } from "@dabsi/typerouter/getRouterMetadata";
+import { Route } from "@dabsi/typerouter/Route";
 import { Router, RouterType } from "./Router";
 
 export type RouterLocationPath =

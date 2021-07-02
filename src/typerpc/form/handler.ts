@@ -1,20 +1,20 @@
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { IfUndefined } from "@dabsi/common/typings2/boolean";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { BaseForm, Form } from "@dabsi/typerpc2/form/rpc";
-import { ConfigOrFactory } from "@dabsi/typerpc2/GenericConfig";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { BaseForm, Form } from "@dabsi/typerpc/form/rpc";
+import { ConfigOrFactory } from "@dabsi/typerpc/GenericConfig";
 import {
   AnyInputWithConfig,
   InputValue,
   InputValueConfig,
-} from "@dabsi/typerpc2/input/InputHandler";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
+} from "@dabsi/typerpc/input/InputHandler";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
 import {
   WidgetHandler,
   WidgetWithConfig,
-} from "@dabsi/typerpc2/widget/WidgetHandler";
+} from "@dabsi/typerpc/widget/WidgetHandler";
 
 declare module "./rpc" {
   interface BaseForm<T, V>

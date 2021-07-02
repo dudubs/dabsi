@@ -1,8 +1,8 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { pushOrAssign } from "@dabsi/common/object/pushOrAssign";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { getRouterRoutes, Route } from "@dabsi/typerouter2/Route";
-import { Router, RouterType } from "@dabsi/typerouter2/Router";
+import { getRouterRoutes, Route } from "@dabsi/typerouter/Route";
+import { Router, RouterType } from "@dabsi/typerouter/Router";
 
 export type RouterChildren = ReturnType<typeof getRouterMetadata>;
 

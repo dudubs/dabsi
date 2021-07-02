@@ -2,8 +2,8 @@ import { defined } from "@dabsi/common/object/defined";
 import { If } from "@dabsi/common/typings2/boolean";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Union } from "@dabsi/common/typings2/Union";
-import { getRouterMetadata } from "@dabsi/typerouter2/getRouterMetadata";
-import { Router, RouterChild, RouterType } from "@dabsi/typerouter2/Router";
+import { getRouterMetadata } from "@dabsi/typerouter/getRouterMetadata";
+import { Router, RouterChild, RouterType } from "@dabsi/typerouter/Router";
 
 declare module "./Router" {
   interface RouterType {

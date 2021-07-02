@@ -5,7 +5,7 @@ import { Consumer, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
-    function injector<T extends Record<string, Provider<any>>, U>(
+    function injector<T extends Record<string, Providable<any>>, U>(
       providableMap: T,
       resolver: Resolver<U>
     ): Consumer<(resolvedMap: { [K in keyof T]: InstanceType<T[K]> }) => U>;

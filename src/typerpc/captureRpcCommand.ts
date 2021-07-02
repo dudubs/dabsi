@@ -1,5 +1,5 @@
 import { pushHook } from "@dabsi/common/pushHook";
-import RpcFuncational from "@dabsi/typerpc2/decorators/RpcFuncational";
+import RpcFuncational from "@dabsi/typerpc/decorators/RpcFuncational";
 
 export type RpcCapturedCommand = {
   resolve(value: any);

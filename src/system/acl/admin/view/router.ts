@@ -2,7 +2,7 @@
 // import Router from "@dabsi/typerouter/router";
 
 import AdminRouter from "@dabsi/system/admin/view/AdminRouter";
-import { Router, Route } from "@dabsi/typerouter2";
+import { Router, Route } from "@dabsi/typerouter";
 
 @AdminRouter.Route("acl")
 export class AclAdminRouter extends Router {

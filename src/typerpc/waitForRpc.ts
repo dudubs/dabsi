@@ -1,6 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { Rpc } from "@dabsi/typerpc2/Rpc";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
+import { Rpc } from "@dabsi/typerpc/Rpc";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
 
 const getRpcListener = WeakMapFactory((rpc: Rpc) => {
   const rpcArgs = RpcArgs.get(rpc);

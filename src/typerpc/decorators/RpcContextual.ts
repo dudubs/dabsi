@@ -1,8 +1,8 @@
 import { Forward } from "@dabsi/common/reflection/Forward";
-import { getChildRpcType } from "@dabsi/typerpc2/getChildRpcType";
-import { Rpc, RpcContextualMember, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { getChildRpcType } from "@dabsi/typerpc/getChildRpcType";
+import { Rpc, RpcContextualMember, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 
 export function RpcContextual<T extends Rpc>(
   getRpcType?: () => RpcType<T>

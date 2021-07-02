@@ -3,30 +3,30 @@ import { Awaitable } from "@dabsi/common/typings2/Async";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Override } from "@dabsi/common/typings2/Override";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
-import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
+import createRpcConfig from "@dabsi/typerpc/createRpcConfig";
 import {
   AnyInput,
   InputError,
   InputValueData,
   InputValueElement,
-} from "@dabsi/typerpc2/input/Input";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
+} from "@dabsi/typerpc/input/Input";
+import { RpcType } from "@dabsi/typerpc/Rpc";
 import {
   InferredHandlerConfig,
   InferredRpcConfig,
-} from "@dabsi/typerpc2/RpcConfig";
+} from "@dabsi/typerpc/RpcConfig";
 import {
   BaseRpcConfigHandler,
   RpcConfigHandlerType,
-} from "@dabsi/typerpc2/RpcConfigHandler";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
+} from "@dabsi/typerpc/RpcConfigHandler";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
 import {
   BaseWidgetHandler,
   WidgetHandler,
   WidgetHandlerOptions,
   WidgetHandlerProps,
   WidgetWithConfig,
-} from "@dabsi/typerpc2/widget/WidgetHandler";
+} from "@dabsi/typerpc/widget/WidgetHandler";
 
 declare const __inputValueConfigSymbol: unique symbol;
 

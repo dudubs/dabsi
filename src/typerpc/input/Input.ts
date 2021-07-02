@@ -1,6 +1,6 @@
-import { RpcFuncational } from "@dabsi/typerpc2/decorators";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import { Widget } from "@dabsi/typerpc2/widget/Widget";
+import { RpcFuncational } from "@dabsi/typerpc/decorators";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import { Widget } from "@dabsi/typerpc/widget/Widget";
 
 const __isInput = Symbol("__isInput");
 

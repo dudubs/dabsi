@@ -1,9 +1,9 @@
-import { Router, RouterType } from "@dabsi/typerouter2/Router";
+import { Router, RouterType } from "@dabsi/typerouter/Router";
 import {
   BaseRouterView,
   BaseRouterViewProps,
-} from "@dabsi/typerouter2/view/BaseRouterView";
-import RouterViewBuilder from "@dabsi/typerouter2/view/RouterViewBuilder";
+} from "@dabsi/typerouter/view/BaseRouterView";
+import RouterViewBuilder from "@dabsi/typerouter/view/RouterViewBuilder";
 import { History } from "history";
 import React from "react";
 

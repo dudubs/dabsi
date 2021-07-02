@@ -1,12 +1,12 @@
 import { CallStackAnchor } from "@dabsi/common/CallStackAnchor";
-import { Rpc, RpcType } from "@dabsi/typerpc2";
+import { Rpc, RpcType } from "@dabsi/typerpc";
 import {
   ConfigFactory,
   Configurator,
   GenericConfig,
-} from "@dabsi/typerpc2/GenericConfig";
-import isHandlingSide from "@dabsi/typerpc2/isHandlingSide";
-import { RpcHandler, RpcWithHandler } from "@dabsi/typerpc2/RpcHandler";
+} from "@dabsi/typerpc/GenericConfig";
+import isHandlingSide from "@dabsi/typerpc/isHandlingSide";
+import { RpcHandler, RpcWithHandler } from "@dabsi/typerpc/RpcHandler";
 
 export const RpcWithConfigSymbol = Symbol("RpcWithConfigSymbol");
 

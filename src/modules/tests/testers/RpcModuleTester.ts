@@ -7,6 +7,7 @@ import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
 import { Rpc, RpcType } from "@dabsi/typerpc";
 import { RpcCommand } from "@dabsi/typerpc/RpcCommand";
+import { RpcError } from "@dabsi/typerpc/RpcError";
 
 export function RpcModuleTester(t: ModuleTester) {
   return Tester.beforeAll(async () => {
@@ -15,17 +16,18 @@ export function RpcModuleTester(t: ModuleTester) {
 
     const createRpcCommand = (rpcType: RpcType): RpcCommand => {
       return async payload => {
-        let result: any = undefined;
-        await serverMoudle.processRequest(
+        let response: any = undefined;
+        response = await serverMoudle.processRequest(
           Resolver.Context.create(t.moduleRunner.context),
           async context =>
-            (result = await rpcModule.processRequest(
+            await rpcModule.processRequest(
               rpcType,
               new RpcRequest(payload, {}),
               Resolver.Context.create(context)
-            ))
+            )
         );
-        return result;
+        if (response.type === "EXECUTED") return response.result;
+        throw new RpcError(`Invalid response type ${response.type}`, response);
       };
     };
 

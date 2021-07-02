@@ -1,7 +1,7 @@
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
-import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc/createRpcCommandFromHandler";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { Rpc, RpcType } from "@dabsi/typerpc/Rpc";
 import { RpcConfigurator } from "./RpcConfig";
 
 export function createRpc<T extends Rpc>(

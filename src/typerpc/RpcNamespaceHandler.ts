@@ -1,12 +1,12 @@
 import { Fn } from "@dabsi/common/typings2/Fn";
-import { Rpc, RpcMemberKey } from "@dabsi/typerpc2/Rpc";
-import { RpcWithConfig } from "@dabsi/typerpc2/RpcConfig";
+import { Rpc, RpcMemberKey } from "@dabsi/typerpc/Rpc";
+import { RpcWithConfig } from "@dabsi/typerpc/RpcConfig";
 import {
   RpcConfigHandler,
   RpcConfigHandlerMember,
-} from "@dabsi/typerpc2/RpcConfigHandler";
-import { RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcNamespace } from "@dabsi/typerpc2/RpcNamespace";
+} from "@dabsi/typerpc/RpcConfigHandler";
+import { RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 
 declare module "./RpcNamespace" {
   interface RpcNamespace

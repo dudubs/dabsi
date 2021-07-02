@@ -4,7 +4,7 @@ import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import { AclCurrentUserReactor } from "@dabsi/system/acl/view";
 import MuiSiteToolbarMenu from "@dabsi/system/site/browser/MuiSiteToolbarMenu";
 import MuiSiteUserMenu from "@dabsi/system/site/browser/MuiSiteUserMenu";
-import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+import RouterViewNavigator from "@dabsi/typerouter/view/RouterViewNavigator";
 import mergeProps from "@dabsi/view/react/mergeProps";
 import ViewContext from "@dabsi/view/react/ViewContext";
 import { Grid, Typography } from "@material-ui/core";

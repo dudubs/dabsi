@@ -1,6 +1,6 @@
 import { defined } from "@dabsi/common/object/defined";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
-import { getRouterMetadata } from "@dabsi/typerouter2/getRouterMetadata";
+import { getRouterMetadata } from "@dabsi/typerouter/getRouterMetadata";
 import { RouterLocation } from "./RouterLocation";
 
 export type InferredRouterChildRouter<

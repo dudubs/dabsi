@@ -1,8 +1,6 @@
 import { Override } from "@dabsi/common/typings2/Override";
-import { Router } from "@dabsi/typerouter2";
-import RouterLink, {
-  RouterLinkProps,
-} from "@dabsi/typerouter2/view/RouterLink";
+import { Router } from "@dabsi/typerouter";
+import RouterLink, { RouterLinkProps } from "@dabsi/typerouter/view/RouterLink";
 import { Link } from "@material-ui/core";
 import React from "react";
 

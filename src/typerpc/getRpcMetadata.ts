@@ -1,7 +1,7 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
-import { isRpcType, Rpc, RpcType } from "@dabsi/typerpc2/Rpc";
-import { RpcMembers, RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+import { isRpcType, Rpc, RpcType } from "@dabsi/typerpc/Rpc";
+import { RpcMembers, RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 
 export type RpcMetadata = NonNullable<ReturnType<typeof getRpcMetadata>>;
 

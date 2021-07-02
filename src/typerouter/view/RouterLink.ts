@@ -1,7 +1,7 @@
-import { Router } from "@dabsi/typerouter2";
-import { getRouterLocation, RouterType } from "@dabsi/typerouter2/Router";
-import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
-import RouterViewNavigator from "@dabsi/typerouter2/view/RouterViewNavigator";
+import { Router } from "@dabsi/typerouter";
+import { getRouterLocation, RouterType } from "@dabsi/typerouter/Router";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
+import RouterViewNavigator from "@dabsi/typerouter/view/RouterViewNavigator";
 import ViewContext from "@dabsi/view/react/ViewContext";
 import React from "react";
 

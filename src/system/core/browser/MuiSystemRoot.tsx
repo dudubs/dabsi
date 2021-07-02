@@ -3,7 +3,7 @@ import { MuiProvider } from "@dabsi/browser/mui/MuiSystem";
 import MuiSystemBuilder from "@dabsi/system/core/browser/MuiSystemBuilder";
 import SystemRouter from "@dabsi/system/core/view/SystemRouter";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { RouterView } from "@dabsi/typerouter2/view/RouterView";
+import { RouterView } from "@dabsi/typerouter/view/RouterView";
 import { createBrowserHistory } from "history";
 import React from "react";
 

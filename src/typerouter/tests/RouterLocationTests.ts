@@ -1,6 +1,6 @@
-import { Route } from "@dabsi/typerouter2/Route";
-import { getRouterLocation, Router } from "@dabsi/typerouter2/Router";
-import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
+import { Route } from "@dabsi/typerouter/Route";
+import { getRouterLocation, Router } from "@dabsi/typerouter/Router";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 
 class A extends Router {
   @Route() r!: Router;

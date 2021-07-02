@@ -1,4 +1,4 @@
-import { RouterLocation } from "@dabsi/typerouter2/RouterLocation";
+import { RouterLocation } from "@dabsi/typerouter/RouterLocation";
 import { getRouterLocation, Router } from "./Router";
 import { Route } from "./Route";
 

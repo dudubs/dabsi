@@ -1,16 +1,16 @@
 import Lazy from "@dabsi/common/patterns/Lazy";
-import { Router } from "@dabsi/typerouter2";
-import { RouterType } from "@dabsi/typerouter2/Router";
+import { Router } from "@dabsi/typerouter";
+import { RouterType } from "@dabsi/typerouter/Router";
 import {
   RouterAt,
   RouterStackAt,
   RouterValidatePath,
-} from "@dabsi/typerouter2/RouterPath";
+} from "@dabsi/typerouter/RouterPath";
 import {
   getRouterViewMetadata,
   RouterViewMatadata,
   RouterViewRenderer,
-} from "@dabsi/typerouter2/view/RouterViewMetadata";
+} from "@dabsi/typerouter/view/RouterViewMetadata";
 
 export default class RouterViewBuilder<T, R extends Router, S> {
   constructor(protected _routerType: RouterType, protected _depth: number) {}

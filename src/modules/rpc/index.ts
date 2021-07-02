@@ -132,7 +132,7 @@ export default class RpcModule {
 
     return {
       type: "EXECUTED",
-      result: this.request.process(
+      result: await this.request.process(
         Resolver.Context.assign(context, [rpcRequest]),
         async () => {
           const configuratorResolver = this._resolverGenerator.getResolver(

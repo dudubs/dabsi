@@ -2,9 +2,9 @@ import {
   RpcContextual,
   RpcFuncational,
   RpcParametrial,
-} from "@dabsi/typerpc2/decorators";
-import { Rpc, RpcMethod } from "@dabsi/typerpc2/Rpc";
-import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
+} from "@dabsi/typerpc/decorators";
+import { Rpc, RpcMethod } from "@dabsi/typerpc/Rpc";
+import { RpcLocation } from "@dabsi/typerpc/RpcLocation";
 
 class A extends Rpc {
   @RpcFuncational()

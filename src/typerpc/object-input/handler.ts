@@ -1,21 +1,21 @@
 import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
-import { RpcType } from "@dabsi/typerpc2";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { getRpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
-import { Input } from "@dabsi/typerpc2/input/Input";
+import { RpcType } from "@dabsi/typerpc";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { getRpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
+import { Input } from "@dabsi/typerpc/input/Input";
 import {
   AnyInputWithConfig,
   InputHandler,
   InputValue,
   InputValueConfig,
   InputWithConfig,
-} from "@dabsi/typerpc2/input/InputHandler";
-import { BaseObjectInput, ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
-import { RpcHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
+} from "@dabsi/typerpc/input/InputHandler";
+import { BaseObjectInput, ObjectInput } from "@dabsi/typerpc/object-input/rpc";
+import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
+import { RpcHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcMemberType } from "@dabsi/typerpc/RpcMembers";
 
 export type AnyInputWithConfigMap = Record<string, AnyInputWithConfig>;
 

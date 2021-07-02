@@ -2,7 +2,7 @@ import SystemRpc from "@dabsi/system/core/common/rpc";
 import {
   RpcMultiplexer,
   RpcMultiplexerHandler,
-} from "@dabsi/typerpc2/RpcMultiplexer";
+} from "@dabsi/typerpc/RpcMultiplexer";
 import ViewLoader from "@dabsi/view/ViewLoader";
 
 namespace SystemCommand {
@@ -10,14 +10,18 @@ namespace SystemCommand {
 
   let _currentHandler: RpcMultiplexerHandler | null = null;
 
-  let _currentPayloads: { resolve(responses: any[]); payloads: any[][] }[] = [];
+  let _currentPayloads: {
+    reject(error: any): any;
+    resolve(responses: any[]);
+    payloads: any[][];
+  }[] = [];
 
   const _multiplexer = new RpcMultiplexer(payloads => {
     if (_currentHandler) {
       return _currentHandler(payloads);
     }
-    return new Promise<any>(resolve => {
-      _currentPayloads.push({ resolve, payloads });
+    return new Promise<any>((resolve, reject) => {
+      _currentPayloads.push({ reject, resolve, payloads });
     });
   });
 

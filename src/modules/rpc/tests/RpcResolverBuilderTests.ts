@@ -11,16 +11,16 @@ import {
   RpcMethod,
   RpcParametrial,
   RpcType,
-} from "@dabsi/typerpc2";
-import { createRpc } from "@dabsi/typerpc2/createRpc";
-import createRpcConfig from "@dabsi/typerpc2/createRpcConfig";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { Form } from "@dabsi/typerpc2/form/rpc";
-import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
-import { InputWithCustomError } from "@dabsi/typerpc2/input/InputWithCustomError";
-import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+} from "@dabsi/typerpc";
+import { createRpc } from "@dabsi/typerpc/createRpc";
+import createRpcConfig from "@dabsi/typerpc/createRpcConfig";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { Form } from "@dabsi/typerpc/form/rpc";
+import { inputBaseConfig } from "@dabsi/typerpc/input/InputHandler";
+import { InputWithCustomError } from "@dabsi/typerpc/input/InputWithCustomError";
+import { ObjectInput } from "@dabsi/typerpc/object-input/rpc";
+import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 
 let rb: RpcResolverGenerator;
 let context: ResolverMap;

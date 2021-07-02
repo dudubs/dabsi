@@ -1,4 +1,4 @@
-import { RpcNamespace } from "@dabsi/typerpc2/RpcNamespace";
+import { RpcNamespace } from "@dabsi/typerpc/RpcNamespace";
 
 export const SYSTEM_RPC_PATH = "/system-rpc";
 

@@ -6,13 +6,13 @@ import {
   Rpc,
   RpcLocation,
   RpcType,
-} from "@dabsi/typerpc2";
-import { AnyInput } from "@dabsi/typerpc2/input/Input";
-import { InputViewProps } from "@dabsi/typerpc2/input/InputView";
-import { RpcArgs } from "@dabsi/typerpc2/RpcArgs";
-import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
-import { AnyWidget } from "@dabsi/typerpc2/widget/Widget";
-import { WidgetViewProps } from "@dabsi/typerpc2/widget/WidgetView";
+} from "@dabsi/typerpc";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
+import { InputViewProps } from "@dabsi/typerpc/input/InputView";
+import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
+import RpcPathMap from "@dabsi/typerpc/RpcPathMap";
+import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
+import { WidgetViewProps } from "@dabsi/typerpc/widget/WidgetView";
 import createFragment from "@dabsi/view/react/createFragment";
 
 import EmptyFragment from "@dabsi/view/react/EmptyFragment";

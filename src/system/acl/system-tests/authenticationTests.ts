@@ -1,12 +1,12 @@
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import makeFakeUserData from "@dabsi/system/acl/system-tests/makeFakeUserData";
 import SystemTests from "@dabsi/system/core/SystemTests";
-import SystemTestsClient from "../../core/SystemTestsClient";
+import SystemClientTester from "../../core/SystemClientTester";
 
 export let _lockSystemCommand = false;
 
-let client1: SystemTestsClient;
-let client2: SystemTestsClient;
+let client1: SystemClientTester;
+let client2: SystemClientTester;
 
 const TEST_PASSWORD = "11111";
 
@@ -31,15 +31,15 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  client1 = new SystemTestsClient();
-  client2 = new SystemTestsClient();
+  client1 = new SystemClientTester();
+  client2 = new SystemClientTester();
 });
 
-const expectToBeLogout = async (client: SystemTestsClient) =>
+const expectToBeLogout = async (client: SystemClientTester) =>
   expect(await client.use(() => AclRpc.instance.getCurrentUser())).toBe(null);
 
 const expectoToBeLogin = async (
-  client: SystemTestsClient,
+  client: SystemClientTester,
   loginName = userWithPasswordLoginName
 ) =>
   expect(await client.use(() => AclRpc.instance.getCurrentUser())).toEqual(

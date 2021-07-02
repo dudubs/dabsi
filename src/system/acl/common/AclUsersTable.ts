@@ -1,4 +1,4 @@
-import { DataTable } from "@dabsi/typerpc2/data-table/rpc";
+import { DataTable } from "@dabsi/typerpc/data-table/rpc";
 
 export default class AclUsersTable extends DataTable({
   loginName: String,

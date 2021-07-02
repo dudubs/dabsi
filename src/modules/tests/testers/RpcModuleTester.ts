@@ -5,8 +5,8 @@ import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import ServerModule from "@dabsi/modules/ServerModule";
 import { Resolver } from "@dabsi/typedi";
 import { ModuleTester } from "@dabsi/typemodule/tests/ModuleTester";
-import { Rpc, RpcType } from "@dabsi/typerpc2";
-import { RpcCommand } from "@dabsi/typerpc2/RpcCommand";
+import { Rpc, RpcType } from "@dabsi/typerpc";
+import { RpcCommand } from "@dabsi/typerpc/RpcCommand";
 
 export function RpcModuleTester(t: ModuleTester) {
   return Tester.beforeAll(async () => {

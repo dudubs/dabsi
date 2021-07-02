@@ -3,7 +3,7 @@ import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
 import makeFakeUserData from "@dabsi/system/acl/system-tests/makeFakeUserData";
 import SystemTests from "@dabsi/system/core/SystemTests";
-import SystemTestsClient from "@dabsi/system/core/SystemTestsClient";
+import SystemClientTester from "@dabsi/system/core/SystemClientTester";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataRow } from "@dabsi/typedata/row";
 import { Resolver } from "@dabsi/typedi";
@@ -13,7 +13,7 @@ declare global {
     acl: typeof AclSystemTests;
   }
 
-  interface ISystemTestsClient {
+  interface ISystemClientTester {
     loginAs(exp: DataExp<User>);
   }
 }
@@ -25,7 +25,7 @@ namespace AclSystemTests {
 
 SystemTests.acl = AclSystemTests;
 
-SystemTestsClient.prototype.loginAs = function (exp) {
+SystemClientTester.prototype.loginAs = function (exp) {
   return this.processRequest(async context => {
     const user = await SystemTests.acl.users.filter(exp).pick([]).getOrFail();
     const session = Resolver.resolve(RequestSession, context);

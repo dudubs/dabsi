@@ -1,4 +1,4 @@
-import { Rpc, RpcFuncational, RpcMethod, RpcNamespace } from "@dabsi/typerpc2";
+import { Rpc, RpcFuncational, RpcMethod, RpcNamespace } from "@dabsi/typerpc";
 
 export class TestNS extends RpcNamespace {}
 

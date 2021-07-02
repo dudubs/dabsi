@@ -8,29 +8,32 @@ class TestPathMap extends PathMap<string, any> {
       return key.slice(1);
     }
   }
-  getChildKey(key: string, pathKey: string) {
+  atPathKey(key: string, pathKey: string) {
     return pathKey.toUpperCase();
+  }
+  getPathKeys(key) {
+    switch (key.toLowerCase()) {
+      case "^c":
+        return ["^d"];
+      case "^d":
+        return ["^e"];
+      case "^e":
+        return ["^c"];
+      default:
+        return [];
+    }
   }
 }
 
 let m: TestPathMap;
 
-const testFindSuffix = (p: string) => {
-  const [key, ...path] = p.split(".");
-  return [...new Set(m.findSuffix(key.toUpperCase(), path))];
-};
-const testFindPrefix = (p: string) => {
-  const [key, ...path] = p.split(".");
-  return [...new Set(m.findPrefix(key.toUpperCase(), path))];
-};
 beforeAll(() => {
   m = new TestPathMap();
   const set = (p: string) => {
     const [key, ...path] = p.split(".");
 
     m.set(
-      key.toUpperCase(),
-      path,
+      [key.toUpperCase(), path],
       p.replace(/^[^\.]+/, x => x.toUpperCase())
     );
   };
@@ -47,34 +50,56 @@ beforeAll(() => {
   set("a.b");
 });
 
-it("expect to get by suffix", () => {
-  expect(testFindSuffix("a.b.c.d.e")).toEqual([
-    "A.b.c.d.e",
-    "B.c.d.e",
-    "C.d.e",
-    "D.e",
-    "E",
+const testLook = (direction: "UP" | "DOWN" | "SUFFIX", path: string[]) => {
+  const x = [...m.look(direction, ["A", path])].map(([key, path]) => {
+    return path.length ? [key, path.join(".")].join(".") : key;
+  });
+  // console.log({ debug: x, direction });
+
+  return expect(x);
+};
+fit("expect to look SUFFIX", () => {
+  testLook("SUFFIX", ["b", "^c", "^d"]).toEqual([
+    "A.b.^c.^d",
+    "B.^c.^d",
+    "^C.^d",
+    "^D",
+    "D",
   ]);
-  expect(testFindSuffix("c.d.e")).toEqual(["C.d.e", "D.e", "E"]);
-  expect(testFindSuffix("e")).toEqual(["E"]);
-  expect(testFindSuffix("c.d")).toEqual(["D"]);
 });
-
-it("expect to find by-base-key", () => {
-  expect(testFindSuffix("x.^^e")).toEqual(["E"]);
-});
-
-it("expect to find by prefix", () => {
-  expect(testFindPrefix("a.b.c.d.e")).toEqual([
-    "A",
+fit("expect to look UP", () => {
+  testLook("UP", ["b", "^c", "^d"]).toEqual([
+    "A.b.^c.^d",
+    "A.b.^c",
     "A.b",
+    "A",
     "B",
+    "^C",
+    "C",
+    "^D",
+    "D",
+  ]);
+});
+fit("expect to look DOWN", () => {
+  testLook("DOWN", ["b", "^c"]).toEqual([
+    "A.b.^c",
+    "A.b.^c.^d",
+    "A.b.^c.^d.^e",
+    "A.b.^c.^d.^e.^c",
+    "^E",
+    "^E.^c",
+    "^E.^c.^d",
+    "^E.^c.^d.^e",
+    "^D",
+    "^D.^e",
+    "^D.^e.^c",
+    "^D.^e.^c.^d",
+    "^C",
+    "^C.^d",
+    "^C.^d.^e",
+    "^C.^d.^e.^c",
     "C",
     "D",
-    "A.b.c.d.e",
-    "B.c.d.e",
-    "C.d.e",
-    "D.e",
     "E",
   ]);
 });

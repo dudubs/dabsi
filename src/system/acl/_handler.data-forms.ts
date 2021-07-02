@@ -9,7 +9,7 @@ import {
 } from "@dabsi/system/acl/admin/common/AclRpc";
 import { Group } from "@dabsi/system/acl/entities/Group";
 import { User } from "@dabsi/system/acl/entities/User";
-import { inputBaseConfig } from "@dabsi/typerpc2/input/InputHandler";
+import { inputBaseConfig } from "@dabsi/typerpc/input/InputHandler";
 
 export default RpcResolverBuilder({
   with: { data: DataContext },

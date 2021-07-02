@@ -13,11 +13,11 @@ import {
   AnyDataTable,
   DataTableRow,
   InferredDataTableRow,
-} from "@dabsi/typerpc2/data-table/rpc";
+} from "@dabsi/typerpc/data-table/rpc";
 import {
   DataTableView,
   DataTableViewProps,
-} from "@dabsi/typerpc2/data-table/view";
+} from "@dabsi/typerpc/data-table/view";
 import LangKey from "@dabsi/view/lang/LangKey";
 import mergeProps from "@dabsi/view/react/mergeProps";
 import { ReactRef } from "@dabsi/view/react/ref";

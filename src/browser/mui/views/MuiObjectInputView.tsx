@@ -1,11 +1,11 @@
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { AnyInputMap } from "@dabsi/typerpc2/object-input/rpc";
+import { AnyInputMap } from "@dabsi/typerpc/object-input/rpc";
 import {
   ObjectInputView,
   ObjectInputViewProps,
-} from "@dabsi/typerpc2/object-input/view";
+} from "@dabsi/typerpc/object-input/view";
 import { Grid, GridProps } from "@material-ui/core";
 import { entries } from "lodash";
 import React from "react";

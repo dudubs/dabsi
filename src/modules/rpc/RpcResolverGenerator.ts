@@ -14,26 +14,26 @@ import {
   RpcNamespace,
   RpcParametrialMember,
   RpcType,
-} from "@dabsi/typerpc2";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { GenericConfig } from "@dabsi/typerpc2/GenericConfig";
-import { getRpcConfigHandlerType } from "@dabsi/typerpc2/getRpcConfigHandlerType";
-import { getRpcMetadata, RpcMetadata } from "@dabsi/typerpc2/getRpcMetadata";
-import { Input } from "@dabsi/typerpc2/input/Input";
+} from "@dabsi/typerpc";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { GenericConfig } from "@dabsi/typerpc/GenericConfig";
+import { getRpcConfigHandlerType } from "@dabsi/typerpc/getRpcConfigHandlerType";
+import { getRpcMetadata, RpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
+import { Input } from "@dabsi/typerpc/input/Input";
 import {
   AnyInputMap,
   BaseObjectInput,
   ObjectInput,
-} from "@dabsi/typerpc2/object-input/rpc";
+} from "@dabsi/typerpc/object-input/rpc";
 import {
   AnyRpcWithConfig,
   isRpcTypeWithConfig,
-} from "@dabsi/typerpc2/RpcConfig";
-import { RpcHandlerMap, RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
-import { RpcMemberType } from "@dabsi/typerpc2/RpcMembers";
-import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
-import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
+} from "@dabsi/typerpc/RpcConfig";
+import { RpcHandlerMap, RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcLocation } from "@dabsi/typerpc/RpcLocation";
+import { RpcMemberType } from "@dabsi/typerpc/RpcMembers";
+import RpcPathMap from "@dabsi/typerpc/RpcPathMap";
+import { RpcTypeOrLocation } from "@dabsi/typerpc/RpcTypeOrLocation";
 
 export class RpcResolverGenerator {
   // Later RpcPathMap<Resolver<any>>

@@ -27,11 +27,11 @@ describe("", () => {
     m = new RpcPathMap();
   });
   it("expect to find functional location", () => {
-    expect(m.get(A, ["testFn"])).toBeUndefined();
-    m.set(A, ["testFn"], 1);
-    expect(m.get(A, ["testFn"])).toEqual(1);
-    expect(m.get(B, ["a", "testFn"])).toEqual(1);
-    expect(m.get(C, ["b", "a", "testFn"])).toEqual(1);
+    expect(m.get([A, ["testFn"]])).toBeUndefined();
+    m.set([A, ["testFn"]], 1);
+    expect(m.get([A, ["testFn"]])).toEqual(1);
+    expect(m.get([B, ["a", "testFn"]])).toEqual(1);
+    expect(m.get([C, ["b", "a", "testFn"]])).toEqual(1);
   });
 });
 
@@ -43,14 +43,14 @@ describe("get-and-map sanity", () => {
 
     it(`expect ${d} to be ${a}-${b}-${c}`, () => {
       const m = new RpcPathMap();
-      /a/.test(d) && m.set(A, [], "a");
-      /b/.test(d) && m.set(B, ["a"], "b");
-      /c/.test(d) && m.set(C, ["b", "a"], "c");
+      /a/.test(d) && m.set([A, []], "a");
+      /b/.test(d) && m.set([B, ["a"]], "b");
+      /c/.test(d) && m.set([C, ["b", "a"]], "c");
 
       expect({
-        a: m.get(A, []) || "x",
-        b: m.get(B, ["a"]) || "x",
-        c: m.get(C, ["b", "a"]) || "x",
+        a: m.get([A, []]) || "x",
+        b: m.get([B, ["a"]]) || "x",
+        c: m.get([C, ["b", "a"]]) || "x",
       }).toEqual({
         a,
         b,

@@ -1,4 +1,5 @@
 import { defined } from "@dabsi/common/object/defined";
+import { PathMapKey } from "@dabsi/common/PathMap";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
@@ -50,6 +51,10 @@ export class RpcLocation<T> {
   get rpcType(): T extends RpcChild<infer U> ? RpcType<U> : undefined {
     if (!this.path.length) return <any>this.rpcRootType;
     return <any>this.member!.childType;
+  }
+
+  asPathMapKey(): PathMapKey<RpcType> {
+    return [this.rpcRootType, this.path];
   }
 
   @Lazy() get member() {
@@ -161,6 +166,13 @@ export class RpcLocation<T> {
         : this.path),
       ...arg0.split("."),
     ]);
+  }
+
+  static at<T extends Rpc, P extends string = never>(
+    rpcType: RpcType<T>,
+    path?: P
+  ): RpcLocation<RpcAt<T, P>> {
+    return new RpcLocation(rpcType, path?.split(".") || []);
   }
 }
 

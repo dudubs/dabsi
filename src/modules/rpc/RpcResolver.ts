@@ -2,11 +2,11 @@ import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Consumer, Resolver } from "@dabsi/typedi";
 import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
-import { Rpc, RpcLocation } from "@dabsi/typerpc2";
-import { ConfigFactory } from "@dabsi/typerpc2/GenericConfig";
-import { RpcConfigurator } from "@dabsi/typerpc2/RpcConfig";
-import { RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
-import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
+import { Rpc, RpcLocation } from "@dabsi/typerpc";
+import { ConfigFactory } from "@dabsi/typerpc/GenericConfig";
+import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
+import { RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
+import { RpcTypeOrLocation } from "@dabsi/typerpc/RpcTypeOrLocation";
 
 export type RpcLocationConfigurator<T> =
   //

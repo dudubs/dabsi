@@ -2,10 +2,10 @@ import {
   SystemViewComponent,
   SystemViewComponentProps,
 } from "@dabsi/system/core/view/SystemView";
-import { RpcAt, RpcLocation, RpcType, RpcValidatePath } from "@dabsi/typerpc2";
-import { RpcChild } from "@dabsi/typerpc2/RpcHandler";
-import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
-import { AnyWidget } from "@dabsi/typerpc2/widget/Widget";
+import { RpcAt, RpcLocation, RpcType, RpcValidatePath } from "@dabsi/typerpc";
+import { RpcChild } from "@dabsi/typerpc/RpcHandler";
+import RpcPathMap from "@dabsi/typerpc/RpcPathMap";
+import { AnyWidget } from "@dabsi/typerpc/widget/Widget";
 import { Renderer } from "@dabsi/view/react/renderer";
 import React from "react";
 

@@ -2,7 +2,7 @@ import AclPersonalRpc from "@dabsi/system/acl-personal/common/AclPersonalRpc";
 import { AclRpc } from "@dabsi/system/acl/common/rpc";
 import makeFakeUserData from "@dabsi/system/acl/system-tests/makeFakeUserData";
 import SystemTests from "@dabsi/system/core/SystemTests";
-import SystemTestsClient from "@dabsi/system/core/SystemTestsClient";
+import SystemClientTester from "@dabsi/system/core/SystemClientTester";
 
 it("expect to change user basic info", async () => {
   const userData = makeFakeUserData();
@@ -11,7 +11,7 @@ it("expect to change user basic info", async () => {
     ...userData,
   });
 
-  const client = new SystemTestsClient();
+  const client = new SystemClientTester();
 
   await client.loginAs({ $is: userKey });
 

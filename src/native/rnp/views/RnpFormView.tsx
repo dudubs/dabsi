@@ -1,7 +1,7 @@
 import RnpForm, { RnpFormProps } from "@dabsi/native/rnp/components/RnpForm";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { AnyForm } from "@dabsi/typerpc2/form/rpc";
-import { FormView, FormViewProps } from "@dabsi/typerpc2/form/view";
+import { AnyForm } from "@dabsi/typerpc/form/rpc";
+import { FormView, FormViewProps } from "@dabsi/typerpc/form/view";
 import { Renderer } from "@dabsi/view/react/renderer";
 import React from "react";
 

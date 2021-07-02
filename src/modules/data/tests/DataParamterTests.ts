@@ -2,14 +2,9 @@ import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
-import {
-  Rpc,
-  RpcFuncational,
-  RpcMethod,
-  RpcParametrial,
-} from "@dabsi/typerpc2";
-import { createRpc } from "@dabsi/typerpc2/createRpc";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
+import { Rpc, RpcFuncational, RpcMethod, RpcParametrial } from "@dabsi/typerpc";
+import { createRpc } from "@dabsi/typerpc/createRpc";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
 
 class PR extends Rpc {
   @RpcParametrial(() => CR) getChild!: (xsByParam: string) => CR;

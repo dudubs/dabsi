@@ -3,8 +3,8 @@ import { Override } from "@dabsi/common/typings2/Override";
 
 import { PartialKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { AnyForm } from "@dabsi/typerpc2/form/rpc";
-import { FormView, FormViewProps } from "@dabsi/typerpc2/form/view";
+import { AnyForm } from "@dabsi/typerpc/form/rpc";
+import { FormView, FormViewProps } from "@dabsi/typerpc/form/view";
 import mergeProps from "@dabsi/view/react/mergeProps";
 import React, { ReactElement } from "react";
 

@@ -7,10 +7,10 @@ import {
   RpcContextual,
   RpcFuncational,
   RpcParametrial,
-} from "@dabsi/typerpc2";
-import { InputWithAlreadyInUseError } from "@dabsi/typerpc2/input/InputWithCustomError";
-import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+} from "@dabsi/typerpc";
+import { InputWithAlreadyInUseError } from "@dabsi/typerpc/input/InputWithCustomError";
+import { ObjectInput } from "@dabsi/typerpc/object-input/rpc";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 import AclGroupsTable from "../../common/AclGroupsTable";
 import AclUsersTable from "../../common/AclUsersTable";
 

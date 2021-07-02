@@ -1,10 +1,10 @@
 import RnGrid from "@dabsi/native/RnGrid";
 import { SystemView } from "@dabsi/system/core/view/SystemView";
-import { AnyInput } from "@dabsi/typerpc2/input/Input";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
 import {
   ObjectInputView,
   ObjectInputViewProps,
-} from "@dabsi/typerpc2/object-input/view";
+} from "@dabsi/typerpc/object-input/view";
 import React from "react";
 
 export default function RnpObjectInputView<T extends Record<string, AnyInput>>(

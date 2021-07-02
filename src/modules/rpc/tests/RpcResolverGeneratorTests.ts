@@ -2,9 +2,9 @@ import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
-import { Rpc, RpcFuncational, RpcMethod, RpcNamespace } from "@dabsi/typerpc2";
-import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
+import { Rpc, RpcFuncational, RpcMethod, RpcNamespace } from "@dabsi/typerpc";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc/createRpcCommandFromHandler";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
 
 class R1 extends Rpc {
   @RpcFuncational() testFn!: RpcMethod<[], string>;

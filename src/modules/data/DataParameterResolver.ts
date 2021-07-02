@@ -7,10 +7,10 @@ import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { Resolver } from "@dabsi/typedi";
 import { ResolverDeps } from "@dabsi/typedi/consume";
-import { Rpc } from "@dabsi/typerpc2";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { RpcError } from "@dabsi/typerpc2/RpcError";
-import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
+import { Rpc } from "@dabsi/typerpc";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { RpcError } from "@dabsi/typerpc/RpcError";
+import { RpcLocation } from "@dabsi/typerpc/RpcLocation";
 
 export function DataParameterResolver<T extends Rpc, U extends ResolverDeps, R>(
   rpcLocation: RpcLocation<DataParameter<T>>,

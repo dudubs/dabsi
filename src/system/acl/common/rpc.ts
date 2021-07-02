@@ -1,5 +1,5 @@
 import SystemRpc from "@dabsi/system/core/common/rpc";
-import { Rpc, RpcContextual, RpcFuncational } from "@dabsi/typerpc2";
+import { Rpc, RpcContextual, RpcFuncational } from "@dabsi/typerpc";
 import { AclCurrentUser } from "./AclCurrentUser";
 import { AclLoginForm } from "./AclLoginForm";
 

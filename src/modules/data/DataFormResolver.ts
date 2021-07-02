@@ -24,14 +24,14 @@ import {
   ConfigFactory,
   ConfigOrFactory,
   GenericConfig,
-} from "@dabsi/typerpc2/GenericConfig";
+} from "@dabsi/typerpc/GenericConfig";
 import {
   AnyInputWithConfig,
   InputValue,
   InputValueConfig,
-} from "@dabsi/typerpc2/input/InputHandler";
-import { RpcLocation } from "@dabsi/typerpc2/RpcLocation";
-import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
+} from "@dabsi/typerpc/input/InputHandler";
+import { RpcLocation } from "@dabsi/typerpc/RpcLocation";
+import { RpcTypeOrLocation } from "@dabsi/typerpc/RpcTypeOrLocation";
 
 export type DataFormConfig<
   Input extends AnyInputWithConfig,

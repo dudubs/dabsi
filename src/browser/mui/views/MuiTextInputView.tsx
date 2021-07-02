@@ -1,11 +1,11 @@
 import { WeakId } from "@dabsi/common/WeakId";
-import { FormView } from "@dabsi/typerpc2/form/view";
-import { InputWithAnyError } from "@dabsi/typerpc2/input/InputWithCustomError";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { FormView } from "@dabsi/typerpc/form/view";
+import { InputWithAnyError } from "@dabsi/typerpc/input/InputWithCustomError";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 import {
   TextInputView,
   TextInputViewProps,
-} from "@dabsi/typerpc2/text-input/view";
+} from "@dabsi/typerpc/text-input/view";
 import LangKey from "@dabsi/view/lang/LangKey";
 import mergeProps from "@dabsi/view/react/mergeProps";
 import ViewContext from "@dabsi/view/react/ViewContext";

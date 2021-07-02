@@ -6,9 +6,9 @@ import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { TestConnection } from "@dabsi/typedata/tests/TestConnection";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
-import { createRpc } from "@dabsi/typerpc2/createRpc";
-import { ObjectInput } from "@dabsi/typerpc2/object-input/rpc";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { createRpc } from "@dabsi/typerpc/createRpc";
+import { ObjectInput } from "@dabsi/typerpc/object-input/rpc";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

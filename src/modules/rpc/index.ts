@@ -7,6 +7,10 @@ import LoaderModule from "@dabsi/modules/LoaderModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
 import RpcLocationContext from "@dabsi/modules/rpc/RpcLocationContext";
+import { RpcBoundPermissionResolver } from "@dabsi/modules/rpc/RpcPermission";
+import RpcPermissionQuery, {
+  RpcPermissionMap,
+} from "@dabsi/modules/rpc/RpcPermissionQuery";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
 import { BaseRpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
@@ -15,10 +19,11 @@ import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
-import { createRpcCommandFromHandler } from "@dabsi/typerpc2/createRpcCommandFromHandler";
-import { createRpcHandler } from "@dabsi/typerpc2/createRpcHandler";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
-import RpcPathMap from "@dabsi/typerpc2/RpcPathMap";
+import { RpcLocation } from "@dabsi/typerpc";
+import { createRpcCommandFromHandler } from "@dabsi/typerpc/createRpcCommandFromHandler";
+import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
+import { RpcType } from "@dabsi/typerpc/Rpc";
+import RpcPathMap from "@dabsi/typerpc/RpcPathMap";
 import express from "express";
 import multer from "multer";
 import path from "path";
@@ -30,6 +35,10 @@ export default class RpcModule {
   protected _resolverGenerator = new RpcResolverGenerator();
 
   readonly _locationContextMap = new RpcPathMap<ResolverMap>();
+
+  readonly _permissionMap: RpcPermissionMap = new RpcPathMap();
+
+  readonly _permssionQuery = new RpcPermissionQuery(this._permissionMap);
 
   protected _locationContextMapCache = new Map<
     RpcType<any>,
@@ -47,7 +56,7 @@ export default class RpcModule {
   }
 
   async installPlatform(@Plugin() platformModule: PlatformModule) {
-    const libPath = path.join(DABSI_SRC_DIR, "typerpc2");
+    const libPath = path.join(DABSI_SRC_DIR, "typerpc");
 
     const viewFilePattern = path.join(libPath, "**/*view.ts");
 
@@ -89,10 +98,10 @@ export default class RpcModule {
       .touch(rpcType, () => new TableMap())
       .touch(path, () => {
         const context = {};
-        for (const childContext of this._locationContextMap.findPrefix(
+        for (const childContext of this._locationContextMap.find("UP", [
           rpcType,
-          path
-        )) {
+          path,
+        ])) {
           Object.assign(context, childContext);
         }
 
@@ -105,27 +114,38 @@ export default class RpcModule {
     rpcRequest: RpcRequest,
     context: ResolverMap
   ): Promise<any> {
+    // if(rpcRequest.payload[0]==="@permssions")
+
+    const path = rpcRequest.payload.filter(item => typeof item === "string");
+
+    const pathMapKey = [rpcType, path] as const;
+
     context = Resolver.Context.create(
       context,
-      this.getLocationContext(
-        rpcType,
-        rpcRequest.payload.filter(item => typeof item === "string")
-      )
+      this.getLocationContext(rpcType, path)
     );
 
-    return this.request.process(
-      Resolver.Context.assign(context, [rpcRequest]),
-      async () => {
-        const configuratorResolver = this._resolverGenerator.getResolver(
-          rpcType
-        );
+    const reason = await this._permssionQuery.askAny(context, pathMapKey);
+    if (reason) {
+      return { type: "ACCESS_DENIED", reason };
+    }
 
-        const configurator = Resolver.resolve(configuratorResolver, context);
-        const handler = await createRpcHandler(rpcType, configurator);
-        const command = createRpcCommandFromHandler(rpcType, handler);
-        return await command(rpcRequest.payload);
-      }
-    );
+    return {
+      type: "EXECUTED",
+      result: this.request.process(
+        Resolver.Context.assign(context, [rpcRequest]),
+        async () => {
+          const configuratorResolver = this._resolverGenerator.getResolver(
+            rpcType
+          );
+
+          const configurator = Resolver.resolve(configuratorResolver, context);
+          const handler = await createRpcHandler(rpcType, configurator);
+          const command = createRpcCommandFromHandler(rpcType, handler);
+          return await command(rpcRequest.payload);
+        }
+      ),
+    };
   }
 
   processMultipleRequests(
@@ -204,11 +224,18 @@ ServerModule.defineLoader(BaseRpcResolver, rpcResolver =>
   })
 );
 
+ServerModule.defineLoader(RpcBoundPermissionResolver.prototype, perm =>
+  Resolver([RpcModule], rpcModule => {
+    rpcModule._permissionMap
+      .touchByLocation(perm.rpcLocation, () => [])
+      .push(perm.resolver);
+  })
+);
+
 ServerModule.defineLoader(RpcLocationContext.prototype, rpcLocationContext =>
   Resolver([RpcModule], rpcModule => {
     rpcModule._locationContextMap.update(
-      rpcLocationContext.location.rpcRootType,
-      rpcLocationContext.location.path,
+      rpcLocationContext.location.asPathMapKey(),
       context => ({ ...context, ...rpcLocationContext.context })
     );
   })

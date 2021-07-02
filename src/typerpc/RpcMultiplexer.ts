@@ -1,3 +1,4 @@
+import { RpcError } from "@dabsi/typerpc2/RpcError";
 import { RpcMemberHandler } from "@dabsi/typerpc2/RpcHandler";
 
 export type RpcQueueRequest = {
@@ -27,7 +28,12 @@ export class RpcMultiplexer {
         );
 
         for (const [index, waiter] of _waiters.entries()) {
-          waiter.resolve(responses[index]);
+          const response = responses[index];
+          if (response.type === "EXECUTED") {
+            waiter.resolve(response.result);
+            continue;
+          }
+          waiter.reject(new RpcError(`RPC_COMMAND_ERROR`, response));
         }
       });
     }

@@ -1,9 +1,9 @@
 import { RnpTextInput, RnpTextInputProps } from "@dabsi/native/rnp";
-import { TextInput } from "@dabsi/typerpc2/text-input/rpc";
+import { TextInput } from "@dabsi/typerpc/text-input/rpc";
 import {
   TextInputView,
   TextInputViewProps,
-} from "@dabsi/typerpc2/text-input/view";
+} from "@dabsi/typerpc/text-input/view";
 import LangKey from "@dabsi/view/lang/LangKey";
 import useLangService from "@dabsi/view/lang/useLangService";
 import mergeProps from "@dabsi/view/react/mergeProps";

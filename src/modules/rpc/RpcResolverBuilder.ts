@@ -3,12 +3,16 @@ import { IfNever } from "@dabsi/common/typings2/IfNever";
 import { inspect } from "@dabsi/logging/inspect";
 import RpcLocationContext from "@dabsi/modules/rpc/RpcLocationContext";
 import {
+  RpcBoundPermissionResolver,
+  RpcPermssionChecker,
+} from "@dabsi/modules/rpc/RpcPermission";
+import {
   RpcLocationConfigurator,
   RpcResolver,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { Resolved, ResolvedMap, Resolver, ResolverMap } from "@dabsi/typedi";
-import { RpcAt, RpcLocation, RpcValidatePath } from "@dabsi/typerpc2";
-import { RpcTypeOrLocation } from "@dabsi/typerpc2/RpcTypeOrLocation";
+import { RpcAt, RpcLocation, RpcValidatePath } from "@dabsi/typerpc";
+import { RpcTypeOrLocation } from "@dabsi/typerpc/RpcTypeOrLocation";
 
 type RpcResolverConfig<
   TargetIn,
@@ -43,18 +47,23 @@ type RpcResolverConfig<
     (context: ContextOut) => RpcLocationConfigurator<TargetOut>
   >;
 
+  permission?: IfNever<
+    InvalidPath,
+    (context: ContextOut) => RpcPermssionChecker
+  >;
+
   provide?: IfNever<InvalidPath, ResolverMap>;
 
-  debug?(_: {
-    TargetIn: TargetIn;
-    ContextIn: ContextIn;
-    ContextNew: ContextNew;
-    ContextOut: ContextOut;
-    ResolvedTarget: TargetOut;
-    NewTarget: TargetNew;
-    Path: Path;
-    TargetNewOrIn: TargetNewOrIn;
-  });
+  // debug?(_: {
+  //   TargetIn: TargetIn;
+  //   ContextIn: ContextIn;
+  //   ContextNew: ContextNew;
+  //   ContextOut: ContextOut;
+  //   ResolvedTarget: TargetOut;
+  //   NewTarget: TargetNew;
+  //   Path: Path;
+  //   TargetNewOrIn: TargetNewOrIn;
+  // });
 };
 
 type RpcResolverConfigBuilder<TargetIn, ContextIn> = {
@@ -125,6 +134,16 @@ export const RpcResolverBuilder: RpcResolverConfigBuilder<never, {}> = (
     if (config.resolve) {
       assertLocation("resolve");
       resolvers.push(config.resolve(location!));
+    }
+
+    if (config.permission) {
+      assertLocation("permission");
+      resolvers.push(
+        new RpcBoundPermissionResolver(
+          location!,
+          Resolver(consumedContext, config.permission)
+        )
+      );
     }
 
     if (config.configure) {

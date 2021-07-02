@@ -1,5 +1,5 @@
 import { SYSTEM_RPC_PATH } from "@dabsi/system/core/common/rpc";
-import captureRpcCommand from "@dabsi/typerpc2/captureRpcCommand";
+import captureRpcCommand from "@dabsi/typerpc/captureRpcCommand";
 export default async function processRpcWithFormData<T>(
   buildFormData: (formData: FormData) => void,
   callback: () => Promise<T>

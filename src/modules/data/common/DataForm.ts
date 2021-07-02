@@ -1,8 +1,8 @@
 // export function DataForm<>
 
-import { Form } from "@dabsi/typerpc2/form/rpc";
-import { AnyInput } from "@dabsi/typerpc2/input/Input";
-import { RpcType } from "@dabsi/typerpc2/Rpc";
+import { Form } from "@dabsi/typerpc/form/rpc";
+import { AnyInput } from "@dabsi/typerpc/input/Input";
+import { RpcType } from "@dabsi/typerpc/Rpc";
 
 export type DataForm<T extends AnyInput> = Form<T, string>;
 

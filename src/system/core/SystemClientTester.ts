@@ -9,12 +9,12 @@ import { Resolver, ResolverMap } from "@dabsi/typedi";
 let _lockSystemCommand = false;
 
 declare global {
-  interface ISystemTestsClient extends ThisType<SystemTestsClient> {}
+  interface ISystemClientTester extends ThisType<SystemClientTester> {}
 }
 
-export interface SystemTestsClient extends ISystemTestsClient {}
+export interface SystemClientTester extends ISystemClientTester {}
 
-export class SystemTestsClient {
+export class SystemClientTester {
   protected _cookie: any = undefined;
 
   createContext() {
@@ -45,8 +45,8 @@ export class SystemTestsClient {
       throw new Error("rpc handling is locked.");
     }
     _lockSystemCommand = true;
-    SystemCommand.handle(async payloads =>
-      defined(
+    SystemCommand.handle(async payloads => {
+      return defined(
         await this.processRequest(context => {
           return SystemTests.module.rpcModule.processMultipleRequests(
             SystemRpc,
@@ -56,8 +56,8 @@ export class SystemTestsClient {
           );
         }),
         () => `No rpc-responses`
-      )
-    );
+      );
+    });
     try {
       return callback();
     } finally {
@@ -66,4 +66,4 @@ export class SystemTestsClient {
   }
 }
 
-export default SystemTestsClient;
+export default SystemClientTester;

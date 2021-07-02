@@ -3,9 +3,9 @@ import { objectBases } from "@dabsi/common/object/objectBases";
 import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { Provider, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
-
 declare module "./Resolver" {
   namespace Resolver {
+    type Context = ResolverMap;
     namespace Context {
       export function assign(
         context: ResolverMap,

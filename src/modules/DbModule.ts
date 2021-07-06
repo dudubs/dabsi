@@ -1,4 +1,5 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
+import notNull from "@dabsi/common/object/notNull";
 import { values } from "@dabsi/common/object/values";
 import { Once } from "@dabsi/common/patterns/Once";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
@@ -57,7 +58,7 @@ export default class DbModule {
     Resolver.Context.assign(
       moduleRunner.context,
       Resolver(DbConnectionRef, () => {
-        return () => defined(this._connection, () => "No DB connection");
+        return () => notNull(this._connection, () => "No DB connection");
       }),
       Resolver(DbQueryRunnerRef, [DbConnectionRef], getConnection => () =>
         getConnection().createQueryRunner()

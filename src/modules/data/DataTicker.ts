@@ -7,8 +7,6 @@ import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 import { Injectable } from "@dabsi/typedi";
 import { DataRowTicker } from "./DataRowTicker";
 
-// DataTicker
-
 export type DataRowTickerMap = Map<Function, Map<string, DataRowTicker>>;
 
 const getRowTickerMap = WeakMapFactory(

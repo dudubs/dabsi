@@ -14,7 +14,7 @@ export type DataRelationMap<T> = {
 };
 
 export type DataCursorPath<T = any> = {
-  keyMap: Record<string, string | number>;
+  constants: Record<string, any>;
   keys: string[];
   filter: DataExp<T>;
   propertyName: string;
@@ -27,7 +27,7 @@ export const EMPTY_DATA_CURSOR: DataCursor = {
   root: [],
   selection: {},
   location: [],
-  keyMap: {},
+  constants: {},
   keys: [],
   filter: undefined,
   skip: 0,
@@ -47,8 +47,7 @@ export type DataCursor<T = any> = {
 
   filter: DataExp<any>;
 
-  // TODO: rename to keyMap
-  keyMap: Record<string, string | number>;
+  constants: Record<string, any>;
 
   keys: string[];
 
@@ -74,7 +73,7 @@ export namespace DataCursor {
         ...cursor.location,
         {
           filter: cursor.filter,
-          keyMap: cursor.keyMap,
+          constants: cursor.constants,
           keys: cursor.keys,
           selection: cursor.selection,
           propertyName,
@@ -89,24 +88,5 @@ export namespace DataCursor {
       cursorAt.selection = relationSelection;
     }
     return <any>cursorAt;
-  }
-
-  export function ofKeyMap(
-    cursor: DataCursor<any>,
-    keyMap: Record<string, any>
-  ): DataCursor<any> {
-    return {
-      ...cursor,
-      keyMap: { ...cursor.keyMap, ...keyMap },
-    };
-  }
-  export function ofKeys(
-    cursor: DataCursor<any>,
-    keys: string[]
-  ): DataCursor<any> {
-    return {
-      ...cursor,
-      keys,
-    };
   }
 }

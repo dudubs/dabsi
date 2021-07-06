@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { RpcType } from "@dabsi/typerpc/Rpc";
 import { getRpcMetadata } from "./getRpcMetadata";
 

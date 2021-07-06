@@ -38,7 +38,7 @@
 //       },
 
 //       addSubmit(value) {
-//         return c.acl.users.insertKey(value);
+//         return c.acl.users.insert(value);
 //       },
 //     })
 // );

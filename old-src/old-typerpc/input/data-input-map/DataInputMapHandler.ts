@@ -42,7 +42,7 @@ export class DataInputMapHandler
     };
 
     let elementMap: Record<string, { label; value }> = {};
-    for (const dataRow of await this.config.source.getRows()) {
+    for (const dataRow of await this.config.source.fetchAll()) {
       const value =
         valueMap?.[dataRow.$key] ?? (await this.config.getRowValue(dataRow));
       elementMap[dataRow.$key] = {
@@ -66,7 +66,7 @@ export class DataInputMapHandler
     const target = await this.getChildHandler("target");
     for (const row of await this.config.source
       .filter({ $is: keys })
-      .getRows()) {
+      .fetchAll()) {
       invalidKeys.delete(row.$key);
 
       const result = await target.loadAndCheck(dataMap[row.$key]);

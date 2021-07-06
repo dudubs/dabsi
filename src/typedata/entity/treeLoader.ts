@@ -1,11 +1,12 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { touchObject } from "@dabsi/common/object/touchObject";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { DataEntityLoader } from "@dabsi/typedata/entity/loader";
 import { DataQueryBuilder } from "@dabsi/typedata/query/builder";
 import { DataQuery } from "@dabsi/typedata/query/exp";
 import { DataTreeRow } from "@dabsi/typedata/row";
+import { DataSource } from "@dabsi/typedata/source/source";
 import { DataEntityRelation } from "@dabsi/typeorm/relations";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 
@@ -226,10 +227,10 @@ export class DataEntityTreeLoader {
     };
   }
 
-  async loadTreeRows<T = any>({
-    minDepth = 0,
-    ...options
-  }: TreeQueryOptions = {}): Promise<DataTreeRow<T>[]> {
+  async loadTreeRows<T = any>(
+    source: DataSource<any>,
+    { minDepth = 0, ...options }: TreeQueryOptions = {}
+  ): Promise<DataTreeRow<T>[]> {
     const treeQuery = this.getTreeQuery({ ...options, minDepth });
 
     const raws = await this.loader.queryRunner.getRows(treeQuery);
@@ -237,12 +238,14 @@ export class DataEntityTreeLoader {
     const pathRowChildrenMap: Record<string, any[]> = {};
     const rootPaths: string[] = [];
 
+    const rowLoader = this.loader.buildRowLoader(source);
+
     for (const raw of raws) {
       const { _path: path, _depth: depth } = raw as {
         _depth: number;
         _path: string;
       };
-      const { row } = (await this.loader.loadOneRow(raw))!;
+      const { row } = (await this.loader.loadOneRow(raw, rowLoader, source))!;
       row.$path = path;
       row.$depth = depth;
       row.$children = touchObject(pathRowChildrenMap, path, () => []);

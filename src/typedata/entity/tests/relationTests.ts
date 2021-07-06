@@ -8,12 +8,12 @@ describe("add/remove", () => {
   let aKey, bKey;
 
   beforeAll(async () => {
-    aKey = await ASource.insertKey({});
-    bKey = await BSource.insertKey({});
+    aKey = await ASource.insert({});
+    bKey = await BSource.insert({});
 
-    expect(await ASource.get(aKey)).toBeTruthy();
-    expect(await ASource.get(bKey)).toBeFalsy();
-    expect(await BSource.get(bKey)).toBeTruthy();
+    expect(await ASource.fetch(aKey)).toBeTruthy();
+    expect(await ASource.fetch(bKey)).toBeFalsy();
+    expect(await BSource.fetch(bKey)).toBeTruthy();
   });
   const debug = false;
 
@@ -40,24 +40,24 @@ describe("add/remove", () => {
         key: string,
         inverseDs: DataSource<U>
       ) {
-        expect(await ds.get()).toBeFalsy();
-        expect(await inverseDs.get()).toBeFalsy();
+        expect(await ds.fetch()).toBeFalsy();
+        expect(await inverseDs.fetch()).toBeFalsy();
 
         await ds.add(key);
-        expect(await ds.get()).toBeTruthy();
-        expect(await inverseDs.get()).toBeTruthy();
+        expect(await ds.fetch()).toBeTruthy();
+        expect(await inverseDs.fetch()).toBeTruthy();
 
         await ds.remove(key);
-        expect(await ds.get()).toBeFalsy();
-        expect(await inverseDs.get()).toBeFalsy();
+        expect(await ds.fetch()).toBeFalsy();
+        expect(await inverseDs.fetch()).toBeFalsy();
       }
     });
   }
 });
 it("expect to insert relation without update", async () => {
   const queries = collectTestSqlQueries();
-  const bKey = await BSource.insertKey({});
-  await ASource.insert({
+  const bKey = await BSource.insert({});
+  await ASource.insertAndFetch({
     manyAToOneB: bKey,
     oneAToOneBOwner: bKey,
   });
@@ -73,14 +73,14 @@ describe("expect to", () => {
   describe("add", () => {
     describe("one-at-one", () => {
       it("owner", async () => {
-        const a = await ASource.insert({});
-        await a.at("oneAToOneBOwner").add(await BSource.insertKey({}));
-        expect(await a.at("oneAToOneBOwner").get()).toBeTruthy();
+        const a = await ASource.insertAndFetch({});
+        await a.at("oneAToOneBOwner").add(await BSource.insert({}));
+        expect(await a.at("oneAToOneBOwner").fetch()).toBeTruthy();
       });
       it("not-owner", async () => {
-        const a = await ASource.insert({});
-        await a.at("oneAToOneB").add(await BSource.insertKey({}));
-        expect(await a.at("oneAToOneB").get()).toBeTruthy();
+        const a = await ASource.insertAndFetch({});
+        await a.at("oneAToOneB").add(await BSource.insert({}));
+        expect(await a.at("oneAToOneB").fetch()).toBeTruthy();
       });
     });
   });
@@ -89,48 +89,48 @@ describe("expect to", () => {
 
     describe("one-to-one", () => {
       it("owner", async () => {
-        const bKey = await BSource.insertKey({});
-        const a = await ASource.insert({
+        const bKey = await BSource.insert({});
+        const a = await ASource.insertAndFetch({
           oneAToOneBOwner: bKey,
         });
-        expect((await a.at("oneAToOneBOwner").get())?.$key).toEqual(bKey);
+        expect((await a.at("oneAToOneBOwner").fetch())?.$key).toEqual(bKey);
       });
 
       it("not-owner", async () => {
-        const bKey = await BSource.insertKey({});
-        const a = await ASource.insert({
+        const bKey = await BSource.insert({});
+        const a = await ASource.insertAndFetch({
           oneAToOneB: bKey,
         });
-        expect((await a.at("oneAToOneB").get())?.$key).toEqual(bKey);
+        expect((await a.at("oneAToOneB").fetch())?.$key).toEqual(bKey);
       });
     });
     describe("one-at-one", () => {
       it("owner", async () => {
-        const a = await ASource.insert({});
-        const bKey = await a.at("oneAToOneBOwner").insertKey({});
-        expect((await a.at("oneAToOneBOwner").get())?.$key).toEqual(bKey);
+        const a = await ASource.insertAndFetch({});
+        const bKey = await a.at("oneAToOneBOwner").insert({});
+        expect((await a.at("oneAToOneBOwner").fetch())?.$key).toEqual(bKey);
       });
 
       it("not-owner", async () => {
-        const a = await ASource.insert({});
-        const bKey = await a.at("oneAToOneB").insertKey({});
-        expect((await a.at("oneAToOneB").get())?.$key).toEqual(bKey);
+        const a = await ASource.insertAndFetch({});
+        const bKey = await a.at("oneAToOneB").insert({});
+        expect((await a.at("oneAToOneB").fetch())?.$key).toEqual(bKey);
       });
     });
   });
   describe("update", () => {
     describe("one-to-one", () => {
       it("owner", async () => {
-        const bKey = await BSource.insertKey({});
-        const a = await ASource.insert({});
+        const bKey = await BSource.insert({});
+        const a = await ASource.insertAndFetch({});
         await a.update({ oneAToOneBOwner: bKey });
-        expect((await a.at("oneAToOneBOwner").get())!.$key).toEqual(bKey);
+        expect((await a.at("oneAToOneBOwner").fetch())!.$key).toEqual(bKey);
       });
       it("not-owner", async () => {
-        const bKey = await BSource.insertKey({});
-        const a = await ASource.insert({});
+        const bKey = await BSource.insert({});
+        const a = await ASource.insertAndFetch({});
         await a.update({ oneAToOneB: bKey });
-        expect((await a.at("oneAToOneB").get())!.$key).toEqual(bKey);
+        expect((await a.at("oneAToOneB").fetch())!.$key).toEqual(bKey);
       });
     });
   });

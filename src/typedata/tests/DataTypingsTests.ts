@@ -135,7 +135,7 @@ pass(() => {
             .pick([], {
               xText: ["x"],
             })
-            .getOrFail()
+            .fetchOrFail()
         ).update({
           aText: "foo",
           // @ts-expect-error
@@ -1076,9 +1076,9 @@ pass(() => {
   {
     testType<DataSource<DUnion>>(ds => {
       // @ts-expect-error
-      ds.insertKey({ dChild1Text: "" });
+      ds.insert({ dChild1Text: "" });
 
-      ds.insertKey({
+      ds.insert({
         dId: "",
       });
 
@@ -1088,7 +1088,7 @@ pass(() => {
         dChild1Text: "",
       };
 
-      ds.as("dChild1").insertKey({
+      ds.as("dChild1").insert({
         dId: "",
         dText: "",
         dChild1Text: "",
@@ -1167,7 +1167,7 @@ pass(() => {
       ds.select({
         fields: { dX: 1 },
       })
-        .getOrFail()
+        .fetchOrFail()
         .then(row => {
           // @ts-expect-error
           void (row.$type === "x");
@@ -1177,7 +1177,7 @@ pass(() => {
           void (row.$type === "dChild2");
         });
 
-      ds.getOrFail().then(row => {
+      ds.fetchOrFail().then(row => {
         // @ts-expect-error
         void (row.$type === "x");
 

@@ -28,7 +28,7 @@ export async function getSessionKey({
         $and: [{ $is: sessionKey }, ["token", { $equals: sessionToken }]],
       })
       .select({ relations: { user: { pick: [] } } })
-      .get();
+      .fetch();
 
     if (session) {
       // TODO: update on request cleanup.
@@ -37,7 +37,7 @@ export async function getSessionKey({
   }
 
   sessionToken = generateSessionToken();
-  sessionKey = await source.insertKey({
+  sessionKey = await source.insert({
     token: sessionToken,
     timeout: new Date().getTime(),
   });

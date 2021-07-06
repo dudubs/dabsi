@@ -1,16 +1,12 @@
-import { hasKeys } from "@dabsi/common/object/hasKeys";
 import { IfNever } from "@dabsi/common/typings2/IfNever";
 import { inspect } from "@dabsi/logging/inspect";
-import RpcLocationContext from "@dabsi/modules/rpc/RpcLocationContext";
+import RpcBoundContext from "@dabsi/modules/rpc/RpcBoundContext";
 import {
   RpcBoundPermissionResolver,
   RpcPermssionChecker,
 } from "@dabsi/modules/rpc/RpcPermission";
-import {
-  RpcLocationConfigurator,
-  RpcResolver,
-} from "@dabsi/modules/rpc/RpcResolver";
-import { Resolved, ResolvedMap, Resolver, ResolverMap } from "@dabsi/typedi";
+import { RpcConfiguratorAt, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { ResolvedMap, Resolver, ResolverMap } from "@dabsi/typedi";
 import { RpcAt, RpcLocation, RpcValidatePath } from "@dabsi/typerpc";
 import { RpcTypeOrLocation } from "@dabsi/typerpc/RpcTypeOrLocation";
 
@@ -44,7 +40,7 @@ type RpcResolverConfig<
 
   configure?: IfNever<
     InvalidPath,
-    (context: ContextOut) => RpcLocationConfigurator<TargetOut>
+    (context: ContextOut) => RpcConfiguratorAt<TargetOut>
   >;
 
   permission?: IfNever<
@@ -122,13 +118,14 @@ export const RpcResolverBuilder: RpcResolverConfigBuilder<never, {}> = (
       return;
     }
 
-    config.let?.(config =>
-      configure({ for: location, ...config } as any, consumedContext)
-    );
+    config.hasOwnProperty("let") &&
+      config.let!(config =>
+        configure({ for: location, ...config } as any, consumedContext)
+      );
 
     if (config.provide) {
       assertLocation("provide");
-      resolvers.push(new RpcLocationContext(location!, config.provide));
+      resolvers.push(new RpcBoundContext(location!, config.provide));
     }
 
     if (config.resolve) {

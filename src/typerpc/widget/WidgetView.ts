@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { RpcArgs } from "@dabsi/typerpc/RpcArgs";
 import {
   AnyWidget,

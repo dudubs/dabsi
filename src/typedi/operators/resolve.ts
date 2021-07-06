@@ -1,27 +1,31 @@
-import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { inspect } from "@dabsi/logging/inspect";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
-import { Factory, Provider, Resolver } from "@dabsi/typedi/Resolver";
+import { Factory, Resolver } from "@dabsi/typedi/Resolver";
 
 declare module "../Resolver" {
   namespace Resolver {
     function resolve<T extends Resolver<any>>(
       resolver: T,
       context: ResolverMap
-    ): Resolved<T>;
+    ): // @ts-ignore
+    Resolved<T>;
   }
 }
 
 Resolver.resolve = function (resolver, context) {
+  resolver = Resolver.forward.resolve(resolver, context);
   const resolve = resolver[Resolver.resolveSymbol];
-  if (resolve) {
-    return resolve.call(resolver, context);
-  }
-  if (typeof resolver === "function") {
-    if (!resolver.prototype || !resolver.name) {
-      return (resolver as Factory<any>)(context);
-    }
-    return Resolver.Providability.resolve(resolver as any, context);
-  }
-  throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);
+  if (!resolve)
+    throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);
+  return resolve.call(resolver, context);
 };
+
+Object.defineProperty(Function.prototype, Resolver.resolveSymbol, {
+  enumerable: false,
+  value(context) {
+    if (!this.prototype || !this.name) {
+      return (this as Factory<any>)(context);
+    }
+    return Resolver.Providability.resolve(this as any, context);
+  },
+});

@@ -1,9 +1,5 @@
 import { Once } from "@dabsi/common/patterns/Once";
 import LoaderModule from "@dabsi/modules/LoaderModule";
-import { BaseRpcResolver } from "@dabsi/modules/rpc/RpcResolver";
-import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
-import ServerModule from "@dabsi/modules/ServerModule";
-import { Resolver } from "@dabsi/typedi";
 import { Module } from "@dabsi/typemodule";
 import { TsConfigPaths2 } from "@dabsi/typestack/TsConfigPaths2";
 import path from "path";

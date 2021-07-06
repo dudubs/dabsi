@@ -15,7 +15,7 @@ TODO:
 
   }}
 
-  User.insertKey({
+  User.insert({
 
       groups: [
         {$key}, "", {}

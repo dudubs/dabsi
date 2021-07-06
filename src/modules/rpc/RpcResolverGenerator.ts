@@ -1,10 +1,11 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
 import flat, { Flattable } from "@dabsi/common/iterator/flat";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { capitalize } from "@dabsi/common/string/capitalize";
 import { inspect } from "@dabsi/logging/inspect";
 import {
-  RpcLocationConfigurator,
+  RpcBoundResolver,
+  RpcConfiguratorAt,
   RpcResolver,
 } from "@dabsi/modules/rpc/RpcResolver";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
@@ -43,34 +44,30 @@ export class RpcResolverGenerator {
 
   protected _generetedResolverMap = new RpcPathMap<RpcResolver<any>>();
 
-  add(...args: Flattable<RpcResolver<any>>[]) {
+  add(...args: Flattable<RpcBoundResolver<any>>[]) {
     for (const resolver of flat(args)) {
-      this._resolverMap.setByLocation(resolver.rpcLocation, resolver);
+      this._resolverMap.setByLocation(resolver.location, resolver.resolver);
     }
   }
 
-  getResolver<T>(rpcLocation: RpcTypeOrLocation<T>): RpcResolver<T> {
-    const _rpcLocation = RpcTypeOrLocation(rpcLocation);
+  getResolver<T>(typeOrLocation: RpcTypeOrLocation<T>): RpcResolver<T> {
+    const location = RpcTypeOrLocation(typeOrLocation);
 
-    return this._resolverMap.touchByLocation(_rpcLocation, () => {
-      // _rpcLocation
-
+    return this._resolverMap.touch(location.asPathMapKey(), () => {
       if (
-        _rpcLocation.member &&
-        _rpcLocation.member.type !== RpcMemberType.Contextual
+        location.member &&
+        location.member.type !== RpcMemberType.Contextual
       ) {
-        if (_rpcLocation.isParameterialLocation) {
-          return this.buildResolver(_rpcLocation);
+        if (location.isParameterialLocation) {
+          return this.buildResolver(location);
         }
         throw new Error(
           `Can't build/generate resolver for ${
-            RpcMemberType[_rpcLocation.member.type!]
-          }: ${inspect(_rpcLocation)}`
+            RpcMemberType[location.member.type!]
+          }: ${inspect(location)}`
         );
       }
-      return (
-        this.generateResolver(rpcLocation) ?? this.buildResolver(_rpcLocation)
-      );
+      return this.generateResolver(location) ?? this.buildResolver(location);
     });
   }
 
@@ -145,7 +142,7 @@ export class RpcResolverGenerator {
           return createRpcHandler(childRpcType!, factory as any);
         }
         const config = await GenericConfig(
-          factory as RpcLocationConfigurator<
+          factory as RpcConfiguratorAt<
             RpcFunctionalMember | RpcParametrialMember
           >
         );

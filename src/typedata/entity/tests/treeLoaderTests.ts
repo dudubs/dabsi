@@ -23,7 +23,7 @@ beforeAll(async () => {
     const parentId = id.substr(0, id.lastIndexOf("_"));
     await save(parentId);
 
-    const a = await ASource.insert({
+    const a = await ASource.insertAndFetch({
       aId: id,
       [treeTypeMap.childrenToParent]: parentId || null,
     });
@@ -87,7 +87,7 @@ describe("DataEntityTreeLoader", () => {
         it(`expect tree-rows will be ${
           inverse ? "parent->child" : "child->parent"
         }`, async () => {
-          const rows = await t.loader.loadTreeRows({ inverse });
+          const rows = await t.loader.loadTreeRows(null!, { inverse });
           // console.log(inspect({ rows }));
           let maxDepth = 0;
 

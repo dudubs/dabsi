@@ -1,6 +1,6 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { touchMap } from "@dabsi/common/map/touchMap";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { Connection, EntityMetadata } from "typeorm";
 import { RelationMetadata } from "typeorm/metadata/RelationMetadata";
 

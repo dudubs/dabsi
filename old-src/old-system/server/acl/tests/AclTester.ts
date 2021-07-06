@@ -124,7 +124,7 @@ export const AclTester = Tester.beforeAll(async t => ({
       mapArrayToObject([...userNames], firstName => [
         firstName,
         () =>
-          t.users.insert({
+          t.users.insertAndFetch({
             firstName,
             lastName: "test",
           }),
@@ -132,8 +132,8 @@ export const AclTester = Tester.beforeAll(async t => ({
       insert => insert()
     )) as Record<typeof userNames[number], DataRow<User>>,
 
-    forum: await t.forums.insert({}),
-    otherForum: await t.forums.insert({}),
+    forum: await t.forums.insertAndFetch({}),
+    otherForum: await t.forums.insertAndFetch({}),
   }))
   .beforeAll(async t => {
     const pm = new PermissionManager(t.connection);
@@ -147,33 +147,33 @@ export const AclTester = Tester.beforeAll(async t => ({
       .at("blockedUsers")
       .add([t.users.blockedByMember, t.users.adminBlockedByMember]);
 
-    await t.forum.at("members").insert({
+    await t.forum.at("members").insertAndFetch({
       user: t.users.member.$key,
       mode: TestForumMemberMode.regular,
     });
 
     // DataEntityRow()
-    await t.forum.at("members").insert({
+    await t.forum.at("members").insertAndFetch({
       user: t.users.admin.$key,
       mode: TestForumMemberMode.admin,
     });
 
-    await t.forum.at("members").insert({
+    await t.forum.at("members").insertAndFetch({
       user: t.users.adminBlockedByMember.$key,
       mode: TestForumMemberMode.admin,
     });
 
-    await t.forum.at("members").insert({
+    await t.forum.at("members").insertAndFetch({
       user: t.users.otherMember.$key,
       mode: TestForumMemberMode.regular,
     });
 
-    await t.forum.at("members").insert({
+    await t.forum.at("members").insertAndFetch({
       user: t.users.blockedByForum.$key,
       mode: TestForumMemberMode.blocked,
     });
     return {
-      postByMember: await t.forum.at("posts").insert({
+      postByMember: await t.forum.at("posts").insertAndFetch({
         user: t.users.member.$key,
       }),
     };

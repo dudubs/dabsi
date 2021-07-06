@@ -6,20 +6,19 @@ import ExpressModule from "@dabsi/modules/ExpressModule";
 import LoaderModule from "@dabsi/modules/LoaderModule";
 import PlatformModule from "@dabsi/modules/PlatformModule";
 import { RequestBuilder } from "@dabsi/modules/RequestBuilder";
-import RpcLocationContext from "@dabsi/modules/rpc/RpcLocationContext";
+import RpcBoundContext from "@dabsi/modules/rpc/RpcBoundContext";
 import { RpcBoundPermissionResolver } from "@dabsi/modules/rpc/RpcPermission";
 import RpcPermissionQuery, {
   RpcPermissionMap,
 } from "@dabsi/modules/rpc/RpcPermissionQuery";
 import RpcRequest from "@dabsi/modules/rpc/RpcRequest";
-import { BaseRpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { RpcBoundResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import ServerModule from "@dabsi/modules/ServerModule";
 import { CliCommand } from "@dabsi/typecli";
 import { Resolver, ResolverMap } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";
 import { ModuleRunnerContext } from "@dabsi/typemodule/ModuleRunner";
-import { RpcLocation } from "@dabsi/typerpc";
 import { createRpcCommandFromHandler } from "@dabsi/typerpc/createRpcCommandFromHandler";
 import { createRpcHandler } from "@dabsi/typerpc/createRpcHandler";
 import { RpcType } from "@dabsi/typerpc/Rpc";
@@ -218,7 +217,7 @@ export default class RpcModule {
   }
 }
 
-ServerModule.defineLoader(BaseRpcResolver, rpcResolver =>
+ServerModule.defineLoader(RpcBoundResolver.prototype, rpcResolver =>
   Resolver([RpcResolverGenerator], rb => {
     rb.add(rpcResolver);
   })
@@ -232,7 +231,7 @@ ServerModule.defineLoader(RpcBoundPermissionResolver.prototype, perm =>
   })
 );
 
-ServerModule.defineLoader(RpcLocationContext.prototype, rpcLocationContext =>
+ServerModule.defineLoader(RpcBoundContext.prototype, rpcLocationContext =>
   Resolver([RpcModule], rpcModule => {
     rpcModule._locationContextMap.update(
       rpcLocationContext.location.asPathMapKey(),

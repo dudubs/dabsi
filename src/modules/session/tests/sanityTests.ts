@@ -123,21 +123,21 @@ const t = Tester.beforeAll(async t => {
     getConnection,
     docs: dbt.getDataSource(TestDoc),
     createResouces: async session => {
-      const res1 = await resources1.insertKey({
+      const res1 = await resources1.insert({
         session,
       });
-      const res2 = await resources2.insertKey({
+      const res2 = await resources2.insert({
         res1,
         session,
       });
-      const res3Child1 = await dbt.getDataSource(TestRes3Child1).insertKey({
+      const res3Child1 = await dbt.getDataSource(TestRes3Child1).insert({
         session,
         res1,
       });
 
       const res3Child1Child1 = await dbt
         .getDataSource(TestRes3Child1Child1)
-        .insertKey({
+        .insert({
           session,
           res1,
         });
@@ -147,11 +147,11 @@ const t = Tester.beforeAll(async t => {
 })
   .beforeAll(async t => {
     return {
-      timeoutSession: await t.sessions.insertKey({
+      timeoutSession: await t.sessions.insert({
         token: "x",
         timeout: getCurrentTime() - SESSION_TIMEOUT,
       }),
-      notTimeoutSesion: await t.sessions.insertKey({
+      notTimeoutSesion: await t.sessions.insert({
         token: "x",
         timeout: getCurrentTime() + SESSION_TIMEOUT,
       }),
@@ -160,7 +160,7 @@ const t = Tester.beforeAll(async t => {
   .beforeAll(async t => {
     const timeoutWithRefs = await t.createResouces(t.timeoutSession);
     (
-      await t.docs.insert({
+      await t.docs.insertAndFetch({
         res2: timeoutWithRefs.res2,
       })
     )
@@ -178,33 +178,33 @@ beforeAll(async () => {
 });
 
 it("expect to delete timeout session", async () => {
-  expect(await t.sessions.get(t.timeoutSession)).toBeFalsy();
-  expect(await t.sessions.get(t.notTimeoutSesion)).toBeTruthy();
+  expect(await t.sessions.fetch(t.timeoutSession)).toBeFalsy();
+  expect(await t.sessions.fetch(t.notTimeoutSesion)).toBeTruthy();
 });
 
 it("expect to delete timeout resources without refs", async () => {
-  expect(await t.resources1.get(t.timeoutWithoutRefs.res1)).toBeFalsy();
-  expect(await t.resources2.get(t.timeoutWithoutRefs.res2)).toBeFalsy();
-  expect(await t.resources3.get(t.timeoutWithoutRefs.res3Child1)).toBeFalsy();
+  expect(await t.resources1.fetch(t.timeoutWithoutRefs.res1)).toBeFalsy();
+  expect(await t.resources2.fetch(t.timeoutWithoutRefs.res2)).toBeFalsy();
+  expect(await t.resources3.fetch(t.timeoutWithoutRefs.res3Child1)).toBeFalsy();
   expect(
-    await t.resources3.get(t.timeoutWithoutRefs.res3Child1Child1)
+    await t.resources3.fetch(t.timeoutWithoutRefs.res3Child1Child1)
   ).toBeFalsy();
 });
 
 it("expect to not delete timeout resources with refs", async () => {
-  expect(await t.resources1.get(t.timeoutWithRefs.res1)).toBeTruthy();
-  expect(await t.resources2.get(t.timeoutWithRefs.res2)).toBeTruthy();
-  expect(await t.resources3.get(t.timeoutWithRefs.res3Child1)).toBeTruthy();
+  expect(await t.resources1.fetch(t.timeoutWithRefs.res1)).toBeTruthy();
+  expect(await t.resources2.fetch(t.timeoutWithRefs.res2)).toBeTruthy();
+  expect(await t.resources3.fetch(t.timeoutWithRefs.res3Child1)).toBeTruthy();
   expect(
-    await t.resources3.get(t.timeoutWithRefs.res3Child1Child1)
+    await t.resources3.fetch(t.timeoutWithRefs.res3Child1Child1)
   ).toBeTruthy();
 });
 
 it("expect to not delete not-timeout resources ", async () => {
-  expect(await t.resources1.get(t.notTimeout.res1)).toBeTruthy();
-  expect(await t.resources2.get(t.notTimeout.res2)).toBeTruthy();
-  expect(await t.resources3.get(t.notTimeout.res3Child1)).toBeTruthy();
-  expect(await t.resources3.get(t.notTimeout.res3Child1Child1)).toBeTruthy();
+  expect(await t.resources1.fetch(t.notTimeout.res1)).toBeTruthy();
+  expect(await t.resources2.fetch(t.notTimeout.res2)).toBeTruthy();
+  expect(await t.resources3.fetch(t.notTimeout.res3Child1)).toBeTruthy();
+  expect(await t.resources3.fetch(t.notTimeout.res3Child1Child1)).toBeTruthy();
 });
 
 it("expect to selection with children", () => {

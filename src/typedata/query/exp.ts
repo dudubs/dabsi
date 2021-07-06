@@ -1,6 +1,6 @@
 import { ExpMap } from "@dabsi/common/typings2/ExpMap";
+import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataOrder } from "@dabsi/typedata/order";
-import { DataExp, DataExpTypes } from "@dabsi/typedata/exp/exp";
 
 export type DataQueryJoinType = "LEFT" | "INNER";
 
@@ -42,10 +42,8 @@ export type DataQuery = {
     }
   >;
 
-  // rename to fieldMap
   fields?: Record<string, DataExp<any>>;
 
-  // rename to joinMap
   joins?: Record<string, DataQueryJoin>;
 
   schema?: string;

@@ -8,7 +8,9 @@ import {
   DataExpTypes,
   DataParameterExp,
 } from "@dabsi/typedata/exp/exp";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
+import { OneOrMany } from "@dabsi/common/array/OneOrMany";
+import { DataKeyOrKeys } from "@dabsi/typedata/key";
 
 type T = any;
 type O = DataExpTypes<T>;
@@ -243,13 +245,11 @@ export abstract class DataTranslator<U> implements IDataTranslator<U> {
   }
 
   $is(exp: O["$is"]): U {
-    if (typeof exp === "string") return this.translateIs(false, [exp]);
-    return this.translateIs(false, exp);
+    return this.translateIs(false, DataKeyOrKeys(exp));
   }
 
   $isNot(exp: O["$is"]): U {
-    if (typeof exp === "string") return this.translateIs(true, [exp]);
-    return this.translateIs(true, exp);
+    return this.translateIs(true, DataKeyOrKeys(exp));
   }
 
   $length(exp: O["$length"]): U {

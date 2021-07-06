@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { Forward } from "@dabsi/common/reflection/Forward";
 import "reflect-metadata";
 

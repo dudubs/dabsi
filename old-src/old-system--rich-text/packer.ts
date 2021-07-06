@@ -31,7 +31,7 @@ export class RichTextPacker {
     for (const relation of await this.context.rels
       .of("document", docKey)
       .select(this.module.createSelection(this.config, "forPacking"))
-      .getRows()) {
+      .fetchAll()) {
       const relationEntityKeys = this.relationTypeKeyMap.get(relation.type);
       if (!relationEntityKeys) {
         // entity removed from this document
@@ -61,7 +61,7 @@ export class RichTextPacker {
         });
       }
     }
-    await this.context.rels.insertKey(rows);
+    await this.context.rels.insert(rows);
   }
 
   async packBlock(

@@ -5,7 +5,7 @@ import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyO
 import { DataForm } from "@dabsi/modules/data/common/DataForm";
 import DataContext from "@dabsi/modules/data/DataContext";
 
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
+import { RpcBoundResolver, RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
@@ -71,7 +71,7 @@ export function DataFormResolver<
   rpcType: RpcTypeOrLocation<DataForm<T>>,
   rowType: Constructor<Data>,
   ...args: ConsumeOptionalArgs<ConfigFactory<C> | UndefinedIfEmptyObject<C>, U>
-): RpcResolver<DataForm<T>>;
+): RpcBoundResolver<DataForm<T>>;
 
 export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
   const configFactoryResolver: Resolver<
@@ -122,7 +122,7 @@ export function DataFormResolver(rpcTypeOrLocation, rowType, ...args) {
             return row.$key;
           }
 
-          return c.data.getSource(rowType).insertKey(commitRow);
+          return c.data.getSource(rowType).insert(commitRow);
         },
       });
     }

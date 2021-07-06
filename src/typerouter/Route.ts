@@ -1,5 +1,5 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";

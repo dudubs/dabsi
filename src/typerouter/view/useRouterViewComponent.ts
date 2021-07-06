@@ -1,5 +1,5 @@
 import { reversed } from "@dabsi/common/array/reversed";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { Router } from "@dabsi/typerouter";
 import { RouterType } from "@dabsi/typerouter/Router";
 import {

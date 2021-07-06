@@ -1,8 +1,10 @@
+import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataParameter } from "@dabsi/modules/data/common/DataParameter";
-import { getRowKeyParameter } from "@dabsi/modules/data/DataContext";
+import DataContext, {
+  getRowKeyParameter,
+} from "@dabsi/modules/data/DataContext";
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
-import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { Resolver } from "@dabsi/typedi";
@@ -29,27 +31,38 @@ export function DataParameterResolver(
   const RowKeyParameter = getRowKeyParameter(rowType);
   return RpcResolver(
     rpcLocation,
-    [
-      Resolver.injector(
+
+    {
+      options: (optionsResolver || (() => null)) as Resolver<null | {
+        filter?: DataExp<any>;
+        check?(row: DataRowTicker<any>);
+      }>,
+      process: AsyncProcess,
+      data: DataContext,
+      getConfigurator: Resolver.injector(
         {
           rowKey: RowKeyParameter,
         },
         RpcResolver(rpcLocation.toParameterialLocation())
       ),
-      DataTicker,
-      optionsResolver || (() => null),
-    ],
-    (
-      getConfigurator,
-      dataTicker,
-      options: { check?(ticker: DataRowTicker); filter? } | null
-    ) => $ =>
+    },
+    c => $ =>
       $((rpcType, rowKey) => {
-        const rowTicker = dataTicker.getRowTicker(rowType, rowKey);
+        const rowTicker = c.data.getRow(rowType, rowKey);
 
-        if (options?.filter !== undefined) {
-          rowTicker.filter = { $and: [rowTicker.filter, options.filter] };
+        if (c.options?.filter !== undefined) {
+          c.process.catch(async () => {
+            const { filtered } = await rowTicker.pick({
+              filtered: c.options!.filter,
+            });
+            if (!filtered) {
+              throw new Error(
+                `DataParameter is out of filter (${rowType.name}#${rowKey})`
+              );
+            }
+          });
         }
+
         rowTicker.push(async row => {
           if (!row?.$key) {
             throw new RpcError(
@@ -58,11 +71,11 @@ export function DataParameterResolver(
           }
         });
 
-        options?.check?.(rowTicker);
+        c.options?.check?.(rowTicker);
 
         return createRpcHandler(
           rpcType,
-          getConfigurator({
+          c.getConfigurator({
             rowKey: new RowKeyParameter(rowKey),
           })
         );

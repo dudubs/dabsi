@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { RpcNamespaceHandler } from "@dabsi/old-typerpc/namespace/handler";
 import {

@@ -1,5 +1,5 @@
 import { assert } from "@dabsi/common/assert";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { inspect } from "@dabsi/logging/inspect";
 import { DataEntityKey } from "@dabsi/typedata/entity/key";
 import { getEntityMetadata } from "@dabsi/typedata/entity/typeormMetadata";

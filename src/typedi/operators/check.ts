@@ -9,18 +9,22 @@ declare module "../Resolver" {
 }
 
 Resolver.check = function (resolver, context) {
+  resolver = Resolver.forward.resolve(resolver, context);
+
   const check = resolver[Resolver.checkSymbol];
-  if (check) {
-    check.call(resolver, context);
-    return;
+  if (!check) {
+    throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);
   }
-  if (typeof resolver === "function") {
-    if (!resolver.prototype) {
-      // is arrow fn
+  check.call(resolver, context);
+};
+
+Object.defineProperty(Function.prototype, Resolver.checkSymbol, {
+  enumerable: false,
+  value(context) {
+    if (!this.prototype) {
+      // no check for arrow func.
       return;
     }
-    Resolver.Providability.check(resolver as Provider<any>, context);
-    return;
-  }
-  throw new ResolveError(`Invalid resolver ${inspect(resolver)}.`);
-};
+    Resolver.Providability.check(this, context);
+  },
+});

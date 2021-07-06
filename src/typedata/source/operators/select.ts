@@ -50,7 +50,8 @@ DataSource.prototype.select = function (this: DataSource<any>, ...args): any {
     };
   }
   if (!selection) return this;
-  return this.updateCursor({
+  return this.withCursor({
+    ...this.cursor,
     selection: DataSelection.merge(this.cursor.selection, selection),
   });
 };

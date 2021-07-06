@@ -1,5 +1,5 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { EntityMetadata } from "typeorm";
 

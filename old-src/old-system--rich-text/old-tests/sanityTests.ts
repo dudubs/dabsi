@@ -1,3 +1,4 @@
+import notNull from "@dabsi/common/object/notNull";
 import { Tester } from "@dabsi/jasmine/Tester";
 import RichTextModule from "@dabsi/system/rich-text";
 import { RichTextContent } from "@dabsi/system/rich-text/common/content";
@@ -85,7 +86,7 @@ const t = Tester.beforeAll(async () => {
     ],
   });
 
-  const doc = await config.context.docs.getOrFail(docKey);
+  const doc = notNull(await config.context.docs.fetchOrFail(docKey));
   const packedContent: RichTextContent.Packed = JSON.parse(doc.content);
 
   const {

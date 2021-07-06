@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { Type } from "@dabsi/common/typings2/Type";

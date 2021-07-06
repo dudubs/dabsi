@@ -1,9 +1,9 @@
-import { defined } from "@dabsi/common/object/defined";
+import notNull from "@dabsi/common/object/notNull";
 
 export let currentJasmineSpecReporterResult: jasmine.CustomReporterResult | null = null;
 
 export function getJasmineSpecReporterResult(): jasmine.CustomReporterResult {
-  return defined(currentJasmineSpecReporterResult);
+  return notNull(currentJasmineSpecReporterResult);
 }
 
 jasmine.getEnv().addReporter({

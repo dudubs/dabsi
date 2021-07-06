@@ -3,6 +3,7 @@ import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 import { ContentAdminRpc } from "@dabsi/system/content/admin/common/rpc";
 import { ContentPage } from "@dabsi/system/content/entities/Page";
 import { RichTextConfigResolver } from "@dabsi/system/rich-text/configResolver";
+import defined from "@dabsi/common/object/defined";
 
 export default RpcResolver(
   ContentAdminRpc.at("pages"),
@@ -21,12 +22,11 @@ export default RpcResolver(
             content: c.contentConfig,
           },
           valueConfig: async $ => {
-            const page = await c
-              .getDataSource(ContentPage)
-              .pick(["title"])
-              .getOrFail(key);
+            const page = notNull(
+              await c.getDataSource(ContentPage).pick(["title"]).fetch()
+            );
 
-            page.at("content").insert({
+            page.at("content").insertAndFetch({
               content: "Asd",
             });
 
@@ -53,7 +53,7 @@ export default RpcResolver(
           content: c.contentConfig,
         },
         async submit({ title, content }) {
-          const pageKey = await c.getDataSource(ContentPage).insertKey({
+          const pageKey = await c.getDataSource(ContentPage).insert({
             title,
             content: await content.save(),
           });

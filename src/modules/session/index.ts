@@ -1,4 +1,5 @@
 // TODO: ResourcesManager { define,clean ... }
+import DataContext from "@dabsi/modules/data/DataContext";
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
 import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import DbModule, { DataSourceFactory2 } from "@dabsi/modules/DbModule";
@@ -87,20 +88,16 @@ export class SessionModule {
 
     serverModule.request.initializers.push(
       Resolver(
-        [SessionCookie, DataTicker, c => c],
-        (cookie, dataTicker, context) => async () => {
+        { cookie: SessionCookie, context: c => c, data: DataContext },
+        c => async () => {
           // TODO
 
           const [sessionKey, userKey] = await getSession();
 
           Resolver.Context.assign(
-            context,
-            Resolver(RequestSession, () =>
-              dataTicker.getRowTicker(Session, sessionKey)
-            ),
-            Resolver(RequestUser, () =>
-              dataTicker.getRowTicker(User, userKey || null)
-            )
+            c.context,
+            Resolver(RequestSession, () => c.data.getRow(Session, sessionKey)),
+            Resolver(RequestUser, () => c.data.getRow(User, userKey || null))
           );
 
           async function getSession(): Promise<
@@ -113,12 +110,12 @@ export class SessionModule {
                   $and: [{ $is: key }, { token }],
                 })
                 .select({ relations: { user: { pick: [] } } })
-                .get();
+                .fetch();
               if (session) return [key, session.user?.$key];
             }
             {
               const token = generateSessionToken();
-              const key = await getDataSource(Session).insertKey({
+              const key = await getDataSource(Session).insert({
                 token,
                 timeout: getCurrentTime(),
               });
@@ -128,7 +125,7 @@ export class SessionModule {
           }
 
           function getCookie() {
-            const data = cookie.get();
+            const data = c.cookie.get();
             if (!data) return;
             try {
               const [key, token] = JSON.parse(data);
@@ -137,7 +134,7 @@ export class SessionModule {
           }
 
           function defineCookie(key: string, token: string) {
-            cookie.define(JSON.stringify([key, token]));
+            c.cookie.define(JSON.stringify([key, token]));
           }
         }
       )

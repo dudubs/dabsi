@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { PathMapKey } from "@dabsi/common/PathMap";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";

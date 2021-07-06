@@ -15,11 +15,11 @@ describe("Selection", () => {
   }).select({ fields: { aBaseText: { $base: "aText" } } });
 
   beforeAll(async () => {
-    key = await ASource.insertKey({ aText: "sourceText" });
+    key = await ASource.insert({ aText: "sourceText" });
   });
 
   it("expect aText will be sourceText", async () => {
-    expect(await ASource.filter({ $is: key }).getOrFail(key)).toEqual(
+    expect(await ASource.filter({ $is: key }).fetchOrFail(key)).toEqual(
       objectContaining({
         aText: "sourceText",
       })
@@ -27,7 +27,7 @@ describe("Selection", () => {
   });
 
   it("expect a text will be selectionText", async () => {
-    expect(await selectionSource.getOrFail(key)).toEqual(
+    expect(await selectionSource.fetchOrFail(key)).toEqual(
       objectContaining({ aText: "selectionText" })
     );
   });
@@ -39,7 +39,7 @@ describe("Selection", () => {
           aTextLength: { $length: "aText" },
           aBaseTextLength: { $length: "aBaseText" },
         })
-        .get(key)
+        .fetch(key)
     ).toEqual(
       objectContaining({
         aTextLength: "selectionText".length,
@@ -49,7 +49,7 @@ describe("Selection", () => {
   });
 
   it("expect aBaseText will be sourceText", async () => {
-    expect(await selectionSource.get(key)).toEqual(
+    expect(await selectionSource.fetch(key)).toEqual(
       objectContaining({
         aText: "selectionText",
         aBaseText: "sourceText",
@@ -59,26 +59,30 @@ describe("Selection", () => {
 
   it("expect selectionSource will filter by selectionText", async () => {
     expect(
-      await selectionSource.filter({ aText: "selectionText" }).get(key)
-    ).toBeDefined();
+      await selectionSource.filter({ aText: "selectionText" }).fetch(key)
+    ).toBeTruthy();
     expect(
-      await selectionSource.filter({ aText: "sourceText" }).get(key)
-    ).toBeUndefined();
+      await selectionSource.filter({ aText: "sourceText" }).fetch(key)
+    ).toBeFalsy();
   });
 
   it("expect source base will filter by sourceText", async () => {
     expect(
-      await selectionSource.filter({ $base: { aText: "sourceText" } }).get(key)
+      await selectionSource
+        .filter({ $base: { aText: "sourceText" } })
+        .fetch(key)
     ).toBeDefined();
   });
 });
 
 it("expect to invalid insert", async () => {
-  await expectAsync(ASource.insert(<any>{ badField: 1 })).toBeRejected();
+  await expectAsync(
+    ASource.insertAndFetch(<any>{ badField: 1 })
+  ).toBeRejected();
 });
 
 it("insert text", async () => {
-  expect(await ASource.insert({ aText: "hello" })).toEqual(
+  expect(await ASource.insertAndFetch({ aText: "hello" })).toEqual(
     objectContaining({ aText: "hello" })
   );
 });
@@ -91,11 +95,11 @@ describe("insert  ", () => {
     describe(relationKey, () => {
       it("expect to not insert", async () => {
         await expectAsync(
-          ASource.of(<any>relationKey, await BSource.insertKey({})).insert(<
-            any
-          >{
-            [relationKey]: await BSource.insertKey({}),
-          })
+          ASource.of(<any>relationKey, await BSource.insert({})).insertAndFetch(
+            <any>{
+              [relationKey]: await BSource.insert({}),
+            }
+          )
         ).toBeRejected();
       });
 
@@ -105,26 +109,28 @@ describe("insert  ", () => {
 });
 
 it("insert relation of", async () => {
-  const aKey = await ASource.insertKey({});
-  const cKey = await CSource.insertKey({});
-  const cKey2 = await CSource.insertKey({});
+  const aKey = await ASource.insert({});
+  const cKey = await CSource.insert({});
+  const cKey2 = await CSource.insert({});
 
   const bOfAOwnerOfCOwner = BSource.of("oneBToOneAOwner", aKey).of(
     "oneBToOneCOwner",
     cKey
   );
 
-  expect(await bOfAOwnerOfCOwner.get()).toBeFalsy();
-  await bOfAOwnerOfCOwner.insertKey({});
-  expect(await bOfAOwnerOfCOwner.get()).toBeTruthy();
+  expect(await bOfAOwnerOfCOwner.fetch()).toBeFalsy();
+  await bOfAOwnerOfCOwner.insert({});
+  expect(await bOfAOwnerOfCOwner.fetch()).toBeTruthy();
 
-  expect(await BSource.of("oneBToOneAOwner", aKey).get()).toBeTruthy();
+  expect(await BSource.of("oneBToOneAOwner", aKey).fetch()).toBeTruthy();
 
   expect(
-    await BSource.of("oneBToOneAOwner", aKey).of("oneBToOneCOwner", cKey2).get()
+    await BSource.of("oneBToOneAOwner", aKey)
+      .of("oneBToOneCOwner", cKey2)
+      .fetch()
   ).toBeFalsy();
 
-  const bKey = await BSource.insertKey({});
+  const bKey = await BSource.insert({});
 
   const bAtAOwnerOfCOwner = BSource.at("oneBToOneAOwner", bKey).of(
     "oneAToOneCOwner",
@@ -132,12 +138,14 @@ it("insert relation of", async () => {
   );
 
   ///
-  expect(await bAtAOwnerOfCOwner.get()).toBeFalsy();
+  expect(await bAtAOwnerOfCOwner.fetch()).toBeFalsy();
 
-  await bAtAOwnerOfCOwner.insertKey({});
-  expect(await bAtAOwnerOfCOwner.get()).toBeTruthy();
+  await bAtAOwnerOfCOwner.insert({});
+  expect(await bAtAOwnerOfCOwner.fetch()).toBeTruthy();
   expect(
-    await BSource.at("oneBToOneAOwner", bKey).of("oneAToOneCOwner", cKey2).get()
+    await BSource.at("oneBToOneAOwner", bKey)
+      .of("oneAToOneCOwner", cKey2)
+      .fetch()
   ).toBeFalsy();
 });
 
@@ -150,80 +158,80 @@ it("deep relation sanity", async () => {
     .of("oneAToOneCOwner", "cid6")
     .at("oneAToOneBOwner", "aid7")
     .at("oneBToOneCOwner", "bid8")
-    .get();
+    .fetch();
 });
 
 it("of relation key", async () => {
-  const aKey = await ASource.insertKey({});
+  const aKey = await ASource.insert({});
   const bOfA = BSource.of("oneBToOneA", aKey);
-  expect(await bOfA.hasRows()).toBeFalsy();
-  await bOfA.insertKey({});
-  expect(await bOfA.hasRows()).toBeTruthy();
+  expect(await bOfA.has()).toBeFalsy();
+  await bOfA.insert({});
+  expect(await bOfA.has()).toBeTruthy();
 });
 
 it("of data key", async () => {
-  const aKey = await ASource.insertKey({});
+  const aKey = await ASource.insert({});
 
   const bOfA = BSource.of("oneBToOneA", aKey);
 
   const bOfAOfHello = bOfA.of("bText", "bHello");
-  expect(await bOfAOfHello.hasRows()).toBeFalsy();
+  expect(await bOfAOfHello.has()).toBeFalsy();
 
-  const bOfAOfHelloKey = await bOfAOfHello.insertKey({});
-  expect(await bOfAOfHello.hasRows()).toBeTruthy();
+  const bOfAOfHelloKey = await bOfAOfHello.insert({});
+  expect(await bOfAOfHello.has()).toBeTruthy();
 
   const bOfAOfWorld = bOfA.of("bText", "bWorld");
-  expect(await bOfAOfWorld.hasRows()).toBeFalsy();
+  expect(await bOfAOfWorld.has()).toBeFalsy();
 
   const cOfbOfA = CSource.of("oneCToOneB", bOfAOfHelloKey);
 
   const cOfbOfAOfHello = cOfbOfA.of("cText", "cHello");
-  expect(await cOfbOfAOfHello.hasRows()).toBeFalsy();
+  expect(await cOfbOfAOfHello.has()).toBeFalsy();
 
-  const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insertKey({});
+  const cOfbOfAOfHelloKey = await cOfbOfAOfHello.insert({});
 
-  expect(await cOfbOfAOfHello.hasRows()).toBeTruthy();
+  expect(await cOfbOfAOfHello.has()).toBeTruthy();
 
   expect(
     await BSource.of("bText", "bHello")
       .at("oneBToOneCOwner", bOfAOfHelloKey)
-      .hasRows()
+      .has()
   ).toBeTruthy();
 
   expect(
     await BSource.of("bText", "bWorld")
       .at("oneBToOneCOwner", bOfAOfHelloKey)
-      .hasRows()
+      .has()
   ).toBeFalsy();
 });
 
 it("children", async () => {
-  const rootKey = await ASource.insertKey({});
+  const rootKey = await ASource.insert({});
   const aChildAtA = ASource.at("manyAToManyA", rootKey);
-  expect(await aChildAtA.getCountRows()).toEqual(0);
+  expect(await aChildAtA.count()).toEqual(0);
 
-  const childKeys = [await ASource.insertKey({}), await ASource.insertKey({})];
+  const childKeys = [await ASource.insert({}), await ASource.insert({})];
   await aChildAtA.add(childKeys);
 
-  expect(await aChildAtA.getCountRows()).toEqual(2);
-  expect((await aChildAtA.getRows()).map(child => child.$key)).toEqual(
+  expect(await aChildAtA.count()).toEqual(2);
+  expect((await aChildAtA.fetchAll()).map(child => child.$key)).toEqual(
     arrayContaining(childKeys)
   );
 });
 
 it("DataRow", async () => {
-  const a = await ASource.insert({});
-  const b = await BSource.insert({});
+  const a = await ASource.insertAndFetch({});
+  const b = await BSource.insertAndFetch({});
 
-  expect(await a.at("oneAToOneBOwner").getCountRows()).toEqual(0);
+  expect(await a.at("oneAToOneBOwner").count()).toEqual(0);
   await a.at("oneAToOneBOwner").add(b);
-  expect(await a.at("oneAToOneBOwner").getCountRows()).toEqual(1);
+  expect(await a.at("oneAToOneBOwner").count()).toEqual(1);
 });
 
 describe("expect to get row after insert", () => {
   let a: DataRow<AEntity>;
   beforeAll(async () => {
-    a = await ASource.insert({});
+    a = await ASource.insertAndFetch({});
   });
 
   forEachTestRelation(
@@ -233,14 +241,14 @@ describe("expect to get row after insert", () => {
     ],
     relationName => {
       it(`relation:` + relationName, () =>
-        a.at(relationName as any).insert({})
+        a.at(relationName as any).insertAndFetch({})
       );
     }
   );
 });
 it("expect to select field in relation", async () => {
-  const aKey = await ASource.insertKey({
-    oneAToOneB: await BSource.insertKey({
+  const aKey = await ASource.insert({
+    oneAToOneB: await BSource.insert({
       bText: "hello",
     }),
   });
@@ -258,15 +266,17 @@ it("expect to select field in relation", async () => {
           },
         },
       })
-      .getOrFail()
+      .fetchOrFail()
   ).toEqual(
     objectContaining({ oneAToOneB: objectContaining({ bX: "hello" }) })
   );
 });
 
 it("selected relation sanity", async () => {
-  const a = await ASource.select({ relations: { oneAToOneB: true } }).insert({
-    oneAToOneB: await BSource.insertKey({ bText: "b" }),
+  const a = await ASource.select({
+    relations: { oneAToOneB: true },
+  }).insertAndFetch({
+    oneAToOneB: await BSource.insert({ bText: "b" }),
   });
   expect(await a.oneAToOneB!.reload()).toEqual(
     objectContaining({ bText: "b" })
@@ -275,10 +285,10 @@ it("selected relation sanity", async () => {
 
 describe("insert relation", () => {
   it("relation by { $key }", async () => {
-    const aKey = await ASource.insertKey({});
+    const aKey = await ASource.insert({});
     const bKey = await BSource.select({
       relations: { oneBToOneA: true },
-    }).insert({
+    }).insertAndFetch({
       oneBToOneA: { $key: aKey },
     });
     expect(bKey.oneBToOneA!.$key).toEqual(aKey);
@@ -287,31 +297,31 @@ describe("insert relation", () => {
 
 describe("rootAt", () => {
   it("to one b", async () => {
-    const bKey = await ASource.rootAt("oneAToOneB").insertKey({
+    const bKey = await ASource.rootAt("oneAToOneB").insert({
       bText: "hello",
     });
-    expect(await BSource.filter({ $is: bKey }).hasRows()).toBeTrue();
+    expect(await BSource.filter({ $is: bKey }).has()).toBeTrue();
   });
   it("to many b", async () => {
-    const bKey = await ASource.rootAt("oneAToManyB").insertKey({
+    const bKey = await ASource.rootAt("oneAToManyB").insert({
       bText: "hello",
     });
-    expect(await BSource.filter({ $is: bKey }).hasRows()).toBeTrue();
+    expect(await BSource.filter({ $is: bKey }).has()).toBeTrue();
   });
   it("to one b to one c", async () => {
     const cKey = await ASource.rootAt("oneAToOneB")
       .rootAt("oneBToOneC")
-      .insertKey({});
-    expect(await CSource.filter({ $is: cKey }).hasRows()).toBeTrue();
+      .insert({});
+    expect(await CSource.filter({ $is: cKey }).has()).toBeTrue();
   });
 });
 
 describe("$find sanity", () => {
   it("", async () => {
-    const a = await ASource.insert({});
+    const a = await ASource.insertAndFetch({});
     const [b1, b2] = [
-      await BSource.insert({ bText: "hello" }),
-      await BSource.insert({ bText: "world" }),
+      await BSource.insertAndFetch({ bText: "hello" }),
+      await BSource.insertAndFetch({ bText: "world" }),
     ];
     await a.at("oneAToManyB").add([b1.$key, b2.$key]);
 
@@ -324,7 +334,7 @@ describe("$find sanity", () => {
           $find: { oneAToManyB: { bText } },
         },
       })
-        .getOrFail(a.$key)
+        .fetchOrFail(a.$key)
         .then(x => x.bKey);
     }
   });

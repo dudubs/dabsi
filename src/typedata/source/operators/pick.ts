@@ -3,7 +3,7 @@ import { DataFields } from "@dabsi/typedata/fields";
 import { DataRelationKeys, DataRelationType } from "@dabsi/typedata/relation";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataPickableKeys } from "@dabsi/typedata/selection/selection";
-import { DataSource, SelectedDataSource } from "@dabsi/typedata/source/source";
+import { DataSource, DataSelectedSource } from "@dabsi/typedata/source/source";
 
 declare global {
   namespace TypeData {
@@ -25,7 +25,7 @@ declare function pickFieldsFromRelation<
   this: DataSource<T>,
   relation: Relation,
   fields: F
-): SelectedDataSource<
+): DataSelectedSource<
   T,
   { pick: readonly never[]; relations: Record<Relation, { fields: F }> }
 >;
@@ -38,7 +38,7 @@ declare function pickKeysFromRelation<
   this: DataSource<T>,
   relation: Relation,
   keys: readonly K[]
-): SelectedDataSource<
+): DataSelectedSource<
   T,
   {
     relations: Record<Relation, { pick: K[] }>;
@@ -55,7 +55,7 @@ declare function pickKeysAndFieldsFromRelation<
   relation: Relation,
   keys: readonly K[],
   fields: F
-): SelectedDataSource<
+): DataSelectedSource<
   T,
   { relations: Record<Relation, { pick: K[]; fields: F }> }
 >;
@@ -64,12 +64,12 @@ declare function pickKeysAndFieldsFromRelation<
 declare function pickFields<T, F extends DataFields<T>>(
   this: DataSource<T>,
   fields: F
-): SelectedDataSource<T, { pick: readonly never[]; fields: F }>;
+): DataSelectedSource<T, { pick: readonly never[]; fields: F }>;
 
 declare function pickKeys<T, K extends DataPickableKeys<T>>(
   this: DataSource<T>,
   keys: readonly K[]
-): SelectedDataSource<T, { pick: K[] }>;
+): DataSelectedSource<T, { pick: K[] }>;
 
 declare function pickKeysAndFields<
   T,
@@ -79,7 +79,7 @@ declare function pickKeysAndFields<
   this: DataSource<T>,
   keys: readonly K[],
   fields: F
-): SelectedDataSource<T, { pick: K[]; fields: F }>;
+): DataSelectedSource<T, { pick: K[]; fields: F }>;
 
 DataSource.prototype.pick = <any>function (this: DataSource<any>, ...args) {
   let relation: string | null = null;

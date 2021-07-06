@@ -3,6 +3,7 @@ import { Resolver } from "@dabsi/typedi";
 import { RpcLocation } from "@dabsi/typerpc";
 
 export type RpcPermissionReason = string;
+
 export type RpcPermssionChecker = () => Awaitable<
   undefined | RpcPermissionReason
 >;

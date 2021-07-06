@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import TableMap from "@dabsi/common/TableMap";
 import { inspect } from "@dabsi/logging/inspect";
 import { IndexedIterable } from "immutable";

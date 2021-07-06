@@ -26,7 +26,7 @@ export default RpcResolverBuilder({
                 password: getPasswordHash(password!),
               })
               .pick({ fullName: User.FullName })
-              .get();
+              .fetch();
             if (!user) return { type: "failed" };
             await c.authenticator.loginAs(user);
             return {

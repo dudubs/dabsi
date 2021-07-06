@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { SingleCall } from "@dabsi/common/patterns/SingleCall";
 
 import { DEntity, EEntity } from "@dabsi/typedata/tests/BaseEntities";

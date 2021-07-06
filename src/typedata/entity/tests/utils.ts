@@ -9,19 +9,10 @@ import {
   CEntity,
 } from "@dabsi/typeorm/relations/tests/TestEntities";
 
-export const ASource = DataEntitySource.createFromConnection(
-  AEntity,
-  getTestConnection
-);
-
-export const BSource = DataEntitySource.createFromConnection(
-  BEntity,
-  getTestConnection
-);
-export const CSource = DataEntitySource.createFromConnection(
-  CEntity,
-  getTestConnection
-);
-
 export const getTestSource = <T>(entityType: Constructor<T>): DataSource<T> =>
   DataEntitySource.createFromConnection(entityType, getTestConnection);
+
+export const ASource = getTestSource(AEntity);
+
+export const BSource = getTestSource(BEntity);
+export const CSource = getTestSource(CEntity);

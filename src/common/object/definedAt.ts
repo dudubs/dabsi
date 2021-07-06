@@ -1,4 +1,4 @@
-import { defined } from "./defined";
+import defined from "./defined";
 
 export function definedAt<T, K extends keyof T>(
   obj: T,

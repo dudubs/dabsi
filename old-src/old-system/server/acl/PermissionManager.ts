@@ -15,11 +15,13 @@ export class PermissionManager {
       .of(to, key)
       .of("ownerToken", token);
 
-    if (await source.hasRows()) {
+    if (await source.has()) {
       return "ALREADY_EXISTS" as const;
     }
 
-    await source.insert([...splitToken(token)].map(token => ({ token })));
+    await source.insertAndFetch(
+      [...splitToken(token)].map(token => ({ token }))
+    );
 
     return "ADDED" as const;
   }

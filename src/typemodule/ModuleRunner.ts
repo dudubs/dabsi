@@ -1,6 +1,6 @@
 import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import repeatDiff from "@dabsi/common/iterator/reapetDiff";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { Reflector } from "@dabsi/common/reflection/Reflector";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { Constructor } from "@dabsi/common/typings2/Constructor";

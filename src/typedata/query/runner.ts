@@ -17,13 +17,13 @@ export class DataQueryRunner {
     );
   }
 
-  getRows(query: DataQuery): Promise<any> {
+  getRows(query: DataQuery): Promise<any[]> {
     const [sql, parameters] = this._getSqlAndParameters(query, false);
     // console.log(formatSql(query));
     return this.queryRunner.query(sql, parameters);
   }
 
-  protected async _getCountRows(query: DataQuery, maxCount: number) {
+  protected async _count(query: DataQuery, maxCount: number) {
     const [sql, params] = this._getSqlAndParameters(
       maxCount ? { ...query, take: maxCount } : query,
       true
@@ -33,11 +33,11 @@ export class DataQueryRunner {
     return value;
   }
 
-  async hasRows(query: DataQuery): Promise<boolean> {
-    return Boolean(await this._getCountRows(query, 1));
+  async has(query: DataQuery): Promise<boolean> {
+    return Boolean(await this._count(query, 1));
   }
 
-  async getCountRows(query: DataQuery): Promise<number> {
-    return await this._getCountRows(query, 0);
+  async count(query: DataQuery): Promise<number> {
+    return await this._count(query, 0);
   }
 }

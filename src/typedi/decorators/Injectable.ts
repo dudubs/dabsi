@@ -4,6 +4,7 @@ import { Resolver } from "@dabsi/typedi";
 import { getParameterName } from "@dabsi/common/reflection/getParameterName";
 import { parameterResolverMap } from "@dabsi/typedi/injectability";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
+import defined from "@dabsi/common/object/defined";
 
 export const getInjectableMetadata = WeakMapFactory((target: Function) => {
   return {
@@ -27,9 +28,11 @@ export function getParamsResolvers(
     }
     return Resolver.forward(() => {
       return <any>(
-        (paramResolverMap?.get(index) ||
-          getForwardParamType(index) ||
-          paramTypes[index]!)
+        defined(
+          paramResolverMap?.get(index) ||
+            getForwardParamType(index) ||
+            paramTypes[index]!
+        )
       );
     });
   });

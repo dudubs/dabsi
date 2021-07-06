@@ -21,7 +21,7 @@ export const DataInputTester = Tester.beforeAll({
   })
   .beforeAll({
     rows: t =>
-      t.source.insert([
+      t.source.insertAndFetch([
         { id: "1", text: "hello" },
         { id: "2", text: "world" },
         { id: "3", text: "foo" },

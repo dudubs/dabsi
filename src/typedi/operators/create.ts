@@ -8,6 +8,7 @@ declare module "../Resolver" {
     ): Consumer<T>;
   }
 }
+
 Resolver.create = function (resolve, check) {
   for (const [propertyName, value] of [
     [Resolver.resolveSymbol, resolve],

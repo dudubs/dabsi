@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { definedAt } from "@dabsi/common/object/definedAt";
 import { entries } from "@dabsi/common/object/entries";
 import { hasKeys } from "@dabsi/common/object/hasKeys";
@@ -58,8 +58,6 @@ export class DataEntityLoader {
       ]
   );
 
-  protected _baseRow = new DataSourceRow(this.source);
-
   private _singlePrimaryColumn =
     this.entityMetadata.primaryColumns.length === 1
       ? this.entityMetadata.primaryColumns[0]
@@ -70,28 +68,35 @@ export class DataEntityLoader {
     this.notMergedSelection
   );
 
-  protected rowLoader = hasKeys(this.typeInfo.children)
-    ? this._buildRowLoaderWithChildren()
-    : this._buildRowLoaderWithoutChildren();
+  // protected rowLoader = hasKeys(this.typeInfo.children)
+  //   ? this._buildRowLoaderWithChildren()
+  //   : this._buildRowLoaderWithoutChildren();
+
+  buildRowLoader(source: DataSource<any>) {
+    return hasKeys(this.typeInfo.children)
+      ? this._buildRowLoaderWithChildren(source)
+      : this._buildRowLoaderWithoutChildren(source);
+  }
 
   constructor(
     public connection: Connection,
     public queryRunner: DataQueryRunner,
     public typeInfo: DataTypeInfo,
     public notMergedSelection: AnyDataSelection,
-    public source: DataSource<any>,
+    public xsource: null,
     public query: DataQuery,
     public schema: string
   ) {}
 
-  private _buildRowLoaderWithoutChildren(): RowLoader {
+  private _buildRowLoaderWithoutChildren(source: DataSource<any>): RowLoader {
     const rowLoader = this._buildRowLoaderForType(
       DataTypeInfo.get(this.typeInfo.type),
       this.entityMetadata,
       defaultChildKey,
       new Set(this._selection.pick || this.entityInfo.notRelationColumnKeys),
       this._selection.fields || {},
-      <any>this._selection.relations || {}
+      <any>this._selection.relations || {},
+      source
     );
 
     // filter root & children union
@@ -114,7 +119,7 @@ export class DataEntityLoader {
     return rowLoader;
   }
 
-  private _buildRowLoaderWithChildren(): RowLoader {
+  private _buildRowLoaderWithChildren(source: DataSource<any>): RowLoader {
     for (const childKey of Object.keys(this._selection.children || {})) {
       if (!(childKey in this.typeInfo.children!)) {
         throw new Error(
@@ -152,7 +157,8 @@ export class DataEntityLoader {
         childKey,
         new Set(childSelection.pick ?? childEntityInfo.notRelationColumnKeys),
         childSelection.fields || {},
-        childSelection.relations || {}
+        childSelection.relations || {},
+        source
       );
     }
 
@@ -184,7 +190,11 @@ export class DataEntityLoader {
     childKey: string,
     columns: Set<string>,
     selectionFieldMap: Record<string, DataExp<any>>,
-    selectionRelationMap: Record<string, boolean | AnyDataSelection.ToOneOrMany>
+    selectionRelationMap: Record<
+      string,
+      boolean | AnyDataSelection.ToOneOrMany
+    >,
+    source: DataSource<any>
   ): RowLoader {
     const loaders: RowLoader[] = [];
 
@@ -266,13 +276,15 @@ export class DataEntityLoader {
               rowTypeInfo,
               rowEntityMetadata,
               propertyName,
-              relationSelection
+              relationSelection,
+              source
             )
           : this._buildReationToManyLoader(
               rowTypeInfo,
               rowEntityMetadata,
               propertyName,
-              relationSelection
+              relationSelection,
+              source
             )
       );
     }
@@ -290,7 +302,8 @@ export class DataEntityLoader {
     rowTypeInfo: DataTypeInfo,
     rowEntityMetadata: EntityMetadata,
     propertyName: string,
-    relationSelection: AnyDataSelection.ToOne
+    relationSelection: AnyDataSelection.ToOne,
+    source: DataSource<any>
   ): RowLoader {
     const relation = new DataEntityRelation(
       this.connection,
@@ -315,7 +328,7 @@ export class DataEntityLoader {
       this.queryRunner,
       relationTypeInfo,
       relationSelection,
-      this.source,
+      null,
       this.query,
       relationSchema
     );
@@ -332,13 +345,14 @@ export class DataEntityLoader {
       });
     }
 
+    const realtionRowLoader = relationLoader.buildRowLoader(source);
+
     return async context => {
       const relationRow = (
         await relationLoader.loadOneRow(
           context.raw,
-          new DataSourceRow(
-            this.source.at(propertyName as never, context.keyText)
-          )
+          realtionRowLoader,
+          source.at(propertyName as never, context.keyText)
         )
       )?.row;
       if (relationRow) {
@@ -351,7 +365,8 @@ export class DataEntityLoader {
     rowTypeInfo: DataTypeInfo,
     rowEntityMetadata: EntityMetadata,
     propertyName: string,
-    relationSelection: AnyDataSelection.ToMany
+    relationSelection: AnyDataSelection.ToMany,
+    source: DataSource<any>
   ): RowLoader {
     const relation = new DataEntityRelation(
       this.connection,
@@ -359,10 +374,12 @@ export class DataEntityLoader {
       propertyName,
       true
     );
+
     const relationTypeInfo =
       rowTypeInfo.relations?.[propertyName] ||
       DataTypeInfo.get(relation.left.entityType);
 
+    // const relationSource =
     return async context => {
       const relationQuery: DataQuery = {
         from: relation.left.entityMetadata.tableName,
@@ -382,18 +399,21 @@ export class DataEntityLoader {
         this.queryRunner,
         relationTypeInfo,
         relationSelection,
-        this.source.at(propertyName as never, context.keyText),
+        null,
         relationQuery,
         relationQuery.alias
-      ).loadCursor(relationSelection);
+      ).setQueryCursor(relationSelection);
 
-      context.row[propertyName] = await relationLoader.loadManyRows();
+      context.row[propertyName] = await relationLoader.loadManyRows(
+        source.at(propertyName as never, context.keyText)
+      );
     };
   }
 
   async loadOneRow(
     raw: object,
-    baseRow: object = this._baseRow
+    rowLoader: RowLoader,
+    source: DataSource<any>
   ): Promise<RowContext | undefined> {
     const keyObject: object = {};
 
@@ -407,7 +427,7 @@ export class DataEntityLoader {
       ? String(keyObject[this._singlePrimaryColumn.propertyName])
       : DataEntityKey.stringify(this.entityMetadata, keyObject);
 
-    const row: any = {};
+    const row: any = new DataSourceRow(source);
     row.$key = keyText;
 
     const context: RowContext = {
@@ -416,22 +436,22 @@ export class DataEntityLoader {
       keyObject,
       keyText,
     };
-    Object.setPrototypeOf(row, baseRow);
-    await this.rowLoader(context);
+
+    await rowLoader(context);
     return context;
   }
 
-  async loadManyRows(baseRow?: object): Promise<any[]> {
+  async loadManyRows(source: DataSource<any>): Promise<any[]> {
     const rows: any[] = [];
-
+    const rowLaoder = this.buildRowLoader(source);
     for (const raw of await this.queryRunner.getRows(this.query)) {
-      const context = await this.loadOneRow(raw, baseRow);
+      const context = await this.loadOneRow(raw, rowLaoder, source);
       context && rows.push(context.row);
     }
     return rows;
   }
 
-  loadCursor(cursor: {
+  setQueryCursor(cursor: {
     skip?: number;
     take?: number;
     order?: DataOrder<any>[];

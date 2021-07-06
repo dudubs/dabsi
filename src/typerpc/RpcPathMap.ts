@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import PathMap from "@dabsi/common/PathMap";
 import { getRpcMetadata } from "@dabsi/typerpc/getRpcMetadata";
 import { RpcLocation } from "@dabsi/typerpc/RpcLocation";

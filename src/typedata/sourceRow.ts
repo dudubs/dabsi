@@ -49,6 +49,6 @@ export class DataSourceRow {
   }
 
   reload<T extends AnyBasedDataRow>(this: T): Promise<DataRow<RebaseType<T>>> {
-    return this.getSource().getOrFail(this.$key);
+    return this.getSource().fetchOrFail(this.$key);
   }
 }

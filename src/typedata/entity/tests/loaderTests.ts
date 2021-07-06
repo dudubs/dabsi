@@ -10,7 +10,7 @@ it("expect to invalid child", () =>
           invaldChild: {},
         },
       })
-      .get()
+      .fetch()
   ).toBeRejected());
 
 it("expect to invalid field", () =>
@@ -25,5 +25,5 @@ it("expect to invalid field", () =>
           },
         },
       })
-      .get()
+      .fetch()
   ).toBeRejected());

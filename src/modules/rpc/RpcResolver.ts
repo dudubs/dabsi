@@ -1,6 +1,7 @@
+import defined from "@dabsi/common/object/defined";
 import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
-import { Consumer, Resolver } from "@dabsi/typedi";
+import { ForwardResolver, Resolver } from "@dabsi/typedi";
 import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
 import { Rpc, RpcLocation } from "@dabsi/typerpc";
 import { ConfigFactory } from "@dabsi/typerpc/GenericConfig";
@@ -8,38 +9,51 @@ import { RpcConfigurator } from "@dabsi/typerpc/RpcConfig";
 import { RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
 import { RpcTypeOrLocation } from "@dabsi/typerpc/RpcTypeOrLocation";
 
-export type RpcLocationConfigurator<T> =
+export class RpcBoundResolver<T>
+  implements ForwardResolver<RpcConfiguratorAt<T>> {
+  constructor(
+    readonly location: RpcLocation<T>,
+    readonly resolver: Resolver<RpcConfiguratorAt<T>>
+  ) {}
+
+  [Resolver.forwardSymbol](): Resolver<RpcConfiguratorAt<T>> {
+    return this.resolver;
+  }
+
+  [inspect.custom]() {
+    return `<RpcBoundResolver ${this.location.innerInspect()}>`;
+  }
+}
+
+export type RpcConfiguratorAt<T> =
   //
   T extends Rpc
     ? RpcConfigurator<T>
     : // T
       ConfigFactory<RpcMemberHandler<T>>;
 
-export interface RpcResolver<T> extends Consumer<RpcLocationConfigurator<T>> {
-  rpcLocation: RpcLocation<T>;
-  rpcOriginalResolver: Resolver<T>;
-}
+export type RpcResolver<T> = Resolver<RpcConfiguratorAt<T>>;
 
 // ----------------------------------
 
 export function RpcResolver<T, U extends ResolverDeps>(
-  rpcTypeOrLocation: RpcTypeOrLocation<T>
-): Resolver<RpcLocationConfigurator<T>>;
+  typeOrLocation: RpcTypeOrLocation<T>
+): Resolver<RpcConfiguratorAt<T>>;
 
 export function RpcResolver<T, U extends ResolverDeps>(
-  rpcTypeOrLocation: RpcTypeOrLocation<T>,
-  ...args: ConsumeArgs<RpcLocationConfigurator<T>, U>
-): RpcResolver<T>;
+  typeOrLocation: RpcTypeOrLocation<T>,
+  ...args: ConsumeArgs<RpcConfiguratorAt<T>, U>
+): RpcBoundResolver<T>;
 
-export function RpcResolver(rpcTypeOrLocation?, ...args): any {
-  const rpcLocation = RpcTypeOrLocation(rpcTypeOrLocation);
+export function RpcResolver(typeOrLocation?, ...args): any {
+  const location = RpcTypeOrLocation(typeOrLocation);
 
   if (args.length === 0) {
     return Resolver.forward(context =>
       Resolver
         //
         .resolve(RpcResolverGenerator, context)
-        .getResolver(rpcLocation)
+        .getResolver(location)
     );
   }
 
@@ -48,47 +62,11 @@ export function RpcResolver(rpcTypeOrLocation?, ...args): any {
   }
 
   if (args.length === 2) {
-    return RpcResolver.bindToLocation(
-      rpcLocation,
+    return new RpcBoundResolver(
+      location,
       ConsumeArgs(args as [{}, () => any])!
     );
   }
 
   throw new Error(`Invalid arguments ${inspect(args)}`);
-}
-
-// ----------------------------------
-
-export const BaseRpcResolver: RpcResolver<any> = Object.setPrototypeOf(
-  {
-    [inspect.custom](this: RpcResolver<any>) {
-      return `<RpcResolver ${this.rpcLocation.innerInspect()}>`;
-    },
-  },
-  Function.prototype
-) as any;
-
-export namespace RpcResolver {
-  export function bindToLocation<T>(
-    rpcTypeOrLocation: RpcTypeOrLocation<T>,
-    resolver: Resolver<RpcLocationConfigurator<T>>
-  ): RpcResolver<T>;
-
-  export function bindToLocation(rpcTypeOrLocation, resolver) {
-    if ((<RpcResolver<any>>resolver).rpcLocation === rpcTypeOrLocation) {
-      return resolver;
-    }
-
-    const rpcLocation = RpcTypeOrLocation(rpcTypeOrLocation);
-    const originalResolver = resolver.rpcOriginalResolver || resolver;
-    const boundResolver = Resolver.forward(
-      () => originalResolver
-    ) as RpcResolver<any>;
-
-    boundResolver.rpcOriginalResolver = resolver;
-    boundResolver.rpcLocation = rpcLocation;
-    Object.setPrototypeOf(boundResolver, BaseRpcResolver);
-
-    return boundResolver;
-  }
 }

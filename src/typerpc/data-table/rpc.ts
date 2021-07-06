@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { RpcType } from "@dabsi/typerpc";

@@ -1,8 +1,4 @@
-import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-// TODO: DataSource.clone(), DataSource.freeze()
-import { defined } from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
-import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { BaseType, RebaseType } from "@dabsi/typedata/BaseType";
 import { chunks } from "@dabsi/typedata/chunks";
 import { DataCursor, EMPTY_DATA_CURSOR } from "@dabsi/typedata/cursor";
@@ -10,25 +6,21 @@ import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataFields, DataFieldsRow } from "@dabsi/typedata/fields";
 import { DataKey, DataKeyOrKeys } from "@dabsi/typedata/key";
 import { DataNullsSort, DataOrder, DataSort } from "@dabsi/typedata/order";
-import {
-  DataRelationKeys,
-  DataRelationTreeKeys,
-  DataRelationType,
-} from "@dabsi/typedata/relation";
+import { DataRelationKeys, DataRelationType } from "@dabsi/typedata/relation";
 import { DataRow, DataTreeRow } from "@dabsi/typedata/row";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
-import { DataSourceRow } from "@dabsi/typedata/sourceRow";
 import { WithDataUnionMetaChildren } from "@dabsi/typedata/union";
-import { DataInsertRow, DataUpdateRow } from "@dabsi/typedata/value";
+import { DataUpdateRow } from "@dabsi/typedata/value";
 
-export type SelectedDataSource<T, S> = DataSource<DataSelectionRow<T, S>>;
+export type DataSelectedSource<T, S> = DataSource<DataSelectionRow<T, S>>;
 
 declare global {
   namespace TypeData {
     interface IDataSource<T> {}
   }
 }
+
 export declare namespace DataSource {
   export type At<T, K extends DataRelationKeys<T>> = DataSource<
     DataRelationType<Required<T>[K]>
@@ -42,30 +34,30 @@ export interface DataSource<T> extends TypeData.IDataSource<T> {}
 export abstract class DataSource<T> {
   // $debugType!: T;
 
-  abstract getRows(): Promise<DataRow<T>[]>;
+  protected abstract handleFetch(source: DataSource<any>): Promise<any[]>;
 
   // count()
-  abstract getCountRows(): Promise<number>;
+  abstract count(): Promise<number>;
 
-  // hasRows()
-  abstract hasRows(): Promise<boolean>;
+  abstract has(): Promise<boolean>;
 
   abstract cursor: DataCursor;
 
   abstract withCursor(cursor: DataCursor): DataSource<any>;
 
+  protected abstract handleInsert(rows: any[]): Promise<string[]>;
+
   protected abstract handleDelete(keys: string[]): Promise<void>;
 
-  protected abstract handleGetTree<T>(
-    this: DataSource<T>,
+  protected abstract handleFetchTree(
+    source: DataSource<any>,
     inverse: boolean,
     relationPropertyName: string
-  ): Promise<DataTreeRow<T>[]>;
+  ): Promise<DataTreeRow<{}>[]>;
 
-  protected abstract handleUpdate<T>(
-    this: DataSource<T>,
+  protected abstract handleUpdate(
     keys: string[],
-    value: DataUpdateRow<T>
+    value: DataUpdateRow<any>
   ): Promise<number>;
 
   protected abstract handleUpdateRelations(
@@ -73,34 +65,19 @@ export abstract class DataSource<T> {
     keysToRemove: string[]
   ): Promise<void>;
 
-  // countAndFetch
-  async getCountAndRows<T>(
-    this: DataSource<T>
-  ): Promise<[number, DataRow<T>[]]> {
+  // todo: optional handleGetCountAndRows
+  async countAndFetch<T>(this: DataSource<T>): Promise<[number, DataRow<T>[]]> {
     // TODO: Optimizing
-    return [await this.getCountRows(), await this.getRows()];
-  }
-
-  // fetchMap
-  async getRowMap(): Promise<Record<string, DataRow<T>>> {
-    return mapArrayToObject(await this.getRows(), row => [row.$key, row]);
-  }
-
-  getKeys(): Promise<string[]> {
-    return this._selectKeys()
-      .getRows()
-      .then(rows => rows.map(row => row.$key));
+    return [await this.count(), await this.handleFetch(this)];
   }
 
   rebase<T>(this: DataSource<T>): DataSource<RebaseType<T>> {
-    return <any>this.withCursor({
-      ...this.cursor,
-      selection: {},
-    });
+    return <any>this.withCursor({ ...this.cursor, selection: {} });
   }
 
-  protected _selectKeys<T>(this: DataSource<T>): DataSource<T> {
-    return this.updateCursor({
+  protected _selectKeys(): DataSource<{}> {
+    return this.withCursor({
+      ...this.cursor,
       selection: {
         pick: [],
         fields: {},
@@ -110,49 +87,25 @@ export abstract class DataSource<T> {
     });
   }
 
-  async *find(pageSize = 10): AsyncIterableIterator<DataRow<T>> {
-    let source: DataSource<T> = this.updateCursor({
+  async *find<T>(
+    this: DataSource<T>,
+    pageSize = 10
+  ): AsyncIterableIterator<DataRow<T>> {
+    let source: DataSource<T> = this.withCursor({
+      ...this.cursor,
       skip: 0,
       take: pageSize,
     });
 
     while (true) {
-      const rows = await source.getRows();
+      const rows = await source.fetchAll();
       yield* rows;
       if (pageSize > rows.length) break;
-      source = source.updateCursor({
+      source = source.withCursor({
+        ...this.cursor,
         skip: source.cursor.skip + rows.length,
       });
     }
-  }
-
-  //
-  async touch<T>(
-    this: DataSource<T>,
-    // TODO: Exclude keys .of(key, value)
-    insert?: DataInsertRow<T>
-  ): Promise<DataRow<T>> {
-    return (await this.get()) || (await this.insert(insert || ({} as any)));
-  }
-
-  // fetchOrFail
-  async getOrFail(key?: string | number): Promise<DataRow<T>> {
-    return defined(await this.get(key?.toString()), () =>
-      key ? `No row "${key}"` : "No row"
-    );
-  }
-
-  async get(key?: string | number): Promise<DataRow<T> | undefined> {
-    if (typeof key === "number") key = String(key);
-    const result = await this.filter(
-      typeof key === "string" ? { $is: key } : undefined
-    )
-      .take(1)
-      .getRows();
-
-    return (
-      result[0] && Object.setPrototypeOf(result[0], new DataSourceRow(this))
-    );
   }
 
   // relation
@@ -173,38 +126,18 @@ export abstract class DataSource<T> {
     await this.handleUpdateRelations(keysToAdd, keysToRemove);
   }
 
-  // TODO: insertManyKeys, insertKey
-  insertKey(value: DataInsertRow<T>): Promise<string>;
-  insertKey(values: DataInsertRow<T>[]): Promise<string[]>;
-  insertKey(values) {
-    return Array.isArray(values)
-      ? this.insertKeys(values)
-      : this.insertKeys([values]).then(rows => rows[0]);
-  }
-
-  // TODO: doInsertManyKeys
-  protected abstract insertKeys<T>(
-    datas: DataInsertRow<T>[]
-  ): Promise<string[]>;
-
-  protected async _each(
+  protected async _forEachKeys(
     keyOrKeys: DataKeyOrKeys<T> | undefined,
     callback: (keys: string[]) => Promise<void>
   ): Promise<string[]> {
-    let keys: string[];
+    let keys: string[] | null = null;
 
     if (!keyOrKeys && this.cursor.keys.length) {
-      keyOrKeys = this.cursor.keys;
-    }
-
-    if (keyOrKeys !== undefined) {
-      if (Array.isArray(keyOrKeys)) {
-        keys = keyOrKeys.map(DataKey);
-      } else {
-        keys = [DataKey(keyOrKeys)];
-      }
+      keys = this.cursor.keys;
       await callback(keys);
-      return keys;
+    } else if (keyOrKeys !== undefined) {
+      keys = DataKeyOrKeys(keyOrKeys);
+      await callback(keys);
     } else {
       keys = [];
       for await (const rows of chunks(this._selectKeys().find(), 100)) {
@@ -216,8 +149,12 @@ export abstract class DataSource<T> {
     return keys;
   }
 
-  async update(value: DataUpdateRow<T>): Promise<string[]>;
-  async update(
+  async update<T>(
+    this: DataSource<T>,
+    value: DataUpdateRow<T>
+  ): Promise<string[]>;
+  async update<T>(
+    this: DataSource<T>,
     keyOrKeys: DataKeyOrKeys<T>,
     value: DataUpdateRow<T>
   ): Promise<string[]>;
@@ -229,105 +166,64 @@ export abstract class DataSource<T> {
     } else {
       [keyOrKeys, values] = args;
     }
-    return this._each(keyOrKeys, async keys => {
+    return this._forEachKeys(keyOrKeys, async keys => {
       await this.handleUpdate(keys, values);
     });
   }
 
   async add(keyOrKeys?: DataKeyOrKeys<T>): Promise<string[]> {
-    return this._each(keyOrKeys, keys => this.handleUpdateRelations(keys, []));
+    return this._forEachKeys(keyOrKeys, keys =>
+      this.handleUpdateRelations(keys, [])
+    );
   }
 
   async remove(keyOrKeys?: DataKeyOrKeys<T>): Promise<string[]> {
-    return this._each(keyOrKeys, keys => this.handleUpdateRelations([], keys));
+    return this._forEachKeys(keyOrKeys, keys =>
+      this.handleUpdateRelations([], keys)
+    );
   }
 
   async delete(keyOrKeys?: DataKeyOrKeys<T>): Promise<string[]> {
-    return this._each(keyOrKeys, keys => this.handleDelete(keys));
-  }
-
-  insert<T>(this: DataSource<T>, value: DataInsertRow<T>): Promise<DataRow<T>>;
-  insert<T>(
-    this: DataSource<T>,
-    values: DataInsertRow<T>[]
-  ): Promise<DataRow<T>[]>;
-
-  async insert(values): Promise<any> {
-    if (!Array.isArray(values)) {
-      return this.insert([values]).then(rows => rows[0]);
-    }
-    const keys = await this.insertKeys(values);
-
-    const baseRow = new DataSourceRow(this);
-
-    return this.filter({ $is: keys })
-      .getRows()
-      .then(rows => rows.map(row => Object.setPrototypeOf(row, baseRow)));
-  }
-
-  // cursoring
-
-  // asMutable()
-  // asImmutable()
-
-  updateCursor<U = any>(callbackOrCursor: Partial<DataCursor>): DataSource<U> {
-    return <any>this.withCursor({ ...this.cursor, ...callbackOrCursor });
+    return this._forEachKeys(keyOrKeys, keys => this.handleDelete(keys));
   }
 
   as<K extends keyof Children, Children>(
     this: DataSource<WithDataUnionMetaChildren<Children>>,
     type: string & K
   ): DataSource<Children[K]> {
-    return this.updateCursor({
-      type,
-    });
-  }
-
-  T?: T;
-
-  protected _buildCursor<
-    K extends ExtractKeys<
-      typeof DataCursor,
-      (cursor: DataCursor<any>, ...args: any[]) => DataCursor<any>
-    >
-  >(
-    method: K,
-    ...args: typeof DataCursor[K] extends (_: any, ...args: infer U) => any
-      ? U
-      : []
-  ): DataSource<any> {
-    return <any>(
-      this.withCursor((DataCursor as any)[method](this.cursor, ...args))
-    );
+    return this.withCursor({ ...this.cursor, type });
   }
 
   of<T>(this: DataSource<T>, keyMap: Record<string, any>): DataSource<T>;
-  of<T>(this: DataSource<T>, keyOrKeys: string | string[]): DataSource<T>;
+
+  of<T>(this: DataSource<T>, keyOrKeys: DataKeyOrKeys<T>): DataSource<T>;
 
   of<T, K extends string & keyof Required<T>>(
     this: DataSource<T>,
     propertyName: string & K,
     value: DataKey<T[K]>
   ): DataSource<T>;
+
   of(...args) {
+    // of(propertyName, value)
     if (args.length === 2) {
       const [k, v] = args;
-      return this._buildCursor("ofKeyMap", { [k]: v });
+      return this.withCursor({
+        ...this.cursor,
+        constants: { ...this.cursor.constants, [k]: v },
+      });
     }
     const [arg0] = args;
-
-    if (typeof arg0 === "string") {
-      return this._buildCursor("ofKeys", [arg0]);
+    if (typeof arg0 === "string" || Array.isArray(arg0)) {
+      return this.withCursor({ ...this.cursor, keys: DataKeyOrKeys(arg0) });
     }
-    if (Array.isArray(arg0)) {
-      return this._buildCursor("ofKeys", arg0);
-    }
-
-    return this._buildCursor("ofKeyMap", arg0);
+    return this.withCursor({
+      ...this.cursor,
+      constants: { ...this.cursor.constants, ...arg0 },
+    });
   }
 
-  at<T, K extends DataRelationKeys<T>>(
-    this: DataSource<T>,
+  at<K extends DataRelationKeys<T>>(
     propertyName: K,
     key: DataKey<DataRelationType<T[K]>> = this.cursor.keys[0]
   ): DataSource.At<T, K> {
@@ -339,22 +235,36 @@ export abstract class DataSource<T> {
     );
   }
 
-  skip(count: number): DataSource<T> {
-    return this.updateCursor({ skip: count });
+  skip<T>(this: DataSource<T>, count: number): DataSource<T> {
+    return this.withCursor({ ...this.cursor, skip: count });
   }
 
-  take(count: number, skip: number = this.cursor.skip): DataSource<T> {
-    return this.updateCursor({ take: count, skip });
+  take<T>(
+    this: DataSource<T>,
+    count: number,
+    skip: number = this.cursor.skip
+  ): DataSource<T> {
+    return this.withCursor({ ...this.cursor, take: count, skip });
   }
 
-  addSort(order: DataOrder<T>[]): DataSource<T>;
-  addSort(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>;
+  addSort<T>(this: DataSource<T>, order: DataOrder<T>[]): DataSource<T>;
+  addSort<T>(
+    this: DataSource<T>,
+    by: DataExp<T>,
+    sort: DataSort,
+    nulls?: DataNullsSort
+  ): DataSource<T>;
   addSort(...args) {
     return this._sort(true, args);
   }
 
-  sort(orders: DataOrder<T>[]): DataSource<T>;
-  sort(by: DataExp<T>, sort: DataSort, nulls?: DataNullsSort): DataSource<T>;
+  sort<T>(this: DataSource<T>, orders: DataOrder<T>[]): DataSource<T>;
+  sort<T>(
+    this: DataSource<T>,
+    by: DataExp<T>,
+    sort: DataSort,
+    nulls?: DataNullsSort
+  ): DataSource<T>;
   sort(...args) {
     return this._sort(false, args);
   }
@@ -364,14 +274,12 @@ export abstract class DataSource<T> {
       const [by, sort, nulls] = args;
       args = [{ by, sort, nulls }];
     }
-
     const [order] = args;
-
     if (add && !order.length) {
       return this;
     }
-
-    return this.updateCursor({
+    return this.withCursor({
+      ...this.cursor,
       order: add ? [this.cursor.order, ...order] : order,
     });
   }
@@ -380,7 +288,8 @@ export abstract class DataSource<T> {
     this: DataSource<T>,
     fields: Fields
   ): DataSource<T & DataFieldsRow<T, Fields>> {
-    return this.updateCursor({
+    return this.withCursor({
+      ...this.cursor,
       selection: DataSelection.merge(this.cursor.selection, { fields }),
     });
   }
@@ -388,7 +297,8 @@ export abstract class DataSource<T> {
   filter<T>(this: DataSource<T>, ...exps: DataExp<T>[]): DataSource<T> {
     const filter = DataExp({ $and: exps as any });
     if (filter === undefined) return this;
-    return this.updateCursor({
+    return this.withCursor({
+      ...this.cursor,
       filter: DataExp(this.cursor.filter, filter),
     });
   }
@@ -406,41 +316,5 @@ export abstract class DataSource<T> {
         key,
       ],
     });
-  }
-
-  getTreeOf<T>(
-    this: DataSource<T>,
-    relationPropertyName: string & DataRelationTreeKeys<RebaseType<T>>
-  ): Promise<DataTreeRow<T>[]> {
-    return this.handleGetTree(false, relationPropertyName);
-  }
-
-  async getTreeAt<T>(
-    this: DataSource<T>,
-    relationPropertyName: string & DataRelationTreeKeys<RebaseType<T>>,
-    childToParent = false
-  ): Promise<DataRow<T>[][]> {
-    const children = await this.handleGetTree(true, relationPropertyName);
-
-    return [
-      //
-      ...flat(children, []),
-    ];
-
-    function* flat(
-      children: DataTreeRow<T>[],
-      parents: DataTreeRow<T>[]
-    ): IterableIterator<DataTreeRow<T>[]> {
-      if (!children.length) {
-        yield parents;
-        return;
-      }
-      for (const child of children) {
-        yield* flat(
-          child.$children,
-          childToParent ? [child, ...parents] : [...parents, child]
-        );
-      }
-    }
   }
 }

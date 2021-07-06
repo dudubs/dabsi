@@ -35,7 +35,7 @@ export default RpcResolver(
             },
           })
           .take(20)
-          .getRows();
+          .fetchAll();
 
         return rows.map(row => [row.$key, row.mentionName]);
       },

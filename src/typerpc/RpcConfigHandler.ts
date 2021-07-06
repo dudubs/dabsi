@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { capitalize } from "@dabsi/common/string/capitalize";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { If, IsUndefined } from "@dabsi/common/typings2/boolean";

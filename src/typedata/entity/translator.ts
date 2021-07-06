@@ -1,5 +1,5 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { touchObject } from "@dabsi/common/object/touchObject";
 import Lazy from "@dabsi/common/patterns/Lazy";
 import { inspect } from "@dabsi/logging/inspect";

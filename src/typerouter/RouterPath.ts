@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { If } from "@dabsi/common/typings2/boolean";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Union } from "@dabsi/common/typings2/Union";

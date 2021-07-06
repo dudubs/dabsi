@@ -1,4 +1,5 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
+import notNull from "@dabsi/common/object/notNull";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataRowLoader } from "@dabsi/modules/data/DataRowLoader";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
@@ -17,11 +18,11 @@ import { DataSource } from "@dabsi/typedata/source";
 import { DataUpdateRow } from "@dabsi/typedata/value";
 
 export class DataRowTicker<T = any> {
-  filter: DataExp<T> = undefined;
-
   protected _selection: AnyDataSelection = { pick: [] };
 
   protected _callbacks: ((row: any, tick: number) => Promise<void>)[] = [];
+
+  protected _waiters: (() => void)[] = [];
 
   constructor(
     protected getDataSource: DataSourceFactory2,
@@ -47,16 +48,25 @@ export class DataRowTicker<T = any> {
 
   // TODO: updateBeforeFetch, updateAfterFetch
   async update<T>(this: DataRowTicker<T>, row: DataUpdateRow<T>) {
-    // TODO: update on tick: runUpdate(), runFetch()
+    await this.wait();
     await this.getSource().update(this._definedKey, row);
   }
 
   protected get _definedKey(): string {
-    return defined(this.$key, () => `No "${this.rowType.name}" key`);
+    return notNull(this.$key, () => `No "${this.rowType.name}" key`);
   }
 
   async delete() {
+    await this.wait();
     return this.getSource().delete(this._definedKey);
+  }
+
+  async wait() {
+    if (this._callbacks.length) {
+      await new Promise<void>(done => {
+        this._waiters.push(done);
+      });
+    }
   }
 
   async run(tick: number) {
@@ -66,14 +76,19 @@ export class DataRowTicker<T = any> {
 
     const row = await this.getSource()
       .of(this._definedKey)
-      .filter(this.filter)
       .select(this._selection as {})
-      .get();
+      .fetch();
 
     // reset selection
     this._selection = { pick: [] };
 
     await Promise.all(_callbacks.map(async callback => callback(row, tick)));
+
+    if (!_callbacks.length) {
+      this._waiters.forEach(done => {
+        done();
+      });
+    }
   }
 
   push(callback: (row: any, tick: number) => Promise<void>) {

@@ -1,12 +1,10 @@
+import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataRowTicker } from "@dabsi/modules/data/DataRowTicker";
-import { DataTicker } from "@dabsi/modules/data/DataTicker";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { Inject, Injectable, Resolver, ResolverMap } from "@dabsi/typedi";
-import { ConsumeArgs, ResolverDeps } from "@dabsi/typedi/consume";
-import { ResolverOrConsumeArgs } from "@dabsi/typedi/ResolverOrConsumeArgs";
 
 export const getRowKeyParameter = WeakMapFactory(
   (rowType: Function) =>
@@ -31,11 +29,16 @@ export function RowKeyParameterResolver(
   );
 }
 
+const _parameterMap = new WeakMap<
+  AsyncProcess,
+  Map<Function, Map<string | null, DataRowTicker<any>>>
+>();
+
 @Injectable()
 export default class DataContext {
   constructor(
     readonly getSource: DataSourceFactory2,
-    readonly dataTicker: DataTicker,
+    readonly process: AsyncProcess,
     @Inject(c => c)
     readonly context: ResolverMap
   ) {}
@@ -49,9 +52,24 @@ export default class DataContext {
     );
   }
 
+  get _parameterMap(): Map<Function, Map<string | null, DataRowTicker>> {
+    return _parameterMap.touch(this.process, () => new Map());
+  }
+
+  getRow<T>(rowType: Constructor<T>, rowKey: string | null): DataRowTicker<T> {
+    return this._parameterMap
+      .touch(rowType, () => new Map())
+      .touch(
+        rowKey,
+        () =>
+          new DataRowTicker(this.getSource, rowType, rowKey, callback =>
+            this.process.push(callback)
+          )
+      );
+  }
+
   getParameter<T>(rowType: Constructor<T>): DataRowTicker<T> {
-    const rowKey = this.getParameterKey(rowType);
-    return this.dataTicker.getRowTicker(rowType, rowKey);
+    return this.getRow(rowType, this.getParameterKey(rowType));
   }
 
   async checkUnique<T>(
@@ -59,7 +77,7 @@ export default class DataContext {
     filter: DataExp<T>
   ): Promise<"ALREADY_IN_USE" | undefined> {
     const rowKey = this.getParameterKey(rowType);
-    const row = await this.getSource(rowType).filter(filter).pick([]).get();
+    const row = await this.getSource(rowType).filter(filter).pick([]).fetch();
     if (!row || row.$key === rowKey) return;
     return "ALREADY_IN_USE";
   }

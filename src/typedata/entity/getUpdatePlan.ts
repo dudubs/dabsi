@@ -90,7 +90,7 @@ export default function (
       for (const entityTextKey of keys) {
         const entityKey = DataEntityKey.parse(
           entityCursor.entityMetadata,
-          DataKey(entityTextKey)
+          entityTextKey
         );
         await update(entityKey);
       }

@@ -21,6 +21,7 @@ import { DataSource } from "@dabsi/typedata/source";
 import { Injectable, Resolver } from "@dabsi/typedi";
 import { RpcUnresolvedConfig } from "@dabsi/old-typerpc/Rpc";
 import { RpcError } from "@dabsi/old-typerpc/RpcError";
+import notNull from "@dabsi/common/object/notNull";
 
 declare global {
   namespace IRichText {
@@ -60,14 +61,14 @@ export class RichTextContext {
 
     if (docKeyOrSource) {
       if (typeof docKeyOrSource === "object") {
-        ({ $key: docKey } = await docKeyOrSource.pick([]).getOrFail());
+        ({ $key: docKey } = notNull(await docKeyOrSource.pick([]));
       } else {
         docKey = docKeyOrSource;
       }
       await packer.deleteUnusedRelations(docKey);
       await this.docs.update(docKey, { content: packedContentText });
     } else {
-      docKey = await this.docs.insertKey({
+      docKey = await this.docs.insert({
         session: this.session.$key,
         content: packedContentText,
       });
@@ -91,7 +92,7 @@ export class RichTextContext {
       docSource = docKeyOrSource;
     }
 
-    const doc = await docSource.pick(["content"]).getOrFail();
+    const doc = notNull(await docSource.pick(["content"]).fetch());
     const relationTypeMap = new Map<string, Map<string, any>>();
     for (const rel of await doc
       .at("relations")
@@ -105,7 +106,7 @@ export class RichTextContext {
           ))
         )
       )
-      .getRows()) {
+      .fetchAll()) {
       relationTypeMap
         .touch(rel.type, () => new Map())
         .set(rel.$key, rel[rel.type]);

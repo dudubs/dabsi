@@ -1,5 +1,8 @@
-export default function defined<T>(value: T, errorOrCallback?): NonNullable<T> {
-  if (value == null)
+export default function notNull<T>(
+  value: T,
+  errorOrCallback?
+): Exclude<T, null> {
+  if (value === null)
     throw new Error(
       typeof errorOrCallback === "function"
         ? errorOrCallback()

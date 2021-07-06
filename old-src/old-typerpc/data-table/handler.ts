@@ -159,9 +159,9 @@ export class DataTableHandler
     let dataRows: DataRow<any>[];
 
     if (query.getCount) {
-      [totalRows, dataRows] = await source.getCountAndRows();
+      [totalRows, dataRows] = await source.countAndFetch();
     } else {
-      [totalRows, dataRows] = [0, await source.getRows()];
+      [totalRows, dataRows] = [0, await source.fetchAll()];
     }
     const rows: any[] = [];
     for (const dataRow of dataRows) {

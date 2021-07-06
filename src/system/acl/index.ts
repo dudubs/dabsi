@@ -20,20 +20,20 @@ export default class AclModule {
       await groups
         .pick(["name"], { countUsers: { $count: "users" } })
         .take(1)
-        .getRows()
+        .fetchAll()
     );
   }
 
   @CliCommand("groups.add", "[name]", y => y.option("name", { type: "string" }))
   async addGroup({ name }, { groups: source }: AclContext) {
-    console.log(`created new group #${await source.insertKey({ name })}.`);
+    console.log(`created new group #${await source.insert({ name })}.`);
   }
 
   @CliCommand("users.add", "[loginName]", y =>
     y.option("loginName", { type: "string" })
   )
   async addUser({ loginName }, { users: source }: AclContext) {
-    console.log(`created new user #${await source.insertKey({ loginName })}.`);
+    console.log(`created new user #${await source.insert({ loginName })}.`);
   }
 
   @CliCommand("users.update", "[login-name-or-id]", y =>
@@ -67,7 +67,7 @@ export default class AclModule {
       await users
         .take(20)
         .pick(["loginName", "firstName", "lastName"])
-        .getRows()
+        .fetchAll()
     );
   }
 }

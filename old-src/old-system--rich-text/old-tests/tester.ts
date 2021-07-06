@@ -51,7 +51,7 @@ export const rtTester = Tester.beforeAll(t => ({
 
   await dbt.wait();
 
-  const session = await dbt.getDataSource(Session).insert({
+  const session = await dbt.getDataSource(Session).insertAndFetch({
     token: "test",
     timeout: getCurrentTime() + SESSION_TIMEOUT,
   });
@@ -69,7 +69,7 @@ export const rtTester = Tester.beforeAll(t => ({
 
   const testContent = async (content: RichTextContent.Unpacked) => {
     const docKey = await rtConfig.context.pack(rtConfig, content);
-    const doc = await rtConfig.context.docs.getOrFail(docKey);
+    const doc = await rtConfig.context.docs.fetchOrFail(docKey);
     const packedContent = JSON.parse(doc.content) as RichTextContent.Packed;
     return {
       packedContent,

@@ -18,7 +18,7 @@ beforeAll(async () => {
   {
     const userData = makeFakeUserData();
     userWithPasswordLoginName = userData.loginName;
-    userWithPasswordKey = await SystemTests.acl.users.insertKey({
+    userWithPasswordKey = await SystemTests.acl.users.insert({
       ...userData,
       password: TEST_PASSWORD,
     });
@@ -26,7 +26,7 @@ beforeAll(async () => {
   {
     const userData = makeFakeUserData();
     userWithoutPasswordLoginName = userData.loginName;
-    await SystemTests.acl.users.insertKey(userData);
+    await SystemTests.acl.users.insert(userData);
   }
 });
 

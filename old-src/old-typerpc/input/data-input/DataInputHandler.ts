@@ -39,7 +39,7 @@ export class DataInputHandler
     }
     if (this.rpc.isValueDataRow) {
       if (typeof valueConfig === "string") {
-        return await this.valueSource.get(valueConfig);
+        return await this.valueSource.fetch(valueConfig);
       }
       return valueConfig;
     }
@@ -78,13 +78,13 @@ export class DataInputHandler
     key: NonNullable<InputValueData<T>>
   ): Promise<ErrorOrValue<InputError<T>, NonNullable<InputValue<T>>>> {
     if (this.rpc.isValueDataRow) {
-      const row = await this.valueSource.get(String(key));
+      const row = await this.valueSource.fetch(String(key));
       if (!row) {
         return { error: "INVALID_DATA_KEY", value: undefined };
       }
       return { value: row };
     }
-    if (!(await this.config.source.filter({ $is: key }).hasRows())) {
+    if (!(await this.config.source.filter({ $is: key }).has())) {
       return { error: "INVALID_DATA_KEY", value: undefined };
     }
     return { value: key };

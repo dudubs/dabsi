@@ -1,8 +1,10 @@
+import { OneOrMany } from "@dabsi/common/array/OneOrMany";
 import { ExpMap } from "@dabsi/common/typings2/ExpMap";
 import { ExtractKeys } from "@dabsi/common/typings2/ExtractKeys";
 import { Union } from "@dabsi/common/typings2/Union";
 import { RebaseType } from "@dabsi/typedata/BaseType";
 import { DataOperatorExp } from "@dabsi/typedata/exp/operator";
+import { DataKey, DataKeyOrKeys } from "@dabsi/typedata/key";
 
 import {
   DataRelationKeys,
@@ -52,9 +54,9 @@ export interface DataExpTypes<T> {
 
   $base: DataExp<RebaseType<T>>;
 
-  $is: string[] | string;
+  $is: DataKeyOrKeys<T>;
 
-  $isNot: string[] | string;
+  $isNot: DataKeyOrKeys<T>;
 
   $and: DataExp<T>[];
 

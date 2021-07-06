@@ -7,7 +7,7 @@ import SystemClientTester from "@dabsi/system/core/SystemClientTester";
 it("expect to change user basic info", async () => {
   const userData = makeFakeUserData();
 
-  const userKey = await SystemTests.acl.users.insertKey({
+  const userKey = await SystemTests.acl.users.insert({
     ...userData,
   });
 

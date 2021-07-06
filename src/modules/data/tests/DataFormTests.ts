@@ -64,7 +64,7 @@ const test = async () => {
   const dfc = Resolver.resolve(rb.getResolver(dft), context);
   const df = createRpc(dft, dfc);
   const { value } = <{ value }>await df.submit({ msg: "hello" });
-  return await testSource.filter({ $is: value }).pick(["text"]).getOrFail();
+  return await testSource.filter({ $is: value }).pick(["text"]).fetchOrFail();
 };
 
 it("expect to insert", async () => {

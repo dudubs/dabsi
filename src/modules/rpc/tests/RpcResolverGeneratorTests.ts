@@ -1,4 +1,3 @@
-import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";
 import { Resolver } from "@dabsi/typedi";
@@ -40,7 +39,9 @@ it("expect to generate namespace handler", async () => {
 });
 
 it("debug", async () => {
-  const x = Resolver.resolve(rb.getResolver(R1)!, context);
+  const r = rb.getResolver(R1);
+  expect(r).toBeDefined();
+  const x = Resolver.resolve(r, context);
   const h = await createRpcHandler(R1, x);
   expect(await h.handleTestFn()).toEqual("works");
 });

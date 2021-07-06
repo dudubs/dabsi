@@ -1,4 +1,4 @@
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { findEntities } from "@dabsi/typeorm/findEntities";
 import { Connection, createConnection, ObjectType } from "typeorm";
 

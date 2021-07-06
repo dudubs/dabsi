@@ -12,14 +12,9 @@ export default class AsyncProcess {
   protected _countRunningTasks = 0;
 
   catch(callback: () => any) {
-    let result;
-    try {
-      result = callback();
-    } catch (error) {
+    (async () => await callback())().catch(error => {
       this.push(() => Promise.reject(error));
-      return;
-    }
-    this.push(() => Promise.resolve(result));
+    });
   }
 
   push(task: Task) {

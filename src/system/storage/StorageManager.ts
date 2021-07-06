@@ -28,7 +28,7 @@ export default class StorageManager {
     const { url } = await this.storage.upload(tag, type, buffer);
     return {
       url,
-      key: await files.insertKey({
+      key: await files.insert({
         ...entityData,
         url,
         session: this.session.$key,

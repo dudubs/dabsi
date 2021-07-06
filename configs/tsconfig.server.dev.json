@@ -5,7 +5,7 @@
   "exclude": [
     "../src/**/native",
     "../src/**/browser",
-    "../src/**/old-*",
-    "../src/**/tests"
+    "../src/**/old-*"
+    // "../src/**/tests"
   ]
 }

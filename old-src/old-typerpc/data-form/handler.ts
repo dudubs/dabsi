@@ -118,7 +118,7 @@ export function DataFormConfigResolver<
             await c.row.update(commitRow);
             return c.row.$key;
           }
-          return source.insertKey(commitRow);
+          return source.insert(commitRow);
         },
       });
     }

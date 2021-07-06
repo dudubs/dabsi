@@ -30,9 +30,9 @@ const source = DataEntitySource.createFromConnection(
 );
 
 beforeAll(async () => {
-  await source.insertKey({ xs: "hello" });
-  await source.insertKey({ xs: "world" });
-  await source.insertKey({ xs: "foo" });
+  await source.insert({ xs: "hello" });
+  await source.insert({ xs: "world" });
+  await source.insert({ xs: "foo" });
 });
 
 class dtWithXsColumn extends DataTable({ xs: String }) {}

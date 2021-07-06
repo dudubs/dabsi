@@ -1,5 +1,5 @@
 import { mapArrayToObject } from "@dabsi/common/array/mapArrayToObject";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { entries } from "@dabsi/common/object/entries";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { Type } from "@dabsi/common/typings2/Type";
@@ -105,7 +105,7 @@ describe("entity children", () => {
     for (const row of await DataEntitySource.createFromConnection(
       entityType,
       getConnection
-    ).getRows()) {
+    ).fetchAll()) {
       expect(disValues).toContain(row[md.discriminatorColumn!.propertyName]);
       await callback?.(row);
     }
@@ -294,7 +294,7 @@ function testEntity<T>(
     entityKeyToRow = mapArrayToObject(
       await DataEntitySource.createFromConnection(<any>type, () => connection)
         .select(<any>selection)
-        .getRows(),
+        .fetchAll(),
       row => [row.$key, row]
     );
   });
@@ -388,23 +388,23 @@ describe("DataSelector", () => {
   );
 
   beforeAll(async () => {
-    key = await ASource.insertKey({
-      oneAToOneB: await BSource.insertKey({}),
+    key = await ASource.insert({
+      oneAToOneB: await BSource.insert({}),
     });
   });
 
   it("expect to not load relation.", async () => {
-    expect((await ASource.get(key))?.oneAToOneB).toBeFalsy();
+    expect((await ASource.fetch(key))?.oneAToOneB).toBeFalsy();
   });
 
   it("expect to load relation because source selection.", async () => {
     expect(
-      (await ASource.select({ relations: { oneAToOneB: true } }).get(key))
+      (await ASource.select({ relations: { oneAToOneB: true } }).fetch(key))
         ?.oneAToOneB
     ).toBeTruthy();
   });
 
   it("expect to load relation because type selection", async () => {
-    expect((await ASelectorSource.get(key))?.oneAToOneB).toBeTruthy();
+    expect((await ASelectorSource.fetch(key))?.oneAToOneB).toBeTruthy();
   });
 });

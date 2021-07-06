@@ -41,7 +41,7 @@ export default RpcResolver(
             const [tree] = await source
               .filter({ $is: key })
               .pick(["title"])
-              .getTreeAt("parent");
+              .fetchTreeAt("parent");
 
             return {
               path: tree.reverse().map(({ $key, title }) => ({ $key, title })),
@@ -51,13 +51,13 @@ export default RpcResolver(
           add: $ =>
             $({
               async submit({ title }) {
-                return { $key: await childrenSource.insertKey({ title }) };
+                return { $key: await childrenSource.insert({ title }) };
               },
             }),
 
           edit: {
             valueConfig: async $ => {
-              const { title } = await source.pick(["title"]).getOrFail(key);
+              const { title } = await source.pick(["title"]).get(key);
 
               return $({
                 title,
@@ -76,7 +76,7 @@ export default RpcResolver(
         // inputConfig: {},
         async submit({ title }) {
           return {
-            $key: await source.insertKey({
+            $key: await source.insert({
               title,
             }),
           };

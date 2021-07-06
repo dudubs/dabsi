@@ -1,4 +1,3 @@
-import { inspect } from "@dabsi/logging/inspect";
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import RpcResolverBuilder from "@dabsi/modules/rpc/RpcResolverBuilder";
 import { RpcResolverGenerator } from "@dabsi/modules/rpc/RpcResolverGenerator";

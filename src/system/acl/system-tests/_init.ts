@@ -27,7 +27,7 @@ SystemTests.acl = AclSystemTests;
 
 SystemClientTester.prototype.loginAs = function (exp) {
   return this.processRequest(async context => {
-    const user = await SystemTests.acl.users.filter(exp).pick([]).getOrFail();
+    const user = await SystemTests.acl.users.filter(exp).pick([]).fetchOrFail();
     const session = Resolver.resolve(RequestSession, context);
     await session.update({ user });
   });
@@ -47,13 +47,13 @@ SystemTests.onBuild.push(async () => {
     await Promise.all(
       groupTypes.map(async name => [
         name,
-        await SystemTests.acl.groups.insert({ name }),
+        await SystemTests.acl.groups.insertAndFetch({ name }),
       ])
     )
   ) as { [K in typeof groupTypes[number]]: DataRow<Group> };
 
   const makeFakeUserKey = () =>
-    SystemTests.acl.users.insertKey(makeFakeUserData());
+    SystemTests.acl.users.insert(makeFakeUserData());
 
   await groups.GroupWithOneUser.at("users").add([await makeFakeUserKey()]);
 

@@ -1,5 +1,5 @@
 import { WeakMapFactory } from "@dabsi/common/map/mapFactory";
-import { defined } from "@dabsi/common/object/defined";
+import defined from "@dabsi/common/object/defined";
 import { keys } from "@dabsi/common/object/keys";
 import { mapObject } from "@dabsi/common/object/mapObject";
 import { mapObjectToArray } from "@dabsi/common/object/mapObjectToArray";
@@ -280,8 +280,8 @@ export default WidgetHandler(
         }
 
         const [count, rows] = query.count
-          ? await source.getCountAndRows()
-          : [undefined, await source.getRows()];
+          ? await source.countAndFetch()
+          : [undefined, await source.fetchAll()];
 
         return {
           count,

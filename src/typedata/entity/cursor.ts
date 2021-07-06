@@ -102,7 +102,7 @@ export namespace DataEntityCursor {
           path.key
         ),
 
-        ...getChildKeys(typeInfo.type, path.keyMap),
+        ...getChildKeys(typeInfo.type, path.constants),
       };
 
       const entityType = relation.left.entityType;
@@ -138,7 +138,7 @@ export namespace DataEntityCursor {
       entityMetadata,
       entityInfo: getDataEntityMetadata(entityMetadata),
       parent,
-      ...getChildKeys(typeInfo.type, cursor.keyMap),
+      ...getChildKeys(typeInfo.type, cursor.constants),
     };
 
     function updateTypeInfo(childTypeName: string) {

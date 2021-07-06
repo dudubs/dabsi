@@ -18,19 +18,19 @@ let gi = 0;
 
 beforeAll(async () => {
   [g1, g2] = [
-    await Groups.insertKey({ name: `g${gi++}` }),
-    await Groups.insertKey({ name: `g${gi++}` }),
+    await Groups.insert({ name: `g${gi++}` }),
+    await Groups.insert({ name: `g${gi++}` }),
   ];
   [u1, u2, u3] = [
-    await Users.insertKey({
+    await Users.insert({
       firstName: "u1",
       lastName: "test",
     }),
-    await Users.insertKey({
+    await Users.insert({
       firstName: "u2",
       lastName: "test",
     }),
-    await Users.insertKey({
+    await Users.insert({
       firstName: "u2",
       lastName: "test",
     }),
@@ -42,7 +42,7 @@ beforeAll(async () => {
       u1InGroup: { $has: { users: { $is: u1 } } },
       u2InGroup: { $has: { users: { $is: u2 } } },
       u3InGroup: { $has: { users: { $is: u3 } } },
-    }).getRows()
+    }).fetchAll()
   ).map(item => ({
     ...item,
     u1InGroup: !!item.u1InGroup,
@@ -54,7 +54,7 @@ beforeAll(async () => {
 let items: any[];
 
 it("$is", async () => {
-  const result = await Users.filter({ $is: [u1, u2] }).getRows();
+  const result = await Users.filter({ $is: [u1, u2] }).fetchAll();
   expect(result).toEqual(
     jasmine.arrayContaining([
       jasmine.objectContaining({ $key: u1 }),

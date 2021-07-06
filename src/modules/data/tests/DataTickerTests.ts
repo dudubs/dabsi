@@ -1,17 +1,16 @@
 import AsyncProcess from "@dabsi/common/async/AsyncProcess";
 import { Tester } from "@dabsi/jasmine/Tester";
-import { inspect } from "@dabsi/logging/inspect";
-import { DataTicker } from "@dabsi/modules/data/DataTicker";
+
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { getTestConnection } from "@dabsi/typedata/entity/tests/tester";
 import { ASource, BSource } from "@dabsi/typedata/entity/tests/utils";
 import { AEntity } from "@dabsi/typeorm/relations/tests/TestEntities";
+import DataContext from "@dabsi/modules/data/DataContext";
 
 const t = Tester.beforeAll(async () => {
-  // @ts-ignore
-  const a1 = await ASource.insert({
+  const a1 = await ASource.insertAndFetch({
     aText: "a-text",
-    oneAToOneB: await BSource.insertKey({
+    oneAToOneB: await BSource.insert({
       bText: "b-text",
     }),
   });
@@ -20,15 +19,21 @@ const t = Tester.beforeAll(async () => {
   };
 }).beforeEach(t => {
   const process = new AsyncProcess();
-  const loader = new DataTicker(process, entityType =>
-    DataEntitySource.createFromConnection(entityType, getTestConnection)
+
+  // new DataContext();
+
+  const data = new DataContext(
+    entityType =>
+      DataEntitySource.createFromConnection(entityType, getTestConnection),
+    process,
+    {}
   );
 
   return {
     process,
-    loader,
-    a1Fetcher: loader.getRowTicker(AEntity, t.a1.$key),
-    axFetcher: loader.getRowTicker(AEntity, "invalid-key-x"),
+    data,
+    a1Fetcher: data.getRow(AEntity, t.a1.$key),
+    axFetcher: data.getRow(AEntity, "invalid-key-x"),
   };
 });
 

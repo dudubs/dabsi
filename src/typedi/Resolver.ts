@@ -7,7 +7,6 @@ import {
 import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { ResolveError } from "@dabsi/typedi/ResolveError";
 import { ResolverOrConsumeArgs } from "@dabsi/typedi/ResolverOrConsumeArgs";
-import { ContextType } from "react";
 
 export type ResolverMap<T = any> = Record<string, Resolver<T>>;
 
@@ -19,12 +18,13 @@ export type ResolvedMap<T extends ResolverMap<any>> = {
   [K in keyof T]: Resolved<T[K]>;
 };
 
-// Provider, FunctionalResolver, Consumeabial
 export const checkSymbol = Symbol("check");
 
 export const resolveSymbol = Symbol("resolve");
 
 export const providableSymbol = Symbol("providable");
+
+export const forwardSymbol = Symbol("forward");
 
 // Customer
 export type Factory<T> = (context: ResolverMap<any>) => T;
@@ -47,11 +47,23 @@ export type Consumer<T> = {
   [providableSymbol]: false;
 };
 
-export type Resolver<T = any> =
+export type CustomResolver<T> = {
+  [resolveSymbol](context: ResolverMap): T;
+  [checkSymbol]?(context: ResolverMap): void;
+};
+
+export type ForwardResolver<T> = {
+  [forwardSymbol](context: ResolverMap): Resolver<T>;
+};
+
+export type BaseResolver<T = any> =
   | Provider<T>
   | Factory<T>
   | Constructor<T>
-  | Consumer<T>;
+  | Consumer<T>
+  | CustomResolver<T>;
+
+export type Resolver<T = any> = BaseResolver<T> | ForwardResolver<T>;
 
 export type ProviderOnly<T> = {
   providableType: T;
@@ -140,3 +152,4 @@ class _Provider {
 Resolver.checkSymbol = checkSymbol;
 Resolver.resolveSymbol = resolveSymbol;
 Resolver.providableSymbol = providableSymbol;
+Resolver.forwardSymbol = forwardSymbol;

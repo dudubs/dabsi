@@ -1,4 +1,4 @@
-import { Permission } from "@dabsi/old-system/server/acl/Permission";
+import { Permission } from "@dabsi/old-system/server/uac/Permission";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 
 export function isPermissionOfUserExp(userKey: string): DataExp<Permission> {

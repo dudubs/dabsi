@@ -1,4 +1,4 @@
-import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
+import assignDescriptors from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { RpcType } from "@dabsi/typerpc/Rpc";
 import { InferredHandlerConfig, RpcWithConfig } from "@dabsi/typerpc/RpcConfig";

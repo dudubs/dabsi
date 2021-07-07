@@ -65,9 +65,7 @@ export abstract class DataSource<T> {
     keysToRemove: string[]
   ): Promise<void>;
 
-  // todo: optional handleGetCountAndRows
   async countAndFetch<T>(this: DataSource<T>): Promise<[number, DataRow<T>[]]> {
-    // TODO: Optimizing
     return [await this.count(), await this.handleFetch(this)];
   }
 

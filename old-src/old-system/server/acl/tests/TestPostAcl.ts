@@ -1,7 +1,7 @@
-import { AclRow } from "@dabsi/old-system/server/acl/AclCriterion";
-import { AclExp } from "@dabsi/old-system/server/acl/AclExp";
-import { TestPost } from "@dabsi/old-system/server/acl/tests/AclTester";
-import { TestForumAcl } from "@dabsi/old-system/server/acl/tests/TestForumAcl";
+import { AclRow } from "@dabsi/old-system/server/uac/AclCriterion";
+import { AclExp } from "@dabsi/old-system/server/uac/AclExp";
+import { TestPost } from "@dabsi/old-system/server/uac/tests/AclTester";
+import { TestForumAcl } from "@dabsi/old-system/server/uac/tests/TestForumAcl";
 
 export class TestPostAcl {
   constructor(public post: AclRow<TestPost>, public forumAcl: TestForumAcl) {}

@@ -1,7 +1,7 @@
 // import { Fn } from "@dabsi/common/typings2/Fn";
 // import { PartialUndefinedKeys } from "@dabsi/common/typings2/PartialUndefinedKeys";
 // import { UndefinedIfEmptyObject } from "@dabsi/common/typings2/UndefinedIfEmptyObject";
-// import { User } from "@dabsi/system/acl/entities/User";
+// import { User } from "@dabsi/system/uac/entities/User";
 // import { DataEntitySource } from "@dabsi/typedata/entity/source";
 // import { DataExp } from "@dabsi/typedata/exp/exp";
 // import { DataSource } from "@dabsi/typedata/source";
@@ -121,7 +121,7 @@
 //   ) => void;
 // }
 
-// class AclAdminRpc {
+// class UacAdminRpc {
 //   @RpcMethod(() => DataManagerRpc)
 //   users!: DataManagerRpc<User>;
 

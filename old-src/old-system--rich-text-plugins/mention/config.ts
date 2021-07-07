@@ -1,6 +1,6 @@
 import { RpcResolver } from "@dabsi/modules/rpc/RpcResolver";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 import { RichTextMentionRpc } from "@dabsi/system/rich-text-plugins/mention/common/rpc";
 import { RichTextConfigContext } from "@dabsi/system/rich-text/configContext";
 

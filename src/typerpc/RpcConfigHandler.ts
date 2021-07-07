@@ -22,7 +22,7 @@ import {
 } from "@dabsi/typerpc/Rpc";
 import { RpcHandler, RpcMemberHandler } from "@dabsi/typerpc/RpcHandler";
 import { RpcMemberType } from "@dabsi/typerpc/RpcMembers";
-import { assignDescriptors } from "../common/object/assignDescriptors";
+import assignDescriptors from "../common/object/assignDescriptors";
 import {
   AnyRpcWithConfig,
   InferredRpcConfig,

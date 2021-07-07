@@ -1,14 +1,14 @@
 import { mapObjectAsync } from "@dabsi/common/object/mapObject";
 import { Awaited } from "@dabsi/common/typings2/Async";
-import { AclQuery } from "@dabsi/old-system/server/acl/AclQuery";
-import { AclTester } from "@dabsi/old-system/server/acl/tests/AclTester";
+import { AclQuery } from "@dabsi/old-system/server/uac/AclQuery";
+import { AclTester } from "@dabsi/old-system/server/uac/tests/AclTester";
 import {
   TestForumAcl,
   TEST_FORUMS_ADMIN_TOKEN,
   TEST_GOD_TOKEN,
-} from "@dabsi/old-system/server/acl/tests/TestForumAcl";
-import { TestPostAcl } from "@dabsi/old-system/server/acl/tests/TestPostAcl";
-import { User } from "@dabsi/system/acl/entities/User";
+} from "@dabsi/old-system/server/uac/tests/TestForumAcl";
+import { TestPostAcl } from "@dabsi/old-system/server/uac/tests/TestPostAcl";
+import { User } from "@dabsi/system/uac/entities/User";
 import { DataRow } from "@dabsi/typedata/row";
 
 const t = AclTester.beforeAll(async t => {

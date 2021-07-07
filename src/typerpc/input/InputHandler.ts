@@ -1,4 +1,4 @@
-import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
+import assignDescriptors from "@dabsi/common/object/assignDescriptors";
 import { Awaitable } from "@dabsi/common/typings2/Async";
 import { IsNever } from "@dabsi/common/typings2/boolean/IsNever";
 import { Override } from "@dabsi/common/typings2/Override";

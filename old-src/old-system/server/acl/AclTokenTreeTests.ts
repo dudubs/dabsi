@@ -1,14 +1,14 @@
 import { Tester } from "@dabsi/jasmine/Tester";
 import { inspect } from "@dabsi/logging/inspect";
-import { AclTokenTree } from "@dabsi/old-system/server/acl/AclTokenTree";
+import { AclTokenTree } from "@dabsi/old-system/server/uac/AclTokenTree";
 import arrayContaining = jasmine.arrayContaining;
 import objectContaining = jasmine.objectContaining;
 
 const t = Tester.beforeAll(() => ({
   tree: new AclTokenTree()
     .add("ADMIN")
-    .add("ADMIN/ACL")
-    .add("ADMIN/ACL/USERS/ALL")
+    .add("ADMIN/ACM")
+    .add("ADMIN/ACM/USERS/ALL")
     .add("ADMIN/FORUMS"),
 })).beforeAll(t => ({
   bases: [...t.tree.getBases()],
@@ -22,8 +22,8 @@ it("expect 'ADMIN/FORUMS' will be a base-token", () => {
   expect(t.bases).toContain("ADMIN/FORUMS");
 });
 
-testSubTokens("ADMIN", ["ADMIN/ACL/USERS/ALL", "ADMIN/FORUMS", "ADMIN/ACL"]);
-testSubTokens("ADMIN", ["ADMIN/ACL/USERS/ALL"]);
+testSubTokens("ADMIN", ["ADMIN/ACM/USERS/ALL", "ADMIN/FORUMS", "ADMIN/ACM"]);
+testSubTokens("ADMIN", ["ADMIN/ACM/USERS/ALL"]);
 
 function testSubTokens(token, subTokens) {
   it(`expect to sub-tokens of '${token}'`, () => {

@@ -1,6 +1,6 @@
 import { entries } from "@dabsi/common/object/entries";
 
-export function assignDescriptors<T, U>(
+export default function assignDescriptors<T, U>(
   target: T,
   source: U,
   ignore?: (keyof T)[]

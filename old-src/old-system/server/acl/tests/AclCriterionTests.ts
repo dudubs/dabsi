@@ -1,11 +1,11 @@
 import {
   AclCriterion,
   AclCriterionExps,
-} from "@dabsi/old-system/server/acl/AclCriterion";
+} from "@dabsi/old-system/server/uac/AclCriterion";
 import {
   TestForum,
   TestForumMemberMode,
-} from "@dabsi/old-system/server/acl/tests/AclTester";
+} from "@dabsi/old-system/server/uac/tests/AclTester";
 import anything = jasmine.anything;
 import arrayContaining = jasmine.arrayContaining;
 

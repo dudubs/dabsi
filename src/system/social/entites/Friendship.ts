@@ -1,6 +1,6 @@
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 import { DataRelation } from "@dabsi/typedata/relation";
-import { Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Entity, ManyToOne } from "typeorm";
 
 @Entity()
 export class Friendship {

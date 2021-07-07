@@ -10,7 +10,7 @@ import {
   MapRelation,
 } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";
-import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
+import { DataMergedSelection } from "@dabsi/typedata/selection/merger";
 import { DataSelectionRow } from "@dabsi/typedata/selection/row";
 import { DataSelection } from "@dabsi/typedata/selection/selection";
 import { DataSource } from "@dabsi/typedata/source";
@@ -178,7 +178,7 @@ pass(() => {
     // MergePicks
     {
       function testPicks<L, R>(
-        x: PluckDefined<MergeDataSelection<{ pick: L }, { pick: R }>, "pick">
+        x: PluckDefined<DataMergedSelection<{ pick: L }, { pick: R }>, "pick">
       ) {}
 
       testPicks<undefined, undefined>(undefined);
@@ -460,7 +460,7 @@ pass(() => {
     );
 
     testType<
-      MergeDataSelection<
+      DataMergedSelection<
         {
           pick: ["dId"];
           fields: {

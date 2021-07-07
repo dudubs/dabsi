@@ -1,6 +1,6 @@
 export * from "./source";
 
-import "./operators/select";
-import "./operators/pick";
+import "./select";
+import "./pick";
 import "./insert";
 import "./fetch";

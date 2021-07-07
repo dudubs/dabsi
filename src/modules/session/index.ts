@@ -12,7 +12,7 @@ import { Session } from "@dabsi/modules/session/entities/Session";
 import { generateSessionToken } from "@dabsi/modules/session/generateSessionToken";
 import getCurrentTime from "@dabsi/modules/session/getCurrentTime";
 import { ResourceManager } from "@dabsi/modules/session/ResourceManager";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 import { CliArgument, CliCommand } from "@dabsi/typecli";
 import { Resolver } from "@dabsi/typedi";
 import { Module, Plugin } from "@dabsi/typemodule";

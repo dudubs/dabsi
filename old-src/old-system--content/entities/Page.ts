@@ -1,4 +1,4 @@
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 import { RichTextDocument } from "@dabsi/system/rich-text/entities/Document";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";

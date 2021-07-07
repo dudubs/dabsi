@@ -3,7 +3,7 @@ import notNull from "@dabsi/common/object/notNull";
 import { Constructor } from "@dabsi/common/typings2/Constructor";
 import { DataRowLoader } from "@dabsi/modules/data/DataRowLoader";
 import { DataSourceFactory2 } from "@dabsi/modules/DbModule";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataFields } from "@dabsi/typedata/fields";
 import { DataRelationKeys } from "@dabsi/typedata/relation";

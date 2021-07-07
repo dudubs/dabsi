@@ -16,12 +16,12 @@ import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { DataRelation } from "@dabsi/typedata/relation";
 import { DataRow } from "@dabsi/typedata/row";
 import { createTestConnection } from "@dabsi/typedata/tests/TestConnection";
-import { PermissionManager } from "@dabsi/old-system/server/acl/PermissionManager";
-import { User } from "@dabsi/system/acl/entities/User";
+import { PermissionManager } from "@dabsi/old-system/server/uac/PermissionManager";
+import { User } from "@dabsi/system/uac/entities/User";
 import {
   TEST_FORUMS_ADMIN_TOKEN,
   TEST_GOD_TOKEN,
-} from "@dabsi/old-system/server/acl/tests/TestForumAcl";
+} from "@dabsi/old-system/server/uac/tests/TestForumAcl";
 
 @Entity()
 export class TestForum {
@@ -91,7 +91,7 @@ decorateDesignType(User, "blockedUsers", Object as Function, [
   ManyToMany(() => User),
 ]);
 
-declare module "@dabsi/system/acl/entities/User" {
+declare module "@dabsi/system/uac/entities/User" {
   interface User {
     blockedUsers: DataRelation<User>[];
   }

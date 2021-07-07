@@ -1,5 +1,4 @@
-import { reversed } from "@dabsi/common/array/reversed";
-import { objectBases } from "@dabsi/common/object/objectBases";
+import { assignDefault } from "@dabsi/common/object/assignDefault";
 import getProviderToken from "@dabsi/typedi/getProviderToken";
 import { Provider, Resolver, ResolverMap } from "@dabsi/typedi/Resolver";
 
@@ -68,9 +67,12 @@ Resolver.Context.assign = function (context, ...args) {
 Resolver.Context.flat = function (context, ...args) {
   const result = {};
 
-  for (const base of reversed([...objectBases(context)])) {
-    if (base === Object.prototype) continue;
-    Object.assign(result, base);
+  for (
+    let base = context;
+    base && base !== Object.prototype;
+    base = Object.getPrototypeOf(base)
+  ) {
+    assignDefault(result, base);
   }
 
   args.length && _assign(result, args);

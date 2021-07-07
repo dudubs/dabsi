@@ -1,6 +1,6 @@
 // TODO: remove controller.
-import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
-import { assignDescriptors } from "@dabsi/common/object/assignDescriptors";
+import assignDescriptors from "@dabsi/common/object/assignDescriptors";
+import assignDescriptors from "@dabsi/common/object/assignDescriptors";
 import { entries } from "@dabsi/common/object/entries";
 import { keys } from "@dabsi/common/object/keys";
 import Lazy from "@dabsi/common/patterns/Lazy";

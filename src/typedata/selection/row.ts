@@ -8,7 +8,7 @@ import {
   DataRelationTypeAt,
   MapRelation,
 } from "@dabsi/typedata/relation";
-import { MergeDataSelection } from "@dabsi/typedata/selection/merger";
+import { DataMergedSelection } from "@dabsi/typedata/selection/merger";
 import {
   DataTypeMetaKey,
   DataUnionMetaChildrenKey,
@@ -33,7 +33,7 @@ type _ChildrenRow<
       {
         [K in keyof UChildren]: _Row<
           UChildren[K], //
-          MergeDataSelection<
+          DataMergedSelection<
             //
             SWithoutChildren,
             PluckDefined<SChildren, K>

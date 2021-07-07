@@ -1,4 +1,4 @@
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 import RichTextModule from "@dabsi/system/rich-text";
 import { DataExp } from "@dabsi/typedata/exp/exp";
 import { DataSource } from "@dabsi/typedata/source";

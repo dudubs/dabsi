@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/relation";
-import { User } from "@dabsi/system/acl/entities/User";
+import { User } from "@dabsi/system/uac/entities/User";
 
 // TODO: Resource
 @Entity({ name: "system/session" })

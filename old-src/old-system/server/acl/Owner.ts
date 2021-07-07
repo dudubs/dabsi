@@ -1,7 +1,7 @@
 import { Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { DataRelation } from "@dabsi/typedata/relation";
-import { Group } from "@dabsi/system/acl/entities/Group";
-import { User } from "@dabsi/system/acl/entities/User";
+import { Group } from "@dabsi/system/uac/entities/Group";
+import { User } from "@dabsi/system/uac/entities/User";
 
 @Entity()
 export class Owner {

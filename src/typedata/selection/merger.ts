@@ -75,4 +75,4 @@ type _Merge<L, R> = HasKeys<L> extends false
   ? L
   : _MergeObject<L, R>;
 
-export type MergeDataSelection<L, R> = _Merge<L, R>;
+export type DataMergedSelection<L, R> = _Merge<L, R>;

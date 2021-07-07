@@ -1,8 +1,8 @@
 import { Connection } from "typeorm";
 import { DataEntitySource } from "@dabsi/typedata/entity/source";
 import { Inject } from "@dabsi/typedi";
-import { Permission } from "@dabsi/old-system/server/acl/Permission";
-import { splitToken } from "@dabsi/old-system/server/acl/splitToken";
+import { Permission } from "@dabsi/old-system/server/uac/Permission";
+import { splitToken } from "@dabsi/old-system/server/uac/splitToken";
 
 export class PermissionManager {
   constructor(@Inject() public connection: Connection) {}
